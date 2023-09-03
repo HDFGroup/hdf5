@@ -36,7 +36,7 @@
 static hid_t H5FD_SUBFILING_g = H5I_INVALID_HID;
 
 /* Whether the driver initialized MPI on its own */
-static hbool_t H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = FALSE;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -101,7 +101,7 @@ typedef struct H5FD_subfiling_t {
     uint64_t file_id;
     int64_t  context_id; /* The value used to lookup a subfiling context for the file */
 
-    hbool_t fail_to_encode; /* Used to check for failures from sb_get_size routine */
+    bool fail_to_encode; /* Used to check for failures from sb_get_size routine */
 
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
@@ -172,9 +172,9 @@ static herr_t  H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t
                                            haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
 static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                             haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
-static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 #if 0
-static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__subfiling_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
 #endif
 static herr_t H5FD__subfiling_del(const char *name, hid_t fapl);
@@ -527,7 +527,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 {
     const H5FD_subfiling_config_t *config_ptr         = NULL;
     H5P_genplist_t                *plist              = NULL;
-    hbool_t                        use_default_config = FALSE;
+    bool                           use_default_config = FALSE;
     herr_t                         ret_value          = SUCCEED;
 
     /*NO TRACE*/
@@ -873,7 +873,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
 
     /* Decode "require IOC" field */
     INT32DECODE(p, tmp32);
-    file->fa.require_ioc = (hbool_t)tmp32;
+    file->fa.require_ioc = (bool)tmp32;
 
     /* Decode subfiling stripe size */
     INT64DECODE(p, file->fa.shared_cfg.stripe_size);
@@ -1101,7 +1101,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t                  *driver    = NULL; /* VFD for file */
     H5P_genplist_t                *plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    hbool_t                        bcasted_eof = FALSE;
+    bool                           bcasted_eof = FALSE;
     int64_t                        sf_eof      = -1;
     int                            mpi_code; /* MPI return code */
     H5FD_t                        *ret_value = NULL;
@@ -1544,7 +1544,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     int64_t             *source_data_offset = NULL;
     int64_t             *sf_data_size       = NULL;
     int64_t             *sf_offset          = NULL;
-    hbool_t              rank0_bcast        = FALSE;
+    bool                 rank0_bcast        = FALSE;
     int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
@@ -2089,8 +2089,8 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
     /* TODO: setup real support for vector I/O */
     if (file_ptr->fa.require_ioc) {
 
-        hbool_t    extend_sizes = FALSE;
-        hbool_t    extend_types = FALSE;
+        bool       extend_sizes = FALSE;
+        bool       extend_types = FALSE;
         int        k;
         size_t     size;
         H5FD_mem_t type;
@@ -2247,8 +2247,8 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
     /* Call the subfiling IOC write*/
     if (file_ptr->fa.require_ioc) {
 
-        hbool_t    extend_sizes = FALSE;
-        hbool_t    extend_types = FALSE;
+        bool       extend_sizes = FALSE;
+        bool       extend_types = FALSE;
         int        k;
         size_t     size;
         H5FD_mem_t type;
@@ -2340,7 +2340,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -2417,7 +2417,7 @@ done:
  */
 #if 0
 static herr_t
-H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
+H5FD__subfiling_lock(H5FD_t *_file, bool rw)
 {
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct  */
     herr_t            ret_value = SUCCEED;                   /* Return value       */
@@ -2829,8 +2829,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         int64_t *_io_block_len;
         int64_t  subfile_bytes = 0;
         int64_t  iovec_depth;
-        hbool_t  is_first = FALSE;
-        hbool_t  is_last  = FALSE;
+        bool     is_first = FALSE;
+        bool     is_last  = FALSE;
         size_t   output_offset;
 
         iovec_depth = curr_max_iovec_depth;
@@ -2885,7 +2885,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
             /* Account for subfiles with uniform segments */
             if (!is_first && !is_last) {
-                hbool_t thin_uniform_section = FALSE;
+                bool thin_uniform_section = FALSE;
 
                 if (last_subfile >= first_subfile) {
                     /*

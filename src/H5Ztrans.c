@@ -86,8 +86,8 @@ static H5Z_node  *H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_p
 static H5Z_node  *H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers);
 static H5Z_node  *H5Z__new_node(H5Z_token_type type);
 static void       H5Z__do_op(H5Z_node *tree);
-static hbool_t    H5Z__op_is_numbs(H5Z_node *_tree);
-static hbool_t    H5Z__op_is_numbs2(H5Z_node *_tree);
+static bool       H5Z__op_is_numbs(H5Z_node *_tree);
+static bool       H5Z__op_is_numbs2(H5Z_node *_tree);
 static hid_t      H5Z__xform_find_type(const H5T_t *type);
 static herr_t     H5Z__xform_eval_full(H5Z_node *tree, size_t array_size, hid_t array_type, H5Z_result *res);
 static void       H5Z__xform_destroy_parse_tree(H5Z_node *tree);
@@ -1254,10 +1254,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5Z__op_is_numbs(H5Z_node *_tree)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = FALSE;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1282,10 +1282,10 @@ H5Z__op_is_numbs(H5Z_node *_tree)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5Z__op_is_numbs2(H5Z_node *_tree)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = FALSE;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1614,10 +1614,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
 {
-    hbool_t ret_value = TRUE; /* Return value */
+    bool ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

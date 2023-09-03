@@ -188,8 +188,8 @@ H5G__link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 herr_t
 H5G__ent_to_link(H5O_link_t *lnk, const H5HL_t *heap, const H5G_entry_t *ent, const char *name)
 {
-    hbool_t dup_soft  = FALSE;   /* xstrdup the symbolic link name or not */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   dup_soft  = FALSE;   /* xstrdup the symbolic link name or not */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

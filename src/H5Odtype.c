@@ -34,11 +34,10 @@ static herr_t H5O__dtype_reset(void *_mesg);
 static herr_t H5O__dtype_free(void *_mesg);
 static herr_t H5O__dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O__dtype_can_share(const void *_mesg);
-static herr_t H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                        const H5O_copy_t *cpy_info, void *_udata);
 static void  *H5O__dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
-                                   H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-                                   void *udata);
+                                   H5F_t *file_dst, bool *recompute_size, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__dtype_shared_post_copy_upd(const H5O_loc_t *src_oloc, const void *mesg_src,
                                               H5O_loc_t *dst_oloc, void *mesg_dst, H5O_copy_t *cpy_info);
 static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
@@ -119,7 +118,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, hbool_t skip,
+H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, bool skip,
                          const uint8_t *p_end)
 {
     unsigned flags;
@@ -1312,7 +1311,7 @@ static void *
 H5O__dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned *ioflags /*in,out*/, size_t p_size, const uint8_t *p)
 {
-    hbool_t        skip;
+    bool           skip;
     H5T_t         *dt        = NULL;
     const uint8_t *p_end     = p + p_size - 1;
     void          *ret_value = NULL;
@@ -1719,7 +1718,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t H5_ATTR_UNUSED *deleted,
+H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool H5_ATTR_UNUSED *deleted,
                          const H5O_copy_t *cpy_info, void *_udata)
 {
     const H5T_t        *dt_src    = (const H5T_t *)mesg_src;      /* Source datatype */
@@ -1772,7 +1771,7 @@ done:
  */
 static void *
 H5O__dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
-                     H5F_t *file_dst, hbool_t H5_ATTR_UNUSED *recompute_size,
+                     H5F_t *file_dst, bool H5_ATTR_UNUSED *recompute_size,
                      H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     H5T_t *dst_mesg;         /* Destination datatype */

@@ -353,9 +353,9 @@ herr_t
 H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                  void *bufs[] /* out */)
 {
-    hbool_t    addrs_cooked = FALSE;
-    hbool_t    extend_sizes = FALSE;
-    hbool_t    extend_types = FALSE;
+    bool       addrs_cooked = FALSE;
+    bool       extend_sizes = FALSE;
+    bool       extend_types = FALSE;
     uint32_t   i;
     size_t     size      = 0;
     H5FD_mem_t type      = H5FD_MEM_DEFAULT;
@@ -567,9 +567,9 @@ herr_t
 H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                   const void *bufs[])
 {
-    hbool_t    addrs_cooked = FALSE;
-    hbool_t    extend_sizes = FALSE;
-    hbool_t    extend_types = FALSE;
+    bool       addrs_cooked = FALSE;
+    bool       extend_sizes = FALSE;
+    bool       extend_types = FALSE;
     uint32_t   i;
     size_t     size = 0;
     H5FD_mem_t type = H5FD_MEM_DEFAULT;
@@ -754,12 +754,12 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
                                uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                size_t element_sizes[], void *bufs[] /* out */)
 {
-    hbool_t         extend_sizes = FALSE;
-    hbool_t         extend_bufs  = FALSE;
+    bool            extend_sizes = FALSE;
+    bool            extend_bufs  = FALSE;
     uint32_t        i;
     size_t          element_size = 0;
     void           *buf          = NULL;
-    hbool_t         use_vector   = FALSE;
+    bool            use_vector   = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
     haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
@@ -780,8 +780,8 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     size_t          seq_nelem;
     H5S_sel_iter_t *file_iter      = NULL;
     H5S_sel_iter_t *mem_iter       = NULL;
-    hbool_t         file_iter_init = FALSE;
-    hbool_t         mem_iter_init  = FALSE;
+    bool            file_iter_init = FALSE;
+    bool            mem_iter_init  = FALSE;
     H5FD_mem_t      types[2]       = {type, H5FD_MEM_NOLIST};
     size_t          vec_arr_nalloc = H5FD_LOCAL_VECTOR_LEN;
     size_t          vec_arr_nused  = 0;
@@ -1082,7 +1082,7 @@ herr_t
 H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces,
                     haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
-    hbool_t  offsets_cooked = FALSE;
+    bool     offsets_cooked = FALSE;
     hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
     hid_t   *mem_space_ids = mem_space_ids_local;
     hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -1254,7 +1254,7 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
                        void *bufs[] /* out */)
 {
-    hbool_t  offsets_cooked = FALSE;
+    bool     offsets_cooked = FALSE;
     H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
     H5S_t  **mem_spaces = mem_spaces_local;
     H5S_t   *file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -1411,12 +1411,12 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
                                 uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                 size_t element_sizes[], const void *bufs[])
 {
-    hbool_t         extend_sizes = FALSE;
-    hbool_t         extend_bufs  = FALSE;
+    bool            extend_sizes = FALSE;
+    bool            extend_bufs  = FALSE;
     uint32_t        i;
     size_t          element_size = 0;
     const void     *buf          = NULL;
-    hbool_t         use_vector   = FALSE;
+    bool            use_vector   = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
     haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
@@ -1437,8 +1437,8 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     size_t          seq_nelem;
     H5S_sel_iter_t *file_iter      = NULL;
     H5S_sel_iter_t *mem_iter       = NULL;
-    hbool_t         file_iter_init = FALSE;
-    hbool_t         mem_iter_init  = FALSE;
+    bool            file_iter_init = FALSE;
+    bool            mem_iter_init  = FALSE;
     H5FD_mem_t      types[2]       = {type, H5FD_MEM_NOLIST};
     size_t          vec_arr_nalloc = H5FD_LOCAL_VECTOR_LEN;
     size_t          vec_arr_nused  = 0;
@@ -1737,7 +1737,7 @@ herr_t
 H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces,
                      haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
-    hbool_t  offsets_cooked = FALSE;
+    bool     offsets_cooked = FALSE;
     hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
     hid_t   *mem_space_ids = mem_space_ids_local;
     hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -1902,7 +1902,7 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
                         hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
                         size_t element_sizes[], const void *bufs[])
 {
-    hbool_t  offsets_cooked = FALSE;
+    bool     offsets_cooked = FALSE;
     H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
     H5S_t  **mem_spaces = mem_spaces_local;
     H5S_t   *file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -2429,7 +2429,7 @@ H5FD__srt_tmp_cmp(const void *element_1, const void *element_2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct H5FD_srt_tmp_t **srt_tmp)
+H5FD__sort_io_req_real(size_t count, haddr_t *addrs, bool *was_sorted, struct H5FD_srt_tmp_t **srt_tmp)
 {
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -2520,7 +2520,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t types[], haddr_t addrs[],
+H5FD_sort_vector_io_req(bool *vector_was_sorted, uint32_t _count, H5FD_mem_t types[], haddr_t addrs[],
                         size_t sizes[], H5_flexible_const_ptr_t bufs[], H5FD_mem_t **s_types_ptr,
                         haddr_t **s_addrs_ptr, size_t **s_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
@@ -2693,7 +2693,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, size_t count, hid_t mem_space_ids[],
+H5FD_sort_selection_io_req(bool *selection_was_sorted, size_t count, hid_t mem_space_ids[],
                            hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
                            H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids_ptr,
                            hid_t **s_file_space_ids_ptr, haddr_t **s_offsets_ptr,
@@ -2907,7 +2907,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *success)
+H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *success)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2987,7 +2987,7 @@ H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5FD_register_driver_by_name(const char *name, hbool_t app_ref)
+H5FD_register_driver_by_name(const char *name, bool app_ref)
 {
     htri_t driver_is_registered = FALSE;
     hid_t  driver_id            = H5I_INVALID_HID;
@@ -3041,7 +3041,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref)
+H5FD_register_driver_by_value(H5FD_class_value_t value, bool app_ref)
 {
     htri_t driver_is_registered = FALSE;
     hid_t  driver_id            = H5I_INVALID_HID;
@@ -3177,7 +3177,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5FD_get_driver_id_by_name(const char *name, hbool_t is_api)
+H5FD_get_driver_id_by_name(const char *name, bool is_api)
 {
     H5FD_get_driver_ud_t op_data;
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
@@ -3216,7 +3216,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5FD_get_driver_id_by_value(H5FD_class_value_t value, hbool_t is_api)
+H5FD_get_driver_id_by_value(H5FD_class_value_t value, bool is_api)
 {
     H5FD_get_driver_ud_t op_data;
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */

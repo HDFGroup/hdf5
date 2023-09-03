@@ -43,10 +43,10 @@ static htri_t ignore_disabled_file_locks_s = FAIL;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_direct_fapl_t {
-    size_t  mboundary;  /* Memory boundary for alignment    */
-    size_t  fbsize;     /* File system block size      */
-    size_t  cbsize;     /* Maximal buffer size for copying user data  */
-    hbool_t must_align; /* Decides if data alignment is required        */
+    size_t mboundary;  /* Memory boundary for alignment    */
+    size_t fbsize;     /* File system block size      */
+    size_t cbsize;     /* Maximal buffer size for copying user data  */
+    bool   must_align; /* Decides if data alignment is required        */
 } H5FD_direct_fapl_t;
 
 /*
@@ -69,7 +69,7 @@ typedef struct H5FD_direct_t {
     haddr_t            pos; /*current file I/O position  */
     int                op;  /*last operation    */
     H5FD_direct_fapl_t fa;  /*file access properties  */
-    hbool_t            ignore_disabled_file_locks;
+    bool               ignore_disabled_file_locks;
 #ifndef H5_HAVE_WIN32_API
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -132,8 +132,8 @@ static herr_t  H5FD__direct_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
                                  void *buf);
 static herr_t  H5FD__direct_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                   const void *buf);
-static herr_t  H5FD__direct_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__direct_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__direct_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__direct_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__direct_unlock(H5FD_t *_file);
 static herr_t  H5FD__direct_delete(const char *filename, hid_t fapl_id);
 
@@ -821,7 +821,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file;
     ssize_t        nbytes;
-    hbool_t        _must_align = TRUE;
+    bool           _must_align = TRUE;
     herr_t         ret_value   = SUCCEED; /* Return value */
     size_t         alloc_size;
     void          *copy_buf = NULL, *p2;
@@ -998,7 +998,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file;
     ssize_t        nbytes;
-    hbool_t        _must_align = TRUE;
+    bool           _must_align = TRUE;
     herr_t         ret_value   = SUCCEED; /* Return value */
     size_t         alloc_size;
     void          *copy_buf = NULL, *p1;
@@ -1218,7 +1218,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_direct_t *file      = (H5FD_direct_t *)_file;
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -1279,7 +1279,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__direct_lock(H5FD_t *_file, hbool_t rw)
+H5FD__direct_lock(H5FD_t *_file, bool rw)
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file; /* VFD file struct      */
     int            lock_flags;                    /* file locking flags   */

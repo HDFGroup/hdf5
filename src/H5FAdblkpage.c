@@ -134,7 +134,7 @@ herr_t
 H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
 {
     H5FA_dblk_page_t *dblk_page = NULL;  /* Fixed array data block page */
-    hbool_t           inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool              inserted  = FALSE; /* Whether the header was inserted into cache */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE

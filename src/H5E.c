@@ -1227,7 +1227,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
     va_list ap;                   /* Varargs info */
     H5E_t  *estack;               /* Pointer to error stack to modify */
     char   *tmp        = NULL;    /* Buffer to place formatted description in */
-    hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
+    bool    va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */

@@ -613,7 +613,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     H5C_t   *cache_ptr;
     unsigned entries_cleared;
     unsigned pinned_entries_cleared;
-    hbool_t  progress;
+    bool     progress;
     unsigned entries_examined;
     unsigned initial_list_len;
     haddr_t  addr;
@@ -815,7 +815,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
+H5C_clear_coll_entries(H5C_t *cache_ptr, bool partial)
 {
     uint32_t           clear_cnt;
     H5C_cache_entry_t *entry_ptr = NULL;
@@ -1121,8 +1121,8 @@ static herr_t
 H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flush, unsigned entries_to_clear)
 {
     H5C_t   *cache_ptr;
-    hbool_t  progress;
-    hbool_t  restart_scan    = FALSE;
+    bool     progress;
+    bool     restart_scan    = FALSE;
     unsigned entries_flushed = 0;
     unsigned entries_cleared = 0;
 #ifdef H5C_DO_SANITY_CHECKS
@@ -1171,7 +1171,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
     entry_ptr    = cache_ptr->LRU_tail_ptr;
     while (((entries_flushed < entries_to_flush) || (entries_cleared < entries_to_clear)) &&
            (entry_ptr != NULL)) {
-        hbool_t            prev_is_dirty = FALSE;
+        bool               prev_is_dirty = FALSE;
         H5C_cache_entry_t *next_ptr;
 
         /* Entries in the LRU must not have flush dependency children */
@@ -1315,7 +1315,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
         while ((entry_ptr != NULL) &&
                ((entries_flushed < entries_to_flush) || (entries_cleared < entries_to_clear))) {
             H5C_cache_entry_t *prev_ptr;
-            hbool_t            next_is_dirty = FALSE;
+            bool               next_is_dirty = FALSE;
 
             assert(entry_ptr->is_pinned);
 

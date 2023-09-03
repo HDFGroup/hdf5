@@ -245,7 +245,7 @@ H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_
              * is possible, for example, if an attribute's datatype is shared in
              * the same object header the attribute is in.  Adjust the link
              * count directly. */
-            hbool_t deleted = FALSE; /* This is used only to satisfy H5O__link_oh */
+            bool deleted = FALSE; /* This is used only to satisfy H5O__link_oh */
 
             if (H5O__link_oh(f, adjust, open_oh, &deleted) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count");
@@ -540,7 +540,7 @@ done:
 herr_t
 H5O__shared_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, H5F_t *file_dst,
                       const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
-                      hbool_t H5_ATTR_UNUSED *recompute_size, unsigned *mesg_flags,
+                      bool H5_ATTR_UNUSED *recompute_size, unsigned *mesg_flags,
                       H5O_copy_t H5_ATTR_NDEBUG_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5O_shared_t *shared_src =

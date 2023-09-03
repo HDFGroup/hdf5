@@ -437,8 +437,8 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info");
 
     /* Update fields */
-    linfo.track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
-    linfo.index_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
+    linfo.track_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
+    linfo.index_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
 
     /* Set link info */
     if (H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
@@ -641,8 +641,8 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
     H5_DECODE_UNSIGNED(*pp, crt_order_flags);
 
     /* Update fields */
-    linfo->track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
-    linfo->index_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
+    linfo->track_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
+    linfo->index_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

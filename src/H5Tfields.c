@@ -261,7 +261,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
 {
     unsigned nmembs; /* Number of members for datatype */
     size_t   size;
-    hbool_t  swapped; /* Whether we've swapped fields */
+    bool     swapped; /* Whether we've swapped fields */
     uint8_t  tbuf[32];
     unsigned i, j;                /* Local index variables */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -363,7 +363,7 @@ H5T__sort_name(const H5T_t *dt, int *map)
 {
     unsigned i, j, nmembs;
     size_t   size;
-    hbool_t  swapped;
+    bool     swapped;
     uint8_t  tbuf[32];
 
     FUNC_ENTER_PACKAGE_NOERR

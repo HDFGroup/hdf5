@@ -38,7 +38,7 @@ static size_t H5O__fill_new_size(const H5F_t *f, const void *_mesg);
 static void  *H5O__fill_copy(const void *_mesg, void *_dest);
 static herr_t H5O__fill_reset(void *_mesg);
 static herr_t H5O__fill_free(void *_mesg);
-static herr_t H5O__fill_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__fill_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                       const H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__fill_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -825,7 +825,7 @@ H5O__fill_free(void *fill)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, hbool_t H5_ATTR_UNUSED *deleted,
+H5O__fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, bool H5_ATTR_UNUSED *deleted,
                         const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5O_fill_t *fill_src  = (const H5O_fill_t *)mesg_src; /* Source fill value */
@@ -955,7 +955,7 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
+H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
 {
     H5T_path_t *tpath;                    /* Type conversion info    */
     void       *buf = NULL, *bkg = NULL;  /* Conversion buffers    */

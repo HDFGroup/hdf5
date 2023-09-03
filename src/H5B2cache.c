@@ -60,7 +60,7 @@
 /* Metadata cache callbacks */
 static herr_t H5B2__cache_hdr_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5B2__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata);
-static void  *H5B2__cache_hdr_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5B2__cache_hdr_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_hdr_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
@@ -68,7 +68,7 @@ static herr_t H5B2__cache_hdr_free_icr(void *thing);
 
 static herr_t H5B2__cache_int_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5B2__cache_int_verify_chksum(const void *image_ptr, size_t len, void *udata);
-static void  *H5B2__cache_int_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5B2__cache_int_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_int_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5B2__cache_int_notify(H5AC_notify_action_t action, void *thing);
@@ -76,7 +76,7 @@ static herr_t H5B2__cache_int_free_icr(void *thing);
 
 static herr_t H5B2__cache_leaf_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5B2__cache_leaf_verify_chksum(const void *image_ptr, size_t len, void *udata);
-static void  *H5B2__cache_leaf_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5B2__cache_leaf_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_leaf_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *thing);
@@ -220,7 +220,7 @@ H5B2__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  */
 static void *
 H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata,
-                            hbool_t H5_ATTR_UNUSED *dirty)
+                            bool H5_ATTR_UNUSED *dirty)
 {
     H5B2_hdr_t          *hdr   = NULL; /* B-tree header */
     H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata;
@@ -588,7 +588,7 @@ H5B2__cache_int_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, voi
  */
 static void *
 H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata,
-                            hbool_t H5_ATTR_UNUSED *dirty)
+                            bool H5_ATTR_UNUSED *dirty)
 {
     H5B2_internal_cache_ud_t *udata    = (H5B2_internal_cache_ud_t *)_udata; /* Pointer to user data */
     H5B2_internal_t          *internal = NULL;                               /* Internal node read */
@@ -986,7 +986,7 @@ H5B2__cache_leaf_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  */
 static void *
 H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata,
-                             hbool_t H5_ATTR_UNUSED *dirty)
+                             bool H5_ATTR_UNUSED *dirty)
 {
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
     H5B2_leaf_t          *leaf  = NULL;                    /* Pointer to lead node loaded */

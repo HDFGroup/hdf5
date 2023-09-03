@@ -66,7 +66,7 @@ static H5HF_free_section_t *H5FS__sect_node_new(unsigned sect_type, haddr_t sect
 static herr_t               H5HF__sect_node_free(H5HF_free_section_t *sect, H5HF_indirect_t *parent);
 
 /* 'single' section routines */
-static herr_t H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, hbool_t refresh, H5HF_free_section_t *sect);
+static herr_t H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, bool refresh, H5HF_free_section_t *sect);
 static herr_t H5HF__sect_single_full_dblock(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
 
 /* 'single' section callbacks */
@@ -82,7 +82,7 @@ static herr_t H5HF__sect_single_shrink(H5FS_section_info_t **_sect, void *udata)
 static herr_t H5HF__sect_single_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t *sect);
 
 /* 'row' section routines */
-static H5HF_free_section_t *H5HF__sect_row_create(haddr_t sect_off, hsize_t sect_size, hbool_t is_first,
+static H5HF_free_section_t *H5HF__sect_row_create(haddr_t sect_off, hsize_t sect_size, bool is_first,
                                                   unsigned row, unsigned col, unsigned nentries,
                                                   H5HF_free_section_t *under_sect);
 static herr_t               H5HF__sect_row_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
@@ -111,7 +111,7 @@ static herr_t H5HF__sect_row_debug(const H5FS_section_info_t *sect, FILE *stream
 static H5HF_free_section_t *H5HF__sect_indirect_new(H5HF_hdr_t *hdr, haddr_t sect_off, hsize_t sect_size,
                                                     H5HF_indirect_t *iblock, hsize_t iblock_off, unsigned row,
                                                     unsigned col, unsigned nentries);
-static herr_t H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_t first_child,
+static herr_t H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, bool first_child,
                                             H5HF_free_section_t **first_row_sect, unsigned space_flags,
                                             unsigned start_row, unsigned start_col, unsigned end_row,
                                             unsigned end_col);
@@ -122,10 +122,10 @@ static herr_t               H5HF__sect_indirect_revive_row(H5HF_hdr_t *hdr, H5HF
 static herr_t               H5HF__sect_indirect_revive(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
                                                        H5HF_indirect_t *sect_iblock);
 static herr_t               H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect,
-                                                           hbool_t *alloc_from_start);
-static herr_t  H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned child_entry);
-static herr_t  H5HF__sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
-static hbool_t H5HF__sect_indirect_is_first(H5HF_free_section_t *sect);
+                                                           bool *alloc_from_start);
+static herr_t H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned child_entry);
+static herr_t H5HF__sect_indirect_first(H5HF_hdr_t *hdr, H5HF_free_section_t *sect);
+static bool   H5HF__sect_indirect_is_first(H5HF_free_section_t *sect);
 static H5HF_indirect_t     *H5HF__sect_indirect_get_iblock(H5HF_free_section_t *sect);
 static hsize_t              H5HF__sect_indirect_iblock_off(const H5HF_free_section_t *sect);
 static H5HF_free_section_t *H5HF__sect_indirect_top(H5HF_free_section_t *sect);
@@ -477,11 +477,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, hbool_t refresh, H5HF_free_section_t *sect)
+H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, bool refresh, H5HF_free_section_t *sect)
 {
     H5HF_indirect_t *sec_iblock;          /* Pointer to section indirect block */
     unsigned         sec_entry;           /* Entry within section indirect block */
-    hbool_t          did_protect;         /* Whether we protected the indirect block or not */
+    bool             did_protect;         /* Whether we protected the indirect block or not */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -694,7 +694,7 @@ H5HF__sect_single_full_dblock(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
     if ((dblock_size - dblock_overhead) == sect->sect_info.size && hdr->man_dtable.curr_root_rows > 0) {
         H5HF_direct_t *dblock;         /* Pointer to direct block for section */
-        hbool_t        parent_removed; /* Whether the direct block parent was removed from the file */
+        bool           parent_removed; /* Whether the direct block parent was removed from the file */
 
         if (NULL == (dblock = H5HF__man_dblock_protect(hdr, dblock_addr, dblock_size, sect->u.single.parent,
                                                        sect->u.single.par_entry, H5AC__NO_FLAGS_SET)))
@@ -1147,7 +1147,7 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
  *-------------------------------------------------------------------------
  */
 static H5HF_free_section_t *
-H5HF__sect_row_create(haddr_t sect_off, hsize_t sect_size, hbool_t is_first, unsigned row, unsigned col,
+H5HF__sect_row_create(haddr_t sect_off, hsize_t sect_size, bool is_first, unsigned row, unsigned col,
                       unsigned nentries, H5HF_free_section_t *under_sect)
 {
     H5HF_free_section_t *sect      = NULL; /* 'Row' section created */
@@ -1279,8 +1279,8 @@ done:
 herr_t
 H5HF__sect_row_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned *entry_p)
 {
-    hbool_t alloc_from_start;    /* Whether to allocate from the end of the row */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   alloc_from_start;    /* Whether to allocate from the end of the row */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2188,7 +2188,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_t first_child,
+H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, bool first_child,
                               H5HF_free_section_t **first_row_sect, unsigned space_flags, unsigned start_row,
                               unsigned start_col, unsigned end_row, unsigned end_col)
 {
@@ -2338,7 +2338,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, hbool_
 
             /* Add an indirect section for each indirect block in the row */
             for (v = 0; v < row_entries; v++) {
-                hbool_t did_protect = FALSE; /* Whether we protected the indirect block or not */
+                bool did_protect = FALSE; /* Whether we protected the indirect block or not */
 
                 /* Try to get the child section's indirect block, if it's available */
                 if (sect->sect_info.state == H5FS_SECT_LIVE) {
@@ -2561,7 +2561,7 @@ static herr_t
 H5HF__sect_indirect_revive_row(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 {
     H5HF_indirect_t *sec_iblock;          /* Pointer to section indirect block */
-    hbool_t          did_protect;         /* Whether we protected the indirect block or not */
+    bool             did_protect;         /* Whether we protected the indirect block or not */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2653,7 +2653,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, hbool_t *alloc_from_start)
+H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, bool *alloc_from_start)
 {
     H5HF_free_section_t *sect;                /* Indirect section underlying row section */
     unsigned             row_start_entry;     /* Entry for first block covered in row section */
@@ -2706,7 +2706,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
 
     /* Check if we have a parent section to be detached from */
     if (sect->u.indirect.parent) {
-        hbool_t is_first; /* Flag to indicate that this section is the first section in hierarchy */
+        bool is_first; /* Flag to indicate that this section is the first section in hierarchy */
 
         /* Check if this section is the first section */
         is_first = H5HF__sect_indirect_is_first(sect);
@@ -2951,7 +2951,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
     if (sect->u.indirect.num_entries > 1) {
         /* Check if we have a parent section to be detached from */
         if (sect->u.indirect.parent) {
-            hbool_t is_first; /* Flag to indicate that this section is the first section in hierarchy */
+            bool is_first; /* Flag to indicate that this section is the first section in hierarchy */
 
             /* Check if this section is the first section */
             is_first = H5HF__sect_indirect_is_first(sect);
@@ -3151,10 +3151,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5HF__sect_indirect_is_first(H5HF_free_section_t *sect)
 {
-    hbool_t ret_value = FALSE; /* Return value */
+    bool ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -3265,7 +3265,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
     unsigned             end_entry1;             /* End entry for section #1 */
     unsigned             end_row1;               /* Ending row for section #1 */
     unsigned             start_row2;             /* Starting row for section #2 */
-    hbool_t              merged_rows;            /* Flag to indicate that rows was merged together */
+    bool                 merged_rows;            /* Flag to indicate that rows was merged together */
     unsigned             u;                      /* Local index variable */
     herr_t               ret_value = SUCCEED;    /* Return value */
 

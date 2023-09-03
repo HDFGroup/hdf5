@@ -72,7 +72,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, hbool_t start_immediately)
+H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, bool start_immediately)
 {
     int    mpi_rank  = -1;      /* -1 indicates serial (no MPI rank) */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -253,7 +253,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_logging_status(const H5C_t *cache, hbool_t *is_enabled, hbool_t *is_currently_logging)
+H5C_get_logging_status(const H5C_t *cache, bool *is_enabled, bool *is_currently_logging)
 {
     FUNC_ENTER_NOAPI_NOERR
 

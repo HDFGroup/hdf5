@@ -42,12 +42,12 @@
 /********************/
 
 /* Selection callbacks */
-static herr_t   H5S__none_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
+static herr_t   H5S__none_copy(H5S_t *dst, const H5S_t *src, bool share_selection);
 static herr_t   H5S__none_release(H5S_t *space);
 static htri_t   H5S__none_is_valid(const H5S_t *space);
 static hssize_t H5S__none_serial_size(H5S_t *space);
 static herr_t   H5S__none_serialize(H5S_t *space, uint8_t **p);
-static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip);
+static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip);
 static herr_t   H5S__none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__none_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__none_unlim_dim(const H5S_t *space);
@@ -422,7 +422,7 @@ H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
     herr_t H5S__none_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
-        hbool_t;     IN: Whether to share the selection between the dataspaces
+        bool;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -434,7 +434,7 @@ H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED share_selection)
+H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, bool H5_ATTR_UNUSED share_selection)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -578,7 +578,7 @@ H5S__none_serialize(H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
+H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip)
 {
     H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
                                                    either *space or a newly allocated one */

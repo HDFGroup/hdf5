@@ -125,8 +125,8 @@ static hid_t H5FD_ONION_g = 0;
 typedef struct H5FD_onion_t {
     H5FD_t                 pub;
     H5FD_onion_fapl_info_t fa;
-    hbool_t                is_open_rw;
-    hbool_t                align_history_on_pages;
+    bool                   is_open_rw;
+    bool                   align_history_on_pages;
 
     /* Onion-related files */
     H5FD_t *original_file;

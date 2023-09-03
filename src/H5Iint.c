@@ -53,15 +53,15 @@ typedef struct {
 typedef struct {
     H5I_search_func_t user_func;  /* 'User' function to invoke */
     void             *user_udata; /* User data to pass to 'user' function */
-    hbool_t           app_ref;    /* Whether this is an appl. ref. call */
+    bool              app_ref;    /* Whether this is an appl. ref. call */
     H5I_type_t        obj_type;   /* Type of object we are iterating over */
 } H5I_iterate_ud_t;
 
 /* User data for H5I__clear_type_cb */
 typedef struct {
     H5I_type_info_t *type_info; /* Pointer to the type's info to be cleared */
-    hbool_t          force;     /* Whether to always remove the ID */
-    hbool_t          app_ref;   /* Whether this is an appl. ref. call */
+    bool             force;     /* Whether to always remove the ID */
+    bool             app_ref;   /* Whether this is an appl. ref. call */
 } H5I_clear_type_ud_t;
 
 /********************/
@@ -92,7 +92,7 @@ int              H5I_next_type_g = (int)H5I_NTYPES;
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /* Whether deletes are actually marks (for mark-and-sweep) */
-static hbool_t H5I_marking_s = FALSE;
+static bool H5I_marking_s = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -287,7 +287,7 @@ H5I__unwrap(void *object, H5I_type_t type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
+H5I_clear_type(H5I_type_t type, bool force, bool app_ref)
 {
     H5I_clear_type_ud_t udata; /* udata struct for callback */
     H5I_id_info_t      *item      = NULL;
@@ -355,7 +355,7 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5I_id_info_t       *info  = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
     H5I_clear_type_ud_t *udata = (H5I_clear_type_ud_t *)_udata; /* udata struct */
-    hbool_t              mark  = FALSE;
+    bool                 mark  = FALSE;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -500,7 +500,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_realize_func_t realize_cb,
+H5I__register(H5I_type_t type, const void *object, bool app_ref, H5I_future_realize_func_t realize_cb,
               H5I_future_discard_func_t discard_cb)
 {
     H5I_type_info_t *type_info = NULL;            /* Pointer to the type */
@@ -559,7 +559,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
+H5I_register(H5I_type_t type, const void *object, bool app_ref)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -596,7 +596,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, hid_t existing_id)
+H5I_register_using_existing_id(H5I_type_t type, void *object, bool app_ref, hid_t existing_id)
 {
     H5I_type_info_t *type_info = NULL;    /* Pointer to the type */
     H5I_id_info_t   *info      = NULL;    /* Pointer to the new ID information */
@@ -1273,7 +1273,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5I_inc_ref(hid_t id, hbool_t app_ref)
+H5I_inc_ref(hid_t id, bool app_ref)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
     int            ret_value = 0;    /* Return value */
@@ -1310,7 +1310,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5I_get_ref(hid_t id, hbool_t app_ref)
+H5I_get_ref(hid_t id, bool app_ref)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID */
     int            ret_value = 0;    /* Return value */
@@ -1525,7 +1525,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_ref)
+H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, bool app_ref)
 {
     H5I_type_info_t *type_info = NULL;    /* Pointer to the type */
     herr_t           ret_value = SUCCEED; /* Return value */

@@ -523,7 +523,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* iterate over all dsets and construct I/O information */
     for (i = 0; i < count; i++) {
-        hbool_t should_alloc_space = FALSE; /* Whether or not to initialize dataset's storage */
+        bool    should_alloc_space = FALSE; /* Whether or not to initialize dataset's storage */
         haddr_t prev_tag           = HADDR_UNDEF;
 
         /* check args */
@@ -672,7 +672,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         if (should_alloc_space) {
             hssize_t file_nelmts;    /* Number of elements in file dataset's dataspace */
-            hbool_t  full_overwrite; /* Whether we are over-writing all the elements */
+            bool     full_overwrite; /* Whether we are over-writing all the elements */
 
             /* Get the number of elements in file dataset's dataspace */
             if ((file_nelmts = H5S_GET_EXTENT_NPOINTS(dset_info[i].file_space)) < 0)
@@ -683,7 +683,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (H5T_detect_class(dset_info[i].dset->shared->type, H5T_VLEN, FALSE))
                 full_overwrite = FALSE;
             else
-                full_overwrite = (hbool_t)((hsize_t)file_nelmts == dset_info[i].nelmts ? TRUE : FALSE);
+                full_overwrite = (bool)((hsize_t)file_nelmts == dset_info[i].nelmts ? TRUE : FALSE);
 
             /* Allocate storage */
             if (H5D__alloc_storage(dset_info[i].dset, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
@@ -1267,7 +1267,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
         else {
             /* Fail when file sync is required, since it requires collective write */
             if (io_info->op_type == H5D_IO_OP_WRITE) {
-                hbool_t mpi_file_sync_required = FALSE;
+                bool mpi_file_sync_required = FALSE;
                 if (H5F_shared_get_mpi_file_sync_required(io_info->f_sh, &mpi_file_sync_required) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag");
 
@@ -1410,11 +1410,11 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
             /* If the buffer is too small to hold even one element (in the dataset with the largest , try to
              * make it bigger */
             if (target_size < io_info->max_tconv_type_size) {
-                hbool_t default_buffer_info; /* Whether the buffer information are the defaults */
+                bool default_buffer_info; /* Whether the buffer information are the defaults */
 
                 /* Detect if we have all default settings for buffers */
-                default_buffer_info = (hbool_t)((H5D_TEMP_BUF_SIZE == max_temp_buf) && (NULL == tconv_buf) &&
-                                                (NULL == bkgr_buf));
+                default_buffer_info =
+                    (bool)((H5D_TEMP_BUF_SIZE == max_temp_buf) && (NULL == tconv_buf) && (NULL == bkgr_buf));
 
                 /* Check if we are using the default buffer info */
                 if (default_buffer_info)

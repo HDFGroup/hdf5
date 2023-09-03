@@ -209,7 +209,7 @@ typedef struct ioc_io_queue_entry {
     uint32_t                   magic;
     struct ioc_io_queue_entry *next;
     struct ioc_io_queue_entry *prev;
-    hbool_t                    in_progress;
+    bool                       in_progress;
     uint32_t                   counter;
 
     sf_work_request_t     wk_req;

@@ -107,8 +107,8 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
         H5I_next_type_g++;
     }
     else {
-        hbool_t done; /* Indicate that search was successful */
-        int     i;
+        bool done; /* Indicate that search was successful */
+        int  i;
 
         /* Look for a free type to give out */
         done = FALSE;

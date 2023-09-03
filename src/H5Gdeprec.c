@@ -55,7 +55,7 @@
 /* User data for path traversal routine for getting object info */
 typedef struct {
     H5G_stat_t *statbuf;     /* Stat buffer about object */
-    hbool_t     follow_link; /* Whether we are following a link or not */
+    bool        follow_link; /* Whether we are following a link or not */
     H5F_t      *loc_file;    /* Pointer to the file the location is in */
 } H5G_trav_goi_t;
 
@@ -1062,7 +1062,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5G_stat_t *statbuf /*out*/)
+H5G__get_objinfo(const H5G_loc_t *loc, const char *name, bool follow_link, H5G_stat_t *statbuf /*out*/)
 {
     H5G_trav_goi_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */

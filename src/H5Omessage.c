@@ -52,7 +52,7 @@ typedef struct {
     unsigned       nfailed;  /* # of failed message removals */
     H5O_operator_t op;       /* Callback routine for removal operations */
     void          *op_data;  /* Callback data for removal operations */
-    hbool_t        adj_link; /* Whether to adjust links when removing messages */
+    bool           adj_link; /* Whether to adjust links when removing messages */
 } H5O_iter_rm_t;
 
 /********************/
@@ -854,7 +854,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link)
+H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, bool adj_link)
 {
     H5O_t                 *oh = NULL;        /* Pointer to actual object header */
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
@@ -901,7 +901,7 @@ done:
  */
 herr_t
 H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence, H5O_operator_t op, void *op_data,
-                  hbool_t adj_link)
+                  bool adj_link)
 {
     H5O_t                 *oh = NULL;        /* Pointer to actual object header */
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
@@ -1008,7 +1008,7 @@ done:
  */
 herr_t
 H5O__msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, int sequence, H5O_operator_t app_op,
-                     void *op_data, hbool_t adj_link)
+                     void *op_data, bool adj_link)
 {
     H5O_iter_rm_t       udata;               /* User data for iterator */
     H5O_mesg_operator_t op;                  /* Wrapper for operator */
@@ -1213,7 +1213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5O_msg_raw_size(const H5F_t *f, unsigned type_id, hbool_t disable_shared, const void *mesg)
+H5O_msg_raw_size(const H5F_t *f, unsigned type_id, bool disable_shared, const void *mesg)
 {
     const H5O_msg_class_t *type;          /* Actual H5O class type for the ID */
     size_t                 ret_value = 0; /* Return value */
@@ -1583,7 +1583,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared, unsigned char *buf, const void *mesg)
+H5O_msg_encode(H5F_t *f, unsigned type_id, bool disable_shared, unsigned char *buf, const void *mesg)
 {
     const H5O_msg_class_t *type;                /* Actual H5O class type for the ID */
     herr_t                 ret_value = SUCCEED; /* Return value */
@@ -1656,7 +1656,7 @@ done:
  */
 void *
 H5O__msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src, void *native_src, H5F_t *file_dst,
-                   hbool_t *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata)
+                   bool *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata)
 {
     void *ret_value = NULL; /* Return value */
 
@@ -1760,7 +1760,7 @@ H5O__copy_mesg(H5F_t *f, H5O_t *oh, size_t idx, const H5O_msg_class_t *type, con
 {
     H5O_chunk_proxy_t *chk_proxy   = NULL;           /* Chunk that message is in */
     H5O_mesg_t        *idx_msg     = &oh->mesg[idx]; /* Pointer to message to modify */
-    hbool_t            chk_dirtied = FALSE;          /* Flag for unprotecting chunk */
+    bool               chk_dirtied = FALSE;          /* Flag for unprotecting chunk */
     herr_t             ret_value   = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE

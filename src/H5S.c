@@ -563,7 +563,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
+H5S__extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, bool copy_max)
 {
     unsigned u;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -635,7 +635,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max)
+H5S_copy(const H5S_t *src, bool share_selection, bool copy_max)
 {
     H5S_t *dst       = NULL;
     H5S_t *ret_value = NULL; /* Return value */
@@ -1741,10 +1741,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5S_has_extent(const H5S_t *ds)
 {
-    hbool_t ret_value = FALSE; /* Return value */
+    bool ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

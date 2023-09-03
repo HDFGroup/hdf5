@@ -191,12 +191,12 @@ H5D__contig_fill(H5D_t *dset)
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
     int      mpi_code;                 /* MPI return code */
-    hbool_t  blocks_written = FALSE;   /* Flag to indicate that chunk was actually written */
-    hbool_t  using_mpi =
+    bool     blocks_written = FALSE;   /* Flag to indicate that chunk was actually written */
+    bool     using_mpi =
         FALSE; /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
 #endif         /* H5_HAVE_PARALLEL */
     H5D_fill_buf_info_t fb_info;                /* Dataset's fill buffer info */
-    hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
+    bool                fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     herr_t              ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -506,10 +506,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5D__contig_is_space_alloc(const H5O_storage_t *storage)
 {
-    hbool_t ret_value = FALSE; /* Return value */
+    bool ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -517,7 +517,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
     assert(storage);
 
     /* Set return value */
-    ret_value = (hbool_t)H5_addr_defined(storage->u.contig.addr);
+    ret_value = (bool)H5_addr_defined(storage->u.contig.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_is_space_alloc() */
@@ -531,7 +531,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -752,7 +752,7 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
         io_info->no_selection_io_cause |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
     }
     else {
-        hbool_t page_buf_enabled;
+        bool page_buf_enabled;
 
         assert(dset_info->layout_ops.writevv == H5D__contig_writevv);
 
@@ -1613,11 +1613,11 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     H5S_t        *buf_space   = NULL;                          /* Dataspace describing buffer */
     hid_t         buf_sid     = -1;                            /* ID for buffer dataspace */
     hsize_t       buf_dim[1]  = {0};                           /* Dimension for buffer */
-    hbool_t       is_vlen     = FALSE; /* Flag to indicate that VL type conversion should occur */
-    hbool_t       fix_ref     = FALSE; /* Flag to indicate that ref values should be fixed */
+    bool          is_vlen     = FALSE; /* Flag to indicate that VL type conversion should occur */
+    bool          fix_ref     = FALSE; /* Flag to indicate that ref values should be fixed */
     H5D_shared_t *shared_fo =
         (H5D_shared_t *)cpy_info->shared_fo; /* Pointer to the shared struct for dataset object */
-    hbool_t try_sieve   = FALSE;             /* Try to get data from the sieve buffer */
+    bool    try_sieve   = FALSE;             /* Try to get data from the sieve buffer */
     haddr_t sieve_start = HADDR_UNDEF;       /* Start location of sieve buffer */
     haddr_t sieve_end   = HADDR_UNDEF;       /* End locations of sieve buffer */
     herr_t  ret_value   = SUCCEED;           /* Return value */

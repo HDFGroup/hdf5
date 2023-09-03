@@ -134,7 +134,7 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
     haddr_t       eoa;                     /* Address of end-of-allocated space */
     hsize_t       extra;                   /* Extra space to allocate, to align request */
     unsigned long flags = 0;               /* Driver feature flags */
-    hbool_t       use_alloc_size;          /* Just pass alloc size to the driver */
+    bool          use_alloc_size;          /* Just pass alloc size to the driver */
     haddr_t       ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_PACKAGE

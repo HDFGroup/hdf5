@@ -49,7 +49,7 @@ typedef struct H5SM_read_udata_t {
 /* Local Prototypes */
 /********************/
 static herr_t  H5SM__create_index(H5F_t *f, H5SM_index_header_t *header);
-static herr_t  H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, hbool_t delete_heap);
+static herr_t  H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, bool delete_heap);
 static haddr_t H5SM__create_list(H5F_t *f, H5SM_index_header_t *header);
 static herr_t  H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos,
                                   size_t *list_pos);
@@ -57,10 +57,10 @@ static herr_t  H5SM__convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header
                                            H5HF_t *fheap, H5O_t *open_oh);
 static herr_t  H5SM__bt2_convert_to_list_op(const void *record, void *op_data);
 static herr_t  H5SM__convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header);
-static herr_t  H5SM__incr_ref(void *record, void *_op_data, hbool_t *changed);
-static herr_t  H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t defer,
+static herr_t  H5SM__incr_ref(void *record, void *_op_data, bool *changed);
+static herr_t  H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool defer,
                                 unsigned type_id, void *mesg, unsigned *cache_flags_ptr);
-static herr_t  H5SM__decr_ref(void *record, void *op_data, hbool_t *changed);
+static herr_t  H5SM__decr_ref(void *record, void *op_data, bool *changed);
 static herr_t  H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header,
                                        const H5O_shared_t *mesg, unsigned *cache_flags,
                                        size_t  */*out*/ mesg_size, void  **/*out*/ encoded_mesg);
@@ -528,7 +528,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, hbool_t delete_heap)
+H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, bool delete_heap)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1135,7 +1135,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__incr_ref(void *record, void *_op_data, hbool_t *changed)
+H5SM__incr_ref(void *record, void *_op_data, bool *changed)
 {
     H5SM_sohm_t          *message   = (H5SM_sohm_t *)record;
     H5SM_incr_ref_opdata *op_data   = (H5SM_incr_ref_opdata *)_op_data;
@@ -1208,14 +1208,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t defer, unsigned type_id,
+H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool defer, unsigned type_id,
                  void *mesg, unsigned *cache_flags_ptr)
 {
     H5SM_list_t         *list = NULL;             /* List index */
     H5SM_mesg_key_t      key;                     /* Key used to search the index */
     H5SM_list_cache_ud_t cache_udata;             /* User-data for metadata cache callback */
     H5O_shared_t         shared;                  /* Shared H5O message */
-    hbool_t              found = FALSE;           /* Was the message in the index? */
+    bool                 found = FALSE;           /* Was the message in the index? */
     H5HF_t              *fheap = NULL;            /* Fractal heap handle */
     H5B2_t              *bt2   = NULL;            /* v2 B-tree handle for index */
     size_t               buf_size;                /* Size of the encoded message */
@@ -1668,7 +1668,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
+H5SM__decr_ref(void *record, void *op_data, bool *changed)
 {
     H5SM_sohm_t *message = (H5SM_sohm_t *)record;
 
@@ -2158,7 +2158,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
         message = list->messages[list_pos];
     } /* end if */
     else {
-        hbool_t msg_exists; /* Whether the message exists in the v2 B-tree */
+        bool msg_exists; /* Whether the message exists in the v2 B-tree */
 
         /* Index is a B-tree */
         assert(header->index_type == H5SM_BTREE);

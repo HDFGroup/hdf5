@@ -346,7 +346,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "error in HDF5 file check");
 
             /* Set 'out' value */
-            *args->args.is_accessible.accessible = (hbool_t)result;
+            *args->args.is_accessible.accessible = (bool)result;
 
             break;
         }

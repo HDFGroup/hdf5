@@ -85,7 +85,7 @@ static int ioc_file_report_eof(sf_work_request_t *msg, MPI_Comm comm);
 
 static ioc_io_queue_entry_t *ioc_io_queue_alloc_entry(void);
 static void ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_ptr);
-static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock);
+static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock);
 static void ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr);
 static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr);
 
@@ -654,7 +654,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
 {
     subfiling_context_t *sf_context = NULL;
     MPI_Status           msg_status;
-    hbool_t              send_nack = FALSE;
+    bool                 send_nack = FALSE;
     int64_t              file_context_id;
     int64_t              data_size;
     int64_t              file_offset;
@@ -839,9 +839,9 @@ static int
 ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm, uint32_t counter)
 {
     subfiling_context_t *sf_context     = NULL;
-    hbool_t              send_empty_buf = TRUE;
-    hbool_t              send_nack      = FALSE;
-    hbool_t              need_data_tag  = FALSE;
+    bool                 send_empty_buf = TRUE;
+    bool                 send_nack      = FALSE;
+    bool                 need_data_tag  = FALSE;
     int64_t              file_context_id;
     int64_t              data_size;
     int64_t              file_offset;
@@ -1414,9 +1414,9 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  *       can become O(N**2) in the worst case.
  */
 static void
-ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
+ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
 {
-    hbool_t               conflict_detected;
+    bool                  conflict_detected;
     int64_t               entry_offset;
     int64_t               entry_len;
     int64_t               scan_offset;

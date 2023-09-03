@@ -133,7 +133,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__close_plugin_cache(hbool_t *already_closed /*out*/)
+H5PL__close_plugin_cache(bool *already_closed /*out*/)
 {
     unsigned int u; /* iterator */
     herr_t       ret_value = SUCCEED;
@@ -244,8 +244,7 @@ done:
  */
 H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
-H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *found,
-                           const void **plugin_info)
+H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *found, const void **plugin_info)
 {
     unsigned int u; /* iterator */
     herr_t       ret_value = SUCCEED;
@@ -263,7 +262,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 
     /* Loop over all the plugins, looking for one that matches */
     for (u = 0; u < H5PL_num_plugins_g; u++) {
-        hbool_t matched = FALSE; /* Whether cached plugin info matches */
+        bool matched = FALSE; /* Whether cached plugin info matches */
 
         /* Determine if the plugin types match */
         if (search_params->type != H5PL_cache_g[u].type)

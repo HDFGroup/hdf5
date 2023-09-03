@@ -120,7 +120,7 @@ H5FL_DEFINE_STATIC(H5C_t);
 H5C_t *
 H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
            const H5C_class_t *const *class_table_ptr, H5C_write_permitted_func_t check_write_permitted,
-           hbool_t write_permitted, H5C_log_flush_func_t log_flush, void *aux_ptr)
+           bool write_permitted, H5C_log_flush_func_t log_flush, void *aux_ptr)
 {
     int    i;
     H5C_t *cache_ptr = NULL;
@@ -389,9 +389,9 @@ done:
 herr_t
 H5C_prep_for_file_close(H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t image_generated = FALSE;   /* Whether a cache image was generated */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    H5C_t *cache_ptr;
+    bool   image_generated = FALSE;   /* Whether a cache image was generated */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -612,7 +612,7 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 #endif /* H5C_DO_SANITY_CHECKS */
     H5C_ring_t ring;
     H5C_t     *cache_ptr;
-    hbool_t    destroy;
+    bool       destroy;
     herr_t     ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -739,9 +739,9 @@ done:
 herr_t
 H5C_flush_to_min_clean(H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t write_permitted;
-    herr_t  ret_value = SUCCEED;
+    H5C_t *cache_ptr;
+    bool   write_permitted;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -997,7 +997,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
+H5C_set_evictions_enabled(H5C_t *cache_ptr, bool evictions_enabled)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1076,7 +1076,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_slist)
+H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist)
 {
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -1356,7 +1356,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
+H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, bool *corked)
 {
     H5C_tag_info_t *tag_info  = NULL;
     herr_t          ret_value = SUCCEED;

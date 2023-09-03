@@ -556,7 +556,7 @@ done:
      *-------------------------------------------------------------------------
      */
     herr_t H5MF__aggr_absorb(const H5F_t H5_ATTR_UNUSED *f, H5F_blk_aggr_t *aggr, H5MF_free_section_t *sect,
-                             hbool_t allow_sect_absorb)
+                             bool allow_sect_absorb)
     {
         FUNC_ENTER_PACKAGE_NOERR
 

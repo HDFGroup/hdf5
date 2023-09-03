@@ -208,7 +208,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     char       *nvcat      = NULL;
     hrb_node_t *node_ptr   = NULL;
     hrb_node_t *new_node   = NULL;
-    hbool_t     is_looking = TRUE;
+    bool        is_looking = TRUE;
     herr_t      ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1757,7 +1757,7 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, hbool_t lowercase)
+H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase)
 {
     size_t i         = 0;
     herr_t ret_value = SUCCEED;
@@ -2818,7 +2818,7 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hbool_t encode_slash, size_t *n_written)
+H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, bool encode_slash, size_t *n_written)
 {
     char   c        = 0;
     size_t dest_off = 0;

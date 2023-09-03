@@ -52,12 +52,12 @@ static H5S_pnt_list_t *H5S__copy_pnt_list(const H5S_pnt_list_t *src, unsigned ra
 static void            H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst);
 
 /* Selection callbacks */
-static herr_t   H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
+static herr_t   H5S__point_copy(H5S_t *dst, const H5S_t *src, bool share_selection);
 static herr_t   H5S__point_release(H5S_t *space);
 static htri_t   H5S__point_is_valid(const H5S_t *space);
 static hssize_t H5S__point_serial_size(H5S_t *space);
 static herr_t   H5S__point_serialize(H5S_t *space, uint8_t **p);
-static herr_t   H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip);
+static herr_t   H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip);
 static herr_t   H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__point_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__point_unlim_dim(const H5S_t *space);
@@ -892,7 +892,7 @@ H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst)
     herr_t H5S__point_copy(dst, src, share_selection)
         H5S_t *dst;             OUT: Pointer to the destination dataspace
         H5S_t *src;             IN: Pointer to the source dataspace
-        hbool_t share_selection; IN: Whether to share the selection between the dataspaces
+        bool share_selection; IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -904,7 +904,7 @@ H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selection)
+H5S__point_copy(H5S_t *dst, const H5S_t *src, bool H5_ATTR_UNUSED share_selection)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1037,8 +1037,8 @@ done:
 static herr_t
 H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size)
 {
-    hbool_t      count_up_version = FALSE;   /* Whether number of points exceed H5S_UINT32_MAX */
-    hbool_t      bound_up_version = FALSE;   /* Whether high bounds exceed H5S_UINT32_MAX */
+    bool         count_up_version = FALSE;   /* Whether number of points exceed H5S_UINT32_MAX */
+    bool         bound_up_version = FALSE;   /* Whether high bounds exceed H5S_UINT32_MAX */
     H5F_libver_t low_bound;                  /* The 'low' bound of library format versions */
     H5F_libver_t high_bound;                 /* The 'high' bound of library format versions */
     uint32_t     tmp_version;                /* Local temporary version */
@@ -1337,7 +1337,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
+H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip)
 {
     H5S_t *tmp_space = NULL;                 /* Pointer to actual dataspace to use,
                                                 either *space or a newly allocated one */
@@ -2090,7 +2090,7 @@ done:
 static herr_t
 H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
 {
-    hbool_t         non_zero_offset = FALSE; /* Whether any offset is non-zero */
+    bool            non_zero_offset = FALSE; /* Whether any offset is non-zero */
     H5S_pnt_node_t *node;                    /* Point node */
     unsigned        rank;                    /* Dataspace rank */
     unsigned        u;                       /* Local index variable */
@@ -2157,7 +2157,7 @@ H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
 static herr_t
 H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
 {
-    hbool_t         non_zero_offset = FALSE; /* Whether any offset is non-zero */
+    bool            non_zero_offset = FALSE; /* Whether any offset is non-zero */
     H5S_pnt_node_t *node;                    /* Point node */
     unsigned        rank;                    /* Dataspace rank */
     unsigned        u;                       /* Local index variable */

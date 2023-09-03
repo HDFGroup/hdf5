@@ -112,7 +112,7 @@
 /* Iteration context for destroying page buffer */
 typedef struct {
     H5PB_t *page_buf;
-    hbool_t actual_slist;
+    bool    actual_slist;
 } H5PB_ud1_t;
 
 /********************/
@@ -656,7 +656,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
     size_t        access_size = 0;
-    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
+    bool          bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -955,7 +955,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
     size_t        access_size = 0;
-    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
+    bool          bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -1287,10 +1287,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
+H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, bool *enabled)
 {
     H5PB_t *page_buf;            /* Page buffering info for this file */
-    hbool_t bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    bool    bypass_pb = FALSE;   /* Whether to bypass page buffering */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR

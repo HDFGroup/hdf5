@@ -47,9 +47,9 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5C__autoadjust__ageout(H5F_t *f, double hit_rate, enum H5C_resize_status *status_ptr,
-                                      size_t *new_max_cache_size_ptr, hbool_t write_permitted);
+                                      size_t *new_max_cache_size_ptr, bool write_permitted);
 static herr_t H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr);
-static herr_t H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitted);
+static herr_t H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, bool write_permitted);
 static herr_t H5C__autoadjust__ageout__insert_new_marker(H5C_t *cache_ptr);
 static herr_t H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags);
 static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
@@ -83,11 +83,11 @@ static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
+H5C__auto_adjust_cache_size(H5F_t *f, bool write_permitted)
 {
     H5C_t                 *cache_ptr             = f->shared->cache;
-    hbool_t                reentrant_call        = FALSE;
-    hbool_t                inserted_epoch_marker = FALSE;
+    bool                   reentrant_call        = FALSE;
+    bool                   inserted_epoch_marker = FALSE;
     size_t                 new_max_cache_size    = 0;
     size_t                 old_max_cache_size    = 0;
     size_t                 new_min_clean_size    = 0;
@@ -335,7 +335,7 @@ done:
  */
 static herr_t
 H5C__autoadjust__ageout(H5F_t *f, double hit_rate, enum H5C_resize_status *status_ptr,
-                        size_t *new_max_cache_size_ptr, hbool_t write_permitted)
+                        size_t *new_max_cache_size_ptr, bool write_permitted)
 {
     H5C_t *cache_ptr = f->shared->cache;
     size_t test_size;
@@ -497,13 +497,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitted)
+H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, bool write_permitted)
 {
     H5C_t             *cache_ptr = f->shared->cache;
     size_t             eviction_size_limit;
     size_t             bytes_evicted = 0;
-    hbool_t            prev_is_dirty = FALSE;
-    hbool_t            restart_scan;
+    bool               prev_is_dirty = FALSE;
+    bool               restart_scan;
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *next_ptr;
     H5C_cache_entry_t *prev_ptr;
@@ -530,7 +530,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
         entry_ptr    = cache_ptr->LRU_tail_ptr;
         while (entry_ptr != NULL && entry_ptr->type->id != H5AC_EPOCH_MARKER_ID &&
                bytes_evicted < eviction_size_limit) {
-            hbool_t skipping_entry = FALSE;
+            bool skipping_entry = FALSE;
 
             assert(!(entry_ptr->is_protected));
             assert(!(entry_ptr->is_read_only));
@@ -1133,7 +1133,7 @@ static herr_t
 H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 {
     H5C_t             *cache_ptr;
-    hbool_t            restart_slist_scan;
+    bool               restart_slist_scan;
     uint32_t           protected_entries = 0;
     int32_t            i;
     uint32_t           cur_ring_pel_len;
@@ -1572,11 +1572,11 @@ herr_t
 H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 {
     H5C_t             *cache_ptr = f->shared->cache;
-    hbool_t            flushed_entries_last_pass;
-    hbool_t            flush_marked_entries;
-    hbool_t            ignore_protected;
-    hbool_t            tried_to_flush_protected_entry = FALSE;
-    hbool_t            restart_slist_scan;
+    bool               flushed_entries_last_pass;
+    bool               flush_marked_entries;
+    bool               ignore_protected;
+    bool               tried_to_flush_protected_entry = FALSE;
+    bool               restart_slist_scan;
     uint32_t           protected_entries = 0;
     H5SL_node_t       *node_ptr          = NULL;
     H5C_cache_entry_t *entry_ptr         = NULL;
@@ -1826,7 +1826,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
+H5C__make_space_in_cache(H5F_t *f, size_t space_needed, bool write_permitted)
 {
     H5C_t *cache_ptr = f->shared->cache;
 #if H5C_COLLECT_CACHE_STATS
@@ -1837,10 +1837,10 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     uint32_t           entries_examined = 0;
     uint32_t           initial_list_len;
     size_t             empty_space;
-    hbool_t            reentrant_call    = FALSE;
-    hbool_t            prev_is_dirty     = FALSE;
-    hbool_t            didnt_flush_entry = FALSE;
-    hbool_t            restart_scan;
+    bool               reentrant_call    = FALSE;
+    bool               prev_is_dirty     = FALSE;
+    bool               didnt_flush_entry = FALSE;
+    bool               restart_scan;
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *prev_ptr;
     H5C_cache_entry_t *next_ptr;
@@ -2286,7 +2286,7 @@ done:
 static herr_t
 H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
 {
-    hbool_t            done = FALSE;
+    bool               done = FALSE;
     H5C_t             *cache_ptr;
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED;

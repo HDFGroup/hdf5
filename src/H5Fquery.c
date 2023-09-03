@@ -239,7 +239,7 @@ H5F_get_shared(const H5F_t *f)
  * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_same_shared(const H5F_t *f1, const H5F_t *f2)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -280,7 +280,7 @@ H5F_get_nopen_objs(const H5F_t *f)
  * Return:      TRUE/FALSE
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_file_id_exists(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -506,7 +506,7 @@ H5F_sym_leaf_k(const H5F_t *f)
  * Return:   TRUE/FALSE as set in file
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_min_dset_ohdr(const H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -761,7 +761,7 @@ H5F_get_fc_degree(const H5F_t *f)
  *              Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_evict_on_close(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -782,7 +782,7 @@ H5F_get_evict_on_close(const H5F_t *f)
  *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_store_msg_crt_idx(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -803,7 +803,7 @@ H5F_store_msg_crt_idx(const H5F_t *f)
  *           Failure:    Negative (should not happen)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_shared_has_feature(const H5F_shared_t *f_sh, unsigned feature)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -811,7 +811,7 @@ H5F_shared_has_feature(const H5F_shared_t *f_sh, unsigned feature)
 
     assert(f_sh);
 
-    FUNC_LEAVE_NOAPI((hbool_t)(f_sh->lf->feature_flags & feature))
+    FUNC_LEAVE_NOAPI((bool)(f_sh->lf->feature_flags & feature))
 } /* end H5F_shared_has_feature() */
 
 /*-------------------------------------------------------------------------
@@ -823,7 +823,7 @@ H5F_shared_has_feature(const H5F_shared_t *f_sh, unsigned feature)
  *           Failure:    Negative (should not happen)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_has_feature(const H5F_t *f, unsigned feature)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -832,7 +832,7 @@ H5F_has_feature(const H5F_t *f, unsigned feature)
     assert(f);
     assert(f->shared);
 
-    FUNC_LEAVE_NOAPI((hbool_t)(f->shared->lf->feature_flags & feature))
+    FUNC_LEAVE_NOAPI((bool)(f->shared->lf->feature_flags & feature))
 } /* end H5F_has_feature() */
 
 /*-------------------------------------------------------------------------
@@ -1002,7 +1002,7 @@ done:
  * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -1025,7 +1025,7 @@ H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
  * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_use_tmp_space(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -1070,7 +1070,7 @@ H5F_coll_md_read(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag /*out*/)
+H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, bool *flag /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1099,7 +1099,7 @@ done:
  * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_use_mdc_logging(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -1122,7 +1122,7 @@ H5F_use_mdc_logging(const H5F_t *f)
  * Return:   TRUE/FALSE on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_start_mdc_log_on_access(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -1229,7 +1229,7 @@ H5F_get_pgend_meta_thres(const H5F_t *f)
  *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_point_of_no_return(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -1250,7 +1250,7 @@ H5F_get_point_of_no_return(const H5F_t *f)
  *           Failure:    (can't happen)
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_null_fsm_addr(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
@@ -1344,7 +1344,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_file_locking(const H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1364,10 +1364,10 @@ H5F_get_file_locking(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-H5F_has_vector_select_io(const H5F_t *f, hbool_t is_write)
+bool
+H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 {
-    hbool_t ret_value; /* Return value */
+    bool ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

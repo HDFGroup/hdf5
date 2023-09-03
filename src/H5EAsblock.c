@@ -167,12 +167,12 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_changed, unsigned sblk_idx)
+H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, bool *stats_changed, unsigned sblk_idx)
 {
     H5EA_sblock_t *sblock = NULL;           /* Extensible array super block */
     haddr_t        sblock_addr;             /* Extensible array super block address */
     haddr_t        tmp_addr  = HADDR_UNDEF; /* Address value to fill data block addresses with */
-    hbool_t        inserted  = FALSE;       /* Whether the header was inserted into cache */
+    bool           inserted  = FALSE;       /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE

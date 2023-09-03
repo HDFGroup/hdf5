@@ -522,7 +522,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
     H5HL_free_t *fl = NULL, *last_fl = NULL;
     size_t       need_size;
     size_t       offset = 0;
-    hbool_t      found;
+    bool         found;
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)

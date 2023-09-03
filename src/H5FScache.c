@@ -72,7 +72,7 @@ static herr_t H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *ke
 /* Metadata cache callbacks */
 static herr_t H5FS__cache_hdr_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5FS__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5FS__cache_hdr_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5FS__cache_hdr_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5FS__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5FS__cache_hdr_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len,
                                             haddr_t *new_addr, size_t *new_len, unsigned *flags);
@@ -82,7 +82,7 @@ static herr_t H5FS__cache_hdr_free_icr(void *thing);
 
 static herr_t H5FS__cache_sinfo_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5FS__cache_sinfo_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5FS__cache_sinfo_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5FS__cache_sinfo_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5FS__cache_sinfo_image_len(const void *thing, size_t *image_len);
 static herr_t H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len,
                                               haddr_t *new_addr, size_t *new_len, unsigned *flags);
@@ -213,7 +213,7 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  */
 static void *
 H5FS__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
-                            hbool_t H5_ATTR_UNUSED *dirty)
+                            bool H5_ATTR_UNUSED *dirty)
 {
     H5FS_t              *fspace = NULL;                          /* Free space header info */
     H5FS_hdr_cache_ud_t *udata  = (H5FS_hdr_cache_ud_t *)_udata; /* User data for callback */
@@ -916,7 +916,7 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  */
 static void *
 H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
-                              hbool_t H5_ATTR_NDEBUG_UNUSED *dirty)
+                              bool H5_ATTR_NDEBUG_UNUSED *dirty)
 {
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* User data for callback */
     H5FS_t                *fspace;                                  /* free space manager */

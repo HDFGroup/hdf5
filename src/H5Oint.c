@@ -212,7 +212,7 @@ H5O_init(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
+H5O__set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, bool store_msg_crt_idx)
 {
     uint8_t version;             /* Message version */
     herr_t  ret_value = SUCCEED; /* Return value */
@@ -579,7 +579,7 @@ H5O_open_name(const H5G_loc_t *loc, const char *name, H5I_type_t *opened_type)
     H5G_loc_t  obj_loc;           /* Location used to open group */
     H5G_name_t obj_path;          /* Opened object group hier. path */
     H5O_loc_t  obj_oloc;          /* Opened object object location */
-    hbool_t    loc_found = FALSE; /* Entry at 'name' found */
+    bool       loc_found = FALSE; /* Entry at 'name' found */
     void      *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -627,7 +627,7 @@ H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type, H5
     H5G_loc_t  obj_loc;           /* Location used to open group */
     H5G_name_t obj_path;          /* Opened object group hier. path */
     H5O_loc_t  obj_oloc;          /* Opened object object location */
-    hbool_t    loc_found = FALSE; /* Entry at 'name' found */
+    bool       loc_found = FALSE; /* Entry at 'name' found */
     void      *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -740,7 +740,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
+H5O_close(H5O_loc_t *loc, bool *file_closed /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -803,7 +803,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted)
+H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, bool *deleted)
 {
     haddr_t addr      = H5O_OH_GET_ADDR(oh); /* Object header address */
     int     ret_value = -1;                  /* Return value */
@@ -917,9 +917,9 @@ done:
 int
 H5O_link(const H5O_loc_t *loc, int adjust)
 {
-    H5O_t  *oh        = NULL;
-    hbool_t deleted   = FALSE; /* Whether the object was deleted */
-    int     ret_value = -1;    /* Return value */
+    H5O_t *oh        = NULL;
+    bool   deleted   = FALSE; /* Whether the object was deleted */
+    int    ret_value = -1;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, FAIL)
 
@@ -959,7 +959,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5O_t *
-H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
+H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, bool pin_all_chunks)
 {
     H5O_t          *oh = NULL;        /* Object header protected */
     H5O_cache_ud_t  udata;            /* User data for protecting object header */
@@ -1272,10 +1272,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
+H5O_touch_oh(H5F_t *f, H5O_t *oh, bool force)
 {
     H5O_chunk_proxy_t *chk_proxy   = NULL;  /* Chunk that message is in */
-    hbool_t            chk_dirtied = FALSE; /* Flag for unprotecting chunk */
+    bool               chk_dirtied = FALSE; /* Flag for unprotecting chunk */
     time_t             now;                 /* Current time */
     herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -1366,7 +1366,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch(const H5O_loc_t *loc, hbool_t force)
+H5O_touch(const H5O_loc_t *loc, bool force)
 {
     H5O_t   *oh        = NULL;               /* Object header to modify */
     unsigned oh_flags  = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
@@ -1479,7 +1479,7 @@ H5O_delete(H5F_t *f, haddr_t addr)
     H5O_t    *oh = NULL;                     /* Object header information */
     H5O_loc_t loc;                           /* Object location for object to delete */
     unsigned  oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
-    hbool_t   corked;
+    bool      corked;
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(addr, FAIL)
@@ -2505,7 +2505,7 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *l
     H5G_loc_t            obj_loc;                               /* Location of object */
     H5G_name_t           obj_path;                              /* Object's group hier. path */
     H5O_loc_t            obj_oloc;                              /* Object's object location */
-    hbool_t              obj_found = FALSE;                     /* Object at 'name' found */
+    bool                 obj_found = FALSE;                     /* Object at 'name' found */
     herr_t               ret_value = H5_ITER_CONT;              /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2615,7 +2615,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     H5G_loc_t           obj_loc;                     /* Location used to open object */
     H5G_name_t          obj_path;                    /* Opened object group hier. path */
     H5O_loc_t           obj_oloc;                    /* Opened object object location */
-    hbool_t             loc_found = FALSE;           /* Entry at 'name' found */
+    bool                loc_found = FALSE;           /* Entry at 'name' found */
     H5O_info2_t         oinfo;                       /* Object info struct */
     void               *obj = NULL;                  /* Object */
     H5I_type_t          opened_type;                 /* ID type of object */
@@ -2858,7 +2858,7 @@ H5O_get_proxy(const H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__free(H5O_t *oh, hbool_t H5_ATTR_NDEBUG_UNUSED force)
+H5O__free(H5O_t *oh, bool H5_ATTR_NDEBUG_UNUSED force)
 {
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */

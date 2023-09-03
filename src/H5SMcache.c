@@ -51,14 +51,14 @@
 /* Metadata cache (H5AC) callbacks */
 static herr_t H5SM__cache_table_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5SM__cache_table_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5SM__cache_table_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5SM__cache_table_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5SM__cache_table_image_len(const void *thing, size_t *image_len);
 static herr_t H5SM__cache_table_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5SM__cache_table_free_icr(void *thing);
 
 static herr_t H5SM__cache_list_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5SM__cache_list_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5SM__cache_list_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5SM__cache_list_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5SM__cache_list_image_len(const void *thing, size_t *image_len);
 static herr_t H5SM__cache_list_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5SM__cache_list_free_icr(void *thing);
@@ -187,7 +187,7 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
  */
 static void *
 H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
-                              hbool_t H5_ATTR_UNUSED *dirty)
+                              bool H5_ATTR_UNUSED *dirty)
 {
     H5F_t                 *f;            /* File pointer -- from user data */
     H5SM_master_table_t   *table = NULL; /* Shared message table that we deserializing */
@@ -514,7 +514,7 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
  */
 static void *
 H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
-                             hbool_t H5_ATTR_UNUSED *dirty)
+                             bool H5_ATTR_UNUSED *dirty)
 {
     H5SM_list_t          *list  = NULL;                           /* The SOHM list being read in */
     H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata; /* User data for callback */

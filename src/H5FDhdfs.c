@@ -257,7 +257,7 @@ static herr_t  H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
                                void *buf);
 static herr_t  H5FD__hdfs_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                 const void *buf);
-static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 
 static herr_t H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
@@ -1528,8 +1528,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
-                    hbool_t H5_ATTR_UNUSED closing)
+H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 

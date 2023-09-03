@@ -31,14 +31,14 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__ainfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__ainfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__ainfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__ainfo_copy(const void *_mesg, void *_dest);
-static size_t H5O__ainfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__ainfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__ainfo_free(void *_mesg);
 static herr_t H5O__ainfo_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
-static herr_t H5O__ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                        const H5O_copy_t *cpy_info, void *udata);
-static void  *H5O__ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O__ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, bool *recompute_size,
                                    unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                         void *mesg_dst, unsigned *mesg_flags, H5O_copy_t *cpy_info);
@@ -175,7 +175,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__ainfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
     unsigned char      flags; /* Flags for encoding attribute info */
@@ -262,7 +262,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__ainfo_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_ainfo_t *ainfo     = (const H5O_ainfo_t *)_mesg;
     size_t             ret_value = 0; /* Return value */
@@ -350,8 +350,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
-                         hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+H5O__ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src, bool *deleted,
+                         const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -380,7 +380,7 @@ H5O__ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUS
  */
 static void *
 H5O__ainfo_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
-                     hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
+                     bool H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
                      H5O_copy_t H5_ATTR_NDEBUG_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;

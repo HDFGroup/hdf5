@@ -146,7 +146,7 @@ htri_t
 H5Fis_hdf5(const char *name)
 {
     H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
-    hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
+    bool                      is_accessible = FALSE; /* Whether file is accessible */
     htri_t                    ret_value;             /* Return value */
 
     FUNC_ENTER_API((-1))

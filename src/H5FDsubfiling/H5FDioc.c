@@ -36,7 +36,7 @@
 static hid_t H5FD_IOC_g = H5I_INVALID_HID;
 
 /* Whether the driver initialized MPI on its own */
-static hbool_t H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = FALSE;
 
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
@@ -126,9 +126,9 @@ static herr_t  H5FD__ioc_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count
                                      haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
 static herr_t  H5FD__ioc_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                       haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
-static herr_t  H5FD__ioc_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__ioc_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__ioc_flush(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__ioc_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__ioc_unlock(H5FD_t *_file);
 static herr_t  H5FD__ioc_del(const char *name, hid_t fapl);
 /*
@@ -373,7 +373,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
     const H5FD_ioc_config_t *config_ptr         = NULL;
     H5P_genplist_t          *plist_ptr          = NULL;
-    hbool_t                  use_default_config = FALSE;
+    bool                     use_default_config = FALSE;
     herr_t                   ret_value          = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
@@ -1355,7 +1355,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1375,7 +1375,7 @@ H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, hboo
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
     herr_t      ret_value = SUCCEED;
@@ -1401,7 +1401,7 @@ H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
+H5FD__ioc_lock(H5FD_t H5_ATTR_UNUSED *_file, bool H5_ATTR_UNUSED rw)
 {
     herr_t ret_value = SUCCEED;
 

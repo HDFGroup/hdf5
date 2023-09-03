@@ -57,7 +57,7 @@ static herr_t H5O__cache_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5O__cache_get_final_load_size(const void *image_ptr, size_t image_len, void *udata,
                                              size_t *actual_len);
 static htri_t H5O__cache_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5O__cache_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5O__cache_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5O__cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5O__cache_notify(H5AC_notify_action_t action, void *_thing);
@@ -65,7 +65,7 @@ static herr_t H5O__cache_free_icr(void *thing);
 
 static herr_t H5O__cache_chk_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5O__cache_chk_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5O__cache_chk_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5O__cache_chk_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing);
@@ -76,7 +76,7 @@ static herr_t H5O__prefix_deserialize(const uint8_t *image, size_t len, H5O_cach
 
 /* Chunk routines */
 static herr_t H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t *image,
-                                     size_t len, H5O_common_cache_ud_t *udata, hbool_t *dirty);
+                                     size_t len, H5O_common_cache_ud_t *udata, bool *dirty);
 static herr_t H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno);
 
 /* Misc. routines */
@@ -263,7 +263,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dirty)
+H5O__cache_deserialize(const void *image, size_t len, void *_udata, bool *dirty)
 {
     H5O_t          *oh        = NULL;                     /* Object header read in */
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
@@ -663,7 +663,7 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t *dirty)
+H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, bool *dirty)
 {
     H5O_chunk_proxy_t  *chk_proxy = NULL;                         /* Chunk proxy object */
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
@@ -1181,7 +1181,7 @@ done:
  */
 static herr_t
 H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t *image, size_t len,
-                       H5O_common_cache_ud_t *udata, hbool_t *dirty)
+                       H5O_common_cache_ud_t *udata, bool *dirty)
 {
     const uint8_t *chunk_image = NULL;   /* Pointer into buffer to decode */
     const uint8_t *p_end       = NULL;   /* End of image buffer */
@@ -1189,7 +1189,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
     unsigned       merged_null_msgs = 0; /* Number of null messages merged together */
     unsigned       chunkno;              /* Current chunk's index */
     unsigned       nullcnt;              /* Count of null messages (for sanity checking gaps in chunks) */
-    hbool_t        mesgs_modified =
+    bool           mesgs_modified =
         FALSE; /* Whether any messages were modified when the object header was deserialized */
     herr_t ret_value = SUCCEED;
 

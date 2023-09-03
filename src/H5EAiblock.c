@@ -154,11 +154,11 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
+H5EA__iblock_create(H5EA_hdr_t *hdr, bool *stats_changed)
 {
     H5EA_iblock_t *iblock = NULL;     /* Extensible array index block */
     haddr_t        iblock_addr;       /* Extensible array index block address */
-    hbool_t        inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool           inserted  = FALSE; /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE

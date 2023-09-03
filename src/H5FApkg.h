@@ -128,7 +128,7 @@ typedef struct H5FA_hdr_t {
     size_t  size;           /* Size of header in file                                       */
     H5F_t  *f;              /* Pointer to file for fixed array                              */
     size_t  file_rc;        /* Reference count of files using array header                  */
-    hbool_t pending_delete; /* Array is pending deletion                                    */
+    bool    pending_delete; /* Array is pending deletion                                    */
     size_t  sizeof_addr;    /* Size of file addresses                                       */
     size_t  sizeof_size;    /* Size of file sizes                                           */
 
@@ -136,7 +136,7 @@ typedef struct H5FA_hdr_t {
     void *cb_ctx; /* Callback context */
 
     /* SWMR / Flush dependency information (not stored) */
-    hbool_t             swmr_write; /* Flag indicating the file is opened with SWMR-write access    */
+    bool                swmr_write; /* Flag indicating the file is opened with SWMR-write access    */
     H5AC_proxy_entry_t *top_proxy;  /* 'Top' proxy cache entry for all array entries */
     void               *parent;     /* Pointer to 'top' proxy flush dependency
                                      * parent, if it exists, otherwise NULL.
@@ -269,7 +269,7 @@ H5_DLL herr_t      H5FA__hdr_dest(H5FA_hdr_t *hdr);
 
 /* Data block routines */
 H5_DLL H5FA_dblock_t *H5FA__dblock_alloc(H5FA_hdr_t *hdr);
-H5_DLL haddr_t        H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty);
+H5_DLL haddr_t        H5FA__dblock_create(H5FA_hdr_t *hdr, bool *hdr_dirty);
 H5_DLL unsigned       H5FA__dblock_sblk_idx(const H5FA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5FA_dblock_t *H5FA__dblock_protect(H5FA_hdr_t *hdr, haddr_t dblk_addr, unsigned flags);
 H5_DLL herr_t         H5FA__dblock_unprotect(H5FA_dblock_t *dblock, unsigned cache_flags);

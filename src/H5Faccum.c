@@ -1038,7 +1038,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush)
+H5F__accum_reset(H5F_shared_t *f_sh, bool flush)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -264,7 +264,7 @@ haddr_t
 H5B2__hdr_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
 {
     H5B2_hdr_t *hdr       = NULL;        /* The new v2 B-tree header information */
-    hbool_t     inserted  = FALSE;       /* Whether the header was inserted into cache */
+    bool        inserted  = FALSE;       /* Whether the header was inserted into cache */
     haddr_t     ret_value = HADDR_UNDEF; /* Return value */
 
     FUNC_ENTER_PACKAGE

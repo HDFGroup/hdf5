@@ -111,7 +111,7 @@ herr_t
 H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_type, H5S_t *space)
 {
     H5S_sel_iter_t *mem_iter      = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init = FALSE; /* Whether the memory selection iterator has been initialized */
+    bool            mem_iter_init = FALSE; /* Whether the memory selection iterator has been initialized */
     H5WB_t         *elem_wb       = NULL;  /* Wrapped buffer for element data */
     uint8_t         elem_buf[H5T_ELEM_BUF_SIZE];     /* Buffer for element data */
     H5WB_t         *bkg_elem_wb = NULL;              /* Wrapped buffer for background data */
@@ -332,7 +332,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
         /* Detect whether the datatype has a VL component */
         if ((has_vlen_type = H5T_detect_class(dset_type, H5T_VLEN, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to detect vlen datatypes?");
-        fb_info->has_vlen_fill_type = (hbool_t)has_vlen_type;
+        fb_info->has_vlen_fill_type = (bool)has_vlen_type;
 
         /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
         if (fb_info->has_vlen_fill_type) {

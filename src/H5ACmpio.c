@@ -822,9 +822,9 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsigned flags)
+H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, bool was_dirty, unsigned flags)
 {
-    hbool_t             cleared;
+    bool                cleared;
     H5AC_aux_t         *aux_ptr;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
     herr_t              ret_value       = SUCCEED; /* Return value */
@@ -986,8 +986,8 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 {
     H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
-    hbool_t     entry_in_cache;
-    hbool_t     entry_dirty;
+    bool        entry_in_cache;
+    bool        entry_dirty;
     size_t      entry_size;
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -1715,7 +1715,7 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f)
 {
     H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
-    hbool_t     evictions_enabled;
+    bool        evictions_enabled;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1897,7 +1897,7 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f)
 {
     H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
-    hbool_t     evictions_enabled;
+    bool        evictions_enabled;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

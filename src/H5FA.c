@@ -55,7 +55,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata);
+static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata);
 
 /*********************/
 /* Package Variables */
@@ -97,7 +97,7 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  *-------------------------------------------------------------------------
  */
 static H5FA_t *
-H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
+H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata)
 {
     H5FA_t     *fa        = NULL; /* Pointer to new fixed array */
     H5FA_hdr_t *hdr       = NULL; /* The fixed array header information */
@@ -297,9 +297,9 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
     H5FA_dblk_page_t *dblk_page = NULL;               /* Pointer to fixed array Data block page */
     unsigned dblock_cache_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting fixed array Data block */
     unsigned dblk_page_cache_flags =
-        H5AC__NO_FLAGS_SET;    /* Flags to unprotecting FIxed Array Data block page */
-    hbool_t hdr_dirty = FALSE; /* Whether header information changed */
-    herr_t  ret_value = SUCCEED;
+        H5AC__NO_FLAGS_SET;   /* Flags to unprotecting FIxed Array Data block page */
+    bool   hdr_dirty = FALSE; /* Whether header information changed */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -505,7 +505,7 @@ done:
 herr_t
 H5FA_close(H5FA_t *fa)
 {
-    hbool_t pending_delete = FALSE;       /* Whether the array is pending deletion */
+    bool    pending_delete = FALSE;       /* Whether the array is pending deletion */
     haddr_t fa_addr        = HADDR_UNDEF; /* Address of array (for deletion) */
     herr_t  ret_value      = SUCCEED;
 

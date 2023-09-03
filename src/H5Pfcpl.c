@@ -102,10 +102,10 @@
 #define H5F_CRT_FILE_SPACE_STRATEGY_DEF   H5F_FILE_SPACE_STRATEGY_DEF
 #define H5F_CRT_FILE_SPACE_STRATEGY_ENC   H5P__fcrt_fspace_strategy_enc
 #define H5F_CRT_FILE_SPACE_STRATEGY_DEC   H5P__fcrt_fspace_strategy_dec
-#define H5F_CRT_FREE_SPACE_PERSIST_SIZE   sizeof(hbool_t)
+#define H5F_CRT_FREE_SPACE_PERSIST_SIZE   sizeof(bool)
 #define H5F_CRT_FREE_SPACE_PERSIST_DEF    H5F_FREE_SPACE_PERSIST_DEF
-#define H5F_CRT_FREE_SPACE_PERSIST_ENC    H5P__encode_hbool_t
-#define H5F_CRT_FREE_SPACE_PERSIST_DEC    H5P__decode_hbool_t
+#define H5F_CRT_FREE_SPACE_PERSIST_ENC    H5P__encode_bool
+#define H5F_CRT_FREE_SPACE_PERSIST_DEC    H5P__decode_bool
 #define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE sizeof(hsize_t)
 #define H5F_CRT_FREE_SPACE_THRESHOLD_DEF  H5F_FREE_SPACE_THRESHOLD_DEF
 #define H5F_CRT_FREE_SPACE_THRESHOLD_ENC  H5P__encode_hsize_t
@@ -189,7 +189,7 @@ static const unsigned H5F_def_sohm_index_minsizes_g[H5O_SHMESG_MAX_NINDEXES] =
 static const unsigned              H5F_def_sohm_list_max_g        = H5F_CRT_SHMSG_LIST_MAX_DEF;
 static const unsigned              H5F_def_sohm_btree_min_g       = H5F_CRT_SHMSG_BTREE_MIN_DEF;
 static const H5F_fspace_strategy_t H5F_def_file_space_strategy_g  = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
-static const hbool_t               H5F_def_free_space_persist_g   = H5F_CRT_FREE_SPACE_PERSIST_DEF;
+static const bool                  H5F_def_free_space_persist_g   = H5F_CRT_FREE_SPACE_PERSIST_DEF;
 static const hsize_t               H5F_def_free_space_threshold_g = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
 static const hsize_t               H5F_def_file_space_page_size_g = H5F_CRT_FILE_SPACE_PAGE_SIZE_DEF;
 

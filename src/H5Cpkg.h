@@ -1911,7 +1911,7 @@ typedef struct H5C_tag_info_t {
     haddr_t tag;                /* Tag (address) of the entries (must be first, for skiplist) */
     H5C_cache_entry_t *head;    /* Head of the list of entries for this tag */
     size_t entry_cnt;           /* Number of entries on list */
-    hbool_t corked;             /* Whether this object is corked */
+    bool corked;             /* Whether this object is corked */
 
     /* Hash table fields */
     UT_hash_handle hh;          /* Hash table handle (must be LAST) */
@@ -2998,7 +2998,7 @@ typedef struct H5C_tag_info_t {
  *
  ****************************************************************************/
 struct H5C_t {
-    hbool_t             flush_in_progress;
+    bool             flush_in_progress;
     H5C_log_info_t *    log_info;
     void *              aux_ptr;
     int32_t             max_type_id;
@@ -3006,10 +3006,10 @@ struct H5C_t {
     size_t              max_cache_size;
     size_t              min_clean_size;
     H5C_write_permitted_func_t check_write_permitted;
-    hbool_t             write_permitted;
+    bool             write_permitted;
     H5C_log_flush_func_t log_flush;
-    hbool_t             evictions_enabled;
-    hbool_t             close_warning_received;
+    bool             evictions_enabled;
+    bool             close_warning_received;
 
     /* Fields for maintaining the [hash table] index of entries */
     uint32_t            index_len;
@@ -3032,8 +3032,8 @@ struct H5C_t {
     H5C_cache_entry_t * entry_watched_for_removal;
 
     /* Fields for maintaining list of in-order entries, for flushing */
-    hbool_t             slist_enabled;
-    hbool_t             slist_changed;
+    bool             slist_enabled;
+    bool             slist_changed;
     uint32_t            slist_len;
     size_t              slist_size;
     uint32_t            slist_ring_len[H5C_RING_NTYPES];
@@ -3047,7 +3047,7 @@ struct H5C_t {
 
     /* Fields for maintaining list of tagged entries */
     H5C_tag_info_t *    tag_list;
-    hbool_t             ignore_tags;
+    bool             ignore_tags;
     uint32_t            num_objs_corked;
 
     /* Fields for tracking protected entries */
@@ -3094,20 +3094,20 @@ struct H5C_t {
 #endif /* H5_HAVE_PARALLEL */
 
     /* Fields for automatic cache size adjustment */
-    hbool_t             size_increase_possible;
-    hbool_t             flash_size_increase_possible;
+    bool             size_increase_possible;
+    bool             flash_size_increase_possible;
     size_t              flash_size_increase_threshold;
-    hbool_t             size_decrease_possible;
-    hbool_t             resize_enabled;
-    hbool_t             cache_full;
-    hbool_t             size_decreased;
-    hbool_t             resize_in_progress;
-    hbool_t             msic_in_progress;
+    bool             size_decrease_possible;
+    bool             resize_enabled;
+    bool             cache_full;
+    bool             size_decreased;
+    bool             resize_in_progress;
+    bool             msic_in_progress;
     H5C_auto_size_ctl_t resize_ctl;
 
     /* Fields for epoch markers used in automatic cache size adjustment */
     int32_t             epoch_markers_active;
-    hbool_t             epoch_marker_active[H5C__MAX_EPOCH_MARKERS];
+    bool             epoch_marker_active[H5C__MAX_EPOCH_MARKERS];
     int32_t             epoch_marker_ringbuf[H5C__MAX_EPOCH_MARKERS+1];
     int32_t             epoch_marker_ringbuf_first;
     int32_t             epoch_marker_ringbuf_last;
@@ -3120,10 +3120,10 @@ struct H5C_t {
 
     /* fields supporting generation of a cache image on file close */
     H5C_cache_image_ctl_t image_ctl;
-    hbool_t             serialization_in_progress;
-    hbool_t             load_image;
-    hbool_t             image_loaded;
-    hbool_t             delete_image;
+    bool             serialization_in_progress;
+    bool             load_image;
+    bool             image_loaded;
+    bool             delete_image;
     haddr_t             image_addr;
     hsize_t             image_len;
     hsize_t             image_data_len;
@@ -3136,8 +3136,8 @@ struct H5C_t {
     void *              image_buffer;
 
     /* Free Space Manager Related fields */
-    hbool_t             rdfsm_settled;
-    hbool_t             mdfsm_settled;
+    bool             rdfsm_settled;
+    bool             mdfsm_settled;
 
 #if H5C_COLLECT_CACHE_STATS
     /* stats fields */
@@ -3245,10 +3245,10 @@ typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated);
+H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, bool *image_generated);
 
 /* General routines */
-H5_DLL herr_t H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted);
+H5_DLL herr_t H5C__auto_adjust_cache_size(H5F_t *f, bool write_permitted);
 H5_DLL herr_t H5C__autoadjust__ageout__remove_all_markers(H5C_t *cache_ptr);
 H5_DLL herr_t H5C__autoadjust__ageout__remove_excess_markers(H5C_t *cache_ptr);
 H5_DLL herr_t H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t new_entry_size);
@@ -3259,10 +3259,10 @@ H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr,
 H5_DLL herr_t H5C__generate_cache_image(H5F_t *f, H5C_t *cache_ptr);
 H5_DLL herr_t H5C__load_cache_image(H5F_t *f);
 H5_DLL herr_t H5C__make_space_in_cache(H5F_t * f, size_t space_needed,
-    hbool_t write_permitted);
+    bool write_permitted);
 H5_DLL herr_t H5C__serialize_cache(H5F_t *f);
 H5_DLL herr_t H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
-H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
+H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, bool match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);
 
 /* Routines for operating on entry tags */
@@ -3271,11 +3271,11 @@ H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 
 /* Routines for operating on cache images */
 H5_DLL herr_t H5C__get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
-H5_DLL herr_t H5C__image_stats(H5C_t *cache_ptr, hbool_t print_header);
+H5_DLL herr_t H5C__image_stats(H5C_t *cache_ptr, bool print_header);
 
 /* Debugging routines */
 #ifdef H5C_DO_SLIST_SANITY_CHECKS
-H5_DLL hbool_t H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
+H5_DLL bool H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
 #endif
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
 H5_DLL herr_t H5C__validate_lru_list(H5C_t *cache_ptr);
@@ -3285,7 +3285,7 @@ H5_DLL herr_t H5C__validate_protected_entry_list(H5C_t *cache_ptr);
 
 /* Testing functions */
 #ifdef H5C_TESTING
-H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status);
+H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, bool status);
 #endif /* H5C_TESTING */
 
 #endif /* H5Cpkg_H */

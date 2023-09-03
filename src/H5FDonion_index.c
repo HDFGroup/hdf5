@@ -179,10 +179,10 @@ done:
  * Return:      TRUE/FALSE
  *-----------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 {
-    hbool_t ret_value = TRUE;
+    bool ret_value = TRUE;
 
     FUNC_ENTER_PACKAGE_NOERR
 

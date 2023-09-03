@@ -351,7 +351,7 @@ typedef struct H5AC_aux_t {
     int      mpi_rank;
     int      mpi_size;
 
-    hbool_t write_permitted;
+    bool    write_permitted;
     size_t  dirty_bytes_threshold;
     size_t  dirty_bytes;
     int32_t metadata_write_strategy;
@@ -391,7 +391,7 @@ typedef void (*H5AC_write_done_cb_t)(void);
 H5_DLL herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr);
-H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsigned flags);
+H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, bool was_dirty, unsigned flags);
 H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5AC__flush_entries(H5F_t *f);

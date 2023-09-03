@@ -42,12 +42,12 @@
 /********************/
 
 /* Selection callbacks */
-static herr_t   H5S__all_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
+static herr_t   H5S__all_copy(H5S_t *dst, const H5S_t *src, bool share_selection);
 static herr_t   H5S__all_release(H5S_t *space);
 static htri_t   H5S__all_is_valid(const H5S_t *space);
 static hssize_t H5S__all_serial_size(H5S_t *space);
 static herr_t   H5S__all_serialize(H5S_t *space, uint8_t **p);
-static herr_t   H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip);
+static herr_t   H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip);
 static herr_t   H5S__all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__all_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__all_unlim_dim(const H5S_t *space);
@@ -466,7 +466,7 @@ H5S__all_release(H5S_t *space)
     herr_t H5S__all_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
-        hbool_t;     IN: Whether to share the selection between the dataspaces
+        bool;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -478,7 +478,7 @@ H5S__all_release(H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__all_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED share_selection)
+H5S__all_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, bool H5_ATTR_UNUSED share_selection)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -622,7 +622,7 @@ H5S__all_serialize(H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
+H5S__all_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip)
 {
     uint32_t version;                           /* Version number */
     H5S_t   *tmp_space = NULL;                  /* Pointer to actual dataspace to use,
@@ -1096,7 +1096,7 @@ done:
  USAGE
     herr_t H5S_select_all(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to modify
-        hbool_t rel_prev;      IN: Flag whether to release previous selection or not
+        bool rel_prev;      IN: Flag whether to release previous selection or not
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -1107,7 +1107,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_all(H5S_t *space, hbool_t rel_prev)
+H5S_select_all(H5S_t *space, bool rel_prev)
 {
     herr_t ret_value = SUCCEED; /* return value */
 

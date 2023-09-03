@@ -72,12 +72,12 @@ static herr_t    H5G__node_create(H5F_t *f, H5B_ins_t op, void *_lt_key, void *_
                                   haddr_t *addr_p /*out*/);
 static int       H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
 static int       H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
-static herr_t    H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key, hbool_t *found, void *_udata);
-static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key, hbool_t *lt_key_changed,
-                                  void *_md_key, void *_udata, void *_rt_key, hbool_t *rt_key_changed,
+static herr_t    H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key, bool *found, void *_udata);
+static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key, bool *lt_key_changed, void *_md_key,
+                                  void *_udata, void *_rt_key, bool *rt_key_changed,
                                   haddr_t *new_node_p /*out*/);
-static H5B_ins_t H5G__node_remove(H5F_t *f, haddr_t addr, void *lt_key, hbool_t *lt_key_changed, void *udata,
-                                  void *rt_key, hbool_t *rt_key_changed);
+static H5B_ins_t H5G__node_remove(H5F_t *f, haddr_t addr, void *lt_key, bool *lt_key_changed, void *udata,
+                                  void *rt_key, bool *rt_key_changed);
 static herr_t    H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
 static herr_t    H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
 static herr_t H5G__node_debug_key(FILE *stream, int indent, int fwidth, const void *key, const void *udata);
@@ -442,7 +442,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, hbool_t *found, void *_udata)
+H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, bool *found, void *_udata)
 {
     H5G_bt_lkp_t *udata = (H5G_bt_lkp_t *)_udata;
     H5G_node_t   *sn    = NULL;
@@ -531,8 +531,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H5_ATTR_UNUSED *lt_key_changed,
-                 void *_md_key, void *_udata, void *_rt_key, hbool_t *rt_key_changed, haddr_t *new_node_p)
+H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_ATTR_UNUSED *lt_key_changed,
+                 void *_md_key, void *_udata, void *_rt_key, bool *rt_key_changed, haddr_t *new_node_p)
 {
     H5G_node_key_t *md_key = (H5G_node_key_t *)_md_key;
     H5G_node_key_t *rt_key = (H5G_node_key_t *)_rt_key;
@@ -690,8 +690,8 @@ done:
  */
 static H5B_ins_t
 H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*in,out*/,
-                 hbool_t H5_ATTR_UNUSED *lt_key_changed /*out*/, void *_udata /*in,out*/,
-                 void *_rt_key /*in,out*/, hbool_t *rt_key_changed /*out*/)
+                 bool H5_ATTR_UNUSED *lt_key_changed /*out*/, void *_udata /*in,out*/,
+                 void *_rt_key /*in,out*/, bool *rt_key_changed /*out*/)
 {
     H5G_node_key_t *rt_key   = (H5G_node_key_t *)_rt_key;
     H5G_bt_rm_t    *udata    = (H5G_bt_rm_t *)_udata;

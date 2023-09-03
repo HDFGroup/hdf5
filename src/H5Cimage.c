@@ -133,7 +133,7 @@ static herr_t H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_p
 static herr_t H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr);
 static herr_t H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr);
 static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **buf);
-static herr_t             H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create);
+static herr_t             H5C__write_cache_image_superblock_msg(H5F_t *f, bool create);
 static herr_t             H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr);
 static herr_t             H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr);
 static herr_t             H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr);
@@ -168,10 +168,10 @@ H5FL_DEFINE(H5C_cache_entry_t);
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5C_cache_image_pending(const H5C_t *cache_ptr)
 {
-    hbool_t ret_value = TRUE; /* Return value */
+    bool ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -203,7 +203,7 @@ H5C_cache_image_pending(const H5C_t *cache_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_cache_image_status(H5F_t *f, hbool_t *load_ci_ptr, hbool_t *write_ci_ptr)
+H5C_cache_image_status(H5F_t *f, bool *load_ci_ptr, bool *write_ci_ptr)
 {
     H5C_t *cache_ptr;
 
@@ -688,7 +688,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_t rw)
+H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, bool rw)
 {
     H5C_t *cache_ptr;
 
@@ -806,7 +806,7 @@ H5C__image_entry_cmp(const void *_entry1, const void *_entry2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
+H5C__prep_image_for_file_close(H5F_t *f, bool *image_generated)
 {
     H5C_t  *cache_ptr     = NULL;
     haddr_t eoa_frag_addr = HADDR_UNDEF;
@@ -1276,7 +1276,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
 {
     uint8_t        version;
     uint8_t        flags;
-    hbool_t        have_resize_status = FALSE;
+    bool           have_resize_status = FALSE;
     size_t         actual_header_len;
     size_t         expected_header_len;
     const uint8_t *p;
@@ -1355,10 +1355,10 @@ done:
 static herr_t
 H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint8_t **buf, unsigned entry_num)
 {
-    hbool_t            is_dirty     = FALSE;
-    hbool_t            in_lru       = FALSE; /* Only used in assertions */
-    hbool_t            is_fd_parent = FALSE; /* Only used in assertions */
-    hbool_t            is_fd_child  = FALSE; /* Only used in assertions */
+    bool               is_dirty     = FALSE;
+    bool               in_lru       = FALSE; /* Only used in assertions */
+    bool               is_fd_parent = FALSE; /* Only used in assertions */
+    bool               is_fd_child  = FALSE; /* Only used in assertions */
     haddr_t            addr;
     hsize_t            size = 0;
     void              *image_ptr;
@@ -1725,7 +1725,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
     unsigned external_parent_fd_refs_removed = 0;
     unsigned external_child_fd_refs_removed  = 0;
 #endif
-    hbool_t  done = FALSE;
+    bool     done = FALSE;
     unsigned u; /* Local index variable */
     herr_t   ret_value = SUCCEED;
 
@@ -2124,7 +2124,7 @@ static herr_t
 H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *entry_ptr;
-    hbool_t            include_in_image;
+    bool               include_in_image;
     int                lru_rank = 1;
 #ifndef NDEBUG
     unsigned entries_visited                  = 0;
@@ -2531,7 +2531,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
         /* cache is oversized -- call H5C__make_space_in_cache() with zero
          * space needed to repair the situation if possible.
          */
-        hbool_t write_permitted = FALSE;
+        bool write_permitted = FALSE;
 
         if (cache_ptr->check_write_permitted && (cache_ptr->check_write_permitted)(f, &write_permitted) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "Can't get write_permitted");
@@ -2565,14 +2565,14 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
 {
     H5C_cache_entry_t *pf_entry_ptr = NULL; /* Reconstructed cache entry */
     uint8_t            flags        = 0;
-    hbool_t            is_dirty     = FALSE;
+    bool               is_dirty     = FALSE;
 #ifndef NDEBUG /* only used in assertions */
-    hbool_t in_lru       = FALSE;
-    hbool_t is_fd_parent = FALSE;
-    hbool_t is_fd_child  = FALSE;
+    bool in_lru       = FALSE;
+    bool is_fd_parent = FALSE;
+    bool is_fd_child  = FALSE;
 #endif
     const uint8_t     *p;
-    hbool_t            file_is_rw;
+    bool               file_is_rw;
     H5C_cache_entry_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2734,7 +2734,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create)
+H5C__write_cache_image_superblock_msg(H5F_t *f, bool create)
 {
     H5C_t     *cache_ptr;
     H5O_mdci_t mdci_msg; /* metadata cache image message */

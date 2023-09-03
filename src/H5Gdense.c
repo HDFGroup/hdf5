@@ -109,10 +109,10 @@ typedef struct {
 typedef struct {
     /* downward */
     H5G_bt2_ud_common_t common;          /* Common info for B-tree user data (must be first) */
-    hbool_t             rem_from_fheap;  /* Whether to remove the link from the fractal heap */
+    bool                rem_from_fheap;  /* Whether to remove the link from the fractal heap */
     haddr_t             corder_bt2_addr; /* Address of v2 B-tree indexing creation order */
     H5RS_str_t         *grp_full_path_r; /* Full path of group where link is removed */
-    hbool_t             replace_names;   /* Whether to replace the names of open objects */
+    bool                replace_names;   /* Whether to replace the names of open objects */
 } H5G_bt2_ud_rm_t;
 
 /*
@@ -124,7 +124,7 @@ typedef struct {
     H5F_t      *f;               /* Pointer to file that fractal heap is in */
     haddr_t     corder_bt2_addr; /* Address of v2 B-tree indexing creation order */
     H5RS_str_t *grp_full_path_r; /* Full path of group where link is removed */
-    hbool_t     replace_names;   /* Whether to replace the names of open objects */
+    bool        replace_names;   /* Whether to replace the names of open objects */
 } H5G_fh_ud_rm_t;
 
 /*
@@ -472,7 +472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5G_bt2_ud_common_t udata;               /* User data for v2 B-tree link lookup */
     H5HF_t             *fheap     = NULL;    /* Fractal heap handle */
@@ -1574,7 +1574,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, hbool_t adj_link)
+H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, bool adj_link)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

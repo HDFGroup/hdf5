@@ -62,19 +62,19 @@ typedef struct H5S_mpio_mpitype_list_t {
 /* Local Prototypes */
 /********************/
 static herr_t H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                                 hbool_t *is_derived_type);
-static herr_t H5S__mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
+                                 bool *is_derived_type);
+static herr_t H5S__mpio_none_type(MPI_Datatype *new_type, int *count, bool *is_derived_type);
 static herr_t H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *disp,
                                               MPI_Datatype *new_type);
 static herr_t H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                                   hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute_map,
-                                   hbool_t *is_permuted);
+                                   bool *is_derived_type, bool do_permute, hsize_t **permute_map,
+                                   bool *is_permuted);
 static herr_t H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute_map,
-                                     MPI_Datatype *new_type, int *count, hbool_t *is_derived_type);
+                                     MPI_Datatype *new_type, int *count, bool *is_derived_type);
 static herr_t H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                                       hbool_t *is_derived_type);
+                                       bool *is_derived_type);
 static herr_t H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
-                                        int *count, hbool_t *is_derived_type);
+                                        int *count, bool *is_derived_type);
 static herr_t H5S__release_datatype(H5S_mpio_mpitype_list_t *type_list);
 static herr_t H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t elmt_size,
                                    const MPI_Datatype *elmt_type, MPI_Datatype *span_type,
@@ -110,7 +110,7 @@ H5FL_EXTERN(H5S_sel_iter_t);
  */
 static herr_t
 H5S__mpio_all_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                   hbool_t *is_derived_type)
+                   bool *is_derived_type)
 {
     hsize_t  total_bytes;
     hssize_t snelmts;             /* Total number of elmts	(signed) */
@@ -166,7 +166,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__mpio_none_type(MPI_Datatype *new_type, int *count, hbool_t *is_derived_type)
+H5S__mpio_none_type(MPI_Datatype *new_type, int *count, bool *is_derived_type)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -193,7 +193,7 @@ static herr_t
 H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *disp, MPI_Datatype *new_type)
 {
     MPI_Datatype  elmt_type;                 /* MPI datatype for individual element */
-    hbool_t       elmt_type_created = FALSE; /* Whether the element MPI datatype was created */
+    bool          elmt_type_created = FALSE; /* Whether the element MPI datatype was created */
     int          *inner_blocks      = NULL;  /* Arrays for MPI datatypes when "large" datatype needed */
     MPI_Aint     *inner_disps       = NULL;
     MPI_Datatype *inner_types       = NULL;
@@ -357,7 +357,7 @@ done:
  */
 static herr_t
 H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                     hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute, hbool_t *is_permuted)
+                     bool *is_derived_type, bool do_permute, hsize_t **permute, bool *is_permuted)
 {
     MPI_Aint       *disp = NULL;         /* Datatype displacement for each point*/
     H5S_pnt_node_t *curr = NULL;         /* Current point being operated on in from the selection */
@@ -491,11 +491,11 @@ done:
  */
 static herr_t
 H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Datatype *new_type, int *count,
-                       hbool_t *is_derived_type)
+                       bool *is_derived_type)
 {
     MPI_Aint       *disp          = NULL;  /* Datatype displacement for each point*/
     H5S_sel_iter_t *sel_iter      = NULL;  /* Selection iteration info */
-    hbool_t         sel_iter_init = FALSE; /* Selection iteration info has been initialized */
+    bool            sel_iter_init = FALSE; /* Selection iteration info has been initialized */
     hssize_t        snum_points;           /* Signed number of elements in selection */
     hsize_t         num_points;            /* Number of points in the selection */
     hsize_t        *off = NULL;
@@ -637,10 +637,10 @@ done:
  */
 static herr_t
 H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                         hbool_t *is_derived_type)
+                         bool *is_derived_type)
 {
     H5S_sel_iter_t *sel_iter      = NULL;  /* Selection iteration info */
-    hbool_t         sel_iter_init = FALSE; /* Selection iteration info has been initialized */
+    bool            sel_iter_init = FALSE; /* Selection iteration info has been initialized */
 
     struct dim { /* less hassle than malloc/free & ilk */
         hssize_t start;
@@ -989,11 +989,11 @@ done:
  */
 static herr_t
 H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                          hbool_t *is_derived_type)
+                          bool *is_derived_type)
 {
     H5S_mpio_mpitype_list_t type_list;                    /* List to track MPI data types created */
     MPI_Datatype            elmt_type;                    /* MPI datatype for an element */
-    hbool_t                 elmt_type_is_derived = FALSE; /* Whether the element type has been created */
+    bool                    elmt_type_is_derived = FALSE; /* Whether the element type has been created */
     MPI_Datatype            span_type;                    /* MPI datatype for overall span tree */
     hsize_t                 bigio_count;                  /* Transition point to create derived type */
     hsize_t                 down[H5S_MAX_RANK];           /* 'down' sizes for each dimension */
@@ -1120,7 +1120,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
     size_t            alloc_count       = 0; /* Number of span tree nodes allocated at this level */
     size_t            outercount        = 0; /* Number of span tree nodes at this level */
     MPI_Datatype     *inner_type        = NULL;
-    hbool_t           inner_types_freed = FALSE; /* Whether the inner_type MPI datatypes have been freed */
+    bool              inner_types_freed = FALSE; /* Whether the inner_type MPI datatypes have been freed */
     int              *blocklen          = NULL;
     MPI_Aint         *disp              = NULL;
     size_t            u;                   /* Local index variable */
@@ -1148,7 +1148,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
         /* If this is the fastest changing dimension, it is the base case for derived datatype. */
         span = spans->head;
         if (NULL == span->down) {
-            hbool_t large_block = FALSE; /* Whether the block length is larger than 32 bit integer */
+            bool large_block = FALSE; /* Whether the block length is larger than 32 bit integer */
 
             outercount = 0;
             while (span) {
@@ -1366,8 +1366,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
-                    hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted)
+H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count, bool *is_derived_type,
+                    bool do_permute, hsize_t **permute_map, bool *is_permuted)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -167,11 +167,11 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
+H5FA__dblock_create(H5FA_hdr_t *hdr, bool *hdr_dirty)
 {
     H5FA_dblock_t *dblock = NULL;     /* Fixed array data block */
     haddr_t        dblock_addr;       /* Fixed array data block address */
-    hbool_t        inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool           inserted  = FALSE; /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE

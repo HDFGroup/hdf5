@@ -295,7 +295,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
     hid_t               tid_dst       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
     H5T_path_t         *tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
     size_t              i;                                           /* Local index variable */
-    hbool_t             reg_tid_src             = (tid_src == H5I_INVALID_HID);
+    bool                reg_tid_src             = (tid_src == H5I_INVALID_HID);
     hid_t               dst_loc_id              = H5I_INVALID_HID;
     void               *conv_buf                = NULL;        /* Buffer for converting data */
     size_t              conv_buf_size           = 0;           /* Buffer size */

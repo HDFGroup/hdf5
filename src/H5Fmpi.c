@@ -188,7 +188,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
+H5F__set_mpi_atomicity(H5F_t *file, bool flag)
 {
     herr_t ret_value = SUCCEED;
 
@@ -292,7 +292,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
+H5Fget_mpi_atomicity(hid_t file_id, bool *flag /*out*/)
 {
     H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
@@ -405,11 +405,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
     H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
-    hbool_t                 ret_value = FALSE;
+    bool                    ret_value = FALSE;
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -484,10 +484,10 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
  *-------------------------------------------------------------------------
  */
 void
-H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag)
+H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, bool *context_flag)
 {
     H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
-    hbool_t                 prev_context_flag = FALSE;
+    bool                    prev_context_flag = FALSE;
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -531,7 +531,7 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived)
+H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_derived)
 {
     MPI_Datatype types[2];
     MPI_Aint     displacements[2];

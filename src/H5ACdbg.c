@@ -201,7 +201,7 @@ done:
  */
 #ifndef NDEBUG
 herr_t
-H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, hbool_t *fd_exists_ptr)
+H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, bool *fd_exists_ptr)
 {
     H5C_t *cache_ptr;        /* Ptr to cache */
     herr_t ret_value = FAIL; /* Return value */
@@ -247,8 +247,8 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
  */
 #ifndef NDEBUG
 herr_t
-H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expected_type, hbool_t *in_cache_ptr,
-                       hbool_t *type_ok_ptr)
+H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expected_type, bool *in_cache_ptr,
+                       bool *type_ok_ptr)
 {
     H5C_t *cache_ptr;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -279,11 +279,11 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
-hbool_t
+bool
 H5AC_get_serialization_in_progress(H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t ret_value = FALSE; /* Return value */
+    H5C_t *cache_ptr;
+    bool   ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -315,11 +315,11 @@ H5AC_get_serialization_in_progress(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
-hbool_t
+bool
 H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
 {
-    H5C_t  *cache_ptr;
-    hbool_t ret_value = FALSE; /* Return value */
+    H5C_t *cache_ptr;
+    bool   ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

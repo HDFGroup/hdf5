@@ -58,7 +58,7 @@ typedef struct H5D_compact_iovv_memmanage_ud_t {
 
 /* Layout operation callbacks */
 static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
-static hbool_t H5D__compact_is_space_alloc(const H5O_storage_t *storage);
+static bool    H5D__compact_is_space_alloc(const H5O_storage_t *storage);
 static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
 static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
@@ -113,7 +113,7 @@ herr_t
 H5D__compact_fill(const H5D_t *dset)
 {
     H5D_fill_buf_info_t fb_info;                /* Dataset's fill buffer info */
-    hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
+    bool                fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     herr_t              ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -207,7 +207,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
     FUNC_ENTER_PACKAGE_NOERR

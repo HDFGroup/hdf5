@@ -28,10 +28,10 @@ static void *H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, uns
 static void *H5O__attr_copy(const void *_mesg, void *_dest);
 static size_t H5O__attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__attr_free(void *mesg);
-static herr_t H5O__attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                       const H5O_copy_t *cpy_info, void *udata);
 static void  *H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
-                                  H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata);
+                                  H5F_t *file_dst, bool *recompute_size, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                        void *mesg_dst, H5O_copy_t *cpy_info);
 static herr_t H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
@@ -629,7 +629,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, hbool_t *deleted,
+H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, bool *deleted,
                         const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5A_t *attr_src  = (const H5A_t *)native_src; /* Source attribute */
@@ -670,8 +670,7 @@ done:
  */
 static void *
 H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_type, void *native_src,
-                    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-                    void H5_ATTR_UNUSED *udata)
+                    H5F_t *file_dst, bool *recompute_size, H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     void *ret_value = NULL; /* Return value */
 

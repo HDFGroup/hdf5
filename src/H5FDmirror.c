@@ -153,8 +153,8 @@ static herr_t  H5FD__mirror_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
                                   const void *buf);
 static herr_t  H5FD__mirror_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                  void *buf);
-static herr_t  H5FD__mirror_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__mirror_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__mirror_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__mirror_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__mirror_unlock(H5FD_t *_file);
 
 static herr_t H5FD__mirror_verify_reply(H5FD_mirror_t *file);
@@ -330,7 +330,7 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
  *
  * ---------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 is_host_little_endian(void)
 {
     union {
@@ -938,7 +938,7 @@ H5FD_mirror_xmit_encode_write(unsigned char *dest, const H5FD_mirror_xmit_write_
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_close(const H5FD_mirror_xmit_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -961,7 +961,7 @@ H5FD_mirror_xmit_is_close(const H5FD_mirror_xmit_t *xmit)
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_lock(const H5FD_mirror_xmit_lock_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -984,7 +984,7 @@ H5FD_mirror_xmit_is_lock(const H5FD_mirror_xmit_lock_t *xmit)
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_open(const H5FD_mirror_xmit_open_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -1008,7 +1008,7 @@ H5FD_mirror_xmit_is_open(const H5FD_mirror_xmit_open_t *xmit)
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_set_eoa(const H5FD_mirror_xmit_eoa_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -1031,7 +1031,7 @@ H5FD_mirror_xmit_is_set_eoa(const H5FD_mirror_xmit_eoa_t *xmit)
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_reply(const H5FD_mirror_xmit_reply_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -1054,7 +1054,7 @@ H5FD_mirror_xmit_is_reply(const H5FD_mirror_xmit_reply_t *xmit)
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_write(const H5FD_mirror_xmit_write_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -1077,7 +1077,7 @@ H5FD_mirror_xmit_is_write(const H5FD_mirror_xmit_write_t *xmit)
  * Return:      TRUE if valid; else FALSE.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_xmit(const H5FD_mirror_xmit_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -1777,7 +1777,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mirror_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__mirror_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     unsigned char *xmit_buf  = NULL;
     H5FD_mirror_t *file      = (H5FD_mirror_t *)_file;
@@ -1824,7 +1824,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mirror_lock(H5FD_t *_file, hbool_t rw)
+H5FD__mirror_lock(H5FD_t *_file, bool rw)
 {
     H5FD_mirror_xmit_lock_t xmit_lock;
     unsigned char          *xmit_buf  = NULL;

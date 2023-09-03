@@ -61,7 +61,7 @@
 /*******************/
 
 /* Track whether tzset routine was called */
-static hbool_t H5_ntzset = FALSE;
+static bool H5_ntzset = FALSE;
 
 #ifndef H5_HAVE_VASPRINTF
 /* HDvasprintf provides vasprintf-like function on targets where it is
@@ -378,7 +378,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
     FILETIME             ExitTime;
     LARGE_INTEGER        counts_start;
     static LARGE_INTEGER counts_freq;
-    static hbool_t       is_initialized = FALSE;
+    static bool          is_initialized = FALSE;
     BOOL                 err;
 
     assert(tvs);

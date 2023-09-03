@@ -285,7 +285,7 @@ typedef struct H5FD_subfiling_params_t {
  *      the #H5FD_IOC driver by calling H5Pset_fapl_ioc(), but future development
  *      may allow other file drivers to be used.
  *
- * \var hbool_t H5FD_subfiling_config_t::require_ioc
+ * \var bool H5FD_subfiling_config_t::require_ioc
  *      A boolean flag which indicates whether the #H5FD_SUBFILING driver should
  *      use the #H5FD_IOC driver for its I/O operations. This field should currently
  *      always be set to TRUE.
@@ -300,7 +300,7 @@ typedef struct H5FD_subfiling_config_t {
     uint32_t magic;                     /* Must be set to H5FD_SUBFILING_FAPL_MAGIC                         */
     uint32_t version;                   /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION                  */
     hid_t    ioc_fapl_id;               /* The FAPL setup with the stacked VFD to use for I/O concentrators */
-    hbool_t  require_ioc;               /* Whether to use the IOC VFD (currently must always be TRUE)       */
+    bool     require_ioc;               /* Whether to use the IOC VFD (currently must always be TRUE)       */
     H5FD_subfiling_params_t shared_cfg; /* Subfiling/IOC parameters (stripe size, stripe count, etc.)       */
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->

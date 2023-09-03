@@ -49,7 +49,7 @@ typedef struct {
 
     /* upward */
     H5O_link_t *lnk;   /* Link struct to fill in */
-    hbool_t    *found; /* Pointer to flag to indicate that the object was found */
+    bool       *found; /* Pointer to flag to indicate that the object was found */
 } H5G_iter_lkp_t;
 
 /* Private macros */
@@ -440,7 +440,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5G_iter_lkp_t      udata;               /* User data for iteration callback */
     H5O_mesg_operator_t op;                  /* Message operator */

@@ -201,140 +201,137 @@ typedef struct H5CX_t {
 
 #ifdef H5_HAVE_PARALLEL
     /* Internal: Parallel I/O settings */
-    hbool_t      coll_metadata_read; /* Whether to use collective I/O for metadata read */
+    bool         coll_metadata_read; /* Whether to use collective I/O for metadata read */
     MPI_Datatype btype;              /* MPI datatype for buffer, when using collective I/O */
     MPI_Datatype ftype;              /* MPI datatype for file, when using collective I/O */
-    hbool_t      mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
-    hbool_t      rank0_bcast;        /* Whether a dataset meets read-with-rank0-and-bcast requirements */
+    bool         mpi_file_flushing;  /* Whether an MPI-opened file is being flushed */
+    bool         rank0_bcast;        /* Whether a dataset meets read-with-rank0-and-bcast requirements */
 #endif                               /* H5_HAVE_PARALLEL */
 
     /* Cached DXPL properties */
     size_t    max_temp_buf;            /* Maximum temporary buffer size */
-    hbool_t   max_temp_buf_valid;      /* Whether maximum temporary buffer size is valid */
+    bool      max_temp_buf_valid;      /* Whether maximum temporary buffer size is valid */
     void     *tconv_buf;               /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
-    hbool_t   tconv_buf_valid;         /* Whether temporary conversion buffer is valid */
+    bool      tconv_buf_valid;         /* Whether temporary conversion buffer is valid */
     void     *bkgr_buf;                /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
-    hbool_t   bkgr_buf_valid;          /* Whether background conversion buffer is valid */
+    bool      bkgr_buf_valid;          /* Whether background conversion buffer is valid */
     H5T_bkg_t bkgr_buf_type;           /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
-    hbool_t   bkgr_buf_type_valid;     /* Whether background buffer type is valid */
+    bool      bkgr_buf_type_valid;     /* Whether background buffer type is valid */
     double    btree_split_ratio[3];    /* B-tree split ratios */
-    hbool_t   btree_split_ratio_valid; /* Whether B-tree split ratios are valid */
+    bool      btree_split_ratio_valid; /* Whether B-tree split ratios are valid */
     size_t    vec_size;                /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
-    hbool_t   vec_size_valid;          /* Whether hyperslab vector is valid */
+    bool      vec_size_valid;          /* Whether hyperslab vector is valid */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t io_xfer_mode; /* Parallel transfer mode for this request (H5D_XFER_IO_XFER_MODE_NAME) */
-    hbool_t          io_xfer_mode_valid;      /* Whether parallel transfer mode is valid */
+    bool             io_xfer_mode_valid;      /* Whether parallel transfer mode is valid */
     H5FD_mpio_collective_opt_t mpio_coll_opt; /* Parallel transfer with independent IO or collective IO with
                                                  this mode (H5D_XFER_MPIO_COLLECTIVE_OPT_NAME) */
-    hbool_t mpio_coll_opt_valid;              /* Whether parallel transfer option is valid */
+    bool mpio_coll_opt_valid;                 /* Whether parallel transfer option is valid */
     H5FD_mpio_chunk_opt_t
              mpio_chunk_opt_mode;        /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
-    hbool_t  mpio_chunk_opt_mode_valid;  /* Whether collective chunk option is valid */
+    bool     mpio_chunk_opt_mode_valid;  /* Whether collective chunk option is valid */
     unsigned mpio_chunk_opt_num;         /* Collective chunk threshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
-    hbool_t  mpio_chunk_opt_num_valid;   /* Whether collective chunk threshold is valid */
+    bool     mpio_chunk_opt_num_valid;   /* Whether collective chunk threshold is valid */
     unsigned mpio_chunk_opt_ratio;       /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
-    hbool_t  mpio_chunk_opt_ratio_valid; /* Whether collective chunk ratio is valid */
+    bool     mpio_chunk_opt_ratio_valid; /* Whether collective chunk ratio is valid */
 #endif                                   /* H5_HAVE_PARALLEL */
     H5Z_EDC_t               err_detect;  /* Error detection info (H5D_XFER_EDC_NAME) */
-    hbool_t                 err_detect_valid;     /* Whether error detection info is valid */
+    bool                    err_detect_valid;     /* Whether error detection info is valid */
     H5Z_cb_t                filter_cb;            /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
-    hbool_t                 filter_cb_valid;      /* Whether filter callback function is valid */
+    bool                    filter_cb_valid;      /* Whether filter callback function is valid */
     H5Z_data_xform_t       *data_transform;       /* Data transform info (H5D_XFER_XFORM_NAME) */
-    hbool_t                 data_transform_valid; /* Whether data transform info is valid */
+    bool                    data_transform_valid; /* Whether data transform info is valid */
     H5T_vlen_alloc_info_t   vl_alloc_info;        /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
-    hbool_t                 vl_alloc_info_valid;  /* Whether VL datatype alloc info is valid */
+    bool                    vl_alloc_info_valid;  /* Whether VL datatype alloc info is valid */
     H5T_conv_cb_t           dt_conv_cb;           /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
-    hbool_t                 dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
+    bool                    dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
     H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
-    hbool_t                 selection_io_mode_valid; /* Whether selection I/O mode is valid */
-    hbool_t                 modify_write_buf;        /* Whether the library can modify write buffers */
-    hbool_t                 modify_write_buf_valid;  /* Whether the modify_write_buf field is valid */
+    bool                    selection_io_mode_valid; /* Whether selection I/O mode is valid */
+    bool                    modify_write_buf;        /* Whether the library can modify write buffers */
+    bool                    modify_write_buf_valid;  /* Whether the modify_write_buf field is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
     H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chunk_opt; /* Chunk optimization mode used for parallel I/O
                                                                (H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME) */
-    hbool_t mpio_actual_chunk_opt_set; /* Whether chunk optimization mode used for parallel I/O is set */
+    bool mpio_actual_chunk_opt_set; /* Whether chunk optimization mode used for parallel I/O is set */
     H5D_mpio_actual_io_mode_t
              mpio_actual_io_mode; /* Actual I/O mode used for parallel I/O (H5D_MPIO_ACTUAL_IO_MODE_NAME) */
-    hbool_t  mpio_actual_io_mode_set;        /* Whether actual I/O mode used for parallel I/O is set */
+    bool     mpio_actual_io_mode_set;        /* Whether actual I/O mode used for parallel I/O is set */
     uint32_t mpio_local_no_coll_cause;       /* Local reason for breaking collective I/O
                                                 (H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME) */
-    hbool_t  mpio_local_no_coll_cause_set;   /* Whether local reason for breaking collective I/O is set */
-    hbool_t  mpio_local_no_coll_cause_valid; /* Whether local reason for breaking collective I/O is valid */
+    bool     mpio_local_no_coll_cause_set;   /* Whether local reason for breaking collective I/O is set */
+    bool     mpio_local_no_coll_cause_valid; /* Whether local reason for breaking collective I/O is valid */
     uint32_t mpio_global_no_coll_cause;      /* Global reason for breaking collective I/O
                                                 (H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME) */
-    hbool_t mpio_global_no_coll_cause_set;   /* Whether global reason for breaking collective I/O is set */
-    hbool_t mpio_global_no_coll_cause_valid; /* Whether global reason for breaking collective I/O is valid */
+    bool mpio_global_no_coll_cause_set;      /* Whether global reason for breaking collective I/O is set */
+    bool mpio_global_no_coll_cause_valid;    /* Whether global reason for breaking collective I/O is valid */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    int mpio_coll_chunk_link_hard; /* Instrumented "collective chunk link hard" value
-                                      (H5D_XFER_COLL_CHUNK_LINK_HARD_NAME) */
-    hbool_t
-        mpio_coll_chunk_link_hard_set; /* Whether instrumented "collective chunk link hard" value is set */
-    int mpio_coll_chunk_multi_hard;    /* Instrumented "collective chunk multi hard" value
-                                          (H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME) */
-    hbool_t
-        mpio_coll_chunk_multi_hard_set; /* Whether instrumented "collective chunk multi hard" value is set */
-    int mpio_coll_chunk_link_num_true;  /* Instrumented "collective chunk link num true" value
-                                           (H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME) */
-    hbool_t mpio_coll_chunk_link_num_true_set;  /* Whether instrumented "collective chunk link num true" value
-                                                   is set */
-    int mpio_coll_chunk_link_num_false;         /* Instrumented "collective chunk link num false" value
-                                                   (H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME) */
-    hbool_t mpio_coll_chunk_link_num_false_set; /* Whether instrumented "collective chunk link num false"
-                                                   value is set */
-    int mpio_coll_chunk_multi_ratio_coll;       /* Instrumented "collective chunk multi ratio coll" value
-                                                   (H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME) */
-    hbool_t mpio_coll_chunk_multi_ratio_coll_set; /* Whether instrumented "collective chunk multi ratio coll"
+    int mpio_coll_chunk_link_hard;       /* Instrumented "collective chunk link hard" value
+                                            (H5D_XFER_COLL_CHUNK_LINK_HARD_NAME) */
+    bool mpio_coll_chunk_link_hard_set;  /* Whether instrumented "collective chunk link hard" value is set */
+    int  mpio_coll_chunk_multi_hard;     /* Instrumented "collective chunk multi hard" value
+                                            (H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME) */
+    bool mpio_coll_chunk_multi_hard_set; /* Whether instrumented "collective chunk multi hard" value is set */
+    int  mpio_coll_chunk_link_num_true;  /* Instrumented "collective chunk link num true" value
+                                            (H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME) */
+    bool mpio_coll_chunk_link_num_true_set;    /* Whether instrumented "collective chunk link num true" value
+                                                     is set */
+    int mpio_coll_chunk_link_num_false;        /* Instrumented "collective chunk link num false" value
+                                                  (H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME) */
+    bool mpio_coll_chunk_link_num_false_set;   /* Whether instrumented "collective chunk link num false"
                                                      value is set */
-    int mpio_coll_chunk_multi_ratio_ind;          /* Instrumented "collective chunk multi ratio ind" value
-                                                     (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
-    hbool_t mpio_coll_chunk_multi_ratio_ind_set;  /* Whether instrumented "collective chunk multi ratio ind"
+    int mpio_coll_chunk_multi_ratio_coll;      /* Instrumented "collective chunk multi ratio coll" value
+                                                  (H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME) */
+    bool mpio_coll_chunk_multi_ratio_coll_set; /* Whether instrumented "collective chunk multi ratio coll"
                                                      value is set */
-    hbool_t mpio_coll_rank0_bcast;                /* Instrumented "collective chunk multi ratio ind" value
+    int mpio_coll_chunk_multi_ratio_ind;       /* Instrumented "collective chunk multi ratio ind" value
+                                                  (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
+    bool mpio_coll_chunk_multi_ratio_ind_set;  /* Whether instrumented "collective chunk multi ratio ind"
+                                                     value is set */
+    bool mpio_coll_rank0_bcast;                /* Instrumented "collective chunk multi ratio ind" value
                                                      (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
-    hbool_t
-        mpio_coll_rank0_bcast_set;  /* Whether instrumented "collective chunk multi ratio ind" value is set */
+    bool mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
 #endif                              /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif                              /* H5_HAVE_PARALLEL */
     uint32_t no_selection_io_cause; /* Reason for not performing selection I/O
                                           (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
-    hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
+    bool no_selection_io_cause_set; /* Whether reason for not performing selection I/O is set */
+    bool no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
-    hbool_t    encoding_valid;           /* Whether link name character encoding is valid */
+    bool       encoding_valid;           /* Whether link name character encoding is valid */
     unsigned   intermediate_group;       /* Whether to create intermediate groups */
-    hbool_t    intermediate_group_valid; /* Whether create intermediate group flag is valid */
+    bool       intermediate_group_valid; /* Whether create intermediate group flag is valid */
 
     /* Cached LAPL properties */
-    size_t  nlinks;       /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
-    hbool_t nlinks_valid; /* Whether number of soft / UD links to traverse is valid */
+    size_t nlinks;       /* Number of soft / UD links to traverse (H5L_ACS_NLINKS_NAME) */
+    bool   nlinks_valid; /* Whether number of soft / UD links to traverse is valid */
 
     /* Cached DCPL properties */
-    hbool_t do_min_dset_ohdr;       /* Whether to minimize dataset object header */
-    hbool_t do_min_dset_ohdr_valid; /* Whether minimize dataset object header flag is valid */
+    bool    do_min_dset_ohdr;       /* Whether to minimize dataset object header */
+    bool    do_min_dset_ohdr_valid; /* Whether minimize dataset object header flag is valid */
     uint8_t ohdr_flags;             /* Object header flags */
-    hbool_t ohdr_flags_valid;       /* Whether the object headers flags are valid */
+    bool    ohdr_flags_valid;       /* Whether the object headers flags are valid */
 
     /* Cached DAPL properties */
     const char *extfile_prefix;       /* Prefix for external file                      */
-    hbool_t     extfile_prefix_valid; /* Whether the prefix for external file is valid */
+    bool        extfile_prefix_valid; /* Whether the prefix for external file is valid */
     const char *vds_prefix;           /* Prefix for VDS                                */
-    hbool_t     vds_prefix_valid;     /* Whether the prefix for VDS is valid           */
+    bool        vds_prefix_valid;     /* Whether the prefix for VDS is valid           */
 
     /* Cached FAPL properties */
     H5F_libver_t low_bound;        /* low_bound property for H5Pset_libver_bounds() */
-    hbool_t      low_bound_valid;  /* Whether low_bound property is valid */
+    bool         low_bound_valid;  /* Whether low_bound property is valid */
     H5F_libver_t high_bound;       /* high_bound property for H5Pset_libver_bounds */
-    hbool_t      high_bound_valid; /* Whether high_bound property is valid */
+    bool         high_bound_valid; /* Whether high_bound property is valid */
 
     /* Cached VOL settings */
     H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info */
-    hbool_t vol_connector_prop_valid;         /* Whether property for VOL connector ID & info is valid */
-    void   *vol_wrap_ctx;                     /* VOL connector's "wrap context" for creating IDs */
-    hbool_t vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
+    bool  vol_connector_prop_valid;           /* Whether property for VOL connector ID & info is valid */
+    void *vol_wrap_ctx;                       /* VOL connector's "wrap context" for creating IDs */
+    bool  vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
 } H5CX_t;
 
 /* Typedef for nodes on the API context stack */
@@ -383,7 +380,7 @@ typedef struct H5CX_dxpl_cache_t {
     H5D_selection_io_mode_t selection_io_mode;     /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     uint32_t                no_selection_io_cause; /* Reasons for not performing selection I/O
                                                             (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    hbool_t modify_write_buf;                      /* Whether the library can modify write buffers */
+    bool modify_write_buf;                         /* Whether the library can modify write buffers */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -402,7 +399,7 @@ typedef struct H5CX_lapl_cache_t {
 /* Typedef for cached default dataset creation property list information */
 /* (Same as the cached DXPL struct, above, except for the default DCPL) */
 typedef struct H5CX_dcpl_cache_t {
-    hbool_t do_min_dset_ohdr; /* Whether to minimize dataset object header */
+    bool    do_min_dset_ohdr; /* Whether to minimize dataset object header */
     uint8_t ohdr_flags;       /* Object header flags */
 } H5CX_dcpl_cache_t;
 
@@ -427,7 +424,7 @@ typedef struct H5CX_fapl_cache_t {
 static H5CX_node_t **H5CX__get_context(void);
 #endif /* H5_HAVE_THREADSAFE */
 static void         H5CX__push_common(H5CX_node_t *cnode);
-static H5CX_node_t *H5CX__pop_common(hbool_t update_dxpl_props);
+static H5CX_node_t *H5CX__pop_common(bool update_dxpl_props);
 
 /*********************/
 /* Package Variables */
@@ -1116,11 +1113,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5CX_is_def_dxpl(void)
 {
     H5CX_node_t **head        = NULL;  /* Pointer to head of API context list */
-    hbool_t       is_def_dxpl = FALSE; /* Flag to indicate DXPL is default */
+    bool          is_def_dxpl = FALSE; /* Flag to indicate DXPL is default */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1288,7 +1285,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
                  H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
                      loc_id,
-             hbool_t
+             bool
 #ifndef H5_HAVE_PARALLEL
                  H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
@@ -1701,11 +1698,11 @@ H5CX_get_ring(void)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5CX_get_coll_metadata_read(void)
 {
     H5CX_node_t **head         = NULL; /* Pointer to head of API context list */
-    hbool_t       coll_md_read = FALSE;
+    bool          coll_md_read = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1760,11 +1757,11 @@ H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5CX_get_mpi_file_flushing(void)
 {
     H5CX_node_t **head     = NULL; /* Pointer to head of API context list */
-    hbool_t       flushing = FALSE;
+    bool          flushing = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1788,11 +1785,11 @@ H5CX_get_mpi_file_flushing(void)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5CX_get_mpio_rank0_bcast(void)
 {
     H5CX_node_t **head           = NULL; /* Pointer to head of API context list */
-    hbool_t       do_rank0_bcast = FALSE;
+    bool          do_rank0_bcast = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -2522,7 +2519,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_modify_write_buf(hbool_t *modify_write_buf)
+H5CX_get_modify_write_buf(bool *modify_write_buf)
 {
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -2687,7 +2684,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_get_dset_min_ohdr_flag(hbool_t *dset_min_ohdr_flag)
+H5CX_get_dset_min_ohdr_flag(bool *dset_min_ohdr_flag)
 {
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -2882,7 +2879,7 @@ H5CX_set_ring(H5AC_ring_t ring)
  *-------------------------------------------------------------------------
  */
 void
-H5CX_set_coll_metadata_read(hbool_t cmdr)
+H5CX_set_coll_metadata_read(bool cmdr)
 {
     H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
@@ -2998,7 +2995,7 @@ H5CX_set_mpio_coll_opt(H5FD_mpio_collective_opt_t mpio_coll_opt)
  *-------------------------------------------------------------------------
  */
 void
-H5CX_set_mpi_file_flushing(hbool_t flushing)
+H5CX_set_mpi_file_flushing(bool flushing)
 {
     H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
@@ -3024,7 +3021,7 @@ H5CX_set_mpi_file_flushing(hbool_t flushing)
  *-------------------------------------------------------------------------
  */
 void
-H5CX_set_mpio_rank0_bcast(hbool_t rank0_bcast)
+H5CX_set_mpio_rank0_bcast(bool rank0_bcast)
 {
     H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
@@ -3420,7 +3417,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_test_set_mpio_coll_rank0_bcast(hbool_t mpio_coll_rank0_bcast)
+H5CX_test_set_mpio_coll_rank0_bcast(bool mpio_coll_rank0_bcast)
 {
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -3514,7 +3511,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5CX_node_t *
-H5CX__pop_common(hbool_t update_dxpl_props)
+H5CX__pop_common(bool update_dxpl_props)
 {
     H5CX_node_t **head      = NULL; /* Pointer to head of API context list */
     H5CX_node_t  *ret_value = NULL; /* Return value */
@@ -3563,7 +3560,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5CX_pop(hbool_t update_dxpl_props)
+H5CX_pop(bool update_dxpl_props)
 {
     H5CX_node_t *cnode;               /* Context node */
     herr_t       ret_value = SUCCEED; /* Return value */

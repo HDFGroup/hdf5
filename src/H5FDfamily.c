@@ -63,11 +63,11 @@ typedef struct H5FD_family_t {
     unsigned flags;        /*flags for opening additional members    */
 
     /* Information from properties set by 'h5repart' tool */
-    hsize_t mem_newsize;    /*new member size passed in as private
-                             * property. It's used only by h5repart */
-    hbool_t repart_members; /* Whether to mark the superblock dirty
-                             * when it is loaded, so that the family
-                             * member sizes can be re-encoded       */
+    hsize_t mem_newsize; /*new member size passed in as private
+                          * property. It's used only by h5repart */
+    bool repart_members; /* Whether to mark the superblock dirty
+                          * when it is loaded, so that the family
+                          * member sizes can be re-encoded       */
 } H5FD_family_t;
 
 /* Driver-specific file access properties */
@@ -100,9 +100,9 @@ static herr_t  H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, 
                                  void *_buf /*out*/);
 static herr_t  H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
                                   const void *_buf);
-static herr_t  H5FD__family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__family_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__family_flush(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__family_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__family_unlock(H5FD_t *_file);
 static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
 
@@ -659,7 +659,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     H5FD_family_t *file      = NULL;
     char          *memb_name = NULL, *temp = NULL;
     hsize_t        eof            = HADDR_UNDEF;
-    hbool_t        default_config = FALSE;
+    bool           default_config = FALSE;
     unsigned       t_flags        = flags & ~H5F_ACC_CREAT;
     H5FD_t        *ret_value      = NULL;
 
@@ -1279,7 +1279,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file;
     unsigned       u, nerrors = 0;
@@ -1310,7 +1310,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file;
     unsigned       u, nerrors = 0;
@@ -1342,7 +1342,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_lock(H5FD_t *_file, hbool_t rw)
+H5FD__family_lock(H5FD_t *_file, bool rw)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file; /* VFD file struct */
     unsigned       u;                             /* Local index variable */
@@ -1417,7 +1417,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     H5P_genplist_t           *plist;
     const H5FD_family_fapl_t *fa;
     H5FD_family_fapl_t        default_fa     = {0, H5I_INVALID_HID};
-    hbool_t                   default_config = FALSE;
+    bool                      default_config = FALSE;
     hid_t                     memb_fapl_id   = H5I_INVALID_HID;
     unsigned                  current_member;
     char                     *member_name  = NULL;

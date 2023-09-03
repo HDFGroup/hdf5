@@ -78,13 +78,13 @@ static const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 1;
 #ifdef H5_HAVE_THREADSAFE
 H5_api_t H5_g;
 #else
-hbool_t H5_libinit_g = FALSE; /* Library hasn't been initialized */
-hbool_t H5_libterm_g = FALSE; /* Library isn't being shutdown */
+bool H5_libinit_g = FALSE; /* Library hasn't been initialized */
+bool H5_libterm_g = FALSE; /* Library isn't being shutdown */
 #endif
 
-char           H5_lib_vers_info_g[] = H5_VERS_INFO;
-static hbool_t H5_dont_atexit_g     = FALSE;
-H5_debug_t     H5_debug_g; /* debugging info */
+char        H5_lib_vers_info_g[] = H5_VERS_INFO;
+static bool H5_dont_atexit_g     = FALSE;
+H5_debug_t  H5_debug_g; /* debugging info */
 
 /*******************/
 /* Local Variables */
@@ -371,10 +371,10 @@ H5_term_library(void)
                                       * some dependent modules, first.
                                       */
             const char *name;        /* name of the module */
-            hbool_t     completed;   /* true iff this terminator was already
+            bool     completed;   /* true iff this terminator was already
                                       * completed
                                       */
-            const hbool_t await_prior;  /* true iff all prior terminators in the
+            const bool await_prior;  /* true iff all prior terminators in the
                                          * list must complete before this
                                          * terminator is attempted
                                          */
@@ -690,10 +690,10 @@ done:
 static void
 H5__debug_mask(const char *s)
 {
-    FILE   *stream = stderr;
-    char    pkg_name[32], *rest;
-    size_t  i;
-    hbool_t clear;
+    FILE  *stream = stderr;
+    char   pkg_name[32], *rest;
+    size_t i;
+    bool   clear;
 
     while (s && *s) {
 
@@ -724,11 +724,11 @@ H5__debug_mask(const char *s)
             }
             else if (!HDstrcmp(pkg_name, "ttop")) {
                 H5_debug_g.trace = stream;
-                H5_debug_g.ttop  = (hbool_t)!clear;
+                H5_debug_g.ttop  = (bool)!clear;
             }
             else if (!HDstrcmp(pkg_name, "ttimes")) {
                 H5_debug_g.trace  = stream;
-                H5_debug_g.ttimes = (hbool_t)!clear;
+                H5_debug_g.ttimes = (bool)!clear;
             }
             else if (!HDstrcmp(pkg_name, "all")) {
                 for (i = 0; i < (size_t)H5_NPKGS; i++)
@@ -1121,7 +1121,7 @@ H5close(void)
  *-------------------------------------------------------------------------
  */
 void *H5_ATTR_MALLOC
-H5allocate_memory(size_t size, hbool_t clear)
+H5allocate_memory(size_t size, bool clear)
 {
     void *ret_value = NULL;
 
@@ -1211,7 +1211,7 @@ H5free_memory(void *mem)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_threadsafe(hbool_t *is_ts /*out*/)
+H5is_library_threadsafe(bool *is_ts /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1246,7 +1246,7 @@ H5is_library_threadsafe(hbool_t *is_ts /*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5is_library_terminating(hbool_t *is_terminating /*out*/)
+H5is_library_terminating(bool *is_terminating /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

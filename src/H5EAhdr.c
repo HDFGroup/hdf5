@@ -333,7 +333,7 @@ haddr_t
 H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
 {
     H5EA_hdr_t *hdr       = NULL;  /* Extensible array header */
-    hbool_t     inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool        inserted  = FALSE; /* Whether the header was inserted into cache */
     haddr_t     ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE

@@ -148,8 +148,8 @@ H5O__assert(const H5O_t *oh)
         if (H5O_NULL_ID == curr_msg->type->id)
             free_space += curr_tot_size;
         else if (H5O_CONT_ID == curr_msg->type->id) {
-            H5O_cont_t                   *cont        = (H5O_cont_t *)curr_msg->native;
-            hbool_t H5_ATTR_NDEBUG_UNUSED found_chunk = FALSE; /* Found a chunk that matches */
+            H5O_cont_t                *cont        = (H5O_cont_t *)curr_msg->native;
+            bool H5_ATTR_NDEBUG_UNUSED found_chunk = FALSE; /* Found a chunk that matches */
 
             assert(cont);
 
@@ -393,7 +393,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
                 "Dirty:", oh->mesg[i].dirty ? "TRUE" : "FALSE");
         fprintf(stream, "%*s%-*s ", indent + 3, "", MAX(0, fwidth - 3), "Message flags:");
         if (oh->mesg[i].flags) {
-            hbool_t flag_printed = FALSE;
+            bool flag_printed = FALSE;
 
             /* Sanity check that all flags in format are covered below */
             HDcompile_assert(H5O_MSG_FLAG_BITS ==

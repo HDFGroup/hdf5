@@ -335,11 +335,11 @@ done:
 herr_t
 H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
 {
-    hbool_t same      = FALSE;
-    char   *key       = NULL;
-    char   *value1    = NULL;
-    char   *value2    = NULL;
-    herr_t  ret_value = SUCCEED;
+    bool   same      = FALSE;
+    char  *key       = NULL;
+    char  *value1    = NULL;
+    char  *value2    = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -616,7 +616,7 @@ done:
  */
 herr_t
 H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type, const int recv_counts[],
-                      const int displacements[], MPI_Datatype recv_type, hbool_t allgather, int root,
+                      const int displacements[], MPI_Datatype recv_type, bool allgather, int root,
                       MPI_Comm comm, int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries)
 {
     size_t recv_buf_num_entries = 0;
@@ -710,7 +710,7 @@ done:
  */
 herr_t
 H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type, MPI_Datatype recv_type,
-                             hbool_t allgather, int root, MPI_Comm comm, int mpi_rank, int mpi_size,
+                             bool allgather, int root, MPI_Comm comm, int mpi_rank, int mpi_size,
                              void **out_buf, size_t *out_buf_num_entries)
 {
     int   *recv_counts_disps_array = NULL;
@@ -791,7 +791,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
+H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_required)
 {
     MPI_Info info_used;
     int      flag;

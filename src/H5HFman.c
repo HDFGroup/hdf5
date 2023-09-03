@@ -345,7 +345,7 @@ H5HF__man_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *
     } /* end if */
     else {
         H5HF_indirect_t *iblock;      /* Pointer to indirect block */
-        hbool_t          did_protect; /* Whether we protected the indirect block or not */
+        bool             did_protect; /* Whether we protected the indirect block or not */
         unsigned         entry;       /* Entry of block */
 
         /* Look up indirect block containing direct block */
@@ -526,7 +526,7 @@ H5HF__man_remove(H5HF_hdr_t *hdr, const uint8_t *id)
 {
     H5HF_free_section_t *sec_node    = NULL;  /* Pointer to free space section for block */
     H5HF_indirect_t     *iblock      = NULL;  /* Pointer to indirect block */
-    hbool_t              did_protect = FALSE; /* Whether we protected the indirect block or not */
+    bool                 did_protect = FALSE; /* Whether we protected the indirect block or not */
     hsize_t              obj_off;             /* Object's offset in heap */
     size_t               obj_len;             /* Object's length in heap */
     size_t               dblock_size;         /* Direct block size */

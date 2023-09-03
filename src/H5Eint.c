@@ -396,7 +396,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
+H5E__print(const H5E_t *estack, FILE *stream, bool bk_compatible)
 {
     H5E_print_t   eprint;  /* Callback information to pass to H5E_walk() */
     H5E_walk_op_t walk_op; /* Error stack walking callback */
@@ -623,7 +623,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 {
     va_list ap;                   /* Varargs info */
     char   *tmp        = NULL;    /* Buffer to place formatted description in */
-    hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
+    bool    va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
     /*
@@ -882,7 +882,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_dump_api_stack(hbool_t is_api)
+H5E_dump_api_stack(bool is_api)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

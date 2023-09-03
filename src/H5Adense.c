@@ -263,7 +263,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
+H5A__dense_fnd_cb(const H5A_t *attr, bool *took_ownership, void *_user_attr)
 {
     const H5A_t **user_attr = (const H5A_t **)_user_attr; /* User data from v2 B-tree attribute lookup */
     herr_t        ret_value = SUCCEED;                    /* Return value */
@@ -326,7 +326,7 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     H5HF_t             *shared_fheap = NULL; /* Fractal heap handle for shared header messages */
     H5B2_t             *bt2_name     = NULL; /* v2 B-tree handle for name index */
     htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
-    hbool_t             attr_exists;         /* Attribute exists in v2 B-tree */
+    bool                attr_exists;         /* Attribute exists in v2 B-tree */
     H5A_t              *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -557,7 +557,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
+H5A__dense_write_bt2_cb2(void *_record, void *_op_data, bool *changed)
 {
     H5A_dense_bt2_corder_rec_t *record = (H5A_dense_bt2_corder_rec_t *)_record; /* Record from B-tree */
     H5O_fheap_id_t *new_heap_id        = (H5O_fheap_id_t *)_op_data; /* "op data" from v2 B-tree modify */
@@ -587,7 +587,7 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
+H5A__dense_write_bt2_cb(void *_record, void *_op_data, bool *changed)
 {
     H5A_dense_bt2_name_rec_t *record     = (H5A_dense_bt2_name_rec_t *)_record; /* Record from B-tree */
     H5A_bt2_od_wrt_t         *op_data    = (H5A_bt2_od_wrt_t *)_op_data; /* "op data" from v2 B-tree modify */
@@ -837,7 +837,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     H5A_t              *attr_copy    = NULL; /* Copy of attribute to rename */
     htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              shared_mesg;         /* Should this message be stored in the Shared Message table? */
-    hbool_t             attr_exists;         /* Attribute exists in v2 B-tree */
+    bool                attr_exists;         /* Attribute exists in v2 B-tree */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -914,7 +914,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
 
     /* Need to remove the attribute from the creation order index v2 B-tree */
     if (ainfo->index_corder) {
-        hbool_t corder_attr_exists; /* Attribute exists in v2 B-tree */
+        bool corder_attr_exists; /* Attribute exists in v2 B-tree */
 
         /* Open the creation order index v2 B-tree */
         assert(H5_addr_defined(ainfo->corder_bt2_addr));
@@ -1380,8 +1380,8 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     H5A_bt2_ud_rmbi_t              *bt2_udata = (H5A_bt2_ud_rmbi_t *)_bt2_udata; /* User data for callback */
     H5A_fh_ud_cp_t                  fh_udata; /* User data for fractal heap 'op' callback */
     H5O_shared_t                    sh_loc;   /* Shared message info for attribute */
-    hbool_t use_sh_loc;          /* Whether to use the attribute's shared location or the separate one */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   use_sh_loc;          /* Whether to use the attribute's shared location or the separate one */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1618,7 +1618,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, hbool_t *attr_exists)
+H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, bool *attr_exists)
 {
     H5A_bt2_ud_common_t udata;               /* User data for v2 B-tree modify */
     H5HF_t             *fheap        = NULL; /* Fractal heap handle */

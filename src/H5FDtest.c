@@ -82,10 +82,10 @@
  *              error return value.
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5FD__supports_swmr_test(const char *vfd_name)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

@@ -161,7 +161,7 @@
 /* Definition for whether to convert family to a single-file driver.
  * It's a private property only used by h5repart.
  */
-#define H5F_ACS_FAMILY_TO_SINGLE_SIZE sizeof(hbool_t)
+#define H5F_ACS_FAMILY_TO_SINGLE_SIZE sizeof(bool)
 #define H5F_ACS_FAMILY_TO_SINGLE_DEF  FALSE
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_SIZE sizeof(H5FD_mem_t)
@@ -184,7 +184,7 @@
 /* Definition for whether to query the file descriptor from the core VFD
  * instead of the memory address.  (Private to library)
  */
-#define H5F_ACS_WANT_POSIX_FD_SIZE sizeof(hbool_t)
+#define H5F_ACS_WANT_POSIX_FD_SIZE sizeof(bool)
 #define H5F_ACS_WANT_POSIX_FD_DEF  FALSE
 /* Definition for external file cache size */
 #define H5F_ACS_EFC_SIZE_SIZE sizeof(unsigned)
@@ -212,21 +212,21 @@
         NULL, NULL                                                                                           \
     }
 /* Definition for status_flags in the superblock */
-#define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE sizeof(hbool_t)
+#define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE sizeof(bool)
 #define H5F_ACS_CLEAR_STATUS_FLAGS_DEF  FALSE
 
 /* Definition for dropping free-space to the floor when reading in the superblock */
-#define H5F_ACS_NULL_FSM_ADDR_SIZE sizeof(hbool_t)
+#define H5F_ACS_NULL_FSM_ADDR_SIZE sizeof(bool)
 #define H5F_ACS_NULL_FSM_ADDR_DEF  FALSE
 /* Definition for skipping EOF check when reading in the superblock */
-#define H5F_ACS_SKIP_EOF_CHECK_SIZE sizeof(hbool_t)
+#define H5F_ACS_SKIP_EOF_CHECK_SIZE sizeof(bool)
 #define H5F_ACS_SKIP_EOF_CHECK_DEF  FALSE
 
 /* Definition for 'use metadata cache logging' flag */
-#define H5F_ACS_USE_MDC_LOGGING_SIZE sizeof(hbool_t)
+#define H5F_ACS_USE_MDC_LOGGING_SIZE sizeof(bool)
 #define H5F_ACS_USE_MDC_LOGGING_DEF  FALSE
-#define H5F_ACS_USE_MDC_LOGGING_ENC  H5P__encode_hbool_t
-#define H5F_ACS_USE_MDC_LOGGING_DEC  H5P__decode_hbool_t
+#define H5F_ACS_USE_MDC_LOGGING_ENC  H5P__encode_bool
+#define H5F_ACS_USE_MDC_LOGGING_DEC  H5P__decode_bool
 /* Definition for 'mdc log location' flag */
 #define H5F_ACS_MDC_LOG_LOCATION_SIZE  sizeof(char *)
 #define H5F_ACS_MDC_LOG_LOCATION_DEF   NULL /* default is no log location */
@@ -237,15 +237,15 @@
 #define H5F_ACS_MDC_LOG_LOCATION_CMP   H5P__facc_mdc_log_location_cmp
 #define H5F_ACS_MDC_LOG_LOCATION_CLOSE H5P__facc_mdc_log_location_close
 /* Definition for 'start metadata cache logging on access' flag */
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE sizeof(hbool_t)
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE sizeof(bool)
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF  FALSE
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC  H5P__encode_hbool_t
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC  H5P__decode_hbool_t
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC  H5P__encode_bool
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC  H5P__decode_bool
 /* Definition for evict on close property */
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE sizeof(hbool_t)
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE sizeof(bool)
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF  FALSE
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC  H5P__encode_hbool_t
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC  H5P__decode_hbool_t
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC  H5P__encode_bool
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC  H5P__decode_bool
 #ifdef H5_HAVE_PARALLEL
 /* Definition of collective metadata read mode flag */
 #define H5F_ACS_COLL_MD_READ_FLAG_SIZE sizeof(H5P_coll_md_read_flag_t)
@@ -253,10 +253,10 @@
 #define H5F_ACS_COLL_MD_READ_FLAG_ENC  H5P__encode_coll_md_read_flag_t
 #define H5F_ACS_COLL_MD_READ_FLAG_DEC  H5P__decode_coll_md_read_flag_t
 /* Definition of collective metadata write mode flag */
-#define H5F_ACS_COLL_MD_WRITE_FLAG_SIZE sizeof(hbool_t)
+#define H5F_ACS_COLL_MD_WRITE_FLAG_SIZE sizeof(bool)
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEF  FALSE
-#define H5F_ACS_COLL_MD_WRITE_FLAG_ENC  H5P__encode_hbool_t
-#define H5F_ACS_COLL_MD_WRITE_FLAG_DEC  H5P__decode_hbool_t
+#define H5F_ACS_COLL_MD_WRITE_FLAG_ENC  H5P__encode_bool
+#define H5F_ACS_COLL_MD_WRITE_FLAG_DEC  H5P__decode_bool
 /* Definition for the file's MPI communicator */
 #define H5F_ACS_MPI_PARAMS_COMM_SIZE  sizeof(MPI_Comm)
 #define H5F_ACS_MPI_PARAMS_COMM_DEF   MPI_COMM_NULL
@@ -313,26 +313,26 @@
 /* Definition for using file locking or not. The default is set
  * via the configure step.
  */
-#define H5F_ACS_USE_FILE_LOCKING_SIZE sizeof(hbool_t)
+#define H5F_ACS_USE_FILE_LOCKING_SIZE sizeof(bool)
 #if defined H5_USE_FILE_LOCKING && H5_USE_FILE_LOCKING
 #define H5F_ACS_USE_FILE_LOCKING_DEF TRUE
 #else
 #define H5F_ACS_USE_FILE_LOCKING_DEF FALSE
 #endif
-#define H5F_ACS_USE_FILE_LOCKING_ENC H5P__encode_hbool_t
-#define H5F_ACS_USE_FILE_LOCKING_DEC H5P__decode_hbool_t
+#define H5F_ACS_USE_FILE_LOCKING_ENC H5P__encode_bool
+#define H5F_ACS_USE_FILE_LOCKING_DEC H5P__decode_bool
 /* Definition for whether we ignore file locking errors when we can
  * tell that file locking has been disabled on the file system.
  * The default is set via the configure step.
  */
-#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE sizeof(hbool_t)
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE sizeof(bool)
 #if defined H5_IGNORE_DISABLED_FILE_LOCKS && H5_IGNORE_DISABLED_FILE_LOCKS
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF TRUE
 #else
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF FALSE
 #endif
-#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_hbool_t
-#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_hbool_t
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_bool
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_bool
 
 /******************/
 /* Local Typedefs */
@@ -478,8 +478,7 @@ static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF; /
 static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF; /* Default offset for family VFD */
 static const hsize_t H5F_def_family_newsize_g =
     H5F_ACS_FAMILY_NEWSIZE_DEF; /* Default size of new files for family VFD */
-static const hbool_t H5F_def_family_to_single_g =
-    H5F_ACS_FAMILY_TO_SINGLE_DEF; /* Default ?? for family VFD */
+static const bool H5F_def_family_to_single_g = H5F_ACS_FAMILY_TO_SINGLE_DEF; /* Default ?? for family VFD */
 static const H5FD_mem_t H5F_def_mem_type_g =
     H5F_ACS_MULTI_TYPE_DEF; /* Default file space type for multi VFD */
 
@@ -488,7 +487,7 @@ static const H5F_libver_t H5F_def_libver_low_bound_g =
 static const H5F_libver_t H5F_def_libver_high_bound_g =
     H5F_ACS_LIBVER_HIGH_BOUND_DEF; /* Default setting for "high" bound of format version */
 
-static const hbool_t H5F_def_want_posix_fd_g =
+static const bool H5F_def_want_posix_fd_g =
     H5F_ACS_WANT_POSIX_FD_DEF; /* Default setting for retrieving 'handle' from core VFD */
 static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF; /* Default external file cache size */
 static const H5FD_file_image_info_t H5F_def_file_image_info_g =
@@ -497,24 +496,24 @@ static const unsigned H5F_def_metadata_read_attempts_g =
     H5F_ACS_METADATA_READ_ATTEMPTS_DEF; /* Default setting for the # of metadata read attempts */
 static const H5F_object_flush_t H5F_def_object_flush_cb_g =
     H5F_ACS_OBJECT_FLUSH_CB_DEF; /* Default setting for object flush callback */
-static const hbool_t H5F_def_clear_status_flags_g =
+static const bool H5F_def_clear_status_flags_g =
     H5F_ACS_CLEAR_STATUS_FLAGS_DEF; /* Default to clear the superblock status_flags */
-static const hbool_t H5F_def_skip_eof_check_g =
+static const bool H5F_def_skip_eof_check_g =
     H5F_ACS_SKIP_EOF_CHECK_DEF; /* Default setting for skipping EOF check */
-static const hbool_t H5F_def_null_fsm_addr_g =
+static const bool H5F_def_null_fsm_addr_g =
     H5F_ACS_NULL_FSM_ADDR_DEF; /* Default setting for dropping free-space to the floor */
 
-static const hbool_t H5F_def_use_mdc_logging_g =
+static const bool H5F_def_use_mdc_logging_g =
     H5F_ACS_USE_MDC_LOGGING_DEF; /* Default metadata cache logging flag */
-static const char   *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF; /* Default mdc log location */
-static const hbool_t H5F_def_start_mdc_log_on_access_g =
+static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF; /* Default mdc log location */
+static const bool  H5F_def_start_mdc_log_on_access_g =
     H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
-static const hbool_t H5F_def_evict_on_close_flag_g =
+static const bool H5F_def_evict_on_close_flag_g =
     H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF; /* Default setting for evict on close property */
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g =
     H5F_ACS_COLL_MD_READ_FLAG_DEF; /* Default setting for the collective metedata read flag */
-static const hbool_t H5F_def_coll_md_write_flag_g =
+static const bool H5F_def_coll_md_write_flag_g =
     H5F_ACS_COLL_MD_WRITE_FLAG_DEF; /* Default setting for the collective metedata write flag */
 static const MPI_Comm H5F_def_mpi_params_comm_g = H5F_ACS_MPI_PARAMS_COMM_DEF; /* Default MPI communicator */
 static const MPI_Info H5F_def_mpi_params_info_g = H5F_ACS_MPI_PARAMS_INFO_DEF; /* Default MPI info struct */
@@ -526,9 +525,9 @@ static const unsigned H5F_def_page_buf_min_meta_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF; /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF; /* Default page buffer minimum raw data size */
-static const hbool_t H5F_def_use_file_locking_g =
+static const bool H5F_def_use_file_locking_g =
     H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
-static const hbool_t H5F_def_ignore_disabled_file_locks_g =
+static const bool H5F_def_ignore_disabled_file_locks_g =
     H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
 
 /*-------------------------------------------------------------------------
@@ -845,7 +844,7 @@ herr_t
 H5P__facc_set_def_driver(void)
 {
     const char *driver_env_var;
-    hbool_t     driver_ref_inc = FALSE;
+    bool        driver_ref_inc = FALSE;
     hid_t       driver_id      = H5I_INVALID_HID; /* VFL driver ID */
     herr_t      ret_value      = SUCCEED;
 
@@ -1237,7 +1236,7 @@ done:
  */
 herr_t
 H5P_set_driver_by_name(H5P_genplist_t *plist, const char *driver_name, const char *driver_config,
-                       hbool_t app_ref)
+                       bool app_ref)
 {
     hid_t  new_driver_id = H5I_INVALID_HID;
     herr_t ret_value     = SUCCEED;
@@ -1325,7 +1324,7 @@ done:
  */
 herr_t
 H5P_set_driver_by_value(H5P_genplist_t *plist, H5FD_class_value_t driver_value, const char *driver_config,
-                        hbool_t app_ref)
+                        bool app_ref)
 {
     hid_t  new_driver_id = H5I_INVALID_HID;
     herr_t ret_value     = SUCCEED;
@@ -5164,7 +5163,7 @@ H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective /*out*/)
         if (internal_flag < 0)
             *is_collective = FALSE;
         else
-            *is_collective = (hbool_t)internal_flag;
+            *is_collective = (bool)internal_flag;
     } /* end if */
 
 done:

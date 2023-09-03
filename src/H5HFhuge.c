@@ -60,7 +60,7 @@ static herr_t H5HF__huge_bt2_create(H5HF_hdr_t *hdr);
 
 /* Local 'huge' object support routines */
 static hsize_t H5HF__huge_new_id(H5HF_hdr_t *hdr);
-static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_operator_t op,
+static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operator_t op,
                                   void *op_data);
 
 /*********************/
@@ -492,7 +492,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
         } /* end else */
     }     /* end if */
     else {
-        hbool_t found = FALSE; /* Whether entry was found */
+        bool found = FALSE; /* Whether entry was found */
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -575,7 +575,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
         H5F_addr_decode(hdr->f, &id, &obj_addr);
     } /* end if */
     else {
-        hbool_t found = FALSE; /* Whether entry was found */
+        bool found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
         assert(H5_addr_defined(hdr->huge_bt2_addr));
@@ -640,7 +640,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_operator_t op, void *op_data)
+H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operator_t op, void *op_data)
 {
     void    *read_buf = NULL;       /* Pointer to buffer for reading */
     haddr_t  obj_addr;              /* Object's address in the file */
@@ -671,7 +671,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             UINT32DECODE(id, filter_mask);
     } /* end if */
     else {
-        hbool_t found = FALSE; /* Whether entry was found */
+        bool found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
         assert(H5_addr_defined(hdr->huge_bt2_addr));
@@ -823,7 +823,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
     else {
         H5HF_huge_bt2_indir_rec_t found_rec;     /* Record found from tracking object */
         H5HF_huge_bt2_indir_rec_t search_rec;    /* Record for searching for object */
-        hbool_t                   found = FALSE; /* Whether entry was found */
+        bool                      found = FALSE; /* Whether entry was found */
 
         /* Sanity check */
         assert(H5_addr_defined(hdr->huge_bt2_addr));

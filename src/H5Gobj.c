@@ -155,10 +155,10 @@ herr_t
 H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linfo, const H5O_pline_t *pline,
                      H5G_obj_create_t *gcrt_info, H5O_loc_t *oloc /*out*/)
 {
-    size_t  hdr_size;                       /* Size of object header to request */
-    hbool_t use_at_least_v18;               /* Flag indicating the new group format should be used */
-    hid_t   gcpl_id   = gcrt_info->gcpl_id; /* Group creation property list ID */
-    herr_t  ret_value = SUCCEED;            /* Return value */
+    size_t hdr_size;                       /* Size of object header to request */
+    bool   use_at_least_v18;               /* Flag indicating the new group format should be used */
+    hid_t  gcpl_id   = gcrt_info->gcpl_id; /* Group creation property list ID */
+    herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -402,15 +402,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk, hbool_t adj_link,
+H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk, bool adj_link,
                H5O_type_t obj_type, const void *crt_info)
 {
     H5O_pline_t  tmp_pline;             /* Pipeline message */
     H5O_pline_t *pline = NULL;          /* Pointer to pipeline message */
     H5O_linfo_t  linfo;                 /* Link info message */
     htri_t       linfo_exists;          /* Whether the link info message exists */
-    hbool_t      use_old_format;        /* Whether to use 'old format' (symbol table) for insertions or not */
-    hbool_t      use_new_dense = FALSE; /* Whether to use "dense" form of 'new format' group */
+    bool         use_old_format;        /* Whether to use 'old format' (symbol table) for insertions or not */
+    bool         use_new_dense = FALSE; /* Whether to use "dense" form of 'new format' group */
     herr_t       ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
@@ -835,7 +835,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
             if (linfo->nlinks < ginfo.min_dense) {
                 struct H5O_t    *oh = NULL;          /* Pointer to group's object header */
                 H5G_link_table_t ltable;             /* Table of links */
-                hbool_t          can_convert = TRUE; /* Whether converting to link messages is possible */
+                bool             can_convert = TRUE; /* Whether converting to link messages is possible */
                 size_t           u;                  /* Local index */
 
                 /* Build the table of links for this group */
@@ -910,7 +910,7 @@ H5G_obj_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *n
 {
     H5O_linfo_t linfo;               /* Link info message            */
     htri_t      linfo_exists;        /* Whether the link info message exists */
-    hbool_t     use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
+    bool        use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(oloc->addr, FAIL)
@@ -971,7 +971,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
 {
     H5O_linfo_t linfo;               /* Link info message            */
     htri_t      linfo_exists;        /* Whether the link info message exists */
-    hbool_t     use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
+    bool        use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1037,7 +1037,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5O_linfo_t linfo;               /* Link info message */
     htri_t      linfo_exists;        /* Whether the link info message exists */

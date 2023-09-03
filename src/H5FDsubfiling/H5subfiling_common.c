@@ -73,7 +73,7 @@ static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id
 static void   clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static herr_t ioc_open_files(int64_t file_context_id, int file_acc_flags);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
-                                 const char *config_dir, const char *subfile_dir, hbool_t truncate_if_exists);
+                                 const char *config_dir, const char *subfile_dir, bool truncate_if_exists);
 static herr_t open_config_file(const char *base_filename, const char *config_dir, uint64_t file_id,
                                const char *mode, FILE **config_file_out);
 
@@ -441,7 +441,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 
 #ifndef NDEBUG
     {
-        hbool_t topology_cached = FALSE;
+        bool topology_cached = FALSE;
 
         /* Make sure this application topology object is in the cache */
         for (size_t i = 0; i < sf_topology_cache_num_entries; i++)
@@ -510,7 +510,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
 {
     H5P_genplist_t *plist         = NULL;
     uint64_t        stub_file_id  = UINT64_MAX;
-    hbool_t         bcasted_inode = FALSE;
+    bool            bcasted_inode = FALSE;
     H5FD_t         *stub_file     = NULL;
     hid_t           fapl_id       = H5I_INVALID_HID;
     int             mpi_rank      = 0;
@@ -2273,14 +2273,14 @@ done:
  */
 static herr_t
 create_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *config_dir,
-                   const char *subfile_dir, hbool_t truncate_if_exists)
+                   const char *subfile_dir, bool truncate_if_exists)
 {
-    hbool_t config_file_exists = FALSE;
-    FILE   *config_file        = NULL;
-    char   *config_filename    = NULL;
-    char   *line_buf           = NULL;
-    int     ret                = 0;
-    herr_t  ret_value          = SUCCEED;
+    bool   config_file_exists = FALSE;
+    FILE  *config_file        = NULL;
+    char  *config_filename    = NULL;
+    char  *line_buf           = NULL;
+    int    ret                = 0;
+    herr_t ret_value          = SUCCEED;
 
     assert(sf_context);
     assert(base_filename);
@@ -2406,11 +2406,11 @@ static herr_t
 open_config_file(const char *base_filename, const char *config_dir, uint64_t file_id, const char *mode,
                  FILE **config_file_out)
 {
-    hbool_t config_file_exists = FALSE;
-    FILE   *config_file        = NULL;
-    char   *config_filename    = NULL;
-    int     ret                = 0;
-    herr_t  ret_value          = SUCCEED;
+    bool   config_file_exists = FALSE;
+    FILE  *config_file        = NULL;
+    char  *config_filename    = NULL;
+    int    ret                = 0;
+    herr_t ret_value          = SUCCEED;
 
     assert(base_filename);
     assert(config_dir);
@@ -2568,8 +2568,8 @@ herr_t
 H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath)
 {
     hsize_t path_len         = HSIZE_UNDEF;
-    hbool_t bcasted_path_len = FALSE;
-    hbool_t bcasted_path     = FALSE;
+    bool    bcasted_path_len = FALSE;
+    bool    bcasted_path     = FALSE;
     char   *resolved_path    = NULL;
     char   *file_basename    = NULL;
     char   *file_dirname     = NULL;

@@ -112,7 +112,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
     hsize_t          curr_offset;          /* Current offset, as adjusted */
     unsigned         row;                  /* Current row we are on */
     unsigned         col;                  /* Column in row */
-    hbool_t          root_block = TRUE;    /* Flag to indicate the current block is the root indirect block */
+    bool             root_block = TRUE;    /* Flag to indicate the current block is the root indirect block */
     herr_t           ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -145,7 +145,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
 
     */
     do {
-        hbool_t did_protect; /* Whether we protected the indirect block or not */
+        bool did_protect; /* Whether we protected the indirect block or not */
 
         /* Walk down the rows in the doubling table until we've found the correct row for the next block */
         for (row = 0; row < hdr->man_dtable.max_root_rows; row++)
@@ -555,7 +555,7 @@ H5HF__man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsi
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5HF__man_iter_ready(H5HF_block_iter_t *biter)
 {
     FUNC_ENTER_PACKAGE_NOERR

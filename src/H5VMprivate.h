@@ -475,11 +475,11 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  * Return:      TRUE/FALSE
  *-------------------------------------------------------------------------
  */
-static inline hbool_t H5_ATTR_UNUSED
+static inline bool H5_ATTR_UNUSED
 H5VM_bit_get(const unsigned char *buf, size_t offset)
 {
     /* Test the appropriate bit in the buffer */
-    return (hbool_t)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? TRUE : FALSE);
+    return (bool)((buf[offset / 8] & (H5VM_bit_set_g[offset % 8])) ? TRUE : FALSE);
 } /* end H5VM_bit_get() */
 
 /*-------------------------------------------------------------------------
@@ -502,7 +502,7 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *-------------------------------------------------------------------------
  */
 static inline void H5_ATTR_UNUSED
-H5VM_bit_set(unsigned char *buf, size_t offset, hbool_t val)
+H5VM_bit_set(unsigned char *buf, size_t offset, bool val)
 {
     /* Set/reset the appropriate bit in the buffer */
     if (val)

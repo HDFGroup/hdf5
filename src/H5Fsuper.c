@@ -172,7 +172,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hbool_t was_created)
+H5F__super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, bool was_created)
 {
     H5AC_ring_t orig_ring = H5AC_RING_INV; /* Original ring value */
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -302,7 +302,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
+H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 {
     H5AC_ring_t               orig_ring = H5AC_RING_INV;
     H5F_super_t              *sblock    = NULL; /* Superblock structure */
@@ -313,7 +313,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     haddr_t  super_addr;                        /* Absolute address of superblock */
     haddr_t  eof;                               /* End of file address */
     unsigned rw_flags;                          /* Read/write permissions for file */
-    hbool_t  skip_eof_check = FALSE;            /* Whether to skip checking the EOF value */
+    bool     skip_eof_check = FALSE;            /* Whether to skip checking the EOF value */
 #ifdef H5_HAVE_PARALLEL
     int mpi_size = 1;
 #endif                          /* H5_HAVE_PARALLEL */
@@ -913,7 +913,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         if ((status = H5O_msg_exists(&ext_loc, H5O_MDCI_MSG_ID)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header");
         if (status) {
-            hbool_t    rw = ((rw_flags & H5AC__READ_ONLY_FLAG) == 0);
+            bool       rw = ((rw_flags & H5AC__READ_ONLY_FLAG) == 0);
             H5O_mdci_t mdci_msg;
 
             /* if the metadata cache image superblock extension message exists,
@@ -1009,7 +1009,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     f->shared->sblock = sblock;
 
     /* Set the page aggregation mode */
-    if (H5F__set_paged_aggr(f, (hbool_t)H5F_PAGED_AGGR(f)) < 0)
+    if (H5F__set_paged_aggr(f, (bool)H5F_PAGED_AGGR(f)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "failed to set paged_aggr status for file driver");
 
 done:
@@ -1069,10 +1069,10 @@ done:
 herr_t
 H5F__super_init(H5F_t *f)
 {
-    H5F_super_t *sblock     = NULL;  /* Superblock cache structure                 */
-    hbool_t sblock_in_cache = FALSE; /* Whether the superblock has been inserted into the metadata cache */
-    H5O_drvinfo_t *drvinfo  = NULL;  /* Driver info */
-    hbool_t        drvinfo_in_cache =
+    H5F_super_t *sblock    = NULL;  /* Superblock cache structure                 */
+    bool sblock_in_cache   = FALSE; /* Whether the superblock has been inserted into the metadata cache */
+    H5O_drvinfo_t *drvinfo = NULL;  /* Driver info */
+    bool           drvinfo_in_cache =
         FALSE;             /* Whether the driver info block has been inserted into the metadata cache */
     H5P_genplist_t *plist; /* File creation property list                */
     H5AC_ring_t     orig_ring = H5AC_RING_INV;
@@ -1082,10 +1082,10 @@ H5F__super_init(H5F_t *f)
     size_t          driver_size;                              /* Size of driver info block (bytes)          */
     unsigned        super_vers = HDF5_SUPERBLOCK_VERSION_DEF; /* Superblock version for file */
     H5O_loc_t       ext_loc;                                  /* Superblock extension object location */
-    hbool_t         need_ext;                                 /* Whether the superblock extension is needed */
-    hbool_t         ext_created     = FALSE;                  /* Whether the extension has been created */
-    hbool_t non_default_fs_settings = FALSE;   /* Whether the file has non-default free-space settings */
-    herr_t  ret_value               = SUCCEED; /* Return Value                              */
+    bool            need_ext;                                 /* Whether the superblock extension is needed */
+    bool            ext_created    = FALSE;                   /* Whether the extension has been created */
+    bool   non_default_fs_settings = FALSE;   /* Whether the file has non-default free-space settings */
+    herr_t ret_value               = SUCCEED; /* Return Value                              */
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__SUPERBLOCK_TAG)
 
@@ -1189,7 +1189,7 @@ H5F__super_init(H5F_t *f)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set superblock version");
     } /* end if */
 
-    if (H5FD_set_paged_aggr(f->shared->lf, (hbool_t)H5F_PAGED_AGGR(f)) < 0)
+    if (H5FD_set_paged_aggr(f->shared->lf, (bool)H5F_PAGED_AGGR(f)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to set paged_aggr status for file driver");
 
     /*
@@ -1678,11 +1678,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, hbool_t may_create, unsigned mesg_flags)
+H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, bool may_create, unsigned mesg_flags)
 {
     H5AC_ring_t orig_ring   = H5AC_RING_INV; /* Original ring value */
-    hbool_t     ext_created = FALSE;         /* Whether superblock extension was created */
-    hbool_t     ext_opened  = FALSE;         /* Whether superblock extension was opened */
+    bool        ext_created = FALSE;         /* Whether superblock extension was created */
+    bool        ext_opened  = FALSE;         /* Whether superblock extension was opened */
     H5O_loc_t   ext_loc;                     /* "Object location" for superblock extension */
     htri_t      status;                      /* Indicate whether the message exists or not */
     herr_t      ret_value = SUCCEED;         /* Return value */
@@ -1764,7 +1764,7 @@ H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
 {
     H5AC_ring_t orig_ring = H5AC_RING_INV; /* Original ring value */
     H5O_loc_t   ext_loc;                   /* "Object location" for superblock extension */
-    hbool_t     ext_opened = FALSE;        /* Whether the superblock extension was opened */
+    bool        ext_opened = FALSE;        /* Whether the superblock extension was opened */
     int         null_count = 0;            /* # of null messages */
     htri_t      status;                    /* Indicate whether the message exists or not */
     herr_t      ret_value = SUCCEED;       /* Return value */

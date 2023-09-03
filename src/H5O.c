@@ -1019,7 +1019,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     H5VL_object_t              *vol_obj;            /* Object of loc_id */
     H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;         /* Location parameters for object access */
-    hbool_t                     obj_exists = FALSE; /* Whether object exists */
+    bool                        obj_exists = FALSE; /* Whether object exists */
     htri_t                      ret_value  = FAIL;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2187,7 +2187,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
+H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
 {
     H5VL_object_t                     *vol_obj;             /* Object of loc_id */
     H5VL_optional_args_t               vol_cb_args;         /* Arguments to VOL callback */
@@ -2196,7 +2196,7 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
     herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", object_id, are_disabled);
+    H5TRACE2("e", "i*!", object_id, are_disabled);
 
     /* Sanity check */
     if (!are_disabled)

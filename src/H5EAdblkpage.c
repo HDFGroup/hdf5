@@ -131,7 +131,7 @@ herr_t
 H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
 {
     H5EA_dblk_page_t *dblk_page = NULL;  /* Extensible array data block page */
-    hbool_t           inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool              inserted  = FALSE; /* Whether the header was inserted into cache */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE

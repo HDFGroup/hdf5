@@ -59,7 +59,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5_trace_args_bool(H5RS_str_t *rs, hbool_t val);
+static herr_t H5_trace_args_bool(H5RS_str_t *rs, bool val);
 static herr_t H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset);
 static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree);
 
@@ -78,7 +78,7 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
 /*-------------------------------------------------------------------------
  * Function:    H5_trace_args_bool
  *
- * Purpose:     This routine formats an hbool_t and adds the output to
+ * Purpose:     This routine formats an bool and adds the output to
  *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
@@ -86,7 +86,7 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
+H5_trace_args_bool(H5RS_str_t *rs, bool val)
 {
     /* FUNC_ENTER() should not be called */
 
@@ -472,10 +472,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     } /* end switch */
                     break;
 
-                case 'b': /* hbool_t */
+                case 'b': /* bool */
                 {
-                    /* Can't pass hbool_t to va_arg() */
-                    hbool_t bool_var = (hbool_t)va_arg(ap, int);
+                    /* Can't pass bool to va_arg() */
+                    bool bool_var = (bool)va_arg(ap, int);
 
                     H5_trace_args_bool(rs, bool_var);
                 } /* end block */
@@ -897,7 +897,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         {
                             H5D_mpio_no_collective_cause_t nocol_cause_mode =
                                 (H5D_mpio_no_collective_cause_t)va_arg(ap, int);
-                            hbool_t flag_already_displayed = FALSE;
+                            bool flag_already_displayed = FALSE;
 
                             /* Check for all bit-flags which might be set */
                             if (nocol_cause_mode & H5D_MPIO_COLLECTIVE) {
@@ -3961,7 +3961,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     H5RS_str_t       *rs = NULL;
     hssize_t          i;
     FILE             *out                 = H5_debug_g.trace;
-    static hbool_t    is_first_invocation = TRUE;
+    static bool       is_first_invocation = TRUE;
     H5_timer_t        function_timer      = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, FALSE};
     H5_timevals_t     function_times      = {0.0, 0.0, 0.0};
     static H5_timer_t running_timer;

@@ -55,7 +55,7 @@
 static herr_t H5HG__cache_heap_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5HG__cache_heap_get_final_load_size(const void *_image, size_t image_len, void *udata,
                                                    size_t *actual_len);
-static void  *H5HG__cache_heap_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HG__cache_heap_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len);
 static herr_t H5HG__cache_heap_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HG__cache_heap_free_icr(void *thing);
@@ -214,7 +214,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5F_t         *f         = (H5F_t *)_udata; /* File pointer */
     H5HG_heap_t   *heap      = NULL;            /* New global heap */

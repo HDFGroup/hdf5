@@ -264,7 +264,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
         fprintf(stderr, "%s: fspace_status = %0x: ", __func__, fspace_status);
         if (fspace_status) {
-            hbool_t printed = FALSE;
+            bool printed = FALSE;
 
             if (fspace_status & H5AC_ES__IN_CACHE) {
                 fprintf(stderr, "H5AC_ES__IN_CACHE");
@@ -867,7 +867,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
+H5FS_free(H5F_t *f, H5FS_t *fspace, bool free_file_space)
 {
     haddr_t  saved_addr;          /* Previous address of item */
     unsigned cache_flags;         /* Flags for unprotecting cache entries */

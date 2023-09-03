@@ -125,9 +125,9 @@ H5O__copy(const H5G_loc_t *loc, const char *src_name, H5G_loc_t *dst_loc, const 
     H5G_loc_t  src_loc;             /* Source object group location */
     H5G_name_t src_path;            /* Opened source object hier. path */
     H5O_loc_t  src_oloc;            /* Opened source object object location */
-    hbool_t    dst_exists;          /* Does destination name exist already? */
-    hbool_t    loc_found = FALSE;   /* Location at 'name' found */
-    hbool_t    obj_open  = FALSE;   /* Entry at 'name' found */
+    bool       dst_exists;          /* Does destination name exist already? */
+    bool       loc_found = FALSE;   /* Location at 'name' found */
+    bool       obj_open  = FALSE;   /* Entry at 'name' found */
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -199,8 +199,8 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     H5O_t          *oh_dst   = NULL; /* Object header for destination object */
     unsigned        mesgno   = 0;
     haddr_t         addr_new = HADDR_UNDEF;
-    hbool_t        *deleted  = NULL; /* Array of flags indicating whether messages should be copied */
-    hbool_t     inserted = FALSE; /* Whether the destination object header has been inserted into the cache */
+    bool           *deleted  = NULL; /* Array of flags indicating whether messages should be copied */
+    bool        inserted = FALSE; /* Whether the destination object header has been inserted into the cache */
     size_t      null_msgs;        /* Number of NULL messages found in each loop */
     size_t      orig_dst_msgs;    /* Original # of messages in dest. object */
     H5O_mesg_t *mesg_src;         /* Message in source object header */
@@ -342,9 +342,9 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     /* Allocate memory for "deleted" array.  This array marks the message in
      * the source that shouldn't be copied to the destination.
      */
-    if (NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
+    if (NULL == (deleted = (bool *)H5MM_malloc(sizeof(bool) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    memset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
+    memset(deleted, FALSE, sizeof(bool) * oh_src->nmesgs);
 
     /* "pre copy" pass over messages, to gather information for actual message copy operation
      * (for messages which depend on information from other messages)
@@ -448,7 +448,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
         /* copy this message into destination file */
         if (copy_type->copy_file) {
-            hbool_t  recompute_size; /* Whether copy_file callback created a shared message */
+            bool     recompute_size; /* Whether copy_file callback created a shared message */
             unsigned mesg_flags;     /* Message flags */
 
             /* Decode the message if necessary. */
@@ -797,11 +797,11 @@ done:
  */
 herr_t
 H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5O_copy_t *cpy_info,
-                    hbool_t inc_depth, H5O_type_t *obj_type, void **udata /*out*/)
+                    bool inc_depth, H5O_type_t *obj_type, void **udata /*out*/)
 {
     H5O_addr_map_t *addr_map = NULL; /* Address mapping of object copied */
     H5_obj_t        src_obj_pos;     /* Position of source object */
-    hbool_t         inc_link;        /* Whether to increment the link count for the object */
+    bool            inc_link;        /* Whether to increment the link count for the object */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1027,7 +1027,7 @@ H5O__copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name, hid_
     H5O_loc_t  new_oloc;                 /* Copied object object location */
     H5G_loc_t  new_loc;                  /* Group location of object copied */
     H5F_t     *cached_dst_file;          /* Cached destination file */
-    hbool_t    entry_inserted = FALSE;   /* Flag to indicate that the new entry was inserted into a group */
+    bool       entry_inserted = FALSE;   /* Flag to indicate that the new entry was inserted into a group */
     herr_t     ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1154,7 +1154,7 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
     H5T_t                         *dt           = NULL;    /* Datatype */
     H5O_copy_search_comm_dt_key_t *key          = NULL;    /* Skiplist key */
     haddr_t                       *addr         = NULL;    /* Destination address */
-    hbool_t                        obj_inserted = FALSE;   /* Object inserted into skip list */
+    bool                           obj_inserted = FALSE;   /* Object inserted into skip list */
     herr_t                         ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1229,7 +1229,7 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
 {
     H5O_copy_search_comm_dt_key_t *key          = NULL;  /* Skiplist key */
     haddr_t                       *addr         = NULL;  /* Destination address */
-    hbool_t                        obj_inserted = FALSE; /* Object inserted into skip list */
+    bool                           obj_inserted = FALSE; /* Object inserted into skip list */
     H5A_attr_iter_op_t             attr_op;              /* Attribute iteration operator */
     const H5O_obj_class_t         *obj_class = NULL;     /* Type of object */
     herr_t                         ret_value = SUCCEED;  /* Return value */
@@ -1347,7 +1347,7 @@ H5O__copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name, const 
     H5G_loc_t  obj_loc;                         /* Location of object */
     H5O_loc_t  obj_oloc;                        /* Object's object location */
     H5G_name_t obj_path;                        /* Object's group hier. path */
-    hbool_t    obj_found = FALSE;               /* Object at 'name' found */
+    bool       obj_found = FALSE;               /* Object at 'name' found */
     herr_t     ret_value = H5_ITER_CONT;        /* Return value */
 
     FUNC_ENTER_PACKAGE

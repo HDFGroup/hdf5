@@ -202,7 +202,7 @@ done:
     herr_t H5S_select_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
-        hbool_t;     IN: Whether to share the selection between the dataspaces
+        bool;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -219,7 +219,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
+H5S_select_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
 {
     herr_t ret_value = FAIL; /* Return value */
 
@@ -518,7 +518,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
     uint32_t       sel_type;                                   /* Pointer to the selection type */
     herr_t         ret_value = FAIL;                           /* Return value */
     const uint8_t *p_end     = *p + p_size - 1;                /* Pointer to last valid byte in buffer */
-    hbool_t        skip = (p_size == SIZE_MAX ? TRUE : FALSE); /* If p_size is unknown, skip buffer checks */
+    bool           skip = (p_size == SIZE_MAX ? TRUE : FALSE); /* If p_size is unknown, skip buffer checks */
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(space);
@@ -1360,7 +1360,7 @@ herr_t
 H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_iter_op_t *op, void *op_data)
 {
     H5S_sel_iter_t *iter      = NULL;         /* Selection iteration info */
-    hbool_t         iter_init = FALSE;        /* Selection iteration info has been initialized */
+    bool            iter_init = FALSE;        /* Selection iteration info has been initialized */
     hsize_t        *off       = NULL;         /* Array to store sequence offsets */
     size_t         *len       = NULL;         /* Array to store sequence lengths */
     hssize_t        nelmts;                   /* Number of elements in selection */
@@ -1602,8 +1602,8 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 {
     H5S_sel_iter_t *iter_a      = NULL;  /* Selection a iteration info */
     H5S_sel_iter_t *iter_b      = NULL;  /* Selection b iteration info */
-    hbool_t         iter_a_init = FALSE; /* Selection a iteration info has been initialized */
-    hbool_t         iter_b_init = FALSE; /* Selection b iteration info has been initialized */
+    bool            iter_a_init = FALSE; /* Selection a iteration info has been initialized */
+    bool            iter_b_init = FALSE; /* Selection b iteration info has been initialized */
     htri_t          ret_value   = TRUE;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1725,7 +1725,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
             hsize_t  end_a[H5S_MAX_RANK];   /* End point of selection block in dataspace a */
             hsize_t  end_b[H5S_MAX_RANK];   /* End point of selection block in dataspace b */
             hssize_t offset[H5S_MAX_RANK];  /* Offset of selection b blocks relative to selection a blocks */
-            hbool_t  first_block = TRUE;    /* Flag to indicate the first block */
+            bool     first_block = TRUE;    /* Flag to indicate the first block */
 
             /* Allocate the selection iterators */
             if (NULL == (iter_a = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -2296,7 +2296,7 @@ herr_t
 H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *_buf)
 {
     H5S_sel_iter_t *iter      = NULL;    /* Selection iteration info */
-    hbool_t         iter_init = FALSE;   /* Selection iteration info has been initialized */
+    bool            iter_init = FALSE;   /* Selection iteration info has been initialized */
     hsize_t        *off       = NULL;    /* Array to store sequence offsets */
     size_t         *len       = NULL;    /* Array to store sequence lengths */
     hssize_t        nelmts;              /* Number of elements in selection */
@@ -2391,7 +2391,7 @@ done:
 src_intersect_space H5S_t *dst_space;       IN: Selection that is mapped to src_space H5S_t
 *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the
 result H5S_t **new_space_ptr;  OUT: Will contain the result (intersection of src_intersect_space and src_space
-projected from src_space to dst_space) after the operation hbool_t share_selection; IN: Whether we are allowed
+projected from src_space to dst_space) after the operation bool share_selection; IN: Whether we are allowed
 to share structures inside dst_space with proj_space
 
  RETURNS
@@ -2410,14 +2410,14 @@ to share structures inside dst_space with proj_space
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_intersect_space,
-                                H5S_t **new_space_ptr, hbool_t share_selection)
+                                H5S_t **new_space_ptr, bool share_selection)
 {
     H5S_t          *new_space               = NULL;    /* New dataspace constructed */
     H5S_t          *tmp_src_intersect_space = NULL;    /* Temporary SIS converted from points->hyperslabs */
     H5S_sel_iter_t *ss_iter                 = NULL;    /* Selection iterator for src_space */
-    hbool_t         ss_iter_init            = FALSE;   /* Whether ss_iter has been initialized */
+    bool            ss_iter_init            = FALSE;   /* Whether ss_iter has been initialized */
     H5S_sel_iter_t *ds_iter                 = NULL;    /* Selection iterator for dst_space */
-    hbool_t         ds_iter_init            = FALSE;   /* Whether ds_iter has been initialized */
+    bool            ds_iter_init            = FALSE;   /* Whether ds_iter has been initialized */
     herr_t          ret_value               = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2938,7 +2938,7 @@ done:
  USAGE
     herr_t H5S_select_contig_block(space, is_contig, off, len)
         H5S_t   *space;      IN: Selection to check
-        hbool_t *is_contig;  OUT: Whether the selection is contiguous
+        bool *is_contig;  OUT: Whether the selection is contiguous
         hsize_t *off;        OUT: Offset of selection
         size_t  *len;        OUT: Length of selection
 
@@ -2955,10 +2955,10 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *len)
+H5S_select_contig_block(H5S_t *space, bool *is_contig, hsize_t *off, size_t *len)
 {
     H5S_sel_iter_t *iter      = NULL;  /* Selection iterator */
-    hbool_t         iter_init = FALSE; /* Selection iteration info has been initialized */
+    bool            iter_init = FALSE; /* Selection iteration info has been initialized */
     size_t          nseq_tmp;
     size_t          nelem_tmp;
     hsize_t         sel_off;

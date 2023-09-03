@@ -92,7 +92,7 @@ typedef struct H5FL_reg_node_t {
 
 /* Data structure for free list of blocks */
 typedef struct H5FL_reg_head_t {
-    hbool_t          init;      /* Whether the free list has been initialized */
+    bool             init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Number of blocks allocated */
     unsigned         onlist;    /* Number of blocks on free list */
     const char      *name;      /* Name of the type */
@@ -163,7 +163,7 @@ typedef struct H5FL_blk_node_t {
 
 /* Data structure for priority queue of native block free lists */
 typedef struct H5FL_blk_head_t {
-    hbool_t          init;      /* Whether the free list has been initialized */
+    bool             init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Total number of blocks allocated */
     unsigned         onlist;    /* Total number of blocks on free list */
     size_t           list_mem;  /* Total amount of memory in blocks on free list */
@@ -237,7 +237,7 @@ typedef struct H5FL_arr_node_t {
 
 /* Data structure for free list of array blocks */
 typedef struct H5FL_arr_head_t {
-    hbool_t          init;      /* Whether the free list has been initialized */
+    bool             init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Total number of blocks allocated */
     size_t           list_mem;  /* Amount of memory in block on free list */
     const char      *name;      /* Name of the type */
@@ -358,7 +358,7 @@ typedef struct H5FL_fac_node_t    H5FL_fac_node_t;
 
 /* Data structure for free list block factory */
 typedef struct H5FL_fac_head_t {
-    hbool_t             init;      /* Whether the free list has been initialized */
+    bool                init;      /* Whether the free list has been initialized */
     unsigned            allocated; /* Number of blocks allocated */
     unsigned            onlist;    /* Number of blocks on free list */
     size_t              size;      /* Size of the blocks in the list */

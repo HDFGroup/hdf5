@@ -79,7 +79,7 @@ herr_t
 H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, uint16_t depth)
 {
     H5B2_internal_t *internal  = NULL;    /* Pointer to new internal node created */
-    hbool_t          inserted  = FALSE;   /* Whether the internal node was inserted into cache */
+    bool             inserted  = FALSE;   /* Whether the internal node was inserted into cache */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -172,8 +172,8 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_internal_t *
-H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, uint16_t depth,
-                       hbool_t shadow, unsigned flags)
+H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, uint16_t depth, bool shadow,
+                       unsigned flags)
 {
     H5B2_internal_cache_ud_t udata;            /* User data to pass through to cache 'deserialize' callback */
     H5B2_internal_t         *internal  = NULL; /* v2 B-tree internal node */
@@ -540,7 +540,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
 
     /* Check for modifying existing record */
     if (0 == cmp) {
-        hbool_t changed = FALSE; /* Whether the 'modify' callback changed the record */
+        bool changed = FALSE; /* Whether the 'modify' callback changed the record */
 
         /* Make callback for current record */
         if ((op)(H5B2_INT_NREC(internal, hdr, idx), op_data, &changed) < 0) {
@@ -614,7 +614,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
             case H5B2_UPDATE_INSERT_CHILD_FULL:
                 /* Split/redistribute this node */
                 if (internal->nrec == hdr->node_info[depth].split_nrec) {
-                    hbool_t could_split = FALSE; /* Whether the child node could split */
+                    bool could_split = FALSE; /* Whether the child node could split */
 
                     if (idx == 0) { /* Left-most child */
                         /* Check for left-most child and its neighbor being close to full */
@@ -777,7 +777,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc, void *swap_parent,
+H5B2__remove_internal(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_loc, void *swap_parent,
                       uint16_t depth, H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
                       H5B2_nodepos_t curr_pos, H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
                       void *op_data)
@@ -790,7 +790,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
     unsigned         internal_flags = H5AC__NO_FLAGS_SET;
     haddr_t          internal_addr  = HADDR_UNDEF; /* Address of internal node */
     size_t           merge_nrec;                   /* Number of records to merge node at */
-    hbool_t          collapsed_root = FALSE;       /* Whether the root was collapsed */
+    bool             collapsed_root = FALSE;       /* Whether the root was collapsed */
     herr_t           ret_value      = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1018,7 +1018,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc, void *swap_parent,
+H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_loc, void *swap_parent,
                              uint16_t depth, H5AC_info_t *parent_cache_info,
                              unsigned *parent_cache_info_flags_ptr, H5B2_node_ptr_t *curr_node_ptr,
                              H5B2_nodepos_t curr_pos, hsize_t n, H5B2_remove_t op, void *op_data)
@@ -1031,7 +1031,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
     unsigned         internal_flags = H5AC__NO_FLAGS_SET;
     haddr_t          internal_addr  = HADDR_UNDEF; /* Address of internal node */
     size_t           merge_nrec;                   /* Number of records to merge node at */
-    hbool_t          collapsed_root = FALSE;       /* Whether the root was collapsed */
+    bool             collapsed_root = FALSE;       /* Whether the root was collapsed */
     herr_t           ret_value      = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1097,7 +1097,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
     else {
         hsize_t  orig_n = n;    /* Original index looked for */
         unsigned idx;           /* Location of record which matches key */
-        hbool_t  found = FALSE; /* Comparison value of records */
+        bool     found = FALSE; /* Comparison value of records */
         unsigned retries;       /* Number of times to attempt redistribution */
 
         /* Shadow the node if doing SWMR writes */

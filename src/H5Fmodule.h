@@ -845,8 +845,8 @@
  *
  * <em>Managing file access for in-memory files</em>
  * \code
- *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t block_size, hbool_t backing_store)
- *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size), hbool_t *backing_store)
+ *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t block_size, bool backing_store)
+ *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size), bool *backing_store)
  * \endcode
  *
  * #H5Pset_fapl_core sets the file access property list to use the Memory driver; any previously
@@ -981,9 +981,9 @@
  * \code
  *   herr_t H5Pset_fapl_multi (hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
  *                             const char * const *memb_name, const haddr_t *memb_addr,
- *                             hbool_t relax)
+ *                             bool relax)
  *  herr_t H5Pget_fapl_multi (hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
- *                             const char **memb_name, const haddr_t *memb_addr, hbool_t *relax)
+ *                             const char **memb_name, const haddr_t *memb_addr, bool *relax)
  * \endcode
  *
  * #H5Pset_fapl_multi sets the file access properties to use the Multi driver; any previously defined

@@ -60,7 +60,7 @@ static herr_t H5F__cache_superblock_get_initial_load_size(void *udata, size_t *i
 static herr_t H5F__cache_superblock_get_final_load_size(const void *image_ptr, size_t image_len, void *udata,
                                                         size_t *actual_len);
 static htri_t H5F__cache_superblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5F__cache_superblock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5F__cache_superblock_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5F__cache_superblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5F__cache_superblock_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5F__cache_superblock_free_icr(void *thing);
@@ -68,16 +68,16 @@ static herr_t H5F__cache_superblock_free_icr(void *thing);
 static herr_t H5F__cache_drvrinfo_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5F__cache_drvrinfo_get_final_load_size(const void *image_ptr, size_t image_len, void *udata,
                                                       size_t *actual_len);
-static void  *H5F__cache_drvrinfo_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5F__cache_drvrinfo_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5F__cache_drvrinfo_image_len(const void *thing, size_t *image_len);
 static herr_t H5F__cache_drvrinfo_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5F__cache_drvrinfo_free_icr(void *thing);
 
 /* Local encode/decode routines */
 static herr_t H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref, size_t len,
-                                            const H5F_superblock_cache_ud_t *udata, hbool_t extend_eoa);
+                                            const H5F_superblock_cache_ud_t *udata, bool extend_eoa);
 static herr_t H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvinfo, char *drv_name, const uint8_t **image_ref,
-                                          size_t len, H5F_drvrinfo_cache_ud_t *udata, hbool_t extend_eoa);
+                                          size_t len, H5F_drvrinfo_cache_ud_t *udata, bool extend_eoa);
 
 /*********************/
 /* Package Variables */
@@ -140,7 +140,7 @@ H5FL_EXTERN(H5F_super_t);
  */
 static herr_t
 H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref, size_t len,
-                              const H5F_superblock_cache_ud_t *udata, hbool_t extend_eoa)
+                              const H5F_superblock_cache_ud_t *udata, bool extend_eoa)
 {
     const uint8_t *image     = (const uint8_t *)*image_ref; /* Pointer into raw data buffer */
     const uint8_t *end       = image + len - 1;             /* Pointer to end of buffer */
@@ -225,7 +225,7 @@ done:
  */
 static herr_t
 H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8_t **image_ref, size_t len,
-                            H5F_drvrinfo_cache_ud_t *udata, hbool_t extend_eoa)
+                            H5F_drvrinfo_cache_ud_t *udata, bool extend_eoa)
 {
     const uint8_t *image = (const uint8_t *)*image_ref; /* Pointer into raw data buffer */
     const uint8_t *end   = image + len - 1;             /* Pointer to end of buffer */
@@ -401,7 +401,7 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
  *-------------------------------------------------------------------------
  */
 static void *
-H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5F_super_t               *sblock    = NULL;                                /* File's superblock */
     H5F_superblock_cache_ud_t *udata     = (H5F_superblock_cache_ud_t *)_udata; /* User data */
@@ -868,7 +868,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5F__cache_drvrinfo_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5F__cache_drvrinfo_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5O_drvinfo_t           *drvinfo = NULL;                              /* Driver info */
     H5F_drvrinfo_cache_ud_t *udata   = (H5F_drvrinfo_cache_ud_t *)_udata; /* User data */

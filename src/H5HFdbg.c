@@ -218,7 +218,7 @@ H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fw
  *-------------------------------------------------------------------------
  */
 void
-H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int indent, int fwidth)
+H5HF_hdr_print(const H5HF_hdr_t *hdr, bool dump_internal, FILE *stream, int indent, int fwidth)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -549,7 +549,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *stream, int indent, int fwidth)
+H5HF_iblock_print(const H5HF_indirect_t *iblock, bool dump_internal, FILE *stream, int indent, int fwidth)
 {
     const H5HF_hdr_t *hdr;          /* Pointer to heap's header */
     char              temp_str[64]; /* Temporary string, for formatting */
@@ -663,7 +663,7 @@ H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
 {
     H5HF_hdr_t      *hdr         = NULL;    /* Fractal heap header info */
     H5HF_indirect_t *iblock      = NULL;    /* Fractal heap direct block info */
-    hbool_t          did_protect = FALSE;   /* Whether we protected the indirect block or not */
+    bool             did_protect = FALSE;   /* Whether we protected the indirect block or not */
     herr_t           ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

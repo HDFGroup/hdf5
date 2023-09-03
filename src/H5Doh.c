@@ -335,8 +335,8 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     H5O_layout_t layout;              /* Data storage layout message */
     H5O_efl_t    efl;                 /* External File List message */
-    hbool_t      layout_read = FALSE; /* Whether the layout message was read */
-    hbool_t      efl_read    = FALSE; /* Whether the external file list message was read */
+    bool         layout_read = FALSE; /* Whether the layout message was read */
+    bool         efl_read    = FALSE; /* Whether the external file list message was read */
     htri_t       exists;              /* Flag if header message of interest exists */
     herr_t       ret_value = SUCCEED; /* Return value */
 

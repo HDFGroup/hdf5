@@ -51,11 +51,11 @@
 /* User data for path traversal routine */
 typedef struct {
     /* down */
-    hbool_t chk_exists; /* Flag to indicate we are checking if object exists */
+    bool chk_exists; /* Flag to indicate we are checking if object exists */
 
     /* up */
     H5G_loc_t *obj_loc; /* Object location */
-    hbool_t    exists;  /* Indicate if object exists */
+    bool       exists;  /* Indicate if object exists */
 } H5G_trav_slink_t;
 
 /********************/
@@ -69,9 +69,9 @@ static herr_t H5G__traverse_slink_cb(H5G_loc_t *grp_loc, const char *name, const
                                      H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                                      H5G_own_loc_t *own_loc /*out*/);
 static herr_t H5G__traverse_ud(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj_loc /*in,out*/,
-                               unsigned target, hbool_t *obj_exists);
+                               unsigned target, bool *obj_exists);
 static herr_t H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
-                                  H5G_loc_t *obj_loc /*in,out*/, unsigned target, hbool_t *obj_exists);
+                                  H5G_loc_t *obj_loc /*in,out*/, unsigned target, bool *obj_exists);
 static herr_t H5G__traverse_real(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traverse_t op,
                                  void *op_data);
 
@@ -142,7 +142,7 @@ done:
  */
 static herr_t
 H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G_loc_t *obj_loc /*in,out*/,
-                 unsigned target, hbool_t *obj_exists)
+                 unsigned target, bool *obj_exists)
 {
     const H5L_class_t *link_class;     /* User-defined link class */
     hid_t              cb_return = -1; /* The ID the user-defined callback returned */
@@ -261,15 +261,15 @@ done:
  */
 static herr_t
 H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj_loc /*in,out*/,
-                    unsigned target, hbool_t *obj_exists)
+                    unsigned target, bool *obj_exists)
 {
     H5G_trav_slink_t udata;                     /* User data to pass to link traversal callback */
     H5G_name_t       tmp_obj_path;              /* Temporary copy of object's path */
-    hbool_t          tmp_obj_path_set = FALSE;  /* Flag to indicate that tmp object path is initialized */
+    bool             tmp_obj_path_set = FALSE;  /* Flag to indicate that tmp object path is initialized */
     H5O_loc_t        tmp_grp_oloc;              /* Temporary copy of group entry */
     H5G_name_t       tmp_grp_path;              /* Temporary copy of group's path */
     H5G_loc_t        tmp_grp_loc;               /* Temporary copy of group's location */
-    hbool_t          tmp_grp_loc_set = FALSE;   /* Flag to indicate that tmp group location is initialized */
+    bool             tmp_grp_loc_set = FALSE;   /* Flag to indicate that tmp group location is initialized */
     herr_t           ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -335,8 +335,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned target, hbool_t last_comp,
-                      H5G_loc_t *obj_loc, hbool_t *obj_exists)
+H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned target, bool last_comp,
+                      H5G_loc_t *obj_loc, bool *obj_exists)
 {
     size_t nlinks;              /* # of soft / UD links left to traverse */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -447,14 +447,14 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
     H5G_loc_t     obj_loc;                /* Location of object           */
     size_t        nchars;                 /* component name length	*/
     H5O_link_t    lnk;                    /* Link information for object  */
-    hbool_t       link_valid    = FALSE;  /* Flag to indicate that the link information is valid */
-    hbool_t       obj_loc_valid = FALSE;  /* Flag to indicate that the object location is valid */
+    bool          link_valid    = FALSE;  /* Flag to indicate that the link information is valid */
+    bool          obj_loc_valid = FALSE;  /* Flag to indicate that the object location is valid */
     H5G_own_loc_t own_loc = H5G_OWN_NONE; /* Enum to indicate whether callback took ownership of locations*/
-    hbool_t       group_copy = FALSE;     /* Flag to indicate that the group entry is copied */
+    bool          group_copy = FALSE;     /* Flag to indicate that the group entry is copied */
     char          comp_buf[1024];         /* Temporary buffer for path components */
     char         *comp;                   /* Pointer to buffer for path components */
     H5WB_t       *wb        = NULL;       /* Wrapped buffer for temporary buffer */
-    hbool_t       last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
+    bool          last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -517,8 +517,8 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
     /* Traverse the path */
     while ((name = H5G__component(name, &nchars)) && *name) {
         const char *s;             /* Temporary string pointer */
-        hbool_t     lookup_status; /* Status from object lookup */
-        hbool_t     obj_exists;    /* Whether the object exists */
+        bool        lookup_status; /* Status from object lookup */
+        bool        obj_exists;    /* Whether the object exists */
 
         /*
          * Copy the component name into a null-terminated buffer so

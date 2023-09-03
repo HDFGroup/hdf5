@@ -427,7 +427,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
 {
     H5O_loc_t  temp_oloc;           /* Temporary object header location */
     H5G_name_t temp_path;           /* Temporary path */
-    hbool_t    loc_init = FALSE;    /* Have temp_oloc and temp_path been initialized? */
+    bool       loc_init = FALSE;    /* Have temp_oloc and temp_path been initialized? */
     size_t     dtype_size;          /* Size of the datatype message */
     herr_t     ret_value = SUCCEED; /* Return value */
 
@@ -947,7 +947,7 @@ H5T__open_name(const H5G_loc_t *loc, const char *name)
     H5O_loc_t  oloc;              /* Datatype object location */
     H5G_loc_t  type_loc;          /* Group object for datatype */
     H5O_type_t obj_type;          /* Type of object at location */
-    hbool_t    obj_found = FALSE; /* Object at 'name' found */
+    bool       obj_found = FALSE; /* Object at 'name' found */
     H5T_t     *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1382,7 +1382,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5T_already_vol_managed(const H5T_t *dt)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR

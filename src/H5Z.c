@@ -44,9 +44,8 @@ typedef struct H5Z_object_t {
     H5Z_filter_t filter_id; /* ID of the filter we're looking for */
     htri_t       found;     /* Whether we find an object using the filter */
 #ifdef H5_HAVE_PARALLEL
-    hbool_t
-        sanity_checked; /* Whether the sanity check for collectively calling H5Zunregister has been done */
-#endif                  /* H5_HAVE_PARALLEL */
+    bool sanity_checked; /* Whether the sanity check for collectively calling H5Zunregister has been done */
+#endif                   /* H5_HAVE_PARALLEL */
 } H5Z_object_t;
 
 /* Enumerated type for dataset creation prelude callbacks */
@@ -1004,7 +1003,7 @@ H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space)
     H5O_pline_t     pline;                   /* Object's I/O pipeline information */
     H5S_class_t     space_class;             /* To check class of space */
     H5T_class_t     type_class;              /* To check if type is VL */
-    hbool_t         bad_for_filters = FALSE; /* Suitable to have filters */
+    bool            bad_for_filters = FALSE; /* Suitable to have filters */
     htri_t          ret_value       = FALSE; /* TRUE for ignoring filters */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1330,7 +1329,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
             if ((fclass_idx = H5Z__find_idx(pline->filter[idx].id)) < 0) {
                 H5PL_key_t          key;
                 const H5Z_class2_t *filter_info;
-                hbool_t             issue_error = FALSE;
+                bool                issue_error = FALSE;
 
                 /* Try loading the filter */
                 key.id = (int)(pline->filter[idx].id);
@@ -1597,8 +1596,8 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
     }
     /* Delete filter */
     else {
-        size_t  idx;           /* Index of filter in pipeline */
-        hbool_t found = FALSE; /* Indicate filter was found in pipeline */
+        size_t idx;           /* Index of filter in pipeline */
+        bool   found = FALSE; /* Indicate filter was found in pipeline */
 
         /* Locate the filter in the pipeline */
         for (idx = 0; idx < pline->nused; idx++)

@@ -569,7 +569,7 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
     hsize_t  nelmts;                /*number of elements to fill	*/
     hsize_t  i;                     /*counter			*/
     int      j;                     /*counter			*/
-    hbool_t  carry;                 /*subtraction carray value	*/
+    bool     carry;                 /*subtraction carray value	*/
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -624,7 +624,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
     hsize_t        nelmts;                      /*num elements to copy	*/
     hsize_t        i;                           /*counter		*/
     int            j;                           /*counters		*/
-    hbool_t        carry;                       /*carray for subtraction*/
+    bool           carry;                       /*carray for subtraction*/
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -687,7 +687,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
     hsize_t        nelmts;                      /*num elements to copy	*/
     hsize_t        i;                           /*counter		*/
     int            j;                           /*counters		*/
-    hbool_t        carry;                       /*carray for subtraction*/
+    bool           carry;                       /*carray for subtraction*/
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

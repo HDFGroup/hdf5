@@ -63,7 +63,7 @@ static unsigned int H5PL_plugin_control_mask_g = H5PL_ALL_PLUGIN;
  * environment variable was set to H5PL_NO_PLUGIN at
  * package initialization.
  */
-static hbool_t H5PL_allow_plugins_g = TRUE;
+static bool H5PL_allow_plugins_g = TRUE;
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__get_plugin_control_mask
@@ -174,8 +174,8 @@ done:
 int
 H5PL_term_package(void)
 {
-    hbool_t already_closed = FALSE;
-    int     ret_value      = 0;
+    bool already_closed = FALSE;
+    int  ret_value      = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -213,7 +213,7 @@ const void *
 H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 {
     H5PL_search_params_t search_params;       /* Plugin search parameters     */
-    hbool_t              found       = FALSE; /* Whether the plugin was found */
+    bool                 found       = FALSE; /* Whether the plugin was found */
     const void          *plugin_info = NULL;  /* Information from the plugin  */
     const void          *ret_value   = NULL;
 
@@ -316,8 +316,8 @@ done:
  */
 H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
-H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *success,
-           H5PL_type_t *plugin_type, const void **plugin_info)
+H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *success, H5PL_type_t *plugin_type,
+           const void **plugin_info)
 {
     H5PL_HANDLE            handle          = NULL;
     H5PL_get_plugin_type_t get_plugin_type = NULL;

@@ -475,7 +475,7 @@ htri_t
 H5Fis_accessible(const char *filename, hid_t fapl_id)
 {
     H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
-    hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
+    bool                      is_accessible = FALSE; /* Whether file is accessible */
     htri_t                    ret_value;             /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1139,7 +1139,7 @@ H5Fdelete(const char *filename, hid_t fapl_id)
     H5P_genplist_t           *plist;                 /* Property list pointer */
     H5VL_connector_prop_t     connector_prop;        /* Property for VOL connector ID & info */
     H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
-    hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
+    bool                      is_accessible = FALSE; /* Whether file is accessible */
     herr_t                    ret_value     = SUCCEED;
 
     FUNC_ENTER_API(FAIL)

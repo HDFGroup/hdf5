@@ -426,7 +426,7 @@ H5B2_iterate(H5B2_t *bt2, H5B2_operator_t op, void *op_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_data)
+H5B2_find(H5B2_t *bt2, void *udata, bool *found, H5B2_found_t op, void *op_data)
 {
     H5B2_hdr_t     *hdr;                 /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;       /* Node pointer info for current node */
@@ -899,7 +899,7 @@ H5B2_remove(H5B2_t *bt2, void *udata, H5B2_remove_t op, void *op_data)
 
     /* Attempt to remove record from B-tree */
     if (hdr->depth > 0) {
-        hbool_t depth_decreased = FALSE; /* Flag to indicate whether the depth of the B-tree decreased */
+        bool depth_decreased = FALSE; /* Flag to indicate whether the depth of the B-tree decreased */
 
         if (H5B2__remove_internal(hdr, &depth_decreased, NULL, NULL, hdr->depth, &(hdr->cache_info), NULL,
                                   H5B2_POS_ROOT, &hdr->root, udata, op, op_data) < 0)
@@ -977,7 +977,7 @@ H5B2_remove_by_idx(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_remove_
 
     /* Attempt to remove record from B-tree */
     if (hdr->depth > 0) {
-        hbool_t depth_decreased = FALSE; /* Flag to indicate whether the depth of the B-tree decreased */
+        bool depth_decreased = FALSE; /* Flag to indicate whether the depth of the B-tree decreased */
 
         if (H5B2__remove_internal_by_idx(hdr, &depth_decreased, NULL, NULL, hdr->depth, &(hdr->cache_info),
                                          NULL, &hdr->root, H5B2_POS_ROOT, idx, op, op_data) < 0)
@@ -1217,7 +1217,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
             curr_node_ptr = next_node_ptr;
         } /* end if */
         else {
-            hbool_t changed; /* Whether the 'modify' callback changed the record */
+            bool changed; /* Whether the 'modify' callback changed the record */
 
             /* Make callback for current record */
             if ((op)(H5B2_INT_NREC(internal, hdr, idx), op_data, &changed) < 0) {
@@ -1250,7 +1250,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     {
         H5B2_leaf_t *leaf;                            /* Pointer to leaf node in B-tree */
         unsigned     leaf_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting the leaf node */
-        hbool_t      changed    = FALSE;              /* Whether the 'modify' callback changed the record */
+        bool         changed    = FALSE;              /* Whether the 'modify' callback changed the record */
 
         /* Lock B-tree leaf node */
         if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, &curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
@@ -1351,7 +1351,7 @@ herr_t
 H5B2_close(H5B2_t *bt2)
 {
     haddr_t bt2_addr       = HADDR_UNDEF; /* Address of v2 B-tree (for deletion) */
-    hbool_t pending_delete = FALSE;       /* Whether the v2 B-tree is pending deletion */
+    bool    pending_delete = FALSE;       /* Whether the v2 B-tree is pending deletion */
     herr_t  ret_value      = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

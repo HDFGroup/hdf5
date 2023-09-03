@@ -140,11 +140,11 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, hbool_t *stats_changed, hsize_t dblk_off, size_t nelmts)
+H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, bool *stats_changed, hsize_t dblk_off, size_t nelmts)
 {
     H5EA_dblock_t *dblock = NULL;     /* Extensible array data block */
     haddr_t        dblock_addr;       /* Extensible array data block address */
-    hbool_t        inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool           inserted  = FALSE; /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE

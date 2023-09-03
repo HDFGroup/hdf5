@@ -334,7 +334,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     H5T_t   *copied_dt = NULL;   /* Do sorting in copied datatype */
     unsigned lt, md = 0, rt;     /* Indices for binary search	*/
     int      cmp        = (-1);  /* Comparison result		*/
-    hbool_t  alloc_name = FALSE; /* Whether name has been allocated */
+    bool     alloc_name = FALSE; /* Whether name has been allocated */
     char    *ret_value  = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE

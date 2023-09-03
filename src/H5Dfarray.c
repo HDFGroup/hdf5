@@ -64,7 +64,7 @@ typedef struct H5D_farray_ctx_t {
 typedef struct H5D_farray_it_ud_t {
     H5D_chunk_common_ud_t common;    /* Common info for Fixed Array user data (must be first) */
     H5D_chunk_rec_t       chunk_rec; /* Generic chunk record for callback */
-    hbool_t               filtered;  /* Whether the chunks are filtered */
+    bool                  filtered;  /* Whether the chunks are filtered */
     H5D_chunk_cb_func_t   cb;        /* Chunk callback routine */
     void                 *udata;     /* User data for chunk callback routine */
 } H5D_farray_it_ud_t;
@@ -102,25 +102,25 @@ static herr_t H5D__farray_filt_decode(const void *raw, void *elmt, size_t nelmts
 static herr_t H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
 
 /* Chunked layout indexing callbacks */
-static herr_t  H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
-                                    haddr_t dset_ohdr_addr);
-static herr_t  H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info);
-static hbool_t H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t  H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-                                      const H5D_t *dset);
-static herr_t  H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
-static int     H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
-                                       void *chunk_udata);
-static herr_t  H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
-static herr_t  H5D__farray_idx_delete(const H5D_chk_idx_info_t *idx_info);
-static herr_t  H5D__farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
-                                          const H5D_chk_idx_info_t *idx_info_dst);
-static herr_t  H5D__farray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
-                                             H5O_storage_chunk_t *storage_dst);
-static herr_t  H5D__farray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
-static herr_t  H5D__farray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-static herr_t  H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
-static herr_t  H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
+                                   haddr_t dset_ohdr_addr);
+static herr_t H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info);
+static bool   H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
+static herr_t H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+                                     const H5D_t *dset);
+static herr_t H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
+static int    H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
+                                      void *chunk_udata);
+static herr_t H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
+static herr_t H5D__farray_idx_delete(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
+                                         const H5D_chk_idx_info_t *idx_info_dst);
+static herr_t H5D__farray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
+                                            H5O_storage_chunk_t *storage_dst);
+static herr_t H5D__farray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
+static herr_t H5D__farray_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);
+static herr_t H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
+static herr_t H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Generic fixed array routines */
 static herr_t H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info);
@@ -415,7 +415,7 @@ H5D__farray_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 {
     H5D_farray_ctx_ud_t *dbg_ctx = NULL;     /* Context for fixed array callback */
     H5O_loc_t            obj_loc;            /* Pointer to an object's location */
-    hbool_t              obj_opened = FALSE; /* Flag to indicate that the object header was opened */
+    bool                 obj_opened = FALSE; /* Flag to indicate that the object header was opened */
     H5O_layout_t         layout;             /* Layout message */
     void                *ret_value = NULL;   /* Return value */
 
@@ -862,7 +862,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -870,7 +870,7 @@ H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     assert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((bool)H5_addr_defined(storage->idx_addr))
 } /* end H5D__farray_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -1468,7 +1468,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__farray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
+H5D__farray_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr)
 {
     FUNC_ENTER_PACKAGE_NOERR
 

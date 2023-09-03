@@ -718,7 +718,7 @@
             H5T_t        *st, *dt;            /*datatype descriptors        */                               \
             ST            src_aligned;        /*source aligned type        */                                \
             DT            dst_aligned;        /*destination aligned type    */                               \
-            hbool_t       s_mv, d_mv;         /*move data to align it?    */                                 \
+            bool          s_mv, d_mv;         /*move data to align it?    */                                 \
             ssize_t       s_stride, d_stride; /*src and dst strides        */                                \
             size_t        safe;               /*how many elements are safe to process in each pass */        \
             H5T_conv_cb_t cb_struct;          /*conversion callback structure */                             \
@@ -1681,7 +1681,7 @@ H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     uint8_t       *src_rev   = NULL;         /*order-reversed source buffer  */
     H5T_conv_cb_t  cb_struct = {NULL, NULL}; /*conversion callback structure */
     H5T_conv_ret_t except_ret;               /*return of callback function   */
-    hbool_t        reverse;                  /*if reverse the order of destination        */
+    bool           reverse;                  /*if reverse the order of destination        */
     herr_t         ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2432,7 +2432,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
     size_t             elmtno;                     /*element counter        */
     size_t             copy_size;                  /*size of element for copying   */
     H5T_conv_struct_t *priv      = NULL;           /*private data            */
-    hbool_t            no_stride = FALSE;          /*flag to indicate no stride    */
+    bool               no_stride = FALSE;          /*flag to indicate no stride    */
     unsigned           u;                          /*counters            */
     int                i;                          /*counters            */
     herr_t             ret_value = SUCCEED;        /* Return value */
@@ -3085,8 +3085,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 {
     H5T_vlen_alloc_info_t vl_alloc_info;              /* VL allocation info */
     H5T_path_t           *tpath         = NULL;       /* Type conversion path             */
-    hbool_t               noop_conv     = FALSE;      /* Flag to indicate a noop conversion */
-    hbool_t               write_to_file = FALSE;      /* Flag to indicate writing to file */
+    bool                  noop_conv     = FALSE;      /* Flag to indicate a noop conversion */
+    bool                  write_to_file = FALSE;      /* Flag to indicate writing to file */
     htri_t                parent_is_vlen;             /* Flag to indicate parent is vlen datatype */
     size_t                bg_seq_len = 0;             /* The number of elements in the background sequence */
     hid_t                 tsrc_id = -1, tdst_id = -1; /*temporary type atoms         */
@@ -3103,7 +3103,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
     size_t                conv_buf_size = 0;            /*size of conversion buffer in bytes */
     void                 *tmp_buf       = NULL;         /*temporary background buffer          */
     size_t                tmp_buf_size  = 0;            /*size of temporary bkg buffer         */
-    hbool_t               nested        = FALSE;        /*flag of nested VL case             */
+    bool                  nested        = FALSE;        /*flag of nested VL case             */
     size_t                elmtno;                       /*element number counter         */
     herr_t                ret_value = SUCCEED;          /* Return value */
 
@@ -3271,7 +3271,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                 } /* end else */
 
                 for (elmtno = 0; elmtno < safe; elmtno++) {
-                    hbool_t is_nil; /* Whether sequence is "nil" */
+                    bool is_nil; /* Whether sequence is "nil" */
 
                     /* Check for "nil" source sequence */
                     if ((*(src->shared->u.vlen.cls->isnull))(src->shared->u.vlen.file, s, &is_nil) < 0)
@@ -3722,9 +3722,9 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 } /* end else */
 
                 for (elmtno = 0; elmtno < safe; elmtno++) {
-                    size_t  buf_size;
-                    hbool_t dst_copy = FALSE;
-                    hbool_t is_nil; /* Whether reference is "nil" */
+                    size_t buf_size;
+                    bool   dst_copy = FALSE;
+                    bool   is_nil; /* Whether reference is "nil" */
 
                     /* Check for "nil" source reference */
                     if ((*(src->shared->u.atomic.u.r.cls->isnull))(src->shared->u.atomic.u.r.file, s,
@@ -3833,7 +3833,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         i;                        /*Local index variables         */
     H5T_conv_cb_t  cb_struct = {NULL, NULL}; /*conversion callback structure */
     H5T_conv_ret_t except_ret;               /*return of callback function   */
-    hbool_t        reverse;                  /*if reverse the order of destination        */
+    bool           reverse;                  /*if reverse the order of destination        */
     herr_t         ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -4190,7 +4190,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     assert(H5T_PAD_ZERO == dst->shared->u.atomic.lsb_pad ||
                            H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad);
                     H5T__bit_set(d, (size_t)0, dst->shared->u.atomic.offset,
-                                 (hbool_t)(H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad));
+                                 (bool)(H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad));
                 }
                 if (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec != 8 * dst->shared->size) {
                     assert(H5T_PAD_ZERO == dst->shared->u.atomic.msb_pad ||
@@ -4198,7 +4198,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     H5T__bit_set(d, dst->shared->u.atomic.offset + dst->shared->u.atomic.prec,
                                  8 * dst->shared->size -
                                      (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec),
-                                 (hbool_t)(H5T_PAD_ONE == dst->shared->u.atomic.msb_pad));
+                                 (bool)(H5T_PAD_ONE == dst->shared->u.atomic.msb_pad));
                 }
 
                 /*
@@ -4277,13 +4277,13 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         mpos;                        /*offset to useful mant is src    */
     uint64_t       sign;                        /*source sign bit value         */
     size_t         mrsh;                        /*amount to right shift mantissa*/
-    hbool_t        carry = FALSE;               /*carry after rounding mantissa    */
+    bool           carry = FALSE;               /*carry after rounding mantissa    */
     size_t         i;                           /*miscellaneous counters    */
     size_t         implied;                     /*destination implied bits    */
-    hbool_t        denormalized = FALSE;        /*is either source or destination denormalized?*/
+    bool           denormalized = FALSE;        /*is either source or destination denormalized?*/
     H5T_conv_cb_t  cb_struct    = {NULL, NULL}; /*conversion callback structure */
     H5T_conv_ret_t except_ret;                  /*return of callback function   */
-    hbool_t        reverse;                     /*if reverse the order of destination        */
+    bool           reverse;                     /*if reverse the order of destination        */
     herr_t         ret_value = SUCCEED;         /*return value                 */
 
     FUNC_ENTER_PACKAGE
@@ -4761,12 +4761,12 @@ padding:
                  */
                 if (dst.offset > 0) {
                     assert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
-                    H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE == dst.lsb_pad));
+                    H5T__bit_set(d, (size_t)0, dst.offset, (bool)(H5T_PAD_ONE == dst.lsb_pad));
                 }
                 if (dst.offset + dst.prec != 8 * dst_p->shared->size) {
                     assert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
                     H5T__bit_set(d, dst.offset + dst.prec, 8 * dst_p->shared->size - (dst.offset + dst.prec),
-                                 (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
+                                 (bool)(H5T_PAD_ONE == dst.msb_pad));
                 }
 
                 /*
@@ -7913,8 +7913,8 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         first;                    /*first bit(MSB) in an integer  */
     ssize_t        sfirst;                   /*a signed version of `first'    */
     H5T_conv_cb_t  cb_struct = {NULL, NULL}; /*conversion callback structure */
-    hbool_t        truncated;                /*if fraction value is dropped  */
-    hbool_t        reverse;                  /*if reverse order of destination at the end */
+    bool           truncated;                /*if fraction value is dropped  */
+    bool           reverse;                  /*if reverse order of destination at the end */
     H5T_conv_ret_t except_ret;               /*return of callback function   */
     herr_t         ret_value = SUCCEED;      /* Return value                 */
 
@@ -8442,12 +8442,12 @@ padding:
                  */
                 if (dst.offset > 0) {
                     assert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
-                    H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE == dst.lsb_pad));
+                    H5T__bit_set(d, (size_t)0, dst.offset, (bool)(H5T_PAD_ONE == dst.lsb_pad));
                 }
                 if (dst.offset + dst.prec != 8 * dst_p->shared->size) {
                     assert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
                     H5T__bit_set(d, dst.offset + dst.prec, 8 * dst_p->shared->size - (dst.offset + dst.prec),
-                                 (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
+                                 (bool)(H5T_PAD_ONE == dst.msb_pad));
                 }
 
                 /*
@@ -8531,8 +8531,8 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     hsize_t        expo;                     /*destination exponent        */
     hsize_t        expo_max;                 /*maximal possible exponent value       */
     size_t         sign;                     /*source sign bit value         */
-    hbool_t        is_max_neg;               /*source is maximal negative value*/
-    hbool_t        do_round;                 /*whether there is roundup      */
+    bool           is_max_neg;               /*source is maximal negative value*/
+    bool           do_round;                 /*whether there is roundup      */
     uint8_t       *int_buf = NULL;           /*buffer for temporary value    */
     size_t         buf_size;                 /*buffer size for temporary value */
     size_t         i;                        /*miscellaneous counters    */
@@ -8540,7 +8540,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     ssize_t        sfirst;                   /*a signed version of `first'    */
     H5T_conv_cb_t  cb_struct = {NULL, NULL}; /*conversion callback structure */
     H5T_conv_ret_t except_ret;               /*return of callback function   */
-    hbool_t        reverse;                  /*if reverse the order of destination   */
+    bool           reverse;                  /*if reverse the order of destination   */
     herr_t         ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -8851,12 +8851,12 @@ padding:
                  */
                 if (dst.offset > 0) {
                     assert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
-                    H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE == dst.lsb_pad));
+                    H5T__bit_set(d, (size_t)0, dst.offset, (bool)(H5T_PAD_ONE == dst.lsb_pad));
                 }
                 if (dst.offset + dst.prec != 8 * dst_p->shared->size) {
                     assert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
                     H5T__bit_set(d, dst.offset + dst.prec, 8 * dst_p->shared->size - (dst.offset + dst.prec),
-                                 (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
+                                 (bool)(H5T_PAD_ONE == dst.msb_pad));
                 }
 
                 /*

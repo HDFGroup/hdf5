@@ -531,7 +531,7 @@ H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t thresh
 {
 
     H5F_fspace_strategy_t new_strategy;                                 /* File space strategy type */
-    hbool_t               new_persist   = H5F_FREE_SPACE_PERSIST_DEF;   /* Persisting free-space or not */
+    bool                  new_persist   = H5F_FREE_SPACE_PERSIST_DEF;   /* Persisting free-space or not */
     hsize_t               new_threshold = H5F_FREE_SPACE_THRESHOLD_DEF; /* Free-space section threshold */
     H5F_file_space_type_t in_strategy   = strategy;                     /* Input strategy */
     hsize_t               in_threshold  = threshold;                    /* Input threshold */
@@ -600,7 +600,7 @@ herr_t
 H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy /*out*/, hsize_t *threshold /*out*/)
 {
     H5F_fspace_strategy_t new_strategy;        /* File space strategy type */
-    hbool_t               new_persist;         /* Persisting free-space or not */
+    bool                  new_persist;         /* Persisting free-space or not */
     hsize_t               new_threshold;       /* Free-space section threshold */
     herr_t                ret_value = SUCCEED; /* Return value */
 

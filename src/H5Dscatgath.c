@@ -448,14 +448,14 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
     void           *buf;                    /* Local pointer to application buffer */
     void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
-    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
-    hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
+    bool            bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
     H5S_sel_iter_t *file_iter      = NULL;  /* File selection iteration info*/
-    hbool_t         file_iter_init = FALSE; /* File selection iteration info has been initialized */
+    bool            file_iter_init = FALSE; /* File selection iteration info has been initialized */
     hsize_t         smine_start;            /* Strip mine start loc	*/
     size_t          smine_nelmts;           /* Elements per strip	*/
-    hbool_t         in_place_tconv;         /* Whether to perform in-place type_conversion */
+    bool            in_place_tconv;         /* Whether to perform in-place type_conversion */
     herr_t          ret_value = SUCCEED;    /* Return value		*/
 
     FUNC_ENTER_PACKAGE
@@ -633,14 +633,14 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     const void     *buf;                    /* Local pointer to application buffer */
     void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
-    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
-    hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
+    bool            bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
     H5S_sel_iter_t *file_iter      = NULL;  /* File selection iteration info*/
-    hbool_t         file_iter_init = FALSE; /* File selection iteration info has been initialized */
+    bool            file_iter_init = FALSE; /* File selection iteration info has been initialized */
     hsize_t         smine_start;            /* Strip mine start loc	*/
     size_t          smine_nelmts;           /* Elements per strip	*/
-    hbool_t         in_place_tconv;         /* Whether to perform in-place type_conversion */
+    bool            in_place_tconv;         /* Whether to perform in-place type_conversion */
     herr_t          ret_value = SUCCEED;    /* Return value		*/
 
     FUNC_ENTER_PACKAGE
@@ -817,7 +817,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
 {
     H5S_t         **tmp_mem_spaces   = NULL;  /* Memory spaces to use for read from disk */
     H5S_sel_iter_t *mem_iter         = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init    = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init    = FALSE; /* Memory selection iteration info has been initialized */
     void          **tmp_bufs         = NULL;  /* Buffers to use for read from disk */
     void           *tmp_bkg_buf      = NULL;  /* Temporary background buffer pointer */
     size_t          tconv_bytes_used = 0;     /* Number of bytes used so far in conversion buffer */
@@ -1049,7 +1049,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     H5S_t         **write_mem_spaces  = NULL;  /* Memory spaces to use for write to disk */
     size_t          spaces_added      = 0;     /* Number of spaces added to write_mem_spaces */
     H5S_sel_iter_t *mem_iter          = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init     = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init     = FALSE; /* Memory selection iteration info has been initialized */
     const void    **write_bufs        = NULL;  /* Buffers to use for write to disk */
     size_t          tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
     size_t          bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */

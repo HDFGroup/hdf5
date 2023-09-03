@@ -68,7 +68,7 @@ typedef struct {
     H5A_t *attr; /* Attribute data to update object header with */
 
     /* up */
-    hbool_t found; /* Whether the attribute was found */
+    bool found; /* Whether the attribute was found */
 } H5O_iter_wrt_t;
 
 /* User data for iteration when renaming an attribute */
@@ -79,7 +79,7 @@ typedef struct {
     const char *new_name; /* New name of attribute */
 
     /* up */
-    hbool_t found; /* Whether the attribute was found */
+    bool found; /* Whether the attribute was found */
 } H5O_iter_ren_t;
 
 /* User data for iteration when removing an attribute */
@@ -89,7 +89,7 @@ typedef struct {
     const char *name; /* Name of attribute to open */
 
     /* up */
-    hbool_t found; /* Found attribute to delete */
+    bool found; /* Found attribute to delete */
 } H5O_iter_rm_t;
 
 /* User data for iteration when checking if an attribute exists */
@@ -98,7 +98,7 @@ typedef struct {
     const char *name; /* Name of attribute to open */
 
     /* up */
-    hbool_t *exists; /* Pointer to flag to indicate attribute exists */
+    bool *exists; /* Pointer to flag to indicate attribute exists */
 } H5O_iter_xst_t;
 
 /********************/
@@ -213,16 +213,16 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
 
     /* Check if this object already has attribute information */
     if (oh->version > H5O_VERSION_1) {
-        hbool_t new_ainfo = FALSE; /* Flag to indicate that the attribute information is new */
-        htri_t  ainfo_exists;      /* Whether the attribute info was retrieved */
+        bool   new_ainfo = FALSE; /* Flag to indicate that the attribute information is new */
+        htri_t ainfo_exists;      /* Whether the attribute info was retrieved */
 
         /* Check for (& retrieve if available) attribute info */
         if ((ainfo_exists = H5A__get_ainfo(loc->file, oh, &ainfo)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message");
         if (!ainfo_exists) {
             /* Initialize attribute information */
-            ainfo.track_corder    = (hbool_t)((oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? TRUE : FALSE);
-            ainfo.index_corder    = (hbool_t)((oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? TRUE : FALSE);
+            ainfo.track_corder    = (bool)((oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? TRUE : FALSE);
+            ainfo.index_corder    = (bool)((oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? TRUE : FALSE);
             ainfo.max_crt_idx     = 0;
             ainfo.corder_bt2_addr = HADDR_UNDEF;
             ainfo.nattrs          = 0;
@@ -773,7 +773,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
 {
     H5O_iter_wrt_t    *udata       = (H5O_iter_wrt_t *)_udata; /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy   = NULL;                     /* Chunk that message is in */
-    hbool_t            chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
+    bool               chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
     herr_t             ret_value   = H5_ITER_CONT;             /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -967,7 +967,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
 {
     H5O_iter_ren_t    *udata       = (H5O_iter_ren_t *)_udata; /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy   = NULL;                     /* Chunk that message is in */
-    hbool_t            chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
+    bool               chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
     herr_t             ret_value   = H5_ITER_CONT;             /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1308,8 +1308,8 @@ H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
 
     /* Check for shifting from dense storage back to compact storage */
     if (H5_addr_defined(ainfo->fheap_addr) && ainfo->nattrs < oh->min_dense) {
-        hbool_t can_convert = TRUE; /* Whether converting to attribute messages is possible */
-        size_t  u;                  /* Local index */
+        bool   can_convert = TRUE; /* Whether converting to attribute messages is possible */
+        size_t u;                  /* Local index */
 
         /* Build the table of attributes for this object */
         if (H5A__dense_build_table(loc->file, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
@@ -1700,7 +1700,7 @@ H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsig
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__attr_exists(const H5O_loc_t *loc, const char *name, hbool_t *attr_exists)
+H5O__attr_exists(const H5O_loc_t *loc, const char *name, bool *attr_exists)
 {
     H5O_t      *oh = NULL;           /* Pointer to actual object header */
     H5O_ainfo_t ainfo;               /* Attribute information for object */

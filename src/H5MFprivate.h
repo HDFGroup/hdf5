@@ -63,8 +63,8 @@ H5_DLL haddr_t H5MF_alloc_tmp(H5F_t *f, hsize_t size);
 H5_DLL herr_t H5MF_free_aggrs(H5F_t *f);
 
 /* Free space manager settling routines */
-H5_DLL herr_t H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled);
-H5_DLL herr_t H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled);
+H5_DLL herr_t H5MF_settle_raw_data_fsm(H5F_t *f, bool *fsm_settled);
+H5_DLL herr_t H5MF_settle_meta_data_fsm(H5F_t *f, bool *fsm_settled);
 
 /* This function has to be declared in H5MFprivate.h as it is needed
  * in our test code to allow us to manually start a self referential

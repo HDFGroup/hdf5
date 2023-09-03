@@ -22,11 +22,11 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__efl_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__efl_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__efl_copy(const void *_mesg, void *_dest);
-static size_t H5O__efl_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__efl_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__efl_reset(void *_mesg);
-static void  *H5O__efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O__efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, bool *recompute_size,
                                  unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__efl_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -197,7 +197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__efl_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     size_t           u; /* Local index variable */
@@ -260,7 +260,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     H5O_efl_t       *dest = (H5O_efl_t *)_dest;
     size_t           u;                      /* Local index variable */
-    hbool_t          slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
+    bool             slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
     void            *ret_value      = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -320,7 +320,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__efl_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_efl_t *mesg      = (const H5O_efl_t *)_mesg;
     size_t           ret_value = 0;
@@ -425,7 +425,7 @@ done:
  */
 static void *
 H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
-                   hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
+                   bool H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
                    H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *_udata)
 {
     H5O_efl_t *efl_src = (H5O_efl_t *)mesg_src;

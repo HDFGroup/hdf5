@@ -51,18 +51,18 @@
 /********************/
 
 /* Non Index chunking I/O ops */
-static herr_t  H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info);
-static hbool_t H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t  H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
-static int     H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
-                                     void *chunk_udata);
-static herr_t  H5D__none_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
-static herr_t  H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info);
-static herr_t  H5D__none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
-                                        const H5D_chk_idx_info_t *idx_info_dst);
-static herr_t  H5D__none_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
-static herr_t  H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-static herr_t  H5D__none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
+static herr_t H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info);
+static bool   H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
+static herr_t H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
+static int    H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
+                                    void *chunk_udata);
+static herr_t H5D__none_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
+static herr_t H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
+                                       const H5D_chk_idx_info_t *idx_info_dst);
+static herr_t H5D__none_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
+static herr_t H5D__none_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);
+static herr_t H5D__none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
 
 /*********************/
 /* Package Variables */
@@ -149,7 +149,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -157,7 +157,7 @@ H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     assert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((bool)H5_addr_defined(storage->idx_addr))
 } /* end H5D__none_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -416,7 +416,7 @@ H5D__none_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *i
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
+H5D__none_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr)
 {
     FUNC_ENTER_PACKAGE_NOERR
 

@@ -54,7 +54,7 @@ static herr_t H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_
 static herr_t H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                             H5_iter_order_t order, hsize_t n, hid_t lapl_id, void **token_ptr,
                                             H5VL_object_t **_vol_obj_ptr);
-static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id,
+static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, bool *exists, hid_t lapl_id,
                                      void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static herr_t H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
                                       hsize_t *idx_p, H5L_iterate2_t op, void *op_data, void **token_ptr,
@@ -1150,7 +1150,7 @@ done:
  *
  *--------------------------------------------------------------------------*/
 static herr_t
-H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, void **token_ptr,
+H5L__exists_api_common(hid_t loc_id, const char *name, bool *exists, hid_t lapl_id, void **token_ptr,
                        H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
@@ -1195,8 +1195,8 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    hbool_t exists;           /* Flag to indicate if link exists */
-    htri_t  ret_value = FAIL; /* Return value */
+    bool   exists;           /* Flag to indicate if link exists */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
@@ -1469,8 +1469,8 @@ done:
 htri_t
 H5Lis_registered(H5L_type_t id)
 {
-    hbool_t is_registered = FALSE;
-    htri_t  ret_value     = FALSE; /* Return value */
+    bool   is_registered = FALSE;
+    htri_t ret_value     = FALSE; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "Ll", id);

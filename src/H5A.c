@@ -80,11 +80,11 @@ static herr_t H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name,
                                              const char *new_attr_name, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
 static herr_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
-                                 hbool_t *attr_exists, void **token_ptr);
-static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists,
-                                     void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+                                 bool *attr_exists, void **token_ptr);
+static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, bool *attr_exists, void **token_ptr,
+                                     H5VL_object_t **_vol_obj_ptr);
 static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name,
-                                             hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
+                                             bool *attr_exists, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
@@ -2303,7 +2303,7 @@ done:
  *--------------------------------------------------------------------------*/
 static herr_t
 H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
-                   hbool_t *attr_exists, void **token_ptr)
+                   bool *attr_exists, void **token_ptr)
 {
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
@@ -2340,7 +2340,7 @@ done:
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
+H5A__exists_api_common(hid_t obj_id, const char *attr_name, bool *attr_exists, void **token_ptr,
                        H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
@@ -2385,8 +2385,8 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    hbool_t exists;           /* Flag for attribute existence */
-    htri_t  ret_value = FAIL; /* Return value */
+    bool   exists;           /* Flag for attribute existence */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "i*s", obj_id, attr_name);
@@ -2452,9 +2452,8 @@ done:
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
-                               hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
-                               H5VL_object_t **_vol_obj_ptr)
+H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, bool *attr_exists,
+                               hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
@@ -2498,8 +2497,8 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    hbool_t exists;           /* Flag for attribute existence */
-    htri_t  ret_value = FAIL; /* Return value */
+    bool   exists;           /* Flag for attribute existence */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);

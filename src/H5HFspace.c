@@ -79,7 +79,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF__space_start(H5HF_hdr_t *hdr, hbool_t may_create)
+H5HF__space_start(H5HF_hdr_t *hdr, bool may_create)
 {
     const H5FS_section_class_t *classes[] = {/* Free space section classes implemented for fractal heap */
                                              H5HF_FSPACE_SECT_CLS_SINGLE, H5HF_FSPACE_SECT_CLS_FIRST_ROW,

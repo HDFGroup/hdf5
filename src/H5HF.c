@@ -559,7 +559,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_write(H5HF_t *fh, void *_id, hbool_t H5_ATTR_UNUSED *id_changed, const void *obj)
+H5HF_write(H5HF_t *fh, void *_id, bool H5_ATTR_UNUSED *id_changed, const void *obj)
 {
     uint8_t *id = (uint8_t *)_id; /* Object ID */
     uint8_t  id_flags;            /* Heap ID flag bits */
@@ -747,7 +747,7 @@ done:
 herr_t
 H5HF_close(H5HF_t *fh)
 {
-    hbool_t pending_delete = FALSE;       /* Whether the heap is pending deletion */
+    bool    pending_delete = FALSE;       /* Whether the heap is pending deletion */
     haddr_t heap_addr      = HADDR_UNDEF; /* Address of heap (for deletion) */
     herr_t  ret_value      = SUCCEED;     /* Return value */
 

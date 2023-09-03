@@ -176,7 +176,7 @@
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE sizeof(uint32_t)
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
 /* Definitions for modify write buffer property */
-#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
+#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(bool)
 #define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE
 #define H5D_XFER_MODIFY_WRITE_BUF_ENC  H5P__dxfr_modify_write_buf_enc
 #define H5D_XFER_MODIFY_WRITE_BUF_DEC  H5P__dxfr_modify_write_buf_dec
@@ -295,7 +295,7 @@ static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
-static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
+static const bool                    H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -2254,8 +2254,8 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 {
     H5P_genplist_t *plist               = NULL;    /* Property list pointer */
     H5S_t          *space               = NULL;    /* Dataspace to hold selection */
-    hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
-    hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
+    bool            space_created       = FALSE;   /* Whether a new dataspace has been created */
+    bool            reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2471,8 +2471,8 @@ done:
 static herr_t
 H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *size /*out*/)
 {
-    const hbool_t *modify_write_buf = (const hbool_t *)value; /* Create local alias for values */
-    uint8_t      **pp               = (uint8_t **)_pp;
+    const bool *modify_write_buf = (const bool *)value; /* Create local alias for values */
+    uint8_t   **pp               = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2505,7 +2505,7 @@ H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *si
 static herr_t
 H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
 {
-    hbool_t        *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
+    bool           *modify_write_buf = (bool *)_value; /* Modify write buffer */
     const uint8_t **pp               = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -2516,7 +2516,7 @@ H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
     assert(modify_write_buf);
 
     /* Decode selection I/O mode property */
-    *modify_write_buf = (hbool_t) * (*pp)++;
+    *modify_write_buf = (bool)*(*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__dxfr_modify_write_buf_dec() */

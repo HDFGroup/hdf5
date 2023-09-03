@@ -391,7 +391,7 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
 #ifndef NDEBUG
     {
         H5VL_object_t *vol_obj_container;
-        hbool_t        is_native_vol_obj;
+        bool           is_native_vol_obj;
 
         /* Get the location object */
         if (NULL == (vol_obj_container = (H5VL_object_t *)H5I_object(loc_id)))
@@ -485,7 +485,7 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
 #ifndef NDEBUG
     {
         H5VL_object_t *vol_obj_container;
-        hbool_t        is_native_vol_obj;
+        bool           is_native_vol_obj;
 
         /* Get the location object */
         if (NULL == (vol_obj_container = (H5VL_object_t *)H5I_object(loc_id)))

@@ -45,11 +45,11 @@ static herr_t H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actu
 
 static herr_t H5Z__set_parms_nooptype(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[]);
 static herr_t H5Z__set_parms_atomic(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
-                                    hbool_t *need_not_compress);
+                                    bool *need_not_compress);
 static herr_t H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
-                                   hbool_t *need_not_compress);
+                                   bool *need_not_compress);
 static herr_t H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
-                                      hbool_t *need_not_compress);
+                                      bool *need_not_compress);
 
 static void   H5Z__nbit_next_byte(size_t *j, size_t *buf_len);
 static void   H5Z__nbit_decompress_one_byte(unsigned char *data, size_t data_offset, unsigned k,
@@ -416,7 +416,7 @@ done:
  */
 static herr_t
 H5Z__set_parms_atomic(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
-                      hbool_t *need_not_compress)
+                      bool *need_not_compress)
 {
     H5T_order_t dtype_order;         /* Atomic datatype's endianness order */
     size_t      dtype_size;          /* Atomic datatype's size (in bytes) */
@@ -504,7 +504,7 @@ done:
  */
 static herr_t
 H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
-                     hbool_t *need_not_compress)
+                     bool *need_not_compress)
 {
     H5T_t      *dtype_base = NULL;   /* Array datatype's base datatype */
     H5T_class_t dtype_base_class;    /* Array datatype's base datatype's class */
@@ -604,7 +604,7 @@ done:
  */
 static herr_t
 H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
-                        hbool_t *need_not_compress)
+                        bool *need_not_compress)
 {
     int         snmembers;           /* Compound datatype's number of members */
     unsigned    nmembers;            /* Compound datatype's number of members */
@@ -758,7 +758,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     unsigned       *cd_values = NULL;                 /* Filter parameters */
     hssize_t        npoints;                          /* Number of points in the dataspace */
     H5T_class_t     dtype_class;                      /* Datatype's class */
-    hbool_t         need_not_compress;   /* Flag if TRUE indicating no need to do nbit compression */
+    bool            need_not_compress;   /* Flag if TRUE indicating no need to do nbit compression */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

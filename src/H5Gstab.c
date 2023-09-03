@@ -74,7 +74,7 @@ typedef struct H5G_bt_it_lbi_t {
 
     /* upward */
     H5O_link_t *lnk;   /*link to be returned                        */
-    hbool_t     found; /*whether we found the link                  */
+    bool        found; /*whether we found the link                  */
 } H5G_bt_it_lbi_t;
 
 /********************/
@@ -365,7 +365,7 @@ H5G__stab_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, 
     H5O_stab_t  stab;                 /* Symbol table message		*/
     H5G_bt_rm_t udata;                /* Data to pass through B-tree	*/
     H5O_link_t  obj_lnk;              /* Object's link within group */
-    hbool_t     lnk_copied = FALSE;   /* Whether the link was copied */
+    bool        lnk_copied = FALSE;   /* Whether the link was copied */
     herr_t      ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -677,7 +677,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
     H5HL_t          *heap = NULL;           /* Pointer to local heap */
     H5O_stab_t       stab;                  /* Info about local heap & B-tree */
     H5G_bt_it_gnbi_t udata;                 /* Iteration information */
-    hbool_t          udata_valid = FALSE;   /* Whether iteration information is valid */
+    bool             udata_valid = FALSE;   /* Whether iteration information is valid */
     herr_t           ret_value   = SUCCEED; /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
@@ -785,7 +785,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5HL_t           *heap = NULL;         /* Pointer to local heap */
     H5G_bt_lkp_t      bt_udata;            /* Data to pass through B-tree	*/
@@ -961,7 +961,7 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
 {
     H5O_stab_t stab;                /* Current symbol table */
     H5HL_t    *heap      = NULL;    /* Pointer to local heap */
-    hbool_t    changed   = FALSE;   /* Whether stab has been modified */
+    bool       changed   = FALSE;   /* Whether stab has been modified */
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)

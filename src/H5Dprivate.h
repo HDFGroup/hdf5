@@ -104,7 +104,7 @@
 #define H5D_XFER_COLL_RANK0_BCAST_NAME "coll_rank0_bcast"
 
 /* Definitions for general collective I/O instrumentation properties */
-#define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(hbool_t)
+#define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(bool)
 #define H5D_XFER_COLL_RANK0_BCAST_DEF  FALSE
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
@@ -172,7 +172,7 @@ H5_DLL hid_t       H5D_get_create_plist(const H5D_t *dset);
 H5_DLL hid_t       H5D_get_access_plist(const H5D_t *dset);
 
 /* Functions that operate on chunked storage */
-H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
+H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);
 
 /* Functions that operate on virtual storage */
 H5_DLL herr_t H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,

@@ -208,7 +208,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__chunk_unprotect(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t dirtied)
+H5O__chunk_unprotect(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, bool dirtied)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
