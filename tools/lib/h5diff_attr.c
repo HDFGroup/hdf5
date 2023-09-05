@@ -326,8 +326,8 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
     size_t     msize2;                      /* memory size of memory type */
     void      *buf1        = NULL;          /* data buffer */
     void      *buf2        = NULL;          /* data buffer */
-    hbool_t    buf1hasdata = FALSE;         /* buffer has data */
-    hbool_t    buf2hasdata = FALSE;         /* buffer has data */
+    bool       buf1hasdata = false;         /* buffer has data */
+    bool       buf2hasdata = false;         /* buffer has data */
     int        rank1;                       /* rank of dataset */
     int        rank2;                       /* rank of dataset */
     hsize_t    dims1[H5S_MAX_RANK];         /* dimensions of dataset */
@@ -443,7 +443,7 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Aget_type first attribute failed");
         }
         else
-            buf1hasdata = TRUE;
+            buf1hasdata = true;
         H5TOOLS_DEBUG("attr H5Aread 1");
 
         if (H5Aread(attr2_id, mtype2_id, buf2) < 0) {
@@ -451,7 +451,7 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "H5Aget_type second attribute failed");
         }
         else
-            buf2hasdata = TRUE;
+            buf2hasdata = true;
         H5TOOLS_DEBUG("attr H5Aread 2");
 
         /* format output string */
@@ -530,12 +530,12 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
     /* Free buf1 and buf2, check both VLEN-data VLEN-string to reclaim any
      * VLEN memory first */
-    if (TRUE == h5tools_detect_vlen(mtype1_id))
+    if (true == h5tools_detect_vlen(mtype1_id))
         H5Treclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
     free(buf1);
     buf1 = NULL;
 
-    if (TRUE == h5tools_detect_vlen(mtype2_id))
+    if (true == h5tools_detect_vlen(mtype2_id))
         H5Treclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
     free(buf2);
     buf2 = NULL;
@@ -559,12 +559,12 @@ done:
     H5E_BEGIN_TRY
     {
         if (buf1) {
-            if (buf1hasdata && TRUE == h5tools_detect_vlen(mtype1_id))
+            if (buf1hasdata && true == h5tools_detect_vlen(mtype1_id))
                 H5Treclaim(mtype1_id, space1_id, H5P_DEFAULT, buf1);
             free(buf1);
         } /* end if */
         if (buf2) {
-            if (buf2hasdata && TRUE == h5tools_detect_vlen(mtype2_id))
+            if (buf2hasdata && true == h5tools_detect_vlen(mtype2_id))
                 H5Treclaim(mtype2_id, space2_id, H5P_DEFAULT, buf2);
             free(buf2);
         } /* end if */

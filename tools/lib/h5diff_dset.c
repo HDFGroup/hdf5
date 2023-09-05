@@ -351,10 +351,10 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
     /* Check if type is either VLEN-data or VLEN-string to reclaim any
      * VLEN memory buffer later
      */
-    if (TRUE == h5tools_detect_vlen(m_tid1))
-        vl_data1 = TRUE;
-    if (TRUE == h5tools_detect_vlen(m_tid2))
-        vl_data2 = TRUE;
+    if (true == h5tools_detect_vlen(m_tid1))
+        vl_data1 = true;
+    if (true == h5tools_detect_vlen(m_tid2))
+        vl_data2 = true;
     H5TOOLS_DEBUG("h5tools_detect_vlen %d:%d - errstat:%d", vl_data1, vl_data2, opts->err_stat);
 
     /*------------------------------------------------------------------------

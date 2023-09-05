@@ -33,13 +33,13 @@ static int TEST_3   = 0x4; /* Test 3 */
 static const char *FILENAME[] = {"meta_perf_1", "meta_perf_2", "meta_perf_3", NULL};
 
 /* Default values for performance. Can be changed through command line options */
-static int     NUM_DSETS   = 16;
-static int     NUM_ATTRS   = 8;
-static int     BATCH_ATTRS = 2;
-static hbool_t flush_dset  = FALSE;
-static hbool_t flush_attr  = FALSE;
-static int     nerrors     = 0; /* errors count */
-static hid_t   fapl;
+static int   NUM_DSETS   = 16;
+static int   NUM_ATTRS   = 8;
+static int   BATCH_ATTRS = 2;
+static bool  flush_dset  = false;
+static bool  flush_attr  = false;
+static int   nerrors     = 0; /* errors count */
+static hid_t fapl;
 
 /* Data space IDs */
 static hid_t space;
@@ -117,9 +117,9 @@ parse_options(int argc, char **argv)
 
                 case 'f': /* Call H5Fflush for each dataset or attribute */
                     if (!strcmp("a", (*argv + 2)))
-                        flush_attr = TRUE;
+                        flush_attr = true;
                     else if (!strcmp("d", (*argv + 2)))
-                        flush_dset = TRUE;
+                        flush_dset = true;
                     else {
                         nerrors++;
                         return (1);

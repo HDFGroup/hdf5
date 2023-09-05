@@ -213,7 +213,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
  */
 #define CATCH                                                                                                \
 catch_except:;                                                                                               \
-    past_catch = TRUE;
+    past_catch = true;
 
 /*
  * H5_LEAVE macro, used to facilitate control flow in a function. The argument

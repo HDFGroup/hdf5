@@ -3891,7 +3891,7 @@ gent_multi(void)
     }
     memb_map[H5FD_MEM_DEFAULT] = H5FD_MEM_SUPER;
 
-    H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE);
+    H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, false);
 
     fid = H5Fcreate(FILE36, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
@@ -7133,7 +7133,7 @@ gent_fs_strategy_threshold(void)
     fcpl = H5Pcreate(H5P_FILE_CREATE);
 
     /* Set file space information */
-    H5Pset_file_space_strategy(fcpl, STRATEGY, TRUE, (hsize_t)THRESHOLD10);
+    H5Pset_file_space_strategy(fcpl, STRATEGY, true, (hsize_t)THRESHOLD10);
     H5Pset_file_space_page_size(fcpl, (hsize_t)FSPACE_PAGE_SIZE);
 
     /* Create the file with the specified strategy and threshold */

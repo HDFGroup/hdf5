@@ -132,7 +132,7 @@ init_ref_path_table(void)
             return (-1);
 
         /* Iterate over objects in this file */
-        if (h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL, H5O_INFO_BASIC) < 0) {
+        if (h5trav_visit(thefile, "/", true, true, init_ref_path_cb, NULL, NULL, H5O_INFO_BASIC) < 0) {
             error_msg("unable to construct reference path table\n");
             h5tools_setstatus(EXIT_FAILURE);
         } /* end if */

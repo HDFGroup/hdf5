@@ -30,13 +30,13 @@ static struct h5_long_options l_opts[] = {
 
 /* Command line parameter settings */
 typedef struct mkgrp_opt_t {
-    char   *fname;   /* File name to operate on */
-    hbool_t latest;  /* Whether file should use latest format versions */
-    hbool_t verbose; /* Whether output should be verbose */
-    hbool_t parents; /* Whether to create intermediate groups */
-    size_t  ngroups; /* Number of groups to create */
-    char  **groups;  /* Pointer to array of group names */
-    hid_t   fapl_id; /* fapl to use when opening the file */
+    char  *fname;   /* File name to operate on */
+    bool   latest;  /* Whether file should use latest format versions */
+    bool   verbose; /* Whether output should be verbose */
+    bool   parents; /* Whether to create intermediate groups */
+    size_t ngroups; /* Number of groups to create */
+    char **groups;  /* Pointer to array of group names */
+    hid_t  fapl_id; /* fapl to use when opening the file */
 } mkgrp_opt_t;
 
 static mkgrp_opt_t params_g; /* Command line parameter settings */
@@ -135,8 +135,8 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 {
     int                opt;        /* Option from command line */
     size_t             curr_group; /* Current group name to copy */
-    hbool_t            custom_vol = FALSE;
-    hbool_t            custom_vfd = FALSE;
+    bool               custom_vol = false;
+    bool               custom_vfd = false;
     h5tools_vol_info_t vol_info;
     h5tools_vfd_info_t vfd_info;
     hid_t              tmp_fapl_id = H5I_INVALID_HID;
@@ -162,17 +162,17 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
             /* Create objects with the latest version of the format */
             case 'l':
-                options->latest = TRUE;
+                options->latest = true;
                 break;
 
             /* Create parent groups */
             case 'p':
-                options->parents = TRUE;
+                options->parents = true;
                 break;
 
             /* Verbose output */
             case 'v':
-                options->verbose = TRUE;
+                options->verbose = true;
                 break;
 
             /* Display version */
@@ -184,13 +184,13 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
             case '1':
                 vol_info.type    = VOL_BY_VALUE;
                 vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                custom_vol       = TRUE;
+                custom_vol       = true;
                 break;
 
             case '2':
                 vol_info.type   = VOL_BY_NAME;
                 vol_info.u.name = H5_optarg;
-                custom_vol      = TRUE;
+                custom_vol      = true;
                 break;
 
             case '3':
@@ -200,13 +200,13 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
             case '4':
                 vfd_info.type    = VFD_BY_VALUE;
                 vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                custom_vfd       = TRUE;
+                custom_vfd       = true;
                 break;
 
             case '5':
                 vfd_info.type   = VFD_BY_NAME;
                 vfd_info.u.name = H5_optarg;
-                custom_vfd      = TRUE;
+                custom_vfd      = true;
                 break;
 
             case '6':
@@ -346,7 +346,7 @@ main(int argc, char *argv[])
     /* Check for creating intermediate groups */
     if (params_g.parents) {
         /* Set the intermediate group creation property */
-        if (H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) {
+        if (H5Pset_create_intermediate_group(lcpl_id, true) < 0) {
             error_msg("Could not set property for creating parent groups\n");
             leave(EXIT_FAILURE);
         }

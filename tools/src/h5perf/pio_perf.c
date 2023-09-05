@@ -83,12 +83,12 @@
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE (!TRUE)
-#endif /* FALSE */
+#ifndef true
+#define true 1
+#endif /* true */
+#ifndef false
+#define false (!true)
+#endif /* false */
 
 /* global variables */
 FILE    *output;              /* output file                          */
@@ -1255,13 +1255,13 @@ parse_command_line(int argc, const char *const *argv)
     cl_opts->interleaved   = 0;     /* Default to contiguous blocks in dataset */
     cl_opts->collective    = 0;     /* Default to independent I/O access */
     cl_opts->dim2d         = 0;     /* Default to 1D */
-    cl_opts->print_times   = FALSE; /* Printing times is off by default */
-    cl_opts->print_raw     = FALSE; /* Printing raw data throughput is off by default */
+    cl_opts->print_times   = false; /* Printing times is off by default */
+    cl_opts->print_raw     = false; /* Printing raw data throughput is off by default */
     cl_opts->h5_alignment  = 1;     /* No alignment for HDF5 objects by default */
     cl_opts->h5_threshold  = 1;     /* No threshold for aligning HDF5 objects by default */
-    cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
-    cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
-    cl_opts->verify        = FALSE; /* No Verify data correctness by default */
+    cl_opts->h5_use_chunks = false; /* Don't chunk the HDF5 dataset by default */
+    cl_opts->h5_write_only = false; /* Do both read and write by default */
+    cl_opts->verify        = false; /* No Verify data correctness by default */
 
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
@@ -1313,7 +1313,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
             case 'c':
                 /* Turn on chunked HDF5 dataset creation */
-                cl_opts->h5_use_chunks = TRUE;
+                cl_opts->h5_use_chunks = true;
                 break;
             case 'C':
                 cl_opts->collective = 1;
@@ -1354,15 +1354,15 @@ parse_command_line(int argc, const char *const *argv)
                         switch (*buf) {
                             case 'r':
                                 /* Turn on raw data throughput info */
-                                cl_opts->print_raw = TRUE;
+                                cl_opts->print_raw = true;
                                 break;
                             case 't':
                                 /* Turn on time printing */
-                                cl_opts->print_times = TRUE;
+                                cl_opts->print_times = true;
                                 break;
                             case 'v':
                                 /* Turn on verify data correctness*/
-                                cl_opts->verify = TRUE;
+                                cl_opts->verify = true;
                                 break;
                             default:
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
@@ -1406,7 +1406,7 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->h5_threshold = parse_size_directive(H5_optarg);
                 break;
             case 'w':
-                cl_opts->h5_write_only = TRUE;
+                cl_opts->h5_write_only = true;
                 break;
             case 'x':
                 cl_opts->min_xfer_size = (size_t)parse_size_directive(H5_optarg);

@@ -233,7 +233,7 @@ main(int argc, char *argv[])
     size_t         u;
     H5E_auto2_t    func           = NULL;
     void          *edata          = NULL;
-    hbool_t        api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool           api_ctx_pushed = false; /* Whether API context pushed */
     herr_t         status         = SUCCEED;
     int            exit_value     = 0;
 
@@ -280,7 +280,7 @@ main(int argc, char *argv[])
         exit_value = 1;
         goto done;
     }
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     if (NULL == (vol_obj = (H5VL_object_t *)H5VL_vol_object(fid))) {
         fprintf(stderr, "cannot obtain vol_obj pointer\n");
@@ -807,7 +807,7 @@ done:
 
     /* Pop API context */
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 

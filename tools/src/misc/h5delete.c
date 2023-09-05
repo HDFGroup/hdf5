@@ -31,7 +31,7 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    hbool_t     quiet = FALSE;
+    bool        quiet = false;
     const char *name  = NULL;
     int         ret   = 0;
 
@@ -41,7 +41,7 @@ main(int argc, char *argv[])
                 usage();
                 return EXIT_FAILURE;
             }
-            quiet = TRUE;
+            quiet = true;
             name  = argv[2];
             break;
         case 2:

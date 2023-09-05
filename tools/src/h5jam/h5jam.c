@@ -23,7 +23,7 @@ hsize_t compute_user_block_size(hsize_t);
 hsize_t copy_some_to_file(int, int, hsize_t, hsize_t, ssize_t);
 void    parse_command_line(int, const char *const *);
 
-static int   do_clobber  = FALSE;
+static int   do_clobber  = false;
 static char *output_file = NULL;
 static char *input_file  = NULL;
 static char *ub_file     = NULL;
@@ -105,7 +105,7 @@ leave(int ret)
 void
 parse_command_line(int argc, const char *const *argv)
 {
-    int opt = FALSE;
+    int opt = false;
 
     /* parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -120,7 +120,7 @@ parse_command_line(int argc, const char *const *argv)
                 ub_file = HDstrdup(H5_optarg);
                 break;
             case 'c':
-                do_clobber = TRUE;
+                do_clobber = true;
                 break;
             case 'h':
                 usage(h5tools_getprogname());
@@ -294,7 +294,7 @@ main(int argc, char *argv[])
     startub = usize;
 
     if (usize > 0) {
-        if (do_clobber == TRUE) {
+        if (do_clobber == true) {
             /* where is max of the current size or the new UB */
             if (usize > newubsize) {
                 newubsize = usize;

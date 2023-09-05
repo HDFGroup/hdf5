@@ -198,7 +198,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 break;
 
             case 'l':
-                opts->follow_links = TRUE;
+                opts->follow_links = true;
                 break;
 
             case 'x':
@@ -241,7 +241,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 break;
 
             case 'C':
-                opts->disable_compact_subset = TRUE;
+                opts->disable_compact_subset = true;
                 break;
 
             case 'A':
@@ -323,13 +323,13 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case '1':
                 opts->vol_info[0].type    = VOL_BY_VALUE;
                 opts->vol_info[0].u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                opts->custom_vol[0]       = TRUE;
+                opts->custom_vol[0]       = true;
                 break;
 
             case '2':
                 opts->vol_info[0].type   = VOL_BY_NAME;
                 opts->vol_info[0].u.name = H5_optarg;
-                opts->custom_vol[0]      = TRUE;
+                opts->custom_vol[0]      = true;
                 break;
 
             case '3':
@@ -339,13 +339,13 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case '4':
                 opts->vol_info[1].type    = VOL_BY_VALUE;
                 opts->vol_info[1].u.value = (H5VL_class_value_t)atoi(H5_optarg);
-                opts->custom_vol[1]       = TRUE;
+                opts->custom_vol[1]       = true;
                 break;
 
             case '5':
                 opts->vol_info[1].type   = VOL_BY_NAME;
                 opts->vol_info[1].u.name = H5_optarg;
-                opts->custom_vol[1]      = TRUE;
+                opts->custom_vol[1]      = true;
                 break;
 
             case '6':
@@ -355,13 +355,13 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case '7':
                 opts->vfd_info[0].type    = VFD_BY_VALUE;
                 opts->vfd_info[0].u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                opts->custom_vfd[0]       = TRUE;
+                opts->custom_vfd[0]       = true;
                 break;
 
             case '8':
                 opts->vfd_info[0].type   = VFD_BY_NAME;
                 opts->vfd_info[0].u.name = H5_optarg;
-                opts->custom_vfd[0]      = TRUE;
+                opts->custom_vfd[0]      = true;
                 break;
 
             case '9':
@@ -371,13 +371,13 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case '0':
                 opts->vfd_info[1].type    = VFD_BY_VALUE;
                 opts->vfd_info[1].u.value = (H5FD_class_value_t)atoi(H5_optarg);
-                opts->custom_vfd[1]       = TRUE;
+                opts->custom_vfd[1]       = true;
                 break;
 
             case 'Y':
                 opts->vfd_info[1].type   = VFD_BY_NAME;
                 opts->vfd_info[1].u.name = H5_optarg;
-                opts->custom_vfd[1]      = TRUE;
+                opts->custom_vfd[1]      = true;
                 break;
 
             case 'Z':

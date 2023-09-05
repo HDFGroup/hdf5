@@ -54,7 +54,7 @@ table_t            *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 
 unsigned    dump_indent = 0;     /* how far in to indent the line */
 int         unamedtype  = 0;     /* shared datatype with no name */
-hbool_t     hit_elink   = FALSE; /* whether we have traversed an external link */
+bool        hit_elink   = false; /* whether we have traversed an external link */
 size_t      prefix_len  = 1024;
 char       *prefix      = NULL;
 const char *fp_format   = NULL;
@@ -79,8 +79,8 @@ typedef struct {
     int display_vds_first;      /* vds display to all by default */
     int vds_gap_size;           /* vds skip missing files default is none */
 } dump_opt_t;
-dump_opt_t dump_opts = {TRUE, FALSE, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE,
-                        TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,  FALSE, 0};
+dump_opt_t dump_opts = {true, false, true,  true,  false, false, false, false, false,
+                        true, false, false, false, false, true,  false, 0};
 
 #define PACKED_BITS_MAX      8                       /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX (8 * sizeof(long long)) /* Maximum bits size of integer types of packed-bits */
