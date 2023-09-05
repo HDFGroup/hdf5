@@ -49,7 +49,7 @@ struct H5RS_str_t {
     char    *end;     /* Pointer to terminating NUL character at the end of the string */
     size_t   len;     /* Current length of the string */
     size_t   max;     /* Size of allocated buffer */
-    hbool_t  wrapped; /* Indicates that the string to be ref-counted is not copied */
+    bool     wrapped; /* Indicates that the string to be ref-counted is not copied */
     unsigned n;       /* Reference count of number of pointers sharing string */
 };
 
@@ -191,7 +191,7 @@ H5RS__prepare_for_append(H5RS_str_t *rs)
         if (rs->wrapped) {
             if (H5RS__xstrdup(rs, rs->s) < 0)
                 HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
-            rs->wrapped = FALSE;
+            rs->wrapped = false;
         } /* end if */
     }     /* end else */
 
@@ -316,7 +316,7 @@ H5RS_wrap(const char *s)
      *
      * We ignore warnings about storing a const char pointer in the struct
      * since we never modify or free the string when the wrapped struct
-     * field is set to TRUE.
+     * field is set to true.
      */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
     ret_value->s = (char *)s;
@@ -325,7 +325,7 @@ H5RS_wrap(const char *s)
     ret_value->len = HDstrlen(s);
     ret_value->end = ret_value->s + ret_value->len;
 
-    ret_value->wrapped = TRUE;
+    ret_value->wrapped = true;
     ret_value->max     = 0; /* Wrapped, not allocated */
     ret_value->n       = 1;
 
@@ -602,7 +602,7 @@ H5RS_incr(H5RS_str_t *rs)
     if (rs->wrapped) {
         if (H5RS__xstrdup(rs, rs->s) < 0)
             HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
-        rs->wrapped = FALSE;
+        rs->wrapped = false;
     } /* end if */
 
     /* Increment reference count for string */

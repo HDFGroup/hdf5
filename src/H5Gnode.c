@@ -72,12 +72,12 @@ static herr_t    H5G__node_create(H5F_t *f, H5B_ins_t op, void *_lt_key, void *_
                                   haddr_t *addr_p /*out*/);
 static int       H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
 static int       H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
-static herr_t    H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key, hbool_t *found, void *_udata);
-static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key, hbool_t *lt_key_changed,
-                                  void *_md_key, void *_udata, void *_rt_key, hbool_t *rt_key_changed,
+static herr_t    H5G__node_found(H5F_t *f, haddr_t addr, const void *_lt_key, bool *found, void *_udata);
+static H5B_ins_t H5G__node_insert(H5F_t *f, haddr_t addr, void *_lt_key, bool *lt_key_changed, void *_md_key,
+                                  void *_udata, void *_rt_key, bool *rt_key_changed,
                                   haddr_t *new_node_p /*out*/);
-static H5B_ins_t H5G__node_remove(H5F_t *f, haddr_t addr, void *lt_key, hbool_t *lt_key_changed, void *udata,
-                                  void *rt_key, hbool_t *rt_key_changed);
+static H5B_ins_t H5G__node_remove(H5F_t *f, haddr_t addr, void *lt_key, bool *lt_key_changed, void *udata,
+                                  void *rt_key, bool *rt_key_changed);
 static herr_t    H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
 static herr_t    H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
 static herr_t H5G__node_debug_key(FILE *stream, int indent, int fwidth, const void *key, const void *udata);
@@ -96,8 +96,8 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G__node_cmp3,         /*cmp3          */
     H5G__node_found,        /*found         */
     H5G__node_insert,       /*insert        */
-    TRUE,                   /*follow min branch?    */
-    TRUE,                   /*follow max branch?    */
+    true,                   /*follow min branch?    */
+    true,                   /*follow max branch?    */
     H5B_RIGHT,              /*critical key  */
     H5G__node_remove,       /*remove        */
     H5G__node_decode_key,   /*decode        */
@@ -246,7 +246,7 @@ H5G__node_free(H5G_node_t *sym)
     assert(sym);
 
     /* Verify that node is clean */
-    assert(sym->cache_info.is_dirty == FALSE);
+    assert(sym->cache_info.is_dirty == false);
 
     if (sym->entry)
         sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
@@ -435,14 +435,14 @@ done:
  *              entry field.  Otherwise the entry is copied from the
  *              UDATA entry field to the symbol table.
  *
- * Return:      Success:    Non-negative (TRUE/FALSE) if found and data
+ * Return:      Success:    Non-negative (true/false) if found and data
  *                          returned through the UDATA pointer, if *FOUND is true.
  *              Failure:    Negative if not found.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, hbool_t *found, void *_udata)
+H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, bool *found, void *_udata)
 {
     H5G_bt_lkp_t *udata = (H5G_bt_lkp_t *)_udata;
     H5G_node_t   *sn    = NULL;
@@ -485,10 +485,10 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, hboo
     } /* end while */
 
     if (cmp)
-        *found = FALSE;
+        *found = false;
     else {
         /* Set the 'found it' flag */
-        *found = TRUE;
+        *found = true;
 
         /* Call user's callback operator */
         if ((udata->op)(&sn->entry[idx], udata->op_data) < 0)
@@ -531,8 +531,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
-H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H5_ATTR_UNUSED *lt_key_changed,
-                 void *_md_key, void *_udata, void *_rt_key, hbool_t *rt_key_changed, haddr_t *new_node_p)
+H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_ATTR_UNUSED *lt_key_changed,
+                 void *_md_key, void *_udata, void *_rt_key, bool *rt_key_changed, haddr_t *new_node_p)
 {
     H5G_node_key_t *md_key = (H5G_node_key_t *)_md_key;
     H5G_node_key_t *rt_key = (H5G_node_key_t *)_rt_key;
@@ -628,7 +628,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
             insert_into = snrt;
             if (idx == (int)H5F_SYM_LEAF_K(f)) {
                 rt_key->offset  = ent.name_off;
-                *rt_key_changed = TRUE;
+                *rt_key_changed = true;
             } /* end if */
         }     /* end else */
     }         /* end if */
@@ -639,7 +639,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
         insert_into = sn;
         if (idx == (int)sn->nsyms) {
             rt_key->offset  = ent.name_off;
-            *rt_key_changed = TRUE;
+            *rt_key_changed = true;
         } /* end if */
     }     /* end else */
 
@@ -690,8 +690,8 @@ done:
  */
 static H5B_ins_t
 H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*in,out*/,
-                 hbool_t H5_ATTR_UNUSED *lt_key_changed /*out*/, void *_udata /*in,out*/,
-                 void *_rt_key /*in,out*/, hbool_t *rt_key_changed /*out*/)
+                 bool H5_ATTR_UNUSED *lt_key_changed /*out*/, void *_udata /*in,out*/,
+                 void *_rt_key /*in,out*/, bool *rt_key_changed /*out*/)
 {
     H5G_node_key_t *rt_key   = (H5G_node_key_t *)_rt_key;
     H5G_bt_rm_t    *udata    = (H5G_bt_rm_t *)_udata;
@@ -743,7 +743,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
         link_name_len = HDstrlen(lnk.name) + 1;
 
         /* Set up rest of link structure */
-        lnk.corder_valid = FALSE;
+        lnk.corder_valid = false;
         lnk.corder       = 0;
         lnk.cset         = H5T_CSET_ASCII;
         if (sn->entry[idx].type == H5G_CACHED_SLINK) {
@@ -822,7 +822,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
             sn->nsyms -= 1;
             sn_flags |= H5AC__DIRTIED_FLAG;
             rt_key->offset  = sn->entry[sn->nsyms - 1].name_off;
-            *rt_key_changed = TRUE;
+            *rt_key_changed = true;
             ret_value       = H5B_INS_NOOP;
         }
         else {
@@ -1206,7 +1206,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
             tmp_src_oloc.addr = src_ent->header;
 
             /* Copy the shared object from source to destination */
-            if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, TRUE, &obj_type,
+            if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, true, &obj_type,
                                     (void **)&cpy_udata) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy object");
 
@@ -1239,7 +1239,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
         /* Set up common link data */
         lnk.cset         = H5F_DEFAULT_CSET; /* XXX: Allow user to set this */
         lnk.corder       = 0;                /* Creation order is not tracked for old-style links */
-        lnk.corder_valid = FALSE;            /* Creation order is not valid */
+        lnk.corder_valid = false;            /* Creation order is not valid */
         /* lnk.name = name; */               /* This will be set in callback */
 
         /* Determine name of source object */

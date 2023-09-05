@@ -104,7 +104,7 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
     assert(dst_oloc);
 
     /* Perform the copy, or look up existing copy */
-    if ((ret_value = H5O_copy_header_map(src_oloc, dst_oloc, cpy_info, FALSE, NULL, NULL)) < 0)
+    if ((ret_value = H5O_copy_header_map(src_oloc, dst_oloc, cpy_info, false, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object");
 
     /* Check if a new valid object is copied to the destination */
@@ -295,7 +295,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
     hid_t               tid_dst       = H5I_INVALID_HID;             /* Datatype ID for memory datatype */
     H5T_path_t         *tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
     size_t              i;                                           /* Local index variable */
-    hbool_t             reg_tid_src             = (tid_src == H5I_INVALID_HID);
+    bool                reg_tid_src             = (tid_src == H5I_INVALID_HID);
     hid_t               dst_loc_id              = H5I_INVALID_HID;
     void               *conv_buf                = NULL;        /* Buffer for converting data */
     size_t              conv_buf_size           = 0;           /* Buffer size */
@@ -309,13 +309,13 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
     FUNC_ENTER_PACKAGE
 
     /* Create datatype ID for src datatype. */
-    if ((tid_src == H5I_INVALID_HID) && (tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)
+    if ((tid_src == H5I_INVALID_HID) && (tid_src = H5I_register(H5I_DATATYPE, dt_src, false)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register source file datatype");
 
     /* create a memory copy of the reference datatype */
     if (NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy");
-    if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0) {
+    if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, false)) < 0) {
         (void)H5T_close_real(dt_mem);
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register memory datatype");
     } /* end if */
@@ -327,7 +327,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
         (void)H5T_close_real(dt_dst);
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "cannot mark datatype on disk");
     } /* end if */
-    if ((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, FALSE)) < 0) {
+    if ((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, false)) < 0) {
         (void)H5T_close_real(dt_dst);
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype");
     } /* end if */
@@ -379,7 +379,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
             if (H5R__set_obj_token(ref, (const H5O_token_t *)&tmp_token, token_size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set object token");
             /* Do not set app_ref since references are released once the copy is done */
-            if (H5R__set_loc_id(ref, dst_loc_id, TRUE, FALSE) < 0)
+            if (H5R__set_loc_id(ref, dst_loc_id, true, false) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set destination loc id");
         } /* end if */
     }     /* end for */

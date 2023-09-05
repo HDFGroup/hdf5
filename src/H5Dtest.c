@@ -136,7 +136,7 @@ done:
  USAGE
     herr_t H5D__layout_compact_dirty_test(did, dirty)
         hid_t did;              IN: Dataset to query
-        hbool_t *dirty;         OUT: Pointer to location to place "dirty" info
+        bool *dirty;         OUT: Pointer to location to place "dirty" info
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -148,7 +148,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5D__layout_compact_dirty_test(hid_t did, hbool_t *dirty)
+H5D__layout_compact_dirty_test(hid_t did, bool *dirty)
 {
     H5D_t *dset;                /* Pointer to dataset to query */
     herr_t ret_value = SUCCEED; /* return value */

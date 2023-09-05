@@ -122,7 +122,7 @@ done:
 
     /* Release resources */
     if (cont_chk_proxy)
-        if (H5O__chunk_unprotect(f, cont_chk_proxy, FALSE) < 0)
+        if (H5O__chunk_unprotect(f, cont_chk_proxy, false) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk");
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -208,7 +208,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O__chunk_unprotect(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t dirtied)
+H5O__chunk_unprotect(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, bool dirtied)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

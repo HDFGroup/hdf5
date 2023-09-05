@@ -916,14 +916,14 @@ H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
  *          \code
  *          plist_class_id = H5Pget_class (dsetA_plist);
  *
- *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = TRUE;
+ *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = true;
  *              [ H5P_OBJECT_CREATE is the property list class    ]
  *              [ returned by H5Pget_class.                        ]
  *
- *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = TRUE;
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = true;
  *              [ H5P_DATASET_CREATE is the property list class.  ]
  *
- *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = TRUE;
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = true;
  *              [ H5P_DATASET_XFER is the property list class.    ]
  *
  *          .
@@ -2081,7 +2081,7 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  *       are being recorded
  *
  * \plist_id
- * \param[out] track_times Boolean value, 1 (TRUE) or 0 (FALSE),
+ * \param[out] track_times Boolean value, 1 (true) or 0 (false),
  *             specifying whether object times are being recorded
  *
  * \return \herr_t
@@ -5807,7 +5807,7 @@ H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
  *          <i>no dataset attributes</i> hint setting for the dataset
  *          creation property list \p dcpl_id. This setting is used to
  *          inform the library to create minimized dataset object headers
- *          when TRUE. The setting value is returned in the boolean pointer
+ *          when true. The setting value is returned in the boolean pointer
  *          \p minimize.
  *
  * \since 1.10.5
@@ -6296,13 +6296,13 @@ H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
  *          hint setting for the dataset creation property list \p dcpl_id.
  *          Datasets created with the dataset creation property list
  *          \p dcpl_id will have their object headers minimized if the
- *          boolean flag \p minimize is set to TRUE. By setting \p minimize
- *          to TRUE, the library expects that no attributes will be added
+ *          boolean flag \p minimize is set to true. By setting \p minimize
+ *          to true, the library expects that no attributes will be added
  *          to the dataset. Attributes can be added, but they are appended
  *          with a continuation message, which can reduce performance.
  *
  *          This setting interacts with H5Fset_dset_no_attrs_hint(): if
- *          either is set to TRUE, then the created dataset's object header
+ *          either is set to true, then the created dataset's object header
  *          will be minimized.
  *
  * \since 1.10.5
@@ -8408,14 +8408,14 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  * \details H5Pset_modify_write_buf() sets whether the library is allowed to
  *          modify the contents of write buffers passed to HDF5 API routines
  *          that are passed the dataset transfer property list \p plist_id.  The
- *          default value for modify_write_buf is FALSE.
+ *          default value for modify_write_buf is false.
  *
  *          This function can be used to allow the library to perform in-place
  *          type conversion on write operations to save memory space.  After making an
- *          API call with this parameter set to TRUE, the contents of the write buffer
+ *          API call with this parameter set to true, the contents of the write buffer
  *          are undefined.
  *
- * \note    When modify_write_buf is set to TRUE the library may violate the
+ * \note    When modify_write_buf is set to true the library may violate the
  *          const qualifier on the API parameter for the write buffer.
  *
  * \since 1.14.1
@@ -8438,7 +8438,7 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf);
  *          from the dataset transfer property list \p plist_id.  This property
  *          determines whether the library is allowed to  modify the contents of
  *          write buffers passed to HDF5 API routines that are passed
- *          \p plist_id.  The default value for modify_write_buf is FALSE.
+ *          \p plist_id.  The default value for modify_write_buf is false.
  *
  * \since 1.14.1
  *

@@ -73,7 +73,7 @@ static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id
 static void   clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static herr_t ioc_open_files(int64_t file_context_id, int file_acc_flags);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
-                                 const char *config_dir, const char *subfile_dir, hbool_t truncate_if_exists);
+                                 const char *config_dir, const char *subfile_dir, bool truncate_if_exists);
 static herr_t open_config_file(const char *base_filename, const char *config_dir, uint64_t file_id,
                                const char *mode, FILE **config_file_out);
 
@@ -441,12 +441,12 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 
 #ifndef NDEBUG
     {
-        hbool_t topology_cached = FALSE;
+        bool topology_cached = false;
 
         /* Make sure this application topology object is in the cache */
         for (size_t i = 0; i < sf_topology_cache_num_entries; i++)
             if (topology == sf_topology_cache[i])
-                topology_cached = TRUE;
+                topology_cached = true;
         assert(topology_cached);
     }
 #endif
@@ -510,7 +510,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
 {
     H5P_genplist_t *plist         = NULL;
     uint64_t        stub_file_id  = UINT64_MAX;
-    hbool_t         bcasted_inode = FALSE;
+    bool            bcasted_inode = false;
     H5FD_t         *stub_file     = NULL;
     hid_t           fapl_id       = H5I_INVALID_HID;
     int             mpi_rank      = 0;
@@ -539,7 +539,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
         MPI_Comm  stub_comm = MPI_COMM_SELF;
         MPI_Info  stub_info = MPI_INFO_NULL;
 
-        if ((fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, FALSE)) < 0)
+        if ((fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, false)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't create FAPL for stub file");
         if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -568,7 +568,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
             stub_file_id = (uint64_t)st.st_ino;
     }
 
-    bcasted_inode = TRUE;
+    bcasted_inode = true;
 
     if (mpi_size > 1) {
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T, 0, file_comm)))
@@ -1106,7 +1106,7 @@ init_app_topology(int64_t sf_context_id, H5FD_subfiling_params_t *subfiling_conf
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling topology object");
         app_topology->app_layout         = NULL;
         app_topology->app_comm           = MPI_COMM_NULL;
-        app_topology->rank_is_ioc        = FALSE;
+        app_topology->rank_is_ioc        = false;
         app_topology->ioc_idx            = -1;
         app_topology->n_io_concentrators = ioc_count;
         app_topology->io_concentrators   = NULL;
@@ -1594,7 +1594,7 @@ compare_layout_nodelocal(const void *layout1, const void *layout2)
  *              can also select one or more additional IOCs.
  *
  *              As a side effect, we fill the 'io_concentrators' vector
- *              and set the 'rank_is_ioc' flag to TRUE if our rank is
+ *              and set the 'rank_is_ioc' flag to true if our rank is
  *              identified as owning an I/O Concentrator (IOC).
  *
  *-------------------------------------------------------------------------
@@ -1658,7 +1658,7 @@ identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topology, int rank_
                     assert(!app_topology->rank_is_ioc);
 
                     app_topology->ioc_idx     = total_ioc_count;
-                    app_topology->rank_is_ioc = TRUE;
+                    app_topology->rank_is_ioc = true;
                 }
 
                 total_ioc_count++;
@@ -1681,7 +1681,7 @@ identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topology, int rank_
                         assert(!app_topology->rank_is_ioc);
 
                         app_topology->ioc_idx     = total_ioc_count;
-                        app_topology->rank_is_ioc = TRUE;
+                        app_topology->rank_is_ioc = true;
                     }
 
                     total_ioc_count++;
@@ -1733,7 +1733,7 @@ identify_ioc_ranks(int64_t sf_context_id, sf_topology_t *app_topology, int rank_
 
                 if (app_layout->world_rank == io_concentrators[num_iocs_assigned]) {
                     app_topology->ioc_idx     = num_iocs_assigned;
-                    app_topology->rank_is_ioc = TRUE;
+                    app_topology->rank_is_ioc = true;
                 }
             }
 
@@ -2273,14 +2273,14 @@ done:
  */
 static herr_t
 create_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *config_dir,
-                   const char *subfile_dir, hbool_t truncate_if_exists)
+                   const char *subfile_dir, bool truncate_if_exists)
 {
-    hbool_t config_file_exists = FALSE;
-    FILE   *config_file        = NULL;
-    char   *config_filename    = NULL;
-    char   *line_buf           = NULL;
-    int     ret                = 0;
-    herr_t  ret_value          = SUCCEED;
+    bool   config_file_exists = false;
+    FILE  *config_file        = NULL;
+    char  *config_filename    = NULL;
+    char  *line_buf           = NULL;
+    int    ret                = 0;
+    herr_t ret_value          = SUCCEED;
 
     assert(sf_context);
     assert(base_filename);
@@ -2406,11 +2406,11 @@ static herr_t
 open_config_file(const char *base_filename, const char *config_dir, uint64_t file_id, const char *mode,
                  FILE **config_file_out)
 {
-    hbool_t config_file_exists = FALSE;
-    FILE   *config_file        = NULL;
-    char   *config_filename    = NULL;
-    int     ret                = 0;
-    herr_t  ret_value          = SUCCEED;
+    bool   config_file_exists = false;
+    FILE  *config_file        = NULL;
+    char  *config_filename    = NULL;
+    int    ret                = 0;
+    herr_t ret_value          = SUCCEED;
 
     assert(base_filename);
     assert(config_dir);
@@ -2568,8 +2568,8 @@ herr_t
 H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath)
 {
     hsize_t path_len         = HSIZE_UNDEF;
-    hbool_t bcasted_path_len = FALSE;
-    hbool_t bcasted_path     = FALSE;
+    bool    bcasted_path_len = false;
+    bool    bcasted_path     = false;
     char   *resolved_path    = NULL;
     char   *file_basename    = NULL;
     char   *file_dirname     = NULL;
@@ -2632,7 +2632,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     }
 
     /* Broadcast the size of the resolved filepath string to other ranks */
-    bcasted_path_len = TRUE;
+    bcasted_path_len = true;
     if (mpi_size > 1) {
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
@@ -2647,7 +2647,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     }
 
     /* Broadcast the resolved filepath to other ranks */
-    bcasted_path = TRUE;
+    bcasted_path = true;
     if (mpi_size > 1) {
         H5_CHECK_OVERFLOW(path_len, hsize_t, int);
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))

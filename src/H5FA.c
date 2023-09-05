@@ -55,7 +55,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata);
+static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata);
 
 /*********************/
 /* Package Variables */
@@ -97,7 +97,7 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  *-------------------------------------------------------------------------
  */
 static H5FA_t *
-H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
+H5FA__new(H5F_t *f, haddr_t fa_addr, bool from_open, void *ctx_udata)
 {
     H5FA_t     *fa        = NULL; /* Pointer to new fixed array */
     H5FA_hdr_t *hdr       = NULL; /* The fixed array header information */
@@ -178,7 +178,7 @@ H5FA_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL, "can't create fixed array header");
 
     /* Allocate and initialize new fixed array wrapper */
-    if (NULL == (fa = H5FA__new(f, fa_addr, FALSE, ctx_udata)))
+    if (NULL == (fa = H5FA__new(f, fa_addr, false, ctx_udata)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL,
                     "allocation and/or initialization failed for fixed array wrapper");
 
@@ -216,7 +216,7 @@ H5FA_open(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
     assert(H5_addr_defined(fa_addr));
 
     /* Allocate and initialize new fixed array wrapper */
-    if (NULL == (fa = H5FA__new(f, fa_addr, TRUE, ctx_udata)))
+    if (NULL == (fa = H5FA__new(f, fa_addr, true, ctx_udata)))
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINIT, NULL,
                     "allocation and/or initialization failed for fixed array wrapper");
 
@@ -297,9 +297,9 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
     H5FA_dblk_page_t *dblk_page = NULL;               /* Pointer to fixed array Data block page */
     unsigned dblock_cache_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting fixed array Data block */
     unsigned dblk_page_cache_flags =
-        H5AC__NO_FLAGS_SET;    /* Flags to unprotecting FIxed Array Data block page */
-    hbool_t hdr_dirty = FALSE; /* Whether header information changed */
-    herr_t  ret_value = SUCCEED;
+        H5AC__NO_FLAGS_SET;   /* Flags to unprotecting FIxed Array Data block page */
+    bool   hdr_dirty = false; /* Whether header information changed */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -360,7 +360,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTCREATE, FAIL, "unable to create data block page");
 
             /* Mark data block page as initialized in data block */
-            H5VM_bit_set(dblock->dblk_page_init, page_idx, TRUE);
+            H5VM_bit_set(dblock->dblk_page_init, page_idx, true);
             dblock_cache_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
 
@@ -505,7 +505,7 @@ done:
 herr_t
 H5FA_close(H5FA_t *fa)
 {
-    hbool_t pending_delete = FALSE;       /* Whether the array is pending deletion */
+    bool    pending_delete = false;       /* Whether the array is pending deletion */
     haddr_t fa_addr        = HADDR_UNDEF; /* Address of array (for deletion) */
     herr_t  ret_value      = SUCCEED;
 
@@ -529,7 +529,7 @@ H5FA_close(H5FA_t *fa)
                 /* Set local info, so array deletion can occur after decrementing the
                  *  header's ref count
                  */
-                pending_delete = TRUE;
+                pending_delete = true;
                 fa_addr        = fa->hdr->addr;
             } /* end if */
         }     /* end if */
@@ -620,7 +620,7 @@ H5FA_delete(H5F_t *f, haddr_t fa_addr, void *ctx_udata)
 
     /* Check for files using shared array header */
     if (hdr->file_rc)
-        hdr->pending_delete = TRUE;
+        hdr->pending_delete = true;
     else {
         /* Set the shared array header's file context for this operation */
         hdr->f = f;

@@ -225,7 +225,7 @@ static herr_t  H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
                                void *buf);
 static herr_t  H5FD__ros3_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                 const void *buf);
-static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
@@ -306,7 +306,7 @@ H5FD_ros3_init(void)
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
-        H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), false);
         if (H5I_INVALID_HID == H5FD_ROS3_g) {
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
         }
@@ -423,7 +423,7 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
 
     /* if set to authenticate, region and id cannot be empty strings */
-    if (fa->authenticate == TRUE)
+    if (fa->authenticate == true)
         if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0'))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Inconsistent authentication information");
 
@@ -957,7 +957,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
-    if (fa.authenticate == TRUE) {
+    if (fa.authenticate == true) {
         /* compute signing key (part of AWS/S3 REST API)
          * can be re-used by user/key for 7 days after creation.
          * find way to re-use/share
@@ -1757,8 +1757,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
-                    hbool_t H5_ATTR_UNUSED closing)
+H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 

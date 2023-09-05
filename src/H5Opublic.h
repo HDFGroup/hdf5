@@ -745,7 +745,7 @@ H5_DLL herr_t H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5
  *      hid_t lcpl_id = H5Pcreate(H5P_LINK_CREATE);
  *
  *      // Sets "create missing intermediate groups" property in that LCPL.
- *      int status = H5Pset_create_intermediate_group(lcpl_id, TRUE);
+ *      int status = H5Pset_create_intermediate_group(lcpl_id, true);
  *
  *      // Creates a group without linking it into the file structure.
  *      hid_t gid  = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);

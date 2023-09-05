@@ -323,7 +323,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_FILE_SPACE_STRATEGY_DEF H5F_FSPACE_STRATEGY_FSM_AGGR
 
 /* Default free space section threshold used by free-space managers */
-#define H5F_FREE_SPACE_PERSIST_DEF FALSE
+#define H5F_FREE_SPACE_PERSIST_DEF false
 
 /* Default free space section threshold used by free-space managers */
 #define H5F_FREE_SPACE_THRESHOLD_DEF 1
@@ -491,8 +491,8 @@ typedef enum H5F_prefix_open_t {
 /* Private functions */
 H5_DLL herr_t H5F_init(void);
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/);
-H5_DLL hid_t  H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref);
+H5_DLL herr_t H5F_try_close(H5F_t *f, bool *was_closed /*out*/);
+H5_DLL hid_t  H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, bool app_ref);
 
 /* Functions that retrieve values from the file struct */
 H5_DLL H5F_libver_t  H5F_get_low_bound(const H5F_t *f);
@@ -503,27 +503,27 @@ H5_DLL char         *H5F_get_open_name(const H5F_t *f);
 H5_DLL char         *H5F_get_actual_name(const H5F_t *f);
 H5_DLL char         *H5F_get_extpath(const H5F_t *f);
 H5_DLL H5F_shared_t *H5F_get_shared(const H5F_t *f);
-H5_DLL hbool_t       H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
+H5_DLL bool          H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
 H5_DLL unsigned      H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned      H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned      H5F_decr_nopen_objs(H5F_t *f);
-H5_DLL hbool_t       H5F_file_id_exists(const H5F_t *f);
+H5_DLL bool          H5F_file_id_exists(const H5F_t *f);
 H5_DLL H5F_t        *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned      H5F_get_nmounts(const H5F_t *f);
 H5_DLL unsigned      H5F_get_read_attempts(const H5F_t *f);
-H5_DLL hid_t         H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
+H5_DLL hid_t         H5F_get_access_plist(H5F_t *f, bool app_ref);
 H5_DLL hid_t         H5F_get_id(H5F_t *file);
-H5_DLL herr_t  H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL herr_t  H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list,
-                               hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL herr_t  H5F_get_obj_count(const H5F_t *f, unsigned types, bool app_ref, size_t *obj_id_count_ptr);
+H5_DLL herr_t  H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, bool app_ref,
+                               size_t *obj_id_count_ptr);
 H5_DLL hsize_t H5F_get_pgend_meta_thres(const H5F_t *f);
-H5_DLL hbool_t H5F_get_point_of_no_return(const H5F_t *f);
-H5_DLL hbool_t H5F_get_null_fsm_addr(const H5F_t *f);
-H5_DLL hbool_t H5F_get_min_dset_ohdr(const H5F_t *f);
-H5_DLL herr_t  H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
+H5_DLL bool    H5F_get_point_of_no_return(const H5F_t *f);
+H5_DLL bool    H5F_get_null_fsm_addr(const H5F_t *f);
+H5_DLL bool    H5F_get_min_dset_ohdr(const H5F_t *f);
+H5_DLL herr_t  H5F_set_min_dset_ohdr(H5F_t *f, bool minimize);
 H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
 H5_DLL H5VL_object_t      *H5F_get_vol_obj(const H5F_t *f);
-H5_DLL hbool_t             H5F_get_file_locking(const H5F_t *f);
+H5_DLL bool                H5F_get_file_locking(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t            H5F_get_base_addr(const H5F_t *f);
@@ -540,45 +540,45 @@ H5_DLL unsigned           H5F_get_sohm_nindexes(const H5F_t *f);
 H5_DLL herr_t             H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes);
 H5_DLL hid_t              H5F_get_fcpl(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
-H5_DLL hbool_t            H5F_get_evict_on_close(const H5F_t *f);
+H5_DLL bool               H5F_get_evict_on_close(const H5F_t *f);
 H5_DLL size_t             H5F_rdcc_nbytes(const H5F_t *f);
 H5_DLL size_t             H5F_rdcc_nslots(const H5F_t *f);
 H5_DLL double             H5F_rdcc_w0(const H5F_t *f);
 H5_DLL size_t             H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned           H5F_gc_ref(const H5F_t *f);
-H5_DLL hbool_t            H5F_store_msg_crt_idx(const H5F_t *f);
-H5_DLL herr_t             H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
+H5_DLL bool               H5F_store_msg_crt_idx(const H5F_t *f);
+H5_DLL herr_t             H5F_set_store_msg_crt_idx(H5F_t *f, bool flag);
 H5_DLL struct H5UC_t     *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL herr_t             H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
-H5_DLL hbool_t            H5F_use_tmp_space(const H5F_t *f);
-H5_DLL hbool_t            H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
+H5_DLL bool               H5F_use_tmp_space(const H5F_t *f);
+H5_DLL bool               H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 H5_DLL hsize_t            H5F_get_alignment(const H5F_t *f);
 H5_DLL hsize_t            H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
 #endif /* H5_HAVE_PARALLEL */
-H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
-H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);
-H5_DLL char   *H5F_mdc_log_location(const H5F_t *f);
+H5_DLL bool  H5F_use_mdc_logging(const H5F_t *f);
+H5_DLL bool  H5F_start_mdc_log_on_access(const H5F_t *f);
+H5_DLL char *H5F_mdc_log_location(const H5F_t *f);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t   H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t  H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
-H5_DLL hbool_t H5F_shared_has_feature(const H5F_shared_t *f, unsigned feature);
-H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
+H5_DLL bool    H5F_shared_has_feature(const H5F_shared_t *f, unsigned feature);
+H5_DLL bool    H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
 H5_DLL herr_t  H5F_shared_get_file_driver(const H5F_shared_t *f_sh, H5FD_t **file_handle);
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
-H5_DLL hbool_t H5F_has_vector_select_io(const H5F_t *f, hbool_t is_write);
+H5_DLL bool    H5F_has_vector_select_io(const H5F_t *f, bool is_write);
 
 /* File mounting routines */
-H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
-H5_DLL herr_t  H5F_unmount(const struct H5G_loc_t *loc, const char *name);
-H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
-H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
-H5_DLL herr_t  H5F_traverse_mount(struct H5O_loc_t *oloc /*in,out*/);
-H5_DLL herr_t  H5F_flush_mounts(H5F_t *f);
+H5_DLL herr_t H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
+H5_DLL herr_t H5F_unmount(const struct H5G_loc_t *loc, const char *name);
+H5_DLL bool   H5F_is_mount(const H5F_t *file);
+H5_DLL bool   H5F_has_mount(const H5F_t *file);
+H5_DLL herr_t H5F_traverse_mount(struct H5O_loc_t *oloc /*in,out*/);
+H5_DLL herr_t H5F_flush_mounts(H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size,
@@ -640,10 +640,10 @@ H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
-H5_DLL herr_t  H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived);
-H5_DLL hbool_t H5F_get_coll_metadata_reads(const H5F_t *f);
-H5_DLL void H5F_set_coll_metadata_reads(H5F_t *f, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag);
-H5_DLL herr_t H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag);
+H5_DLL herr_t   H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_derived);
+H5_DLL bool     H5F_get_coll_metadata_reads(const H5F_t *f);
+H5_DLL void     H5F_set_coll_metadata_reads(H5F_t *f, H5P_coll_md_read_flag_t *file_flag, bool *context_flag);
+H5_DLL herr_t   H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, bool *flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
@@ -657,7 +657,7 @@ H5_DLL H5F_t *H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix
 /* Global heap CWFS routines */
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);
 H5_DLL herr_t H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr);
-H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap, hbool_t add_heap);
+H5_DLL herr_t H5F_cwfs_advance_heap(H5F_t *f, struct H5HG_heap_t *heap, bool add_heap);
 H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *heap);
 
 /* Debugging functions */

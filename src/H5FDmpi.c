@@ -214,7 +214,7 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
+H5FD_mpi_get_file_sync_required(H5FD_t *file, bool *file_sync_required)
 {
     const H5FD_class_t *cls;
     uint64_t            flags                  = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;

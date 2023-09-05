@@ -51,10 +51,10 @@
  *
  * `authenticate` (hbool_t)
  *
- *     Flag TRUE or FALSE whether or not requests are to be authenticated
+ *     Flag true or false whether or not requests are to be authenticated
  *     with the AWS4 algorithm.
- *     If TRUE, `aws_region`, `secret_id`, and `secret_key` must be populated.
- *     If FALSE, those three components are unused.
+ *     If true, `aws_region`, `secret_id`, and `secret_key` must be populated.
+ *     If false, those three components are unused.
  *
  * `aws_region` (char[])
  *
@@ -114,7 +114,7 @@
  *      to #H5FD_CURR_ROS3_FAPL_T_VERSION.
  *
  * \var hbool_t H5FD_ros3_fapl_t::authenticate
- *      A boolean which specifies if security credentials should be used for
+ *      A Boolean which specifies if security credentials should be used for
  *      accessing a S3 bucket.
  *
  * \var char H5FD_ros3_fapl_t::aws_region[H5FD_ROS3_MAX_REGION_LEN + 1]

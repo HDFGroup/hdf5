@@ -33,8 +33,8 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__cont_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__cont_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static size_t H5O__cont_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__cont_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static size_t H5O__cont_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__cont_free(void *mesg);
 static herr_t H5O__cont_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
 static herr_t H5O__cont_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
@@ -122,7 +122,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__cont_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_cont_t *cont = (const H5O_cont_t *)_mesg;
 
@@ -156,7 +156,7 @@ H5O__cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__cont_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
+H5O__cont_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
     size_t ret_value = 0; /* Return value */
 

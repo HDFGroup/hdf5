@@ -79,7 +79,7 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
     H5P_genplist_t *plist;
     H5G_loc_t       loc;     /* Object location */
     H5G_loc_t       obj_loc; /* Location used to open group */
-    hbool_t         loc_found = FALSE;
+    bool            loc_found = false;
     H5T_t          *type, *dt; /* Datatype to use for attribute */
     H5S_t          *space;     /* Dataspace to use for attribute */
     H5A_t          *attr      = NULL;

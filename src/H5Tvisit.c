@@ -80,8 +80,8 @@
 herr_t
 H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
 {
-    hbool_t is_complex;          /* Flag indicating current datatype is "complex" */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   is_complex;          /* Flag indicating current datatype is "complex" */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

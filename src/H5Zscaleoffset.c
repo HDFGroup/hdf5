@@ -757,7 +757,7 @@ H5Z__can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5
     const H5T_t *type;             /* Datatype */
     H5T_class_t  dtype_class;      /* Datatype's class */
     H5T_order_t  dtype_order;      /* Datatype's endianness order */
-    htri_t       ret_value = TRUE; /* Return value */
+    htri_t       ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -766,7 +766,7 @@ H5Z__can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Get datatype's class, for checking the "datatype class" */
-    if ((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
+    if ((dtype_class = H5T_get_class(type, true)) == H5T_NO_CLASS)
         HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     /* Get datatype's size, for checking the "datatype size" */
@@ -780,10 +780,10 @@ H5Z__can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5
 
         /* Range check datatype's endianness order */
         if (dtype_order != H5T_ORDER_LE && dtype_order != H5T_ORDER_BE)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FALSE, "bad datatype endianness order");
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, false, "bad datatype endianness order");
     }
     else
-        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FALSE, "datatype class not supported by scaleoffset");
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, false, "datatype class not supported by scaleoffset");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -966,7 +966,7 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     H5_CHECKED_ASSIGN(cd_values[H5Z_SCALEOFFSET_PARM_NELMTS], unsigned, npoints, hssize_t);
 
     /* Get datatype's class */
-    if ((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
+    if ((dtype_class = H5T_get_class(type, true)) == H5T_NO_CLASS)
         HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype class");
 
     /* Set "local" parameter for datatype's class */
@@ -1054,13 +1054,13 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if (status == H5D_FILL_VALUE_UNDEFINED)
         cd_values[H5Z_SCALEOFFSET_PARM_FILAVAIL] = H5Z_SCALEOFFSET_FILL_UNDEFINED;
     else {
-        int need_convert = FALSE; /* Flag indicating conversion of byte order */
+        int need_convert = false; /* Flag indicating conversion of byte order */
 
         cd_values[H5Z_SCALEOFFSET_PARM_FILAVAIL] = H5Z_SCALEOFFSET_FILL_DEFINED;
 
         /* Check if memory byte order matches dataset datatype byte order */
         if (H5T_native_order_g != dtype_order)
-            need_convert = TRUE;
+            need_convert = true;
 
         /* Before getting fill value, get its type */
         if ((scale_type = H5Z__scaleoffset_get_type(cd_values[H5Z_SCALEOFFSET_PARM_CLASS],
@@ -1109,7 +1109,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     uint32_t               minbits      = 0;                   /* minimum number of bits to store values */
     unsigned long long     minval       = 0;                   /* minimum value of input buffer */
     enum H5Z_scaleoffset_t type;                 /* memory type corresponding to dataset datatype */
-    int                    need_convert = FALSE; /* flag indicating conversion of byte order */
+    int                    need_convert = false; /* flag indicating conversion of byte order */
     unsigned char         *outbuf       = NULL;  /* pointer to new output buffer */
     unsigned               buf_offset   = 21;    /* buffer offset because of parameters stored in file */
     unsigned               i;                    /* index */
@@ -1125,12 +1125,12 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     switch (H5T_native_order_g) {
         case H5T_ORDER_LE: /* memory is little-endian byte order */
             if (cd_values[H5Z_SCALEOFFSET_PARM_ORDER] == H5Z_SCALEOFFSET_ORDER_BE)
-                need_convert = TRUE;
+                need_convert = true;
             break;
 
         case H5T_ORDER_BE: /* memory is big-endian byte order */
             if (cd_values[H5Z_SCALEOFFSET_PARM_ORDER] == H5Z_SCALEOFFSET_ORDER_LE)
-                need_convert = TRUE;
+                need_convert = true;
             break;
 
         case H5T_ORDER_ERROR:

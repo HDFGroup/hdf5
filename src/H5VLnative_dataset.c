@@ -133,7 +133,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
             dinfo[i].file_space = dinfo[i].dset->shared->space;
 
             /* Copy, but share, selection from property list to dataset's dataspace */
-            if (H5S_SELECT_COPY(dinfo[i].file_space, space, TRUE) < 0)
+            if (H5S_SELECT_COPY(dinfo[i].file_space, space, true) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataset I/O selection");
         } /* end else-if */
         else {
@@ -173,10 +173,10 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
         } /* end else */
 
         /* Check for valid selections */
-        if (H5S_SELECT_VALID(dinfo[i].file_space) != TRUE)
+        if (H5S_SELECT_VALID(dinfo[i].file_space) != true)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
                         "selection + offset not within extent for file dataspace");
-        if (H5S_SELECT_VALID(dinfo[i].mem_space) != TRUE)
+        if (H5S_SELECT_VALID(dinfo[i].mem_space) != true)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
                         "selection + offset not within extent for memory dataspace");
 
@@ -220,7 +220,7 @@ H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_s
 
         /* Reset file dataspace selection if it was copied from the property list */
         if (H5S_PLIST == file_space_id[i] && dinfo[i].file_space)
-            if (H5S_select_all(dinfo[i].file_space, TRUE) < 0)
+            if (H5S_select_all(dinfo[i].file_space, true) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
                             "unable to release file dataspace selection for H5S_PLIST");
     }

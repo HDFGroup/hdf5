@@ -91,7 +91,7 @@ H5EScreate(void)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, H5I_INVALID_HID, "can't create event set");
 
     /* Register the new event set to get an ID for it */
-    if ((ret_value = H5I_register(H5I_EVENTSET, es, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_EVENTSET, es, true)) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register event set");
 
 done:

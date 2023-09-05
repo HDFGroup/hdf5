@@ -45,7 +45,7 @@
 #define H5G_FHEAP_MAN_MAX_DIRECT_SIZE  (64 * 1024)
 #define H5G_FHEAP_MAN_MAX_INDEX        32
 #define H5G_FHEAP_MAN_START_ROOT_ROWS  1
-#define H5G_FHEAP_CHECKSUM_DBLOCKS     TRUE
+#define H5G_FHEAP_CHECKSUM_DBLOCKS     true
 #define H5G_FHEAP_MAX_MAN_SIZE         (4 * 1024)
 
 /* v2 B-tree creation macros for 'name' field index */
@@ -109,10 +109,10 @@ typedef struct {
 typedef struct {
     /* downward */
     H5G_bt2_ud_common_t common;          /* Common info for B-tree user data (must be first) */
-    hbool_t             rem_from_fheap;  /* Whether to remove the link from the fractal heap */
+    bool                rem_from_fheap;  /* Whether to remove the link from the fractal heap */
     haddr_t             corder_bt2_addr; /* Address of v2 B-tree indexing creation order */
     H5RS_str_t         *grp_full_path_r; /* Full path of group where link is removed */
-    hbool_t             replace_names;   /* Whether to replace the names of open objects */
+    bool                replace_names;   /* Whether to replace the names of open objects */
 } H5G_bt2_ud_rm_t;
 
 /*
@@ -124,7 +124,7 @@ typedef struct {
     H5F_t      *f;               /* Pointer to file that fractal heap is in */
     haddr_t     corder_bt2_addr; /* Address of v2 B-tree indexing creation order */
     H5RS_str_t *grp_full_path_r; /* Full path of group where link is removed */
-    hbool_t     replace_names;   /* Whether to replace the names of open objects */
+    bool        replace_names;   /* Whether to replace the names of open objects */
 } H5G_fh_ud_rm_t;
 
 /*
@@ -363,7 +363,7 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
     assert(lnk);
 
     /* Find out the size of buffer needed for serialized link */
-    if ((link_size = H5O_msg_raw_size(f, H5O_LINK_ID, FALSE, lnk)) == 0)
+    if ((link_size = H5O_msg_raw_size(f, H5O_LINK_ID, false, lnk)) == 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get link size");
 
     /* Wrap the local buffer for serialized link */
@@ -375,7 +375,7 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
     /* Create serialized form of link */
-    if (H5O_msg_encode(f, H5O_LINK_ID, FALSE, (unsigned char *)link_ptr, lnk) < 0)
+    if (H5O_msg_encode(f, H5O_LINK_ID, false, (unsigned char *)link_ptr, lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode link");
 
     /* Open the fractal heap */
@@ -472,7 +472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5G_bt2_ud_common_t udata;               /* User data for v2 B-tree link lookup */
     H5HF_t             *fheap     = NULL;    /* Fractal heap handle */
@@ -1309,10 +1309,10 @@ H5G__dense_remove(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_
     udata.common.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
     udata.common.found_op      = NULL;
     udata.common.found_op_data = NULL;
-    udata.rem_from_fheap       = TRUE;
+    udata.rem_from_fheap       = true;
     udata.corder_bt2_addr      = linfo->corder_bt2_addr;
     udata.grp_full_path_r      = grp_full_path_r;
-    udata.replace_names        = TRUE;
+    udata.replace_names        = true;
 
     /* Remove the record from the name index v2 B-tree */
     if (H5B2_remove(bt2, &udata, H5G__dense_remove_bt2_cb, &udata) < 0)
@@ -1574,7 +1574,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, hbool_t adj_link)
+H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, bool adj_link)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1605,10 +1605,10 @@ H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.common.name_hash     = 0;
         udata.common.found_op      = NULL;
         udata.common.found_op_data = NULL;
-        udata.rem_from_fheap       = FALSE; /* handled in "bulk" below by deleting entire heap */
+        udata.rem_from_fheap       = false; /* handled in "bulk" below by deleting entire heap */
         udata.corder_bt2_addr      = linfo->corder_bt2_addr;
         udata.grp_full_path_r      = NULL;
-        udata.replace_names        = FALSE;
+        udata.replace_names        = false;
 
         /* Delete the name index, adjusting the ref. count on links removed */
         if (H5B2_delete(f, linfo->name_bt2_addr, NULL, H5G__dense_remove_bt2_cb, &udata) < 0)

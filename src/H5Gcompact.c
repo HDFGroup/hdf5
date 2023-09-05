@@ -49,7 +49,7 @@ typedef struct {
 
     /* upward */
     H5O_link_t *lnk;   /* Link struct to fill in */
-    hbool_t    *found; /* Pointer to flag to indicate that the object was found */
+    bool       *found; /* Pointer to flag to indicate that the object was found */
 } H5G_iter_lkp_t;
 
 /* Private macros */
@@ -294,7 +294,7 @@ H5G__compact_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const ch
     udata.name            = name;
 
     /* Iterate over the link messages to delete the right one */
-    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, TRUE) < 0)
+    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, true) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message");
 
 done:
@@ -337,7 +337,7 @@ H5G__compact_remove_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5RS
     udata.name            = ltable.lnks[n].name;
 
     /* Iterate over the link messages to delete the right one */
-    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, TRUE) < 0)
+    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, true) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message");
 
 done:
@@ -420,7 +420,7 @@ H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_ud
         } /* end if */
 
         /* Indicate that the correct link was found */
-        *udata->found = TRUE;
+        *udata->found = true;
 
         /* Stop iteration now */
         HGOTO_DONE(H5_ITER_STOP);
@@ -435,12 +435,12 @@ done:
  *
  * Purpose:	Look up an object relative to a group, using link messages.
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ * Return:	Non-negative (true/false) on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
+H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, bool *found, H5O_link_t *lnk)
 {
     H5G_iter_lkp_t      udata;               /* User data for iteration callback */
     H5O_mesg_operator_t op;                  /* Message operator */

@@ -59,11 +59,11 @@
  */
 static unsigned int H5PL_plugin_control_mask_g = H5PL_ALL_PLUGIN;
 
-/* This flag will be set to FALSE if the HDF5_PLUGIN_PRELOAD
+/* This flag will be set to false if the HDF5_PLUGIN_PRELOAD
  * environment variable was set to H5PL_NO_PLUGIN at
  * package initialization.
  */
-static hbool_t H5PL_allow_plugins_g = TRUE;
+static bool H5PL_allow_plugins_g = true;
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__get_plugin_control_mask
@@ -143,7 +143,7 @@ H5PL_init(void)
     if (NULL != (env_var = HDgetenv(HDF5_PLUGIN_PRELOAD)))
         if (!HDstrcmp(env_var, H5PL_NO_PLUGIN)) {
             H5PL_plugin_control_mask_g = 0;
-            H5PL_allow_plugins_g       = FALSE;
+            H5PL_allow_plugins_g       = false;
         }
 
     /* Create the table of previously-loaded plugins */
@@ -174,8 +174,8 @@ done:
 int
 H5PL_term_package(void)
 {
-    hbool_t already_closed = FALSE;
-    int     ret_value      = 0;
+    bool already_closed = false;
+    int  ret_value      = 0;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -213,7 +213,7 @@ const void *
 H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 {
     H5PL_search_params_t search_params;       /* Plugin search parameters     */
-    hbool_t              found       = FALSE; /* Whether the plugin was found */
+    bool                 found       = false; /* Whether the plugin was found */
     const void          *plugin_info = NULL;  /* Information from the plugin  */
     const void          *ret_value   = NULL;
 
@@ -295,9 +295,9 @@ done:
  *              NULL.
  *
  *              On successful open of a plugin, the `success` parameter
- *              will be set to TRUE and the `plugin_type` and `plugin_info`
+ *              will be set to true and the `plugin_type` and `plugin_info`
  *              parameters will be filled appropriately. On failure, the
- *              `success` parameter will be set to FALSE, the `plugin_type`
+ *              `success` parameter will be set to false, the `plugin_type`
  *              parameter will be set to H5PL_TYPE_ERROR and the
  *              `plugin_info` parameter will be set to NULL.
  *
@@ -316,8 +316,8 @@ done:
  */
 H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
-H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *success,
-           H5PL_type_t *plugin_type, const void **plugin_info)
+H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *success, H5PL_type_t *plugin_type,
+           const void **plugin_info)
 {
     H5PL_HANDLE            handle          = NULL;
     H5PL_get_plugin_type_t get_plugin_type = NULL;
@@ -336,7 +336,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
     assert(plugin_info);
 
     /* Initialize out parameters */
-    *success     = FALSE;
+    *success     = false;
     *plugin_info = NULL;
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
@@ -386,7 +386,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
                 if (plugin_type)
                     *plugin_type = H5PL_TYPE_FILTER;
                 *plugin_info = (const void *)filter_info;
-                *success     = TRUE;
+                *success     = true;
             }
 
             break;

@@ -489,7 +489,7 @@ H5T__init_native_float_types(void)
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
-    if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+    if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_FLOAT_ALIGN_g = det.comp_align;
 
@@ -520,7 +520,7 @@ H5T__init_native_float_types(void)
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
-    if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+    if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_DOUBLE_ALIGN_g = det.comp_align;
 
@@ -551,7 +551,7 @@ H5T__init_native_float_types(void)
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
-    if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+    if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_LDOUBLE_ALIGN_g = det.comp_align;
 

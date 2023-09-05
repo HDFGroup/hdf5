@@ -56,7 +56,7 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5AC__check_if_write_permitted(const H5F_t *f, hbool_t *write_permitted_ptr);
+static herr_t H5AC__check_if_write_permitted(const H5F_t *f, bool *write_permitted_ptr);
 static herr_t H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr,
                                             H5C_auto_size_ctl_t       *int_conf_ptr);
 #if H5AC_DO_TAGGING_SANITY_CHECKS
@@ -73,7 +73,7 @@ static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 
 #ifdef H5_HAVE_PARALLEL
 /* Environment variable for collective API sanity checks */
-hbool_t H5_coll_api_sanity_check_g = false;
+bool H5_coll_api_sanity_check_g = false;
 #endif /* H5_HAVE_PARALLEL */
 
 /*******************/
@@ -146,7 +146,7 @@ H5AC_init(void)
         s = HDgetenv("H5_COLL_API_SANITY_CHECK");
         if (s && isdigit(*s)) {
             long env_val               = strtol(s, NULL, 0);
-            H5_coll_api_sanity_check_g = (0 == env_val) ? FALSE : TRUE;
+            H5_coll_api_sanity_check_g = (0 == env_val) ? false : true;
         }
     }
 #endif /* H5_HAVE_PARALLEL */
@@ -181,18 +181,18 @@ H5AC_term_package(void)
  *              metadata cache image load is pending (i.e. will be executed
  *              on the next protect or insert)
  *
- *              Returns TRUE if a cache image load is pending, and FALSE
+ *              Returns true if a cache image load is pending, and false
  *              if not.  Throws an assertion failure on error.
  *
- * Return:      TRUE if a cache image load is pending, and FALSE otherwise.
+ * Return:      true if a cache image load is pending, and false otherwise.
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5AC_cache_image_pending(const H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t ret_value = FALSE; /* Return value */
+    H5C_t *cache_ptr;
+    bool   ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -268,7 +268,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->mpi_comm                = mpi_comm;
         aux_ptr->mpi_rank                = mpi_rank;
         aux_ptr->mpi_size                = mpi_size;
-        aux_ptr->write_permitted         = FALSE;
+        aux_ptr->write_permitted         = false;
         aux_ptr->dirty_bytes_threshold   = H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
         aux_ptr->dirty_bytes             = 0;
         aux_ptr->metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
@@ -308,11 +308,11 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (aux_ptr->mpi_rank == 0)
             f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
                                           (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
-                                          TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
+                                          true, H5AC__log_flushed_entry, (void *)aux_ptr);
         else
             f->shared->cache =
                 H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
+                           H5AC_class_s, H5AC__check_if_write_permitted, true, NULL, (void *)aux_ptr);
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */
@@ -322,7 +322,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
          */
         f->shared->cache =
             H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                       H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, NULL);
+                       H5AC_class_s, H5AC__check_if_write_permitted, true, NULL, NULL);
 #ifdef H5_HAVE_PARALLEL
     }  /* end else */
 #endif /* H5_HAVE_PARALLEL */
@@ -400,8 +400,8 @@ done:
 herr_t
 H5AC_dest(H5F_t *f)
 {
-    hbool_t log_enabled;  /* TRUE if logging was set up */
-    hbool_t curr_logging; /* TRUE if currently logging */
+    bool log_enabled;  /* true if logging was set up */
+    bool curr_logging; /* true if currently logging */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
 #endif                          /* H5_HAVE_PARALLEL */
@@ -435,7 +435,7 @@ H5AC_dest(H5F_t *f)
 
 #ifdef H5_HAVE_PARALLEL
     /* destroying the cache, so clear all collective entries */
-    if (H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
+    if (H5C_clear_coll_entries(f->shared->cache, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't clear collective entries");
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
@@ -459,14 +459,14 @@ H5AC_dest(H5F_t *f)
          */
         if (H5F_ACC_RDWR & H5F_INTENT(f)) {
             /* enable and load the skip list */
-            if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+            if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
 
             if (H5AC__flush_entries(f) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush");
 
             /* disable the skip list -- should be empty */
-            if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+            if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list");
         } /* end if */
     }     /* end if */
@@ -606,7 +606,7 @@ H5AC_flush(H5F_t *f)
 
 #ifdef H5_HAVE_PARALLEL
     /* flushing the cache, so clear all collective entries */
-    if (H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
+    if (H5C_clear_coll_entries(f->shared->cache, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed");
 
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
@@ -649,15 +649,15 @@ done:
 herr_t
 H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 {
-    hbool_t in_cache;     /* Entry @ addr is in the cache */
-    hbool_t is_dirty;     /* Entry @ addr is in the cache and dirty */
-    hbool_t is_protected; /* Entry @ addr is in the cache and protected */
-    hbool_t is_pinned;    /* Entry @ addr is in the cache and pinned */
-    hbool_t is_corked;
-    hbool_t is_flush_dep_child;  /* Entry @ addr is in the cache and is a flush dependency child */
-    hbool_t is_flush_dep_parent; /* Entry @ addr is in the cache and is a flush dependency parent */
-    hbool_t image_is_up_to_date; /* Entry @ addr is in the cache and has an up to date image */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    bool   in_cache;     /* Entry @ addr is in the cache */
+    bool   is_dirty;     /* Entry @ addr is in the cache and dirty */
+    bool   is_protected; /* Entry @ addr is in the cache and protected */
+    bool   is_pinned;    /* Entry @ addr is in the cache and pinned */
+    bool   is_corked;
+    bool   is_flush_dep_child;  /* Entry @ addr is in the cache and is a flush dependency child */
+    bool   is_flush_dep_parent; /* Entry @ addr is in the cache and is a flush dependency parent */
+    bool   image_is_up_to_date; /* Entry @ addr is in the cache and has an up to date image */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -771,7 +771,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_t rw)
+H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, bool rw)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1127,7 +1127,7 @@ H5AC_prep_for_file_flush(H5F_t *f)
     assert(f->shared);
     assert(f->shared->cache);
 
-    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
 
 done:
@@ -1168,7 +1168,7 @@ H5AC_secure_from_file_flush(H5F_t *f)
     assert(f->shared);
     assert(f->shared->cache);
 
-    if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list");
 
 done:
@@ -1479,7 +1479,7 @@ done:
  *              argument must be the value returned by that call to
  *              H5AC_protect().
  *
- *              If the deleted flag is TRUE, simply remove the target entry
+ *              If the deleted flag is true, simply remove the target entry
  *              from the cache, clear it, and free it without writing it to
  *              disk.
  *
@@ -1504,8 +1504,8 @@ done:
 herr_t
 H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned flags)
 {
-    hbool_t dirtied;
-    hbool_t deleted;
+    bool dirtied;
+    bool deleted;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
 #endif                          /* H5_HAVE_PARALLEL */
@@ -1526,8 +1526,8 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
     assert(((H5AC_info_t *)thing)->type == type);
 
     dirtied =
-        (hbool_t)(((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG) || (((H5AC_info_t *)thing)->dirtied));
-    deleted = (hbool_t)((flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG);
+        (bool)(((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG) || (((H5AC_info_t *)thing)->dirtied));
+    deleted = (bool)((flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG);
 
     /* Check if the size changed out from underneath us, if we're not deleting
      *  the entry.
@@ -1544,7 +1544,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
 
 #ifdef H5_HAVE_PARALLEL
     if (NULL != (aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache))) {
-        if (dirtied && ((H5AC_info_t *)thing)->is_dirty == FALSE)
+        if (dirtied && ((H5AC_info_t *)thing)->is_dirty == false)
             if (H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry");
 
@@ -1591,7 +1591,7 @@ herr_t
 H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
-    hbool_t             evictions_enabled;
+    bool                evictions_enabled;
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1609,11 +1609,11 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr, H5AC_cache_config_t *
 
     /* Set the information to return */
     if (internal_config.rpt_fcn == NULL)
-        config_ptr->rpt_fcn_enabled = FALSE;
+        config_ptr->rpt_fcn_enabled = false;
     else
-        config_ptr->rpt_fcn_enabled = TRUE;
-    config_ptr->open_trace_file        = FALSE;
-    config_ptr->close_trace_file       = FALSE;
+        config_ptr->rpt_fcn_enabled = true;
+    config_ptr->open_trace_file        = false;
+    config_ptr->close_trace_file       = false;
     config_ptr->trace_file_name[0]     = '\0';
     config_ptr->evictions_enabled      = evictions_enabled;
     config_ptr->set_initial_size       = internal_config.set_initial_size;
@@ -1694,7 +1694,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_flush_in_progress(H5AC_t *cache_ptr, hbool_t *flush_in_progress_ptr)
+H5AC_get_cache_flush_in_progress(H5AC_t *cache_ptr, bool *flush_in_progress_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1797,7 +1797,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *
          * This will be trace output until we create a special API call. JSON
          * output is generated when logging is controlled by the H5P calls.
          */
-        if (H5C_log_set_up((H5C_t *)cache_ptr, config_ptr->trace_file_name, H5C_LOG_STYLE_TRACE, TRUE) < 0)
+        if (H5C_log_set_up((H5C_t *)cache_ptr, config_ptr->trace_file_name, H5C_LOG_STYLE_TRACE, true) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging setup failed");
     }
 
@@ -1866,7 +1866,7 @@ H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
     if (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Unknown config version");
 
-    /* don't bother to test trace_file_name unless open_trace_file is TRUE */
+    /* don't bother to test trace_file_name unless open_trace_file is true */
     if (config_ptr->open_trace_file) {
         size_t name_len;
 
@@ -1881,7 +1881,7 @@ H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name too long");
     } /* end if */
 
-    if ((config_ptr->evictions_enabled == FALSE) &&
+    if ((config_ptr->evictions_enabled == false) &&
         ((config_ptr->incr_mode != H5C_incr__off) || (config_ptr->flash_incr_mode != H5C_flash_incr__off) ||
          (config_ptr->decr_mode != H5C_decr__off)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Can't disable evictions while auto-resize is enabled");
@@ -1979,12 +1979,12 @@ H5AC__check_if_write_permitted(const H5F_t
                                    H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
                                        *f,
-                               hbool_t *write_permitted_ptr)
+                               bool    *write_permitted_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
-    hbool_t write_permitted = TRUE;
+    bool write_permitted = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1999,7 +1999,7 @@ H5AC__check_if_write_permitted(const H5F_t
             (aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED))
             write_permitted = aux_ptr->write_permitted;
         else
-            write_permitted = FALSE;
+            write_permitted = false;
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2201,7 +2201,7 @@ done:
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_evict_tagged_metadata(H5F_t *f, haddr_t metadata_tag, hbool_t match_global)
+H5AC_evict_tagged_metadata(H5F_t *f, haddr_t metadata_tag, bool match_global)
 {
     /* Variable Declarations */
     herr_t ret_value = SUCCEED;
@@ -2292,7 +2292,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
+H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, bool *corked)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2313,7 +2313,7 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
     if (action == H5AC__GET_CORKED) {
         assert(corked);
         if (H5C_get_num_objs_corked(f->shared->cache) == 0) {
-            *corked = FALSE;
+            *corked = false;
             HGOTO_DONE(SUCCEED);
         }
     }

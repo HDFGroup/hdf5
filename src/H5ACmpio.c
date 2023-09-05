@@ -699,7 +699,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
 
     /* Sanity checks */
     assert(entry_ptr);
-    assert(entry_ptr->is_dirty == FALSE);
+    assert(entry_ptr->is_dirty == false);
     cache_ptr = entry_ptr->cache_ptr;
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
@@ -772,7 +772,7 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
 
     /* Sanity check */
     assert(entry_ptr);
-    assert(entry_ptr->is_dirty == FALSE);
+    assert(entry_ptr->is_dirty == false);
     cache_ptr = entry_ptr->cache_ptr;
     assert(cache_ptr != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
@@ -822,9 +822,9 @@ H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsigned flags)
+H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, bool was_dirty, unsigned flags)
 {
-    hbool_t             cleared;
+    bool                cleared;
     H5AC_aux_t         *aux_ptr;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
     herr_t              ret_value       = SUCCEED; /* Return value */
@@ -986,8 +986,8 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 {
     H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
-    hbool_t     entry_in_cache;
-    hbool_t     entry_dirty;
+    bool        entry_in_cache;
+    bool        entry_dirty;
     size_t      entry_size;
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -1203,14 +1203,14 @@ H5AC__propagate_and_apply_candidate_list(H5F_t *f)
          */
 
         /* Enable writes during this operation */
-        aux_ptr->write_permitted = TRUE;
+        aux_ptr->write_permitted = true;
 
         /* Apply the candidate list */
         result = H5C_apply_candidate_list(f, cache_ptr, num_candidates, candidates_list_ptr,
                                           aux_ptr->mpi_rank, aux_ptr->mpi_size);
 
         /* Disable writes again */
-        aux_ptr->write_permitted = FALSE;
+        aux_ptr->write_permitted = false;
 
         /* Check for error on the write operation */
         if (result < 0)
@@ -1613,14 +1613,14 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f)
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
         /* Enable writes during this operation */
-        aux_ptr->write_permitted = TRUE;
+        aux_ptr->write_permitted = true;
 
         /* Apply the candidate list */
         result = H5C_apply_candidate_list(f, cache_ptr, num_entries, haddr_buf_ptr, aux_ptr->mpi_rank,
                                           aux_ptr->mpi_size);
 
         /* Disable writes again */
-        aux_ptr->write_permitted = FALSE;
+        aux_ptr->write_permitted = false;
 
         /* Check for error on the write operation */
         if (result < 0)
@@ -1715,7 +1715,7 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f)
 {
     H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
-    hbool_t     evictions_enabled;
+    bool        evictions_enabled;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1819,13 +1819,13 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
         herr_t result;
 
         /* Enable writes during this operation */
-        aux_ptr->write_permitted = TRUE;
+        aux_ptr->write_permitted = true;
 
         /* Flush the cache */
         result = H5C_flush_cache(f, H5AC__NO_FLAGS_SET);
 
         /* Disable writes again */
-        aux_ptr->write_permitted = FALSE;
+        aux_ptr->write_permitted = false;
 
         /* Check for error on the write operation */
         if (result < 0) {
@@ -1897,7 +1897,7 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f)
 {
     H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
-    hbool_t     evictions_enabled;
+    bool        evictions_enabled;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1941,13 +1941,13 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f)
              */
 
             /* Enable writes during this operation */
-            aux_ptr->write_permitted = TRUE;
+            aux_ptr->write_permitted = true;
 
             /* Flush the cache */
             result = H5C_flush_to_min_clean(f);
 
             /* Disable writes again */
-            aux_ptr->write_permitted = FALSE;
+            aux_ptr->write_permitted = false;
 
             /* Check for error on the write operation */
             if (result < 0) {
@@ -2035,7 +2035,7 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
      * order of the collectively accessed entries except through collective
      * access.
      */
-    if (H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+    if (H5C_clear_coll_entries(cache_ptr, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.");
 
     switch (aux_ptr->metadata_write_strategy) {

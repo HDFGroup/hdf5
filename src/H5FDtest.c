@@ -73,24 +73,24 @@
  *
  *              This function is only intended for use in the test code.
  *
- * Return:	    TRUE (1) if the VFD supports SWMR I/O or vfd_name is
+ * Return:	    true (1) if the VFD supports SWMR I/O or vfd_name is
  *              NULL or the empty string (which implies the default VFD).
  *
- *              FALSE (0) if it does not
+ *              false (0) if it does not
  *
  *              This function cannot fail at this time so there is no
  *              error return value.
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5FD__supports_swmr_test(const char *vfd_name)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = false;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
-        ret_value = TRUE;
+        ret_value = true;
     else
         ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
 

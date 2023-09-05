@@ -132,7 +132,7 @@ H5F_t *
 H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_efc_ent_t        *ent       = NULL;  /* Entry for target file in efc */
-    hbool_t               open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
+    bool                  open_file = false; /* Whether ent->file needs to be closed in case of error */
     H5P_genplist_t       *plist;             /* Property list pointer for FAPL */
     H5VL_connector_prop_t connector_prop;    /* Property for VOL connector ID & info        */
     H5F_t                *ret_value = NULL;  /* Return value */
@@ -263,7 +263,7 @@ H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, h
         /* Open the file */
         if (NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
-        open_file = TRUE;
+        open_file = true;
 
         /* Make file post open call */
         if (H5F__post_open(ent->file) < 0)

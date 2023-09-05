@@ -443,7 +443,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
         /* Set track times flag to return */
-        *track_times = (hbool_t)((ohdr_flags & H5O_HDR_STORE_TIMES) ? TRUE : FALSE);
+        *track_times = (bool)((ohdr_flags & H5O_HDR_STORE_TIMES) ? true : false);
     } /* end if */
 
 done:
@@ -933,7 +933,7 @@ done:
  * Purpose:    This is a query routine to verify that all the filters set
  *              in the dataset creation property list are available currently.
  *
- * Return:    Success:    TRUE if all filters available, FALSE if one or
+ * Return:    Success:    true if all filters available, false if one or
  *                              more filters not currently available.
  *        Failure:    FAIL on error
  *
@@ -971,8 +971,8 @@ done:
  * Purpose:    Check whether the filter is in the pipeline of the object
  *              creation property list.
  *
- * Return:    TRUE:        found
- *        FALSE:        not found
+ * Return:    true:        found
+ *        false:        not found
  *              FAIL:         error
  *
  *-------------------------------------------------------------------------
@@ -1319,16 +1319,16 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
-                /* encode TRUE indicating that it exits */
-                *(*pp)++ = (uint8_t)TRUE;
+                /* encode true indicating that it exits */
+                *(*pp)++ = (uint8_t) true;
 
                 /* encode filter name */
                 H5MM_memcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
                 *pp += H5Z_COMMON_NAME_LEN;
             } /* end if */
             else
-                /* encode FALSE indicating that it does not exist */
-                *(*pp)++ = (uint8_t)FALSE;
+                /* encode false indicating that it does not exist */
+                *(*pp)++ = (uint8_t) false;
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;

@@ -86,8 +86,8 @@ static H5Z_node  *H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_p
 static H5Z_node  *H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers);
 static H5Z_node  *H5Z__new_node(H5Z_token_type type);
 static void       H5Z__do_op(H5Z_node *tree);
-static hbool_t    H5Z__op_is_numbs(H5Z_node *_tree);
-static hbool_t    H5Z__op_is_numbs2(H5Z_node *_tree);
+static bool       H5Z__op_is_numbs(H5Z_node *_tree);
+static bool       H5Z__op_is_numbs2(H5Z_node *_tree);
 static hid_t      H5Z__xform_find_type(const H5T_t *type);
 static herr_t     H5Z__xform_eval_full(H5Z_node *tree, size_t array_size, hid_t array_type, H5Z_result *res);
 static void       H5Z__xform_destroy_parse_tree(H5Z_node *tree);
@@ -1130,46 +1130,46 @@ H5Z__xform_find_type(const H5T_t *type)
     assert(type);
 
     /* Check for SHORT type */
-    if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT)) && 0 == H5T_cmp(type, tmp, FALSE))
+    if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SHORT)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_SHORT);
     /* Check for INT type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_INT)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_INT);
     /* Check for LONG type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LONG)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_LONG);
     /* Check for LONGLONG type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LLONG)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LLONG)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_LLONG);
     /* Check for UCHAR type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UCHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UCHAR)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_UCHAR);
     /* Check for CHAR type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_CHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_CHAR)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_CHAR);
     /* Check for SCHAR type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_SCHAR);
     /* Check for USHORT type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_USHORT)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_USHORT)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_USHORT);
     /* Check for UINT type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UINT)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_UINT)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_UINT);
     /* Check for ULONG type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULONG)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULONG)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_ULONG);
     /* Check for ULONGLONG type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULLONG)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_ULLONG)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_ULLONG);
     /* Check for FLOAT type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_FLOAT);
     /* Check for DOUBLE type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_DOUBLE);
     /* Check for LONGDOUBLE type */
-    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE)) && 0 == H5T_cmp(type, tmp, FALSE))
+    else if ((tmp = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE)) && 0 == H5T_cmp(type, tmp, false))
         HGOTO_DONE(H5T_NATIVE_LDOUBLE);
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type");
@@ -1250,14 +1250,14 @@ done:
  * Purpose:     Internal function to facilitate the condition check in
  *              H5Z__xform_reduce_tree to reduce the bulkiness of the code.
  *
- * Return:      TRUE or FALSE
+ * Return:      true or false
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5Z__op_is_numbs(H5Z_node *_tree)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = false;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1265,7 +1265,7 @@ H5Z__op_is_numbs(H5Z_node *_tree)
 
     if (((_tree->lchild->type == H5Z_XFORM_INTEGER) || (_tree->lchild->type == H5Z_XFORM_FLOAT)) &&
         ((_tree->rchild->type == H5Z_XFORM_INTEGER) || (_tree->rchild->type == H5Z_XFORM_FLOAT)))
-        ret_value = TRUE;
+        ret_value = true;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1278,14 +1278,14 @@ H5Z__op_is_numbs(H5Z_node *_tree)
  *              The difference from H5Z__op_is_numbs is that the left child
  *              can be empty, like -x or +x.
  *
- * Return:      TRUE or FALSE
+ * Return:      true or false
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5Z__op_is_numbs2(H5Z_node *_tree)
 {
-    hbool_t ret_value = FALSE;
+    bool ret_value = false;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1297,7 +1297,7 @@ H5Z__op_is_numbs2(H5Z_node *_tree)
           ((_tree->lchild->type == H5Z_XFORM_INTEGER) || (_tree->lchild->type == H5Z_XFORM_FLOAT))) &&
          (_tree->rchild &&
           ((_tree->rchild->type == H5Z_XFORM_INTEGER) || (_tree->rchild->type == H5Z_XFORM_FLOAT)))))
-        ret_value = TRUE;
+        ret_value = true;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1608,26 +1608,26 @@ done:
  *
  * Purpose: Checks if a data transform will be performed
  *
- * Return:  TRUE for no data transform, FALSE for a data transform
+ * Return:  true for no data transform, false for a data transform
  *
  * Comments: Can't fail
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
 {
-    hbool_t ret_value = TRUE; /* Return value */
+    bool ret_value = true; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (data_xform_prop) {
-        ret_value = FALSE;
+        ret_value = false;
 
         /* Check for trivial data transformation: expression = "x" */
         if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
             (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
-            ret_value = TRUE;
+            ret_value = true;
         } /* end if */
     }     /* end if */
 

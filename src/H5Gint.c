@@ -154,7 +154,7 @@ H5G_top_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5I_nmembers(H5I_GROUP) > 0) {
-        (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+        (void)H5I_clear_type(H5I_GROUP, false, false);
         n++;
     }
 
@@ -311,7 +311,7 @@ H5G__create(H5F_t *file, H5G_obj_create_t *gcrt_info)
     /* Add group to list of open objects in file */
     if (H5FO_top_incr(grp->oloc.file, grp->oloc.addr) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINC, NULL, "can't incr object ref. count");
-    if (H5FO_insert(grp->oloc.file, grp->oloc.addr, grp->shared, TRUE) < 0)
+    if (H5FO_insert(grp->oloc.file, grp->oloc.addr, grp->shared, true) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects");
 
     /* Set the count of times the object is opened */
@@ -359,7 +359,7 @@ H5G__open_name(const H5G_loc_t *loc, const char *name)
     H5G_loc_t  grp_loc;           /* Location used to open group */
     H5G_name_t grp_path;          /* Opened object group hier. path */
     H5O_loc_t  grp_oloc;          /* Opened object object location */
-    hbool_t    loc_found = FALSE; /* Location at 'name' found */
+    bool       loc_found = false; /* Location at 'name' found */
     H5O_type_t obj_type;          /* Type of object at location */
     H5G_t     *ret_value = NULL;  /* Return value */
 
@@ -377,7 +377,7 @@ H5G__open_name(const H5G_loc_t *loc, const char *name)
     /* Find the group object */
     if (H5G_loc_find(loc, name, &grp_loc /*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found");
-    loc_found = TRUE;
+    loc_found = true;
 
     /* Check that the object found is the correct type */
     if (H5O_obj_type(&grp_oloc, &obj_type) < 0)
@@ -445,7 +445,7 @@ H5G_open(const H5G_loc_t *loc)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "not found");
 
         /* Add group to list of open objects in file */
-        if (H5FO_insert(grp->oloc.file, grp->oloc.addr, grp->shared, FALSE) < 0) {
+        if (H5FO_insert(grp->oloc.file, grp->oloc.addr, grp->shared, false) < 0) {
             grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, NULL, "can't insert group into list of open objects");
         } /* end if */
@@ -504,8 +504,8 @@ done:
 static herr_t
 H5G__open_oid(H5G_t *grp)
 {
-    hbool_t obj_opened = FALSE;
-    herr_t  ret_value  = SUCCEED;
+    bool   obj_opened = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -519,7 +519,7 @@ H5G__open_oid(H5G_t *grp)
     /* Grab the object header */
     if (H5O_open(&(grp->oloc)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-    obj_opened = TRUE;
+    obj_opened = true;
 
     /* Check if this object has the right message(s) to be treated as a group */
     if ((H5O_msg_exists(&(grp->oloc), H5O_STAB_ID) <= 0) && (H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID) <= 0))
@@ -548,9 +548,9 @@ done:
 herr_t
 H5G_close(H5G_t *grp)
 {
-    hbool_t corked;                /* Whether the group is corked or not   */
-    hbool_t file_closed = TRUE;    /* H5O_close also closed the file?      */
-    herr_t  ret_value   = SUCCEED; /* Return value                         */
+    bool   corked;                /* Whether the group is corked or not   */
+    bool   file_closed = true;    /* H5O_close also closed the file?      */
+    herr_t ret_value   = SUCCEED; /* Return value                         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -582,7 +582,7 @@ H5G_close(H5G_t *grp)
         if (!file_closed && H5F_SHARED(grp->oloc.file) && H5F_EVICT_ON_CLOSE(grp->oloc.file)) {
             if (H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata");
-            if (H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE) < 0)
+            if (H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, false) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata");
         } /* end if */
 
@@ -722,10 +722,10 @@ H5G_mount(H5G_t *grp)
 
     /* Check args */
     assert(grp && grp->shared);
-    assert(grp->shared->mounted == FALSE);
+    assert(grp->shared->mounted == false);
 
     /* Set the 'mounted' flag */
-    grp->shared->mounted = TRUE;
+    grp->shared->mounted = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_mount() */
@@ -739,7 +739,7 @@ H5G_mount(H5G_t *grp)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5G_mounted(H5G_t *grp)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -766,10 +766,10 @@ H5G_unmount(H5G_t *grp)
 
     /* Check args */
     assert(grp && grp->shared);
-    assert(grp->shared->mounted == TRUE);
+    assert(grp->shared->mounted == true);
 
     /* Reset the 'mounted' flag */
-    grp->shared->mounted = FALSE;
+    grp->shared->mounted = false;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_unmount() */
@@ -854,7 +854,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
      */
     if (NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-    if ((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
+    if ((gid = H5VL_wrap_register(H5I_GROUP, grp, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register group");
 
     /* Set up user data for callback */
@@ -917,7 +917,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
     H5G_loc_t            obj_loc;                               /* Location of object */
     H5G_name_t           obj_path;                              /* Object's group hier. path */
     H5O_loc_t            obj_oloc;                              /* Object's object location */
-    hbool_t              obj_found = FALSE;                     /* Object at 'name' found */
+    bool                 obj_found = false;                     /* Object at 'name' found */
     size_t old_path_len = udata->curr_path_len; /* Length of path before appending this link's name */
     size_t link_name_len;                       /* Length of link's name */
     size_t len_needed;                          /* Length of path string needed */
@@ -968,7 +968,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
         /* (Correctly handles mounted files) */
         if (H5G_loc_find(udata->curr_loc, lnk->name, &obj_loc /*out*/) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found");
-        obj_found = TRUE;
+        obj_found = true;
 
         /* Construct unique "position" for this object */
         H5F_GET_FILENO(obj_oloc.file, obj_pos.fileno);
@@ -1108,7 +1108,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
 
     /* Register an ID for the starting group */
-    if ((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
+    if ((gid = H5VL_wrap_register(H5I_GROUP, grp, true)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register group");
 
     /* Get the location of the starting group */
@@ -1223,7 +1223,7 @@ H5G_get_create_plist(const H5G_t *grp)
     /* Copy the default group creation property list */
     if (NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_ID_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can't get default group creation property list");
-    if ((new_gcpl_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
+    if ((new_gcpl_id = H5P_copy_plist(gcpl_plist, true)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "unable to copy the creation property list");
     if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_gcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "can't get property list");
@@ -1299,7 +1299,7 @@ H5G__get_info_by_name(const H5G_loc_t *loc, const char *name, H5G_info_t *grp_in
     H5G_loc_t  grp_loc;             /* Location used to open group */
     H5G_name_t grp_path;            /* Opened object group hier. path */
     H5O_loc_t  grp_oloc;            /* Opened object object location */
-    hbool_t    loc_found = FALSE;   /* Location at 'name' found */
+    bool       loc_found = false;   /* Location at 'name' found */
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1316,7 +1316,7 @@ H5G__get_info_by_name(const H5G_loc_t *loc, const char *name, H5G_info_t *grp_in
     /* Find the group object */
     if (H5G_loc_find(loc, name, &grp_loc /*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
-    loc_found = TRUE;
+    loc_found = true;
 
     /* Retrieve the group's information */
     if (H5G__obj_info(grp_loc.oloc, grp_info /*out*/) < 0)
@@ -1346,7 +1346,7 @@ H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     H5G_loc_t  grp_loc;             /* Location used to open group */
     H5G_name_t grp_path;            /* Opened object group hier. path */
     H5O_loc_t  grp_oloc;            /* Opened object object location */
-    hbool_t    loc_found = FALSE;   /* Location at 'name' found */
+    bool       loc_found = false;   /* Location at 'name' found */
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1363,7 +1363,7 @@ H5G__get_info_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     /* Find the object's location, according to the order in the index */
     if (H5G_loc_find_by_idx(loc, group_name, idx_type, order, n, &grp_loc /*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
-    loc_found = TRUE;
+    loc_found = true;
 
     /* Retrieve the group's information */
     if (H5G__obj_info(grp_loc.oloc, grp_info /*out*/) < 0)

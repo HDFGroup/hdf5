@@ -64,7 +64,7 @@ static herr_t H5PL__replace_at(const char *path, unsigned int idx);
 static herr_t H5PL__expand_path_table(void);
 static herr_t H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type_t iter_type,
                                                     H5PL_iterate_t iter_op, void *op_data);
-static herr_t H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *found,
+static herr_t H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found,
                                         const char *dir, const void **plugin_info);
 
 /*********************/
@@ -604,7 +604,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 {
     H5PL_type_t    plugin_type;
     const void    *plugin_info = NULL;
-    hbool_t        plugin_loaded;
+    bool           plugin_loaded;
     char          *path      = NULL;
     DIR           *dirp      = NULL; /* Directory stream */
     struct dirent *dp        = NULL; /* Directory entry */
@@ -631,7 +631,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
         if (!HDstrncmp(dp->d_name, "cyg", (size_t)3) && HDstrstr(dp->d_name, ".dll")) {
 #endif
 
-            hbool_t   plugin_matches;
+            bool      plugin_matches;
             h5_stat_t my_stat;
             size_t    len;
 
@@ -656,7 +656,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
             /* Attempt to open the dynamic library */
             plugin_type   = H5PL_TYPE_ERROR;
             plugin_info   = NULL;
-            plugin_loaded = FALSE;
+            plugin_loaded = false;
             if (H5PL__open(path, H5PL_TYPE_NONE, NULL, &plugin_loaded, &plugin_type, &plugin_info) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, H5_ITER_ERROR, "failed to open plugin '%s'", path);
 
@@ -696,7 +696,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     HANDLE           hFind = INVALID_HANDLE_VALUE;
     H5PL_type_t      plugin_type;
     const void      *plugin_info = NULL;
-    hbool_t          plugin_loaded;
+    bool             plugin_loaded;
     char            *path = NULL;
     char             service[2048];
     herr_t           ret_value = H5_ITER_CONT;
@@ -717,8 +717,8 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     do {
         /* Ignore '.' and '..' */
         if (HDstrcmp(fdFile.cFileName, ".") != 0 && HDstrcmp(fdFile.cFileName, "..") != 0) {
-            hbool_t plugin_matches;
-            size_t  len;
+            bool   plugin_matches;
+            size_t len;
 
             /* Allocate & initialize the path name */
             len = HDstrlen(plugin_path) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(fdFile.cFileName) + 1;
@@ -735,7 +735,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
             /* Attempt to open the dynamic library */
             plugin_type   = H5PL_TYPE_ERROR;
             plugin_info   = NULL;
-            plugin_loaded = FALSE;
+            plugin_loaded = false;
             if (H5PL__open(path, H5PL_TYPE_NONE, NULL, &plugin_loaded, &plugin_type, &plugin_info) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, H5_ITER_ERROR, "failed to open plugin '%s'", path);
 
@@ -779,7 +779,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool_t *found,
+H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, bool *found,
                                 const void **plugin_info)
 {
     unsigned int u; /* iterator */
@@ -793,7 +793,7 @@ H5PL__find_plugin_in_path_table(const H5PL_search_params_t *search_params, hbool
     assert(plugin_info);
 
     /* Initialize output parameters */
-    *found       = FALSE;
+    *found       = false;
     *plugin_info = NULL;
 
     /* Loop over the paths in the table, checking for an appropriate plugin */
@@ -823,7 +823,7 @@ done:
  *              plugin library. Two function definitions are for Unix and
  *              Windows.
  *
- *              The found parameter will be set to TRUE and the info
+ *              The found parameter will be set to true and the info
  *              parameter will be filled in on success.
  *
  * Return:      SUCCEED/FAIL
@@ -832,7 +832,7 @@ done:
  */
 #ifndef H5_HAVE_WIN32_API
 static herr_t
-H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *found, const char *dir,
+H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found, const char *dir,
                           const void **plugin_info)
 {
     char          *path      = NULL;
@@ -849,7 +849,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     assert(plugin_info);
 
     /* Initialize the found parameter */
-    *found = FALSE;
+    *found = false;
 
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
@@ -913,7 +913,7 @@ done:
 } /* end H5PL__find_plugin_in_path() */
 #else  /* H5_HAVE_WIN32_API */
 static herr_t
-H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *found, const char *dir,
+H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found, const char *dir,
                           const void **plugin_info)
 {
     WIN32_FIND_DATAA fdFile;
@@ -931,7 +931,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
     assert(plugin_info);
 
     /* Initialize the found parameter */
-    *found = FALSE;
+    *found = false;
 
     /* Specify a file mask. *.* = We want everything! */
     HDsnprintf(service, sizeof(service), "%s\\*.dll", dir);

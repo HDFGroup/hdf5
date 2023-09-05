@@ -28,10 +28,10 @@ static void *H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, uns
 static void *H5O__attr_copy(const void *_mesg, void *_dest);
 static size_t H5O__attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__attr_free(void *mesg);
-static herr_t H5O__attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                       const H5O_copy_t *cpy_info, void *udata);
 static void  *H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
-                                  H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata);
+                                  H5F_t *file_dst, bool *recompute_size, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                        void *mesg_dst, H5O_copy_t *cpy_info);
 static herr_t H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
@@ -243,7 +243,7 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     extent = H5FL_FREE(H5S_extent_t, extent);
 
     /* Default to entire dataspace being selected */
-    if (H5S_select_all(attr->shared->ds, FALSE) < 0)
+    if (H5S_select_all(attr->shared->ds, false) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
     /* Determine pointer movement and check if it's valid */
@@ -380,7 +380,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         p += name_len;
 
     /* encode the attribute datatype */
-    if ((H5O_MSG_DTYPE->encode)(f, FALSE, p, attr->shared->dt) < 0)
+    if ((H5O_MSG_DTYPE->encode)(f, false, p, attr->shared->dt) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype");
 
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
@@ -391,7 +391,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         p += attr->shared->dt_size;
 
     /* encode the attribute dataspace */
-    if ((H5O_MSG_SDSPACE->encode)(f, FALSE, p, &(attr->shared->ds->extent)) < 0)
+    if ((H5O_MSG_SDSPACE->encode)(f, false, p, &(attr->shared->ds->extent)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace");
 
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
@@ -629,7 +629,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, hbool_t *deleted,
+H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, bool *deleted,
                         const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5A_t *attr_src  = (const H5A_t *)native_src; /* Source attribute */
@@ -652,7 +652,7 @@ H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, 
      *  that this message should be deleted.
      */
     if (cpy_info->copy_without_attr)
-        *deleted = TRUE;
+        *deleted = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -670,8 +670,7 @@ done:
  */
 static void *
 H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_type, void *native_src,
-                    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-                    void H5_ATTR_UNUSED *udata)
+                    H5F_t *file_dst, bool *recompute_size, H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     void *ret_value = NULL; /* Return value */
 

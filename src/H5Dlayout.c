@@ -155,7 +155,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
+H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, bool include_compact_data)
 {
     size_t ret_value = 0; /* Return value */
 
@@ -340,7 +340,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
             hsize_t  max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
             hsize_t  cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
             unsigned unlim_count = 0;            /* Count of unlimited max. dimensions */
-            hbool_t  single      = TRUE;         /* Fulfill single chunk indexing */
+            bool     single      = true;         /* Fulfill single chunk indexing */
             unsigned u;                          /* Local index variable */
 
             /* Query the dataspace's dimensions */
@@ -352,7 +352,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                 if (max_dims[u] == H5S_UNLIMITED)
                     unlim_count++;
                 if (cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
-                    single = FALSE;
+                    single = false;
             } /* end for */
 
             /* Chunked datasets with unlimited dimension(s) */
@@ -440,7 +440,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     H5O_layout_t     *layout;                /* Dataset's layout information */
     const H5O_fill_t *fill_prop;             /* Pointer to dataset's fill value information */
     unsigned          layout_mesg_flags;     /* Flags for inserting layout message */
-    hbool_t           layout_init = FALSE;   /* Flag to indicate that chunk information was initialized */
+    bool              layout_init = false;   /* Flag to indicate that chunk information was initialized */
     herr_t            ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
@@ -469,14 +469,14 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information");
 
     /* Indicate that the layout information was initialized */
-    layout_init = TRUE;
+    layout_init = true;
 
     /*
      * Allocate storage if space allocate time is early; otherwise delay
      * allocation until later.
      */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
-        if (H5D__alloc_storage(dset, H5D_ALLOC_CREATE, FALSE, NULL) < 0)
+        if (H5D__alloc_storage(dset, H5D_ALLOC_CREATE, false, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
 
     /* Update external storage message, if it's used */
@@ -570,11 +570,11 @@ done:
 herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 {
-    htri_t  msg_exists;              /* Whether a particular type of message exists */
-    hbool_t pline_copied  = FALSE;   /* Flag to indicate that dcpl_cache.pline's message was copied */
-    hbool_t layout_copied = FALSE;   /* Flag to indicate that layout message was copied */
-    hbool_t efl_copied    = FALSE;   /* Flag to indicate that the EFL message was copied */
-    herr_t  ret_value     = SUCCEED; /* Return value */
+    htri_t msg_exists;              /* Whether a particular type of message exists */
+    bool   pline_copied  = false;   /* Flag to indicate that dcpl_cache.pline's message was copied */
+    bool   layout_copied = false;   /* Flag to indicate that layout message was copied */
+    bool   efl_copied    = false;   /* Flag to indicate that the EFL message was copied */
+    herr_t ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -589,7 +589,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         /* Retrieve the I/O pipeline message */
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
-        pline_copied = TRUE;
+        pline_copied = true;
         /* Set the I/O pipeline info in the property list */
         if (H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline");
@@ -603,7 +603,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
      */
     if (NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, &(dataset->shared->layout)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message");
-    layout_copied = TRUE;
+    layout_copied = true;
 
     /* Check for external file list message (which might not exist) */
     if ((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_EFL_ID)) < 0)
@@ -612,7 +612,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         /* Retrieve the EFL  message */
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, &dataset->shared->dcpl_cache.efl))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message");
-        efl_copied = TRUE;
+        efl_copied = true;
 
         /* Set the EFL info in the property list */
         if (H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->shared->dcpl_cache.efl) < 0)

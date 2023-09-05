@@ -170,7 +170,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -179,7 +179,7 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
     assert(storage);
 
     /* EFL storage is currently always treated as allocated */
-    FUNC_LEAVE_NOAPI(TRUE)
+    FUNC_LEAVE_NOAPI(true)
 } /* end H5D__efl_is_space_alloc() */
 
 /*-------------------------------------------------------------------------

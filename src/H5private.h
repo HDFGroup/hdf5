@@ -334,7 +334,7 @@
  * the entire library.
  */
 #define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
-    (skip ? FALSE : ((ptr) + (size)-1) > (buffer_end))
+    (skip ? false : ((ptr) + (size)-1) > (buffer_end))
 
 /*
  * HDF Boolean type.
@@ -550,7 +550,7 @@ typedef struct {
     H5_timevals_t initial;        /* Current interval start time */
     H5_timevals_t final_interval; /* Last interval elapsed time */
     H5_timevals_t total;          /* Total elapsed time for all intervals */
-    hbool_t       is_running;     /* Whether timer is running */
+    bool          is_running;     /* Whether timer is running */
 } H5_timer_t;
 
 /* Returns library bandwidth as a pretty string */
@@ -1235,9 +1235,9 @@ typedef struct H5_debug_open_stream_t {
 } H5_debug_open_stream_t;
 
 typedef struct H5_debug_t {
-    FILE   *trace;  /*API trace output stream  */
-    hbool_t ttop;   /*Show only top-level calls?    */
-    hbool_t ttimes; /*Show trace event times?       */
+    FILE *trace;  /*API trace output stream  */
+    bool  ttop;   /*Show only top-level calls?    */
+    bool  ttimes; /*Show trace event times?       */
     struct {
         const char *name;   /*package name      */
         FILE       *stream; /*output stream  or NULL    */
@@ -1255,7 +1255,7 @@ typedef struct H5_debug_t {
     ((MPI_VERSION > (mpi_version)) ||                                                                        \
      ((MPI_VERSION == (mpi_version)) && (MPI_SUBVERSION >= (mpi_subversion))))
 
-extern hbool_t H5_coll_api_sanity_check_g;
+extern bool H5_coll_api_sanity_check_g;
 #endif /* H5_HAVE_PARALLEL */
 
 extern H5_debug_t H5_debug_g;
@@ -1382,8 +1382,8 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *    profiling.
  *
  * Notes:  Every file must have a file-scope variable called
- *    `initialize_interface_g' of type hbool_t which is initialized
- *    to FALSE.
+ *    `initialize_interface_g' of type bool which is initialized
+ *    to false.
  *
  *    Don't use local variable initializers which contain
  *    calls to other library functions since the initializer
@@ -1444,8 +1444,8 @@ extern char H5_lib_vers_info_g[];
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
     H5TS_mutex_t init_lock;    /* API entrance mutex */
-    hbool_t      H5_libinit_g; /* Has the library been initialized? */
-    hbool_t      H5_libterm_g; /* Is the library being shutdown? */
+    bool         H5_libinit_g; /* Has the library been initialized? */
+    bool         H5_libterm_g; /* Is the library being shutdown? */
 } H5_api_t;
 
 /* Macros for accessing the global variables */
@@ -1484,8 +1484,8 @@ extern H5_api_t H5_g;
 #define H5_API_SET_CANCEL
 
 /* extern global variables */
-extern hbool_t H5_libinit_g; /* Has the library been initialized? */
-extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
+extern bool H5_libinit_g; /* Has the library been initialized? */
+extern bool H5_libterm_g; /* Is the library being shutdown? */
 
 /* Macros for accessing the global variables */
 #define H5_INIT_GLOBAL (H5_libinit_g)
@@ -1508,12 +1508,12 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
-H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
+H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                                                          \
     {                                                                                                        \
-        static hbool_t func_check = FALSE;                                                                   \
+        static bool func_check = false;                                                                      \
                                                                                                              \
         if (!func_check) {                                                                                   \
             /* Check function naming status */                                                               \
@@ -1522,7 +1522,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                    "H5private.h (this is usually due to an incorrect number of underscores)");               \
                                                                                                              \
             /* Don't check again */                                                                          \
-            func_check = TRUE;                                                                               \
+            func_check = true;                                                                               \
         } /* end if */                                                                                       \
     }     /* end scope */
 #else     /* NDEBUG */
@@ -1530,7 +1530,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #endif /* NDEBUG */
 
 #define FUNC_ENTER_COMMON(asrt)                                                                              \
-    hbool_t err_occurred = FALSE;                                                                            \
+    bool err_occurred = false;                                                                               \
                                                                                                              \
     FUNC_ENTER_CHECK_NAME(asrt);
 
@@ -1568,13 +1568,13 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     if (H5CX_push() < 0)                                                                                     \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
-        api_ctx_pushed = TRUE;
+        api_ctx_pushed = true;
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err)                                                                                  \
     {                                                                                                        \
         {                                                                                                    \
-            hbool_t api_ctx_pushed = FALSE;                                                                  \
+            bool api_ctx_pushed = false;                                                                     \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
@@ -1590,7 +1590,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API_NOCLEAR(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
-            hbool_t api_ctx_pushed = FALSE;                                                                  \
+            bool api_ctx_pushed = false;                                                                     \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
@@ -1824,12 +1824,12 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (api_ctx_pushed) {                                                                                    \
-        (void)H5CX_pop(TRUE);                                                                                \
-        api_ctx_pushed = FALSE;                                                                              \
+        (void)H5CX_pop(true);                                                                                \
+        api_ctx_pushed = false;                                                                              \
     }                                                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(TRUE);                                                                      \
+        (void)H5E_dump_api_stack(true);                                                                      \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1842,7 +1842,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(TRUE);                                                                      \
+        (void)H5E_dump_api_stack(true);                                                                      \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1866,7 +1866,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(TRUE);                                                                      \
+        (void)H5E_dump_api_stack(true);                                                                      \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -2081,13 +2081,13 @@ H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_b
                                          MPI_Datatype *new_type);
 H5_DLL herr_t  H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type,
                                      const int recv_counts[], const int displacements[],
-                                     MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                     MPI_Datatype recv_type, bool allgather, int root, MPI_Comm comm,
                                      int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries);
 H5_DLL herr_t  H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type,
-                                            MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                            MPI_Datatype recv_type, bool allgather, int root, MPI_Comm comm,
                                             int mpi_rank, int mpi_size, void **out_buf,
                                             size_t *out_buf_num_entries);
-H5_DLL herr_t  H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required);
+H5_DLL herr_t  H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_required);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */

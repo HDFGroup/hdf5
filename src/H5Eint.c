@@ -396,7 +396,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
+H5E__print(const H5E_t *estack, FILE *stream, bool bk_compatible)
 {
     H5E_print_t   eprint;  /* Callback information to pass to H5E_walk() */
     H5E_walk_op_t walk_op; /* Error stack walking callback */
@@ -457,8 +457,8 @@ done:
  *              CLIENT_DATA pointer passed to H5E_print.
  *
  *              The function FUNC is also provided for backward compatibility.
- *              When BK_COMPATIBLE is set to be TRUE, FUNC is used to be
- *              compatible with older library.  If BK_COMPATIBLE is FALSE,
+ *              When BK_COMPATIBLE is set to be true, FUNC is used to be
+ *              compatible with older library.  If BK_COMPATIBLE is false,
  *              STACK_FUNC is used.
  *
  * Return:      SUCCEED/FAIL
@@ -623,7 +623,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 {
     va_list ap;                   /* Varargs info */
     char   *tmp        = NULL;    /* Buffer to place formatted description in */
-    hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
+    bool    va_started = false;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
     /*
@@ -648,7 +648,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
     /* Start the variable-argument parsing */
     va_start(ap, fmt);
-    va_started = TRUE;
+    va_started = true;
 
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
@@ -731,13 +731,13 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
 
     if (estack->nused < H5E_NSLOTS) {
         /* Increment the IDs to indicate that they are used in this stack */
-        if (H5I_inc_ref(cls_id, FALSE) < 0)
+        if (H5I_inc_ref(cls_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].cls_id = cls_id;
-        if (H5I_inc_ref(maj_id, FALSE) < 0)
+        if (H5I_inc_ref(maj_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].maj_num = maj_id;
-        if (H5I_inc_ref(min_id, FALSE) < 0)
+        if (H5I_inc_ref(min_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].min_num = min_id;
         /* The 'func' & 'file' strings are statically allocated (by the compiler)
@@ -882,7 +882,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_dump_api_stack(hbool_t is_api)
+H5E_dump_api_stack(bool is_api)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
