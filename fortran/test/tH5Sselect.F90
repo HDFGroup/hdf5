@@ -126,7 +126,6 @@ CONTAINS
     INTEGER :: error
     INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
-
     !
     !This writes data to the HDF5 file.
     !
@@ -807,6 +806,12 @@ CONTAINS
      INTEGER :: error
      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
+     LOGICAL :: same, intersects
+     INTEGER(HID_T) :: scalar_all_sid
+
+     INTEGER(hsize_t), DIMENSION(1:2) :: block_start = (/0, 0/)  ! Start offset for BLOCK
+     INTEGER(hsize_t), DIMENSION(1:2) :: block_end   = (/2, 3/)  ! END offset for BLOCK
+
      !
      !initialize the coord array to give the selected points' position
      !
@@ -848,6 +853,22 @@ CONTAINS
      CALL h5screate_simple_f(RANK, dimsf, dataspace, error)
      CALL check("h5screate_simple_f", error, total_error)
 
+     ! Check shape same API
+     CALL h5sselect_shape_same_f(dataspace, dataspace, same, error)
+     CALL check("h5sselect_shape_same_f", error, total_error)
+     CALL VERIFY("h5sselect_shape_same_f", same, .TRUE., total_error)
+
+     CALL h5screate_f(H5S_SCALAR_F, scalar_all_sid, error)
+     CALL check("h5screate_f", error, total_error)
+
+     same = .TRUE.
+     CALL h5sselect_shape_same_f(dataspace, scalar_all_sid, same, error)
+     CALL check("h5sselect_shape_same_f", error, total_error)
+     CALL VERIFY("h5sselect_shape_same_f", same, .FALSE., total_error)
+
+     CALL h5sclose_f(scalar_all_sid,error)
+     CALL check("h5sclose_f", error, total_error)
+
      !
      ! Create the dataset with default properties
      !
@@ -862,6 +883,33 @@ CONTAINS
      data_dims(2) = 6
      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, data_dims, error)
      CALL check("h5dwrite_f", error, total_error)
+
+     ! Set selection to 'all'
+     CALL h5sselect_all_f(dataspace, error)
+     CALL check("h5sselect_all_f", error, total_error)
+
+     ! Test block intersection with 'all' selection (always true)
+     CALL h5sselect_intersect_block_f(dataspace, block_start, block_end, intersects, error)
+     CALL check("h5sselect_intersect_block_f", error, total_error)
+     CALL verify("h5sselect_intersect_block_f", intersects, .TRUE., total_error)
+
+     ! Select 2x2 region of the dataset
+     CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, offset, count, error)
+     CALL check("h5sselect_hyperslab_f", error, total_error)
+
+     ! Check an intersecting region
+     block_start(1:2) = (/1,0/)
+     block_end(1:2) = (/2,2/)
+     CALL h5sselect_intersect_block_f(dataspace, block_start, block_end, intersects, error)
+     CALL check("h5sselect_intersect_block_f", error, total_error)
+     CALL verify("h5sselect_intersect_block_f", intersects, .TRUE., total_error)
+
+     ! Check a non-intersecting region
+     block_start(1:2) = (/2,1/)
+     block_end(1:2) = (/4,5/)
+     CALL h5sselect_intersect_block_f(dataspace, block_start, block_end, intersects, error)
+     CALL check("h5sselect_intersect_block_f", error, total_error)
+     CALL verify("h5sselect_intersect_block_f2", intersects, .FALSE., total_error)
 
      !
      !Close the dataspace for the dataset.
@@ -997,6 +1045,9 @@ CONTAINS
      !deallocate the pointlist array
      !
      DEALLOCATE(pointlist)
+
+
+
 
      !
      !Close the dataspace for the dataset.

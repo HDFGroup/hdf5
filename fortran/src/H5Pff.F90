@@ -5354,8 +5354,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
           IMPORT :: HID_T, C_INT, C_INT32_T
           IMPLICIT NONE
           INTEGER(HID_T)    , VALUE :: plist_id
-          INTEGER(C_INT32_T), VALUE :: local_no_collective_cause
-          INTEGER(C_INT32_T), VALUE :: global_no_collective_cause
+          INTEGER(C_INT32_T) :: local_no_collective_cause
+          INTEGER(C_INT32_T) :: global_no_collective_cause
         END FUNCTION H5Pget_mpio_no_collective_cause
      END INTERFACE
 
@@ -6338,7 +6338,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
           IMPORT :: HID_T, C_INT, C_INT32_T
           IMPLICIT NONE
           INTEGER(HID_T)    , VALUE :: plist_id
-          INTEGER(C_INT32_T), VALUE :: no_selection_io_cause
+          INTEGER(C_INT32_T)        :: no_selection_io_cause
         END FUNCTION H5Pget_no_selection_io_cause
      END INTERFACE
 

@@ -135,8 +135,12 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Test basic generic property list callback functionality', total_error)
 
   ret_total_error = 0
-  CALL test_iter_group(ret_total_error)
+  CALL test_iter_group(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing group iteration functionality', total_error)
+
+  ret_total_error = 0
+  CALL test_visit(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing link visit functionality', total_error)
 
   ret_total_error = 0
   CALL test_nbit(ret_total_error)

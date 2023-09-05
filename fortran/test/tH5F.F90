@@ -1216,7 +1216,7 @@ CONTAINS
     ENDIF
     IF(persist .NEQV. .TRUE.) THEN
        total_error = total_error + 1
-       WRITE(*,*) "h5pget_file_space_strategy_f: wrong persist, ",strategy
+       WRITE(*,*) "h5pget_file_space_strategy_f: wrong persist, ",persist
     ENDIF
     IF(threshold .NE. 4_HSIZE_T) THEN
        total_error = total_error + 1
