@@ -27,7 +27,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-reset_raw_data_files(hbool_t is_env)
+reset_raw_data_files(bool is_env)
 {
     int      fd = 0;          /* external file descriptor             */
     size_t   i, j;            /* iterators                            */

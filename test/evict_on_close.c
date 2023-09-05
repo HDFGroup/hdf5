@@ -69,11 +69,11 @@ const char *FILENAMES[] = {"evict-on-close", /* 0 */
 #define SUBGROUP_NAME_SIZE 16
 
 /* Prototypes */
-static hbool_t verify_tag_not_in_cache(const H5F_t *f, haddr_t tag);
-static herr_t  check_evict_on_close_api(void);
-static hid_t   generate_eoc_test_file(hid_t fapl_id);
-static herr_t  check_dset_scheme(hid_t fid, const char *dset_name);
-static herr_t  check_group_layout(hid_t fid, const char *group_name);
+static bool   verify_tag_not_in_cache(const H5F_t *f, haddr_t tag);
+static herr_t check_evict_on_close_api(void);
+static hid_t  generate_eoc_test_file(hid_t fapl_id);
+static herr_t check_dset_scheme(hid_t fid, const char *dset_name);
+static herr_t check_group_layout(hid_t fid, const char *group_name);
 
 /*-------------------------------------------------------------------------
  * Function:    verify_tag_not_in_cache()
@@ -81,11 +81,11 @@ static herr_t  check_group_layout(hid_t fid, const char *group_name);
  * Purpose:     Ensure that metadata cache entries with a given tag are not
  *              present in the cache.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-static H5_ATTR_PURE hbool_t
+static H5_ATTR_PURE bool
 verify_tag_not_in_cache(const H5F_t *f, haddr_t tag)
 {
     H5C_t *cache_ptr = NULL; /* cache pointer                */
@@ -100,13 +100,13 @@ verify_tag_not_in_cache(const H5F_t *f, haddr_t tag)
         entry_ptr = cache_ptr->index[i];
         while (entry_ptr != NULL) {
             if (tag == entry_ptr->tag_info->tag)
-                return TRUE;
+                return true;
             else
                 entry_ptr = entry_ptr->ht_next;
         }
     }
 
-    return FALSE;
+    return false;
 } /* end verify_tag_not_in_cache() */
 
 /*-------------------------------------------------------------------------
@@ -633,7 +633,7 @@ check_group_layout(hid_t fid, const char *group_name)
         if (H5Gclose(gid2) < 0)
             TEST_ERROR;
 
-        if (TRUE == verify_tag_not_in_cache(file_ptr, tag2))
+        if (true == verify_tag_not_in_cache(file_ptr, tag2))
             TEST_ERROR;
     } /* end for */
 
@@ -663,7 +663,7 @@ check_group_layout(hid_t fid, const char *group_name)
 #endif
 
     /* Ensure that the cache does not contain entries with the tag */
-    if (TRUE == verify_tag_not_in_cache(file_ptr, tag1))
+    if (true == verify_tag_not_in_cache(file_ptr, tag1))
         TEST_ERROR;
     /* Compare the number of cache entries */
     if (before != after || before == during)
@@ -764,7 +764,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
 #endif
 
     /* Ensure that the cache does not contain entries with the tag */
-    if (TRUE == verify_tag_not_in_cache(file_ptr, tag))
+    if (true == verify_tag_not_in_cache(file_ptr, tag))
         TEST_ERROR;
 
     /* Compare the number of cache entries */
@@ -801,10 +801,10 @@ error:
 static herr_t
 check_evict_on_close_api(void)
 {
-    hid_t   fapl_id = -1;
-    hid_t   dapl_id = -1;
-    hbool_t evict_on_close;
-    herr_t  status;
+    hid_t  fapl_id = -1;
+    hid_t  dapl_id = -1;
+    bool   evict_on_close;
+    herr_t status;
 
     TESTING("evict on close API");
 
@@ -813,22 +813,22 @@ check_evict_on_close_api(void)
         TEST_ERROR;
 
     /* Check the default */
-    evict_on_close = TRUE;
+    evict_on_close = true;
     if (H5Pget_evict_on_close(fapl_id, &evict_on_close) < 0)
         TEST_ERROR;
-    if (evict_on_close != FALSE)
+    if (evict_on_close != false)
         FAIL_PUTS_ERROR("Incorrect default evict on close value.");
 
     /* Set the evict on close property */
-    evict_on_close = TRUE;
+    evict_on_close = true;
     if (H5Pset_evict_on_close(fapl_id, evict_on_close) < 0)
         TEST_ERROR;
 
     /* Make sure we can get it back out */
-    evict_on_close = FALSE;
+    evict_on_close = false;
     if (H5Pget_evict_on_close(fapl_id, &evict_on_close) < 0)
         TEST_ERROR;
-    if (evict_on_close != TRUE)
+    if (evict_on_close != true)
         FAIL_PUTS_ERROR("Incorrect evict on close value.");
 
     /* close fapl */
@@ -902,7 +902,7 @@ main(void)
     } /* end if */
 
     /* Set evict-on-close property */
-    if (H5Pset_evict_on_close(fapl_id, TRUE) < 0) {
+    if (H5Pset_evict_on_close(fapl_id, true) < 0) {
         nerrors++;
         PUTS_ERROR("Unable to set evict-on-close property\n");
     } /* end if */
@@ -990,9 +990,9 @@ error:
 static herr_t
 check_evict_on_close_parallel_fail(void)
 {
-    hid_t   fapl_id = -1;
-    hbool_t evict_on_close;
-    herr_t  status;
+    hid_t  fapl_id = -1;
+    bool   evict_on_close;
+    herr_t status;
 
     TESTING("evict on close fails in parallel");
 
@@ -1001,7 +1001,7 @@ check_evict_on_close_parallel_fail(void)
         TEST_ERROR;
 
     /* Set the evict on close property (should fail)*/
-    evict_on_close = TRUE;
+    evict_on_close = true;
     H5E_BEGIN_TRY
     {
         status = H5Pset_evict_on_close(fapl_id, evict_on_close);

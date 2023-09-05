@@ -913,14 +913,14 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+               HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
+               HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+               HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
-        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != true)
             TEST_ERROR;
         if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
@@ -937,8 +937,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0)) {
+    if ((bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+               HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_vfd_handle */
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
@@ -977,14 +977,14 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+               HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
+               HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+               HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
-        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != true)
             TEST_ERROR;
         if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
@@ -994,14 +994,14 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for several VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                  HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
-                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
+    if ((bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+               HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
+               HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+               HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
-        if (H5Pequal(fapl_id, fapl_id2) != TRUE)
+        if (H5Pequal(fapl_id, fapl_id2) != true)
             TEST_ERROR;
         if (H5Pclose(fapl_id2) < 0)
             TEST_ERROR;
@@ -1055,7 +1055,7 @@ test_basic_group_operation(void)
     hid_t      gcpl_id = H5I_INVALID_HID;
     char       filename[1024];
     H5G_info_t info;
-    hbool_t    driver_is_parallel;
+    bool       driver_is_parallel;
 
     TESTING("Basic VOL group operations");
 
@@ -1173,7 +1173,7 @@ test_basic_dataset_operation(void)
     haddr_t            offset;
     H5D_space_status_t status;
 
-    hbool_t driver_is_parallel;
+    bool driver_is_parallel;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -1488,7 +1488,7 @@ test_basic_object_operation(void)
     //! [H5Oget_info_by_name3_snip]
 
     /* H5Oexists_by_name */
-    if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != TRUE)
+    if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != true)
         TEST_ERROR;
 
     /* H5Oopen/close */
@@ -1615,13 +1615,13 @@ error:
 static herr_t
 test_basic_datatype_operation(void)
 {
-    hid_t   fid      = H5I_INVALID_HID;
-    hid_t   fapl_id  = H5I_INVALID_HID;
-    hid_t   tid      = H5I_INVALID_HID;
-    hid_t   tid_anon = H5I_INVALID_HID;
-    hid_t   tcpl_id  = H5I_INVALID_HID;
-    char    filename[1024];
-    hbool_t driver_is_parallel;
+    hid_t fid      = H5I_INVALID_HID;
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t tid      = H5I_INVALID_HID;
+    hid_t tid_anon = H5I_INVALID_HID;
+    hid_t tcpl_id  = H5I_INVALID_HID;
+    char  filename[1024];
+    bool  driver_is_parallel;
 
     TESTING("Basic VOL datatype operations");
 
@@ -1776,12 +1776,12 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
         H5CX_push();
 
     /* Create fake object on fake VOL connector */
-    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, fake_vol_id, TRUE)))
+    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, fake_vol_id, true)))
         TEST_ERROR;
 
     /* Pop the API context off the stack */
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     /* Attempt to issue operation on fake VOL connector */
     fake_obj            = -1;
@@ -1832,12 +1832,12 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
         H5CX_push();
 
     /* Create fake object on reg_opt VOL connector */
-    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, reg_opt_vol_id, TRUE)))
+    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, reg_opt_vol_id, true)))
         TEST_ERROR;
 
     /* Pop the API context off the stack */
     if (H5VL_SUBCLS_DATATYPE == subcls)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     /* Issue first operation */
     fake_obj            = -1;
@@ -2122,7 +2122,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Set environment variable to use 'fake async' connector & re-init default connector */
-    if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", TRUE) < 0)
+    if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", true) < 0)
         TEST_ERROR;
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
         TEST_ERROR;
@@ -2190,7 +2190,7 @@ test_async_vol_props(void)
 
     /* Restore environment variable, if there was one */
     if (conn_env_str) {
-        if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, TRUE) < 0)
+        if (HDsetenv(HDF5_VOL_CONNECTOR, conn_env_str, true) < 0)
             TEST_ERROR;
         free(conn_env_str);
 

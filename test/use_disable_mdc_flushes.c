@@ -308,7 +308,7 @@ write_file(void)
     hsize_t   dims[3];                        /* Dataspace dimensions */
     hsize_t   memdims[3];                     /* Memory space dimensions */
     hsize_t   start[3] = {0, 0, 0}, count[3]; /* Hyperslab selection values */
-    hbool_t   disabled;                       /* Object's disabled status */
+    bool      disabled;                       /* Object's disabled status */
     hsize_t   i, j, k;
 
     name = filename_g;

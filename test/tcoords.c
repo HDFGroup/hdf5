@@ -42,7 +42,7 @@ static int da_buffer[2][3][6][2];
 **
 *************************************************************/
 static void
-test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
+test_singleEnd_selElements(hid_t file, bool is_chunked)
 {
     hid_t   sid, plid, did, msid;
     char    dset_name[NAME_LEN]; /* Dataset name */
@@ -225,7 +225,7 @@ test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
 **
 *************************************************************/
 static void
-test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
+test_singleEnd_selHyperslab(hid_t file, bool is_chunked)
 {
     hid_t   sid, did, msid;
     char    dset_name[NAME_LEN]; /* Dataset name */
@@ -371,7 +371,7 @@ test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
 **
 *************************************************************/
 static void
-test_multiple_ends(hid_t file, hbool_t is_chunked)
+test_multiple_ends(hid_t file, bool is_chunked)
 {
     hid_t   sid, plid, did, msid;
     char    dset_name[NAME_LEN]; /* Dataset name */
@@ -680,10 +680,10 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
 void
 test_coords(void)
 {
-    hid_t   fid;
-    hbool_t is_chunk[2] = {TRUE, FALSE};
-    int     i;
-    herr_t  ret; /* Generic error return */
+    hid_t  fid;
+    bool   is_chunk[2] = {true, false};
+    int    i;
+    herr_t ret; /* Generic error return */
 
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");

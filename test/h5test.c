@@ -119,7 +119,7 @@ uint64_t vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
-                              size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
+                              size_t size, bool nest_printf, bool subst_for_superblock);
 
 /*-------------------------------------------------------------------------
  * Function:  h5_errors
@@ -362,7 +362,7 @@ h5_test_init(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, false, false));
 }
 
 /*-------------------------------------------------------------------------
@@ -384,7 +384,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 char *
 h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
+    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, false, true));
 }
 
 /*-------------------------------------------------------------------------
@@ -403,7 +403,7 @@ h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size
 char *
 h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE, FALSE));
+    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, false, false));
 }
 
 /*-------------------------------------------------------------------------
@@ -425,7 +425,7 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
 char *
 h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE, FALSE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, true, false));
 }
 
 /*-------------------------------------------------------------------------
@@ -449,7 +449,7 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  */
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname, size_t size,
-                hbool_t nest_printf, hbool_t subst_for_superblock)
+                bool nest_printf, bool subst_for_superblock)
 {
     const char *prefix         = NULL;
     const char *driver_env_var = NULL; /* HDF5_DRIVER environment variable     */
@@ -562,7 +562,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                        "   export HDF5_PARAPREFIX\n"
                        "*** End of Hint ***\n");
 
-            explained = TRUE;
+            explained = true;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif /* HDF5_PARAPREFIX */
@@ -2005,19 +2005,19 @@ done:
  * Purpose:     Checks if file locking is enabled on this file system.
  *
  * Return:      SUCCEED/FAIL
- *              are_enabled will be FALSE if file locking is disabled on
+ *              are_enabled will be false if file locking is disabled on
  *              the file system of if there were errors.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_check_if_file_locking_enabled(hbool_t *is_enabled)
+h5_check_if_file_locking_enabled(bool *is_enabled)
 {
     const char *filename = "locking_test_file";
     int         pmode    = O_RDWR | O_CREAT | O_TRUNC;
     int         fd       = -1;
 
-    *is_enabled = TRUE;
+    *is_enabled = true;
 
     if ((fd = HDopen(filename, pmode, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto error;
@@ -2033,7 +2033,7 @@ h5_check_if_file_locking_enabled(hbool_t *is_enabled)
              * error condition.
              */
             errno       = 0;
-            *is_enabled = FALSE;
+            *is_enabled = false;
         }
         else
             goto error;
@@ -2049,7 +2049,7 @@ h5_check_if_file_locking_enabled(hbool_t *is_enabled)
     return SUCCEED;
 
 error:
-    *is_enabled = FALSE;
+    *is_enabled = false;
     if (fd > -1) {
         HDclose(fd);
         HDremove(filename);
@@ -2064,14 +2064,14 @@ error:
  *              default VFD. If `drv_name` is NULL, the HDF5_DRIVER
  *              environment is checked instead (if it is set).
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 h5_using_default_driver(const char *drv_name)
 {
-    hbool_t ret_val = TRUE;
+    bool ret_val = true;
 
     assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
@@ -2094,12 +2094,12 @@ h5_using_default_driver(const char *drv_name)
  *              which are not currently supported for parallel HDF5, such
  *              as writing of VL or region reference datatypes.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
+h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel)
 {
     unsigned long feat_flags = 0;
     hid_t         driver_id  = H5I_INVALID_HID;
@@ -2142,7 +2142,7 @@ h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible)
+h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible)
 {
     unsigned long feat_flags = 0;
     hid_t         driver_id  = H5I_INVALID_HID;
@@ -2187,14 +2187,14 @@ h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatib
  *              Eventually, this should become a VFD feature flag so this
  *              check is less fragile.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
 {
-    hbool_t ret_val = FALSE;
+    bool ret_val = false;
 
     if (!drv_name)
         drv_name = HDgetenv(HDF5_DRIVER);
@@ -2203,12 +2203,12 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
             if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") ||
                 !HDstrcmp(drv_name, "family") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
-                return TRUE;
+                return true;
         }
 
         if ((flags & H5_EXCLUDE_NON_MULTIPART_DRIVERS) == 0) {
             if (!HDstrcmp(drv_name, "splitter"))
-                return TRUE;
+                return true;
         }
     }
 

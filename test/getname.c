@@ -3676,7 +3676,7 @@ test_elinks(hid_t fapl)
     hid_t   group, group2;                    /* Group IDs                    */
     char    name[NAME_BUF_SIZE];              /* Buffer for storing object's name */
     ssize_t namelen;                          /* Length of object's name */
-    hbool_t name_cached;                      /* Indicate if name is cached */
+    bool    name_cached;                      /* Indicate if name is cached */
 
     /* Initialize the file names */
     h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
@@ -3711,7 +3711,7 @@ test_elinks(hid_t fapl)
 
     /* Query the external link object's name */
     *name       = '\0';
-    name_cached = FALSE;
+    name_cached = false;
     namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
     if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR;
@@ -3726,7 +3726,7 @@ test_elinks(hid_t fapl)
 
     /* Query the external link to external link object's name */
     *name       = '\0';
-    name_cached = FALSE;
+    name_cached = false;
     namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
     if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR;
@@ -3750,11 +3750,11 @@ error:
 int
 main(void)
 {
-    hid_t   file_id = (-1);
-    int     nerrors = 0;
-    hid_t   fapl;
-    char    filename0[1024];
-    hbool_t driver_is_parallel;
+    hid_t file_id = (-1);
+    int   nerrors = 0;
+    hid_t fapl;
+    char  filename0[1024];
+    bool  driver_is_parallel;
 
     /* Reset the library and get the file access property list */
     h5_reset();

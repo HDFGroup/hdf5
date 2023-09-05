@@ -34,9 +34,9 @@
 /* Local Prototypes */
 /********************/
 
-static int check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_name,
-                         symbol_t *record, hid_t rec_sid);
-static int read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned random_seed,
+static int check_dataset(hid_t fid, bool verbose, FILE *verbose_file, const char *sym_name, symbol_t *record,
+                         hid_t rec_sid);
+static int read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned random_seed,
                         unsigned long nseconds, unsigned poll_time, unsigned ncommon, unsigned nrandom);
 
 /*******************/
@@ -55,7 +55,7 @@ static hid_t symbol_tid = -1; /* The type ID for the SWMR datasets */
  * Parameters:  hid_t fid
  *              The SWMR test file's ID.
  *
- *              hbool_t verbose
+ *              bool verbose
  *              Whether verbose console output is desired.
  *
  *              FILE *verbose_file
@@ -78,7 +78,7 @@ static hid_t symbol_tid = -1; /* The type ID for the SWMR datasets */
  *-------------------------------------------------------------------------
  */
 static int
-check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_name, symbol_t *record,
+check_dataset(hid_t fid, bool verbose, FILE *verbose_file, const char *sym_name, symbol_t *record,
               hid_t rec_sid)
 {
     hid_t    dsid;                                 /* Dataset ID */
@@ -163,7 +163,7 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_na
  * Parameters:  const char *filename
  *              The SWMR test file's name.
  *
- *              hbool_t verbose
+ *              bool verbose
  *              Whether verbose console output is desired.
  *
  *              FILE *verbose_file
@@ -190,7 +190,7 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_na
  *-------------------------------------------------------------------------
  */
 static int
-read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned random_seed,
+read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned random_seed,
              unsigned long nseconds, unsigned poll_time, unsigned ncommon, unsigned nrandom)
 {
     time_t          start_time;          /* Starting time */
@@ -202,7 +202,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     hid_t           fapl;                /* file access property list */
     symbol_t        record;              /* The record to read from the dataset */
     unsigned        v;                   /* Local index variable */
-    hbool_t         use_log_vfd = FALSE; /* Use the log VFD (set this manually) */
+    bool            use_log_vfd = false; /* Use the log VFD (set this manually) */
 
     assert(filename);
     assert(nseconds != 0);
@@ -392,9 +392,9 @@ main(int argc, char *argv[])
     int      poll_time    = 1;     /* # of seconds between polling */
     int      ncommon      = 5;     /* # of common symbols to poll */
     int      nrandom      = 10;    /* # of random symbols to poll */
-    hbool_t  verbose      = TRUE;  /* Whether to emit some informational messages */
+    bool     verbose      = true;  /* Whether to emit some informational messages */
     FILE    *verbose_file = NULL;  /* File handle for verbose output */
-    hbool_t  use_seed     = FALSE; /* Set to 1 if a seed was set on the command line */
+    bool     use_seed     = false; /* Set to 1 if a seed was set on the command line */
     unsigned random_seed  = 0;     /* Random # seed */
     unsigned u;                    /* Local index variables */
     int      temp;
@@ -425,13 +425,13 @@ main(int argc, char *argv[])
 
                     /* Be quiet */
                     case 'q':
-                        verbose = FALSE;
+                        verbose = false;
                         u++;
                         break;
 
                     /* Random # seed */
                     case 'r':
-                        use_seed = TRUE;
+                        use_seed = true;
                         temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();

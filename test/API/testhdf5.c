@@ -262,7 +262,7 @@ error:
 #endif
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname, size_t size,
-                hbool_t nest_printf, hbool_t subst_for_superblock)
+                bool nest_printf, bool subst_for_superblock)
 {
     const char *prefix         = NULL;
     const char *driver_env_var = NULL; /* HDF5_DRIVER environment variable     */
@@ -370,7 +370,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                        "   export HDF5_PARAPREFIX\n"
                        "*** End of Hint ***\n");
 
-            explained = TRUE;
+            explained = true;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif /* HDF5_PARAPREFIX */
@@ -486,19 +486,19 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, false, false));
 }
 
 char *
 h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
+    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, false, true));
 }
 
-hbool_t
+bool
 h5_using_default_driver(const char *drv_name)
 {
-    hbool_t ret_val = TRUE;
+    bool ret_val = true;
 
     assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
@@ -512,7 +512,7 @@ h5_using_default_driver(const char *drv_name)
 }
 
 herr_t
-h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible)
+h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible)
 {
     unsigned long feat_flags = 0;
     hid_t         driver_id  = H5I_INVALID_HID;

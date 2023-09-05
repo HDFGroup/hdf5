@@ -35,10 +35,10 @@
 /* Local Prototypes */
 /********************/
 
-static hid_t create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned random_seed);
-static int   create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file,
+static hid_t create_file(const char *filename, bool verbose, FILE *verbose_file, unsigned random_seed);
+static int   create_datasets(hid_t fid, int comp_level, bool verbose, FILE *verbose_file,
                              const char *index_type);
-static int   add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecords,
+static int   add_records(hid_t fid, bool verbose, FILE *verbose_file, unsigned long nrecords,
                          unsigned long flush_count);
 static void  usage(void);
 
@@ -63,7 +63,7 @@ static void  usage(void);
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned random_seed)
+create_file(const char *filename, bool verbose, FILE *verbose_file, unsigned random_seed)
 {
     hid_t fid;  /* File ID for new HDF5 file */
     hid_t fcpl; /* File creation property list */
@@ -135,7 +135,7 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned 
  *-------------------------------------------------------------------------
  */
 static int
-create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file, const char *index_type)
+create_datasets(hid_t fid, int comp_level, bool verbose, FILE *verbose_file, const char *index_type)
 {
     hid_t    dcpl;                               /* Dataset creation property list */
     hid_t    tid;                                /* Datatype for dataset elements */
@@ -209,7 +209,7 @@ create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file, 
  *-------------------------------------------------------------------------
  */
 static int
-add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecords, unsigned long flush_count)
+add_records(hid_t fid, bool verbose, FILE *verbose_file, unsigned long nrecords, unsigned long flush_count)
 {
     hid_t         tid;                                  /* Datatype ID for records */
     hid_t         mem_sid;                              /* Memory dataspace ID */
@@ -356,9 +356,9 @@ main(int argc, char *argv[])
     hid_t       fid;                  /* File ID for file opened */
     long        nrecords     = 0;     /* # of records to append */
     long        flush_count  = 10000; /* # of records to write between flushing file */
-    hbool_t     verbose      = TRUE;  /* Whether to emit some informational messages */
+    bool        verbose      = true;  /* Whether to emit some informational messages */
     FILE       *verbose_file = NULL;  /* File handle for verbose output */
-    hbool_t     use_seed     = FALSE; /* Set to TRUE if a seed was set on the command line */
+    bool        use_seed     = false; /* Set to true if a seed was set on the command line */
     unsigned    random_seed  = 0;     /* Random # seed */
     int         comp_level   = -1;    /* Compression level (-1 is no compression) */
     const char *index_type   = "b1";  /* Chunk index type */
@@ -399,13 +399,13 @@ main(int argc, char *argv[])
 
                     /* Be quiet */
                     case 'q':
-                        verbose = FALSE;
+                        verbose = false;
                         u++;
                         break;
 
                     /* Random # seed */
                     case 'r':
-                        use_seed = TRUE;
+                        use_seed = true;
                         temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();

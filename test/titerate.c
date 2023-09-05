@@ -52,8 +52,8 @@ typedef struct {
 #define CORRUPTED_ATNAMELEN_FILE "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
-    char    message[256];
-    hbool_t found;
+    char message[256];
+    bool found;
 } searched_err_t;
 
 /* Call back function for test_corrupted_attnamelen */
@@ -119,7 +119,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
 **
 ****************************************************************/
 static void
-test_iter_group(hid_t fapl, hbool_t new_format)
+test_iter_group(hid_t fapl, bool new_format)
 {
     hid_t      file;                  /* File ID */
     hid_t      dataset;               /* Dataset ID */
@@ -408,7 +408,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
 **
 ****************************************************************/
 static void
-test_iter_attr(hid_t fapl, hbool_t new_format)
+test_iter_attr(hid_t fapl, bool new_format)
 {
     hid_t     file;          /* File ID */
     hid_t     dataset;       /* Common Dataset ID */
@@ -986,7 +986,7 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
 
     /* If the searched error message is found, stop the iteration */
     if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
-        searched_err->found = TRUE;
+        searched_err->found = true;
         status              = H5_ITER_STOP;
     }
 
@@ -1008,7 +1008,7 @@ test_corrupted_attnamelen(void)
     searched_err_t err_caught; /* Data to be passed to callback func */
     int            err_status; /* Status returned by H5Aiterate2 */
     herr_t         ret;        /* Return value */
-    hbool_t        driver_is_default_compatible;
+    bool           driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
     /* The error message produced when the failure occurs
@@ -1044,14 +1044,14 @@ test_corrupted_attnamelen(void)
     if (err_status == -1) {
         /* Initialize client data */
         HDstrcpy(err_caught.message, err_message);
-        err_caught.found = FALSE;
+        err_caught.found = false;
 
         /* Look for the correct error message */
         ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
         CHECK(ret, FAIL, "H5Ewalk2");
 
         /* Fail if the indicated message is not found */
-        CHECK(err_caught.found, FALSE, "test_corrupted_attnamelen: Expected error not found");
+        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
     }
 
     /* Close the dataset and file */
@@ -1175,7 +1175,7 @@ test_iterate(void)
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* These next tests use the same file */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         test_iter_group(new_format ? fapl2 : fapl, new_format); /* Test group iteration */
         test_iter_group_large(new_format ? fapl2 : fapl); /* Test group iteration for large # of objects */
         test_iter_attr(new_format ? fapl2 : fapl, new_format); /* Test attribute iteration */

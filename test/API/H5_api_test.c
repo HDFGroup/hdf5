@@ -124,7 +124,7 @@ main(int argc, char **argv)
     hid_t       registered_con_id         = H5I_INVALID_HID;
     char       *vol_connector_string_copy = NULL;
     char       *vol_connector_info        = NULL;
-    hbool_t     err_occurred              = FALSE;
+    bool        err_occurred              = false;
 
     /* Simple argument checking, TODO can improve that later */
     if (argc > 1) {
@@ -171,13 +171,13 @@ main(int argc, char **argv)
 
         if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
             fprintf(stderr, "Unable to copy VOL connector string\n");
-            err_occurred = TRUE;
+            err_occurred = true;
             goto done;
         }
 
         if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
             fprintf(stderr, "Error while parsing VOL connector string\n");
-            err_occurred = TRUE;
+            err_occurred = true;
             goto done;
         }
 
@@ -197,7 +197,7 @@ main(int argc, char **argv)
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         fprintf(stderr, "Unable to create FAPL\n");
-        err_occurred = TRUE;
+        err_occurred = true;
         goto done;
     }
 
@@ -213,14 +213,14 @@ main(int argc, char **argv)
 
         if ((is_registered = H5VLis_connector_registered_by_name(vol_connector_name)) < 0) {
             fprintf(stderr, "Unable to determine if VOL connector is registered\n");
-            err_occurred = TRUE;
+            err_occurred = true;
             goto done;
         }
 
         if (!is_registered) {
             fprintf(stderr, "Specified VOL connector '%s' wasn't correctly registered!\n",
                     vol_connector_name);
-            err_occurred = TRUE;
+            err_occurred = true;
             goto done;
         }
         else {
@@ -231,19 +231,19 @@ main(int argc, char **argv)
              */
             if (H5Pget_vol_id(fapl_id, &default_con_id) < 0) {
                 fprintf(stderr, "Couldn't retrieve ID of VOL connector set on default FAPL\n");
-                err_occurred = TRUE;
+                err_occurred = true;
                 goto done;
             }
 
             if ((registered_con_id = H5VLget_connector_id_by_name(vol_connector_name)) < 0) {
                 fprintf(stderr, "Couldn't retrieve ID of registered VOL connector\n");
-                err_occurred = TRUE;
+                err_occurred = true;
                 goto done;
             }
 
             if (default_con_id != registered_con_id) {
                 fprintf(stderr, "VOL connector set on default FAPL didn't match specified VOL connector\n");
-                err_occurred = TRUE;
+                err_occurred = true;
                 goto done;
             }
         }
@@ -255,7 +255,7 @@ main(int argc, char **argv)
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
         fprintf(stderr, "Unable to retrieve VOL connector capability flags\n");
-        err_occurred = TRUE;
+        err_occurred = true;
         goto done;
     }
 
@@ -265,7 +265,7 @@ main(int argc, char **argv)
      */
     if (create_test_container(H5_api_test_filename, vol_cap_flags_g) < 0) {
         fprintf(stderr, "Unable to create testing container file '%s'\n", H5_api_test_filename);
-        err_occurred = TRUE;
+        err_occurred = true;
         goto done;
     }
 
@@ -290,17 +290,17 @@ done:
 
     if (default_con_id >= 0 && H5VLclose(default_con_id) < 0) {
         fprintf(stderr, "Unable to close VOL connector ID\n");
-        err_occurred = TRUE;
+        err_occurred = true;
     }
 
     if (registered_con_id >= 0 && H5VLclose(registered_con_id) < 0) {
         fprintf(stderr, "Unable to close VOL connector ID\n");
-        err_occurred = TRUE;
+        err_occurred = true;
     }
 
     if (fapl_id >= 0 && H5Pclose(fapl_id) < 0) {
         fprintf(stderr, "Unable to close FAPL\n");
-        err_occurred = TRUE;
+        err_occurred = true;
     }
 
     H5close();

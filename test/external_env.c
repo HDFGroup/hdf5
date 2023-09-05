@@ -60,7 +60,7 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(TRUE) < 0)
+    if (reset_raw_data_files(true) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
@@ -156,7 +156,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Test with old & new format groups */
-    for (latest_format = FALSE; latest_format <= TRUE; latest_format++) {
+    for (latest_format = false; latest_format <= true; latest_format++) {
         hid_t current_fapl_id = -1;
 
         /* Set the fapl for different file formats */

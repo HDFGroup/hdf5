@@ -973,7 +973,7 @@ test_h5o_link(void)
     /* Create LCPL with intermediate group creation flag set */
     lcpl_id = H5Pcreate(H5P_LINK_CREATE);
     CHECK(lcpl_id, FAIL, "H5Pcreate");
-    ret = H5Pset_create_intermediate_group(lcpl_id, TRUE);
+    ret = H5Pset_create_intermediate_group(lcpl_id, true);
     CHECK(ret, FAIL, "H5Pset_create_intermediate_group");
 
     /* Create a file access property list */
@@ -1008,7 +1008,7 @@ test_h5o_link(void)
             ret = H5Tcommit_anon(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(ret, FAIL, "H5Tcommit_anon");
             committed = H5Tcommitted(type_id);
-            VERIFY(committed, TRUE, "H5Tcommitted");
+            VERIFY(committed, true, "H5Tcommitted");
 
             /* Create a dataset with no name using the committed datatype*/
             dset_id = H5Dcreate_anon(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);

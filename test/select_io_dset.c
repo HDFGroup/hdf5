@@ -163,7 +163,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
@@ -282,7 +282,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     /* Create 1d data space */
@@ -453,7 +453,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
@@ -595,7 +595,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
@@ -731,7 +731,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     /* Allocate buffers for datasets */
@@ -1081,7 +1081,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
@@ -1401,7 +1401,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     dims[0] = DSET_SELECT_DIM;
@@ -1842,7 +1842,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 
     /* Set modify write buffer if requested */
     if (mwbuf)
-        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+        if (H5Pset_modify_write_buf(dxpl, true) < 0)
             FAIL_STACK_ERROR;
 
     dims[0] = DSET_SELECT_DIM;
@@ -2276,7 +2276,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
         /* Set modify write buffer if requested */
         if (mwbuf)
-            if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+            if (H5Pset_modify_write_buf(dxpl, true) < 0)
                 FAIL_STACK_ERROR;
 
         /* Set dataset layout: contiguous or chunked */
@@ -2843,7 +2843,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                           = FALSE;
+    bool     is_chunked                           = false;
     hid_t    tid                                  = H5T_NATIVE_INT;
     uint32_t no_selection_io_cause_write          = 0;
     uint32_t no_selection_io_cause_read           = 0;
@@ -2908,13 +2908,13 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if (test_mode == TEST_DATASET_FILTER) {
         if (H5Pset_deflate(dcpl, 9) < 0)
             FAIL_STACK_ERROR;
-        is_chunked = TRUE;
+        is_chunked = true;
         no_selection_io_cause_write_expected |= H5D_SEL_IO_DATASET_FILTER;
         no_selection_io_cause_read_expected |= H5D_SEL_IO_DATASET_FILTER;
     }
 
     if (test_mode == TEST_CHUNK_CACHE) {
-        is_chunked = TRUE;
+        is_chunked = true;
         no_selection_io_cause_write_expected |= H5D_SEL_IO_CHUNK_CACHE;
         no_selection_io_cause_read_expected |= H5D_SEL_IO_CHUNK_CACHE;
     }
@@ -2945,7 +2945,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
             /* If we're using in-place type conversion sel io will succeed and only switch to scalar at the
              * VFL */
             if (test_mode & TEST_IN_PLACE_TCONV) {
-                if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                if (H5Pset_modify_write_buf(dxpl, true) < 0)
                     FAIL_STACK_ERROR;
                 no_selection_io_cause_write_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
             }
@@ -3140,14 +3140,14 @@ main(void)
         TEST_ERROR;
 
     /* Test with contiguous or chunked dataset */
-    for (chunked = FALSE; chunked <= TRUE; chunked++) {
+    for (chunked = false; chunked <= true; chunked++) {
 
         /* Data transforms only apply to integer or floating-point datasets */
         /* therefore, not all tests are run with data transform */
-        for (dtrans = FALSE; dtrans <= TRUE; dtrans++) {
+        for (dtrans = false; dtrans <= true; dtrans++) {
 
             /* Test with and without modify_write_buf turned on */
-            for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
+            for (mwbuf = false; mwbuf <= true; mwbuf++) {
                 /* Print configuration message */
                 printf("Testing for selection I/O ");
                 if (chunked)

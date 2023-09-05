@@ -324,7 +324,7 @@ main(void)
     unsigned     bit_config;
     H5F_libver_t low, high;   /* Low and high bounds */
     const char  *env_h5_drvr; /* File Driver value from environment */
-    hbool_t      driver_is_parallel;
+    bool         driver_is_parallel;
     int          nerrors = 0;
 
     env_h5_drvr = HDgetenv(HDF5_DRIVER);

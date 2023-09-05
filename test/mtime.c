@@ -46,7 +46,7 @@ main(void)
     signed char buf1[32], buf2[32];
     char        filename[1024];
     int         token_cmp;
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
 
     h5_reset();
     fapl = h5_fileaccess();

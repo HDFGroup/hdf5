@@ -364,15 +364,15 @@ test_detect(void)
      *  Test class of some atomic types.
      *------------------------------------------------------------------------------*/
     /* Native integers should be in the integer class */
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_INTEGER) != true)
         TEST_ERROR;
 
     /* Native integers should _not_ be in other classes */
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_FLOAT) != FALSE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_FLOAT) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ARRAY) != FALSE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ARRAY) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ENUM) != FALSE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ENUM) != false)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -393,15 +393,15 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_cmpd_id, H5T_COMPOUND) != TRUE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_COMPOUND) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_cmpd_id, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_INTEGER) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_cmpd_id, H5T_FLOAT) != TRUE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_FLOAT) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_cmpd_id, H5T_VLEN) != FALSE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_VLEN) != false)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -412,17 +412,17 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_arr_id, H5T_ARRAY) != TRUE)
+    if (H5Tdetect_class(atom_arr_id, H5T_ARRAY) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_arr_id, H5T_REFERENCE) != TRUE)
+    if (H5Tdetect_class(atom_arr_id, H5T_REFERENCE) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_arr_id, H5T_VLEN) != FALSE)
+    if (H5Tdetect_class(atom_arr_id, H5T_VLEN) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_arr_id, H5T_FLOAT) != FALSE)
+    if (H5Tdetect_class(atom_arr_id, H5T_FLOAT) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_arr_id, H5T_INTEGER) != FALSE)
+    if (H5Tdetect_class(atom_arr_id, H5T_INTEGER) != false)
         TEST_ERROR;
 
     /* Create a VL datatype with an atomic base type of float*/
@@ -430,15 +430,15 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_vlf_id, H5T_VLEN) != TRUE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_VLEN) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_vlf_id, H5T_FLOAT) != TRUE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_FLOAT) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_vlf_id, H5T_COMPOUND) != FALSE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_COMPOUND) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_vlf_id, H5T_INTEGER) != FALSE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_INTEGER) != false)
         TEST_ERROR;
 
     /* Create a VL datatype with an atomic base type of char.  It should be a VL
@@ -447,13 +447,13 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_vlc_id, H5T_VLEN) != TRUE)
+    if (H5Tdetect_class(atom_vlc_id, H5T_VLEN) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_vlc_id, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(atom_vlc_id, H5T_INTEGER) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_vlc_id, H5T_STRING) != FALSE)
+    if (H5Tdetect_class(atom_vlc_id, H5T_STRING) != false)
         TEST_ERROR;
 
     /* Create a VL string.  It should be a string, not a VL class. */
@@ -463,11 +463,11 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_vls_id, H5T_STRING) != TRUE)
+    if (H5Tdetect_class(atom_vls_id, H5T_STRING) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_vls_id, H5T_VLEN) != FALSE)
+    if (H5Tdetect_class(atom_vls_id, H5T_VLEN) != false)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -490,25 +490,25 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_COMPOUND) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_COMPOUND) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_ARRAY) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_ARRAY) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_REFERENCE) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_REFERENCE) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_INTEGER) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_FLOAT) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_FLOAT) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_STRING) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_STRING) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_VLEN) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_VLEN) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_TIME) != FALSE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_TIME) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_ENUM) != FALSE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_ENUM) != false)
         TEST_ERROR;
 
     /* Close complex compound datatype */
@@ -3697,7 +3697,7 @@ test_compound_18(void)
     hsize_t     dim      = 1;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     char        filename[1024];
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret;
 
     TESTING("accessing objects with compound datatypes that have no fields");
@@ -4550,7 +4550,7 @@ test_str_create(void)
 {
     hid_t  fixed_str1, fixed_str2;
     hid_t  vlen_str1, vlen_str2;
-    htri_t is_vl_str = FALSE;
+    htri_t is_vl_str = false;
     size_t query_size, str_size = 10;
 
     TESTING("string type creation using H5Tcreate");
@@ -7915,7 +7915,7 @@ test_deprec(hid_t fapl)
     int      perm[2]  = {0, 1};   /* Dimensions permutations for array datatype */
     hsize_t  rdims[2] = {0, 0};   /* Dimensions for querying array datatype */
     int      rperm[2] = {-2, -2}; /* Dimensions permutations for array datatype */
-    hbool_t  dim_mismatch;        /* Whether any dimensions didn't match */
+    bool     dim_mismatch;        /* Whether any dimensions didn't match */
     char     filename[1024];
     unsigned u;      /* Local index variable */
     herr_t   status; /* Generic routine value */
@@ -7928,9 +7928,9 @@ test_deprec(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(type, H5T_ARRAY) != TRUE)
+    if (H5Tdetect_class(type, H5T_ARRAY) != true)
         FAIL_STACK_ERROR;
-    if (H5Tdetect_class(type, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(type, H5T_INTEGER) != true)
         FAIL_STACK_ERROR;
 
     /* Get the array dimensions */
@@ -7939,24 +7939,24 @@ test_deprec(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Check the array dimensions */
-    dim_mismatch = FALSE;
+    dim_mismatch = false;
     for (u = 0; u < rank; u++)
         if (rdims[u] != dims[u]) {
             TestErrPrintf("Array dimension information doesn't match!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
                           (int)rdims[u], u, (int)dims[u]);
-            dim_mismatch = TRUE;
+            dim_mismatch = true;
         } /* end if */
     if (dim_mismatch)
         FAIL_PUTS_ERROR("    Dimensions didn't match!");
 
     /* Check the array dimension permutations */
-    dim_mismatch = FALSE;
+    dim_mismatch = false;
     for (u = 0; u < rank; u++)
         if (rperm[u] != -2) {
             TestErrPrintf(
                 "Array dimension permutation information was modified!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
                 rperm[u], u, perm[u]);
-            dim_mismatch = TRUE;
+            dim_mismatch = true;
         } /* end if */
     if (dim_mismatch)
         FAIL_PUTS_ERROR("    Dimension permutations modified!");
@@ -8746,9 +8746,9 @@ error:
 int
 main(void)
 {
-    hbool_t driver_is_parallel;
-    long    nerrors = 0;
-    hid_t   fapl    = H5I_INVALID_HID;
+    bool  driver_is_parallel;
+    long  nerrors = 0;
+    hid_t fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));

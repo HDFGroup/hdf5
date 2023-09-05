@@ -625,28 +625,28 @@ test_append(void)
     /* Try to append bad error stack IDs */
     H5E_BEGIN_TRY
     {
-        ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE);
+        ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, false);
     }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
-        ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE);
+        ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, false);
     }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
-        ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE);
+        ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, false);
     }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
     /* Append error stack #2 to error stack #1, without closing stack #2 */
-    if (H5Eappend_stack(estack_id1, estack_id2, FALSE) < 0)
+    if (H5Eappend_stack(estack_id1, estack_id2, false) < 0)
         TEST_ERROR;
 
     /* Check the number of errors on stack #1 */
@@ -660,7 +660,7 @@ test_append(void)
         TEST_ERROR;
 
     /* Append error stack #2 to error stack #1, and close stack #2 */
-    if (H5Eappend_stack(estack_id1, estack_id2, TRUE) < 0)
+    if (H5Eappend_stack(estack_id1, estack_id2, true) < 0)
         TEST_ERROR;
 
     /* Try to close error stack #2.  Should fail because H5Eappend_stack

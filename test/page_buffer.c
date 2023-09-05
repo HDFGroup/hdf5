@@ -301,20 +301,20 @@ error:
 static unsigned
 set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
 {
-    hbool_t    split = FALSE;
-    hbool_t    multi = FALSE;
+    bool       split = false;
+    bool       multi = false;
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t      memb_fapl_arr[H5FD_MEM_NTYPES];
     char      *memb_name[H5FD_MEM_NTYPES];
     haddr_t    memb_addr[H5FD_MEM_NTYPES];
-    hbool_t    relax;
+    bool       relax;
     H5FD_mem_t mt;
 
     /* Check for split or multi driver */
     if (!HDstrcmp(env_h5_drvr, "split"))
-        split = TRUE;
+        split = true;
     else if (!HDstrcmp(env_h5_drvr, "multi"))
-        multi = TRUE;
+        multi = true;
 
     if (split || multi) {
 
@@ -2067,7 +2067,7 @@ main(void)
     hid_t       fapl           = -1;    /* File access property list for data files */
     unsigned    nerrors        = 0;     /* Cumulative error count */
     const char *env_h5_drvr    = NULL;  /* File Driver value from environment */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     h5_reset();
 
@@ -2095,7 +2095,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -2118,9 +2118,9 @@ main(void)
         goto error;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     HDputs("All Page Buffering tests passed.");
 
@@ -2136,7 +2136,7 @@ error:
     H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     exit(EXIT_FAILURE);
 } /* main() */

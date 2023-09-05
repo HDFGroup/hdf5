@@ -566,7 +566,7 @@ error:
  *
  * Purpose:     Creates object headers that use a large datatype message.
  *
- *              Set test_file_closing to TRUE to add file closing and reopening
+ *              Set test_file_closing to true to add file closing and reopening
  *              whenever possible (to test that SOHMs are written correctly
  *              on disk and not just in memory).
  *
@@ -576,7 +576,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_closing)
+size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_closing)
 {
     dtype1_struct wdata;
     dtype1_struct rdata;
@@ -616,7 +616,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
      * local disks.  Don't close and reopen if express testing is enabled.
      */
     if (GetTestExpress() > 1)
-        test_file_closing = FALSE;
+        test_file_closing = false;
 
     /* Initialize wdata */
     memset(&wdata, 0, sizeof(wdata));
@@ -750,7 +750,7 @@ error:
  *----------------------------------------------------------------------------
  */
 static h5_stat_size_t
-getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t test_file_closing,
+getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, bool test_file_closing,
                   H5O_native_info_t *ninfo)
 {
     hid_t  fid = H5I_INVALID_HID;
@@ -759,7 +759,7 @@ getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t te
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
-    /* If test_file_closing is TRUE, you will get back a different ID,
+    /* If test_file_closing is true, you will get back a different ID,
      * which will need to be closed. The helper will close your passed-in
      * ID.
      */
@@ -833,7 +833,7 @@ test_sohm_size1(void)
 
     for (use_shared = 0; use_shared < 2; use_shared++) {
         for (use_btree = 0; use_btree < 2; use_btree++) {
-            hbool_t test_open_close;
+            bool test_open_close;
 
             /* cannot use btree indexing without shared messages; skip case */
             if (use_btree && !use_shared)
@@ -871,9 +871,9 @@ test_sohm_size1(void)
             file_sizes[size_index++] = h5_get_file_size(FILENAME, fapl_id);
 
             /* size of populated file, with different populating behaviors */
-            test_open_close          = TRUE;
+            test_open_close          = true;
             file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, test_open_close, &ninfo);
-            test_open_close          = FALSE;
+            test_open_close          = false;
             file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, test_open_close, &ninfo);
             oh_sizes[oh_size_index++] = ninfo.hdr.space.total;
 
@@ -1022,7 +1022,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to previously-created file */
         file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
         CHECK_I(file, "H5Fopen");
-        file = size1_helper(file, FILENAME, fapl_id, FALSE);
+        file = size1_helper(file, FILENAME, fapl_id, false);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
@@ -1037,7 +1037,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to a newly-created file */
         file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
         CHECK_I(file, "H5Fcreate");
-        file = size1_helper(file, FILENAME, fapl_id, FALSE);
+        file = size1_helper(file, FILENAME, fapl_id, false);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
@@ -3198,9 +3198,9 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
 static void
 test_sohm_extlink(void)
 {
-    hid_t   fcpl_id = -1;
-    hbool_t driver_is_default_compatible;
-    herr_t  ret;
+    hid_t  fcpl_id = -1;
+    bool   driver_is_default_compatible;
+    herr_t ret;
 
     MESSAGE(5, ("Testing SOHM creation through external links\n"));
 
@@ -3233,13 +3233,13 @@ test_sohm_extlink(void)
  * Purpose:     Tests extending a dataset's dataspace when sharing is
  *              enabled.
  *
- *              If close_reopen is TRUE, closes and reopens the file to
+ *              If close_reopen is true, closes and reopens the file to
  *              ensure that data is correctly written to disk.
  *
  *-------------------------------------------------------------------------
  */
 static int
-verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
+verify_dataset_extension(hid_t fcpl_id, bool close_reopen)
 {
     hid_t   file_id       = H5I_INVALID_HID;
     hid_t   orig_space_id = H5I_INVALID_HID;
@@ -3510,54 +3510,54 @@ test_sohm_extend_dset(void)
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     /* No shared messages */
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* Only dataspaces */
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_SDSPACE_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages */
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages in lists */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 100, 50);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages in lists converted to B-trees */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages in B-trees */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     ret = H5Pclose(fcpl_id);
@@ -3711,7 +3711,7 @@ void
 test_sohm(void)
 {
     const char *env_h5_drvr;
-    hbool_t     default_driver;
+    bool        default_driver;
 
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 

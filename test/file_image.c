@@ -676,14 +676,14 @@ error:
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
-test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, hbool_t user)
+test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, bool user)
 {
     char      file_name[1024] = "\0";
     void     *insertion_ptr   = NULL;
     void     *image_ptr       = NULL;
     void     *file_image_ptr  = NULL;
-    hbool_t   is_family_file  = FALSE;
-    hbool_t   identical;
+    bool      is_family_file  = false;
+    bool      identical;
     int       data[100];
     int       i;
     int       fd = -1;
@@ -710,7 +710,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     VERIFY(driver >= 0, "H5Pget_driver(fapl) failed");
 
     if (driver == H5FD_FAMILY)
-        is_family_file = TRUE;
+        is_family_file = true;
 
     /* setup the file name */
     h5_fixname(FILENAME2[file_name_num], fapl, file_name, sizeof(file_name));
@@ -885,11 +885,11 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     }
 
     /* verify that the file and the image contain the same data */
-    identical = TRUE;
+    identical = true;
     i         = 0;
     while ((i < (int)image_size) && identical) {
         if (((char *)image_ptr)[i] != ((char *)file_image_ptr)[i])
-            identical = FALSE;
+            identical = false;
         i++;
     }
     VERIFY(identical, "file and image differ.");
@@ -901,7 +901,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     VERIFY(core_fapl_id >= 0, "H5Pcreate() failed");
 
     /* setup core_fapl_id to use the core file driver */
-    err = H5Pset_fapl_core(core_fapl_id, (size_t)(64 * 1024), FALSE);
+    err = H5Pset_fapl_core(core_fapl_id, (size_t)(64 * 1024), false);
     VERIFY(err == SUCCEED, "H5Pset_fapl_core() failed.");
 
     /* Set file image in core fapl */
@@ -1121,7 +1121,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(fapl_id >= 0, "H5Pcreate(2) failed");
 
     /* setup the fapl for the multi file driver */
-    err = H5Pset_fapl_multi(fapl_id, memb_map, memb_fapl, memb_name, memb_addr, FALSE);
+    err = H5Pset_fapl_multi(fapl_id, memb_map, memb_fapl, memb_name, memb_addr, false);
     VERIFY(err >= 0, "H5Pset_fapl_multi failed");
 
     /* setup the file name */
@@ -1308,7 +1308,7 @@ main(void)
 {
     int      errors = 0;
     hid_t    fapl;
-    hbool_t  driver_is_default_compatible;
+    bool     driver_is_default_compatible;
     unsigned user;
 
     h5_reset();
@@ -1325,7 +1325,7 @@ main(void)
     }
 
     /* Perform tests with/without user block */
-    for (user = FALSE; user <= TRUE; user++) {
+    for (user = false; user <= true; user++) {
 
         /* test H5Fget_file_image() with sec2 driver */
         fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -1343,7 +1343,7 @@ main(void)
 
         /* test H5Fget_file_image() with core driver */
         fapl = H5Pcreate(H5P_FILE_ACCESS);
-        if (H5Pset_fapl_core(fapl, (size_t)(64 * 1024), TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)(64 * 1024), true) < 0)
             errors++;
         else
             errors += test_get_file_image("H5Fget_file_image() with core driver", 2, fapl, user);

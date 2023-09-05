@@ -338,9 +338,9 @@ error:
 int
 main(void)
 {
-    hbool_t driver_is_default_compatible;
-    char    filename[1024];
-    int     nerrors = 0;
+    bool driver_is_default_compatible;
+    char filename[1024];
+    int  nerrors = 0;
 
     h5_reset();
 

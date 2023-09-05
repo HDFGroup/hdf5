@@ -38,7 +38,7 @@ static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflu
 /* Number of sub-groups created in the containing group */
 #define NGROUPS 100
 
-static hid_t  create_file(const char *filename, hid_t fapl_id, hbool_t swmr);
+static hid_t  create_file(const char *filename, hid_t fapl_id, bool swmr);
 static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
 
 /*-------------------------------------------------------------------------
@@ -52,7 +52,7 @@ static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_file(const char *filename, hid_t fapl_id, hbool_t swmr)
+create_file(const char *filename, hid_t fapl_id, bool swmr)
 {
     hid_t    fid     = -1;   /* file ID                          */
     hid_t    top_gid = -1;   /* containing group ID              */
@@ -176,12 +176,12 @@ error:
 int
 main(void)
 {
-    char   *driver = NULL;     /* name of current VFD (from env var)       */
-    hbool_t vfd_supports_swmr; /* whether the current VFD supports SWMR    */
-    hid_t   fid     = -1;      /* file ID                                  */
-    hid_t   fapl_id = -1;      /* file access proplist ID                  */
-    char    filename[1024];    /* filename                                 */
-    hbool_t use_swmr;          /* whether or not to use SWMR I/O           */
+    char *driver = NULL;     /* name of current VFD (from env var)       */
+    bool  vfd_supports_swmr; /* whether the current VFD supports SWMR    */
+    hid_t fid     = -1;      /* file ID                                  */
+    hid_t fapl_id = -1;      /* file access proplist ID                  */
+    char  filename[1024];    /* filename                                 */
+    bool  use_swmr;          /* whether or not to use SWMR I/O           */
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
@@ -198,7 +198,7 @@ main(void)
     /* Create a file and flush */
     TESTING("H5Fflush (part1 with flush)");
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -209,7 +209,7 @@ main(void)
     TESTING("H5Fflush (part1 with flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -222,7 +222,7 @@ main(void)
     /* Create a file which will not be flushed */
     TESTING("H5Fflush (part1 without flush)");
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     PASSED();
@@ -231,7 +231,7 @@ main(void)
     TESTING("H5Fflush (part1 without flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[3], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         PASSED();
@@ -242,7 +242,7 @@ main(void)
     /* Create a file, flush, add a dataset, flush */
     TESTING("H5Fflush (part1 with flush and later addition and another flush)");
     h5_fixname(FILENAME[4], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -257,7 +257,7 @@ main(void)
     TESTING("H5Fflush (part1 with flush and later addition and another flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -274,7 +274,7 @@ main(void)
     /* Create a file, flush, add a dataset, (no flush) */
     TESTING("H5Fflush (part1 with flush and later addition)");
     h5_fixname(FILENAME[6], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -287,7 +287,7 @@ main(void)
     TESTING("H5Fflush (part1 with flush and later addition + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)

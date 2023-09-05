@@ -2639,11 +2639,11 @@ test_full_group_compact(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) != TRUE)
+    if (H5G__has_links_test(gid, NULL) != true)
         TEST_ERROR;
-    if (H5G__has_stab_test(gid) == TRUE)
+    if (H5G__has_stab_test(gid) == true)
         TEST_ERROR;
 
     /* Close group with objects to delete */
@@ -2813,11 +2813,11 @@ test_full_group_dense(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Close group with objects to delete */
@@ -2920,7 +2920,7 @@ main(void)
         TEST_ERROR;
 
     /* Test with old & new format groups */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t my_fapl;
 
         /* Set the FAPL for the type of format */

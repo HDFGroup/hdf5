@@ -424,12 +424,12 @@ test_vlstring_type(void)
     ret = H5Tget_class(tid_vlstr);
     VERIFY(ret, H5T_STRING, "H5Tget_class");
     ret = H5Tis_variable_str(tid_vlstr);
-    VERIFY(ret, TRUE, "H5Tis_variable_str");
+    VERIFY(ret, true, "H5Tis_variable_str");
 
     /* Verify that the class detects as a string */
     vl_str = H5Tdetect_class(tid_vlstr, H5T_STRING);
     CHECK(vl_str, FAIL, "H5Tdetect_class");
-    VERIFY(vl_str, TRUE, "H5Tdetect_class");
+    VERIFY(vl_str, true, "H5Tdetect_class");
 
     /* Check default character set and padding */
     cset = H5Tget_cset(tid_vlstr);
