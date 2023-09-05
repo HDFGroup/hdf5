@@ -262,9 +262,9 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
         /* set Parallel access with communicator */
         ret = H5Pset_fapl_mpio(ret_pl, comm, info);
         VRFY((ret >= 0), "");
-        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
+        ret = H5Pset_all_coll_metadata_ops(ret_pl, true);
         VRFY((ret >= 0), "");
-        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
+        ret = H5Pset_coll_metadata_write(ret_pl, true);
         VRFY((ret >= 0), "");
         return (ret_pl);
     }
@@ -3344,10 +3344,10 @@ test_actual_io_mode(int selection_mode)
     H5D_mpio_actual_io_mode_t        actual_io_mode_expected        = H5D_MPIO_NO_COLLECTIVE;
     const char                      *filename;
     const char                      *test_name;
-    hbool_t                          direct_multi_chunk_io;
-    hbool_t                          multi_chunk_io;
-    hbool_t                          is_chunked;
-    hbool_t                          is_collective;
+    bool                             direct_multi_chunk_io;
+    bool                             multi_chunk_io;
+    bool                             is_chunked;
+    bool                             is_collective;
     int                              mpi_size = -1;
     int                              mpi_rank = -1;
     int                              length;
@@ -3858,8 +3858,8 @@ test_no_collective_cause_mode(int selection_mode)
 
     const char *filename;
     const char *test_name;
-    hbool_t     is_chunked     = 1;
-    hbool_t     is_independent = 0;
+    bool        is_chunked     = 1;
+    bool        is_independent = 0;
     int         mpi_size       = -1;
     int         mpi_rank       = -1;
     int         length;

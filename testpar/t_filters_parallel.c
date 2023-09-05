@@ -8641,8 +8641,8 @@ main(int argc, char **argv)
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     VRFY((H5Pset_fapl_mpio(fapl_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
-    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, TRUE) >= 0), "H5Pset_all_coll_metadata_ops succeeded");
-    VRFY((H5Pset_coll_metadata_write(fapl_id, TRUE) >= 0), "H5Pset_coll_metadata_write succeeded");
+    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0), "H5Pset_all_coll_metadata_ops succeeded");
+    VRFY((H5Pset_coll_metadata_write(fapl_id, true) >= 0), "H5Pset_coll_metadata_write succeeded");
 
     VRFY((H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
          "Set libver bounds succeeded");
@@ -8653,7 +8653,7 @@ main(int argc, char **argv)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     VRFY((fcpl_id >= 0), "FCPL creation succeeded");
 
-    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, 1) >= 0),
+    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, true, 1) >= 0),
          "H5Pset_file_space_strategy succeeded");
 
     VRFY((h5_fixname(FILENAME[0], fapl_id, filenames[0], sizeof(filenames[0])) != NULL),

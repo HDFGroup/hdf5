@@ -894,7 +894,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     const char *fcnName = "lower_dim_size_comp_test__select_checker_board():";
 #endif
-    hbool_t   first_selection = TRUE;
+    bool      first_selection = true;
     int       i, j, k, l, m;
     int       ds_offset;
     int       sel_offset;
@@ -1116,7 +1116,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
                             if (first_selection) {
 
-                                first_selection = FALSE;
+                                first_selection = false;
 
                                 ret = H5Sselect_hyperslab(tgt_sid, H5S_SELECT_SET, &(start[ds_offset]),
                                                           &(stride[ds_offset]), &(count[ds_offset]),
@@ -1192,7 +1192,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 **  lower_dim_size_comp_test__verify_data():
 **
 **    Examine the supplied buffer to see if it contains the
-**    expected data.  Return TRUE if it does, and FALSE
+**    expected data.  Return true if it does, and false
 **      otherwise.
 **
 **    The supplied buffer is presumed to this process's slice
@@ -1245,20 +1245,20 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
 #define LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG 0
 
-static hbool_t
+static bool
 lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
                                       const int mpi_rank,
 #endif /* LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG */
                                       const int rank, const int edge_size, const int checker_edge_size,
-                                      uint32_t first_expected_val, hbool_t buf_starts_in_checker)
+                                      uint32_t first_expected_val, bool buf_starts_in_checker)
 {
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
     const char *fcnName = "lower_dim_size_comp_test__verify_data():";
 #endif
-    hbool_t   good_data = TRUE;
-    hbool_t   in_checker;
-    hbool_t   start_in_checker[5];
+    bool      good_data = true;
+    bool      in_checker;
+    bool      start_in_checker[5];
     uint32_t  expected_value;
     uint32_t *val_ptr;
     int       i, j, k, l, m;     /* to track position in n-cube */
@@ -1351,7 +1351,7 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
 
                             if (*val_ptr != expected_value) {
 
-                                good_data = FALSE;
+                                good_data = false;
                             }
 
                             /* zero out buffer for re-use */
@@ -1359,7 +1359,7 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
                         }
                         else if (*val_ptr != 0) {
 
-                            good_data = FALSE;
+                            good_data = false;
 
                             /* zero out buffer for re-use */
                             *val_ptr = 0;
@@ -1408,7 +1408,7 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
 #define LDSCT_DS_RANK 5
 
 static void
-lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_collective_io,
+lower_dim_size_comp_test__run_test(const int chunk_edge_size, const bool use_collective_io,
                                    const hid_t dset_type)
 {
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
@@ -1418,8 +1418,8 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     hsize_t     max_dims[32];
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
     const char *filename;
-    hbool_t     data_ok   = FALSE;
-    hbool_t     mis_match = FALSE;
+    bool        data_ok   = false;
+    bool        mis_match = false;
     int         i;
     int         start_index;
     int         stop_index;
@@ -1761,10 +1761,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     }
 
     check = H5Sselect_valid(mem_small_ds_sid);
-    VRFY((check == TRUE), "H5Sselect_valid(mem_small_ds_sid) returns TRUE");
+    VRFY((check == true), "H5Sselect_valid(mem_small_ds_sid) returns true");
 
     check = H5Sselect_valid(file_small_ds_sid);
-    VRFY((check == TRUE), "H5Sselect_valid(file_small_ds_sid) returns TRUE");
+    VRFY((check == true), "H5Sselect_valid(file_small_ds_sid) returns true");
 
     /* write the initial value of the small data set to file */
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
@@ -1791,7 +1791,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
      * and reset the buffer to zero in passing.
      */
     expected_value = 0;
-    mis_match      = FALSE;
+    mis_match      = false;
     ptr_1          = small_ds_buf_1;
 
     i = 0;
@@ -1799,7 +1799,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
         if (*ptr_1 != expected_value) {
 
-            mis_match = TRUE;
+            mis_match = true;
         }
 
         *ptr_1 = (uint32_t)0;
@@ -1807,7 +1807,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
         ptr_1++;
         expected_value++;
     }
-    VRFY((mis_match == FALSE), "small ds init data good.");
+    VRFY((mis_match == false), "small ds init data good.");
 
     /* setup selections for writing initial data to the large data set */
     start[0] = (hsize_t)(mpi_rank + 1);
@@ -1915,10 +1915,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
     check = H5Sselect_valid(mem_large_ds_sid);
-    VRFY((check == TRUE), "H5Sselect_valid(mem_large_ds_sid) returns TRUE");
+    VRFY((check == true), "H5Sselect_valid(mem_large_ds_sid) returns true");
 
     check = H5Sselect_valid(file_large_ds_sid);
-    VRFY((check == TRUE), "H5Sselect_valid(file_large_ds_sid) returns TRUE");
+    VRFY((check == true), "H5Sselect_valid(file_large_ds_sid) returns true");
 
     /* write the initial value of the large data set to file */
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
@@ -1952,7 +1952,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
      * in passing, reset the buffer to zeros
      */
     expected_value = 0;
-    mis_match      = FALSE;
+    mis_match      = false;
     ptr_1          = large_ds_buf_1;
 
     i = 0;
@@ -1960,7 +1960,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
         if (*ptr_1 != expected_value) {
 
-            mis_match = TRUE;
+            mis_match = true;
         }
 
         *ptr_1 = (uint32_t)0;
@@ -1968,7 +1968,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
         ptr_1++;
         expected_value++;
     }
-    VRFY((mis_match == FALSE), "large ds init data good.");
+    VRFY((mis_match == false), "large ds init data good.");
 
     /***********************************/
     /***** INITIALIZATION COMPLETE *****/
@@ -2006,7 +2006,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
      * selections as having the same shape.
      */
     check = H5Sselect_shape_same(mem_large_ds_sid, file_small_ds_sid);
-    VRFY((check == TRUE), "H5Sselect_shape_same passed (1)");
+    VRFY((check == true), "H5Sselect_shape_same passed (1)");
 
     ret = H5Dread(small_dataset, H5T_NATIVE_UINT32, mem_large_ds_sid, file_small_ds_sid, xfer_plist,
                   large_ds_buf_1);
@@ -2021,7 +2021,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
     /* verify that expected data is retrieved */
 
-    data_ok = TRUE;
+    data_ok = true;
 
     start_index = (int)((large_sel_start[0] * large_dims[1] * large_dims[2] * large_dims[3] * large_dims[4]) +
                         (large_sel_start[1] * large_dims[2] * large_dims[3] * large_dims[4]) +
@@ -2040,14 +2040,14 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
         if (*ptr_1 != (uint32_t)0) {
 
-            data_ok = FALSE;
+            data_ok = false;
             *ptr_1  = (uint32_t)0;
         }
 
         ptr_1++;
     }
 
-    VRFY((data_ok == TRUE), "slice read from small ds data good(1).");
+    VRFY((data_ok == true), "slice read from small ds data good(1).");
 
     data_ok = lower_dim_size_comp_test__verify_data(ptr_1,
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
@@ -2056,11 +2056,11 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
                                                     /* rank */ 2,
                                                     /* edge_size */ 10,
                                                     /*  checker_edge_size */ 3, expected_value,
-                                                    /* buf_starts_in_checker */ TRUE);
+                                                    /* buf_starts_in_checker */ true);
 
-    VRFY((data_ok == TRUE), "slice read from small ds data good(2).");
+    VRFY((data_ok == true), "slice read from small ds data good(2).");
 
-    data_ok = TRUE;
+    data_ok = true;
 
     ptr_1 += small_ds_slice_size;
 
@@ -2068,14 +2068,14 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
         if (*ptr_1 != (uint32_t)0) {
 
-            data_ok = FALSE;
+            data_ok = false;
             *ptr_1  = (uint32_t)0;
         }
 
         ptr_1++;
     }
 
-    VRFY((data_ok == TRUE), "slice read from small ds data good(3).");
+    VRFY((data_ok == true), "slice read from small ds data good(3).");
 
     /* read a checkerboard selection of a slice of the process slice of
      * the large on disk data set into the process slice of the small
@@ -2103,7 +2103,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
      * selections as having the same shape.
      */
     check = H5Sselect_shape_same(mem_small_ds_sid, file_large_ds_sid);
-    VRFY((check == TRUE), "H5Sselect_shape_same passed (2)");
+    VRFY((check == true), "H5Sselect_shape_same passed (2)");
 
     ret = H5Dread(large_dataset, H5T_NATIVE_UINT32, mem_small_ds_sid, file_large_ds_sid, xfer_plist,
                   small_ds_buf_1);
@@ -2118,7 +2118,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
     /* verify that expected data is retrieved */
 
-    data_ok = TRUE;
+    data_ok = true;
 
     expected_value =
         (uint32_t)((large_sel_start[0] * large_dims[1] * large_dims[2] * large_dims[3] * large_dims[4]) +
@@ -2140,14 +2140,14 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
         if (*ptr_1 != (uint32_t)0) {
 
-            data_ok = FALSE;
+            data_ok = false;
             *ptr_1  = (uint32_t)0;
         }
 
         ptr_1++;
     }
 
-    VRFY((data_ok == TRUE), "slice read from large ds data good(1).");
+    VRFY((data_ok == true), "slice read from large ds data good(1).");
 
     data_ok = lower_dim_size_comp_test__verify_data(ptr_1,
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
@@ -2156,11 +2156,11 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
                                                     /* rank */ 2,
                                                     /* edge_size */ 10,
                                                     /*  checker_edge_size */ 3, expected_value,
-                                                    /* buf_starts_in_checker */ TRUE);
+                                                    /* buf_starts_in_checker */ true);
 
-    VRFY((data_ok == TRUE), "slice read from large ds data good(2).");
+    VRFY((data_ok == true), "slice read from large ds data good(2).");
 
-    data_ok = TRUE;
+    data_ok = true;
 
     ptr_1 += small_ds_slice_size;
 
@@ -2175,14 +2175,14 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
             }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG */
 
-            data_ok = FALSE;
+            data_ok = false;
             *ptr_1  = (uint32_t)0;
         }
 
         ptr_1++;
     }
 
-    VRFY((data_ok == TRUE), "slice read from large ds data good(3).");
+    VRFY((data_ok == true), "slice read from large ds data good(3).");
 
     /* Close dataspaces */
     ret = H5Sclose(full_mem_small_ds_sid);
@@ -2258,10 +2258,10 @@ lower_dim_size_comp_test(void)
     HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
     for (use_collective_io = 0; use_collective_io <= 1; use_collective_io++) {
         chunk_edge_size = 0;
-        lower_dim_size_comp_test__run_test(chunk_edge_size, (hbool_t)use_collective_io, H5T_NATIVE_UINT);
+        lower_dim_size_comp_test__run_test(chunk_edge_size, (bool)use_collective_io, H5T_NATIVE_UINT);
 
         chunk_edge_size = 5;
-        lower_dim_size_comp_test__run_test(chunk_edge_size, (hbool_t)use_collective_io, H5T_NATIVE_UINT);
+        lower_dim_size_comp_test__run_test(chunk_edge_size, (bool)use_collective_io, H5T_NATIVE_UINT);
     } /* end for */
 
     return;
@@ -2301,7 +2301,7 @@ link_chunk_collective_io_test(void)
 {
     /* const char *fcnName = "link_chunk_collective_io_test()"; */
     const char *filename;
-    hbool_t     mis_match = FALSE;
+    bool        mis_match = false;
     int         i;
     int         mrc;
     int         mpi_rank;
@@ -2427,7 +2427,7 @@ link_chunk_collective_io_test(void)
     VRFY((ret >= 0), "H5Pclose(xfer_plist) succeeded");
 
     /* verify the data */
-    mis_match = FALSE;
+    mis_match = false;
     for (i = 0; i < LINK_CHUNK_COLLECTIVE_IO_TEST_CHUNK_SIZE; i++) {
 
         diff = local_data_written[i] - local_data_read[i];
@@ -2435,10 +2435,10 @@ link_chunk_collective_io_test(void)
 
         if (diff >= 0.001) {
 
-            mis_match = TRUE;
+            mis_match = true;
         }
     }
-    VRFY((mis_match == FALSE), "dataset data good.");
+    VRFY((mis_match == false), "dataset data good.");
 
     /* Close dataspaces */
     ret = H5Sclose(write_mem_ds_sid);
