@@ -521,6 +521,23 @@ SUBROUTINE test_freelist(total_error)
      CALL check("h5get_free_list_sizes_f", -1, total_error)
   ENDIF
 
+  CALL h5garbage_collect_f(error)
+  CALL check("h5garbage_collect_f", error, total_error)
+
+  ! Retrieve initial free list values
+  CALL h5get_free_list_sizes_f(reg_size_final, arr_size_final, blk_size_final, fac_size_final, error)
+  CALL check("h5get_free_list_sizes_f", error, total_error)
+
+  ! All the free list values should be <= previous values
+  IF( reg_size_final .GT. reg_size_start) &
+       CALL check("h5get_free_list_sizes_f: reg_size_final > reg_size_start", -1, total_error)
+  IF( arr_size_final .GT. arr_size_start) &
+       CALL check("h5get_free_list_sizes_f: arr_size_final > arr_size_start", -1, total_error)
+  IF( blk_size_final .GT. blk_size_start) &
+       CALL check("h5get_free_list_sizes_f: blk_size_final > blk_size_start", -1, total_error)
+  IF( fac_size_final .GT. fac_size_start) &
+       CALL check("h5get_free_list_sizes_f: fac_size_final > fac_size_start", -1, total_error)
+
 END SUBROUTINE test_freelist
 
 END MODULE TH5MISC_1_8

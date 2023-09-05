@@ -2474,7 +2474,7 @@ CONTAINS
     INTEGER(HSIZE_T) :: i, rank
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf, hdferr) &
+       INTEGER(C_INT) FUNCTION H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) &
             BIND(C, NAME='H5Dwrite_chunk')
          IMPORT :: SIZE_T, HSIZE_T, HID_T
          IMPORT :: C_PTR, C_INT32_T, C_INT
@@ -2485,7 +2485,6 @@ CONTAINS
          INTEGER(HSIZE_T), DIMENSION(*) :: offset
          INTEGER(SIZE_T)   , VALUE      :: data_size
          TYPE(C_PTR)       , VALUE      :: buf
-         INTEGER           , VALUE      :: hdferr
        END FUNCTION H5Dwrite_chunk
     END INTERFACE
 
@@ -2507,7 +2506,7 @@ CONTAINS
        offset_c(i) = offset(rank - i + 1)
     ENDDO
 
-    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf, hdferr))
+    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf))
 
     DEALLOCATE(offset_c)
 
