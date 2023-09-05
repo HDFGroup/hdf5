@@ -5570,6 +5570,21 @@ H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
  */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
+
+#ifdef H5_HAVE_WIN32_API
+/* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
+ * so we define HDoff_t to be __int64, which is the type of the st_size field
+ * of the _stati64 struct.
+ */
+#define HDoff_t __int64
+#endif /* H5_HAVE_WIN32_API */
+#ifndef H5_HAVE_WIN32_API
+/* These definitions differ in Windows and are defined in
+ * H5win32defs for that platform.
+ */
+#define HDoff_t off_t
+#endif
+
 /**
  * \ingroup FAPL
  *
@@ -6353,7 +6368,7 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size);
+H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size);
 /**
  * \ingroup DCPL
  *

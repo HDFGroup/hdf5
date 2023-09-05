@@ -2599,7 +2599,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
+H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
 {
     size_t          idx;
     hsize_t         total, tmp;
@@ -2608,7 +2608,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*soh", plist_id, name, offset, size);
+    H5TRACE4("e", "i*sHoh", plist_id, name, offset, size);
 
     /* Check arguments */
     if (!name || !*name)
