@@ -2383,7 +2383,7 @@ CONTAINS
 !! \brief Reads a raw data chunk directly from a dataset in a file into a buffer.
 !!
 !! \param dset_id   Identifier of the dataset to read from
-!! \param offset    Logical position of the chunk&apos;s first element in the dataspace, 0-based indices
+!! \param offset    Logical position of the chunk&apos;s first element in the dataspace, \Bold{0-based indices}
 !! \param filters   Mask for identifying the filters in use
 !! \param buf       Buffer containing data to be read from the chunk
 !! \param hdferr    \fortran_error
@@ -2450,7 +2450,7 @@ CONTAINS
 !!
 !! \param dset_id    Identifier of the dataset to write to
 !! \param filters    Mask for identifying the filters in use
-!! \param offset     Logical position of the chunk&apos;s first element in the dataspace, 0-based indices
+!! \param offset     Logical position of the chunk&apos;s first element in the dataspace, \Bold{0-based indices}
 !! \param data_size  Size of the actual data to be written in bytes
 !! \param buf        Buffer containing data to be written to the chunk
 !! \param hdferr     \fortran_error

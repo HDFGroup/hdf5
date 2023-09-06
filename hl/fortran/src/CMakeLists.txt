@@ -243,6 +243,7 @@ set (mod_export_files
     h5lt.mod
     h5lt_const.mod
     h5im.mod
+    h5do.mod
 )
 
 if (BUILD_STATIC_LIBS)

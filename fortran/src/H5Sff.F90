@@ -893,7 +893,7 @@ CONTAINS
 !! \param operator Flag, valid values are:
 !!                 \li H5S_SELECT_SET_F
 !!                 \li H5S_SELECT_OR_F
-!! \param start    Array with hyperslab offsets.
+!! \param start    Array with hyperslab offsets, \Bold{0-based indices}.
 !! \param count    Number of blocks included in the hyperslab.
 !! \param hdferr   \fortran_error
 !! \param stride   Array with hyperslab strides.
