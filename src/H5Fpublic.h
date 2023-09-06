@@ -1730,7 +1730,7 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * pass the same values for \p file_id and \p flag.
  *
  * This function is available only when the HDF5 library is configured with parallel support
- * (\Code{--enable-parallel}). It is useful only when used with the #H5FD_MPIO driver
+ * (\Code{--enable-parallel | HDF5_ENABLE_PARALLEL}). It is useful only when used with the #H5FD_MPIO driver
  * (see H5Pset_fapl_mpio()).
  * \endparblock
  *
