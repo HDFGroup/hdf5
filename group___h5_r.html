@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -588,7 +588,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns identifier of referenced object if successful; otherwise returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000081">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference()</a> or the function <a class="el" href="group___h5_r.html#ga9b09586f7b6ec708434dd8f95f58a9b7" title="Opens the HDF5 object referenced.">H5Rdereference2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000082">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference()</a> or the function <a class="el" href="group___h5_r.html#ga9b09586f7b6ec708434dd8f95f58a9b7" title="Opens the HDF5 object referenced.">H5Rdereference2()</a>.</dd></dl>
 <p>Given a reference, <code>ref</code>, to an object or a region in an object, <a class="el" href="group___h5_r.html#gafe7bbbc168c4836949c4c0b092654c45" title="Opens the HDF5 object referenced.">H5Rdereference1()</a> opens that object and returns an identifier.</p>
 <p>The parameter <code>obj_id</code> must be a valid identifier for an object in the HDF5 file containing the referenced object, including the file identifier.</p>
 <p>The parameter <code>ref_type</code> specifies the reference type of the reference <code>ref</code>. <code>ref_type</code> may contain either of the following values:</p><ul>
@@ -1021,7 +1021,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a valid object type if successful; otherwise returns a negative value (<a class="el" href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a45d6844bdf74176be3b846d007f8c740">H5G_UNKNOWN</a>).</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000080">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_r.html#gafe413df448be0d230de922357fd7bc3b">H5Rget_obj_type()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_r.html#gafe413df448be0d230de922357fd7bc3b">H5Rget_obj_type()</a> or the function <a class="el" href="group___h5_r.html#ga766e39a76bcdd68dc514425353eff807" title="Retrieves the type of object that an object reference points to.">H5Rget_obj_type2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000081">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_r.html#gafe413df448be0d230de922357fd7bc3b">H5Rget_obj_type()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_r.html#gafe413df448be0d230de922357fd7bc3b">H5Rget_obj_type()</a> or the function <a class="el" href="group___h5_r.html#ga766e39a76bcdd68dc514425353eff807" title="Retrieves the type of object that an object reference points to.">H5Rget_obj_type2()</a>.</dd></dl>
 <p>Given an object reference, <code>ref</code>, <a class="el" href="group___h5_r.html#gaf3736b2880a58471882b079b9f03defe" title="Retrieves the type of object that an object reference points to.">H5Rget_obj_type1()</a> returns the type of the referenced object.</p>
 <p>A <em>reference type</em> is the type of reference, either an object reference or a dataset region reference. An <em>object reference</em> points to an HDF5 object, while a <em>dataset region reference</em> points to a defined region within a dataset.</p>
 <p>The <em>referenced object</em> is the object the reference points to. The <em>referenced object type</em>, or the type of the referenced object, is the type of the object that the reference points to.</p>
@@ -1482,7 +1482,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:15 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:38 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

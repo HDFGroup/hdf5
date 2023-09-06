@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -338,7 +338,7 @@ Functions</h2></td></tr>
 <td><a class="el" href="_h5_zpublic_8h.html#a4dead61ceb139a3f97505d6e52eb1b8a">H5Z_FILTER_CONFIG_DECODE_ENABLED</a> </td><td>Decoding is enabled for this filter </td></tr>
 </table>
 <p>A bitwise AND of the returned <code>filter_config_flags</code> and a valid filter configuration flag will reveal whether the related configuration option is available. For example, if the value of </p><div class="fragment"><div class="line"><a class="code" href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a> &amp; filter_config_flags</div>
-</div><!-- fragment --><p> is true, i.e., greater than 0 (zero), the queried filter is configured to encode data; if the value is <code>FALSE</code>, i.e., equal to 0 (zero), the filter is not so configured.</p>
+</div><!-- fragment --><p> is true, i.e., greater than 0 (zero), the queried filter is configured to encode data; if the value is <code>false</code>, i.e., equal to 0 (zero), the filter is not so configured.</p>
 <p>If a filter is not encode-enabled, the corresponding <code>H5Pset_*</code> function will return an error if the filter is added to a dataset creation property list (which is required if the filter is to be used to encode that dataset). For example, if the <a class="el" href="_h5_zpublic_8h.html#ac4ec01a86fdac6619c7c3c1fcf3bf86a">H5Z_FILTER_CONFIG_ENCODE_ENABLED</a> flag is not returned for the SZIP filter, <a class="el" href="_h5_zpublic_8h.html#a421d9941c68ebb776573baeb9aa77cd2">H5Z_FILTER_SZIP</a>, a call to <a class="el" href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6" title="Sets up use of the SZIP compression filter.">H5Pset_szip()</a> will fail.</p>
 <p>If a filter is not decode-enabled, the application will not be able to read an existing file encoded with that filter.</p>
 <p>This function should be called, and the returned <code>filter_config_flags</code> should be analyzed, before calling any other function, such as <a class="el" href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6" title="Sets up use of the SZIP compression filter.">H5Pset_szip()</a>, that might require a particular filter configuration.</p>
@@ -423,7 +423,7 @@ Functions</h2></td></tr>
 <p>When a filter is applied to the fractal heap for a group (e.g., when compressing group metadata) and if they can apply and set local callback functions that have been defined for that filter, HDF5 passes the value -1 for all parameters for those callback functions. This is done to ensure that the filter will not be applied to groups if it relies on these parameters, as they are not applicable to group fractal heaps; to operate on group fractal heaps, a filter must be capable of operating on an opaque block of binary data.</p>
 <p>The <em>can-apply</em> callback function must return a positive value for a valid combination, zero for an invalid combination, and a negative value for an error. </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a> (*<a class="code" href="_h5_zdevelop_8h.html#af2d1e20aeb92b2712ebc2d9b5fcbf510">H5Z_can_apply_func_t</a>)(<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id);</div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition:</b> H5Ipublic.h:60</div></div>
-<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition:</b> H5public.h:259</div></div>
+<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition:</b> H5public.h:265</div></div>
 </div><!-- fragment --><p> Before a dataset is created, the <em>can apply</em> callbacks for any filters used in the dataset creation property list are called with the dataset's dataset creation property list, <code>dcpl_id</code>, the dataset's datatype, <code>type_id</code>, and a dataspace describing a chunk, <code>space_id</code>, (for chunked dataset storage).</p>
 <p>This callback must determine whether the combination of the dataset creation property list settings, the datatype, and the dataspace represent a valid combination to which to apply this filter. For example, an invalid combination may involve the filter not operating correctly on certain datatypes, on certain datatype sizes, or on certain sizes of the chunk dataspace. If this filter is enabled through <a class="el" href="group___o_c_p_l.html#ga191c567ee50b2063979cdef156a768c5" title="Adds a filter to the filter pipeline.">H5Pset_filter()</a> as optional and the can apply function returns 0, the library will skip the filter in the filter pipeline.</p>
 <p>This callback can be the NULL pointer, in which case the library will assume that the filter can be applied to a dataset with any combination of dataset creation property list values, datatypes, and dataspaces.</p>
@@ -491,7 +491,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:13 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:35 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

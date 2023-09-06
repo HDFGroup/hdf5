@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -603,7 +603,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000082">Deprecated:</a></b></dt><dd>Deprecated in favor of <a class="el" href="group___h5_s.html#ga178ec7b8769ad5704a170d9bd3421074" title="Encodes a data space object description into a binary buffer.">H5Sencode2()</a></dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000083">Deprecated:</a></b></dt><dd>Deprecated in favor of <a class="el" href="group___h5_s.html#ga178ec7b8769ad5704a170d9bd3421074" title="Encodes a data space object description into a binary buffer.">H5Sencode2()</a></dd></dl>
 <p>Given the data space identifier <code>obj_id</code>, <a class="el" href="group___h5_s.html#ga82cf9f6af03ad89be21c36922e03baea" title="Encodes a data space object description into a binary buffer.">H5Sencode1()</a> converts a data space description into binary form in a buffer. Using this binary form in the buffer, a data space object can be reconstructed using <a class="el" href="group___h5_s.html#ga0ac0ebd5f292460354f574476be49fad" title="Decodes a binary object description of data space and returns a new object handle.">H5Sdecode()</a> to return a new object handle (<code>hid_t</code>) for this data space.</p>
 <p>A preliminary <a class="el" href="group___h5_s.html#ga82cf9f6af03ad89be21c36922e03baea" title="Encodes a data space object description into a binary buffer.">H5Sencode1()</a> call can be made to find out the size of the buffer needed. This value is returned as <code>nalloc</code>. That value can then be assigned to <code>nalloc</code> for a second <a class="el" href="group___h5_s.html#ga82cf9f6af03ad89be21c36922e03baea" title="Encodes a data space object description into a binary buffer.">H5Sencode1()</a> call, which will retrieve the actual encoded object.</p>
 <p>If the library finds out <code>nalloc</code> is not big enough for the object, it simply returns the size of the buffer needed through <code>nalloc</code> without encoding the provided buffer.</p>
@@ -2178,7 +2178,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:12 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:35 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -555,7 +555,7 @@ See the <code>alloc_time</code> description in <a class="el" href="group___d_c_p
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint()</a> retrieves the <em>no dataset attributes</em> hint setting for the dataset creation property list <code>dcpl_id</code>. This setting is used to inform the library to create minimized dataset object headers when TRUE. The setting value is returned in the boolean pointer <code>minimize</code>.</p>
+<p><a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint()</a> retrieves the <em>no dataset attributes</em> hint setting for the dataset creation property list <code>dcpl_id</code>. This setting is used to inform the library to create minimized dataset object headers when true. The setting value is returned in the boolean pointer <code>minimize</code>.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.5 </dd></dl>
 
 </div>
@@ -1476,8 +1476,8 @@ See <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint()</a> sets the no dataset attributes hint setting for the dataset creation property list <code>dcpl_id</code>. Datasets created with the dataset creation property list <code>dcpl_id</code> will have their object headers minimized if the boolean flag <code>minimize</code> is set to TRUE. By setting <code>minimize</code> to TRUE, the library expects that no attributes will be added to the dataset. Attributes can be added, but they are appended with a continuation message, which can reduce performance.</p>
-<p>This setting interacts with <a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint()</a>: if either is set to TRUE, then the created dataset's object header will be minimized.</p>
+<p><a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint()</a> sets the no dataset attributes hint setting for the dataset creation property list <code>dcpl_id</code>. Datasets created with the dataset creation property list <code>dcpl_id</code> will have their object headers minimized if the boolean flag <code>minimize</code> is set to true. By setting <code>minimize</code> to true, the library expects that no attributes will be added to the dataset. Attributes can be added, but they are appended with a continuation message, which can reduce performance.</p>
+<p>This setting interacts with <a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint()</a>: if either is set to true, then the created dataset's object header will be minimized.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.5 </dd></dl>
 
 </div>
@@ -2067,7 +2067,7 @@ VDS Functions: <a class="el" href="group___d_c_p_l.html#ga83dcce1ce110d1ff6eae0f
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:12 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:34 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

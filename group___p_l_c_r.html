@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -410,14 +410,14 @@ Functions</h2></td></tr>
 <p>Determining the HDF5 property list class name with <a class="el" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20" title="Compares two property lists or classes for equality.">H5Pequal()</a> requires a series of <a class="el" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20" title="Compares two property lists or classes for equality.">H5Pequal()</a> calls in an if-else sequence. An iterative sequence of <a class="el" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20" title="Compares two property lists or classes for equality.">H5Pequal()</a> calls can compare the identifier returned by <a class="el" href="group___p_l_c_r.html#ga9b230c1e85790f9f45c4ca2e79dd62c5" title="Returns the property list class identifier for a property list.">H5Pget_class()</a> to members of the list of valid property list class names. A pseudo-code snippet might read as follows:</p>
 <div class="fragment"><div class="line">plist_class_id = <a class="code" href="group___p_l_c_r.html#ga9b230c1e85790f9f45c4ca2e79dd62c5">H5Pget_class</a> (dsetA_plist);</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordflow">if</span> <a class="code" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20">H5Pequal</a> (plist_class_id, <a class="code" href="_h5_ppublic_8h.html#a42df2a1c964d2b985abc6e422abf6463">H5P_OBJECT_CREATE</a>) = TRUE;</div>
+<div class="line"><span class="keywordflow">if</span> <a class="code" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20">H5Pequal</a> (plist_class_id, <a class="code" href="_h5_ppublic_8h.html#a42df2a1c964d2b985abc6e422abf6463">H5P_OBJECT_CREATE</a>) = <span class="keyword">true</span>;</div>
 <div class="line">    [ <a class="code" href="_h5_ppublic_8h.html#a42df2a1c964d2b985abc6e422abf6463">H5P_OBJECT_CREATE</a> is the <span class="keyword">property</span> list class    ]</div>
 <div class="line">    [ returned by <a class="code" href="group___p_l_c_r.html#ga9b230c1e85790f9f45c4ca2e79dd62c5">H5Pget_class</a>.                        ]</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordflow">else</span> <span class="keywordflow">if</span> <a class="code" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20">H5Pequal</a> (plist_class_id, <a class="code" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>) = TRUE;</div>
+<div class="line"><span class="keywordflow">else</span> <span class="keywordflow">if</span> <a class="code" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20">H5Pequal</a> (plist_class_id, <a class="code" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>) = <span class="keyword">true</span>;</div>
 <div class="line">    [ <a class="code" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a> is the <span class="keyword">property</span> list <span class="keyword">class</span>.  ]</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordflow">else</span> <span class="keywordflow">if</span> <a class="code" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20">H5Pequal</a> (plist_class_id, <a class="code" href="_h5_ppublic_8h.html#a6f9c8a5aba72c0445fff384bf418a80d">H5P_DATASET_XFER</a>) = TRUE;</div>
+<div class="line"><span class="keywordflow">else</span> <span class="keywordflow">if</span> <a class="code" href="group___p_l_c_r_a.html#ga9425ef9f3bc3ee661eca6be654aeae20">H5Pequal</a> (plist_class_id, <a class="code" href="_h5_ppublic_8h.html#a6f9c8a5aba72c0445fff384bf418a80d">H5P_DATASET_XFER</a>) = <span class="keyword">true</span>;</div>
 <div class="line">    [ <a class="code" href="_h5_ppublic_8h.html#a6f9c8a5aba72c0445fff384bf418a80d">H5P_DATASET_XFER</a> is the <span class="keyword">property</span> list <span class="keyword">class</span>.    ]</div>
 <div class="line"> </div>
 <div class="line">.</div>
@@ -443,7 +443,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:15 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:38 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

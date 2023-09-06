@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -141,7 +141,7 @@ $(document).ready(function(){initNavTree('group___h5.html',''); initResizable();
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;fail_read:;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div>
-<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition:</b> H5public.h:243</div></div>
+<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition:</b> H5public.h:249</div></div>
 <div class="ttc" id="agroup___h5_html_ga70bfde4acd009cdd7bcd2f54c594e28a"><div class="ttname"><a href="group___h5.html#ga70bfde4acd009cdd7bcd2f54c594e28a">H5is_library_threadsafe</a></div><div class="ttdeci">herr_t H5is_library_threadsafe(hbool_t *is_ts)</div><div class="ttdoc">Determines whether the HDF5 library was built with the thread-safety feature enabled.</div></div>
 <div class="ttc" id="agroup___h5_html_gaf87da966fdf896ec7bca794e21d4ab0a"><div class="ttname"><a href="group___h5.html#gaf87da966fdf896ec7bca794e21d4ab0a">H5get_libversion</a></div><div class="ttdeci">herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)</div><div class="ttdoc">Returns the HDF library release number.</div></div>
 </div><!-- fragment -->  </td></tr>
@@ -261,7 +261,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>On success, returns pointer to newly allocated buffer or returns NULL if size is 0 (zero).<br  />
  Returns NULL on failure.</dd></dl>
 <p><a class="el" href="group___h5.html#ga3af36230b61a287112c0cd23962b9ec4" title="Allocates memory that will be freed later internally.">H5allocate_memory()</a> allocates a memory buffer of size bytes that will later be freed internally by the HDF5 library.</p>
-<p>The boolean <code>clear</code> parameter specifies whether the buffer should be initialized. If clear is <code>TRUE</code>, all bits in the buffer are to be set to 0 (zero); if clear is <code>FALSE</code>, the buffer will not be initialized.</p>
+<p>The boolean <code>clear</code> parameter specifies whether the buffer should be initialized. If clear is <code>true</code>, all bits in the buffer are to be set to 0 (zero); if clear is <code>false</code>, the buffer will not be initialized.</p>
 <p>This function is intended to have the semantics of malloc() and calloc(). However, unlike malloc() and calloc(), which allow for a "special" pointer to be returned instead of NULL, this function always returns NULL on failure or when size is set to 0 (zero).</p>
 <dl class="section note"><dt>Note</dt><dd>At this time, the only intended use for this function is to allocate memory that will be returned to the library as a data buffer from a third-party filter.</dd></dl>
 <dl class="section attention"><dt>Attention</dt><dd>To avoid heap corruption, allocated memory should be freed using the same library that initially allocated it. In most cases, the HDF5 API uses resources that are allocated and freed either entirely by the user or entirely by the library, so this is not a problem. In rare cases, however, HDF5 API calls will free the memory that the user allocated. This function allows the user to safely allocate this memory.<br  />
@@ -599,7 +599,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5.html#gac2fdfe0e7a1012b796bdeafbed9ab970" title="Checks whether the HDF5 library is closing.">H5is_library_terminating()</a> queries whether the HDF5 library is in the process of shutting down. The <code>is_terminating</code> flag will only be set to TRUE after shutdown starts, it will be FALSE before the library has been initialized, while the library is initialized, and after it has been closed. The value of <code>is_terminating</code> is undefined if this routine fails.</p>
+<p><a class="el" href="group___h5.html#gac2fdfe0e7a1012b796bdeafbed9ab970" title="Checks whether the HDF5 library is closing.">H5is_library_terminating()</a> queries whether the HDF5 library is in the process of shutting down. The <code>is_terminating</code> flag will only be set to true after shutdown starts, it will be false before the library has been initialized, while the library is initialized, and after it has been closed. The value of <code>is_terminating</code> is undefined if this routine fails.</p>
 <dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
 </div>
@@ -798,7 +798,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:15 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:37 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

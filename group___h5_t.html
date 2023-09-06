@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -365,7 +365,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000083">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a> or the function <a class="el" href="group___h5_t.html#ga10352b6fa9ac58a7fbd5299496f1df31" title="Commits a transient datatype, linking it into the file and creating a new committed datatype.">H5Tcommit2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000084">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a> or the function <a class="el" href="group___h5_t.html#ga10352b6fa9ac58a7fbd5299496f1df31" title="Commits a transient datatype, linking it into the file and creating a new committed datatype.">H5Tcommit2()</a>.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga1c00afb6dc5534778370a92c33fa2625" title="Commits a transient datatype to a file, creating a newly named datatype.">H5Tcommit1()</a> commits the transient datatype (not immutable) to a file, turning it into a named datatype.</p>
 <p>The datatype <code>dtype_id</code> is committed as a named datatype at the location <code>loc_id</code>, which is either a file or group identifier, with the name <code>name</code>.</p>
 <p><code>name</code> can be a relative path based at <code>loc_id</code> or an absolute path from the root of the file. Use of this function requires that any intermediate groups specified in the path already exist.</p>
@@ -1197,7 +1197,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000084">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a> or the function <a class="el" href="group___h5_t.html#ga7e65e77634f1fb4ba38cbcdab9a59bc2" title="Opens a committed (named) datatype.">H5Topen2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000085">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a> or the function <a class="el" href="group___h5_t.html#ga7e65e77634f1fb4ba38cbcdab9a59bc2" title="Opens a committed (named) datatype.">H5Topen2()</a>.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga9f76fa0dc34bc7b310e100e5bfed66fb" title="Opens a named datatype.">H5Topen1()</a> opens a named datatype at the location specified by <code>loc_id</code> and returns an identifier for the datatype. <code>loc_id</code> can be either a file or group identifier. The identifier should eventually be closed by calling <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to release resources.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> renamed to <a class="el" href="group___h5_t.html#ga9f76fa0dc34bc7b310e100e5bfed66fb" title="Opens a named datatype.">H5Topen1()</a> and deprecated in this release.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
@@ -1387,7 +1387,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:12 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:35 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

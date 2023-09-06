@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -357,7 +357,7 @@ Obtaining Information Regarding an Object's Attributes</h3>
 <li>The number of attributes attached to an object</li>
 </ul>
 <p>To obtain an attribute's name, call H5Aget_name with an attribute identifier, attr_id: </p><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a> <a class="code" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> attr_id, <span class="keywordtype">size_t</span> buf_size, <span class="keywordtype">char</span> *buf)</div>
-<div class="ttc" id="a_h5public_8h_html_af629ed855824cf5955b54529adf78ad6"><div class="ttname"><a href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a></div><div class="ttdeci">int ssize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:273</div></div>
+<div class="ttc" id="a_h5public_8h_html_af629ed855824cf5955b54529adf78ad6"><div class="ttname"><a href="_h5public_8h.html#af629ed855824cf5955b54529adf78ad6">ssize_t</a></div><div class="ttdeci">int ssize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:279</div></div>
 <div class="ttc" id="agroup___h5_a_html_ga05e195aabab8c623b1c52009aeb99674"><div class="ttname"><a href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a></div><div class="ttdeci">ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)</div><div class="ttdoc">Gets an attribute name.</div></div>
 </div><!-- fragment --><p> As with other attribute functions, attr_id identifies the attribute; buf_size defines the size of the buffer; and buf is the buffer to which the attribute's name will be read.</p>
 <p>If the length of the attribute name, and hence the value required for buf_size, is unknown, a first call to <a class="el" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> will return that size. If the value of buf_size used in that first call is too small, the name will simply be truncated in buf. A second <a class="el" href="group___h5_a.html#ga05e195aabab8c623b1c52009aeb99674">H5Aget_name</a> call can then be used to retrieve the name in an appropriately-sized buffer.</p>
@@ -376,9 +376,9 @@ Iterating across an Object's Attributes</h3>
 <div class="line">                  <a class="code" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a> order, <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *n, <a class="code" href="_h5_apublic_8h.html#a28fef0ded9a6c0eb12334c0d15dc3e74">H5A_operator2_t</a> op,</div>
 <div class="line">                  <span class="keywordtype">void</span> *op_data)</div>
 <div class="ttc" id="a_h5_apublic_8h_html_a28fef0ded9a6c0eb12334c0d15dc3e74"><div class="ttname"><a href="_h5_apublic_8h.html#a28fef0ded9a6c0eb12334c0d15dc3e74">H5A_operator2_t</a></div><div class="ttdeci">herr_t(* H5A_operator2_t)(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)</div><div class="ttdef"><b>Definition:</b> H5Apublic.h:55</div></div>
-<div class="ttc" id="a_h5public_8h_html_a6a6ddd1504d1ed61939d46d91d9441b9"><div class="ttname"><a href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a></div><div class="ttdeci">H5_iter_order_t</div><div class="ttdef"><b>Definition:</b> H5public.h:338</div></div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:291</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8203c78e10ab2d89d8bce688a31afad3"><div class="ttname"><a href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a></div><div class="ttdeci">H5_index_t</div><div class="ttdef"><b>Definition:</b> H5public.h:361</div></div>
+<div class="ttc" id="a_h5public_8h_html_a6a6ddd1504d1ed61939d46d91d9441b9"><div class="ttname"><a href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9">H5_iter_order_t</a></div><div class="ttdeci">H5_iter_order_t</div><div class="ttdef"><b>Definition:</b> H5public.h:344</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:297</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8203c78e10ab2d89d8bce688a31afad3"><div class="ttname"><a href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3">H5_index_t</a></div><div class="ttdeci">H5_index_t</div><div class="ttdef"><b>Definition:</b> H5public.h:367</div></div>
 <div class="ttc" id="agroup___h5_a_html_gab9dcfc543cd4282f32b8ea19e08ffa6c"><div class="ttname"><a href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a></div><div class="ttdeci">#define H5Aiterate</div><div class="ttdef"><b>Definition:</b> H5version.h:879</div></div>
 </div><!-- fragment --><p> <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> successively marches across all of the attributes attached to the object specified in loc_id, performing the operation(s) specified in op_func with the data specified in op_data on each attribute.</p>
 <p>When <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> is called, index contains the index of the attribute to be accessed in this call. When <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate</a> returns, index will contain the index of the next attribute. If the returned index is the null pointer, then all attributes have been processed, and the iterative process is complete.</p>
@@ -489,7 +489,7 @@ A large or shared HDF5 attribute and its associated dataset(s)</div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:10 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:33 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1336,7 +1336,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
     <tr><td class="paramdir">[out]</td><td class="paramname">memb_fapl</td><td>Property list for each memory usage type </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">memb_name</td><td>Name generator for names of member files </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">memb_addr</td><td>The offsets within the virtual address space, from 0 (zero) to <a class="el" href="_h5public_8h.html#a49742d33813ee38ef58eca9fbeda6b86">HADDR_MAX</a>, at which each type of data storage begins </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">relax</td><td>Allows read-only access to incomplete file sets when <code>TRUE</code> </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">relax</td><td>Allows read-only access to incomplete file sets when <code>true</code> </td></tr>
   </table>
   </dd>
 </dl>
@@ -1894,7 +1894,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <div class="ttc" id="a_h5_cpublic_8h_html_a040d488146ff1ca0a82209e9af3918fa"><div class="ttname"><a href="_h5_cpublic_8h.html#a040d488146ff1ca0a82209e9af3918fa">H5C_cache_incr_mode</a></div><div class="ttdeci">H5C_cache_incr_mode</div><div class="ttdef"><b>Definition:</b> H5Cpublic.h:26</div></div>
 <div class="ttc" id="a_h5_cpublic_8h_html_a4f8534794ad9a977185a5d608c0af04f"><div class="ttname"><a href="_h5_cpublic_8h.html#a4f8534794ad9a977185a5d608c0af04f">H5C_cache_decr_mode</a></div><div class="ttdeci">H5C_cache_decr_mode</div><div class="ttdef"><b>Definition:</b> H5Cpublic.h:42</div></div>
 <div class="ttc" id="a_h5_cpublic_8h_html_aaaa13ca7756d135b7df6d5a6779ee908"><div class="ttname"><a href="_h5_cpublic_8h.html#aaaa13ca7756d135b7df6d5a6779ee908">H5C_cache_flash_incr_mode</a></div><div class="ttdeci">H5C_cache_flash_incr_mode</div><div class="ttdef"><b>Definition:</b> H5Cpublic.h:34</div></div>
-<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition:</b> H5public.h:243</div></div>
+<div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition:</b> H5public.h:249</div></div>
 <div class="ttc" id="astruct_h5_a_c__cache__config__t_html"><div class="ttname"><a href="struct_h5_a_c__cache__config__t.html">H5AC_cache_config_t</a></div><div class="ttdef"><b>Definition:</b> H5ACpublic.h:462</div></div>
 <div class="ttc" id="astruct_h5_a_c__cache__config__t_html_a0e25a1dc2c695bea335df0e23ed6363c"><div class="ttname"><a href="struct_h5_a_c__cache__config__t.html#a0e25a1dc2c695bea335df0e23ed6363c">H5AC_cache_config_t::flash_incr_mode</a></div><div class="ttdeci">enum H5C_cache_flash_incr_mode flash_incr_mode</div><div class="ttdef"><b>Definition:</b> H5ACpublic.h:615</div></div>
 <div class="ttc" id="astruct_h5_a_c__cache__config__t_html_a20f323fcb4747fc7228d2d74bb965586"><div class="ttname"><a href="struct_h5_a_c__cache__config__t.html#a20f323fcb4747fc7228d2d74bb965586">H5AC_cache_config_t::lower_hr_threshold</a></div><div class="ttdeci">double lower_hr_threshold</div><div class="ttdef"><b>Definition:</b> H5ACpublic.h:585</div></div>
@@ -3285,8 +3285,8 @@ Raw dataset chunk caching is supported when these drivers are used in read-only 
 <p><a class="el" href="group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849" title="Modifies the file access property list to use the H5FD_CORE driver.">H5Pset_fapl_core()</a> modifies the file access property list to use the <a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> driver.</p>
 <p>The <a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> driver enables an application to work with a file in memory, speeding reads and writes as no disk access is made. File contents are stored only in memory until the file is closed. The <code>backing_store</code> parameter determines whether file contents are ever written to disk.</p>
 <p><code>increment</code> specifies the increment by which allocated memory is to be increased each time more memory is required.</p>
-<p>While using <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> to create a core file, if the <code>backing_store</code> is set to 1 (TRUE), the file contents are flushed to a file with the same name as this core file when the file is closed or access to the file is terminated in memory.</p>
-<p>The application is allowed to open an existing file with <a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> driver. While using <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> to open an existing file, if the <code>backing_store</code> is set to 1 (TRUE) and the <code>flags</code> for <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> is set to <a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, any change to the file contents are saved to the file when the file is closed. If <code>backing_store</code> is set to 0 (FALSE) and the <code>flags</code> for <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> is set to <a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, any change to the file contents will be lost when the file is closed. If the flags for <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> is set to <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, no change to the file is allowed either in memory or on file.</p>
+<p>While using <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> to create a core file, if the <code>backing_store</code> is set to 1 (true), the file contents are flushed to a file with the same name as this core file when the file is closed or access to the file is terminated in memory.</p>
+<p>The application is allowed to open an existing file with <a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> driver. While using <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> to open an existing file, if the <code>backing_store</code> is set to 1 (true) and the <code>flags</code> for <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> is set to <a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, any change to the file contents are saved to the file when the file is closed. If <code>backing_store</code> is set to 0 (false) and the <code>flags</code> for <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> is set to <a class="el" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, any change to the file contents will be lost when the file is closed. If the flags for <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> is set to <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, no change to the file is allowed either in memory or on file.</p>
 <dl class="section note"><dt>Note</dt><dd>Currently this driver cannot create or open family or multi files.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
@@ -3856,7 +3856,7 @@ Flavor of allocation   </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">memb_fapl</td><td>Property list for each memory usage type </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">memb_name</td><td>Name generator for names of member files </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">memb_addr</td><td>The offsets within the virtual address space, from 0 (zero) to <a class="el" href="_h5public_8h.html#a49742d33813ee38ef58eca9fbeda6b86">HADDR_MAX</a>, at which each type of data storage begins </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">relax</td><td>Allows read-only access to incomplete file sets when <code>TRUE</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">relax</td><td>Allows read-only access to incomplete file sets when <code>true</code> </td></tr>
   </table>
   </dd>
 </dl>
@@ -3867,7 +3867,7 @@ Flavor of allocation   </td></tr>
 <p>The array <code>memb_fapl</code> contains a property list for each memory usage type that will be associated with a file.</p>
 <p>The array <code>memb_name</code> should be a name generator (a <code>printf</code>-style format with a <code>s</code> which will be replaced with the name passed to <a class="el" href="_h5_f_ddevelop_8h.html#adc1c79631e8d73baa19bf488549dabb1">H5FDopen()</a>, usually from <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> or <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a>).</p>
 <p>The array <code>memb_addr</code> specifies the offsets within the virtual address space, from 0 (zero) to <a class="el" href="_h5public_8h.html#a49742d33813ee38ef58eca9fbeda6b86">HADDR_MAX</a>, at which each type of data storage begins.</p>
-<p>If <code>relax</code> is set to 1 (TRUE), then opening an existing file for read-only access will not fail if some file members are missing. This allows a file to be accessed in a limited sense if just the meta data is available.</p>
+<p>If <code>relax</code> is set to 1 (true), then opening an existing file for read-only access will not fail if some file members are missing. This allows a file to be accessed in a limited sense if just the meta data is available.</p>
 <p>Default values for each of the optional arguments are as follows: </p><table class="doxtable">
 <tr>
 <td><code>memb_map</code>  </td><td>The default member map contains the value <a class="el" href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5a137331d00cf5b0c84ef7dfa725429f90">H5FD_MEM_DEFAULT</a> for each element.  </td></tr>
@@ -3917,13 +3917,13 @@ Flavor of allocation   </td></tr>
 <div class="line"> </div>
 <div class="line"><a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl = <a class="code" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code" href="_h5_ppublic_8h.html#a60ec2d4334addfc0eda89614598ee38e">H5P_FILE_ACCESS</a>);</div>
 <div class="line"><a class="code" href="group___f_a_p_l.html#ga296bd22cc1e462351f8f0a00a46baf58">H5Pset_fapl_multi</a>(fapl, memb_map, memb_fapl,</div>
-<div class="line">                  memb_name, memb_addr, TRUE);</div>
+<div class="line">                  memb_name, memb_addr, <span class="keyword">true</span>);</div>
 <div class="ttc" id="a_h5_f_dpublic_8h_html_a02887a6f018be1a0ce7358522095578b"><div class="ttname"><a href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a></div><div class="ttdeci">enum H5F_mem_t H5FD_mem_t</div><div class="ttdef"><b>Definition:</b> H5FDpublic.h:259</div></div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5a3be201777da432df4a8e2c1b618a7566"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5a3be201777da432df4a8e2c1b618a7566">H5FD_MEM_NTYPES</a></div><div class="ttdeci">@ H5FD_MEM_NTYPES</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:168</div></div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5ab435b061fede0393691acbe7cac2cb2e"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5ab435b061fede0393691acbe7cac2cb2e">H5FD_MEM_DRAW</a></div><div class="ttdeci">@ H5FD_MEM_DRAW</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:163</div></div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5ae536846ac8d6ecd1a2a8479409df1bce"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5ae536846ac8d6ecd1a2a8479409df1bce">H5FD_MEM_SUPER</a></div><div class="ttdeci">@ H5FD_MEM_SUPER</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:161</div></div>
-<div class="ttc" id="a_h5public_8h_html_a49742d33813ee38ef58eca9fbeda6b86"><div class="ttname"><a href="_h5public_8h.html#a49742d33813ee38ef58eca9fbeda6b86">HADDR_MAX</a></div><div class="ttdeci">#define HADDR_MAX</div><div class="ttdef"><b>Definition:</b> H5public.h:328</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:319</div></div>
+<div class="ttc" id="a_h5public_8h_html_a49742d33813ee38ef58eca9fbeda6b86"><div class="ttname"><a href="_h5public_8h.html#a49742d33813ee38ef58eca9fbeda6b86">HADDR_MAX</a></div><div class="ttdeci">#define HADDR_MAX</div><div class="ttdef"><b>Definition:</b> H5public.h:334</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:325</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga296bd22cc1e462351f8f0a00a46baf58"><div class="ttname"><a href="group___f_a_p_l.html#ga296bd22cc1e462351f8f0a00a46baf58">H5Pset_fapl_multi</a></div><div class="ttdeci">H5_DLL herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char *const *memb_name, const haddr_t *memb_addr, hbool_t relax)</div><div class="ttdoc">Sets up use of the multi-file driver.</div></div>
 </div><!-- fragment --></dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.6.3 <code>memb_name</code> parameter type changed to <code>const char* const*</code>. </dd></dl>
@@ -5451,7 +5451,7 @@ Failure Modes:<ul>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:12 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:35 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

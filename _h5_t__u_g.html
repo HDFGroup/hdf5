@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -326,7 +326,7 @@ Predefined Datatypes</h3>
 <tr>
 <td><a class="el" href="group___p_d_t_n_a_t.html#ga142d44a537dca7ec39da37bca48f7e40">H5T_NATIVE_HERR</a>  </td><td span="3">herr_t   </td></tr>
 <tr>
-<td><a class="el" href="group___p_d_t_n_a_t.html#ga8bd74ace7938e1732ad74d7332de3df2">H5T_NATIVE_HBOOL</a>  </td><td span="3">hbool_t   </td></tr>
+<td><a class="el" href="group___p_d_t_n_a_t.html#ga8bd74ace7938e1732ad74d7332de3df2">H5T_NATIVE_HBOOL</a>  </td><td span="3">bool   </td></tr>
 <tr>
 <td><a class="el" href="group___p_d_t_n_a_t.html#ga2ed3827a2add0f6f2252c17e231b84b1">H5T_NATIVE_B8</a>  </td><td span="3">8-bit unsigned integer or 8-bit buffer in memory   </td></tr>
 <tr>
@@ -1326,7 +1326,7 @@ If class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93
 <div class="line"> </div>
 <div class="line">dataset = <a class="code" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a>(file, datasetname, datatype,</div>
 <div class="line">dataspace, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:291</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:297</div></div>
 <div class="ttc" id="agroup___a_r_r_a_y_html_ga39d41fdef06b3d7972ec2eab16ab5e96"><div class="ttname"><a href="group___a_r_r_a_y.html#ga39d41fdef06b3d7972ec2eab16ab5e96">H5Tarray_create</a></div><div class="ttdeci">#define H5Tarray_create</div><div class="ttdef"><b>Definition:</b> H5version.h:1250</div></div>
 </div><!-- fragment --><table class="doxtable">
 <tr>
@@ -1866,7 +1866,7 @@ Transient datatype states: modifiable, read-only, and immutable</div></div>
 </div><!-- fragment -->  </td><td>A transient datatype (not immutable) can be written to a file and turned into a committed datatype by calling this function. The location is either a file or group identifier and when combined with name refers to a new committed datatype.   </td></tr>
 <tr>
 <td><div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a> <a class="code" href="group___h5_t.html#ga0eba38d8c49784269e71ac9fa79b0f0a">H5Tcommitted</a> (<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)</div>
-<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition:</b> H5public.h:259</div></div>
+<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition:</b> H5public.h:265</div></div>
 <div class="ttc" id="agroup___h5_t_html_ga0eba38d8c49784269e71ac9fa79b0f0a"><div class="ttname"><a href="group___h5_t.html#ga0eba38d8c49784269e71ac9fa79b0f0a">H5Tcommitted</a></div><div class="ttdeci">htri_t H5Tcommitted(hid_t type_id)</div><div class="ttdoc">Determines whether a datatype is a committed type or a transient type.</div></div>
 </div><!-- fragment -->  </td><td>A type can be queried to determine if it is a committed type or a transient type. If this function returns a positive value then the type is committed. Datasets which return committed datatypes with <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> are able to share the datatype with other datasets in the same file.   </td></tr>
 </table>
@@ -2095,7 +2095,7 @@ Text Descriptions of Datatypes: Conversion to and from</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:11 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:34 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

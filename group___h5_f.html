@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -193,7 +193,7 @@ $(document).ready(function(){initNavTree('group___h5_f.html',''); initResizable(
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;fail_fapl:;</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    }</div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a1c406ffa89f4acf5a332144a2683d394"><div class="ttname"><a href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a></div><div class="ttdeci">#define H5F_ACC_RDONLY</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:48</div></div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:291</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:297</div></div>
 <div class="ttc" id="agroup___h5_f_html_ga515426821321c261a825b4e4a3f576fe"><div class="ttname"><a href="group___h5_f.html#ga515426821321c261a825b4e4a3f576fe">H5Fget_filesize</a></div><div class="ttdeci">herr_t H5Fget_filesize(hid_t file_id, hsize_t *size)</div><div class="ttdoc">Returns the size of an HDF5 file (in bytes)</div></div>
 <div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 </div><!-- fragment -->   </td></tr>
@@ -760,7 +760,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint()</a> retrieves the no dataset attributes hint setting for the file specified by the file identifier <code>file_id</code>. This setting is used to inform the library to create minimized dataset object headers when <code>TRUE</code>.</p>
+<p><a class="el" href="group___h5_f.html#gacbf3ba8b36750c42b49740567a9732c4" title="Retrieves the setting for whether or not a file will create minimized dataset object headers.">H5Fget_dset_no_attrs_hint()</a> retrieves the no dataset attributes hint setting for the file specified by the file identifier <code>file_id</code>. This setting is used to inform the library to create minimized dataset object headers when <code>true</code>.</p>
 <p>The setting's value is returned in the boolean pointer minimized.</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.5 </dd></dl>
 
@@ -1009,7 +1009,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">    <a class="code" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> <a class="code" href="struct_h5_f__sect__info__t.html#a0101c61f2ddf602478ae226012252a42">addr</a>; </div>
 <div class="line">    <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> <a class="code" href="struct_h5_f__sect__info__t.html#aa5b212cd36c18ffdccd85c5363889d8b">size</a>; </div>
 <div class="line">} <a class="code" href="struct_h5_f__sect__info__t.html">H5F_sect_info_t</a>;</div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:319</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:325</div></div>
 <div class="ttc" id="astruct_h5_f__sect__info__t_html"><div class="ttname"><a href="struct_h5_f__sect__info__t.html">H5F_sect_info_t</a></div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:175</div></div>
 <div class="ttc" id="astruct_h5_f__sect__info__t_html_a0101c61f2ddf602478ae226012252a42"><div class="ttname"><a href="struct_h5_f__sect__info__t.html#a0101c61f2ddf602478ae226012252a42">H5F_sect_info_t::addr</a></div><div class="ttdeci">haddr_t addr</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:176</div></div>
 <div class="ttc" id="astruct_h5_f__sect__info__t_html_aa5b212cd36c18ffdccd85c5363889d8b"><div class="ttname"><a href="struct_h5_f__sect__info__t.html#aa5b212cd36c18ffdccd85c5363889d8b">H5F_sect_info_t::size</a></div><div class="ttdeci">hsize_t size</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:177</div></div>
@@ -1099,7 +1099,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">        <a class="code" href="struct_h5__ih__info__t.html">H5_ih_info_t</a> <a class="code" href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">msgs_info</a>; </div>
 <div class="line">    } <a class="code" href="struct_h5_f__info1__t.html#a5cf928eff03dc598100ca7b4642ac263">sohm</a>;</div>
 <div class="line">} <a class="code" href="struct_h5_f__info1__t.html">H5F_info1_t</a>;</div>
-<div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition:</b> H5public.h:373</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition:</b> H5public.h:379</div></div>
 <div class="ttc" id="astruct_h5_f__info1__t_html"><div class="ttname"><a href="struct_h5_f__info1__t.html">H5F_info1_t</a></div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1835</div></div>
 <div class="ttc" id="astruct_h5_f__info1__t_html_a4bd7cc5a9377277d7ba270cb7173565b"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">H5F_info1_t::msgs_info</a></div><div class="ttdeci">H5_ih_info_t msgs_info</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1839</div></div>
 <div class="ttc" id="astruct_h5_f__info1__t_html_a4d6224a7603c148dfbbd66169698dcbf"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4d6224a7603c148dfbbd66169698dcbf">H5F_info1_t::super_ext_size</a></div><div class="ttdeci">hsize_t super_ext_size</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1836</div></div>
@@ -1112,8 +1112,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">    <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> <a class="code" href="struct_h5__ih__info__t.html#ab3841d02d93113f5443ea366617a1a81">index_size</a>; </div>
 <div class="line">    <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> <a class="code" href="struct_h5__ih__info__t.html#aa88bb4c49d4a0e04bfb6a0022e8ddb3a">heap_size</a>;</div>
 <div class="line">} <a class="code" href="struct_h5__ih__info__t.html">H5_ih_info_t</a>;</div>
-<div class="ttc" id="astruct_h5__ih__info__t_html_aa88bb4c49d4a0e04bfb6a0022e8ddb3a"><div class="ttname"><a href="struct_h5__ih__info__t.html#aa88bb4c49d4a0e04bfb6a0022e8ddb3a">H5_ih_info_t::heap_size</a></div><div class="ttdeci">hsize_t heap_size</div><div class="ttdef"><b>Definition:</b> H5public.h:375</div></div>
-<div class="ttc" id="astruct_h5__ih__info__t_html_ab3841d02d93113f5443ea366617a1a81"><div class="ttname"><a href="struct_h5__ih__info__t.html#ab3841d02d93113f5443ea366617a1a81">H5_ih_info_t::index_size</a></div><div class="ttdeci">hsize_t index_size</div><div class="ttdef"><b>Definition:</b> H5public.h:374</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html_aa88bb4c49d4a0e04bfb6a0022e8ddb3a"><div class="ttname"><a href="struct_h5__ih__info__t.html#aa88bb4c49d4a0e04bfb6a0022e8ddb3a">H5_ih_info_t::heap_size</a></div><div class="ttdeci">hsize_t heap_size</div><div class="ttdef"><b>Definition:</b> H5public.h:381</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html_ab3841d02d93113f5443ea366617a1a81"><div class="ttname"><a href="struct_h5__ih__info__t.html#ab3841d02d93113f5443ea366617a1a81">H5_ih_info_t::index_size</a></div><div class="ttdeci">hsize_t index_size</div><div class="ttdef"><b>Definition:</b> H5public.h:380</div></div>
 </div><!-- fragment --> </li>
 <li><code>index_size</code> is the summed size of all the shared object header indexes. Each index might be either a B-tree or a list.</li>
 </ul>
@@ -1918,8 +1918,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint()</a> sets the no dataset attributes hint setting for the file specified by the file identifier <code>file_id</code>. If the boolean flag <code>minimize</code> is set to <code>TRUE</code>, then the library will create minimized dataset object headers in the file. <b>All</b> files that refer to the same file-on-disk will be affected by the most recent setting, regardless of the file identifier/handle (e.g., as returned by <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a>). By setting the <code>minimize</code> flag to <code>TRUE</code>, the library expects that no attributes will be added to the dataset - attributes can be added, but they are appended with a continuation message, which can reduce performance.</p>
-<dl class="section attention"><dt>Attention</dt><dd>This setting interacts with <a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint()</a>: if either is set to <code>TRUE</code>, then the created dataset's object header will be minimized.</dd></dl>
+<p><a class="el" href="group___h5_f.html#gafc0166070f920f037e6b1a5c66e5464c" title="Sets the flag to create minimized dataset object headers.">H5Fset_dset_no_attrs_hint()</a> sets the no dataset attributes hint setting for the file specified by the file identifier <code>file_id</code>. If the boolean flag <code>minimize</code> is set to <code>true</code>, then the library will create minimized dataset object headers in the file. <b>All</b> files that refer to the same file-on-disk will be affected by the most recent setting, regardless of the file identifier/handle (e.g., as returned by <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a>). By setting the <code>minimize</code> flag to <code>true</code>, the library expects that no attributes will be added to the dataset - attributes can be added, but they are appended with a continuation message, which can reduce performance.</p>
+<dl class="section attention"><dt>Attention</dt><dd>This setting interacts with <a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint()</a>: if either is set to <code>true</code>, then the created dataset's object header will be minimized.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.5 </dd></dl>
 
 </div>
@@ -2082,7 +2082,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:13 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:35 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

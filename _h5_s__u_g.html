@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.9c85c6e</span>
+   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -178,7 +178,7 @@ Dataspace Programming Model</h3>
 <div class="line">space_id = <a class="code" href="group___h5_s.html#gabee514327cba34ca9951b24fa14fb083">H5Screate</a>(<a class="code" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5">H5S_NULL</a>);</div>
 <div class="line"><a class="code" href="group___h5_s.html#gaf2526a41d2f4506e2c52098510517343">H5Sset_extent_simple</a>(space_id, rank, current_dims, max_dims);</div>
 <div class="ttc" id="a_h5_spublic_8h_html_a5af9ab788797b2ea9a4843857674ac18"><div class="ttname"><a href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a></div><div class="ttdeci">#define H5S_UNLIMITED</div><div class="ttdef"><b>Definition:</b> H5Spublic.h:48</div></div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:291</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:297</div></div>
 <div class="ttc" id="agroup___h5_s_html_gaf2526a41d2f4506e2c52098510517343"><div class="ttname"><a href="group___h5_s.html#gaf2526a41d2f4506e2c52098510517343">H5Sset_extent_simple</a></div><div class="ttdeci">herr_t H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[], const hsize_t max[])</div><div class="ttdoc">Sets or resets the size of an existing dataspace.</div></div>
 </div><!-- fragment --><p>Alternatively, the convenience APIs H5Screate_simple/h5screate_simple_f can replace the H5Screate/h5screate_f and H5Sset_extent_simple/h5sset_extent_simple_f calls. </p><div class="fragment"><div class="line">space_id = <a class="code" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a>(rank, current_dims, max_dims);</div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
@@ -570,7 +570,7 @@ Write data to separate points</div></div>
 <div class="line">ret = <a class="code" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a>(fid, <a class="code" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, NPOINTS, (<span class="keyword">const</span> <a class="code" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a> **)coord);</div>
 <div class="line"> </div>
 <div class="line">ret = <a class="code" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a>(dataset, <a class="code" href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a>, mid2, fid, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, values);</div>
-<div class="ttc" id="a_h5public_8h_html_a7d9d4293176a8d7535ea6d4038235280"><div class="ttname"><a href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a></div><div class="ttdeci">int64_t hssize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:303</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7d9d4293176a8d7535ea6d4038235280"><div class="ttname"><a href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a></div><div class="ttdeci">int64_t hssize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:309</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga2f4407dd73d0ec37e5d9e80e4382483d"><div class="ttname"><a href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a></div><div class="ttdeci">herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)</div><div class="ttdoc">Selects array elements to be included in the selection for a dataspace.</div></div>
 </div><!-- fragment --><h4>Combinations of Selections</h4>
 <p>Selections are a very flexible mechanism for reorganizing data during a data transfer. With different combinations of dataspaces and selections, it is possible to implement many kinds of data transfers including sub‐setting, sampling, and reorganizing the data. The table below gives some example combinations of source and destination, and the operations they implement.</p>
@@ -1182,7 +1182,7 @@ Sample Programs</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 3 2023 00:31:11 for HDF5 by
+    <li class="footer">Generated on Wed Sep 6 2023 00:28:34 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
