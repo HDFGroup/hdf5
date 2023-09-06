@@ -5329,6 +5329,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_fapl_ioc_f
 
+#endif
+
 !>
 !! \ingroup FH5P
 !!
@@ -5362,8 +5364,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
      hdferr = INT(H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause))
 
    END SUBROUTINE h5pget_mpio_no_collective_cause_f
-
-#endif
 
 !>
 !! \ingroup FH5P
