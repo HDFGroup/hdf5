@@ -274,7 +274,7 @@ New Features
 
     High-Level APIs:
     ----------------
-    -
+    - Added Fortran HL API: h5doappend_f
 
 
     C Packet Table API:
