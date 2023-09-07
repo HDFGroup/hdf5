@@ -82,8 +82,8 @@ main(void)
 {
     unsigned nerrors        = 0;     /* track errors */
     bool     api_ctx_pushed = false; /* Whether API context pushed */
-    hid_t    fid            = -1;
-    hid_t    fapl           = -1; /* File access property list */
+    hid_t    fid            = H5I_INVALID_HID;
+    hid_t    fapl           = H5I_INVALID_HID; /* File access property list */
     char     filename[1024];
     H5F_t   *f = NULL; /* File for all tests */
 
@@ -2050,9 +2050,9 @@ unsigned
 test_swmr_write_big(bool newest_format)
 {
 
-    hid_t    fid  = -1;   /* File ID */
-    hid_t    fapl = -1;   /* File access property list */
-    H5F_t   *rf   = NULL; /* File pointer */
+    hid_t    fid  = H5I_INVALID_HID; /* File ID */
+    hid_t    fapl = H5I_INVALID_HID; /* File access property list */
+    H5F_t   *rf   = NULL;            /* File pointer */
     char     filename[1024];
     uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */

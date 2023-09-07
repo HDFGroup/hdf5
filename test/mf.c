@@ -212,11 +212,11 @@ error:
 static unsigned
 test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file     = -1;            /* File ID */
-    hid_t          fapl_new = -1;            /* copy of fapl */
-    char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t         *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t file_size, new_file_size; /* file size */
+    hid_t          file     = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char           filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t         *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t file_size, new_file_size;   /* file size */
     H5FD_mem_t     type;
     haddr_t        addr1, addr2;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF;
@@ -361,8 +361,8 @@ error:
 static unsigned
 test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file     = -1;                /* File ID */
-    hid_t          fapl_new = -1;                /* copy of fapl */
+    hid_t          file     = H5I_INVALID_HID;   /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID;   /* copy of fapl */
     char           filename[FILENAME_LEN];       /* Filename to use */
     H5F_t         *f         = NULL;             /* Internal file object pointer */
     h5_stat_size_t file_size = 0, new_file_size; /* file size */
@@ -648,11 +648,11 @@ error:
 static unsigned
 test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file     = -1;            /* File ID */
-    hid_t          fapl_new = -1;            /* copy of fapl */
-    char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t         *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t file_size, new_file_size; /* File size */
+    hid_t          file     = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char           filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t         *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t file_size, new_file_size;   /* File size */
     H5FD_mem_t     type;
     haddr_t        addr;
     htri_t         was_extended;
@@ -863,9 +863,9 @@ error:
 static unsigned
 test_mf_tmp(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t file  = -1; /* File ID */
-    hid_t fapl2 = -1; /* File access property list */
-    hid_t fcpl  = -1; /* File creation property list */
+    hid_t file  = H5I_INVALID_HID; /* File ID */
+    hid_t fapl2 = H5I_INVALID_HID; /* File access property list */
+    hid_t fcpl  = H5I_INVALID_HID; /* File creation property list */
 
     if (new_format)
         TESTING("'temporary' file space allocation with new library format");
@@ -1056,11 +1056,11 @@ error:
 static unsigned
 test_mf_fs_start(hid_t fapl)
 {
-    hid_t          file     = -1;            /* File ID */
-    hid_t          fapl_new = -1;            /* copy of fapl */
-    char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t         *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t file_size, new_file_size; /* file size */
+    hid_t          file     = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char           filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t         *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t file_size, new_file_size;   /* file size */
     H5FS_stat_t    state;
 
     TESTING("H5MF_create_fstype()/H5MF__open_fstype() of free-space manager");
@@ -1167,11 +1167,11 @@ error:
 static unsigned
 test_mf_fs_alloc_free(hid_t fapl)
 {
-    hid_t                file     = -1;            /* File ID */
-    hid_t                fapl_new = -1;            /* copy of fapl */
-    char                 filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t               *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t       file_size, new_file_size; /* file size */
+    hid_t                file     = H5I_INVALID_HID; /* File ID */
+    hid_t                fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char                 filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t               *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t       file_size, new_file_size;   /* file size */
     H5MF_free_section_t *sect_node = NULL;
     haddr_t              addr;
     haddr_t              tmp;
@@ -1496,11 +1496,11 @@ error:
 static unsigned
 test_mf_fs_extend(hid_t fapl)
 {
-    hid_t                file     = -1;            /* File ID */
-    hid_t                fapl_new = -1;            /* copy of fapl */
-    char                 filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t               *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t       file_size, new_file_size; /* file size */
+    hid_t                file     = H5I_INVALID_HID; /* File ID */
+    hid_t                fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char                 filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t               *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t       file_size, new_file_size;   /* file size */
     H5MF_free_section_t *sect_node1 = NULL, *sect_node2 = NULL;
     haddr_t              addr;
     haddr_t              tmp;
@@ -2004,7 +2004,7 @@ error:
 static unsigned
 test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t                file = -1;              /* File ID */
+    hid_t                file = H5I_INVALID_HID; /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
     H5F_t               *f = NULL;               /* Internal file object pointer */
     haddr_t              addr, saddr;
@@ -2179,7 +2179,7 @@ error:
 static unsigned
 test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     hid_t          fcpl;                     /* File creation property list */
@@ -2332,7 +2332,7 @@ error:
 static unsigned
 test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
@@ -2489,7 +2489,7 @@ error:
 static unsigned
 test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
@@ -2659,7 +2659,7 @@ error:
 static unsigned
 test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
@@ -2808,7 +2808,7 @@ error:
 static unsigned
 test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
@@ -2945,7 +2945,7 @@ error:
 static unsigned
 test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
@@ -3119,7 +3119,7 @@ error:
 static unsigned
 test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t empty_size, file_size;
@@ -3290,7 +3290,7 @@ error:
 static unsigned
 test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f          = NULL;      /* Internal file object pointer */
     h5_stat_size_t empty_size = 0, file_size;
@@ -3587,7 +3587,7 @@ error:
 static unsigned
 test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f          = NULL;      /* Internal file object pointer */
     h5_stat_size_t empty_size = 0, file_size;
@@ -3837,8 +3837,8 @@ error:
 static unsigned
 test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file  = -1; /* File ID */
-    hid_t          fapl1 = -1;
+    hid_t          file  = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl1 = H5I_INVALID_HID;
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size;
@@ -4134,7 +4134,7 @@ error:
 static unsigned
 test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t                file = -1;              /* File ID */
+    hid_t                file = H5I_INVALID_HID; /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
     h5_stat_size_t       file_size;
     H5F_t               *f         = NULL; /* Internal file object pointer */
@@ -4495,7 +4495,7 @@ error:
 static unsigned
 test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;              /* File size */
@@ -4759,7 +4759,7 @@ error:
 static unsigned
 test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;              /* File size */
@@ -5104,7 +5104,7 @@ error:
 static unsigned
 test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5419,7 +5419,7 @@ error:
 static unsigned
 test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5637,7 +5637,7 @@ error:
 static unsigned
 test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5908,7 +5908,7 @@ error:
 static unsigned
 test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -6118,10 +6118,10 @@ error:
 static unsigned
 test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t      file        = -1;       /* File ID */
-    hid_t      copied_fapl = -1;       /* FAPL to use for this test */
-    char       filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t     *f = NULL;               /* Internal file object pointer */
+    hid_t      file        = H5I_INVALID_HID; /* File ID */
+    hid_t      copied_fapl = H5I_INVALID_HID; /* FAPL to use for this test */
+    char       filename[FILENAME_LEN];        /* Filename to use */
+    H5F_t     *f = NULL;                      /* Internal file object pointer */
     H5FD_mem_t type;
     haddr_t    addr1, addr2;
     hsize_t    block_size;
@@ -6296,9 +6296,9 @@ error:
 static unsigned
 test_mf_fs_persist_split(void)
 {
-    hid_t       file = -1;                      /* File ID */
-    hid_t       fcpl = -1;                      /* File creation property list ID */
-    hid_t       fapl = -1;                      /* File access property list ID */
+    hid_t       file = H5I_INVALID_HID;         /* File ID */
+    hid_t       fcpl = H5I_INVALID_HID;         /* File creation property list ID */
+    hid_t       fapl = H5I_INVALID_HID;         /* File access property list ID */
     char        filename[FILENAME_LEN];         /* Filename to use */
     H5F_t      *f = NULL;                       /* Internal file object pointer */
     H5FD_mem_t  type, stype, btype;             /* File allocation type */
@@ -6611,9 +6611,9 @@ error:
 static unsigned
 test_mf_fs_persist_multi(void)
 {
-    hid_t                file = -1;                      /* File ID */
-    hid_t                fcpl = -1;                      /* File creation property list ID */
-    hid_t                fapl = -1;                      /* File access property list ID */
+    hid_t                file = H5I_INVALID_HID;         /* File ID */
+    hid_t                fcpl = H5I_INVALID_HID;         /* File creation property list ID */
+    hid_t                fapl = H5I_INVALID_HID;         /* File access property list ID */
     char                 filename[FILENAME_LEN];         /* Filename to use */
     H5F_t               *f = NULL;                       /* Internal file object pointer */
     H5FD_mem_t           type, stype, btype, gtype;      /* File allocation type */
@@ -6933,9 +6933,9 @@ error:
 static unsigned
 test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t       file  = -1;                               /* File ID */
-    hid_t       fcpl  = -1;                               /* File creation property list ID */
-    hid_t       fapl2 = -1;                               /* File access property list ID */
+    hid_t       file  = H5I_INVALID_HID;                  /* File ID */
+    hid_t       fcpl  = H5I_INVALID_HID;                  /* File creation property list ID */
+    hid_t       fapl2 = H5I_INVALID_HID;                  /* File access property list ID */
     char        filename[FILENAME_LEN];                   /* Filename to use */
     H5F_t      *f = NULL;                                 /* Internal file object pointer */
     H5FD_mem_t  type;                                     /* File allocation type */
@@ -7108,9 +7108,9 @@ error:
 static unsigned
 test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t       file  = -1;                 /* File ID */
-    hid_t       fcpl  = -1;                 /* File creation property list */
-    hid_t       fapl2 = -1;                 /* File access property list */
+    hid_t       file  = H5I_INVALID_HID;    /* File ID */
+    hid_t       fcpl  = H5I_INVALID_HID;    /* File creation property list */
+    hid_t       fapl2 = H5I_INVALID_HID;    /* File access property list */
     char        filename[FILENAME_LEN];     /* Filename to use */
     H5F_t      *f = NULL;                   /* Internal file object pointer */
     H5FD_mem_t  type;                       /* File allocation type */
@@ -7298,9 +7298,9 @@ error:
 static unsigned
 test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t                 file  = -1;                               /* File ID */
-    hid_t                 fcpl  = -1;                               /* File creation property list template */
-    hid_t                 fapl2 = -1;                               /* File access property list template */
+    hid_t                 file  = H5I_INVALID_HID;                  /* File ID */
+    hid_t                 fcpl  = H5I_INVALID_HID;                  /* File creation property list template */
+    hid_t                 fapl2 = H5I_INVALID_HID;                  /* File access property list template */
     char                  filename[FILENAME_LEN];                   /* Filename to use */
     H5F_t                *f = NULL;                                 /* Internal file object pointer */
     H5FD_mem_t            type;                                     /* File allocation type */
@@ -7467,9 +7467,9 @@ error:
 static unsigned
 test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t                 file  = -1;                               /* File ID */
-    hid_t                 fcpl  = -1;                               /* File creation property list template */
-    hid_t                 fapl2 = -1;                               /* File access property list template */
+    hid_t                 file  = H5I_INVALID_HID;                  /* File ID */
+    hid_t                 fcpl  = H5I_INVALID_HID;                  /* File creation property list template */
+    hid_t                 fapl2 = H5I_INVALID_HID;                  /* File access property list template */
     char                  filename[FILENAME_LEN];                   /* Filename to use */
     H5F_t                *f = NULL;                                 /* Internal file object pointer */
     H5FD_mem_t            type;                                     /* File allocation type */
@@ -7672,7 +7672,7 @@ error:
 static unsigned
 test_dichotomy(hid_t fapl)
 {
-    hid_t      file = -1;              /* File ID */
+    hid_t      file = H5I_INVALID_HID; /* File ID */
     char       filename[FILENAME_LEN]; /* Filename to use */
     H5F_t     *f = NULL;               /* Internal file object pointer */
     H5FD_mem_t type, stype;
@@ -7804,13 +7804,13 @@ static unsigned
 test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t    fid      = -1;   /* File ID */
-    hid_t    fcpl     = -1;   /* File creation property list */
-    hid_t    fapl_new = -1;   /* File access property list ID */
-    H5F_t   *f        = NULL; /* Internal file object pointer */
-    haddr_t  addr2, addr3;    /* Addresses for small metadata blocks */
-    haddr_t  saddr1;          /* Addresses for small raw data blocks */
-    haddr_t  gaddr1;          /* Addresses for large data blocks */
+    hid_t    fid      = H5I_INVALID_HID; /* File ID */
+    hid_t    fcpl     = H5I_INVALID_HID; /* File creation property list */
+    hid_t    fapl_new = H5I_INVALID_HID; /* File access property list ID */
+    H5F_t   *f        = NULL;            /* Internal file object pointer */
+    haddr_t  addr2, addr3;               /* Addresses for small metadata blocks */
+    haddr_t  saddr1;                     /* Addresses for small raw data blocks */
+    haddr_t  gaddr1;                     /* Addresses for large data blocks */
     bool     split = false, multi = false;
     char     filename[FILENAME_LEN]; /* Filename to use */
     haddr_t  found_addr;             /* Address of the found section */
@@ -8034,8 +8034,8 @@ static unsigned
 test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t          fid  = -1;              /* File ID */
-    hid_t          fcpl = -1;              /* File creation property list */
+    hid_t          fid  = H5I_INVALID_HID; /* File ID */
+    hid_t          fcpl = H5I_INVALID_HID; /* File creation property list */
     H5F_t         *f    = NULL;            /* Internal file object pointer */
     haddr_t        addr1;                  /* Address for small metadata block */
     haddr_t        saddr1;                 /* Address for small raw data block */
@@ -8163,8 +8163,8 @@ static unsigned
 test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t   fid  = -1;              /* File ID */
-    hid_t   fcpl = -1;              /* File creation property list */
+    hid_t   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl = H5I_INVALID_HID; /* File creation property list */
     H5F_t  *f    = NULL;            /* Internal file object pointer */
     haddr_t addr1, addr2, addr3;    /* Addresses for small metadata blocks */
     haddr_t saddr1;                 /* Address for small raw data block */
@@ -8341,8 +8341,8 @@ static unsigned
 test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t   fid  = -1;                      /* File ID */
-    hid_t   fcpl = -1;                      /* File creation property list */
+    hid_t   fid  = H5I_INVALID_HID;         /* File ID */
+    hid_t   fcpl = H5I_INVALID_HID;         /* File creation property list */
     H5F_t  *f    = NULL;                    /* Internal file object pointer */
     haddr_t gaddr1, gaddr2, gaddr3, gaddr4; /* Addresses for large data blocks */
     bool    contig_addr_vfd;                /* Whether VFD used has a contiguous address space */
@@ -8502,8 +8502,8 @@ static unsigned
 test_page_large(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t          fid  = -1;                      /* File ID */
-    hid_t          fcpl = -1;                      /* File creation property list ID */
+    hid_t          fid  = H5I_INVALID_HID;         /* File ID */
+    hid_t          fcpl = H5I_INVALID_HID;         /* File creation property list ID */
     H5F_t         *f    = NULL;                    /* Internal file object pointer */
     haddr_t        gaddr1, gaddr2, gaddr3, gaddr4; /* Addresses for blocks */
     bool           contig_addr_vfd;                /* Whether VFD used has a contiguous address space */
@@ -8654,8 +8654,8 @@ error:
 static unsigned
 test_page_small(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t       fid  = -1;                  /* File ID */
-    hid_t       fcpl = -1;                  /* File creation property list */
+    hid_t       fid  = H5I_INVALID_HID;     /* File ID */
+    hid_t       fcpl = H5I_INVALID_HID;     /* File creation property list */
     H5F_t      *f    = NULL;                /* Internal file object pointer */
     haddr_t     addr2, addr3, addr4, addr5; /* Addresses for blocks */
     haddr_t     addr9, addr10, addr11;      /* Address for small metadata blocks */
@@ -8825,15 +8825,15 @@ static unsigned
 test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t   fid      = -1;          /* File ID */
-    hid_t   fcpl     = -1;          /* File creation property list ID */
-    hid_t   fcpl2    = -1;          /* File creation property list ID */
-    hid_t   fapl_new = -1;          /* File access property list ID */
-    H5F_t  *f        = NULL;        /* Internal file object pointer */
-    haddr_t addr1, addr2;           /* Addresses for small metadata blocks */
-    haddr_t saddr1, saddr2;         /* Addresses for small raw data blocks */
-    haddr_t gaddr1, gaddr2;         /* Addresses for blocks */
-    char    filename[FILENAME_LEN]; /* Filename to use */
+    hid_t   fid      = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl     = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t   fcpl2    = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t   fapl_new = H5I_INVALID_HID; /* File access property list ID */
+    H5F_t  *f        = NULL;            /* Internal file object pointer */
+    haddr_t addr1, addr2;               /* Addresses for small metadata blocks */
+    haddr_t saddr1, saddr2;             /* Addresses for small raw data blocks */
+    haddr_t gaddr1, gaddr2;             /* Addresses for blocks */
+    char    filename[FILENAME_LEN];     /* Filename to use */
     bool    split = false, multi = false;
 
     TESTING("Paged aggregation and H5Pset_alignment: verify proper alignment is used");
@@ -9126,12 +9126,12 @@ error:
 int
 main(void)
 {
-    hid_t       fapl     = -1;          /* File access property list for data files */
-    hid_t       new_fapl = -1;          /* File access property list for alignment & aggr setting */
-    unsigned    nerrors  = 0;           /* Cumulative error count */
-    test_type_t curr_test;              /* Current test being worked on */
-    const char *env_h5_drvr;            /* File Driver value from environment */
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    hid_t       fapl     = H5I_INVALID_HID; /* File access property list for data files */
+    hid_t       new_fapl = H5I_INVALID_HID; /* File access property list for alignment & aggr setting */
+    unsigned    nerrors  = 0;               /* Cumulative error count */
+    test_type_t curr_test;                  /* Current test being worked on */
+    const char *env_h5_drvr;                /* File Driver value from environment */
+    bool        api_ctx_pushed = false;     /* Whether API context pushed */
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv(HDF5_DRIVER);

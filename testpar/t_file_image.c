@@ -67,11 +67,11 @@ file_image_daisy_chain_test(void)
     int        space_ndims;
     MPI_Status rcvstat;
     int       *vector_ptr = NULL;
-    hid_t      fapl_id    = -1;
+    hid_t      fapl_id    = H5I_INVALID_HID;
     hid_t      file_id; /* file IDs */
-    hid_t      dset_id      = -1;
-    hid_t      dset_type_id = -1;
-    hid_t      space_id     = -1;
+    hid_t      dset_id      = H5I_INVALID_HID;
+    hid_t      dset_type_id = H5I_INVALID_HID;
+    hid_t      space_id     = H5I_INVALID_HID;
     herr_t     err;
     hsize_t    dims[1];
     void      *image_ptr = NULL;

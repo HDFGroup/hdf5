@@ -1701,7 +1701,7 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* int         chunk_edge_size                 = */ -1,
         /* int         small_rank                      = */ -1,
         /* int         large_rank                      = */ -1,
-        /* hid_t       dset_type                       = */ -1,
+        /* hid_t       dset_type                       = */ H5I_INVALID_HID,
         /* uint32_t  * small_ds_buf_0                  = */ NULL,
         /* uint32_t  * small_ds_buf_1                  = */ NULL,
         /* uint32_t  * small_ds_buf_2                  = */ NULL,
@@ -1712,24 +1712,24 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* uint32_t  * large_ds_slice_buf              = */ NULL,
         /* int         small_ds_offset                 = */ -1,
         /* int         large_ds_offset                 = */ -1,
-        /* hid_t       fid                             = */ -1, /* HDF5 file ID */
+        /* hid_t       fid                             = */ H5I_INVALID_HID, /* HDF5 file ID */
         /* hid_t       xfer_plist                      = */ H5P_DEFAULT,
-        /* hid_t       full_mem_small_ds_sid           = */ -1,
-        /* hid_t       full_file_small_ds_sid          = */ -1,
-        /* hid_t       mem_small_ds_sid                = */ -1,
-        /* hid_t       file_small_ds_sid_0             = */ -1,
-        /* hid_t       file_small_ds_sid_1             = */ -1,
-        /* hid_t       small_ds_slice_sid              = */ -1,
-        /* hid_t       full_mem_large_ds_sid           = */ -1,
-        /* hid_t       full_file_large_ds_sid          = */ -1,
-        /* hid_t       mem_large_ds_sid                = */ -1,
-        /* hid_t       file_large_ds_sid_0             = */ -1,
-        /* hid_t       file_large_ds_sid_1             = */ -1,
-        /* hid_t       file_large_ds_process_slice_sid = */ -1,
-        /* hid_t       mem_large_ds_process_slice_sid  = */ -1,
-        /* hid_t       large_ds_slice_sid              = */ -1,
-        /* hid_t       small_dataset                   = */ -1, /* Dataset ID */
-        /* hid_t       large_dataset                   = */ -1, /* Dataset ID */
+        /* hid_t       full_mem_small_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_small_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_small_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       small_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       full_mem_large_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_large_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_process_slice_sid = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_process_slice_sid  = */ H5I_INVALID_HID,
+        /* hid_t       large_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       small_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
+        /* hid_t       large_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
         /* size_t      small_ds_size                   = */ 1,
         /* size_t      small_ds_slice_size             = */ 1,
         /* size_t      large_ds_size                   = */ 1,
@@ -3626,7 +3626,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* int         chunk_edge_size                 = */ -1,
         /* int         small_rank                      = */ -1,
         /* int         large_rank                      = */ -1,
-        /* hid_t       dset_type                       = */ -1,
+        /* hid_t       dset_type                       = */ H5I_INVALID_HID,
         /* uint32_t  * small_ds_buf_0                  = */ NULL,
         /* uint32_t  * small_ds_buf_1                  = */ NULL,
         /* uint32_t  * small_ds_buf_2                  = */ NULL,
@@ -3637,24 +3637,24 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
         /* uint32_t  * large_ds_slice_buf              = */ NULL,
         /* int         small_ds_offset                 = */ -1,
         /* int         large_ds_offset                 = */ -1,
-        /* hid_t       fid                             = */ -1, /* HDF5 file ID */
+        /* hid_t       fid                             = */ H5I_INVALID_HID, /* HDF5 file ID */
         /* hid_t       xfer_plist                      = */ H5P_DEFAULT,
-        /* hid_t       full_mem_small_ds_sid           = */ -1,
-        /* hid_t       full_file_small_ds_sid          = */ -1,
-        /* hid_t       mem_small_ds_sid                = */ -1,
-        /* hid_t       file_small_ds_sid_0             = */ -1,
-        /* hid_t       file_small_ds_sid_1             = */ -1,
-        /* hid_t       small_ds_slice_sid              = */ -1,
-        /* hid_t       full_mem_large_ds_sid           = */ -1,
-        /* hid_t       full_file_large_ds_sid          = */ -1,
-        /* hid_t       mem_large_ds_sid                = */ -1,
-        /* hid_t       file_large_ds_sid_0             = */ -1,
-        /* hid_t       file_large_ds_sid_1             = */ -1,
-        /* hid_t       file_large_ds_process_slice_sid = */ -1,
-        /* hid_t       mem_large_ds_process_slice_sid  = */ -1,
-        /* hid_t       large_ds_slice_sid              = */ -1,
-        /* hid_t       small_dataset                   = */ -1, /* Dataset ID */
-        /* hid_t       large_dataset                   = */ -1, /* Dataset ID */
+        /* hid_t       full_mem_small_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_small_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_small_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_small_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       small_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       full_mem_large_ds_sid           = */ H5I_INVALID_HID,
+        /* hid_t       full_file_large_ds_sid          = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_sid                = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_0             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_sid_1             = */ H5I_INVALID_HID,
+        /* hid_t       file_large_ds_process_slice_sid = */ H5I_INVALID_HID,
+        /* hid_t       mem_large_ds_process_slice_sid  = */ H5I_INVALID_HID,
+        /* hid_t       large_ds_slice_sid              = */ H5I_INVALID_HID,
+        /* hid_t       small_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
+        /* hid_t       large_dataset                   = */ H5I_INVALID_HID, /* Dataset ID */
         /* size_t      small_ds_size                   = */ 1,
         /* size_t      small_ds_slice_size             = */ 1,
         /* size_t      large_ds_size                   = */ 1,
@@ -4142,7 +4142,7 @@ parse_options(int argc, char **argv)
 hid_t
 create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
-    hid_t  ret_pl = -1;
+    hid_t  ret_pl = H5I_INVALID_HID;
     herr_t ret;      /* generic return value */
     int    mpi_rank; /* mpi variables */
 

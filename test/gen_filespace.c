@@ -26,8 +26,8 @@ const char *FILENAMES[] = {
 
 #define DATASET   "dset"
 #define NUM_ELMTS 100
-#define false 0
-#define true 1
+#define false     0
+#define true      1
 
 /*
  * Compile and run this program in the trunk to generate
@@ -46,15 +46,15 @@ const char *FILENAMES[] = {
 int
 main(void)
 {
-    hid_t                 fid  = -1;       /* File ID */
-    hid_t                 fcpl = -1;       /* File creation property list */
-    hid_t                 did  = -1;       /* Dataset ID */
-    hid_t                 sid  = -1;       /* Dataspace ID */
-    hsize_t               dim[1];          /* Dimension sizes */
-    int                   data[NUM_ELMTS]; /* Buffer for data */
-    int                   i, j;            /* Local index variables */
-    H5F_fspace_strategy_t fs_strategy;     /* File space handling strategy */
-    unsigned              fs_persist;      /* Persisting free-space or not */
+    hid_t                 fid  = H5I_INVALID_HID; /* File ID */
+    hid_t                 fcpl = H5I_INVALID_HID; /* File creation property list */
+    hid_t                 did  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t                 sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t               dim[1];                 /* Dimension sizes */
+    int                   data[NUM_ELMTS];        /* Buffer for data */
+    int                   i, j;                   /* Local index variables */
+    H5F_fspace_strategy_t fs_strategy;            /* File space handling strategy */
+    unsigned              fs_persist;             /* Persisting free-space or not */
 
     j = 0;
     for (fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_strategy < H5F_FSPACE_STRATEGY_NTYPES;

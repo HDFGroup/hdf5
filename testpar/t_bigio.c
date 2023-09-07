@@ -1107,10 +1107,10 @@ single_rank_independent_io(void)
 
     if (MAIN_PROCESS) {
         hsize_t  dims[1];
-        hid_t    file_id   = -1;
-        hid_t    fapl_id   = -1;
-        hid_t    dset_id   = -1;
-        hid_t    fspace_id = -1;
+        hid_t    file_id   = H5I_INVALID_HID;
+        hid_t    fapl_id   = H5I_INVALID_HID;
+        hid_t    dset_id   = H5I_INVALID_HID;
+        hid_t    fspace_id = H5I_INVALID_HID;
         herr_t   ret;
         int     *data = NULL;
         uint64_t i;
@@ -1181,7 +1181,7 @@ single_rank_independent_io(void)
 hid_t
 create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
-    hid_t  ret_pl = -1;
+    hid_t  ret_pl = H5I_INVALID_HID;
     herr_t ret;      /* generic return value */
     int    mpi_rank; /* mpi variables */
 

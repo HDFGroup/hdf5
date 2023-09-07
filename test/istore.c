@@ -543,7 +543,7 @@ error:
 int
 main(int argc, char *argv[])
 {
-    hid_t    fapl = -1, file = -1, fcpl = -1;
+    hid_t    fapl = H5I_INVALID_HID, file = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
     herr_t   status;
     int      nerrors = 0;
     unsigned size_of_test;

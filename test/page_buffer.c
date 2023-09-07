@@ -82,13 +82,13 @@ static const char *FILENAME[] = {"filepaged", NULL};
 static unsigned
 create_file(char *filename, hid_t fcpl, hid_t fapl)
 {
-    hid_t   file_id   = -1;
-    hid_t   dset_id   = -1;
-    hid_t   grp_id    = -1;
-    hid_t   filespace = -1;
+    hid_t   file_id   = H5I_INVALID_HID;
+    hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   grp_id    = H5I_INVALID_HID;
+    hid_t   filespace = H5I_INVALID_HID;
     hsize_t dimsf[2]  = {NX, NY}; /* dataset dimensions */
     int    *data      = NULL;     /* pointer to data buffer to write */
-    hid_t   dcpl      = -1;
+    hid_t   dcpl      = H5I_INVALID_HID;
     int     i;
     int     num_elements;
     int     j;
@@ -219,9 +219,9 @@ error:
 static unsigned
 open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size)
 {
-    hid_t  file_id = -1;
-    hid_t  dset_id = -1;
-    hid_t  grp_id  = -1;
+    hid_t  file_id = H5I_INVALID_HID;
+    hid_t  dset_id = H5I_INVALID_HID;
+    hid_t  grp_id  = H5I_INVALID_HID;
     int   *data    = NULL; /* pointer to data buffer to write */
     int    i;
     int    j;
@@ -376,10 +376,10 @@ error:
 static unsigned
 test_args(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char   filename[FILENAME_LEN]; /* Filename to use */
-    hid_t  file_id = -1;           /* File ID */
-    hid_t  fcpl    = -1;
-    hid_t  fapl    = -1;
+    char   filename[FILENAME_LEN];    /* Filename to use */
+    hid_t  file_id = H5I_INVALID_HID; /* File ID */
+    hid_t  fcpl    = H5I_INVALID_HID;
+    hid_t  fapl    = H5I_INVALID_HID;
     herr_t ret;
 
     TESTING("Settings for Page Buffering");
@@ -547,10 +547,10 @@ error:
 static unsigned
 test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char    filename[FILENAME_LEN]; /* Filename to use */
-    hid_t   file_id = -1;           /* File ID */
-    hid_t   fcpl    = -1;
-    hid_t   fapl    = -1;
+    char    filename[FILENAME_LEN];    /* Filename to use */
+    hid_t   file_id = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl    = H5I_INVALID_HID;
+    hid_t   fapl    = H5I_INVALID_HID;
     size_t  base_page_cnt;
     size_t  page_count = 0;
     int     i, num_elements = 2000;
@@ -810,10 +810,10 @@ error:
 static unsigned
 test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char    filename[FILENAME_LEN]; /* Filename to use */
-    hid_t   file_id = -1;           /* File ID */
-    hid_t   fcpl    = -1;
-    hid_t   fapl    = -1;
+    char    filename[FILENAME_LEN];    /* Filename to use */
+    hid_t   file_id = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl    = H5I_INVALID_HID;
+    hid_t   fapl    = H5I_INVALID_HID;
     size_t  base_page_cnt;
     size_t  page_count = 0;
     int     i;
@@ -1049,10 +1049,10 @@ error:
 static unsigned
 test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char    filename[FILENAME_LEN]; /* Filename to use */
-    hid_t   file_id       = -1;     /* File ID */
-    hid_t   fcpl          = -1;
-    hid_t   fapl          = -1;
+    char    filename[FILENAME_LEN];          /* Filename to use */
+    hid_t   file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl          = H5I_INVALID_HID;
+    hid_t   fapl          = H5I_INVALID_HID;
     size_t  base_raw_cnt  = 0;
     size_t  base_meta_cnt = 0;
     size_t  page_count    = 0;
@@ -1667,10 +1667,10 @@ error:
 static unsigned
 test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char    filename[FILENAME_LEN]; /* Filename to use */
-    hid_t   file_id = -1;           /* File ID */
-    hid_t   fcpl    = -1;
-    hid_t   fapl    = -1;
+    char    filename[FILENAME_LEN];    /* Filename to use */
+    hid_t   file_id = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl    = H5I_INVALID_HID;
+    hid_t   fapl    = H5I_INVALID_HID;
     int     i;
     int     num_elements  = 1000;
     size_t  base_raw_cnt  = 0;
@@ -1956,10 +1956,10 @@ error:
 static unsigned
 verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
 {
-    char  filename[FILENAME_LEN]; /* Filename to use */
-    hid_t file_id = -1;           /* File ID */
-    hid_t fcpl    = -1;
-    hid_t fapl    = -1;
+    char  filename[FILENAME_LEN];    /* Filename to use */
+    hid_t file_id = H5I_INVALID_HID; /* File ID */
+    hid_t fcpl    = H5I_INVALID_HID;
+    hid_t fapl    = H5I_INVALID_HID;
 
     TESTING("Page Buffering Disabled");
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
@@ -2064,10 +2064,10 @@ error:
 int
 main(void)
 {
-    hid_t       fapl           = -1;    /* File access property list for data files */
-    unsigned    nerrors        = 0;     /* Cumulative error count */
-    const char *env_h5_drvr    = NULL;  /* File Driver value from environment */
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    hid_t       fapl           = H5I_INVALID_HID; /* File access property list for data files */
+    unsigned    nerrors        = 0;               /* Cumulative error count */
+    const char *env_h5_drvr    = NULL;            /* File Driver value from environment */
+    bool        api_ctx_pushed = false;           /* Whether API context pushed */
 
     h5_reset();
 

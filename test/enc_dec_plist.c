@@ -24,10 +24,10 @@
 static int
 test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t  pl        = (-1); /* Decoded property list */
-    hid_t  fapl      = -1;   /* File access property list */
-    void  *temp_buf  = NULL; /* Pointer to encoding buffer */
-    size_t temp_size = 0;    /* Size of encoding buffer */
+    hid_t  pl        = (H5I_INVALID_HID); /* Decoded property list */
+    hid_t  fapl      = H5I_INVALID_HID;   /* File access property list */
+    void  *temp_buf  = NULL;              /* Pointer to encoding buffer */
+    size_t temp_size = 0;                 /* Size of encoding buffer */
 
     /* Create file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -113,24 +113,24 @@ error:
 int
 main(void)
 {
-    hid_t        dcpl;                       /* dataset create prop. list */
-    hid_t        dapl;                       /* dataset access prop. list */
-    hid_t        dxpl;                       /* dataset xfer prop. list */
-    hid_t        gcpl;                       /* group create prop. list */
-    hid_t        ocpypl;                     /* object copy prop. list */
-    hid_t        ocpl;                       /* object create prop. list */
-    hid_t        lcpl;                       /* link create prop. list */
-    hid_t        lapl;                       /* link access prop. list */
-    hid_t        fapl;                       /* file access prop. list */
-    hid_t        fcpl;                       /* file create prop. list */
-    hid_t        strcpl;                     /* string create prop. list */
-    hid_t        acpl;                       /* attribute create prop. list */
-    hid_t        srcspace      = -1;         /* Source dataspaces */
-    hid_t        vspace        = -1;         /* Virtual dset dataspaces */
-    hsize_t      dims[1]       = {3};        /* Data space current size */
-    hsize_t      chunk_size[2] = {16384, 4}; /* chunk size */
-    double       fill          = 2.7;        /* Fill value */
-    hsize_t      max_size[1];                /* data space maximum size */
+    hid_t        dcpl;                            /* dataset create prop. list */
+    hid_t        dapl;                            /* dataset access prop. list */
+    hid_t        dxpl;                            /* dataset xfer prop. list */
+    hid_t        gcpl;                            /* group create prop. list */
+    hid_t        ocpypl;                          /* object copy prop. list */
+    hid_t        ocpl;                            /* object create prop. list */
+    hid_t        lcpl;                            /* link create prop. list */
+    hid_t        lapl;                            /* link access prop. list */
+    hid_t        fapl;                            /* file access prop. list */
+    hid_t        fcpl;                            /* file create prop. list */
+    hid_t        strcpl;                          /* string create prop. list */
+    hid_t        acpl;                            /* attribute create prop. list */
+    hid_t        srcspace      = H5I_INVALID_HID; /* Source dataspaces */
+    hid_t        vspace        = H5I_INVALID_HID; /* Virtual dset dataspaces */
+    hsize_t      dims[1]       = {3};             /* Data space current size */
+    hsize_t      chunk_size[2] = {16384, 4};      /* chunk size */
+    double       fill          = 2.7;             /* Fill value */
+    hsize_t      max_size[1];                     /* data space maximum size */
     size_t       nslots = 521 * 2;
     size_t       nbytes = 1048576 * 10;
     double       w0     = 0.5;

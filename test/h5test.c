@@ -456,7 +456,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     char       *ptr, last = '\0';
     const char *suffix = _suffix;
     size_t      i, j;
-    hid_t       driver     = -1;
+    hid_t       driver     = H5I_INVALID_HID;
     int         isppdriver = 0; /* if the driver is MPI parallel */
 
     if (!base_name || !fullname || size < 1)
@@ -1446,7 +1446,7 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_
 herr_t
 h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
 {
-    hid_t file = -1;
+    hid_t file = H5I_INVALID_HID;
     char  filename[1024];
     int   i = 0;
 

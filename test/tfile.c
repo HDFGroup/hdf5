@@ -653,12 +653,12 @@ test_file_open(const char *env_h5_drvr)
 static void
 test_file_reopen(void)
 {
-    hid_t   fid  = -1; /* file ID from initial open            */
-    hid_t   rfid = -1; /* file ID from reopen                  */
-    hid_t   did  = -1; /* dataset ID (both opens)              */
-    hid_t   sid  = -1; /* dataspace ID for dataset creation    */
-    hsize_t dims = 6;  /* dataspace size                       */
-    herr_t  ret;       /* Generic return value                 */
+    hid_t   fid  = H5I_INVALID_HID; /* file ID from initial open            */
+    hid_t   rfid = H5I_INVALID_HID; /* file ID from reopen                  */
+    hid_t   did  = H5I_INVALID_HID; /* dataset ID (both opens)              */
+    hid_t   sid  = H5I_INVALID_HID; /* dataspace ID for dataset creation    */
+    hsize_t dims = 6;               /* dataspace size                       */
+    herr_t  ret;                    /* Generic return value                 */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing File Re-opening\n"));
@@ -2592,17 +2592,17 @@ test_file_double_dataset_open(void)
 static void
 test_file_double_file_dataset_open(bool new_format)
 {
-    hid_t   fapl = -1;                        /* File access property list */
-    hid_t   dcpl = -1;                        /* Dataset creation property list */
-    hid_t   fid1 = -1, fid2 = -1;             /* File IDs */
-    hid_t   did1 = -1, did2 = -1;             /* Dataset IDs */
-    hid_t   sid1 = -1, sid2 = -1;             /* Dataspace IDs */
-    hid_t   tid1 = -1, tid2 = -1;             /* Datatype IDs */
-    hsize_t dims[1] = {5}, dims2[2] = {1, 4}; /* Dimension sizes */
-    hsize_t e_ext_dims[1] = {7};              /* Expanded dimension sizes */
-    hsize_t s_ext_dims[1] = {3};              /* Shrunk dimension sizes */
-    hsize_t max_dims0[1]  = {8};              /* Maximum dimension sizes */
-    hsize_t max_dims1[1]  = {H5S_UNLIMITED};  /* Maximum dimesion sizes for extensible array index */
+    hid_t   fapl = H5I_INVALID_HID;                         /* File access property list */
+    hid_t   dcpl = H5I_INVALID_HID;                         /* Dataset creation property list */
+    hid_t   fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t   did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t   sid1 = H5I_INVALID_HID, sid2 = H5I_INVALID_HID; /* Dataspace IDs */
+    hid_t   tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
+    hsize_t dims[1] = {5}, dims2[2] = {1, 4};               /* Dimension sizes */
+    hsize_t e_ext_dims[1] = {7};                            /* Expanded dimension sizes */
+    hsize_t s_ext_dims[1] = {3};                            /* Shrunk dimension sizes */
+    hsize_t max_dims0[1]  = {8};                            /* Maximum dimension sizes */
+    hsize_t max_dims1[1]  = {H5S_UNLIMITED}; /* Maximum dimesion sizes for extensible array index */
     hsize_t max_dims2[2]  = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dimension sizes for v2 B-tree index */
     hsize_t chunks[1] = {2}, chunks2[2] = {4, 5};           /* Chunk dimension sizes */
     hsize_t size;                                           /* File size */
@@ -4857,8 +4857,8 @@ static void
 test_filespace_compatible(void)
 {
     int                   fd_old = (-1), fd_new = (-1); /* File descriptors for copying data */
-    hid_t                 fid = -1;                     /* File id */
-    hid_t                 did = -1;                     /* Dataset id */
+    hid_t                 fid = H5I_INVALID_HID;        /* File id */
+    hid_t                 did = H5I_INVALID_HID;        /* Dataset id */
     hid_t                 fcpl;                         /* File creation property list template */
     int                   check[100];                   /* Temporary buffer for verifying dataset data */
     int                   rdbuf[100];                   /* Temporary buffer for reading in dataset data */
@@ -4988,17 +4988,17 @@ test_filespace_compatible(void)
 static void
 test_filespace_1_10_0_compatible(void)
 {
-    hid_t                 fid = -1;  /* File id */
-    hid_t                 did = -1;  /* Dataset id */
-    hid_t                 fcpl;      /* File creation property list */
-    bool                  persist;   /* Persist free-space or not */
-    hsize_t               threshold; /* Free-space section threshold */
-    H5F_fspace_strategy_t strategy;  /* File space handling strategy */
-    int                   wbuf[24];  /* Buffer for dataset data */
-    int                   rdbuf[24]; /* Buffer for dataset data */
-    int                   status;    /* Status from copying the existing file */
-    unsigned              i, j;      /* Local index variable */
-    herr_t                ret;       /* Return value */
+    hid_t                 fid = H5I_INVALID_HID; /* File id */
+    hid_t                 did = H5I_INVALID_HID; /* Dataset id */
+    hid_t                 fcpl;                  /* File creation property list */
+    bool                  persist;               /* Persist free-space or not */
+    hsize_t               threshold;             /* Free-space section threshold */
+    H5F_fspace_strategy_t strategy;              /* File space handling strategy */
+    int                   wbuf[24];              /* Buffer for dataset data */
+    int                   rdbuf[24];             /* Buffer for dataset data */
+    int                   status;                /* Status from copying the existing file */
+    unsigned              i, j;                  /* Local index variable */
+    herr_t                ret;                   /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("File space compatibility testing for 1.10.0 files\n"));
@@ -5302,15 +5302,15 @@ test_filespace_1_10_0_compatible(void)
 static void
 test_filespace_round_compatible(void)
 {
-    hid_t                 fid  = -1;  /* File id */
-    hid_t                 fcpl = -1;  /* File creation property list ID */
-    unsigned              j;          /* Local index variable */
-    H5F_fspace_strategy_t strategy;   /* File space strategy */
-    bool                  persist;    /* Persist free-space or not */
-    hsize_t               threshold;  /* Free-space section threshold */
-    hssize_t              free_space; /* Amount of free space in the file */
-    int                   status;     /* Status from copying the existing file */
-    herr_t                ret;        /* Return value */
+    hid_t                 fid  = H5I_INVALID_HID; /* File id */
+    hid_t                 fcpl = H5I_INVALID_HID; /* File creation property list ID */
+    unsigned              j;                      /* Local index variable */
+    H5F_fspace_strategy_t strategy;               /* File space strategy */
+    bool                  persist;                /* Persist free-space or not */
+    hsize_t               threshold;              /* Free-space section threshold */
+    hssize_t              free_space;             /* Amount of free space in the file */
+    int                   status;                 /* Status from copying the existing file */
+    herr_t                ret;                    /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("File space compatibility testing for files from trunk to 1_8 to trunk\n"));
@@ -5467,12 +5467,12 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create, H5F
 static void
 test_libver_bounds_open(void)
 {
-    hid_t        file     = -1;                /* File ID */
-    hid_t        space    = -1;                /* Dataspace ID */
-    hid_t        dset     = -1;                /* Dataset ID */
-    hid_t        fapl     = -1;                /* File access property list ID */
-    hid_t        new_fapl = -1;                /* File access property list ID for reopened file */
-    hid_t        dcpl     = -1;                /* Dataset creation property list ID */
+    hid_t        file     = H5I_INVALID_HID;   /* File ID */
+    hid_t        space    = H5I_INVALID_HID;   /* Dataspace ID */
+    hid_t        dset     = H5I_INVALID_HID;   /* Dataset ID */
+    hid_t        fapl     = H5I_INVALID_HID;   /* File access property list ID */
+    hid_t        new_fapl = H5I_INVALID_HID;   /* File access property list ID for reopened file */
+    hid_t        dcpl     = H5I_INVALID_HID;   /* Dataset creation property list ID */
     hsize_t      dim[1]   = {SPACE1_DIM1};     /* Dataset dimensions */
     H5F_libver_t low, high;                    /* File format bounds */
     hsize_t      chunk_dim[1] = {SPACE1_DIM1}; /* Chunk dimensions */
@@ -5604,11 +5604,11 @@ test_libver_bounds_open(void)
 static void
 test_libver_bounds_copy(void)
 {
-    hid_t       src_fid = -1; /* File ID */
-    hid_t       dst_fid = -1; /* File ID */
-    hid_t       fapl    = -1; /* File access property list ID */
-    const char *src_fname;    /* Source file name */
-    herr_t      ret;          /* Generic return value */
+    hid_t       src_fid = H5I_INVALID_HID; /* File ID */
+    hid_t       dst_fid = H5I_INVALID_HID; /* File ID */
+    hid_t       fapl    = H5I_INVALID_HID; /* File access property list ID */
+    const char *src_fname;                 /* Source file name */
+    herr_t      ret;                       /* Generic return value */
     bool        driver_is_default_compatible;
 
     /* Output message about the test being performed */
@@ -7631,20 +7631,20 @@ test_libver_macros2(void)
 static void
 test_incr_filesize(void)
 {
-    hid_t          fid;                    /* File opened with read-write permission */
-    h5_stat_size_t filesize;               /* Size of file when empty */
-    hid_t          fcpl;                   /* File creation property list */
-    hid_t          fapl;                   /* File access property list */
-    hid_t          dspace;                 /* Dataspace ID */
-    hid_t          dset;                   /* Dataset ID */
-    hid_t          dcpl;                   /* Dataset creation property list */
-    unsigned       u;                      /* Local index variable */
-    char           filename[FILENAME_LEN]; /* Filename to use */
-    char           name[32];               /* Dataset name */
-    haddr_t        stored_eoa;             /* The stored EOA value */
-    hid_t          driver_id    = -1;      /* ID for this VFD */
-    unsigned long  driver_flags = 0;       /* VFD feature flags */
-    herr_t         ret;                    /* Return value */
+    hid_t          fid;                            /* File opened with read-write permission */
+    h5_stat_size_t filesize;                       /* Size of file when empty */
+    hid_t          fcpl;                           /* File creation property list */
+    hid_t          fapl;                           /* File access property list */
+    hid_t          dspace;                         /* Dataspace ID */
+    hid_t          dset;                           /* Dataset ID */
+    hid_t          dcpl;                           /* Dataset creation property list */
+    unsigned       u;                              /* Local index variable */
+    char           filename[FILENAME_LEN];         /* Filename to use */
+    char           name[32];                       /* Dataset name */
+    haddr_t        stored_eoa;                     /* The stored EOA value */
+    hid_t          driver_id    = H5I_INVALID_HID; /* ID for this VFD */
+    unsigned long  driver_flags = 0;               /* VFD feature flags */
+    herr_t         ret;                            /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5Fincrement_filesize() and H5Fget_eoa())\n"));
@@ -7760,8 +7760,8 @@ test_min_dset_ohdr(void)
 {
     const char basename[]             = "min_dset_ohdr_testfile";
     char       filename[FILENAME_LEN] = "";
-    hid_t      file_id                = -1;
-    hid_t      file2_id               = -1;
+    hid_t      file_id                = H5I_INVALID_HID;
+    hid_t      file2_id               = H5I_INVALID_HID;
     bool       minimize;
     herr_t     ret;
 

@@ -386,7 +386,7 @@ test_multiple_ends(hid_t file, bool is_chunked)
     /* For testing the full selections in the fastest-growing end and in the middle dimensions */
     struct {
         int arr[1][1][1][4][2][1][6][2];
-    } *mem1_buffer         = NULL;
+    }      *mem1_buffer    = NULL;
     hsize_t mem1_dims[8]   = {1, 1, 1, 4, 2, 1, 6, 2};
     hsize_t mem1_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem1_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -396,7 +396,7 @@ test_multiple_ends(hid_t file, bool is_chunked)
     /* For testing the full selections in the slowest-growing end and in the middle dimensions */
     struct {
         int arr[4][5][1][4][2][1][1][1];
-    } *mem2_buffer         = NULL;
+    }      *mem2_buffer    = NULL;
     hsize_t mem2_dims[8]   = {4, 5, 1, 4, 2, 1, 1, 1};
     hsize_t mem2_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem2_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -406,7 +406,7 @@ test_multiple_ends(hid_t file, bool is_chunked)
     /* For testing two unadjacent full selections in the middle dimensions */
     struct {
         int arr[1][5][3][1][1][3][6][1];
-    } *mem3_buffer         = NULL;
+    }      *mem3_buffer    = NULL;
     hsize_t mem3_dims[8]   = {1, 5, 3, 1, 1, 3, 6, 1};
     hsize_t mem3_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem3_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -416,7 +416,7 @@ test_multiple_ends(hid_t file, bool is_chunked)
     /* For testing the full selections in the fastest-growing end and the slowest-growing end */
     struct {
         int arr[4][5][1][1][1][1][6][2];
-    } *mem4_buffer         = NULL;
+    }      *mem4_buffer    = NULL;
     hsize_t mem4_dims[8]   = {4, 5, 1, 1, 1, 1, 6, 2};
     hsize_t mem4_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem4_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -427,7 +427,7 @@ test_multiple_ends(hid_t file, bool is_chunked)
      * also in the middle dimensions */
     struct {
         int arr[4][5][1][4][2][1][6][2];
-    } *mem5_buffer         = NULL;
+    }      *mem5_buffer    = NULL;
     hsize_t mem5_dims[8]   = {4, 5, 1, 4, 2, 1, 6, 2};
     hsize_t mem5_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem5_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};

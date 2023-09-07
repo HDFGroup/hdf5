@@ -60,9 +60,9 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 {
     char                filename[512];
     herr_t              result;
-    hid_t               fapl_id        = -1;
-    hid_t               test_fapl_id   = -1;
-    hid_t               file_id        = -1;
+    hid_t               fapl_id        = H5I_INVALID_HID;
+    hid_t               test_fapl_id   = H5I_INVALID_HID;
+    hid_t               file_id        = H5I_INVALID_HID;
     H5F_t              *file_ptr       = NULL;
     H5C_t              *cache_ptr      = NULL;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
@@ -499,7 +499,7 @@ static bool
 check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
 {
     char                filename[512];
-    hid_t               file_id = -1;
+    hid_t               file_id = H5I_INVALID_HID;
     size_t              max_size;
     size_t              min_clean_size;
     size_t              cur_size;
@@ -827,12 +827,12 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
     int64_t             min_accesses    = 1000;
     double              min_hit_rate    = 0.90;
     bool                dump_cache_size = false;
-    hid_t               file_id         = -1;
-    hid_t               dataspace_id    = -1;
+    hid_t               file_id         = H5I_INVALID_HID;
+    hid_t               dataspace_id    = H5I_INVALID_HID;
     hid_t               filespace_ids[NUM_DSETS];
-    hid_t               memspace_id = -1;
+    hid_t               memspace_id = H5I_INVALID_HID;
     hid_t               dataset_ids[NUM_DSETS];
-    hid_t               properties = -1;
+    hid_t               properties = H5I_INVALID_HID;
     char                dset_name[64];
     int                 i, j, k, l, m, n;
     herr_t              status;
@@ -1622,7 +1622,7 @@ check_fapl_mdc_api_errs(void)
     static char         msg[128];
     int                 i;
     herr_t              result;
-    hid_t               fapl_id        = -1;
+    hid_t               fapl_id        = H5I_INVALID_HID;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t scratch;
 
@@ -1638,7 +1638,7 @@ check_fapl_mdc_api_errs(void)
 
         H5E_BEGIN_TRY
         {
-            result = H5Pget_mdc_config((hid_t)-1, &scratch);
+            result = H5Pget_mdc_config((hid_t)H5I_INVALID_HID, &scratch);
         }
         H5E_END_TRY
 
@@ -1713,7 +1713,7 @@ check_fapl_mdc_api_errs(void)
 
         H5E_BEGIN_TRY
         {
-            result = H5Pset_mdc_config((hid_t)-1, &default_config);
+            result = H5Pset_mdc_config((hid_t)H5I_INVALID_HID, &default_config);
         }
         H5E_END_TRY
 
@@ -1803,7 +1803,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
     bool                show_progress = false;
     int                 i;
     herr_t              result;
-    hid_t               file_id = -1;
+    hid_t               file_id = H5I_INVALID_HID;
     size_t              max_size;
     size_t              min_clean_size;
     size_t              cur_size;
@@ -1868,7 +1868,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fget_mdc_config((hid_t)-1, &scratch);
+            result = H5Fget_mdc_config((hid_t)H5I_INVALID_HID, &scratch);
         }
         H5E_END_TRY
 
@@ -1932,7 +1932,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fset_mdc_config((hid_t)-1, &default_config);
+            result = H5Fset_mdc_config((hid_t)H5I_INVALID_HID, &default_config);
         }
         H5E_END_TRY
 
@@ -2000,7 +2000,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fget_mdc_hit_rate((hid_t)-1, &hit_rate);
+            result = H5Fget_mdc_hit_rate((hid_t)H5I_INVALID_HID, &hit_rate);
         }
         H5E_END_TRY
 
@@ -2041,7 +2041,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Freset_mdc_hit_rate_stats((hid_t)-1);
+            result = H5Freset_mdc_hit_rate_stats((hid_t)H5I_INVALID_HID);
         }
         H5E_END_TRY
 
@@ -2062,7 +2062,8 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
 
         H5E_BEGIN_TRY
         {
-            result = H5Fget_mdc_size((hid_t)-1, &max_size, &min_clean_size, &cur_size, &cur_num_entries);
+            result = H5Fget_mdc_size((hid_t)H5I_INVALID_HID, &max_size, &min_clean_size, &cur_size,
+                                     &cur_num_entries);
         }
         H5E_END_TRY
 
@@ -2143,8 +2144,8 @@ main(void)
 {
     unsigned nerrs = 0;
     int      express_test;
-    hid_t    fcpl_id  = -1;
-    hid_t    fcpl2_id = -1;
+    hid_t    fcpl_id  = H5I_INVALID_HID;
+    hid_t    fcpl2_id = H5I_INVALID_HID;
     unsigned paged;
 
     H5open();

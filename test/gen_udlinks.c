@@ -30,9 +30,9 @@
 int
 main(void)
 {
-    hid_t fid1 = -1;
-    hid_t fid2 = -1;
-    hid_t gid  = -1;
+    hid_t fid1 = H5I_INVALID_HID;
+    hid_t fid2 = H5I_INVALID_HID;
+    hid_t gid  = H5I_INVALID_HID;
     char  filename1[NAME_BUF_SIZE];
     char  filename2[NAME_BUF_SIZE];
 

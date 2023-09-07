@@ -166,9 +166,10 @@ token_reset(void)
 static herr_t
 attach_ref_attr(hid_t file_id, hid_t loc_id)
 {
-    char      dsetname1[] = "dataset1_pointed_by_ref_attr";
-    char      dsetname2[] = "dataset2_pointed_by_ref_attr";
-    hid_t     did1 = (-1), did2 = (-1), aid = (-1), sid = (-1), sid_ref = (-1);
+    char  dsetname1[] = "dataset1_pointed_by_ref_attr";
+    char  dsetname2[] = "dataset2_pointed_by_ref_attr";
+    hid_t did1 = (H5I_INVALID_HID), did2 = (H5I_INVALID_HID), aid = (H5I_INVALID_HID),
+          sid = (H5I_INVALID_HID), sid_ref = (H5I_INVALID_HID);
     hsize_t   dims[2]     = {2, 9};
     hsize_t   dims_ref[1] = {2};
     H5R_ref_t ref[2];
@@ -247,10 +248,10 @@ static herr_t
 attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 {
     const char dsetnamev[] = "dataset_pointed_by_reg_ref_attr";
-    hid_t      aid         = (-1);
-    hid_t      space_id    = (-1); /* dataspace identifiers */
-    hid_t      spacer_id   = (-1); /* dataspace identifiers */
-    hid_t      dsetv_id    = (-1); /*dataset identifiers*/
+    hid_t      aid         = (H5I_INVALID_HID);
+    hid_t      space_id    = (H5I_INVALID_HID); /* dataspace identifiers */
+    hid_t      spacer_id   = (H5I_INVALID_HID); /* dataspace identifiers */
+    hid_t      dsetv_id    = (H5I_INVALID_HID); /*dataset identifiers*/
     hsize_t    dims[2]     = {2, 9};
     hsize_t    dimsr[1]    = {2};
     int        rank        = 2;
@@ -347,10 +348,10 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     const char dsetnamer[]  = "dataset_with_reg_ref";
     const char dsetnamer1[] = "compact_dataset_with_reg_ref";
     const char dsetnamer2[] = "compressed_dataset_with_reg_ref";
-    hid_t      space_id     = (-1); /* dataspace identifiers */
-    hid_t      spacer_id    = (-1);
-    hid_t      dsetv_id     = (-1); /*dataset identifiers*/
-    hid_t      dsetr_id     = (-1);
+    hid_t      space_id     = (H5I_INVALID_HID); /* dataspace identifiers */
+    hid_t      spacer_id    = (H5I_INVALID_HID);
+    hid_t      dsetv_id     = (H5I_INVALID_HID); /*dataset identifiers*/
+    hid_t      dsetr_id     = (H5I_INVALID_HID);
     hsize_t    dims[2]      = {2, 9};
     hsize_t    dimsr[1]     = {2};
     int        rank         = 2;
@@ -362,7 +363,7 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     hsize_t    count[2];
     hsize_t    coord[3][2] = {{0, 0}, {1, 6}, {0, 8}};
     size_t     num_points  = 3;
-    hid_t      pid         = (-1);
+    hid_t      pid         = (H5I_INVALID_HID);
 
     if ((space_id = H5Screate_simple(rank, dims, NULL)) < 0)
         TEST_ERROR;
@@ -471,11 +472,11 @@ error:
 static int
 test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
 {
-    hid_t    aid = -1, sid = -1;
+    hid_t    aid = H5I_INVALID_HID, sid = H5I_INVALID_HID;
     char     attr_name[ATTR_NAME_LEN];
     int      attr_data[2];
     hsize_t  dim1 = 2;
-    hid_t    acpl = -1;
+    hid_t    acpl = H5I_INVALID_HID;
     unsigned u;
     int      ret_value = -1;
 
@@ -538,16 +539,16 @@ done:
 static int
 compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_owner)
 {
-    hid_t      sid = -1, sid2 = -1; /* Dataspace IDs */
-    hid_t      tid = -1, tid2 = -1; /* Datatype IDs */
-    size_t     elmt_size;           /* Size of datatype */
-    htri_t     is_committed;        /* If the datatype is committed */
-    htri_t     is_committed2;       /* If the datatype is committed */
-    H5A_info_t ainfo;               /* Attribute info */
-    H5A_info_t ainfo2;              /* Attribute info */
-    hssize_t   nelmts;              /* # of elements in dataspace */
-    void      *rbuf  = NULL;        /* Buffer for reading raw data */
-    void      *rbuf2 = NULL;        /* Buffer for reading raw data */
+    hid_t      sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID; /* Dataspace IDs */
+    hid_t      tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
+    size_t     elmt_size;                                     /* Size of datatype */
+    htri_t     is_committed;                                  /* If the datatype is committed */
+    htri_t     is_committed2;                                 /* If the datatype is committed */
+    H5A_info_t ainfo;                                         /* Attribute info */
+    H5A_info_t ainfo2;                                        /* Attribute info */
+    hssize_t   nelmts;                                        /* # of elements in dataspace */
+    void      *rbuf  = NULL;                                  /* Buffer for reading raw data */
+    void      *rbuf2 = NULL;                                  /* Buffer for reading raw data */
 
     /* Check the character sets are equal */
     if (H5Aget_info(aid, &ainfo) < 0)
@@ -698,9 +699,9 @@ error:
 static int
 compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 {
-    hid_t       aid = -1, aid2 = -1; /* Attribute IDs */
-    H5O_info2_t oinfo1, oinfo2;      /* Object info */
-    unsigned    cpy_flags;           /* Object copy flags */
+    hid_t       aid = H5I_INVALID_HID, aid2 = H5I_INVALID_HID; /* Attribute IDs */
+    H5O_info2_t oinfo1, oinfo2;                                /* Object info */
+    unsigned    cpy_flags;                                     /* Object copy flags */
 
     /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
     if (pid != H5P_DEFAULT) {
@@ -1028,18 +1029,18 @@ error:
 static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 {
-    hid_t              sid = -1, sid2 = -1;   /* Dataspace IDs */
-    hid_t              tid = -1, tid2 = -1;   /* Datatype IDs */
-    hid_t              dcpl = -1, dcpl2 = -1; /* Dataset creation property list IDs */
-    size_t             elmt_size;             /* Size of datatype */
-    htri_t             is_committed;          /* If the datatype is committed */
-    htri_t             is_committed2;         /* If the datatype is committed */
-    int                nfilters;              /* Number of filters applied to dataset */
-    hssize_t           nelmts;                /* # of elements in dataspace */
-    void              *rbuf  = NULL;          /* Buffer for reading raw data */
-    void              *rbuf2 = NULL;          /* Buffer for reading raw data */
-    H5D_space_status_t space_status;          /* Dataset's raw dataspace status */
-    H5D_space_status_t space_status2;         /* Dataset's raw dataspace status */
+    hid_t    sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID;   /* Dataspace IDs */
+    hid_t    tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;   /* Datatype IDs */
+    hid_t    dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID; /* Dataset creation property list IDs */
+    size_t   elmt_size;                                       /* Size of datatype */
+    htri_t   is_committed;                                    /* If the datatype is committed */
+    htri_t   is_committed2;                                   /* If the datatype is committed */
+    int      nfilters;                                        /* Number of filters applied to dataset */
+    hssize_t nelmts;                                          /* # of elements in dataspace */
+    void    *rbuf  = NULL;                                    /* Buffer for reading raw data */
+    void    *rbuf2 = NULL;                                    /* Buffer for reading raw data */
+    H5D_space_status_t space_status;                          /* Dataset's raw dataspace status */
+    H5D_space_status_t space_status2;                         /* Dataset's raw dataspace status */
 
     /* Check the datatypes are equal */
 
@@ -1430,14 +1431,14 @@ static int
 test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, unsigned flag,
                  bool crt_intermediate_grp, const char *test_desciption)
 {
-    hid_t    fid_src = -1, fid_dst = -1, fid_ext = -1; /* File IDs */
-    hid_t    sid = -1;                                 /* Dataspace ID */
-    hid_t    did = -1;                                 /* Dataset ID */
-    hid_t    gid = -1, gid2 = -1, gid_ref = -1;        /* Group IDs */
-    hid_t    gid_sub = -1, gid_sub_sub = -1;           /* Sub-group ID */
-    hid_t    pid = -1, lcpl_id = -1;                   /* Property IDs */
-    unsigned cpy_flags;                                /* Object copy flags */
-    int      depth = -1;                               /* Copy depth */
+    hid_t    fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
+    hid_t    sid = H5I_INVALID_HID;                                                    /* Dataspace ID */
+    hid_t    did = H5I_INVALID_HID;                                                    /* Dataset ID */
+    hid_t    gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gid_ref = H5I_INVALID_HID; /* Group IDs */
+    hid_t    gid_sub = H5I_INVALID_HID, gid_sub_sub = H5I_INVALID_HID;                 /* Sub-group ID */
+    hid_t    pid = H5I_INVALID_HID, lcpl_id = H5I_INVALID_HID;                         /* Property IDs */
+    unsigned cpy_flags;                                                                /* Object copy flags */
+    int      depth = -1;                                                               /* Copy depth */
     hsize_t  dim2d[2];
     int      buf[DIM_SIZE_1][DIM_SIZE_2];
     int      i, j;

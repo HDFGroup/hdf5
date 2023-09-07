@@ -50,9 +50,9 @@ static int external_link_env(hid_t fapl, bool new_format);
 static int
 external_link_env(hid_t fapl, bool new_format)
 {
-    hid_t       fid    = (-1); /* File ID */
-    hid_t       gid    = (-1); /* Group IDs */
-    const char *envval = NULL; /* Pointer to environment variable */
+    hid_t       fid    = (H5I_INVALID_HID); /* File ID */
+    hid_t       gid    = (H5I_INVALID_HID); /* Group IDs */
+    const char *envval = NULL;              /* Pointer to environment variable */
     char        filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Holders for filename */
 

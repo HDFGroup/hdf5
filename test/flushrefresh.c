@@ -1054,7 +1054,7 @@ herr_t
 flush_verification(const char *obj_pathname, const char *expected)
 {
     /* Variables */
-    hid_t       oid = -1, fid = -1;
+    hid_t       oid = H5I_INVALID_HID, fid = H5I_INVALID_HID;
     herr_t      status = 0;
     H5O_info2_t oinfo;
 

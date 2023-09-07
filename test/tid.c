@@ -424,7 +424,7 @@ test_is_valid(void)
         goto out;
 
     /* Check that an id of -1 is invalid */
-    tri_ret = H5Iis_valid((hid_t)-1);
+    tri_ret = H5Iis_valid((hid_t)H5I_INVALID_HID);
     VERIFY(tri_ret, false, "H4Iis_valid");
     if (tri_ret != false)
         goto out;
@@ -465,7 +465,7 @@ test_get_type(void)
         goto out;
 
     /* Check that the ID is correct */
-    type_ret = H5Iget_type((hid_t)-1);
+    type_ret = H5Iget_type((hid_t)H5I_INVALID_HID);
     VERIFY(type_ret, H5I_BADID, "H5Iget_type");
     if (type_ret != H5I_BADID)
         goto out;

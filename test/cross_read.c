@@ -66,11 +66,11 @@ static const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
 static int
 check_data_i(const char *dsetname, hid_t fid)
 {
-    hid_t     did = -1;             /* dataset ID                       */
-    long long data_in[NX + 1][NY];  /* input buffer                     */
-    long long data_out[NX + 1][NY]; /* output buffer                    */
-    int       i, j;                 /* iterators                        */
-    int       nerrors = 0;          /* # errors in dataset values       */
+    hid_t     did = H5I_INVALID_HID; /* dataset ID                       */
+    long long data_in[NX + 1][NY];   /* input buffer                     */
+    long long data_out[NX + 1][NY];  /* output buffer                    */
+    int       i, j;                  /* iterators                        */
+    int       nerrors = 0;           /* # errors in dataset values       */
 
     /* Open the dataset. */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
@@ -137,11 +137,11 @@ error:
 static int
 check_data_f(const char *dsetname, hid_t fid)
 {
-    hid_t  did = -1;             /* dataset ID                       */
-    double data_in[NX + 1][NY];  /* input buffer                     */
-    double data_out[NX + 1][NY]; /* output buffer                    */
-    int    i, j;                 /* iterators                        */
-    int    nerrors = 0;          /* # of errors in dataset values    */
+    hid_t  did = H5I_INVALID_HID; /* dataset ID                       */
+    double data_in[NX + 1][NY];   /* input buffer                     */
+    double data_out[NX + 1][NY];  /* output buffer                    */
+    int    i, j;                  /* iterators                        */
+    int    nerrors = 0;           /* # of errors in dataset values    */
 
     /* Open the dataset. */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
@@ -209,7 +209,7 @@ static int
 check_file(char *filename)
 {
     const char *pathname = H5_get_srcdir_filename(filename); /* Corrected test file name     */
-    hid_t       fid      = -1;                               /* file ID                      */
+    hid_t       fid      = H5I_INVALID_HID;                  /* file ID                      */
     int         nerrors  = 0;                                /* # of datasets with errors    */
 #if !defined(H5_HAVE_FILTER_DEFLATE) || !defined(H5_HAVE_FILTER_SZIP)
     const char *not_supported = "    filter is not enabled."; /* no filter message            */

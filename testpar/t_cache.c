@@ -1068,7 +1068,7 @@ setup_derived_types(void)
     int           i;
     int           result;
     MPI_Datatype  mpi_types[9] = {MPI_INT, MPI_INT, MPI_INT,      MPI_LONG,    HADDR_AS_MPI_TYPE,
-                                 MPI_INT, MPI_INT, MPI_UNSIGNED, MPI_UNSIGNED};
+                                  MPI_INT, MPI_INT, MPI_UNSIGNED, MPI_UNSIGNED};
     int           block_len[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
     MPI_Aint      displs[9];
     struct mssg_t sample; /* used to compute displacements */
@@ -3585,7 +3585,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
 {
     bool                success        = false; /* will set to true if appropriate. */
     bool                enable_rpt_fcn = false;
-    hid_t               fid            = -1;
+    hid_t               fid            = H5I_INVALID_HID;
     H5AC_cache_config_t config;
     H5AC_cache_config_t test_config;
     H5F_t              *file_ptr  = NULL;
@@ -4902,7 +4902,7 @@ smoke_check_1(int metadata_write_strategy)
     bool          success = true;
     int           i;
     int           max_nerrors;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5064,7 +5064,7 @@ smoke_check_2(int metadata_write_strategy)
     bool          success = true;
     int           i;
     int           max_nerrors;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5267,7 +5267,7 @@ smoke_check_3(int metadata_write_strategy)
     int           max_count;
     int           min_idx;
     int           max_idx;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5550,7 +5550,7 @@ smoke_check_4(int metadata_write_strategy)
     int           max_count;
     int           min_idx;
     int           max_idx;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5823,7 +5823,7 @@ smoke_check_5(int metadata_write_strategy)
     bool          success = true;
     int           i;
     int           max_nerrors;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -6037,57 +6037,57 @@ trace_file_check(int metadata_write_strategy)
 
     const char *((*expected_output)[])      = NULL;
     const char         *expected_output_0[] = {"### HDF5 metadata cache trace file version 1 ###\n",
-                                       "H5AC_set_cache_auto_resize_config",
-                                       "H5AC_insert_entry",
-                                       "H5AC_insert_entry",
-                                       "H5AC_insert_entry",
-                                       "H5AC_insert_entry",
-                                       "H5AC_protect",
-                                       "H5AC_mark_entry_dirty",
-                                       "H5AC_unprotect",
-                                       "H5AC_protect",
-                                       "H5AC_pin_protected_entry",
-                                       "H5AC_unprotect",
-                                       "H5AC_unpin_entry",
-                                       "H5AC_expunge_entry",
-                                       "H5AC_protect",
-                                       "H5AC_pin_protected_entry",
-                                       "H5AC_unprotect",
-                                       "H5AC_mark_entry_dirty",
-                                       "H5AC_resize_entry",
-                                       "H5AC_resize_entry",
-                                       "H5AC_unpin_entry",
-                                       "H5AC_move_entry",
-                                       "H5AC_move_entry",
-                                       "H5AC_flush",
-                                       "H5AC_flush",
-                                       NULL};
+                                               "H5AC_set_cache_auto_resize_config",
+                                               "H5AC_insert_entry",
+                                               "H5AC_insert_entry",
+                                               "H5AC_insert_entry",
+                                               "H5AC_insert_entry",
+                                               "H5AC_protect",
+                                               "H5AC_mark_entry_dirty",
+                                               "H5AC_unprotect",
+                                               "H5AC_protect",
+                                               "H5AC_pin_protected_entry",
+                                               "H5AC_unprotect",
+                                               "H5AC_unpin_entry",
+                                               "H5AC_expunge_entry",
+                                               "H5AC_protect",
+                                               "H5AC_pin_protected_entry",
+                                               "H5AC_unprotect",
+                                               "H5AC_mark_entry_dirty",
+                                               "H5AC_resize_entry",
+                                               "H5AC_resize_entry",
+                                               "H5AC_unpin_entry",
+                                               "H5AC_move_entry",
+                                               "H5AC_move_entry",
+                                               "H5AC_flush",
+                                               "H5AC_flush",
+                                               NULL};
     const char         *expected_output_1[] = {"### HDF5 metadata cache trace file version 1 ###\n",
-                                       "H5AC_set_cache_auto_resize_config",
-                                       "H5AC_insert_entry",
-                                       "H5AC_insert_entry",
-                                       "H5AC_insert_entry",
-                                       "H5AC_insert_entry",
-                                       "H5AC_protect",
-                                       "H5AC_mark_entry_dirty",
-                                       "H5AC_unprotect",
-                                       "H5AC_protect",
-                                       "H5AC_pin_protected_entry",
-                                       "H5AC_unprotect",
-                                       "H5AC_unpin_entry",
-                                       "H5AC_expunge_entry",
-                                       "H5AC_protect",
-                                       "H5AC_pin_protected_entry",
-                                       "H5AC_unprotect",
-                                       "H5AC_mark_entry_dirty",
-                                       "H5AC_resize_entry",
-                                       "H5AC_resize_entry",
-                                       "H5AC_unpin_entry",
-                                       "H5AC_move_entry",
-                                       "H5AC_move_entry",
-                                       "H5AC_flush",
-                                       "H5AC_flush",
-                                       NULL};
+                                               "H5AC_set_cache_auto_resize_config",
+                                               "H5AC_insert_entry",
+                                               "H5AC_insert_entry",
+                                               "H5AC_insert_entry",
+                                               "H5AC_insert_entry",
+                                               "H5AC_protect",
+                                               "H5AC_mark_entry_dirty",
+                                               "H5AC_unprotect",
+                                               "H5AC_protect",
+                                               "H5AC_pin_protected_entry",
+                                               "H5AC_unprotect",
+                                               "H5AC_unpin_entry",
+                                               "H5AC_expunge_entry",
+                                               "H5AC_protect",
+                                               "H5AC_pin_protected_entry",
+                                               "H5AC_unprotect",
+                                               "H5AC_mark_entry_dirty",
+                                               "H5AC_resize_entry",
+                                               "H5AC_resize_entry",
+                                               "H5AC_unpin_entry",
+                                               "H5AC_move_entry",
+                                               "H5AC_move_entry",
+                                               "H5AC_flush",
+                                               "H5AC_flush",
+                                               NULL};
     char                buffer[256];
     char                trace_file_name[64];
     bool                done = false;
@@ -6095,7 +6095,7 @@ trace_file_check(int metadata_write_strategy)
     int                 max_nerrors;
     size_t              expected_line_len;
     size_t              actual_line_len;
-    hid_t               fid            = -1;
+    hid_t               fid            = H5I_INVALID_HID;
     H5F_t              *file_ptr       = NULL;
     H5C_t              *cache_ptr      = NULL;
     FILE               *trace_file_ptr = NULL;
@@ -6411,7 +6411,7 @@ smoke_check_6(int metadata_write_strategy)
     bool                    success = true;
     int                     i;
     int                     max_nerrors;
-    hid_t                   fid       = -1;
+    hid_t                   fid       = H5I_INVALID_HID;
     H5F_t                  *file_ptr  = NULL;
     H5C_t                  *cache_ptr = NULL;
     struct mssg_t           mssg;

@@ -41,9 +41,9 @@ hid_t saved_fcpl_id = H5P_DEFAULT; /* store the fcpl id here between
                                     * close.
                                     */
 
-hid_t saved_fid = -1; /* store the file id here between cache setup
-                       * and takedown.
-                       */
+hid_t saved_fid = H5I_INVALID_HID; /* store the file id here between cache setup
+                                    * and takedown.
+                                    */
 bool write_permitted         = true;
 bool try_core_file_driver    = false;
 bool core_file_driver_failed = false;
@@ -3901,7 +3901,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 5,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1, -1,
-              -1},
+                  -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, -1, -1, -1},
              /* expected_deserialized = */ true,
              /* expected_serialized   = */ true,
@@ -3914,7 +3914,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 6,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
-              MONSTER_ENTRY_TYPE, -1, -1},
+                  MONSTER_ENTRY_TYPE, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, 20, -1, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ true,
@@ -3927,7 +3927,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 7,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
-              MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1},
+                  MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, 20, 30, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ true,
@@ -33513,7 +33513,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     bool    show_progress = false;
     bool    verbose       = true;
     int     mile_stone    = 1;
-    hid_t   fid           = -1;
+    hid_t   fid           = H5I_INVALID_HID;
     H5F_t  *file_ptr      = NULL;
     H5C_t  *cache_ptr     = NULL;
     H5F_t  *ret_val       = NULL;

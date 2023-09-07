@@ -41,7 +41,7 @@
 /* Local Variables */
 /*******************/
 
-static hid_t symbol_tid = (-1);
+static hid_t symbol_tid = (H5I_INVALID_HID);
 
 /********************/
 /* Local Prototypes */

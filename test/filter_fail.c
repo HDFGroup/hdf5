@@ -93,10 +93,10 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
 static herr_t
 test_filter_write(char *file_name, hid_t my_fapl, bool cache_enabled)
 {
-    hid_t   file          = -1;
-    hid_t   dataset       = -1;                 /* dataset ID */
-    hid_t   sid           = -1;                 /* dataspace ID */
-    hid_t   dcpl          = -1;                 /* dataset creation property list ID */
+    hid_t   file          = H5I_INVALID_HID;
+    hid_t   dataset       = H5I_INVALID_HID;    /* dataset ID */
+    hid_t   sid           = H5I_INVALID_HID;    /* dataspace ID */
+    hid_t   dcpl          = H5I_INVALID_HID;    /* dataset creation property list ID */
     hsize_t dims[1]       = {DIM};              /* dataspace dimension - 10*/
     hsize_t chunk_dims[1] = {FILTER_CHUNK_DIM}; /* chunk dimension - 2*/
     int     points[DIM];                        /* Data */
@@ -225,10 +225,10 @@ error:
 static herr_t
 test_filter_read(char *file_name, hid_t my_fapl)
 {
-    hid_t   file    = -1;
-    hid_t   dataset = -1; /* dataset ID */
-    hid_t   sid     = -1;
-    hid_t   mspace  = -1;
+    hid_t   file    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   mspace  = H5I_INVALID_HID;
     hsize_t dims[1] = {DIM}; /* dataspace dimension - 10*/
     int     rbuf[DIM];       /* Data */
     hsize_t dset_size = 0;   /* Dataset storage size */

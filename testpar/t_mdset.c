@@ -1751,7 +1751,7 @@ io_mode_confusion(void)
 const char *dataset_name[NUM_DATA_SETS] = {"dataset_0", "dataset_1", "dataset_2", "dataset_3"};
 const char *att_name[NUM_DATA_SETS]     = {"attribute_0", "attribute_1", "attribute_2", "attribute_3"};
 const char *lg_att_name[NUM_DATA_SETS]  = {"large_attribute_0", "large_attribute_1", "large_attribute_2",
-                                          "large_attribute_3"};
+                                           "large_attribute_3"};
 
 void
 rr_obj_hdr_flush_confusion(void)
@@ -1806,9 +1806,9 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
 {
     int     i;
     int     j;
-    hid_t   file_id = -1;
-    hid_t   fapl_id = -1;
-    hid_t   dxpl_id = -1;
+    hid_t   file_id = H5I_INVALID_HID;
+    hid_t   fapl_id = H5I_INVALID_HID;
+    hid_t   dxpl_id = H5I_INVALID_HID;
     hid_t   att_id[NUM_DATA_SETS];
     hid_t   att_space[NUM_DATA_SETS];
     hid_t   lg_att_id[NUM_DATA_SETS];
@@ -2187,9 +2187,9 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 {
     int     i;
     int     j;
-    hid_t   file_id = -1;
-    hid_t   fapl_id = -1;
-    hid_t   dxpl_id = -1;
+    hid_t   file_id = H5I_INVALID_HID;
+    hid_t   fapl_id = H5I_INVALID_HID;
+    hid_t   dxpl_id = H5I_INVALID_HID;
     hid_t   lg_att_id[NUM_DATA_SETS];
     hid_t   lg_att_type[NUM_DATA_SETS];
     hid_t   disk_space[NUM_DATA_SETS];

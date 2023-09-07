@@ -561,14 +561,14 @@ remove_cb(const void *_record, void *_op_data)
 static unsigned
 test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t   file = -1;   /* File ID */
-    H5F_t  *f    = NULL; /* Internal file object pointer */
-    H5B2_t *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t bt2_addr;    /* Address of B-tree created */
-    hsize_t record;      /* Record to insert into tree */
-    hsize_t idx;         /* Index within B-tree, for iterator */
-    bool    found;       /* Whether record was found */
-    herr_t  ret;         /* Generic error return value */
+    hid_t   file = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f    = NULL;            /* Internal file object pointer */
+    H5B2_t *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t bt2_addr;               /* Address of B-tree created */
+    hsize_t record;                 /* Record to insert into tree */
+    hsize_t idx;                    /* Index within B-tree, for iterator */
+    bool    found;                  /* Whether record was found */
+    herr_t  ret;                    /* Generic error return value */
 
     /*
      * Test v2 B-tree creation
@@ -799,16 +799,16 @@ error:
 static unsigned
 test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    unsigned    u;           /* Local index variable */
-    bool        found;       /* Whether record was found */
-    herr_t      ret;         /* Generic error return value */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
+    bool        found;                  /* Whether record was found */
+    herr_t      ret;                    /* Generic error return value */
 
     /*
      * Test inserting enough records into v2 B-tree to split the root node
@@ -982,13 +982,13 @@ error:
 static unsigned
 test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -1132,13 +1132,13 @@ error:
 static unsigned
 test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -1290,14 +1290,14 @@ error:
 static unsigned
 test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -1429,14 +1429,14 @@ error:
 static unsigned
 test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -1544,16 +1544,16 @@ error:
 static unsigned
 test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
-    bool        found;       /* Whether record was found */
-    herr_t      ret;         /* Generic error return value */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
+    bool        found;                  /* Whether record was found */
+    herr_t      ret;                    /* Generic error return value */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -1736,14 +1736,14 @@ error:
 static unsigned
 test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -1961,14 +1961,14 @@ error:
 static unsigned
 test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2192,14 +2192,14 @@ static unsigned
 test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
                                        const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2360,14 +2360,14 @@ error:
 static unsigned
 test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2536,14 +2536,14 @@ static unsigned
 test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
                                        const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2710,14 +2710,14 @@ error:
 static unsigned
 test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;    /* Address of B-tree created */
-    hsize_t     record;      /* Record to insert into tree */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
-    hsize_t     idx;         /* Index within B-tree, for iterator */
-    unsigned    u;           /* Local index variable */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -2885,22 +2885,22 @@ error:
 static unsigned
 test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t       file = -1;      /* File ID */
-    char        filename[1024]; /* Filename to use */
-    H5F_t      *f   = NULL;     /* Internal file object pointer */
-    H5B2_t     *bt2 = NULL;     /* v2 B-tree wrapper */
-    haddr_t     bt2_addr;       /* Address of B-tree created */
-    hsize_t     record;         /* Record to insert into tree */
-    hsize_t     idx;            /* Index within B-tree, for iterator */
-    time_t      curr_time;      /* Current time, for seeding random number generator */
-    hsize_t    *records;        /* Record #'s for random insertion */
-    unsigned    u;              /* Local index variable */
-    unsigned    swap_idx;       /* Location to swap with when shuffling */
-    hsize_t     temp_rec;       /* Temporary record */
-    H5B2_stat_t bt2_stat;       /* Statistics about B-tree created */
-    hsize_t     nrec;           /* Number of records in B-tree */
-    bool        found;          /* Whether record was found */
-    herr_t      ret;            /* Generic error return value */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    char        filename[1024];         /* Filename to use */
+    H5F_t      *f   = NULL;             /* Internal file object pointer */
+    H5B2_t     *bt2 = NULL;             /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    time_t      curr_time;              /* Current time, for seeding random number generator */
+    hsize_t    *records;                /* Record #'s for random insertion */
+    unsigned    u;                      /* Local index variable */
+    unsigned    swap_idx;               /* Location to swap with when shuffling */
+    hsize_t     temp_rec;               /* Temporary record */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     nrec;                   /* Number of records in B-tree */
+    bool        found;                  /* Whether record was found */
+    herr_t      ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
@@ -3125,15 +3125,15 @@ error:
 static unsigned
 test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_test_rec_t modify;      /* Modified value */
-    H5B2_test_rec_t find;        /* Record to find */
-    bool            found;       /* Whether record was found */
-    herr_t          ret;         /* Generic error return value */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_test_rec_t modify;                 /* Modified value */
+    H5B2_test_rec_t find;                   /* Record to find */
+    bool            found;                  /* Whether record was found */
+    herr_t          ret;                    /* Generic error return value */
 
     /* Create the file for the test */
     if (create_file(&file, &f, fapl) < 0)
@@ -3532,18 +3532,18 @@ error:
 static unsigned
 test_update_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_test_rec_t modify;      /* Modified value */
-    H5B2_test_rec_t find;        /* Record to find */
-    H5B2_test_rec_t idx;         /* Index within B-tree, for iterator */
-    H5B2_stat_t     bt2_stat;    /* Statistics about B-tree created */
-    unsigned        u;           /* Local index variable */
-    bool            found;       /* Whether record was found */
-    herr_t          ret;         /* Generic error return value */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_test_rec_t modify;                 /* Modified value */
+    H5B2_test_rec_t find;                   /* Record to find */
+    H5B2_test_rec_t idx;                    /* Index within B-tree, for iterator */
+    H5B2_stat_t     bt2_stat;               /* Statistics about B-tree created */
+    unsigned        u;                      /* Local index variable */
+    bool            found;                  /* Whether record was found */
+    herr_t          ret;                    /* Generic error return value */
 
     /*
      * Test inserting enough records into v2 B-tree to split the root node
@@ -3791,13 +3791,13 @@ error:
 static unsigned
 test_update_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_stat_t     bt2_stat;    /* Statistics about B-tree created */
-    unsigned        u;           /* Local index variable */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_stat_t     bt2_stat;               /* Statistics about B-tree created */
+    unsigned        u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -3945,13 +3945,13 @@ error:
 static unsigned
 test_update_level1_side_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_stat_t     bt2_stat;    /* Statistics about B-tree created */
-    unsigned        u;           /* Local index variable */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_stat_t     bt2_stat;               /* Statistics about B-tree created */
+    unsigned        u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -4107,14 +4107,14 @@ error:
 static unsigned
 test_update_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_test_rec_t idx;         /* Index within B-tree, for iterator */
-    H5B2_stat_t     bt2_stat;    /* Statistics about B-tree created */
-    unsigned        u;           /* Local index variable */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_test_rec_t idx;                    /* Index within B-tree, for iterator */
+    H5B2_stat_t     bt2_stat;               /* Statistics about B-tree created */
+    unsigned        u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -4250,14 +4250,14 @@ error:
 static unsigned
 test_update_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_stat_t     bt2_stat;    /* Statistics about B-tree created */
-    H5B2_test_rec_t idx;         /* Index within B-tree, for iterator */
-    unsigned        u;           /* Local index variable */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_stat_t     bt2_stat;               /* Statistics about B-tree created */
+    H5B2_test_rec_t idx;                    /* Index within B-tree, for iterator */
+    unsigned        u;                      /* Local index variable */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -4368,17 +4368,17 @@ error:
 static unsigned
 test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t           file = -1;   /* File ID */
-    H5F_t          *f    = NULL; /* Internal file object pointer */
-    H5B2_t         *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t         bt2_addr;    /* Address of B-tree created */
-    H5B2_test_rec_t record;      /* Record to insert into tree */
-    H5B2_test_rec_t find;        /* Record to find */
-    H5B2_test_rec_t idx;         /* Index within B-tree, for iterator */
-    H5B2_stat_t     bt2_stat;    /* Statistics about B-tree created */
-    unsigned        u;           /* Local index variable */
-    bool            found;       /* Whether record was found */
-    herr_t          ret;         /* Generic error return value */
+    hid_t           file = H5I_INVALID_HID; /* File ID */
+    H5F_t          *f    = NULL;            /* Internal file object pointer */
+    H5B2_t         *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t         bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;                 /* Record to insert into tree */
+    H5B2_test_rec_t find;                   /* Record to find */
+    H5B2_test_rec_t idx;                    /* Index within B-tree, for iterator */
+    H5B2_stat_t     bt2_stat;               /* Statistics about B-tree created */
+    unsigned        u;                      /* Local index variable */
+    bool            found;                  /* Whether record was found */
+    herr_t          ret;                    /* Generic error return value */
 
     /*
      * Test inserting many records into v2 B-tree
@@ -4956,21 +4956,21 @@ error:
 static unsigned
 test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t            file = -1;   /* File ID */
-    H5F_t           *f    = NULL; /* Internal file object pointer */
-    H5B2_t          *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t          bt2_addr;    /* Address of B-tree created */
-    time_t           curr_time;   /* Current time, for seeding random number generator */
-    H5B2_test_rec_t *records;     /* Record #'s for random insertion */
-    H5B2_test_rec_t  record;      /* Record to insert into tree */
-    H5B2_test_rec_t  modify;      /* Modified value */
-    H5B2_test_rec_t  find;        /* Record to find */
-    H5B2_test_rec_t  iter;        /* Index within B-tree, for iterator */
-    H5B2_stat_t      bt2_stat;    /* Statistics about B-tree created */
-    hsize_t          nrec;        /* Number of records in B-tree */
-    unsigned         u;           /* Local index variable */
-    bool             found;       /* Whether record was found */
-    herr_t           ret;         /* Generic error return value */
+    hid_t            file = H5I_INVALID_HID; /* File ID */
+    H5F_t           *f    = NULL;            /* Internal file object pointer */
+    H5B2_t          *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t          bt2_addr;               /* Address of B-tree created */
+    time_t           curr_time;              /* Current time, for seeding random number generator */
+    H5B2_test_rec_t *records;                /* Record #'s for random insertion */
+    H5B2_test_rec_t  record;                 /* Record to insert into tree */
+    H5B2_test_rec_t  modify;                 /* Modified value */
+    H5B2_test_rec_t  find;                   /* Record to find */
+    H5B2_test_rec_t  iter;                   /* Index within B-tree, for iterator */
+    H5B2_stat_t      bt2_stat;               /* Statistics about B-tree created */
+    hsize_t          nrec;                   /* Number of records in B-tree */
+    unsigned         u;                      /* Local index variable */
+    bool             found;                  /* Whether record was found */
+    herr_t           ret;                    /* Generic error return value */
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
@@ -5205,15 +5205,15 @@ error:
 static unsigned
 test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t   file = -1;   /* File ID */
-    H5F_t  *f    = NULL; /* Internal file object pointer */
-    H5B2_t *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t bt2_addr;    /* Address of B-tree created */
-    hsize_t record;      /* Record to insert into tree */
-    hsize_t rrecord;     /* Record to remove from tree */
-    hsize_t nrec;        /* Number of records in B-tree */
-    haddr_t root_addr;   /* Address of root of B-tree created */
-    herr_t  ret;         /* Generic error return value */
+    hid_t   file = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f    = NULL;            /* Internal file object pointer */
+    H5B2_t *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t bt2_addr;               /* Address of B-tree created */
+    hsize_t record;                 /* Record to insert into tree */
+    hsize_t rrecord;                /* Record to remove from tree */
+    hsize_t nrec;                   /* Number of records in B-tree */
+    haddr_t root_addr;              /* Address of root of B-tree created */
+    herr_t  ret;                    /* Generic error return value */
 
     /* Record removal tests */
     TESTING("B-tree remove: record from empty B-tree");
@@ -5515,16 +5515,16 @@ error:
 static unsigned
 test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t    file = -1;   /* File ID */
-    H5F_t   *f    = NULL; /* Internal file object pointer */
-    H5B2_t  *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t  bt2_addr;    /* Address of B-tree created */
-    hsize_t  record;      /* Record to insert into tree */
-    hsize_t  rrecord;     /* Record to remove from tree */
-    hsize_t  nrec;        /* Number of records in B-tree */
-    haddr_t  root_addr;   /* Address of root of B-tree created */
-    unsigned u;           /* Local index variable */
-    herr_t   ret;         /* Generic error return value */
+    hid_t    file = H5I_INVALID_HID; /* File ID */
+    H5F_t   *f    = NULL;            /* Internal file object pointer */
+    H5B2_t  *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t  bt2_addr;               /* Address of B-tree created */
+    hsize_t  record;                 /* Record to insert into tree */
+    hsize_t  rrecord;                /* Record to remove from tree */
+    hsize_t  nrec;                   /* Number of records in B-tree */
+    haddr_t  root_addr;              /* Address of root of B-tree created */
+    unsigned u;                      /* Local index variable */
+    herr_t   ret;                    /* Generic error return value */
 
     /* B-tree record removal tests */
     TESTING("B-tree remove: non-existent record from level-1 B-tree");
@@ -5736,15 +5736,15 @@ error:
 static unsigned
 test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t    file = -1;   /* File ID */
-    H5F_t   *f    = NULL; /* Internal file object pointer */
-    H5B2_t  *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t  bt2_addr;    /* Address of B-tree created */
-    hsize_t  record;      /* Record to insert into tree */
-    hsize_t  rrecord;     /* Record to remove from tree */
-    hsize_t  nrec;        /* Number of records in B-tree */
-    haddr_t  root_addr;   /* Address of root of B-tree created */
-    unsigned u;           /* Local index variable */
+    hid_t    file = H5I_INVALID_HID; /* File ID */
+    H5F_t   *f    = NULL;            /* Internal file object pointer */
+    H5B2_t  *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t  bt2_addr;               /* Address of B-tree created */
+    hsize_t  record;                 /* Record to insert into tree */
+    hsize_t  rrecord;                /* Record to remove from tree */
+    hsize_t  nrec;                   /* Number of records in B-tree */
+    haddr_t  root_addr;              /* Address of root of B-tree created */
+    unsigned u;                      /* Local index variable */
 
     /* More complex record removals */
     TESTING("B-tree remove: redistribute 2 leaves in level-1 B-tree (r->l)");
@@ -5929,16 +5929,16 @@ error:
 static unsigned
 test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: merge 2 leaves to 1 in level-1 B-tree (r->l)");
 
@@ -6104,16 +6104,16 @@ error:
 static unsigned
 test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: merge 3 leaves to 2 in level-1 B-tree");
 
@@ -6226,16 +6226,16 @@ error:
 static unsigned
 test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from right leaf of level-1 B-tree");
 
@@ -6450,16 +6450,16 @@ static unsigned
 test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
                                            const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/2 node redistrib");
 
@@ -6595,16 +6595,16 @@ static unsigned
 test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
                                            const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/3 node redistrib");
 
@@ -6740,16 +6740,16 @@ static unsigned
 test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
                                        const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/2->1 merge");
 
@@ -6882,16 +6882,16 @@ static unsigned
 test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
                                        const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/3->2 merge");
 
@@ -7023,16 +7023,16 @@ error:
 static unsigned
 test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0");
 
@@ -7158,16 +7158,16 @@ error:
 static unsigned
 test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from right internal of level-2 B-tree");
 
@@ -7441,16 +7441,16 @@ static unsigned
 test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
                                                const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
 
@@ -7589,16 +7589,16 @@ static unsigned
 test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
                                                const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from left internal of level-2 B-tree w/redistrib");
 
@@ -7737,16 +7737,16 @@ static unsigned
 test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cparam,
                                            const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/merge");
 
@@ -7886,16 +7886,16 @@ static unsigned
 test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cparam,
                                            const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: promote from middle internal of level-2 B-tree w/merge");
 
@@ -8035,16 +8035,16 @@ static unsigned
 test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
                                         const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (l->r)");
 
@@ -8158,16 +8158,16 @@ static unsigned
 test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam,
                                          const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (r->l)");
 
@@ -8280,16 +8280,16 @@ error:
 static unsigned
 test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: merge 3 internal nodes to 2 in level-2 B-tree");
 
@@ -8403,17 +8403,17 @@ error:
 static unsigned
 test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               rrecord;     /* Record to remove from tree */
-    hsize_t               nrec;        /* Number of records in B-tree */
-    haddr_t               root_addr;   /* Address of root of B-tree created */
-    H5B2_stat_t           bt2_stat;    /* Statistics about B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               rrecord;                /* Record to remove from tree */
+    hsize_t               nrec;                   /* Number of records in B-tree */
+    haddr_t               root_addr;              /* Address of root of B-tree created */
+    H5B2_stat_t           bt2_stat;               /* Statistics about B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
 
     TESTING("B-tree remove: collapse level-2 B-tree back to level-1 (r->l)");
 
@@ -8526,12 +8526,12 @@ static unsigned
 gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam, haddr_t *bt2_addr,
               const hsize_t *records)
 {
-    hid_t       file = -1;   /* File ID */
-    H5F_t      *f    = NULL; /* Internal file object pointer */
-    H5B2_t     *bt2  = NULL; /* v2 B-tree wrapper */
-    hsize_t     record;      /* Record to insert into tree */
-    unsigned    u;           /* Local index variable */
-    H5B2_stat_t bt2_stat;    /* Statistics about B-tree created */
+    hid_t       file = H5I_INVALID_HID; /* File ID */
+    H5F_t      *f    = NULL;            /* Internal file object pointer */
+    H5B2_t     *bt2  = NULL;            /* v2 B-tree wrapper */
+    hsize_t     record;                 /* Record to insert into tree */
+    unsigned    u;                      /* Local index variable */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -8600,23 +8600,23 @@ error:
 static unsigned
 test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cparam)
 {
-    hid_t     file = -1;        /* File ID */
-    char      filename[1024];   /* Filename to use */
-    H5F_t    *f  = NULL;        /* Internal file object pointer */
-    int       fd = -1;          /* File descriptor */
-    h5_stat_t sb;               /* Stat buffer for file */
-    void     *file_data = NULL; /* Copy of file data */
-    H5B2_t   *bt2       = NULL; /* v2 B-tree wrapper */
-    haddr_t   bt2_addr;         /* Address of B-tree created */
-    hsize_t   record;           /* Record to insert into tree */
-    hsize_t   rrecord;          /* Record to remove from tree */
-    haddr_t   root_addr;        /* Address of root of B-tree created */
-    time_t    curr_time;        /* Current time, for seeding random number generator */
-    hsize_t  *records;          /* Record #'s for random insertion */
-    unsigned  u;                /* Local index variable */
-    unsigned  rem_idx;          /* Location to remove */
-    hsize_t   nrec;             /* Number of records in B-tree */
-    bool      single_file_vfd;  /* Whether VFD used stores data in a single file */
+    hid_t     file = H5I_INVALID_HID; /* File ID */
+    char      filename[1024];         /* Filename to use */
+    H5F_t    *f  = NULL;              /* Internal file object pointer */
+    int       fd = -1;                /* File descriptor */
+    h5_stat_t sb;                     /* Stat buffer for file */
+    void     *file_data = NULL;       /* Copy of file data */
+    H5B2_t   *bt2       = NULL;       /* v2 B-tree wrapper */
+    haddr_t   bt2_addr;               /* Address of B-tree created */
+    hsize_t   record;                 /* Record to insert into tree */
+    hsize_t   rrecord;                /* Record to remove from tree */
+    haddr_t   root_addr;              /* Address of root of B-tree created */
+    time_t    curr_time;              /* Current time, for seeding random number generator */
+    hsize_t  *records;                /* Record #'s for random insertion */
+    unsigned  u;                      /* Local index variable */
+    unsigned  rem_idx;                /* Location to remove */
+    hsize_t   nrec;                   /* Number of records in B-tree */
+    bool      single_file_vfd;        /* Whether VFD used stores data in a single file */
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
@@ -9039,16 +9039,16 @@ error:
 static unsigned
 test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               search;      /* Search value */
-    hsize_t              *records;     /* Record #'s for random insertion */
-    unsigned              u;           /* Local index variable */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    herr_t                ret;         /* Generic error return value */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               search;                 /* Search value */
+    hsize_t              *records;                /* Record #'s for random insertion */
+    unsigned              u;                      /* Local index variable */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    herr_t                ret;                    /* Generic error return value */
 
     /* Allocate space for the records */
     if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * FIND_NEIGHBOR)))
@@ -9261,16 +9261,16 @@ error:
 static unsigned
 test_delete(hid_t fapl, const H5B2_create_t *cparam)
 {
-    hid_t          file = -1;      /* File ID */
-    char           filename[1024]; /* Filename to use */
-    H5F_t         *f = NULL;       /* Internal file object pointer */
-    h5_stat_size_t empty_size;     /* Size of an empty file */
-    h5_stat_size_t file_size;      /* Size of each file created */
-    H5B2_t        *bt2 = NULL;     /* v2 B-tree wrapper */
-    haddr_t        bt2_addr;       /* Address of B-tree created */
-    hsize_t        record;         /* Record to insert into tree */
-    H5B2_stat_t    bt2_stat;       /* Statistics about B-tree created */
-    unsigned       u;              /* Local index variable */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    char           filename[1024];         /* Filename to use */
+    H5F_t         *f = NULL;               /* Internal file object pointer */
+    h5_stat_size_t empty_size;             /* Size of an empty file */
+    h5_stat_size_t file_size;              /* Size of each file created */
+    H5B2_t        *bt2 = NULL;             /* v2 B-tree wrapper */
+    haddr_t        bt2_addr;               /* Address of B-tree created */
+    hsize_t        record;                 /* Record to insert into tree */
+    H5B2_stat_t    bt2_stat;               /* Statistics about B-tree created */
+    unsigned       u;                      /* Local index variable */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -9530,18 +9530,18 @@ error:
 static unsigned
 test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tparam)
 {
-    hid_t                 file = -1;   /* File ID */
-    H5F_t                *f    = NULL; /* Internal file object pointer */
-    H5B2_t               *bt2  = NULL; /* v2 B-tree wrapper */
-    haddr_t               bt2_addr;    /* Address of B-tree created */
-    hsize_t               record;      /* Record to insert into tree */
-    hsize_t               modify;      /* Modified value */
-    hsize_t               found;       /* Found value */
-    H5B2_stat_t           bt2_stat;    /* Statistics about B-tree created */
-    H5B2_node_info_test_t ninfo;       /* B-tree node info */
-    unsigned              u;           /* Local index variable */
-    bool                  rec_found;   /* Whether record was found */
-    herr_t                ret;         /* Generic error return value */
+    hid_t                 file = H5I_INVALID_HID; /* File ID */
+    H5F_t                *f    = NULL;            /* Internal file object pointer */
+    H5B2_t               *bt2  = NULL;            /* v2 B-tree wrapper */
+    haddr_t               bt2_addr;               /* Address of B-tree created */
+    hsize_t               record;                 /* Record to insert into tree */
+    hsize_t               modify;                 /* Modified value */
+    hsize_t               found;                  /* Found value */
+    H5B2_stat_t           bt2_stat;               /* Statistics about B-tree created */
+    H5B2_node_info_test_t ninfo;                  /* B-tree node info */
+    unsigned              u;                      /* Local index variable */
+    bool                  rec_found;              /* Whether record was found */
+    herr_t                ret;                    /* Generic error return value */
 
     /*
      * Test modifying records
@@ -9773,17 +9773,17 @@ error:
 static unsigned
 test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
 {
-    char    filename[1024];     /* Filename to use */
-    char    filename_tmp[1024]; /* Temporary file name */
-    hid_t   file   = -1;        /* File ID */
-    hid_t   file2  = -1;        /* File ID */
-    hid_t   file0  = -1;        /* File ID */
-    hid_t   file00 = -1;        /* File ID */
-    H5F_t  *f      = NULL;      /* Internal file object pointer */
-    H5F_t  *f2     = NULL;      /* Internal file object pointer */
-    H5B2_t *bt2    = NULL;      /* v2 B-tree wrapper */
-    H5B2_t *bt2_2  = NULL;      /* Second v2 B-tree wrapper */
-    haddr_t bt2_addr;           /* Address of B-tree created */
+    char    filename[1024];           /* Filename to use */
+    char    filename_tmp[1024];       /* Temporary file name */
+    hid_t   file   = H5I_INVALID_HID; /* File ID */
+    hid_t   file2  = H5I_INVALID_HID; /* File ID */
+    hid_t   file0  = H5I_INVALID_HID; /* File ID */
+    hid_t   file00 = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f      = NULL;            /* Internal file object pointer */
+    H5F_t  *f2     = NULL;            /* Internal file object pointer */
+    H5B2_t *bt2    = NULL;            /* v2 B-tree wrapper */
+    H5B2_t *bt2_2  = NULL;            /* Second v2 B-tree wrapper */
+    haddr_t bt2_addr;                 /* Address of B-tree created */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -9909,11 +9909,11 @@ error:
 int
 main(void)
 {
-    H5B2_create_t    cparam, cparam2; /* Creation parameters for v2 B-tree */
-    bt2_test_param_t tparam;          /* Test parameters for v2 B-tree */
-    hid_t            fapl    = -1;    /* File access property list for data files */
-    unsigned         nerrors = 0;     /* Cumulative error count */
-    unsigned         reopen;          /* Whether to reopen B-tree during tests */
+    H5B2_create_t    cparam, cparam2;           /* Creation parameters for v2 B-tree */
+    bt2_test_param_t tparam;                    /* Test parameters for v2 B-tree */
+    hid_t            fapl    = H5I_INVALID_HID; /* File access property list for data files */
+    unsigned         nerrors = 0;               /* Cumulative error count */
+    unsigned         reopen;                    /* Whether to reopen B-tree during tests */
     int              ExpressMode;
     const char      *envval         = NULL;
     bool             api_ctx_pushed = false; /* Whether API context pushed */

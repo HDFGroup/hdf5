@@ -129,7 +129,7 @@ construct_test_file(int test_file_index)
     const char *fcn_name = "construct_test_file()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -393,11 +393,11 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
     int         i, j, k, l, m;
     int         data_chunk[CHUNK_SIZE][CHUNK_SIZE];
     herr_t      status;
-    hid_t       dataspace_id = -1;
+    hid_t       dataspace_id = H5I_INVALID_HID;
     hid_t       filespace_ids[MAX_NUM_DSETS];
-    hid_t       memspace_id = -1;
+    hid_t       memspace_id = H5I_INVALID_HID;
     hid_t       dataset_ids[MAX_NUM_DSETS];
-    hid_t       properties = -1;
+    hid_t       properties = H5I_INVALID_HID;
     hsize_t     dims[2];
     hsize_t     a_size[2];
     hsize_t     offset[2];
@@ -807,9 +807,9 @@ open_hdf5_file(const bool create_file, const bool mdci_sbem_expected, const bool
     bool                      show_progress = false;
     bool                      verbose       = false;
     int                       cp            = 0;
-    hid_t                     fapl_id       = -1;
-    hid_t                     fcpl_id       = -1;
-    hid_t                     file_id       = -1;
+    hid_t                     fapl_id       = H5I_INVALID_HID;
+    hid_t                     fcpl_id       = H5I_INVALID_HID;
+    hid_t                     file_id       = H5I_INVALID_HID;
     herr_t                    result;
     H5F_t                    *file_ptr  = NULL;
     H5C_t                    *cache_ptr = NULL;
@@ -1277,12 +1277,12 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
     hsize_t     offset[3];
     hsize_t     chunk_size[3];
     hid_t       status;
-    hid_t       dataspace_id = -1;
-    hid_t       memspace_id  = -1;
-    hid_t       dset_id      = -1;
-    hid_t       filespace_id = -1;
-    hid_t       dcpl_id      = -1;
-    hid_t       dxpl_id      = -1;
+    hid_t       dataspace_id = H5I_INVALID_HID;
+    hid_t       memspace_id  = H5I_INVALID_HID;
+    hid_t       dset_id      = H5I_INVALID_HID;
+    hid_t       filespace_id = H5I_INVALID_HID;
+    hid_t       dcpl_id      = H5I_INVALID_HID;
+    hid_t       dxpl_id      = H5I_INVALID_HID;
 
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
@@ -1764,10 +1764,10 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
     hsize_t     a_size[3];
     hsize_t     offset[3];
     hid_t       status;
-    hid_t       memspace_id  = -1;
-    hid_t       dset_id      = -1;
-    hid_t       filespace_id = -1;
-    hid_t       dxpl_id      = -1;
+    hid_t       memspace_id  = H5I_INVALID_HID;
+    hid_t       dset_id      = H5I_INVALID_HID;
+    hid_t       filespace_id = H5I_INVALID_HID;
+    hid_t       dxpl_id      = H5I_INVALID_HID;
 
     show_progress = (show_progress && (mpi_rank == 0));
     verbose       = (verbose && (mpi_rank == 0));
@@ -2009,7 +2009,7 @@ serial_insert_cache_image(int file_name_idx, int mpi_size)
     int         cp            = 0;
     int         i;
     int         num_dsets  = PAR_NUM_DSETS;
-    hid_t       file_id    = -1;
+    hid_t       file_id    = H5I_INVALID_HID;
     H5F_t      *file_ptr   = NULL;
     H5C_t      *cache_ptr  = NULL;
     MPI_Comm    dummy_comm = MPI_COMM_WORLD;
@@ -2122,9 +2122,9 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
     hsize_t     a_size[3];
     hsize_t     offset[3];
     hid_t       status;
-    hid_t       memspace_id  = -1;
-    hid_t       dset_id      = -1;
-    hid_t       filespace_id = -1;
+    hid_t       memspace_id  = H5I_INVALID_HID;
+    hid_t       dset_id      = H5I_INVALID_HID;
+    hid_t       filespace_id = H5I_INVALID_HID;
 
     HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", dset_num);
 
@@ -2344,7 +2344,7 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
     int         data_chunk[CHUNK_SIZE][CHUNK_SIZE];
     herr_t      status;
     hid_t       filespace_ids[MAX_NUM_DSETS];
-    hid_t       memspace_id = -1;
+    hid_t       memspace_id = H5I_INVALID_HID;
     hid_t       dataset_ids[MAX_NUM_DSETS];
     hsize_t     dims[2];
     hsize_t     a_size[2];
@@ -2591,7 +2591,7 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     const char *fcn_name = "verify_cache_image_RO()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -2851,7 +2851,7 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
     const char *fcn_name = "verify_cache_imageRW()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -3113,7 +3113,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     const char    *fcn_name = "smoke_check_1()";
     char           filename[512];
     bool           show_progress = false;
-    hid_t          file_id       = -1;
+    hid_t          file_id       = H5I_INVALID_HID;
     H5F_t         *file_ptr      = NULL;
     H5C_t         *cache_ptr     = NULL;
     int            cp            = 0;

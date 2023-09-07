@@ -38,17 +38,17 @@ static const char *EXT_ENV_FNAME[] = {"extern_env_dir/env_file_1", NULL};
 static int
 test_path_env(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dapl  = -1;        /* dataset access property list         */
-    hid_t   dset  = -1;        /* dataset                              */
-    size_t  i;                 /* miscellaneous counters               */
-    char    filename[1024];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
-    char    buffer[1024];      /* buffer to read efile_prefix          */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dapl  = H5I_INVALID_HID; /* dataset access property list         */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    size_t  i;                       /* miscellaneous counters               */
+    char    filename[1024];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
+    char    buffer[1024];            /* buffer to read efile_prefix          */
 
     TESTING("prefix in HDF5_EXTFILE_PREFIX");
 
@@ -137,12 +137,12 @@ error:
 int
 main(void)
 {
-    hid_t    fapl_id_old = -1; /* file access properties (old format)  */
-    hid_t    fapl_id_new = -1; /* file access properties (new format)  */
-    hid_t    fid         = -1; /* file for test_1* functions           */
-    hid_t    gid         = -1; /* group to emit diagnostics            */
-    unsigned latest_format;    /* default or latest file format        */
-    int      nerrors = 0;      /* number of errors                     */
+    hid_t    fapl_id_old = H5I_INVALID_HID; /* file access properties (old format)  */
+    hid_t    fapl_id_new = H5I_INVALID_HID; /* file access properties (new format)  */
+    hid_t    fid         = H5I_INVALID_HID; /* file for test_1* functions           */
+    hid_t    gid         = H5I_INVALID_HID; /* group to emit diagnostics            */
+    unsigned latest_format;                 /* default or latest file format        */
+    int      nerrors = 0;                   /* number of errors                     */
 
     h5_reset();
 
@@ -157,7 +157,7 @@ main(void)
 
     /* Test with old & new format groups */
     for (latest_format = false; latest_format <= true; latest_format++) {
-        hid_t current_fapl_id = -1;
+        hid_t current_fapl_id = H5I_INVALID_HID;
 
         /* Set the fapl for different file formats */
         if (latest_format) {

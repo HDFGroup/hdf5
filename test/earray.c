@@ -566,10 +566,10 @@ error:
 static unsigned
 test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5EA_t *ea      = NULL;        /* Extensible array wrapper */
-    haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -808,10 +808,10 @@ error:
 static unsigned
 test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5EA_t *ea      = NULL;        /* Extensible array wrapper */
-    haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -876,13 +876,13 @@ error:
 static unsigned
 test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    hid_t   file2   = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5F_t  *f2      = NULL;        /* Internal file object pointer */
-    H5EA_t *ea      = NULL;        /* Extensible array wrapper */
-    H5EA_t *ea2     = NULL;        /* Extensible array wrapper */
-    haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    hid_t   file2   = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5F_t  *f2      = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    H5EA_t *ea2     = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -984,10 +984,10 @@ static unsigned
 test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
     char    filename_tmp[EARRAY_FILENAME_LEN]; /* Temporary file name */
-    hid_t   file    = -1;                      /* File ID */
-    hid_t   file2   = -1;                      /* File ID */
-    hid_t   file0   = -1;                      /* File ID */
-    hid_t   file00  = -1;                      /* File ID */
+    hid_t   file    = H5I_INVALID_HID;         /* File ID */
+    hid_t   file2   = H5I_INVALID_HID;         /* File ID */
+    hid_t   file0   = H5I_INVALID_HID;         /* File ID */
+    hid_t   file00  = H5I_INVALID_HID;         /* File ID */
     H5F_t  *f       = NULL;                    /* Internal file object pointer */
     H5F_t  *f2      = NULL;                    /* Internal file object pointer */
     H5EA_t *ea      = NULL;                    /* Extensible array wrapper */
@@ -1120,12 +1120,12 @@ error:
 static unsigned
 test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t          file    = -1;          /* File ID */
-    H5F_t         *f       = NULL;        /* Internal file object pointer */
-    H5EA_t        *ea      = NULL;        /* Extensible array wrapper */
-    H5EA_t        *ea2     = NULL;        /* Extensible array wrapper */
-    haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
-    h5_stat_size_t file_size;             /* File size, after deleting array */
+    hid_t          file    = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f       = NULL;            /* Internal file object pointer */
+    H5EA_t        *ea      = NULL;            /* Extensible array wrapper */
+    H5EA_t        *ea2     = NULL;            /* Extensible array wrapper */
+    haddr_t        ea_addr = HADDR_UNDEF;     /* Array address in file */
+    h5_stat_size_t file_size;                 /* File size, after deleting array */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -1961,20 +1961,20 @@ static unsigned
 test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, hsize_t nelmts,
                const char *test_str)
 {
-    hid_t          file = -1;             /* File ID */
-    H5F_t         *f    = NULL;           /* Internal file object pointer */
-    H5EA_t        *ea   = NULL;           /* Extensible array wrapper */
-    void          *eiter_info;            /* Extensible array iterator info */
-    earray_state_t state;                 /* State of extensible array */
-    uint64_t       welmt;                 /* Element to write */
-    uint64_t       relmt;                 /* Element to read */
-    hsize_t        nelmts_written;        /* Highest element written in array */
-    hsize_t        cnt;                   /* Count of array indices */
-    hssize_t       smax;                  /* Index value of max. element set */
-    hsize_t        max;                   /* Index value of max. element set */
-    hssize_t       sidx;                  /* Index value of first element of first data block */
-    hsize_t        idx;                   /* Index value of first element of first data block */
-    haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f    = NULL;            /* Internal file object pointer */
+    H5EA_t        *ea   = NULL;            /* Extensible array wrapper */
+    void          *eiter_info;             /* Extensible array iterator info */
+    earray_state_t state;                  /* State of extensible array */
+    uint64_t       welmt;                  /* Element to write */
+    uint64_t       relmt;                  /* Element to read */
+    hsize_t        nelmts_written;         /* Highest element written in array */
+    hsize_t        cnt;                    /* Count of array indices */
+    hssize_t       smax;                   /* Index value of max. element set */
+    hsize_t        max;                    /* Index value of max. element set */
+    hssize_t       sidx;                   /* Index value of first element of first data block */
+    hsize_t        idx;                    /* Index value of first element of first data block */
+    haddr_t        ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /*
      * Display testing message
@@ -2136,16 +2136,16 @@ static unsigned
 test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, hsize_t skip_elmts,
                 const char *test_str)
 {
-    hid_t          file = -1;             /* File ID */
-    H5F_t         *f    = NULL;           /* Internal file object pointer */
-    H5EA_t        *ea   = NULL;           /* Extensible array wrapper */
-    earray_state_t state;                 /* State of extensible array */
-    uint64_t       welmt;                 /* Element to write */
-    uint64_t       relmt;                 /* Element to read */
-    hsize_t        nelmts_written;        /* Highest element written in array */
-    hsize_t        idx;                   /* Index value of element to get */
-    hsize_t        cnt;                   /* Count of array indices */
-    haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f    = NULL;            /* Internal file object pointer */
+    H5EA_t        *ea   = NULL;            /* Extensible array wrapper */
+    earray_state_t state;                  /* State of extensible array */
+    uint64_t       welmt;                  /* Element to write */
+    uint64_t       relmt;                  /* Element to read */
+    hsize_t        nelmts_written;         /* Highest element written in array */
+    hsize_t        idx;                    /* Index value of element to get */
+    hsize_t        cnt;                    /* Count of array indices */
+    haddr_t        ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /*
      * Display testing message
@@ -2291,15 +2291,15 @@ error:
 int
 main(void)
 {
-    H5EA_create_t       cparam;                 /* Creation parameters for extensible array */
-    earray_test_param_t tparam;                 /* Testing parameters */
-    earray_test_type_t  curr_test;              /* Current test being worked on */
-    earray_iter_type_t  curr_iter;              /* Current iteration type being worked on */
-    hid_t               fapl    = -1;           /* File access property list for data files */
-    unsigned            nerrors = 0;            /* Cumulative error count */
-    time_t              curr_time;              /* Current time, for seeding random number generator */
-    int                 ExpressMode;            /* Test express value */
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5EA_create_t       cparam;                    /* Creation parameters for extensible array */
+    earray_test_param_t tparam;                    /* Testing parameters */
+    earray_test_type_t  curr_test;                 /* Current test being worked on */
+    earray_iter_type_t  curr_iter;                 /* Current iteration type being worked on */
+    hid_t               fapl    = H5I_INVALID_HID; /* File access property list for data files */
+    unsigned            nerrors = 0;               /* Cumulative error count */
+    time_t              curr_time;                 /* Current time, for seeding random number generator */
+    int                 ExpressMode;               /* Test express value */
+    bool                api_ctx_pushed = false;    /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();

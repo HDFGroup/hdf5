@@ -5541,11 +5541,11 @@ test_select_hyper_union_3d(void)
 static void
 test_select_hyper_valid_combination(void)
 {
-    hid_t   single_pt_sid;         /* Dataspace ID    with single point selection */
-    hid_t   single_hyper_sid;      /* Dataspace ID    with single block hyperslab selection */
-    hid_t   regular_hyper_sid;     /* Dataspace ID    with regular hyperslab selection */
-    hid_t   non_existent_sid = -1; /* A non-existent space id */
-    hid_t   tmp_sid;               /* Temporary dataspace ID */
+    hid_t   single_pt_sid;                      /* Dataspace ID    with single point selection */
+    hid_t   single_hyper_sid;                   /* Dataspace ID    with single block hyperslab selection */
+    hid_t   regular_hyper_sid;                  /* Dataspace ID    with regular hyperslab selection */
+    hid_t   non_existent_sid = H5I_INVALID_HID; /* A non-existent space id */
+    hid_t   tmp_sid;                            /* Temporary dataspace ID */
     hsize_t dims2D[] = {SPACE9_DIM1, SPACE9_DIM2};
     hsize_t dims3D[] = {SPACE4_DIM1, SPACE4_DIM2, SPACE4_DIM3};
 

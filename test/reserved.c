@@ -31,8 +31,8 @@ static const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
 static herr_t
 rsrv_heap(void)
 {
-    hid_t   file_id = (-1), dataset_id = (-1), dataspace_id = (-1);
-    hid_t   fapl = (-1), fcpl = (-1);
+    hid_t   file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID);
+    hid_t   fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID);
     hsize_t dims[1] = {1};
     char    filename[1024], dset_name[10];
     int     i;
@@ -160,8 +160,8 @@ error:
 static herr_t
 rsrv_ohdr(void)
 {
-    hid_t   file_id = (-1), dataset_id = (-1), dataspace_id = (-1);
-    hid_t   fapl = (-1), fcpl = (-1), aid, attr_id;
+    hid_t   file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID);
+    hid_t   fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID), aid, attr_id;
     hsize_t dims[2];
     herr_t  status;
     int     attrval[4][6];
@@ -298,8 +298,9 @@ error:
 static herr_t
 rsrv_vlen(void)
 {
-    hid_t    file_id = (-1), dataset_id = (-1), dataspace_id = (-1), type_id = (-1);
-    hid_t    fapl = (-1), fcpl = (-1), mem_space_id = (-1);
+    hid_t file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID),
+          type_id = (H5I_INVALID_HID);
+    hid_t    fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID), mem_space_id = (H5I_INVALID_HID);
     hssize_t offset[1];
     hsize_t  start[1];
     hsize_t  dims[1], count[1];

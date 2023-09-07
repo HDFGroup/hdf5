@@ -85,8 +85,8 @@ static const char *FILENAME[] = {"stab", NULL};
 static int
 test_misc(hid_t fcpl, hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t g1 = (-1), g2 = (-1), g3 = (-1);
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t g1 = (H5I_INVALID_HID), g2 = (H5I_INVALID_HID), g3 = (H5I_INVALID_HID);
     char  filename[NAME_BUF_SIZE];
     char  comment[64];
 
@@ -186,8 +186,8 @@ error:
 static int
 test_long(hid_t fcpl, hid_t fapl, bool new_format)
 {
-    hid_t  fid = (-1); /* File ID */
-    hid_t  g1 = (-1), g2 = (-1);
+    hid_t  fid = (H5I_INVALID_HID); /* File ID */
+    hid_t  g1 = (H5I_INVALID_HID), g2 = (H5I_INVALID_HID);
     size_t name2Len;
     char  *name1 = NULL, *name2 = NULL;
     char   filename[NAME_BUF_SIZE];
@@ -270,8 +270,8 @@ error:
 static int
 test_large(hid_t fcpl, hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1);             /* File ID */
-    hid_t cwg = (-1), dir = (-1); /* Group IDs */
+    hid_t fid = (H5I_INVALID_HID);                          /* File ID */
+    hid_t cwg = (H5I_INVALID_HID), dir = (H5I_INVALID_HID); /* Group IDs */
     char  filename[NAME_BUF_SIZE];
     char  name[NAME_BUF_SIZE];
     int   i;
@@ -342,18 +342,18 @@ error:
 static int
 lifecycle(hid_t fcpl, hid_t fapl2)
 {
-    hid_t             fid  = (-1);            /* File ID */
-    hid_t             gid  = (-1);            /* Group ID */
-    hid_t             gid2 = (-1);            /* Datatype ID */
-    hid_t             gcpl = (-1);            /* Group creation property list ID */
-    size_t            lheap_size_hint;        /* Local heap size hint */
-    unsigned          max_compact;            /* Maximum # of links to store in group compactly */
-    unsigned          min_dense;              /* Minimum # of links to store in group "densely" */
-    unsigned          est_num_entries;        /* Estimated # of entries in group */
-    unsigned          est_name_len;           /* Estimated length of entry name */
-    unsigned          nmsgs;                  /* Number of messages in group's header */
-    H5O_native_info_t ninfo;                  /* Object info */
-    char              objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t             fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t             gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t             gid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t             gcpl = (H5I_INVALID_HID); /* Group creation property list ID */
+    size_t            lheap_size_hint;          /* Local heap size hint */
+    unsigned          max_compact;              /* Maximum # of links to store in group compactly */
+    unsigned          min_dense;                /* Minimum # of links to store in group "densely" */
+    unsigned          est_num_entries;          /* Estimated # of entries in group */
+    unsigned          est_name_len;             /* Estimated length of entry name */
+    unsigned          nmsgs;                    /* Number of messages in group's header */
+    H5O_native_info_t ninfo;                    /* Object info */
+    char              objname[NAME_BUF_SIZE];   /* Object name */
     char              filename[NAME_BUF_SIZE];
     h5_stat_size_t    empty_size; /* Size of an empty file */
     unsigned          u;          /* Local index variable */
@@ -625,10 +625,10 @@ error:
 static int
 long_compact(hid_t fcpl, hid_t fapl2)
 {
-    hid_t          fid     = (-1); /* File ID */
-    hid_t          gid     = (-1); /* Group ID */
-    hid_t          gid2    = (-1); /* Group ID */
-    char          *objname = NULL; /* Object name */
+    hid_t          fid     = (H5I_INVALID_HID); /* File ID */
+    hid_t          gid     = (H5I_INVALID_HID); /* Group ID */
+    hid_t          gid2    = (H5I_INVALID_HID); /* Group ID */
+    char          *objname = NULL;              /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
     h5_stat_size_t file_size;  /* Size of each file created */
@@ -788,11 +788,11 @@ error:
 static int
 read_old(void)
 {
-    hid_t    fid  = (-1);            /* File ID */
-    hid_t    gid  = (-1);            /* Group ID */
-    hid_t    gid2 = (-1);            /* Group ID */
-    char     objname[NAME_BUF_SIZE]; /* Object name */
-    unsigned u;                      /* Local index variable */
+    hid_t    fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t    gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t    gid2 = (H5I_INVALID_HID); /* Group ID */
+    char     objname[NAME_BUF_SIZE];   /* Object name */
+    unsigned u;                        /* Local index variable */
 
     TESTING("reading old groups");
 
@@ -892,11 +892,11 @@ error:
 static int
 no_compact(hid_t fcpl, hid_t fapl2)
 {
-    hid_t          fid  = (-1);            /* File ID */
-    hid_t          gid  = (-1);            /* Group ID */
-    hid_t          gid2 = (-1);            /* Datatype ID */
-    hid_t          gcpl = (-1);            /* Group creation property list ID */
-    char           objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t          fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t          gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t          gid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t          gcpl = (H5I_INVALID_HID); /* Group creation property list ID */
+    char           objname[NAME_BUF_SIZE];   /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size;      /* Size of an empty file */
     h5_stat_size_t file_size;       /* Size of each file created */
@@ -1029,14 +1029,14 @@ error:
 static int
 gcpl_on_root(hid_t fapl2)
 {
-    hid_t    fid  = (-1); /* File ID */
-    hid_t    gid  = (-1); /* Group ID */
-    hid_t    gid2 = (-1); /* Datatype ID */
-    hid_t    fcpl = (-1); /* File creation property list ID */
-    hid_t    gcpl = (-1); /* Group creation property list ID */
-    hid_t    lcpl = (-1); /* Link creation property list ID */
-    unsigned max_compact; /* Maximum # of links to store in group compactly */
-    unsigned min_dense;   /* Minimum # of links to store in group "densely" */
+    hid_t    fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t    gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t    gid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t    fcpl = (H5I_INVALID_HID); /* File creation property list ID */
+    hid_t    gcpl = (H5I_INVALID_HID); /* Group creation property list ID */
+    hid_t    lcpl = (H5I_INVALID_HID); /* Link creation property list ID */
+    unsigned max_compact;              /* Maximum # of links to store in group compactly */
+    unsigned min_dense;                /* Minimum # of links to store in group "densely" */
     char     filename[NAME_BUF_SIZE];
 
     TESTING("setting root group creation properties");
@@ -1179,10 +1179,10 @@ static int
 old_api(hid_t fapl)
 {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    hid_t          fid = (-1);      /* File ID */
-    hid_t          gid = (-1);      /* Group ID */
-    h5_stat_size_t small_file_size; /* Size of small group file */
-    h5_stat_size_t large_file_size; /* Size of large group file */
+    hid_t          fid = (H5I_INVALID_HID); /* File ID */
+    hid_t          gid = (H5I_INVALID_HID); /* Group ID */
+    h5_stat_size_t small_file_size;         /* Size of small group file */
+    h5_stat_size_t large_file_size;         /* Size of large group file */
     char           filename[NAME_BUF_SIZE];
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1281,8 +1281,8 @@ error:
 static int
 corrupt_stab_msg(void)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t did = (-1); /* Dataset ID */
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t did = (H5I_INVALID_HID); /* Dataset ID */
 
     TESTING("corrupt symbol table message");
 

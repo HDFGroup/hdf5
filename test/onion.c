@@ -1285,7 +1285,7 @@ test_revision_record_encode_decode(void)
         0, 0, 0, 0,                             /* Bytes 080-083:   checksum (populated below) */
         /* ENTRY 1 */
         0, 0xF0, 0x2E, 0, 0, 0, 0, 0,           /* Bytes 084-091:   entry 1: logical offset */
-        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */ 
+        0xA7, 0, 0, 0, 0, 0, 0, 0,              /* Bytes 092-099:   entry 1: physical address */
         0, 0, 0, 0,                             /* Bytes 100-103:   checksum (populated below) */
         /* ENTRY 2 */
         0, 0x50, 0x15, 0, 0, 0x20, 0, 0,        /* Bytes 104-111:   entry 2: logical offset */

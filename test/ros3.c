@@ -412,7 +412,7 @@ test_fapl_config_validation(void)
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id = -1; /* file access property list ID */
+    hid_t            fapl_id = H5I_INVALID_HID; /* file access property list ID */
     H5FD_ros3_fapl_t config;
     H5FD_ros3_fapl_t fa_fetch;
     herr_t           success  = SUCCEED;
@@ -620,9 +620,9 @@ test_ros3_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id      = -1; /* file access property list ID */
-    hid_t            driver_id    = -1; /* ID for this VFD              */
-    unsigned long    driver_flags = 0;  /* VFD feature flags            */
+    hid_t            fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t            driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;               /* VFD feature flags            */
     H5FD_ros3_fapl_t ros3_fa_0    = {
         H5FD_CURR_ROS3_FAPL_T_VERSION, /* version       */
         false,                         /* authenticate  */
@@ -787,8 +787,8 @@ test_vfd_open(void)
     };
     H5FD_t  *fd               = NULL;
     bool     curl_ready       = false;
-    hid_t    fapl_id          = -1;
-    hid_t    fapl_file_access = -1;
+    hid_t    fapl_id          = H5I_INVALID_HID;
+    hid_t    fapl_file_access = H5I_INVALID_HID;
     unsigned i                = 0;
     unsigned tests_count      = 10;
 
@@ -930,7 +930,7 @@ test_eof_eoa(void)
 
     H5FD_t *fd_shakespeare = NULL;
     bool    curl_ready     = false;
-    hid_t   fapl_id        = -1;
+    hid_t   fapl_id        = H5I_INVALID_HID;
 
     TESTING("ROS3 eof/eoa gets and sets");
 
@@ -1038,7 +1038,7 @@ test_H5FDread_without_eoa_set_fails(void)
     char         buffer[256];
     unsigned int i                = 0;
     H5FD_t      *file_shakespeare = NULL;
-    hid_t        fapl_id          = -1;
+    hid_t        fapl_id          = H5I_INVALID_HID;
 
     TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
 
@@ -1209,7 +1209,7 @@ test_read(void)
     char            buffer[S3_TEST_MAX_URL_SIZE];
     unsigned int    i          = 0;
     H5FD_t         *file_raven = NULL;
-    hid_t           fapl_id    = -1;
+    hid_t           fapl_id    = H5I_INVALID_HID;
 
     TESTING("ROS3 VFD read/range-gets");
 
@@ -1348,7 +1348,7 @@ test_noops_and_autofails(void)
      ************************/
 
     bool       curl_ready = false;
-    hid_t      fapl_id    = -1;
+    hid_t      fapl_id    = H5I_INVALID_HID;
     H5FD_t    *file       = NULL;
     const char data[36]   = "The Force shall be with you, always";
 
@@ -1467,7 +1467,7 @@ test_cmp(void)
     H5FD_t *fd_shakes  = NULL;
     H5FD_t *fd_raven_2 = NULL;
     bool    curl_ready = false;
-    hid_t   fapl_id    = -1;
+    hid_t   fapl_id    = H5I_INVALID_HID;
 
     TESTING("ROS3 cmp (comparison)");
 
@@ -1587,8 +1587,8 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file    = -1;
-    hid_t fapl_id = -1;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("S3 file access through HD5F library (H5F API)");
 

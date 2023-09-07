@@ -27,7 +27,8 @@
 int
 main(void)
 {
-    hid_t              file = -1, dcpl = -1, space = -1, dset1 = -1, dset2 = -1;
+    hid_t file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, space = H5I_INVALID_HID, dset1 = H5I_INVALID_HID,
+          dset2                    = H5I_INVALID_HID;
     hsize_t            cur_size[2] = {8, 8};
     H5D_space_status_t allocation;
     int                fill_val1 = 4444, fill_val2 = 5555;

@@ -42,7 +42,7 @@ int
 main(void)
 {
     hid_t       fapl = H5P_DEFAULT;     /* file access properties   */
-    hid_t       file = -1;              /* hdf5 file                */
+    hid_t       file = H5I_INVALID_HID; /* hdf5 file                */
     H5F_t      *f    = NULL;            /* hdf5 file pointer        */
     char        filename[1024];         /* file name                */
     haddr_t     heap_addr;              /* local heap address       */
@@ -176,7 +176,7 @@ main(void)
         TESTING("opening pre-created file with non-default sizes");
         {
             const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
-            hid_t       dset     = -1;
+            hid_t       dset     = H5I_INVALID_HID;
             file                 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
             if (file >= 0) {
                 if ((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)

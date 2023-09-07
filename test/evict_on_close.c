@@ -122,22 +122,22 @@ verify_tag_not_in_cache(const H5F_t *f, haddr_t tag)
 static hid_t
 generate_eoc_test_file(hid_t fapl_id)
 {
-    char              filename[FILENAME_BUF_SIZE]; /* decorated file name          */
-    hid_t             fid          = -1;           /* file ID (returned)           */
-    hid_t             fapl_copy_id = -1;           /* ID of copied fapl            */
-    hid_t             gid1 = -1, gid2 = -1;        /* group IDs                    */
-    hid_t             sid     = -1;                /* dataspace ID                 */
-    hid_t             dcpl_id = -1;                /* dataset creation plist       */
-    hid_t             did     = -1;                /* dataset ID                   */
-    int               rank;                        /* # of array dimensions        */
-    hsize_t           current_dims[2];             /* current dataset size         */
-    hsize_t           maximum_dims[2];             /* maximum dataset size         */
-    hsize_t           chunk_dims[2];               /* chunk dimensions             */
-    H5D_chunk_index_t idx_type;                    /* dataset chunk index type     */
-    H5D_layout_t      layout_type;                 /* dataset layout type          */
-    int              *data = NULL;                 /* buffer for fake data         */
-    int               n;                           /* # of data elements           */
-    int               i;                           /* iterator (# subgroups)       */
+    char              filename[FILENAME_BUF_SIZE];                    /* decorated file name          */
+    hid_t             fid          = H5I_INVALID_HID;                 /* file ID (returned)           */
+    hid_t             fapl_copy_id = H5I_INVALID_HID;                 /* ID of copied fapl            */
+    hid_t             gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* group IDs                    */
+    hid_t             sid     = H5I_INVALID_HID;                      /* dataspace ID                 */
+    hid_t             dcpl_id = H5I_INVALID_HID;                      /* dataset creation plist       */
+    hid_t             did     = H5I_INVALID_HID;                      /* dataset ID                   */
+    int               rank;                                           /* # of array dimensions        */
+    hsize_t           current_dims[2];                                /* current dataset size         */
+    hsize_t           maximum_dims[2];                                /* maximum dataset size         */
+    hsize_t           chunk_dims[2];                                  /* chunk dimensions             */
+    H5D_chunk_index_t idx_type;                                       /* dataset chunk index type     */
+    H5D_layout_t      layout_type;                                    /* dataset layout type          */
+    int              *data = NULL;                                    /* buffer for fake data         */
+    int               n;                                              /* # of data elements           */
+    int               i;                                              /* iterator (# subgroups)       */
 
     TESTING("generating evict-on-close test file");
 
@@ -584,12 +584,12 @@ error:
 static herr_t
 check_group_layout(hid_t fid, const char *group_name)
 {
-    H5F_t   *file_ptr = NULL;       /* ptr to internal file struct  */
-    hid_t    gid1 = -1, gid2 = -1;  /* group IDs                    */
-    H5G_t   *grp_ptr = NULL;        /* ptr to internal group struct */
-    haddr_t  tag1, tag2;            /* MD cache tags for groups     */
-    uint32_t before, during, after; /* cache sizes                  */
-    int      i;                     /* iterator                     */
+    H5F_t   *file_ptr = NULL;                                /* ptr to internal file struct  */
+    hid_t    gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* group IDs                    */
+    H5G_t   *grp_ptr = NULL;                                 /* ptr to internal group struct */
+    haddr_t  tag1, tag2;                                     /* MD cache tags for groups     */
+    uint32_t before, during, after;                          /* cache sizes                  */
+    int      i;                                              /* iterator                     */
 
     /* NOTE: The TESTING() macro is called in main() */
 
@@ -698,12 +698,12 @@ error:
 static herr_t
 check_dset_scheme(hid_t fid, const char *dset_name)
 {
-    H5F_t   *file_ptr = NULL;       /* ptr to internal file struct  */
-    hid_t    did      = -1;         /* dataset ID                   */
-    H5D_t   *dset_ptr = NULL;       /* ptr to internal dset struct  */
-    haddr_t  tag;                   /* MD cache tag for dataset     */
-    int     *data = NULL;           /* buffer for fake data         */
-    uint32_t before, during, after; /* cache sizes                  */
+    H5F_t   *file_ptr = NULL;            /* ptr to internal file struct  */
+    hid_t    did      = H5I_INVALID_HID; /* dataset ID                   */
+    H5D_t   *dset_ptr = NULL;            /* ptr to internal dset struct  */
+    haddr_t  tag;                        /* MD cache tag for dataset     */
+    int     *data = NULL;                /* buffer for fake data         */
+    uint32_t before, during, after;      /* cache sizes                  */
 
     /* NOTE: The TESTING() macro is called in main() */
 
@@ -801,8 +801,8 @@ error:
 static herr_t
 check_evict_on_close_api(void)
 {
-    hid_t  fapl_id = -1;
-    hid_t  dapl_id = -1;
+    hid_t  fapl_id = H5I_INVALID_HID;
+    hid_t  dapl_id = H5I_INVALID_HID;
     bool   evict_on_close;
     herr_t status;
 
@@ -883,9 +883,9 @@ error:
 int
 main(void)
 {
-    hid_t    fapl_id = -1; /* VFD-specific fapl                    */
-    hid_t    fid     = -1; /* file ID                              */
-    unsigned nerrors = 0;  /* number of test errors                */
+    hid_t    fapl_id = H5I_INVALID_HID; /* VFD-specific fapl                    */
+    hid_t    fid     = H5I_INVALID_HID; /* file ID                              */
+    unsigned nerrors = 0;               /* number of test errors                */
 
     printf("Testing evict-on-close cache behavior\n");
 
@@ -990,7 +990,7 @@ error:
 static herr_t
 check_evict_on_close_parallel_fail(void)
 {
-    hid_t  fapl_id = -1;
+    hid_t  fapl_id = H5I_INVALID_HID;
     bool   evict_on_close;
     herr_t status;
 

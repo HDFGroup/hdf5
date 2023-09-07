@@ -87,8 +87,8 @@ int create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
 int
 create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t dataset = -1; /* file and dataset handles */
-    hid_t dcpl    = -1;
+    hid_t dataset = H5I_INVALID_HID; /* file and dataset handles */
+    hid_t dcpl    = H5I_INVALID_HID;
     float data[NX][NY]; /* data to write */
     float fillvalue = -2.2f;
     int   i, j;
@@ -188,8 +188,8 @@ error:
 int
 create_scale_offset_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     float   data[NX][NY]; /* data to write */
     float   fillvalue   = -2.2f;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -273,8 +273,8 @@ error:
 int
 create_scale_offset_dsets_double(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     double  data[NX][NY]; /* data to write */
     double  fillvalue   = -2.2;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -358,8 +358,8 @@ error:
 int
 create_scale_offset_dsets_char(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     char    data[NX][NY]; /* data to write */
     char    fillvalue   = -2;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -451,8 +451,8 @@ error:
 int
 create_scale_offset_dsets_short(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     short   data[NX][NY]; /* data to write */
     short   fillvalue   = -2;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -544,8 +544,8 @@ error:
 int
 create_scale_offset_dsets_int(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     int     data[NX][NY]; /* data to write */
     int     fillvalue   = -2;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -638,8 +638,8 @@ error:
 int
 create_scale_offset_dsets_long_long(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t     dataset = -1; /* dataset handles */
-    hid_t     dcpl    = -1;
+    hid_t     dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t     dcpl    = H5I_INVALID_HID;
     long long data[NX][NY]; /* data to write */
     long long fillvalue   = -2;
     hsize_t   chunk[RANK] = {CHUNK0, CHUNK1};
@@ -731,8 +731,8 @@ error:
 int
 create_fletcher_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     float   data[NX][NY]; /* data to write */
     float   fillvalue   = -2.2f;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -817,8 +817,8 @@ int
 create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     float   data[NX][NY]; /* data to write */
     float   fillvalue   = -2.2f;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -998,8 +998,8 @@ error:
 int
 create_shuffle_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset = -1; /* dataset handles */
-    hid_t   dcpl    = -1;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset handles */
+    hid_t   dcpl    = H5I_INVALID_HID;
     float   data[NX][NY]; /* data to write */
     float   fillvalue   = -2.2f;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
@@ -1083,9 +1083,9 @@ error:
 int
 create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 {
-    hid_t   dataset  = -1; /* dataset handles */
-    hid_t   datatype = -1;
-    hid_t   dcpl     = -1;
+    hid_t   dataset  = H5I_INVALID_HID; /* dataset handles */
+    hid_t   datatype = H5I_INVALID_HID;
+    hid_t   dcpl     = H5I_INVALID_HID;
     size_t  precision, offset;
     float   data[NX][NY]; /* data to write */
     float   fillvalue   = -2.2f;
@@ -1188,9 +1188,9 @@ error:
 int
 main(void)
 {
-    hid_t   file      = -1;
-    hid_t   filespace = -1;
-    hid_t   memspace  = -1;
+    hid_t   file      = H5I_INVALID_HID;
+    hid_t   filespace = H5I_INVALID_HID;
+    hid_t   memspace  = H5I_INVALID_HID;
     hsize_t dimsf[RANK];
     hsize_t start[RANK] = {0, 0};
 

@@ -2499,34 +2499,34 @@ test_vltypes_fill_value(void)
         const char  *str_unit;
     } dtype1_struct;
 
-    herr_t              ret;
-    hid_t               file_id;
-    hid_t               dtype1_id = -1;
-    hid_t               str_id    = -1;
-    hid_t               small_dspace_id;            /* Dataspace ID for small datasets */
-    hid_t               large_dspace_id;            /* Dataspace ID for large datasets */
-    hid_t               small_select_dspace_id;     /* Dataspace ID for selection in small datasets */
-    hid_t               large_select_dspace_id;     /* Dataspace ID for selection in large datasets */
-    hid_t               dset_dspace_id        = -1; /* Dataspace ID for a particular dataset */
-    hid_t               dset_select_dspace_id = -1; /* Dataspace ID for selection in a particular dataset */
-    hid_t               scalar_dspace_id;           /* Dataspace ID for scalar dataspace */
-    hid_t               single_dspace_id;           /* Dataspace ID for single element selection */
-    hsize_t             single_offset[]      = {2}; /* Offset of single element selection */
-    hsize_t             single_block[]       = {1}; /* Block size of single element selection */
-    hsize_t             select_offset[]      = {0}; /* Offset of non-contiguous element selection */
-    hsize_t             select_stride[]      = {2}; /* Stride size of non-contiguous element selection */
-    hsize_t             small_select_count[] = {SPACE4_DIM_SMALL /
+    herr_t  ret;
+    hid_t   file_id;
+    hid_t   dtype1_id = H5I_INVALID_HID;
+    hid_t   str_id    = H5I_INVALID_HID;
+    hid_t   small_dspace_id;                         /* Dataspace ID for small datasets */
+    hid_t   large_dspace_id;                         /* Dataspace ID for large datasets */
+    hid_t   small_select_dspace_id;                  /* Dataspace ID for selection in small datasets */
+    hid_t   large_select_dspace_id;                  /* Dataspace ID for selection in large datasets */
+    hid_t   dset_dspace_id        = H5I_INVALID_HID; /* Dataspace ID for a particular dataset */
+    hid_t   dset_select_dspace_id = H5I_INVALID_HID; /* Dataspace ID for selection in a particular dataset */
+    hid_t   scalar_dspace_id;                        /* Dataspace ID for scalar dataspace */
+    hid_t   single_dspace_id;                        /* Dataspace ID for single element selection */
+    hsize_t single_offset[]      = {2};              /* Offset of single element selection */
+    hsize_t single_block[]       = {1};              /* Block size of single element selection */
+    hsize_t select_offset[]      = {0};              /* Offset of non-contiguous element selection */
+    hsize_t select_stride[]      = {2};              /* Stride size of non-contiguous element selection */
+    hsize_t small_select_count[] = {SPACE4_DIM_SMALL /
                                     2}; /* Count of small non-contiguous element selection */
-    hsize_t             large_select_count[] = {SPACE4_DIM_LARGE /
+    hsize_t large_select_count[] = {SPACE4_DIM_LARGE /
                                     2}; /* Count of large non-contiguous element selection */
-    hsize_t             select_block[]       = {1}; /* Block size of non-contiguous element selection */
-    hid_t               dcpl_id, xfer_pid;
-    hid_t               dset_id;
-    hsize_t             small_dims[] = {SPACE4_DIM_SMALL};
-    hsize_t             large_dims[] = {SPACE4_DIM_LARGE};
-    size_t              dset_elmts   = 0; /* Number of elements in a particular dataset */
-    const dtype1_struct fill1        = {1, 2,   "foobar", "",  NULL,     "\0",   "dead",
-                                 3, 4.0, 100.0,    1.0, "liquid", "meter"};
+    hsize_t select_block[]       = {1}; /* Block size of non-contiguous element selection */
+    hid_t   dcpl_id, xfer_pid;
+    hid_t   dset_id;
+    hsize_t small_dims[]         = {SPACE4_DIM_SMALL};
+    hsize_t large_dims[]         = {SPACE4_DIM_LARGE};
+    size_t  dset_elmts           = 0; /* Number of elements in a particular dataset */
+    const dtype1_struct fill1    = {1, 2,   "foobar", "",  NULL,     "\0",   "dead",
+                                    3, 4.0, 100.0,    1.0, "liquid", "meter"};
     const dtype1_struct wdata    = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0, 200.0, 2.0, "solid", "yard"};
     dtype1_struct      *rbuf     = NULL;                /* Buffer for reading data */
     size_t              mem_used = 0;                   /* Memory used during allocation */

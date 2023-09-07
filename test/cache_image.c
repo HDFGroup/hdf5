@@ -93,11 +93,11 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     int         i, j, k, l, m;
     int         data_chunk[CHUNK_SIZE][CHUNK_SIZE];
     herr_t      status;
-    hid_t       dataspace_id = -1;
+    hid_t       dataspace_id = H5I_INVALID_HID;
     hid_t       filespace_ids[MAX_NUM_DSETS];
-    hid_t       memspace_id = -1;
+    hid_t       memspace_id = H5I_INVALID_HID;
     hid_t       dataset_ids[MAX_NUM_DSETS];
-    hid_t       properties = -1;
+    hid_t       properties = H5I_INVALID_HID;
     hsize_t     dims[2];
     hsize_t     a_size[2];
     hsize_t     offset[2];
@@ -498,9 +498,9 @@ open_hdf5_file(bool create_file, bool mdci_sbem_expected, bool read_only, bool s
     bool                      show_progress = false;
     bool                      verbose       = false;
     int                       cp            = 0;
-    hid_t                     fapl_id       = -1;
-    hid_t                     fcpl_id       = -1;
-    hid_t                     file_id       = -1;
+    hid_t                     fapl_id       = H5I_INVALID_HID;
+    hid_t                     fcpl_id       = H5I_INVALID_HID;
+    hid_t                     file_id       = H5I_INVALID_HID;
     herr_t                    result;
     H5F_t                    *file_ptr  = NULL;
     H5C_t                    *cache_ptr = NULL;
@@ -857,8 +857,8 @@ attempt_swmr_open_hdf5_file(const bool create_file, const bool set_mdci_fapl, co
     const char               *fcn_name      = "attempt_swmr_open_hdf5_file()";
     bool                      show_progress = false;
     int                       cp            = 0;
-    hid_t                     fapl_id       = -1;
-    hid_t                     file_id       = -1;
+    hid_t                     fapl_id       = H5I_INVALID_HID;
+    hid_t                     file_id       = H5I_INVALID_HID;
     herr_t                    result;
     H5AC_cache_image_config_t cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, true, false,
                                                     H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
@@ -977,7 +977,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     int         data_chunk[CHUNK_SIZE][CHUNK_SIZE];
     herr_t      status;
     hid_t       filespace_ids[MAX_NUM_DSETS];
-    hid_t       memspace_id = -1;
+    hid_t       memspace_id = H5I_INVALID_HID;
     hid_t       dataset_ids[MAX_NUM_DSETS];
     hsize_t     dims[2];
     hsize_t     a_size[2];
@@ -1251,7 +1251,7 @@ check_cache_image_ctl_flow_1(bool single_file_vfd)
     const char *fcn_name = "check_cache_image_ctl_flow_1()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -1525,7 +1525,7 @@ check_cache_image_ctl_flow_2(bool single_file_vfd)
     const char *fcn_name = "check_cache_image_ctl_flow_2()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -1786,7 +1786,7 @@ check_cache_image_ctl_flow_3(bool single_file_vfd)
     const char *fcn_name = "check_cache_image_ctl_flow_3()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -2149,7 +2149,7 @@ check_cache_image_ctl_flow_4(bool single_file_vfd)
     const char *fcn_name = "check_cache_image_ctl_flow_4()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -2475,7 +2475,7 @@ check_cache_image_ctl_flow_5(bool single_file_vfd)
     const char *fcn_name = "check_cache_image_ctl_flow_5()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -2753,7 +2753,7 @@ check_cache_image_ctl_flow_6(bool single_file_vfd)
     const char *fcn_name = "check_cache_image_ctl_flow_6()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -3036,7 +3036,7 @@ cache_image_smoke_check_1(bool single_file_vfd)
     const char *fcn_name = "cache_image_smoke_check_1()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -3444,7 +3444,7 @@ cache_image_smoke_check_2(bool single_file_vfd)
     const char *fcn_name = "cache_image_smoke_check_2()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -3739,7 +3739,7 @@ cache_image_smoke_check_3(bool single_file_vfd)
     const char *fcn_name = "cache_image_smoke_check_3()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -4113,7 +4113,7 @@ cache_image_smoke_check_4(bool single_file_vfd)
     const char *fcn_name = "cache_image_smoke_check_4()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -4504,8 +4504,8 @@ cache_image_smoke_check_5(bool single_file_vfd)
     char        filename[512];
     char        process_group_name[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
-    hid_t       proc_gid      = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
+    hid_t       proc_gid      = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -4998,7 +4998,7 @@ cache_image_smoke_check_6(bool single_file_vfd)
     const char    *fcn_name = "cache_image_smoke_check_6()";
     char           filename[512];
     bool           show_progress = false;
-    hid_t          file_id       = -1;
+    hid_t          file_id       = H5I_INVALID_HID;
     H5F_t         *file_ptr      = NULL;
     H5C_t         *cache_ptr     = NULL;
     h5_stat_size_t file_size;
@@ -5390,7 +5390,7 @@ cache_image_api_error_check_1(bool single_file_vfd)
     const char *fcn_name = "cache_image_api_error_check_1()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -5755,7 +5755,7 @@ cache_image_api_error_check_2(bool single_file_vfd)
     const char *fcn_name = "cache_image_api_error_check_2()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -6153,7 +6153,7 @@ cache_image_api_error_check_3(bool single_file_vfd)
     const char *fcn_name = "cache_image_api_error_check_3()";
     char        filename[512];
     bool        show_progress = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
@@ -6431,8 +6431,8 @@ cache_image_api_error_check_4(bool single_file_vfd)
     const char               *fcn_name = "cache_image_api_error_check_4()";
     char                      filename[512];
     bool                      show_progress = false;
-    hid_t                     fapl_id       = -1;
-    hid_t                     file_id       = -1;
+    hid_t                     fapl_id       = H5I_INVALID_HID;
+    hid_t                     file_id       = H5I_INVALID_HID;
     H5F_t                    *file_ptr      = NULL;
     H5C_t                    *cache_ptr     = NULL;
     int                       cp            = 0;
@@ -7000,7 +7000,7 @@ get_free_sections_test(bool single_file_vfd)
     const char    *fcn_name = "get_free_sections_test()";
     char           filename[512];
     bool           show_progress = false;
-    hid_t          file_id       = -1;
+    hid_t          file_id       = H5I_INVALID_HID;
     H5F_t         *file_ptr      = NULL;
     H5C_t         *cache_ptr     = NULL;
     h5_stat_size_t file_size;
@@ -7440,7 +7440,7 @@ evict_on_close_test(bool H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     char        filename[512];
     bool        show_progress = false;
     bool        verbose       = false;
-    hid_t       file_id       = -1;
+    hid_t       file_id       = H5I_INVALID_HID;
     H5F_t      *file_ptr      = NULL;
     H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;

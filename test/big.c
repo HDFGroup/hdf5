@@ -306,11 +306,12 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hsize_t size2[1] = {8LL * 1024LL * 1024LL * 1024LL};
     hsize_t hs_start[1];
     hsize_t hs_size[1];
-    hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
-    int    *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
-    int     i, j;
-    FILE   *out = fopen(DNAME, "w");
-    hid_t   dcpl;
+    hid_t   file = H5I_INVALID_HID, space1 = H5I_INVALID_HID, space2 = H5I_INVALID_HID,
+          mem_space = H5I_INVALID_HID, d1 = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
+    int  *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
+    int   i, j;
+    FILE *out = fopen(DNAME, "w");
+    hid_t dcpl;
 
     switch (testsize) {
         case LFILE:
@@ -449,7 +450,7 @@ static int
 reader(char *filename, hid_t fapl)
 {
     FILE   *script = NULL;
-    hid_t   file = -1, mspace = -1, fspace = -1, d2 = -1;
+    hid_t   file = H5I_INVALID_HID, mspace = H5I_INVALID_HID, fspace = H5I_INVALID_HID, d2 = H5I_INVALID_HID;
     char    ln[128], *s;
     hsize_t hs_offset[1];
     hsize_t hs_size[1] = {WRT_SIZE};
@@ -705,8 +706,8 @@ int
 main(int ac, char **av)
 {
     unsigned long seed   = 0; /* Random # seed */
-    hid_t         fapl   = -1;
-    hid_t         driver = -1;
+    hid_t         fapl   = H5I_INVALID_HID;
+    hid_t         driver = H5I_INVALID_HID;
 
     /* parameters setup */
 

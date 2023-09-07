@@ -109,12 +109,12 @@
 static herr_t
 gen_earliest_latest(void)
 {
-    hid_t   fid              = -1;                   /* File ID */
-    hid_t   fapl             = -1;                   /* File access property list ID */
-    hid_t   fcpl             = -1;                   /* File creation property list ID */
-    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
-    hid_t   space            = -1;                   /* Dataspace ID */
-    hid_t   dset             = -1;                   /* Dataset ID */
+    hid_t   fid              = H5I_INVALID_HID;      /* File ID */
+    hid_t   fapl             = H5I_INVALID_HID;      /* File access property list ID */
+    hid_t   fcpl             = H5I_INVALID_HID;      /* File creation property list ID */
+    hid_t   dcpl             = H5I_INVALID_HID;      /* Dataset creation property list ID */
+    hid_t   space            = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t   dset             = H5I_INVALID_HID;      /* Dataset ID */
     float  *buf              = NULL;                 /* Buffer for writing data */
     float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
@@ -253,12 +253,12 @@ error:
 static herr_t
 gen_earliest_v18(void)
 {
-    hid_t   fid              = -1;                   /* File ID */
-    hid_t   fapl             = -1;                   /* File access property list ID */
-    hid_t   fcpl             = -1;                   /* File creation property list ID */
-    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
-    hid_t   space            = -1;                   /* Dataspace ID */
-    hid_t   dset             = -1;                   /* Dataset ID */
+    hid_t   fid              = H5I_INVALID_HID;      /* File ID */
+    hid_t   fapl             = H5I_INVALID_HID;      /* File access property list ID */
+    hid_t   fcpl             = H5I_INVALID_HID;      /* File creation property list ID */
+    hid_t   dcpl             = H5I_INVALID_HID;      /* Dataset creation property list ID */
+    hid_t   space            = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t   dset             = H5I_INVALID_HID;      /* Dataset ID */
     float  *buf              = NULL;                 /* Buffer for writing data */
     float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
@@ -372,11 +372,11 @@ error:
 static herr_t
 gen_latest_latest(void)
 {
-    hid_t   fid              = -1;                   /* File ID */
-    hid_t   fapl             = -1;                   /* File access property list ID */
-    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
-    hid_t   space            = -1;                   /* Dataspace ID */
-    hid_t   dset             = -1;                   /* Dataset ID */
+    hid_t   fid              = H5I_INVALID_HID;      /* File ID */
+    hid_t   fapl             = H5I_INVALID_HID;      /* File access property list ID */
+    hid_t   dcpl             = H5I_INVALID_HID;      /* Dataset creation property list ID */
+    hid_t   space            = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t   dset             = H5I_INVALID_HID;      /* Dataset ID */
     float  *buf              = NULL;                 /* Buffer for writing data */
     float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
@@ -480,12 +480,12 @@ error:
 static herr_t
 gen_v18_latest(void)
 {
-    hid_t   fid              = -1;                   /* File ID */
-    hid_t   fapl             = -1;                   /* File access property list ID */
-    hid_t   fcpl             = -1;                   /* File creation property list ID */
-    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
-    hid_t   space            = -1;                   /* Dataspace ID */
-    hid_t   dset             = -1;                   /* Dataset ID */
+    hid_t   fid              = H5I_INVALID_HID;      /* File ID */
+    hid_t   fapl             = H5I_INVALID_HID;      /* File access property list ID */
+    hid_t   fcpl             = H5I_INVALID_HID;      /* File creation property list ID */
+    hid_t   dcpl             = H5I_INVALID_HID;      /* Dataset creation property list ID */
+    hid_t   space            = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t   dset             = H5I_INVALID_HID;      /* Dataset ID */
     float  *buf              = NULL;                 /* Buffer for writing data */
     float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
@@ -595,12 +595,12 @@ error:
 static herr_t
 gen_v18_v18(void)
 {
-    hid_t   fid              = -1;                   /* File ID */
-    hid_t   fapl             = -1;                   /* File access property list ID */
-    hid_t   fcpl             = -1;                   /* File creation property list ID */
-    hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
-    hid_t   space            = -1;                   /* Dataspace ID */
-    hid_t   dset             = -1;                   /* Dataset ID */
+    hid_t   fid              = H5I_INVALID_HID;      /* File ID */
+    hid_t   fapl             = H5I_INVALID_HID;      /* File access property list ID */
+    hid_t   fcpl             = H5I_INVALID_HID;      /* File creation property list ID */
+    hid_t   dcpl             = H5I_INVALID_HID;      /* Dataset creation property list ID */
+    hid_t   space            = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t   dset             = H5I_INVALID_HID;      /* Dataset ID */
     float  *buf              = NULL;                 /* Buffer for writing data */
     float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */

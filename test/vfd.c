@@ -191,14 +191,14 @@ static herr_t  H5FD__ctl_test_vfd_ctl(H5FD_t *_file, uint64_t op_code, uint64_t 
 static herr_t
 test_sec2(void)
 {
-    hid_t         fid          = -1;     /* file ID                      */
-    hid_t         fapl_id      = -1;     /* file access property list ID */
-    hid_t         fapl_id_out  = -1;     /* from H5Fget_access_plist     */
-    hid_t         driver_id    = -1;     /* ID for this VFD              */
-    unsigned long driver_flags = 0;      /* VFD feature flags            */
-    char          filename[1024];        /* filename                     */
-    void         *os_file_handle = NULL; /* OS file handle               */
-    hsize_t       file_size;             /* file size                    */
+    hid_t         fid          = H5I_INVALID_HID; /* file ID                      */
+    hid_t         fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t         fapl_id_out  = H5I_INVALID_HID; /* from H5Fget_access_plist     */
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
+    char          filename[1024];                 /* filename                     */
+    void         *os_file_handle = NULL;          /* OS file handle               */
+    hsize_t       file_size;                      /* file size                    */
 
     TESTING("SEC2 file driver");
 
@@ -303,28 +303,28 @@ error:
 static herr_t
 test_core(void)
 {
-    hid_t         fid          = -1;        /* file ID                      */
-    hid_t         fapl_id      = -1;        /* file access property list ID */
-    hid_t         fapl_id_out  = -1;        /* from H5Fget_access_plist     */
-    hid_t         driver_id    = -1;        /* ID for this VFD              */
-    unsigned long driver_flags = 0;         /* VFD feature flags            */
-    hid_t         did          = -1;        /* dataset ID                   */
-    hid_t         sid          = -1;        /* dataspace ID                 */
-    char          filename[1024];           /* filename                     */
-    void         *os_file_handle = NULL;    /* OS file handle               */
-    hsize_t       file_size;                /* file size                    */
-    size_t        increment;                /* core VFD increment           */
-    bool          backing_store;            /* use backing store?           */
-    bool          use_write_tracking;       /* write tracking flag          */
-    size_t        write_tracking_page_size; /* write tracking page size     */
-    int          *data_w = NULL;            /* data written to the dataset  */
-    int          *data_r = NULL;            /* data read from the dataset   */
-    int           val;                      /* data value                   */
-    int          *pw = NULL, *pr = NULL;    /* pointers for iterating over
-                                               data arrays (write & read)   */
-    hsize_t dims[2];                        /* dataspace dimensions         */
-    int     i, j;                           /* iterators                    */
-    htri_t  status;                         /* return value from H5Lexists  */
+    hid_t         fid          = H5I_INVALID_HID; /* file ID                      */
+    hid_t         fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t         fapl_id_out  = H5I_INVALID_HID; /* from H5Fget_access_plist     */
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
+    hid_t         did          = H5I_INVALID_HID; /* dataset ID                   */
+    hid_t         sid          = H5I_INVALID_HID; /* dataspace ID                 */
+    char          filename[1024];                 /* filename                     */
+    void         *os_file_handle = NULL;          /* OS file handle               */
+    hsize_t       file_size;                      /* file size                    */
+    size_t        increment;                      /* core VFD increment           */
+    bool          backing_store;                  /* use backing store?           */
+    bool          use_write_tracking;             /* write tracking flag          */
+    size_t        write_tracking_page_size;       /* write tracking page size     */
+    int          *data_w = NULL;                  /* data written to the dataset  */
+    int          *data_r = NULL;                  /* data read from the dataset   */
+    int           val;                            /* data value                   */
+    int          *pw = NULL, *pr = NULL;          /* pointers for iterating over
+                                                     data arrays (write & read)   */
+    hsize_t dims[2];                              /* dataspace dimensions         */
+    int     i, j;                                 /* iterators                    */
+    htri_t  status;                               /* return value from H5Lexists  */
 
     TESTING("CORE file driver");
 
@@ -693,8 +693,9 @@ static herr_t
 test_direct(void)
 {
 #ifdef H5_HAVE_DIRECT
-    hid_t   file = -1, fapl = -1, access_fapl = -1;
-    hid_t   dset1 = -1, dset2 = -1, space1 = -1, space2 = -1;
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, access_fapl = H5I_INVALID_HID;
+    hid_t dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID, space1 = H5I_INVALID_HID,
+          space2 = H5I_INVALID_HID;
     char    filename[1024];
     int    *fhandle = NULL;
     hsize_t file_size;
@@ -925,7 +926,7 @@ H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
-    hid_t file = -1;
+    hid_t file = H5I_INVALID_HID;
     char  first_name[1024];
     char  wrong_name[1024];
     int   i;
@@ -1000,10 +1001,11 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 static herr_t
 test_family(void)
 {
-    hid_t         file = -1, fapl = -1, fapl2 = -1, space = -1, dset = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID, space = H5I_INVALID_HID,
+          dset                 = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     char          dname[] = "dataset";
     unsigned int  i, j;
@@ -1210,8 +1212,8 @@ H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_family_compat(void)
 {
-    hid_t file = -1, fapl = -1;
-    hid_t dset    = -1;
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID;
+    hid_t dset    = H5I_INVALID_HID;
     char  dname[] = "dataset";
     char  filename[1024];
     char  pathname[1024], pathname_individual[1024];
@@ -1460,11 +1462,12 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 static herr_t
 test_multi(void)
 {
-    hid_t         file = -1, fapl = -1, fapl2 = -1, dset = -1, space = -1;
-    hid_t         root = -1, attr = -1, aspace = -1, atype = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID, dset = H5I_INVALID_HID,
+          space = H5I_INVALID_HID;
+    hid_t root = H5I_INVALID_HID, attr = H5I_INVALID_HID, aspace = H5I_INVALID_HID, atype = H5I_INVALID_HID;
+    hid_t access_fapl          = H5I_INVALID_HID;
+    hid_t driver_id            = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     int          *fhandle2 = NULL, *fhandle = NULL;
     hsize_t       file_size;
@@ -1716,10 +1719,10 @@ error:
 static herr_t
 test_multi_compat(void)
 {
-    hid_t       file = -1, fapl = -1, dset = -1, space = -1;
-    char        newname[1024];
-    char        filename_s[1024], newname_s[1024];
-    char        filename_r[1024], newname_r[1024];
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, dset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    char  newname[1024];
+    char  filename_s[1024], newname_s[1024];
+    char  filename_r[1024], newname_r[1024];
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
@@ -1898,11 +1901,11 @@ error:
 static herr_t
 test_log(void)
 {
-    hid_t         file         = -1;
-    hid_t         fapl         = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t         file         = H5I_INVALID_HID;
+    hid_t         fapl         = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     int          *fhandle   = NULL;
     hsize_t       file_size = 0;
@@ -2021,11 +2024,11 @@ error:
 static herr_t
 test_stdio(void)
 {
-    hid_t         file         = -1;
-    hid_t         fapl         = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t         file         = H5I_INVALID_HID;
+    hid_t         fapl         = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     FILE         *fhandle   = NULL;
     hsize_t       file_size = 0;
@@ -2127,11 +2130,11 @@ test_windows(void)
 {
 #ifdef H5_HAVE_WINDOWS
 
-    hid_t         file         = -1;
-    hid_t         fapl         = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t         file         = H5I_INVALID_HID;
+    hid_t         fapl         = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     int          *fhandle   = NULL;
     hsize_t       file_size = 0;
@@ -2255,12 +2258,12 @@ static herr_t
 test_ros3(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    hid_t            fid          = -1; /* file ID                      */
-    hid_t            fapl_id      = -1; /* file access property list ID */
-    hid_t            fapl_id_out  = -1; /* from H5Fget_access_plist     */
-    hid_t            driver_id    = -1; /* ID for this VFD              */
-    unsigned long    driver_flags = 0;  /* VFD feature flags            */
-    char             filename[1024];    /* filename                     */
+    hid_t            fid          = H5I_INVALID_HID; /* file ID                      */
+    hid_t            fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t            fapl_id_out  = H5I_INVALID_HID; /* from H5Fget_access_plist     */
+    hid_t            driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;               /* VFD feature flags            */
+    char             filename[1024];                 /* filename                     */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
         /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
@@ -4470,51 +4473,51 @@ test_vector_io(const char *vfd_name)
     bool        type_fixed_1 = false; /* types in vector are fixed.   */
     bool        type_fixed_2 = false; /*                              */
     bool        verbose      = false;
-    hid_t       fapl_id      = -1;          /* file access property list ID */
-    haddr_t     eoa;                        /* file eoa                     */
-    char        filename[1024];             /* filename                     */
-    char       *buf;                        /* tmp ptr to buf               */
-    unsigned    flags = 0;                  /* file open flags              */
-    H5FD_t     *lf    = NULL;               /* VFD struct ptr               */
-    uint32_t    i;                          /* index                        */
-    uint32_t    j;                          /* index                        */
-    uint32_t    count = VECTOR_LEN;         /* length of vectors            */
-    H5FD_mem_t  types_0[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t  types_1[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t  types_2[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t  f_types_0[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t  f_types_1[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t  f_types_2[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t  f_type_0 = H5FD_MEM_NTYPES; /* current type for f vector 0  */
-    H5FD_mem_t  f_type_1 = H5FD_MEM_NTYPES; /* current type for f vector 1  */
-    H5FD_mem_t  f_type_2 = H5FD_MEM_NTYPES; /* current type for f vector 2  */
-    haddr_t     addrs_0[VECTOR_LEN];        /* addresses vector             */
-    haddr_t     addrs_1[VECTOR_LEN];        /* addresses vector             */
-    haddr_t     addrs_2[VECTOR_LEN];        /* addresses vector             */
-    haddr_t     f_addrs_0[VECTOR_LEN];      /* fixed addresses vector       */
-    haddr_t     f_addrs_1[VECTOR_LEN];      /* fixed addresses vector       */
-    haddr_t     f_addrs_2[VECTOR_LEN];      /* fixed addresses vector       */
-    size_t      sizes_0[VECTOR_LEN];        /* sizes vector                 */
-    size_t      sizes_1[VECTOR_LEN];        /* sizes vector                 */
-    size_t      sizes_2[VECTOR_LEN];        /* sizes vector                 */
-    size_t      f_sizes_0[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t      f_sizes_1[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t      f_sizes_2[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t      f_size_0 = 0;               /* current size for f vector 0  */
-    size_t      f_size_1 = 0;               /* current size for f vector 1  */
-    size_t      f_size_2 = 0;               /* current size for f vector 2  */
-    const void *write_bufs_0[VECTOR_LEN];   /* write bufs vector            */
-    const void *write_bufs_1[VECTOR_LEN];   /* write bufs vector            */
-    const void *write_bufs_2[VECTOR_LEN];   /* write bufs vector            */
-    const void *f_write_bufs_0[VECTOR_LEN]; /* fixed write bufs vector      */
-    const void *f_write_bufs_1[VECTOR_LEN]; /* fixed write bufs vector      */
-    const void *f_write_bufs_2[VECTOR_LEN]; /* fixed write bufs vector      */
-    void       *read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
-    void       *read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
-    void       *read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
-    void       *f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
-    void       *f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
-    void       *f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
+    hid_t       fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    haddr_t     eoa;                            /* file eoa                     */
+    char        filename[1024];                 /* filename                     */
+    char       *buf;                            /* tmp ptr to buf               */
+    unsigned    flags = 0;                      /* file open flags              */
+    H5FD_t     *lf    = NULL;                   /* VFD struct ptr               */
+    uint32_t    i;                              /* index                        */
+    uint32_t    j;                              /* index                        */
+    uint32_t    count = VECTOR_LEN;             /* length of vectors            */
+    H5FD_mem_t  types_0[VECTOR_LEN];            /* types vector                 */
+    H5FD_mem_t  types_1[VECTOR_LEN];            /* types vector                 */
+    H5FD_mem_t  types_2[VECTOR_LEN];            /* types vector                 */
+    H5FD_mem_t  f_types_0[VECTOR_LEN];          /* fixed types vector           */
+    H5FD_mem_t  f_types_1[VECTOR_LEN];          /* fixed types vector           */
+    H5FD_mem_t  f_types_2[VECTOR_LEN];          /* fixed types vector           */
+    H5FD_mem_t  f_type_0 = H5FD_MEM_NTYPES;     /* current type for f vector 0  */
+    H5FD_mem_t  f_type_1 = H5FD_MEM_NTYPES;     /* current type for f vector 1  */
+    H5FD_mem_t  f_type_2 = H5FD_MEM_NTYPES;     /* current type for f vector 2  */
+    haddr_t     addrs_0[VECTOR_LEN];            /* addresses vector             */
+    haddr_t     addrs_1[VECTOR_LEN];            /* addresses vector             */
+    haddr_t     addrs_2[VECTOR_LEN];            /* addresses vector             */
+    haddr_t     f_addrs_0[VECTOR_LEN];          /* fixed addresses vector       */
+    haddr_t     f_addrs_1[VECTOR_LEN];          /* fixed addresses vector       */
+    haddr_t     f_addrs_2[VECTOR_LEN];          /* fixed addresses vector       */
+    size_t      sizes_0[VECTOR_LEN];            /* sizes vector                 */
+    size_t      sizes_1[VECTOR_LEN];            /* sizes vector                 */
+    size_t      sizes_2[VECTOR_LEN];            /* sizes vector                 */
+    size_t      f_sizes_0[VECTOR_LEN];          /* fixed sizes vector           */
+    size_t      f_sizes_1[VECTOR_LEN];          /* fixed sizes vector           */
+    size_t      f_sizes_2[VECTOR_LEN];          /* fixed sizes vector           */
+    size_t      f_size_0 = 0;                   /* current size for f vector 0  */
+    size_t      f_size_1 = 0;                   /* current size for f vector 1  */
+    size_t      f_size_2 = 0;                   /* current size for f vector 2  */
+    const void *write_bufs_0[VECTOR_LEN];       /* write bufs vector            */
+    const void *write_bufs_1[VECTOR_LEN];       /* write bufs vector            */
+    const void *write_bufs_2[VECTOR_LEN];       /* write bufs vector            */
+    const void *f_write_bufs_0[VECTOR_LEN];     /* fixed write bufs vector      */
+    const void *f_write_bufs_1[VECTOR_LEN];     /* fixed write bufs vector      */
+    const void *f_write_bufs_2[VECTOR_LEN];     /* fixed write bufs vector      */
+    void       *read_bufs_0[VECTOR_LEN];        /* read bufs vector             */
+    void       *read_bufs_1[VECTOR_LEN];        /* read bufs vector             */
+    void       *read_bufs_2[VECTOR_LEN];        /* read bufs vector             */
+    void       *f_read_bufs_0[VECTOR_LEN];      /* fixed read bufs vector       */
+    void       *f_read_bufs_1[VECTOR_LEN];      /* fixed read bufs vector       */
+    void       *f_read_bufs_2[VECTOR_LEN];      /* fixed read bufs vector       */
 
     HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
@@ -5019,7 +5022,7 @@ static herr_t
 test_selection_io(const char *vfd_name)
 {
     char       test_title[80];
-    hid_t      fapl_id = -1;                                        /* file access property list ID */
+    hid_t      fapl_id = H5I_INVALID_HID;                           /* file access property list ID */
     char       filename[1024];                                      /* filename                     */
     unsigned   flags = 0;                                           /* file open flags              */
     H5FD_t    *lf    = NULL;                                        /* VFD struct ptr               */

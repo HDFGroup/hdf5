@@ -258,9 +258,10 @@ token_reset(void)
 static herr_t
 attach_ref_attr(hid_t file_id, hid_t loc_id)
 {
-    char       dsetname1[] = "dataset1_pointed_by_ref_attr";
-    char       dsetname2[] = "dataset2_pointed_by_ref_attr";
-    hid_t      did1 = (-1), did2 = (-1), aid = (-1), sid = (-1), sid_ref = (-1);
+    char  dsetname1[] = "dataset1_pointed_by_ref_attr";
+    char  dsetname2[] = "dataset2_pointed_by_ref_attr";
+    hid_t did1 = (H5I_INVALID_HID), did2 = (H5I_INVALID_HID), aid = (H5I_INVALID_HID),
+          sid = (H5I_INVALID_HID), sid_ref = (H5I_INVALID_HID);
     hsize_t    dims[2]     = {2, 9};
     hsize_t    dims_ref[1] = {2};
     hobj_ref_t ref[2];
@@ -333,10 +334,10 @@ static herr_t
 attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 {
     const char      dsetnamev[] = "dataset_pointed_by_reg_ref_attr";
-    hid_t           aid         = (-1);
-    hid_t           space_id    = (-1); /* dataspace identifiers */
-    hid_t           spacer_id   = (-1); /* dataspace identifiers */
-    hid_t           dsetv_id    = (-1); /*dataset identifiers*/
+    hid_t           aid         = (H5I_INVALID_HID);
+    hid_t           space_id    = (H5I_INVALID_HID); /* dataspace identifiers */
+    hid_t           spacer_id   = (H5I_INVALID_HID); /* dataspace identifiers */
+    hid_t           dsetv_id    = (H5I_INVALID_HID); /*dataset identifiers*/
     hsize_t         dims[2]     = {2, 9};
     hsize_t         dimsr[1]    = {2};
     int             rank        = 2;
@@ -429,10 +430,10 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     const char      dsetnamer[]  = "dataset_with_reg_ref";
     const char      dsetnamer1[] = "compact_dataset_with_reg_ref";
     const char      dsetnamer2[] = "compressed_dataset_with_reg_ref";
-    hid_t           space_id     = (-1); /* dataspace identifiers */
-    hid_t           spacer_id    = (-1);
-    hid_t           dsetv_id     = (-1); /*dataset identifiers*/
-    hid_t           dsetr_id     = (-1);
+    hid_t           space_id     = (H5I_INVALID_HID); /* dataspace identifiers */
+    hid_t           spacer_id    = (H5I_INVALID_HID);
+    hid_t           dsetv_id     = (H5I_INVALID_HID); /*dataset identifiers*/
+    hid_t           dsetr_id     = (H5I_INVALID_HID);
     hsize_t         dims[2]      = {2, 9};
     hsize_t         dimsr[1]     = {2};
     int             rank         = 2;
@@ -444,7 +445,7 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     hsize_t         count[2];
     hsize_t         coord[3][2] = {{0, 0}, {1, 6}, {0, 8}};
     size_t          num_points  = 3;
-    hid_t           pid         = (-1);
+    hid_t           pid         = (H5I_INVALID_HID);
 
     if ((space_id = H5Screate_simple(rank, dims, NULL)) < 0)
         TEST_ERROR;
@@ -547,7 +548,7 @@ error:
 static int
 test_copy_attach_attribute_vl(hid_t loc_id)
 {
-    hid_t        aid = -1, sid = -1, tid = -1;
+    hid_t        aid = H5I_INVALID_HID, sid = H5I_INVALID_HID, tid = H5I_INVALID_HID;
     hvl_t        buf[4];
     hsize_t      dim1 = 4;
     unsigned int i, j;
@@ -602,11 +603,11 @@ done:
 static int
 test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
 {
-    hid_t    aid = -1, sid = -1;
+    hid_t    aid = H5I_INVALID_HID, sid = H5I_INVALID_HID;
     char     attr_name[ATTR_NAME_LEN];
     int      attr_data[2];
     hsize_t  dim1 = 2;
-    hid_t    acpl = -1;
+    hid_t    acpl = H5I_INVALID_HID;
     unsigned u;
     int      ret_value = -1;
 
@@ -669,10 +670,10 @@ done:
 static int
 test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
 {
-    hid_t    aid = -1, sid = -1;
+    hid_t    aid = H5I_INVALID_HID, sid = H5I_INVALID_HID;
     char     attr_name[ATTR_NAME_LEN];
     int      attr_data[2];
-    hid_t    acpl = -1;
+    hid_t    acpl = H5I_INVALID_HID;
     unsigned u;
     hsize_t  dim1 = 2;
 
@@ -745,16 +746,16 @@ done:
 static int
 compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_owner)
 {
-    hid_t      sid = -1, sid2 = -1; /* Dataspace IDs */
-    hid_t      tid = -1, tid2 = -1; /* Datatype IDs */
-    size_t     elmt_size;           /* Size of datatype */
-    htri_t     is_committed;        /* If the datatype is committed */
-    htri_t     is_committed2;       /* If the datatype is committed */
-    H5A_info_t ainfo;               /* Attribute info */
-    H5A_info_t ainfo2;              /* Attribute info */
-    hssize_t   nelmts;              /* # of elements in dataspace */
-    void      *rbuf  = NULL;        /* Buffer for reading raw data */
-    void      *rbuf2 = NULL;        /* Buffer for reading raw data */
+    hid_t      sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID; /* Dataspace IDs */
+    hid_t      tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
+    size_t     elmt_size;                                     /* Size of datatype */
+    htri_t     is_committed;                                  /* If the datatype is committed */
+    htri_t     is_committed2;                                 /* If the datatype is committed */
+    H5A_info_t ainfo;                                         /* Attribute info */
+    H5A_info_t ainfo2;                                        /* Attribute info */
+    hssize_t   nelmts;                                        /* # of elements in dataspace */
+    void      *rbuf  = NULL;                                  /* Buffer for reading raw data */
+    void      *rbuf2 = NULL;                                  /* Buffer for reading raw data */
 
     /* Check the character sets are equal */
     if (H5Aget_info(aid, &ainfo) < 0)
@@ -905,9 +906,9 @@ error:
 static int
 compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 {
-    hid_t       aid = -1, aid2 = -1; /* Attribute IDs */
-    H5O_info2_t oinfo1, oinfo2;      /* Object info */
-    unsigned    cpy_flags;           /* Object copy flags */
+    hid_t       aid = H5I_INVALID_HID, aid2 = H5I_INVALID_HID; /* Attribute IDs */
+    H5O_info2_t oinfo1, oinfo2;                                /* Object info */
+    unsigned    cpy_flags;                                     /* Object copy flags */
 
     /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
     if (pid != H5P_DEFAULT) {
@@ -1307,18 +1308,18 @@ error:
 static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 {
-    hid_t              sid = -1, sid2 = -1;   /* Dataspace IDs */
-    hid_t              tid = -1, tid2 = -1;   /* Datatype IDs */
-    hid_t              dcpl = -1, dcpl2 = -1; /* Dataset creation property list IDs */
-    size_t             elmt_size;             /* Size of datatype */
-    htri_t             is_committed;          /* If the datatype is committed */
-    htri_t             is_committed2;         /* If the datatype is committed */
-    int                nfilters;              /* Number of filters applied to dataset */
-    hssize_t           nelmts;                /* # of elements in dataspace */
-    void              *rbuf  = NULL;          /* Buffer for reading raw data */
-    void              *rbuf2 = NULL;          /* Buffer for reading raw data */
-    H5D_space_status_t space_status;          /* Dataset's raw dataspace status */
-    H5D_space_status_t space_status2;         /* Dataset's raw dataspace status */
+    hid_t    sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID;   /* Dataspace IDs */
+    hid_t    tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;   /* Datatype IDs */
+    hid_t    dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID; /* Dataset creation property list IDs */
+    size_t   elmt_size;                                       /* Size of datatype */
+    htri_t   is_committed;                                    /* If the datatype is committed */
+    htri_t   is_committed2;                                   /* If the datatype is committed */
+    int      nfilters;                                        /* Number of filters applied to dataset */
+    hssize_t nelmts;                                          /* # of elements in dataspace */
+    void    *rbuf  = NULL;                                    /* Buffer for reading raw data */
+    void    *rbuf2 = NULL;                                    /* Buffer for reading raw data */
+    H5D_space_status_t space_status;                          /* Dataset's raw dataspace status */
+    H5D_space_status_t space_status2;                         /* Dataset's raw dataspace status */
 
     /* Check the datatypes are equal */
 
@@ -1747,8 +1748,8 @@ error:
 static int
 test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t tid = -1, tid2 = -1;        /* Datatype IDs */
+    hid_t fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype IDs */
     char  src_filename[NAME_BUF_SIZE];
     char  dst_filename[NAME_BUF_SIZE];
 
@@ -1854,8 +1855,8 @@ error:
 static int
 test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t tid = -1, tid2 = -1;        /* Datatype IDs */
+    hid_t fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype IDs */
     char  src_filename[NAME_BUF_SIZE];
     char  dst_filename[NAME_BUF_SIZE];
 
@@ -1961,8 +1962,8 @@ error:
 static int
 test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t tid = -1, tid2 = -1;        /* Datatype IDs */
+    hid_t fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype IDs */
     char  src_filename[NAME_BUF_SIZE];
     char  dst_filename[NAME_BUF_SIZE];
 
@@ -2078,13 +2079,13 @@ error:
 static int
 test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t       fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t       tid = -1, tid2 = -1;        /* Datatype IDs */
-    hid_t       aid     = -1;               /* Attribute ID */
-    hid_t       sid     = -1;               /* Dataspace ID */
-    hsize_t     dims[2] = {3, 4};           /* Dataspace dimensions */
-    H5O_info2_t oinfo, oinfo2;              /* Object info */
-    H5G_info_t  ginfo;                      /* Group info */
+    hid_t       fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t       tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype IDs */
+    hid_t       aid     = H5I_INVALID_HID;                            /* Attribute ID */
+    hid_t       sid     = H5I_INVALID_HID;                            /* Dataspace ID */
+    hsize_t     dims[2] = {3, 4};                                     /* Dataspace dimensions */
+    H5O_info2_t oinfo, oinfo2;                                        /* Object info */
+    H5G_info_t  ginfo;                                                /* Group info */
     bool        same_type;
     char        src_filename[NAME_BUF_SIZE];
     char        dst_filename[NAME_BUF_SIZE];
@@ -2256,12 +2257,12 @@ error:
 static int
 test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t   sid = -1;                    /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;         /* Dataset IDs */
-    int     buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
-    hsize_t dim2d[2];                    /* Dataset dimensions */
-    int     i, j;                        /* local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    int     buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    int     i, j;                                                 /* local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -2398,19 +2399,19 @@ error:
 static int
 test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
 {
-    hid_t        fid_src = -1, fid_dst = -1;  /* Source and destination file IDs */
-    hid_t        fapl_dst = -1;               /* File access plist for dest file */
-    hid_t        sid      = -1;               /* Dataspace ID */
-    hid_t        did_src = -1, did_dst = -1;  /* Source and destination dataset IDs */
-    int          buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
-    hsize_t      dim2d[2];                    /* Dataset dimensions */
-    char         src_fname[NAME_BUF_SIZE];    /* Name of source file */
-    char         dst_fname[NAME_BUF_SIZE];    /* Name of destination file */
-    H5F_libver_t low, high;                   /* File format bounds */
-    unsigned     srcdset_layoutversion;       /* Layout version of source dataset */
-    int          i, j;                        /* Local index variables */
-    H5D_t       *dsetp = NULL;                /* Pointer to internal dset structure */
-    herr_t       ret;                         /* Generic return value */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* Source and destination file IDs */
+    hid_t   fapl_dst = H5I_INVALID_HID;                           /* File access plist for dest file */
+    hid_t   sid      = H5I_INVALID_HID;                           /* Dataspace ID */
+    hid_t   did_src = H5I_INVALID_HID, did_dst = H5I_INVALID_HID; /* Source and destination dataset IDs */
+    int     buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    char    src_fname[NAME_BUF_SIZE];                             /* Name of source file */
+    char    dst_fname[NAME_BUF_SIZE];                             /* Name of destination file */
+    H5F_libver_t low, high;                                       /* File format bounds */
+    unsigned     srcdset_layoutversion;                           /* Layout version of source dataset */
+    int          i, j;                                            /* Local index variables */
+    H5D_t       *dsetp = NULL;                                    /* Pointer to internal dset structure */
+    herr_t       ret;                                             /* Generic return value */
 
     TESTING("H5Ocopy(): simple dataset with version bounds");
 
@@ -2595,12 +2596,12 @@ error:
 static int
 test_copy_dataset_simple_samefile(hid_t fcpl, hid_t fapl)
 {
-    hid_t   fid = -1;                    /* File ID */
-    hid_t   sid = -1;                    /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;         /* Dataset IDs */
-    int     buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
-    hsize_t dim2d[2];                    /* Dataset dimensions */
-    int     i, j;                        /* local index variables */
+    hid_t   fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t   sid = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    int     buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
+    hsize_t dim2d[2];                                      /* Dataset dimensions */
+    int     i, j;                                          /* local index variables */
     char    filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): simple dataset within the same file");
@@ -2717,10 +2718,10 @@ error:
 static int
 test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool test_open)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hsize_t dim2d[2];                   /* Dataset dimensions */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -2850,11 +2851,11 @@ error:
 static int
 test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hsize_t dim1d[1];                   /* Dataset dimensions */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim1d[1];                                             /* Dataset dimensions */
     typedef struct comp_t {
         int    a;
         double d;
@@ -3002,18 +3003,18 @@ error:
 static int
 test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   pid = -1;                                      /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hsize_t dim1d[1];                                      /* Dataset dimensions */
-    hsize_t max_dim1d[1];                                  /* Dataset max. dimensions */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};               /* Chunk dimensions */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
-    float   buf1d[DIM_SIZE_1];                             /* Buffer for writing data */
-    float   buf2d[DIM_SIZE_1][DIM_SIZE_2];                 /* Buffer for writing data */
-    int     i, j;                                          /* Local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim1d[1];                                             /* Dataset dimensions */
+    hsize_t max_dim1d[1];                                         /* Dataset max. dimensions */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimensions */
+    float   buf1d[DIM_SIZE_1];                                    /* Buffer for writing data */
+    float   buf2d[DIM_SIZE_1][DIM_SIZE_2];                        /* Buffer for writing data */
+    int     i, j;                                                 /* Local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -3526,15 +3527,15 @@ error:
 static int
 test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   pid = -1;                                      /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hsize_t dim1d[1];                                      /* Dataset dimensions */
-    hsize_t max_dim1d[1];                                  /* Dataset max. dimensions */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};               /* Chunk dimensions */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim1d[1];                                             /* Dataset dimensions */
+    hsize_t max_dim1d[1];                                         /* Dataset max. dimensions */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimensions */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -4026,21 +4027,21 @@ error:
 static int
 test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   pid = -1;                                      /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hsize_t dim1d[1];                                      /* Dataset dimensions */
-    hsize_t new_dim1d[1];                                  /* Dataset dimensions */
-    hsize_t max_dim1d[1];                                  /* Dataset max. dimensions */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    hsize_t new_dim2d[2];                                  /* Dataset dimensions */
-    hsize_t max_dim2d[2];                                  /* Dataset max. dimensions */
-    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};               /* Chunk dimensions */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
-    float   buf1d[DIM_SIZE_1];                             /* Buffer for writing data */
-    float   buf2d[DIM_SIZE_1][DIM_SIZE_2];                 /* Buffer for writing data */
-    int     i, j;                                          /* Local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim1d[1];                                             /* Dataset dimensions */
+    hsize_t new_dim1d[1];                                         /* Dataset dimensions */
+    hsize_t max_dim1d[1];                                         /* Dataset max. dimensions */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    hsize_t new_dim2d[2];                                         /* Dataset dimensions */
+    hsize_t max_dim2d[2];                                         /* Dataset max. dimensions */
+    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimensions */
+    float   buf1d[DIM_SIZE_1];                                    /* Buffer for writing data */
+    float   buf2d[DIM_SIZE_1][DIM_SIZE_2];                        /* Buffer for writing data */
+    int     i, j;                                                 /* Local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -4404,14 +4405,14 @@ static int
 test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   pid = -1;                                      /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
-    float   buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
-    int     i, j;                                          /* Local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimensions */
+    float   buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    int     i, j;                                                 /* Local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -4822,14 +4823,14 @@ static int
 test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool test_open)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   pid = -1;                                      /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
-    float   buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
-    int     i, j;                                          /* Local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimensions */
+    float   buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    int     i, j;                                                 /* Local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -5002,13 +5003,13 @@ error:
 static int
 test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool test_open)
 {
-    hid_t   fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t   sid = -1;                    /* Dataspace ID */
-    hid_t   pid = -1;                    /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;         /* Dataset IDs */
-    hsize_t dim2d[2];                    /* Dataset dimensions */
-    float   buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
-    int     i, j;                        /* Local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    float   buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    int     i, j;                                                 /* Local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -5157,10 +5158,10 @@ error:
 static int
 test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   pid = -1;                   /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
     int     i;
     hsize_t size;
     hsize_t dim1d[1];
@@ -5303,10 +5304,10 @@ error:
 static int
 test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
     int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5445,11 +5446,11 @@ error:
 static int
 test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID;                                /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
     int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5610,11 +5611,11 @@ error:
 static int
 test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID;                                /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
     int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5779,10 +5780,10 @@ static int
 test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
                                     bool test_open)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
     int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -5950,11 +5951,11 @@ error:
 static int
 test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   tid = -1;                   /* Datatype ID */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
     int     i;
     hsize_t dim1d[1];
     int     buf[DIM_SIZE_1];
@@ -6118,14 +6119,14 @@ error:
 static int
 test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1;                   /* Datatype ID */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j;                       /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -6275,16 +6276,16 @@ error:
 static int
 test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1;      /* File IDs */
-    hid_t        tid = -1;                        /* Datatype ID */
-    hid_t        sid = -1;                        /* Dataspace ID */
-    hid_t        pid = -1;                        /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;             /* Dataset IDs */
-    hid_t        dxpl_id = -1;                    /* Dataset transfer property list ID */
-    unsigned int i, j;                            /* Local index variables */
-    hsize_t      dim1d[1];                        /* Dataset dimensions */
-    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
-    hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -6489,15 +6490,15 @@ error:
 static int
 test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1;                   /* Datatype ID */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        pid = -1;                   /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j;                       /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -6657,11 +6658,11 @@ error:
 static int
 test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t   aid = -1, aid2 = -1;        /* Attribute IDs */
-    hsize_t dim2d[2];                   /* Dataset dimensions */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   aid = H5I_INVALID_HID, aid2 = H5I_INVALID_HID;        /* Attribute IDs */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -6793,13 +6794,13 @@ error:
 static int
 attach_attribute_compound_vlstr(hid_t loc_id)
 {
-    hid_t   aid        = -1; /* Attribute ID */
-    hid_t   sid        = -1; /* Dataspace ID */
-    hid_t   tid        = -1; /* Datatype ID */
-    hid_t   vl_str_tid = -1; /* Variable length string datatype ID */
-    hid_t   cmpd_tid   = -1; /* Compound datatype ID */
-    hsize_t dim1       = 1;  /* Dimension size */
-    typedef struct {         /* Compound structure for the attribute */
+    hid_t   aid        = H5I_INVALID_HID; /* Attribute ID */
+    hid_t   sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   tid        = H5I_INVALID_HID; /* Datatype ID */
+    hid_t   vl_str_tid = H5I_INVALID_HID; /* Variable length string datatype ID */
+    hid_t   cmpd_tid   = H5I_INVALID_HID; /* Compound datatype ID */
+    hsize_t dim1       = 1;               /* Dimension size */
+    typedef struct {                      /* Compound structure for the attribute */
         int   i;
         char *v;
     } s1;
@@ -6874,10 +6875,10 @@ done:
 static int
 compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
 {
-    hid_t aid = -1, aid2 = -1; /* Attribute IDs */
-    hid_t tid = -1, tid2 = -1; /* Datatype IDs */
-    hid_t sid = -1, sid2 = -1; /* Dataspace IDs */
-    hid_t dxpl_id = -1;
+    hid_t aid = H5I_INVALID_HID, aid2 = H5I_INVALID_HID; /* Attribute IDs */
+    hid_t tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
+    hid_t sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID; /* Dataspace IDs */
+    hid_t dxpl_id = H5I_INVALID_HID;
     typedef struct { /* Compound structure for the attribute */
         int   i;
         char *v;
@@ -6979,14 +6980,14 @@ error:
 static int
 test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t   sid = -1;                    /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;         /* Dataset IDs */
-    hid_t   aid = -1, aid2 = -1;         /* Attribute IDs */
-    hid_t   gid = -1, gid2 = -1;         /* Group IDs */
-    hsize_t dim2d[2];                    /* Dataset dimensions */
-    char    src_filename[NAME_BUF_SIZE]; /* Source file name */
-    char    dst_filename[NAME_BUF_SIZE]; /* Destination file name */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   aid = H5I_INVALID_HID, aid2 = H5I_INVALID_HID;        /* Attribute IDs */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    char    src_filename[NAME_BUF_SIZE];                          /* Source file name */
+    char    dst_filename[NAME_BUF_SIZE];                          /* Destination file name */
 
     TESTING("H5Ocopy(): attribute with compound datatype consisting of variable length string");
 
@@ -7141,16 +7142,16 @@ static int
 test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   tid = -1;                                      /* Datatype ID */
-    hid_t   pid = -1;                                      /* Dataset creation property list ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hid_t   dxpl_id = -1;                                  /* Dataset transfer property list ID */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimensions */
-    hvl_t   buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
-    int     i, j, k;                                       /* Local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimensions */
+    hvl_t   buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    int     i, j, k;                                              /* Local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -7327,8 +7328,8 @@ error:
 static int
 test_copy_group_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t gid = -1, gid2 = -1;        /* Group IDs */
+    hid_t fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
     char  src_filename[NAME_BUF_SIZE];
     char  dst_filename[NAME_BUF_SIZE];
 
@@ -7434,11 +7435,11 @@ error:
 static int
 test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
-    hid_t   gid_sub = -1;               /* Sub-group ID */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID;                                /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
+    hid_t   gid_sub = H5I_INVALID_HID;                            /* Sub-group ID */
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     int     i, j;
@@ -7590,11 +7591,11 @@ error:
 static int
 test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
-    hid_t   gid_sub = -1;               /* Sub-group ID */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID;                                /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
+    hid_t   gid_sub = H5I_INVALID_HID;                            /* Sub-group ID */
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     int     i, j;
@@ -7746,11 +7747,11 @@ error:
 static int
 test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1;                   /* Dataset ID */
-    hid_t   gid = -1, gid2 = -1;        /* Group IDs */
-    hid_t   gid_sub = -1, gid_sub2;     /* Sub-group IDs */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID;                                /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
+    hid_t   gid_sub = H5I_INVALID_HID, gid_sub2;                  /* Sub-group IDs */
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     int     i, j, k;                /* Local index variables */
@@ -7912,9 +7913,9 @@ error:
 static int
 test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t gid = -1, gid2 = -1;         /* Group IDs */
-    hid_t gid_sub = -1, gid_sub2 = -1; /* Sub-group IDs */
+    hid_t fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID;  /* File IDs */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;         /* Group IDs */
+    hid_t gid_sub = H5I_INVALID_HID, gid_sub2 = H5I_INVALID_HID; /* Sub-group IDs */
     char  src_filename[NAME_BUF_SIZE];
     char  dst_filename[NAME_BUF_SIZE];
 
@@ -8046,11 +8047,11 @@ error:
 static int
 test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t    fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t    gid = -1, gid2 = -1;         /* Group IDs */
-    hid_t    gid_sub = -1, gid_sub2 = -1; /* Sub-group IDs */
-    unsigned u, v;                        /* Local index variables */
-    char     objname[NAME_BUF_SIZE];      /* Object name buffer */
+    hid_t    fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID;  /* File IDs */
+    hid_t    gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;         /* Group IDs */
+    hid_t    gid_sub = H5I_INVALID_HID, gid_sub2 = H5I_INVALID_HID; /* Sub-group IDs */
+    unsigned u, v;                                                  /* Local index variables */
+    char     objname[NAME_BUF_SIZE];                                /* Object name buffer */
     char     src_filename[NAME_BUF_SIZE];
     char     dst_filename[NAME_BUF_SIZE];
 
@@ -8191,13 +8192,13 @@ error:
 static int
 test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t       fid_src = -1, fid_dst = -1, fid_ext = -1; /* File IDs */
-    hid_t       sid = -1;                                 /* Dataspace ID */
-    hid_t       did = -1, did2 = -1;                      /* Dataset ID */
-    hid_t       gid = -1, gid2 = -1;                      /* Group IDs */
-    hid_t       plid = -1;                                /* Object copy plist ID */
-    hsize_t     dim2d[2];
-    hsize_t     dim1d[1];
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t   plid = H5I_INVALID_HID;                        /* Object copy plist ID */
+    hsize_t dim2d[2];
+    hsize_t dim1d[1];
     H5L_info2_t linfo;
     int         buf[DIM_SIZE_1][DIM_SIZE_2];
     int         i, j;
@@ -8517,10 +8518,10 @@ error:
 static int
 test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool test_open)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   sid = -1;                   /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t   gid = -1;                   /* Group ID */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID;                                /* Group ID */
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     int     i, j;
@@ -8672,10 +8673,10 @@ error:
 static int
 test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1, fid_ext = -1; /* File IDs */
-    hid_t   sid = -1;                                 /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;                      /* Dataset IDs */
-    hid_t   gid = -1;                                 /* Group ID */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID;                         /* Group ID */
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     int     i, j;
@@ -8834,13 +8835,13 @@ error:
 static int
 test_copy_exist(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t   sid = -1;                    /* Dataspace ID */
-    hid_t   did = -1;                    /* Dataset IDs */
-    int     buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
-    hsize_t dim2d[2];                    /* Dataset dimensions */
-    int     i, j;                        /* local index variables */
-    herr_t  ret;                         /* Generic return value */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID;                                /* Dataset IDs */
+    int     buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    int     i, j;                                                 /* local index variables */
+    herr_t  ret;                                                  /* Generic return value */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -8958,14 +8959,14 @@ error:
 static int
 test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t   sid = -1;                    /* Dataspace ID */
-    hid_t   did = -1, did2 = -1;         /* Dataset IDs */
-    hid_t   gid = -1;                    /* Group ID */
-    int     buf[DIM_SIZE_1][DIM_SIZE_2]; /* Buffer for writing data */
-    hsize_t dim2d[2];                    /* Dataset dimensions */
-    int     i, j;                        /* local index variables */
-    herr_t  ret;                         /* Generic return value */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID;                                /* Group ID */
+    int     buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    int     i, j;                                                 /* local index variables */
+    herr_t  ret;                                                  /* Generic return value */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -9120,8 +9121,8 @@ error:
 static int
 test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fapl)
 {
-    hid_t fid = -1;            /* File ID */
-    hid_t tid = -1, tid2 = -1; /* Datatype IDs */
+    hid_t fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
     char  filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): named datatype in same file");
@@ -9199,9 +9200,9 @@ error:
 static int
 test_copy_old_layout(hid_t fcpl_dst, hid_t fapl, bool test_open)
 {
-    hid_t       fid_src = -1, fid_dst = -1;                             /* File IDs */
-    hid_t       did = -1, did2 = -1;                                    /* Dataset IDs */
-    hid_t       src_fapl     = -1;                                      /* Source file FAPL ID */
+    hid_t       fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID;   /* File IDs */
+    hid_t       did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;          /* Dataset IDs */
+    hid_t       src_fapl     = H5I_INVALID_HID;                         /* Source file FAPL ID */
     const char *src_filename = H5_get_srcdir_filename(FILE_OLD_LAYOUT); /* Corrected test file name */
     char        dst_filename[NAME_BUF_SIZE];
 
@@ -9309,15 +9310,15 @@ error:
 static int
 test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1, tid_copy = -1;    /* Datatype ID */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        pid = -1;                   /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j;                       /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid_copy = H5I_INVALID_HID;    /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -9491,14 +9492,14 @@ error:
 static int
 test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1, tid_copy = -1;    /* Datatype ID */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j;                       /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid_copy = H5I_INVALID_HID;    /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -9665,16 +9666,16 @@ static int
 test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
                                    bool test_open)
 {
-    hid_t        fid_src = -1, fid_dst = -1;      /* File IDs */
-    hid_t        tid = -1, tid_copy = -1;         /* Datatype ID */
-    hid_t        sid = -1;                        /* Dataspace ID */
-    hid_t        pid = -1;                        /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;             /* Dataset IDs */
-    hid_t        dxpl_id = -1;                    /* Dataset transfer property list ID */
-    unsigned int i, j;                            /* Local index variables */
-    hsize_t      dim1d[1];                        /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
-    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid_copy = H5I_INVALID_HID;    /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -9858,16 +9859,16 @@ error:
 static int
 test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1;      /* File IDs */
-    hid_t        tid = -1, tid_copy = -1;         /* Datatype ID */
-    hid_t        sid = -1;                        /* Dataspace ID */
-    hid_t        pid = -1;                        /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;             /* Dataset IDs */
-    hid_t        dxpl_id = -1;                    /* Dataset transfer property list ID */
-    unsigned int i, j;                            /* Local index variables */
-    hsize_t      dim1d[1];                        /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
-    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid_copy = H5I_INVALID_HID;    /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10043,16 +10044,16 @@ error:
 static int
 test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1, tid2 = -1;        /* Datatype ID */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        pid = -1;                   /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j, k;                    /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
-    hvl_t       *tvl;                        /* Temporary pointer to VL information */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j, k;                                              /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    hvl_t       *tvl; /* Temporary pointer to VL information */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10235,16 +10236,16 @@ error:
 static int
 test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool test_open)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1, tid2 = -1;        /* Datatype ID */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        pid = -1;                   /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j, k;                    /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
-    hvl_t       *tvl;                        /* Temporary pointer to VL information */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j, k;                                              /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    hvl_t       *tvl; /* Temporary pointer to VL information */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10431,15 +10432,15 @@ error:
 static int
 test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1;      /* File IDs */
-    hid_t        tid = -1, tid2 = -1;             /* Datatype ID */
-    hid_t        sid = -1;                        /* Dataspace ID */
-    hid_t        pid = -1;                        /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;             /* Dataset IDs */
-    hid_t        dxpl_id = -1;                    /* Dataset transfer property list ID */
-    unsigned int i, j, k;                         /* Local index variables */
-    hsize_t      dim1d[1];                        /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j, k;                                              /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     hvl_t       *tvl;                             /* Temporary pointer to VL information */
     hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
@@ -10667,15 +10668,15 @@ static int
 test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
                                    bool test_open)
 {
-    hid_t        fid_src = -1, fid_dst = -1;      /* File IDs */
-    hid_t        tid = -1, tid2 = -1;             /* Datatype ID */
-    hid_t        sid = -1;                        /* Dataspace ID */
-    hid_t        pid = -1;                        /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;             /* Dataset IDs */
-    hid_t        dxpl_id = -1;                    /* Dataset transfer property list ID */
-    unsigned int i, j, k;                         /* Local index variables */
-    hsize_t      dim1d[1];                        /* Dataset dimensions */
-    hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype ID */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j, k;                                              /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hvl_t        buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     hvl_t       *tvl;                             /* Temporary pointer to VL information */
     hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
@@ -10876,16 +10877,16 @@ typedef struct cmpd_vl_t {
 static int
 test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid     = -1;               /* Datatype ID */
-    hid_t        tid2    = -1;               /* Datatype ID */
-    hid_t        sid     = -1;               /* Dataspace ID */
-    hid_t        did     = -1;               /* Dataset ID */
-    hid_t        did2    = -1;               /* Dataset ID */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j;                       /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    cmpd_vl_t    buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid     = H5I_INVALID_HID;                            /* Datatype ID */
+    hid_t        tid2    = H5I_INVALID_HID;                            /* Datatype ID */
+    hid_t        sid     = H5I_INVALID_HID;                            /* Dataspace ID */
+    hid_t        did     = H5I_INVALID_HID;                            /* Dataset ID */
+    hid_t        did2    = H5I_INVALID_HID;                            /* Dataset ID */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    cmpd_vl_t    buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -11049,16 +11050,16 @@ error:
 static int
 test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1;      /* File IDs */
-    hid_t        tid = -1, tid2 = -1;             /* Datatype IDs */
-    hid_t        sid = -1;                        /* Dataspace ID */
-    hid_t        pid = -1;                        /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;             /* Dataset IDs */
-    hid_t        dxpl_id = -1;                    /* Dataset transfer property list ID */
-    unsigned int i, j;                            /* Local index variables */
-    hsize_t      dim1d[1];                        /* Dataset dimensions */
-    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
-    cmpd_vl_t    buf[DIM_SIZE_1];                 /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype IDs */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1};                      /* Chunk dimensions */
+    cmpd_vl_t    buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -11232,15 +11233,15 @@ error:
 static int
 test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid = -1, tid2 = -1;        /* Datatype IDs */
-    hid_t        sid = -1;                   /* Dataspace ID */
-    hid_t        pid = -1;                   /* Dataset creation property list ID */
-    hid_t        did = -1, did2 = -1;        /* Dataset IDs */
-    hid_t        dxpl_id = -1;               /* Dataset transfer property list ID */
-    unsigned int i, j;                       /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    cmpd_vl_t    buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;        /* Datatype IDs */
+    hid_t        sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t        pid = H5I_INVALID_HID;                                /* Dataset creation property list ID */
+    hid_t        did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t        dxpl_id = H5I_INVALID_HID;                            /* Dataset transfer property list ID */
+    unsigned int i, j;                                                 /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    cmpd_vl_t    buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -11418,14 +11419,14 @@ error:
 static int
 test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t           fid1 = -1, fid2 = -1;                         /* File IDs */
-    hid_t           sid  = -1;                                    /* Dataspace ID */
-    hid_t           pid  = -1;                                    /* Object copy property list ID */
-    hid_t           did1 = -1, did2 = -1;                         /* Dataset IDs */
-    hsize_t         dim1d[1] = {2};                               /* Dataset dimensions */
-    hobj_ref_t      obj_buf[2];                                   /* Buffer for object refs */
-    hdset_reg_ref_t reg_buf[2];                                   /* Buffer for region refs */
-    char            zeros[MAX(sizeof(obj_buf), sizeof(reg_buf))]; /* Array of zeros, for memcmp */
+    hid_t           fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t           sid  = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t           pid  = H5I_INVALID_HID;                         /* Object copy property list ID */
+    hid_t           did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hsize_t         dim1d[1] = {2};                                 /* Dataset dimensions */
+    hobj_ref_t      obj_buf[2];                                     /* Buffer for object refs */
+    hdset_reg_ref_t reg_buf[2];                                     /* Buffer for region refs */
+    char            zeros[MAX(sizeof(obj_buf), sizeof(reg_buf))];   /* Array of zeros, for memcmp */
     char            src_filename[NAME_BUF_SIZE];
     char            mid_filename[NAME_BUF_SIZE];
     char            dst_filename[NAME_BUF_SIZE];
@@ -11609,18 +11610,18 @@ error:
 static int
 test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t           fid1 = -1, fid2 = -1, fid3 = -1;              /* File IDs */
-    hid_t           sid  = -1;                                    /* Dataspace ID */
-    hid_t           pid  = -1;                                    /* Object copy property list ID */
-    hid_t           did1 = -1, did2 = -1;                         /* Dataset IDs */
-    hid_t           did3 = -1, did4 = -1;                         /* Dataset IDs */
-    hid_t           did5 = -1, did6 = -1;                         /* Dataset IDs */
-    hid_t           dcpl           = -1;                          /* Dataset creation property list */
-    hsize_t         chunk_dim1d[1] = {2};                         /* Chunk dimensions */
-    hsize_t         dim1d[1]       = {3};                         /* Dataset dimensions */
-    hobj_ref_t      obj_buf[3];                                   /* Buffer for object refs */
-    hdset_reg_ref_t reg_buf[3];                                   /* Buffer for region refs */
-    char            zeros[MAX(sizeof(obj_buf), sizeof(reg_buf))]; /* Array of zeros, for memcmp */
+    hid_t           fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID; /* File IDs */
+    hid_t           sid  = H5I_INVALID_HID;                                                 /* Dataspace ID */
+    hid_t           pid  = H5I_INVALID_HID;                         /* Object copy property list ID */
+    hid_t           did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t           did3 = H5I_INVALID_HID, did4 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t           did5 = H5I_INVALID_HID, did6 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t           dcpl           = H5I_INVALID_HID;               /* Dataset creation property list */
+    hsize_t         chunk_dim1d[1] = {2};                           /* Chunk dimensions */
+    hsize_t         dim1d[1]       = {3};                           /* Dataset dimensions */
+    hobj_ref_t      obj_buf[3];                                     /* Buffer for object refs */
+    hdset_reg_ref_t reg_buf[3];                                     /* Buffer for region refs */
+    char            zeros[MAX(sizeof(obj_buf), sizeof(reg_buf))];   /* Array of zeros, for memcmp */
     char            src_filename[NAME_BUF_SIZE];
     char            mid_filename[NAME_BUF_SIZE];
     char            dst_filename[NAME_BUF_SIZE];
@@ -11814,9 +11815,9 @@ error:
 static int
 test_copy_attr_crt_order(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid1 = -1, fid2 = -1; /* File IDs */
-    hid_t gcplid = -1;          /* Group creation property list ID */
-    hid_t gid1 = -1, gid2 = -1; /* Group IDs */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t gcplid = H5I_INVALID_HID;                       /* Group creation property list ID */
+    hid_t gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
     char  src_filename[NAME_BUF_SIZE];
     char  dst_filename[NAME_BUF_SIZE];
 
@@ -11947,16 +11948,16 @@ static int
 test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
                                    bool reopen)
 {
-    hid_t        fid_src1 = -1, fid_src2 = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid       = -1;                             /* Datatype ID */
-    hid_t        sid       = -1;                             /* Dataspace ID */
-    hid_t        did       = -1;                             /* Dataset ID */
-    hid_t        ocpypl_id = -1;                             /* Object copy plist ID */
-    unsigned int i;                                          /* Local index variables */
-    hsize_t      dim1d[1];                                   /* Dataset dimensions */
-    int          buf[DIM_SIZE_1];                            /* Buffer for writing data */
-    H5O_info2_t  oinfo;                                      /* Object info */
-    H5O_token_t  exp_token;                                  /* Expected object token */
+    hid_t fid_src1 = H5I_INVALID_HID, fid_src2 = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t tid       = H5I_INVALID_HID;                                                       /* Datatype ID */
+    hid_t sid       = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t did       = H5I_INVALID_HID; /* Dataset ID */
+    hid_t ocpypl_id = H5I_INVALID_HID; /* Object copy plist ID */
+    unsigned int i;                    /* Local index variables */
+    hsize_t      dim1d[1];             /* Dataset dimensions */
+    int          buf[DIM_SIZE_1];      /* Buffer for writing data */
+    H5O_info2_t  oinfo;                /* Object info */
+    H5O_token_t  exp_token;            /* Expected object token */
     char         src1_filename[NAME_BUF_SIZE];
     char         src2_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
@@ -12263,17 +12264,17 @@ error:
 static int
 test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, bool reopen)
 {
-    hid_t        fid       = -1;  /* File ID */
-    hid_t        tid       = -1;  /* Datatype ID */
-    hid_t        sid       = -1;  /* Dataspace ID */
-    hid_t        did       = -1;  /* Dataset ID */
-    hid_t        gid       = -1;  /* Group ID */
-    hid_t        ocpypl_id = -1;  /* Object copy plist ID */
-    unsigned int i;               /* Local index variables */
-    hsize_t      dim1d[1];        /* Dataset dimensions */
-    int          buf[DIM_SIZE_1]; /* Buffer for writing data */
-    H5O_info2_t  oinfo;           /* Object info */
-    H5O_token_t  exp_token;       /* Expected object token */
+    hid_t        fid       = H5I_INVALID_HID; /* File ID */
+    hid_t        tid       = H5I_INVALID_HID; /* Datatype ID */
+    hid_t        sid       = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        did       = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        gid       = H5I_INVALID_HID; /* Group ID */
+    hid_t        ocpypl_id = H5I_INVALID_HID; /* Object copy plist ID */
+    unsigned int i;                           /* Local index variables */
+    hsize_t      dim1d[1];                    /* Dataset dimensions */
+    int          buf[DIM_SIZE_1];             /* Buffer for writing data */
+    H5O_info2_t  oinfo;                       /* Object info */
+    H5O_token_t  exp_token;                   /* Expected object token */
     char         filename[NAME_BUF_SIZE];
     int          token_cmp;
 
@@ -12656,16 +12657,16 @@ error:
 static int
 test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid       = -1;             /* Datatype ID */
-    hid_t        sid       = -1;             /* Dataspace ID */
-    hid_t        did       = -1;             /* Dataset ID */
-    hid_t        ocpypl_id = -1;             /* Object copy plist ID */
-    unsigned int i;                          /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    int          buf[DIM_SIZE_1];            /* Buffer for writing data */
-    H5O_info2_t  oinfo;                      /* Object info */
-    H5O_token_t  exp_token;                  /* Expected object token */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t        sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t        did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t        ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    unsigned int i;                                                    /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    int          buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    H5O_info2_t  oinfo;                                                /* Object info */
+    H5O_token_t  exp_token;                                            /* Expected object token */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
     int          token_cmp;
@@ -12950,18 +12951,18 @@ error:
 static int
 test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid       = -1;             /* Datatype ID */
-    hid_t        sid       = -1;             /* Dataspace ID */
-    hid_t        did       = -1;             /* Dataset ID */
-    hid_t        aid       = -1;             /* Attribute ID */
-    hid_t        gid       = -1;             /* Group ID */
-    hid_t        ocpypl_id = -1;             /* Object copy plist ID */
-    unsigned int i;                          /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    int          buf[DIM_SIZE_1];            /* Buffer for writing data */
-    H5O_info2_t  oinfo;                      /* Object info */
-    H5O_token_t  exp_token;                  /* Expected object token */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t        sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t        did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t        aid       = H5I_INVALID_HID;                          /* Attribute ID */
+    hid_t        gid       = H5I_INVALID_HID;                          /* Group ID */
+    hid_t        ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    unsigned int i;                                                    /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    int          buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    H5O_info2_t  oinfo;                                                /* Object info */
+    H5O_token_t  exp_token;                                            /* Expected object token */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
     int          token_cmp;
@@ -13221,23 +13222,23 @@ error:
 static int
 test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t       fid_src = -1, fid_dst = -1;     /* File IDs */
-    hid_t       tid       = -1;                 /* Datatype ID */
-    hid_t       sid       = -1;                 /* Dataspace ID */
-    hid_t       did       = -1;                 /* Dataset ID */
-    hid_t       gid       = -1;                 /* Group IDs */
-    hid_t       f_tid     = -1;                 /* Datatype ID for root group */
-    hid_t       g_tid     = -1;                 /* Datatype ID for group */
-    hid_t       anon_tid  = -1;                 /* Anonymous datatype */
-    hid_t       aid       = -1;                 /* Attribute ID */
-    hid_t       ocpypl_id = -1;                 /* Object copy plist ID */
-    int         i;                              /* Local index variable */
-    hsize_t     dim1d[1];                       /* dimension sizes */
-    int         buf[DIM_SIZE_1];                /* Buffer for data */
-    H5O_token_t exp_token_int, exp_token_short; /* Expected object tokenes */
-    H5O_info2_t oinfo;                          /* Object info */
-    char        src_filename[NAME_BUF_SIZE];    /* Source file name */
-    char        dst_filename[NAME_BUF_SIZE];    /* Destination file name */
+    hid_t       fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t       tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t       sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t       did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t       gid       = H5I_INVALID_HID;                          /* Group IDs */
+    hid_t       f_tid     = H5I_INVALID_HID;                          /* Datatype ID for root group */
+    hid_t       g_tid     = H5I_INVALID_HID;                          /* Datatype ID for group */
+    hid_t       anon_tid  = H5I_INVALID_HID;                          /* Anonymous datatype */
+    hid_t       aid       = H5I_INVALID_HID;                          /* Attribute ID */
+    hid_t       ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    int         i;                                                    /* Local index variable */
+    hsize_t     dim1d[1];                                             /* dimension sizes */
+    int         buf[DIM_SIZE_1];                                      /* Buffer for data */
+    H5O_token_t exp_token_int, exp_token_short;                       /* Expected object tokenes */
+    H5O_info2_t oinfo;                                                /* Object info */
+    char        src_filename[NAME_BUF_SIZE];                          /* Source file name */
+    char        dst_filename[NAME_BUF_SIZE];                          /* Destination file name */
     int         token_cmp;
 
     if (reopen)
@@ -13691,18 +13692,18 @@ error:
 static int
 test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t       fid_src = -1, fid_dst = -1;  /* File IDs */
-    hid_t       tid1 = -1, tid2 = -1;        /* Datatype IDs */
-    hid_t       tid3 = -1, tid4 = -1;        /* Datatype IDs */
-    hid_t       tid5 = -1, tid = -1;         /* Datatype IDs */
-    hid_t       sid       = -1;              /* Dataspace ID */
-    hid_t       aid       = -1;              /* Attribute ID */
-    hid_t       ocpypl_id = -1;              /* Object copy plist ID */
-    hsize_t     dim1d[1];                    /* dimension sizes */
-    H5O_info2_t oinfo;                       /* Object info */
-    H5O_token_t exp_token;                   /* Expected object token */
-    char        src_filename[NAME_BUF_SIZE]; /* Source file name */
-    char        dst_filename[NAME_BUF_SIZE]; /* Destination file name */
+    hid_t       fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t       tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;       /* Datatype IDs */
+    hid_t       tid3 = H5I_INVALID_HID, tid4 = H5I_INVALID_HID;       /* Datatype IDs */
+    hid_t       tid5 = H5I_INVALID_HID, tid = H5I_INVALID_HID;        /* Datatype IDs */
+    hid_t       sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t       aid       = H5I_INVALID_HID;                          /* Attribute ID */
+    hid_t       ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    hsize_t     dim1d[1];                                             /* dimension sizes */
+    H5O_info2_t oinfo;                                                /* Object info */
+    H5O_token_t exp_token;                                            /* Expected object token */
+    char        src_filename[NAME_BUF_SIZE];                          /* Source file name */
+    char        dst_filename[NAME_BUF_SIZE];                          /* Destination file name */
     int         token_cmp;
 
     if (reopen)
@@ -14004,11 +14005,11 @@ error:
 static int
 test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t       fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t       tid       = -1;             /* Datatype ID */
-    hid_t       ocpypl_id = -1;             /* Object copy plist ID */
-    H5O_info2_t oinfo;                      /* Object info */
-    H5O_token_t exp_token;                  /* Expected object token */
+    hid_t       fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t       tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t       ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    H5O_info2_t oinfo;                                                /* Object info */
+    H5O_token_t exp_token;                                            /* Expected object token */
     char        src_filename[NAME_BUF_SIZE];
     char        dst_filename[NAME_BUF_SIZE];
     int         token_cmp;
@@ -14317,16 +14318,16 @@ error:
 static int
 test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t        fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t        tid       = -1;             /* Datatype ID */
-    hid_t        sid       = -1;             /* Dataspace ID */
-    hid_t        did       = -1;             /* Dataset ID */
-    hid_t        ocpypl_id = -1;             /* Object copy plist ID */
-    unsigned int i;                          /* Local index variables */
-    hsize_t      dim1d[1];                   /* Dataset dimensions */
-    int          buf[DIM_SIZE_1];            /* Buffer for writing data */
-    H5O_info2_t  oinfo;                      /* Object info */
-    H5O_token_t  exp_token;                  /* Expected object token */
+    hid_t        fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t        tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t        sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t        did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t        ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    unsigned int i;                                                    /* Local index variables */
+    hsize_t      dim1d[1];                                             /* Dataset dimensions */
+    int          buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    H5O_info2_t  oinfo;                                                /* Object info */
+    H5O_token_t  exp_token;                                            /* Expected object token */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
     int          token_cmp;
@@ -14690,17 +14691,17 @@ error:
 static int
 test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t   fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t   gid       = -1;             /* Group ID */
-    hid_t   sid       = -1;             /* Dataspace ID */
-    hid_t   tid       = -1;             /* Datatype ID */
-    hid_t   aid       = -1;             /* Attribute ID */
-    hid_t   did       = -1;             /* Dataset ID */
-    hid_t   exp_did   = -1;             /* Dataset ID */
-    hid_t   tid_short = -1;             /* Datatype ID */
-    hid_t   exp_tid   = -1;             /* Expected datatype ID */
-    hid_t   ocpypl_id = -1;             /* Object copy plist ID */
-    hsize_t dim1d[1];                   /* Dataset dimensions */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   gid       = H5I_INVALID_HID;                          /* Group ID */
+    hid_t   sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t   tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t   aid       = H5I_INVALID_HID;                          /* Attribute ID */
+    hid_t   did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t   exp_did   = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t   tid_short = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t   exp_tid   = H5I_INVALID_HID;                          /* Expected datatype ID */
+    hid_t   ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    hsize_t dim1d[1];                                             /* Dataset dimensions */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
@@ -15333,16 +15334,16 @@ mcdt_search_cb(void *_udata)
 static int
 test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t             fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t             tid       = -1;             /* Datatype ID */
-    hid_t             sid       = -1;             /* Dataspace ID */
-    hid_t             did       = -1;             /* Dataset ID */
-    hid_t             ocpypl_id = -1;             /* Object copy plist ID */
-    unsigned int      i;                          /* Local index variables */
-    hsize_t           dim1d[1];                   /* Dataset dimensions */
-    int               buf[DIM_SIZE_1];            /* Buffer for writing data */
-    H5O_info2_t       oinfo;                      /* Object info */
-    H5O_token_t       exp_token;                  /* Expected object token */
+    hid_t             fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t             tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t             sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t             did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t             ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    unsigned int      i;                                                    /* Local index variables */
+    hsize_t           dim1d[1];                                             /* Dataset dimensions */
+    int               buf[DIM_SIZE_1];                                      /* Buffer for writing data */
+    H5O_info2_t       oinfo;                                                /* Object info */
+    H5O_token_t       exp_token;                                            /* Expected object token */
     char              src_filename[NAME_BUF_SIZE];
     char              dst_filename[NAME_BUF_SIZE];
     mcdt_search_cb_ud cb_udata; /* User data for callback */
@@ -15805,14 +15806,14 @@ mcdt_search_cbB(void *_udata)
 static int
 test_copy_set_get_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, bool reopen)
 {
-    hid_t                  fid_src = -1, fid_dst = -1; /* File IDs */
-    hid_t                  tid       = -1;             /* Datatype ID */
-    hid_t                  sid       = -1;             /* Dataspace ID */
-    hid_t                  did       = -1;             /* Dataset ID */
-    hid_t                  ocpypl_id = -1;             /* Object copy plist ID */
-    unsigned int           i;                          /* Local index variables */
-    hsize_t                dim1d[1];                   /* Dataset dimensions */
-    int                    buf[DIM_SIZE_1];            /* Buffer for writing data */
+    hid_t                  fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t                  tid       = H5I_INVALID_HID;                          /* Datatype ID */
+    hid_t                  sid       = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t                  did       = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t                  ocpypl_id = H5I_INVALID_HID;                          /* Object copy plist ID */
+    unsigned int           i;                                                    /* Local index variables */
+    hsize_t                dim1d[1];                                             /* Dataset dimensions */
+    int                    buf[DIM_SIZE_1];                                      /* Buffer for writing data */
     char                   src_filename[NAME_BUF_SIZE];
     char                   dst_filename[NAME_BUF_SIZE];
     H5O_mcdt_search_cb_t   mcdt_cb = NULL;      /* The callback function */
@@ -16216,8 +16217,8 @@ error:
 static int
 test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t fid1 = -1, fid2 = -1; /* File IDs */
-    hid_t gid = -1;             /* Group ID */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t gid = H5I_INVALID_HID;                          /* Group ID */
     int   i;
     char  grp_name[16];
     char  src_filename[NAME_BUF_SIZE];
@@ -16303,14 +16304,14 @@ static int
 test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl, unsigned flag,
                  bool crt_intermediate_grp, const char *test_desciption)
 {
-    hid_t    fid_src = -1, fid_dst = -1, fid_ext = -1; /* File IDs */
-    hid_t    sid = -1;                                 /* Dataspace ID */
-    hid_t    did = -1;                                 /* Dataset ID */
-    hid_t    gid = -1, gid2 = -1, gid_ref = -1;        /* Group IDs */
-    hid_t    gid_sub = -1, gid_sub_sub = -1;           /* Sub-group ID */
-    hid_t    pid = -1, lcpl_id = -1;                   /* Property IDs */
-    unsigned cpy_flags;                                /* Object copy flags */
-    int      depth = -1;                               /* Copy depth */
+    hid_t    fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
+    hid_t    sid = H5I_INVALID_HID;                                                    /* Dataspace ID */
+    hid_t    did = H5I_INVALID_HID;                                                    /* Dataset ID */
+    hid_t    gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gid_ref = H5I_INVALID_HID; /* Group IDs */
+    hid_t    gid_sub = H5I_INVALID_HID, gid_sub_sub = H5I_INVALID_HID;                 /* Sub-group ID */
+    hid_t    pid = H5I_INVALID_HID, lcpl_id = H5I_INVALID_HID;                         /* Property IDs */
+    unsigned cpy_flags;                                                                /* Object copy flags */
+    int      depth = -1;                                                               /* Copy depth */
     hsize_t  dim2d[2];
     int      buf[DIM_SIZE_1][DIM_SIZE_2];
     int      i, j;
@@ -16709,18 +16710,18 @@ error:
 static int
 test_copy_dataset_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t   fid_src = -1, fid_dst = -1;                    /* File IDs */
-    hid_t   sid = -1;                                      /* Dataspace ID */
-    hid_t   tid = -1;                                      /* Datatype ID */
-    hid_t   did = -1, did2 = -1;                           /* Dataset IDs */
-    hid_t   did3 = -1, did4 = -1;                          /* Dataset IDs */
-    hid_t   gid = -1, gid2 = -1;                           /* Group IDs */
-    hid_t   pid            = -1;                           /* Dataset creation property list */
-    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2}; /* Chunk dimension sizes */
-    int     buf[DIM_SIZE_1][DIM_SIZE_2];                   /* Buffer for writing data */
-    int     newbuf[DIM_SIZE_1][DIM_SIZE_2];                /* Buffer for writing data */
-    hsize_t dim2d[2];                                      /* Dataset dimensions */
-    int     i, j;                                          /* local index variables */
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                                /* Dataspace ID */
+    hid_t   tid = H5I_INVALID_HID;                                /* Datatype ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;        /* Dataset IDs */
+    hid_t   did3 = H5I_INVALID_HID, did4 = H5I_INVALID_HID;       /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;        /* Group IDs */
+    hid_t   pid            = H5I_INVALID_HID;                     /* Dataset creation property list */
+    hsize_t chunk_dim2d[2] = {CHUNK_SIZE_1, CHUNK_SIZE_2};        /* Chunk dimension sizes */
+    int     buf[DIM_SIZE_1][DIM_SIZE_2];                          /* Buffer for writing data */
+    int     newbuf[DIM_SIZE_1][DIM_SIZE_2];                       /* Buffer for writing data */
+    hsize_t dim2d[2];                                             /* Dataset dimensions */
+    int     i, j;                                                 /* local index variables */
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
 
