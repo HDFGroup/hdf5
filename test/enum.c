@@ -139,8 +139,8 @@ test_conv(hid_t file)
     c_e1  val;
     /* Some values are out of range for testing. The library should accept them */
     c_e1    data1[] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE, E1_WHITE, E1_BLACK,
-                       E1_GREEN, E1_BLUE,  E1_RED,   E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK,
-                       E1_WHITE, E1_RED,   E1_WHITE, (c_e1)0,  (c_e1)-1, (c_e1)-2};
+                    E1_GREEN, E1_BLUE,  E1_RED,   E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK,
+                    E1_WHITE, E1_RED,   E1_WHITE, (c_e1)0,  (c_e1)-1, (c_e1)-2};
     c_e1    data2[NELMTS(data1)];
     short   data_short[NELMTS(data1)];
     int     data_int[NELMTS(data1)];
@@ -314,7 +314,7 @@ test_tr1(hid_t file)
     c_e1    eval;
     int     ival;
     c_e1    data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
-                         E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
+                      E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
     c_e1    data2[10];
 
     TESTING("O(1) conversions");
@@ -414,7 +414,7 @@ test_tr2(hid_t file)
     c_e1    val1;
     int     val2;
     c_e1    data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
-                         E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
+                      E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
     c_e1    data2[10];
 
     TESTING("O(log N) conversions");

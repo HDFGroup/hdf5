@@ -742,10 +742,10 @@ test_compound_2(void)
 {
     struct st {
         int a, b, c[4], d, e;
-    } *s_ptr;
+    } * s_ptr;
     struct dt {
         int e, d, c[4], b, a;
-    } *d_ptr;
+    } * d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -867,10 +867,10 @@ test_compound_3(void)
 {
     struct st {
         int a, b, c[4], d, e;
-    } *s_ptr;
+    } * s_ptr;
     struct dt {
         int a, c[4], e;
-    } *d_ptr;
+    } * d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -989,13 +989,13 @@ test_compound_4(void)
 
     struct st {
         int a, b, c[4], d, e;
-    } *s_ptr;
+    } * s_ptr;
     struct dt {
         short b;
         int   a, c[4];
         short d;
         int   e;
-    } *d_ptr;
+    } * d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -1217,11 +1217,11 @@ test_compound_6(void)
     struct st {
         short b;
         short d;
-    } *s_ptr;
+    } * s_ptr;
     struct dt {
         long b;
         long d;
-    } *d_ptr;
+    } * d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
@@ -6673,7 +6673,7 @@ test_int_float_except(void)
 {
 #if H5_SIZEOF_INT == 4 && H5_SIZEOF_FLOAT == 4
     float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0F, (float)INT_MAX - 32.0F, (float)INT_MAX - 68.0F,
-                                      (float)4.5F};
+                               (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
     float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
     int   *intp; /* Pointer to buffer, as integers */
@@ -8533,7 +8533,7 @@ test_versionbounds(void)
     hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
     int          low, high;                         /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
-                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
+                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
     int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
     color_t      enum_val;           /* Enum type index */

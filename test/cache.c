@@ -3901,7 +3901,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 5,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1, -1,
-                  -1},
+              -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, -1, -1, -1},
              /* expected_deserialized = */ true,
              /* expected_serialized   = */ true,
@@ -3914,7 +3914,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 6,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
-                  MONSTER_ENTRY_TYPE, -1, -1},
+              MONSTER_ENTRY_TYPE, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, 20, -1, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ true,
@@ -3927,7 +3927,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 7,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
-                  MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1},
+              MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, 20, 30, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ true,

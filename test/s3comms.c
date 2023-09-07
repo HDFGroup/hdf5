@@ -2392,31 +2392,31 @@ test_uriencode(void)
                                    false,
                                    "/path/to/resource.jpg",
                                },
-                                    {
+                               {
                                    "/path/to/resource.jpg",
                                    21,
                                    true,
                                    "%2Fpath%2Fto%2Fresource.jpg",
                                },
-                                    {
+                               {
                                    "string got_spaa  ces",
                                    20,
                                    true,
                                    "string%20got_spaa%20%20ces",
                                },
-                                    {
+                               {
                                    "sp ac~es/and-sl ash.encoded",
                                    27,
                                    true,
                                    "sp%20ac~es%2Fand-sl%20ash.encoded",
                                },
-                                    {
+                               {
                                    "sp ac~es/and-sl ash.unencoded",
                                    29,
                                    false,
                                    "sp%20ac~es/and-sl%20ash.unencoded",
                                },
-                                    {
+                               {
                                    "/path/to/resource.txt",
                                    0,
                                    false,

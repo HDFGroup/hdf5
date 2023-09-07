@@ -65,7 +65,7 @@ test_partial_no_selection_coll_md_read(void)
     hsize_t     max_dataset_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS];
     hsize_t     sel_dims[1];
     hsize_t     chunk_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS] = {PARTIAL_NO_SELECTION_Y_DIM_SCALE,
-                                                                  PARTIAL_NO_SELECTION_X_DIM_SCALE};
+                                                              PARTIAL_NO_SELECTION_X_DIM_SCALE};
     hsize_t     start[PARTIAL_NO_SELECTION_DATASET_NDIMS];
     hsize_t     stride[PARTIAL_NO_SELECTION_DATASET_NDIMS];
     hsize_t     count[PARTIAL_NO_SELECTION_DATASET_NDIMS];

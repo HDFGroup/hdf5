@@ -2317,7 +2317,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool di
     } *wbuf = NULL; /* Write buffer */
     struct {
         hsize_t arr[RAND4_NITER + 1][4];
-    }       *dim_log  = NULL;  /* Log of dataset dimensions */
+    } *dim_log        = NULL;  /* Log of dataset dimensions */
     bool     zero_dim = false; /* Whether a dimension is 0 */
     bool     writing  = true;  /* Whether we're writing to the dset */
     unsigned scalar_iter;      /* Iteration to shrink dset to 1x1x1x1 */
@@ -2535,7 +2535,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool
     } *wbuf = NULL; /* Write buffer */
     struct {
         hsize_t arr[RAND4_NITER + 1][4];
-    }       *dim_log  = NULL;  /* Log of dataset dimensions */
+    } *dim_log        = NULL;  /* Log of dataset dimensions */
     bool     zero_dim = false; /* Whether a dimension is 0 */
     bool     writing  = true;  /* Whether we're writing to the dset */
     hvl_t    fill_value;       /* Fill value */

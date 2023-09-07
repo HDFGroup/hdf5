@@ -1751,7 +1751,7 @@ io_mode_confusion(void)
 const char *dataset_name[NUM_DATA_SETS] = {"dataset_0", "dataset_1", "dataset_2", "dataset_3"};
 const char *att_name[NUM_DATA_SETS]     = {"attribute_0", "attribute_1", "attribute_2", "attribute_3"};
 const char *lg_att_name[NUM_DATA_SETS]  = {"large_attribute_0", "large_attribute_1", "large_attribute_2",
-                                           "large_attribute_3"};
+                                          "large_attribute_3"};
 
 void
 rr_obj_hdr_flush_confusion(void)

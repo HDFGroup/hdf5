@@ -1989,12 +1989,12 @@ test_vlstr_dtype(hid_t file)
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."};
-    char   *rdata[SPACE1_DIM1];            /* Information read in */
-    bool    rdata_alloc = false;           /* Whether the read data is allocated */
-    hid_t   dataset     = H5I_INVALID_HID; /* Dataset ID            */
-    hid_t   sid1        = H5I_INVALID_HID; /* Dataspace ID            */
-    hid_t   tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID */
-    hsize_t dims1[] = {SPACE1_DIM1};
+    char    *rdata[SPACE1_DIM1];            /* Information read in */
+    bool     rdata_alloc = false;           /* Whether the read data is allocated */
+    hid_t    dataset     = H5I_INVALID_HID; /* Dataset ID            */
+    hid_t    sid1        = H5I_INVALID_HID; /* Dataspace ID            */
+    hid_t    tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID */
+    hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned i; /* counting variable */
 
     /* Output message about test being performed */
@@ -2122,8 +2122,8 @@ test_str_dtype(hid_t file)
     char       rdata[SPACE1_DIM1][4];                                /* Information read in */
     hid_t      dataset = H5I_INVALID_HID;                            /* Dataset ID            */
     hid_t      sid1    = H5I_INVALID_HID;                            /* Dataspace ID            */
-    hid_t   tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID */
-    hsize_t dims1[] = {SPACE1_DIM1};
+    hid_t    tid1 = H5I_INVALID_HID, dtype = H5I_INVALID_HID, native_type = H5I_INVALID_HID; /* Datatype ID */
+    hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned i; /* counting variable */
 
     /* Output message about test being performed */
