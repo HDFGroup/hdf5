@@ -148,7 +148,7 @@ CONTAINS
     INTEGER, INTENT(INOUT) :: total_error
 
     !
-    !the respective filename is "mount1.h5" and "mount2.h5"
+    ! the respective filenames are "mount1.h5" and "mount2.h5"
     !
     CHARACTER(LEN=6)  :: filename1
     CHARACTER(LEN=6)  :: filename2
@@ -156,7 +156,7 @@ CONTAINS
     CHARACTER(LEN=80) :: fix_filename2
 
     !
-    !data space rank and dimensions
+    ! data space rank and dimensions
     !
     INTEGER, PARAMETER :: RANK = 2
     INTEGER, PARAMETER :: NX = 4
