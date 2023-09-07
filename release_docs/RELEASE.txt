@@ -249,6 +249,14 @@ New Features
       h5pset_selection_io_f, h5pget_selection_io_f
       h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
+    - Added Fortran APIs:
+      h5get_free_list_sizes_f, h5dwrite_chunk_f, h5dread_chunk_f,
+      h5fget_info_f, h5lvisit_f, h5lvisit_by_name_f,
+      h5pget_no_selection_io_cause_f, h5pget_mpio_no_collective_cause_f,
+      h5sselect_shape_same_f, h5sselect_intersect_block_f,
+      h5pget_file_space_page_size_f, h5pset_file_space_page_size_f,
+      h5pget_file_space_strategy_f, h5pset_file_space_strategy_f
+
     C++ Library:
     ------------
     -
@@ -266,7 +274,7 @@ New Features
 
     High-Level APIs:
     ----------------
-    -
+    - Added Fortran HL API: h5doappend_f
 
 
     C Packet Table API:

@@ -101,28 +101,29 @@ MODULE H5P
      MODULE PROCEDURE h5pinsert_ptr
   END INTERFACE
 
+
   INTERFACE
-     INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue) &
-          BIND(C, NAME='h5pget_fill_value_c')
-       IMPORT :: c_ptr
+     INTEGER(C_INT) FUNCTION H5Pset_fill_value(prp_id, type_id, fillvalue) &
+          BIND(C, NAME='H5Pset_fill_value')
+       IMPORT :: C_INT, C_PTR
        IMPORT :: HID_T
        IMPLICIT NONE
-       INTEGER(HID_T), INTENT(IN) :: prp_id
-       INTEGER(HID_T), INTENT(IN) :: type_id
-       TYPE(C_PTR), VALUE :: fillvalue
-     END FUNCTION h5pget_fill_value_c
+       INTEGER(hid_t), VALUE :: prp_id
+       INTEGER(hid_t), VALUE :: type_id
+       TYPE(C_PTR)   , VALUE :: fillvalue
+     END FUNCTION H5Pset_fill_value
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue) &
-          BIND(C, NAME='h5pset_fill_value_c')
-       IMPORT :: c_ptr
+     INTEGER(C_INT) FUNCTION H5Pget_fill_value(prp_id, type_id, fillvalue) &
+          BIND(C, NAME='H5Pget_fill_value')
+       IMPORT :: C_INT, C_PTR
        IMPORT :: HID_T
        IMPLICIT NONE
-       INTEGER(HID_T), INTENT(IN) :: prp_id
-       INTEGER(HID_T), INTENT(IN) :: type_id
-       TYPE(C_PTR), VALUE :: fillvalue
-     END FUNCTION h5pset_fill_value_c
+       INTEGER(hid_t), VALUE :: prp_id
+       INTEGER(hid_t), VALUE :: type_id
+       TYPE(C_PTR)   , VALUE :: fillvalue
+     END FUNCTION H5Pget_fill_value
   END INTERFACE
 
   INTERFACE
@@ -514,7 +515,7 @@ CONTAINS
 !!
 !! \brief Retrieves the version information of various objects for a file creation property list.
 !!
-!! \param prp_id   File createion property list identifier.
+!! \param prp_id   File creation property list identifier.
 !! \param boot     Super block version number.
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.
@@ -565,16 +566,17 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN) :: size
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pset_userblock_c(prp_id, size) &
-            BIND(C,NAME='h5pset_userblock_c')
+       INTEGER FUNCTION H5Pset_userblock(prp_id, size) &
+            BIND(C,NAME='H5Pset_userblock')
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HSIZE_T), INTENT(IN) :: size
-       END FUNCTION h5pset_userblock_c
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T), VALUE :: size
+       END FUNCTION H5Pset_userblock
     END INTERFACE
 
-    hdferr = h5pset_userblock_c(prp_id, size)
+    hdferr = H5Pset_userblock(prp_id, size)
+
   END SUBROUTINE h5pset_userblock_f
 
 !>
@@ -594,15 +596,17 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(OUT) ::  block_size
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pget_userblock_c(prp_id, block_size) &
-            BIND(C,NAME='h5pget_userblock_c')
+       INTEGER FUNCTION H5Pget_userblock(prp_id, block_size) &
+            BIND(C,NAME='H5Pget_userblock')
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER(HSIZE_T), INTENT(OUT) :: block_size
-       END FUNCTION h5pget_userblock_c
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T)        :: block_size
+       END FUNCTION H5Pget_userblock
     END INTERFACE
-    hdferr = h5pget_userblock_c(prp_id,  block_size)
+
+    hdferr = H5Pget_userblock(prp_id,  block_size)
+
   END SUBROUTINE h5pget_userblock_f
 
 !>
@@ -4592,11 +4596,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(IN), TARGET :: fillvalue
     INTEGER, INTENT(OUT) :: hdferr
+
     TYPE(C_PTR) :: f_ptr ! C address
 
     f_ptr = C_LOC(fillvalue)
 
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pset_fill_value_integer
 
@@ -4610,7 +4615,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
     f_ptr = C_LOC(fillvalue)
 
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pget_fill_value_integer
 
@@ -4623,7 +4628,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     TYPE(C_PTR) :: f_ptr                       ! C address
 
     f_ptr = C_LOC(fillvalue(1:1))
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, f_ptr))
 
   END SUBROUTINE h5pset_fill_value_char
 
@@ -4650,7 +4655,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     ENDIF
 
     f_ptr = C_LOC(chr(1)(1:1))
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
+
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, f_ptr))
 
     DO i = 1, chr_len
        fillvalue(i:i) = chr(i)
@@ -4663,10 +4669,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER(HID_T), INTENT(IN) :: type_id
-    TYPE(C_PTR), INTENT(IN)    :: fillvalue
+    TYPE(C_PTR)                :: fillvalue
     INTEGER, INTENT(OUT)       :: hdferr
 
-    hdferr = h5pset_fill_value_c(prp_id, type_id, fillvalue)
+    hdferr = INT(H5Pset_fill_value(prp_id, type_id, fillvalue))
 
   END SUBROUTINE h5pset_fill_value_ptr
 
@@ -4674,10 +4680,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
+    TYPE(C_PTR)                 :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
 
-    hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
+    hdferr = INT(H5Pget_fill_value(prp_id, type_id, fillvalue))
 
   END SUBROUTINE h5pget_fill_value_ptr
 
@@ -5322,7 +5328,42 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_fapl_ioc(prp_id, f_ptr)
 
   END SUBROUTINE h5pget_fapl_ioc_f
+
 #endif
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves local and global causes that broke collective I/O on the last parallel I/O call.
+!!
+!! \param plist_id                   Dataset transfer property list identifier
+!! \param local_no_collective_cause  An enumerated set value indicating the causes that prevented collective I/O in the local process 
+!! \param global_no_collective_cause An enumerated set value indicating the causes across all processes that prevented collective I/O
+!! \param hdferr                     \fortran_error
+!!
+!! See C API: @ref H5Pget_mpio_no_collective_cause()
+!!
+   SUBROUTINE h5pget_mpio_no_collective_cause_f(plist_id, local_no_collective_cause, global_no_collective_cause, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)    , INTENT(IN)  :: plist_id
+     INTEGER(C_INT32_T), INTENT(OUT) :: local_no_collective_cause
+     INTEGER(C_INT32_T), INTENT(OUT) :: global_no_collective_cause
+     INTEGER           , INTENT(OUT) :: hdferr
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause) &
+             BIND(C, NAME='H5Pget_mpio_no_collective_cause')
+          IMPORT :: HID_T, C_INT, C_INT32_T
+          IMPLICIT NONE
+          INTEGER(HID_T)    , VALUE :: plist_id
+          INTEGER(C_INT32_T) :: local_no_collective_cause
+          INTEGER(C_INT32_T) :: global_no_collective_cause
+        END FUNCTION H5Pget_mpio_no_collective_cause
+     END INTERFACE
+
+     hdferr = INT(H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause))
+
+   END SUBROUTINE h5pget_mpio_no_collective_cause_f
 
 !>
 !! \ingroup FH5P
@@ -6273,6 +6314,183 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(H5Pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
   END SUBROUTINE h5pset_file_locking_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call.
+!!
+!! \param plist_id              Dataset transfer property list identifier
+!! \param no_selection_io_cause	A bitwise set value indicating the relevant causes that prevented selection I/O from being performed
+!! \param hdferr                \fortran_error
+!!
+!! See C API: @ref H5Pget_no_selection_io_cause()
+!!
+   SUBROUTINE h5pget_no_selection_io_cause_f(plist_id, no_selection_io_cause, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)    , INTENT(IN)  :: plist_id
+     INTEGER(C_INT32_T), INTENT(OUT) :: no_selection_io_cause
+     INTEGER           , INTENT(OUT) :: hdferr
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause) &
+             BIND(C, NAME='H5Pget_no_selection_io_cause')
+          IMPORT :: HID_T, C_INT, C_INT32_T
+          IMPLICIT NONE
+          INTEGER(HID_T)    , VALUE :: plist_id
+          INTEGER(C_INT32_T)        :: no_selection_io_cause
+        END FUNCTION H5Pget_no_selection_io_cause
+     END INTERFACE
+
+     hdferr = INT( H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause))
+
+   END SUBROUTINE h5pget_no_selection_io_cause_f
+
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the file space handling strategy and persisting free-space values for a file creation property list.
+!!
+!! \param plist_id  File creation property list identifier
+!! \param strategy  The file space handling strategy to be used. See: H5F_fspace_strategy_t
+!! \param persist   Indicates whether free space should be persistent or not
+!! \param threshold The smallest free-space section size that the free space manager will track
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pset_file_space_strategy()
+!!
+   SUBROUTINE H5Pset_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+     INTEGER(C_INT)  , INTENT(IN)  :: strategy
+     LOGICAL         , INTENT(IN)  :: persist
+     INTEGER(HSIZE_T), INTENT(IN)  :: threshold
+     INTEGER         , INTENT(OUT) :: hdferr
+
+     LOGICAL(C_BOOL) :: c_persist
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pset_file_space_strategy(plist_id, strategy, persist, threshold) &
+             BIND(C, NAME='H5Pset_file_space_strategy')
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_INT32_T, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T)  , VALUE :: plist_id
+          INTEGER(C_INT)  , VALUE :: strategy
+          LOGICAL(C_BOOL) , VALUE :: persist
+          INTEGER(HSIZE_T), VALUE :: threshold
+        END FUNCTION H5Pset_file_space_strategy
+     END INTERFACE
+
+     ! Transfer value of Fortran LOGICAL to C C_BOOL type
+     c_persist = persist
+
+     hdferr = INT( H5Pset_file_space_strategy(plist_id, strategy, c_persist, threshold) )
+
+   END SUBROUTINE H5Pset_file_space_strategy_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets the file space handling strategy and persisting free-space values for a file creation property list.
+!!
+!! \param plist_id  File creation property list identifier
+!! \param strategy  The file space handling strategy to be used.
+!! \param persist   Indicate whether free space should be persistent or not
+!! \param threshold The free-space section size threshold value
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pget_file_space_strategy()
+!!
+   SUBROUTINE h5pget_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
+     IMPLICIT NONE
+     INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+     INTEGER(C_INT)  , INTENT(OUT) :: strategy
+     LOGICAL         , INTENT(OUT) :: persist
+     INTEGER(HSIZE_T), INTENT(OUT) :: threshold
+     INTEGER         , INTENT(OUT) :: hdferr
+
+     LOGICAL(C_BOOL) :: c_persist
+
+     INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_file_space_strategy(plist_id, strategy, persist, threshold) &
+             BIND(C, NAME='H5Pget_file_space_strategy')
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_INT32_T, C_BOOL
+          IMPLICIT NONE
+          INTEGER(HID_T), VALUE :: plist_id
+          INTEGER(C_INT)   :: strategy
+          LOGICAL(C_BOOL)  :: persist
+          INTEGER(HSIZE_T) :: threshold
+        END FUNCTION H5Pget_file_space_strategy
+     END INTERFACE
+
+     hdferr = INT( H5Pget_file_space_strategy(plist_id, strategy, c_persist, threshold) )
+
+     ! Transfer value of Fortran LOGICAL and C C_BOOL type
+     persist = .FALSE.
+     IF(hdferr .GE. 0) persist = c_persist
+
+   END SUBROUTINE h5pget_file_space_strategy_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets the file space page size for a file creation property list.
+!!
+!! \param prp_id   File creation property list identifier
+!! \param fsp_size File space page size
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pset_file_space_page_size()
+!!
+  SUBROUTINE h5pset_file_space_page_size_f(prp_id, fsp_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(HSIZE_T), INTENT(IN) :: fsp_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pset_file_space_page_size(prp_id, fsp_size) &
+            BIND(C,NAME='H5Pset_file_space_page_size')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T)  , VALUE :: prp_id
+         INTEGER(HSIZE_T), VALUE :: fsp_size
+       END FUNCTION H5Pset_file_space_page_size
+    END INTERFACE
+
+    hdferr = INT(h5pset_file_space_page_size(prp_id, fsp_size))
+
+  END SUBROUTINE h5pset_file_space_page_size_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets the file space page size for a file creation property list.
+!!
+!! \param prp_id   File creation property list identifier
+!! \param fsp_size File space page size
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Pget_file_space_page_size()
+!!
+  SUBROUTINE h5pget_file_space_page_size_f(prp_id, fsp_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER(HSIZE_T), INTENT(OUT) :: fsp_size
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_file_space_page_size(prp_id, fsp_size) &
+            BIND(C,NAME='H5Pget_file_space_page_size')
+         IMPORT :: C_INT, HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         INTEGER(HSIZE_T)      :: fsp_size
+       END FUNCTION H5Pget_file_space_page_size
+    END INTERFACE
+
+    hdferr = INT(h5pget_file_space_page_size(prp_id, fsp_size))
+
+  END SUBROUTINE h5pget_file_space_page_size_f
 
 END MODULE H5P
 

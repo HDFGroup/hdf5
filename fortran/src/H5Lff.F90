@@ -748,10 +748,10 @@ CONTAINS
     link_exists_c = H5Lexists(loc_id, c_name, lapl_id_default)
 
     link_exists = .FALSE.
-    IF(link_exists_c.GT.0) link_exists = .TRUE.
+    IF(link_exists_c.GT.0_C_INT) link_exists = .TRUE.
 
     hdferr = 0
-    IF(link_exists_c.LT.0) hdferr = -1
+    IF(link_exists_c.LT.0_C_INT) hdferr = -1
 
   END SUBROUTINE h5lexists_f
 
@@ -1462,7 +1462,7 @@ CONTAINS
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
+
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)           :: loc_id
     CHARACTER(LEN=*), INTENT(IN)           :: group_name
@@ -1508,5 +1508,105 @@ CONTAINS
     END IF
 
   END SUBROUTINE h5literate_by_name_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Recursively visits all links starting from a specified group.
+!!
+!! \param grp_id   Group identifier
+!! \param idx_type Index type
+!! \param order	   Iteration order
+!! \param op	   Callback function
+!! \param op_data  User-defined callback function context
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Lvisit2()
+!!
+  SUBROUTINE H5Lvisit_f(grp_id, idx_type, order, op, op_data, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(hid_t), INTENT(IN)  :: grp_id
+    INTEGER       , INTENT(IN)  :: idx_type
+    INTEGER       , INTENT(IN)  :: order
+    TYPE(C_FUNPTR)              :: op
+    TYPE(C_PTR)                 :: op_data
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lvisit(grp_id, idx_type, order, op, op_data) BIND(C, NAME='H5Lvisit2')
+         IMPORT :: c_char, c_int, c_ptr, c_funptr
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(hid_t), VALUE :: grp_id
+         INTEGER       , VALUE :: idx_type
+         INTEGER       , VALUE :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+       END FUNCTION H5Lvisit
+    END INTERFACE
+
+    hdferr = INT(H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
+
+  END SUBROUTINE H5Lvisit_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Recursively visits all links starting from a specified group.
+!!
+!! \param loc_id     Location identifier
+!! \param group_name Group name
+!! \param idx_type   Index type
+!! \param order	     Iteration order
+!! \param op	     Callback function
+!! \param op_data    User-defined callback function context
+!! \param hdferr     \fortran_error
+!! \param lapl_id    Link access property list
+!!
+!!
+!! See C API: @ref H5Lvisit_by_name2()
+!!
+  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, hdferr, lapl_id)
+
+    IMPLICIT NONE
+
+    INTEGER(hid_t), INTENT(IN)   :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER       , INTENT(IN)   :: idx_type
+    INTEGER       , INTENT(IN)   :: order
+    TYPE(C_FUNPTR)               :: op
+    TYPE(C_PTR)                  :: op_data
+    INTEGER       , INTENT(OUT)  :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data, lapl_id_default) &
+            BIND(C, NAME='H5Lvisit_by_name2')
+         IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(hid_t), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER       , VALUE :: idx_type
+         INTEGER       , VALUE :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Lvisit_by_name
+    END INTERFACE
+
+    c_name = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    hdferr = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
+
+  END SUBROUTINE H5Lvisit_by_name_f
 
 END MODULE H5L

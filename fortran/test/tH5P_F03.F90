@@ -155,8 +155,6 @@ SUBROUTINE test_create(total_error)
   fill_ctype%a = 5555.
   fill_ctype%x = 55
 
-  f_ptr = C_LOC(fill_ctype)
-
   ! Test various fill values
   CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, 'X', error)
   CALL check("H5Pset_fill_value_f",error, total_error)

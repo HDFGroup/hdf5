@@ -2283,6 +2283,8 @@ CONTAINS
 !! \param hdferr        \fortran_error
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
+!! See C API: @ref H5Dread_multi()
+!!
   SUBROUTINE h5dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
 
@@ -2320,6 +2322,7 @@ CONTAINS
     hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE h5dread_multi_f
+
 !>
 !! \ingroup FH5D
 !!
@@ -2333,6 +2336,8 @@ CONTAINS
 !! \param buf           Buffer with data to be written to the file.
 !! \param hdferr        \fortran_error
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!!
+!! See C API: @ref H5Dwrite_multi()
 !!
   SUBROUTINE h5dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
@@ -2371,6 +2376,141 @@ CONTAINS
     hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE h5dwrite_multi_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Reads a raw data chunk directly from a dataset in a file into a buffer.
+!!
+!! \param dset_id   Identifier of the dataset to read from
+!! \param offset    Logical position of the chunk&apos;s first element in the dataspace, \Bold{0-based indices}
+!! \param filters   Mask for identifying the filters in use
+!! \param buf       Buffer containing data to be read from the chunk
+!! \param hdferr    \fortran_error
+!! \param dxpl_id   Dataset transfer property list identifier
+!!
+!! See C API: @ref H5Dread_chunk()
+!!
+  SUBROUTINE h5dread_chunk_f(dset_id, offset, filters, buf, hdferr, dxpl_id)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)    , INTENT(IN)  :: dset_id
+    INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
+    INTEGER(C_INT32_T), INTENT(INOUT)  :: filters
+    TYPE(C_PTR)                     :: buf
+    INTEGER           , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
+
+    INTEGER(HID_T) :: dxpl_id_default
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
+    INTEGER(HSIZE_T) :: i, rank
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dread_chunk(dset_id, dxpl_id, offset, filters, buf) &
+            BIND(C, NAME='H5Dread_chunk')
+         IMPORT :: SIZE_T, HSIZE_T, HID_T
+         IMPORT :: C_PTR, C_INT32_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T)    , VALUE :: dset_id
+         INTEGER(HID_T)    , VALUE :: dxpl_id
+         INTEGER(HSIZE_T)  , DIMENSION(*) :: offset
+         INTEGER(C_INT32_T) :: filters
+         TYPE(C_PTR)       , VALUE :: buf
+       END FUNCTION H5Dread_chunk
+    END INTERFACE
+
+    dxpl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
+
+    rank = SIZE(offset, KIND=HSIZE_T)
+
+    ALLOCATE(offset_c(rank), STAT=hdferr)
+    IF (hdferr .NE. 0 ) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+
+    !
+    ! Reverse dimensions due to C-FORTRAN storage order
+    !
+    DO i = 1, rank
+       offset_c(i) = offset(rank - i + 1)
+    ENDDO
+
+    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, filters, buf))
+
+    DEALLOCATE(offset_c)
+
+  END SUBROUTINE h5dread_chunk_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Writes a raw data chunk from a buffer directly to a dataset in a file.
+!!
+!! \param dset_id    Identifier of the dataset to write to
+!! \param filters    Mask for identifying the filters in use
+!! \param offset     Logical position of the chunk&apos;s first element in the dataspace, \Bold{0-based indices}
+!! \param data_size  Size of the actual data to be written in bytes
+!! \param buf        Buffer containing data to be written to the chunk
+!! \param hdferr     \fortran_error
+!! \param dxpl_id    Dataset transfer property list identifier
+!!
+!! See C API: @ref H5Dwrite_chunk()
+!!
+  SUBROUTINE h5dwrite_chunk_f(dset_id, filters, offset, data_size, buf, hdferr, dxpl_id)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)    , INTENT(IN) :: dset_id
+    INTEGER(C_INT32_T), INTENT(IN) :: filters
+    INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
+    INTEGER(SIZE_T)   , INTENT(IN)  :: data_size
+    TYPE(C_PTR)                     :: buf
+    INTEGER           , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
+
+    INTEGER(HID_T) :: dxpl_id_default
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
+    INTEGER(HSIZE_T) :: i, rank
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) &
+            BIND(C, NAME='H5Dwrite_chunk')
+         IMPORT :: SIZE_T, HSIZE_T, HID_T
+         IMPORT :: C_PTR, C_INT32_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T)    , VALUE      :: dset_id
+         INTEGER(HID_T)    , VALUE      :: dxpl_id
+         INTEGER(C_INT32_T), VALUE      :: filters
+         INTEGER(HSIZE_T), DIMENSION(*) :: offset
+         INTEGER(SIZE_T)   , VALUE      :: data_size
+         TYPE(C_PTR)       , VALUE      :: buf
+       END FUNCTION H5Dwrite_chunk
+    END INTERFACE
+
+    dxpl_id_default = H5P_DEFAULT_F
+    IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
+
+    rank = SIZE(offset, KIND=HSIZE_T)
+
+    ALLOCATE(offset_c(rank), STAT=hdferr)
+    IF (hdferr .NE. 0 ) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+
+    !
+    ! Reverse dimensions due to C-FORTRAN storage order
+    !
+    DO i = 1, rank
+       offset_c(i) = offset(rank - i + 1)
+    ENDDO
+
+    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf))
+
+    DEALLOCATE(offset_c)
+
+  END SUBROUTINE h5dwrite_chunk_f
 
 END MODULE H5D
 
