@@ -1514,40 +1514,52 @@ CONTAINS
 !!
 !! \brief Recursively visits all links starting from a specified group.
 !!
-!! \param grp_id   Group identifier
-!! \param idx_type Index type
-!! \param order	   Iteration order
-!! \param op	   Callback function
-!! \param op_data  User-defined callback function context
-!! \param hdferr   \fortran_error
+!! \param grp_id       Group identifier
+!! \param idx_type     Index type
+!! \param order	       Iteration order
+!! \param op	       Callback function
+!! \param op_data      User-defined callback function context
+!! \param return_value The return value of the first operator that returns non-zero, or zero if
+!!                     all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
 !!
 !! See C API: @ref H5Lvisit2()
 !!
-  SUBROUTINE H5Lvisit_f(grp_id, idx_type, order, op, op_data, hdferr)
+  SUBROUTINE h5lvisit_f(grp_id, idx_type, order, op, op_data, return_value, hdferr)
 
     IMPLICIT NONE
 
-    INTEGER(hid_t), INTENT(IN)  :: grp_id
-    INTEGER       , INTENT(IN)  :: idx_type
-    INTEGER       , INTENT(IN)  :: order
-    TYPE(C_FUNPTR)              :: op
-    TYPE(C_PTR)                 :: op_data
-    INTEGER       , INTENT(OUT) :: hdferr
+    INTEGER(hid_t), INTENT(IN)    :: grp_id
+    INTEGER       , INTENT(IN)    :: idx_type
+    INTEGER       , INTENT(IN)    :: order
+    TYPE(C_FUNPTR), INTENT(IN)    :: op
+    TYPE(C_PTR)   , INTENT(INOUT) :: op_data  ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER       , INTENT(OUT)   :: return_value
+    INTEGER       , INTENT(OUT)   :: hdferr
+
+    INTEGER(C_INT) :: return_value_c
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Lvisit(grp_id, idx_type, order, op, op_data) BIND(C, NAME='H5Lvisit2')
          IMPORT :: c_char, c_int, c_ptr, c_funptr
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(hid_t), VALUE :: grp_id
-         INTEGER       , VALUE :: idx_type
-         INTEGER       , VALUE :: order
+         INTEGER(HID_T), VALUE :: grp_id
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR)   , VALUE :: op_data
        END FUNCTION H5Lvisit
     END INTERFACE
 
-    hdferr = INT(H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
+    return_value_c = INT(H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
+    return_value = INT(return_value_c)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
 
   END SUBROUTINE H5Lvisit_f
 
@@ -1556,47 +1568,51 @@ CONTAINS
 !!
 !! \brief Recursively visits all links starting from a specified group.
 !!
-!! \param loc_id     Location identifier
-!! \param group_name Group name
-!! \param idx_type   Index type
-!! \param order	     Iteration order
-!! \param op	     Callback function
-!! \param op_data    User-defined callback function context
-!! \param hdferr     \fortran_error
-!! \param lapl_id    Link access property list
+!! \param loc_id       Location identifier
+!! \param group_name   Group name
+!! \param idx_type     Index type
+!! \param order	       Iteration order
+!! \param op	       Callback function
+!! \param op_data      User-defined callback function context
+!! \param return_value The return value of the first operator that returns non-zero, or zero if
+!!                     all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list
 !!
 !!
 !! See C API: @ref H5Lvisit_by_name2()
 !!
-  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, hdferr, lapl_id)
+  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, return_value, hdferr, lapl_id)
 
     IMPLICIT NONE
 
-    INTEGER(hid_t), INTENT(IN)   :: loc_id
-    CHARACTER(LEN=*), INTENT(IN) :: group_name
-    INTEGER       , INTENT(IN)   :: idx_type
-    INTEGER       , INTENT(IN)   :: order
-    TYPE(C_FUNPTR)               :: op
-    TYPE(C_PTR)                  :: op_data
-    INTEGER       , INTENT(OUT)  :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)    :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)    :: group_name
+    INTEGER         , INTENT(IN)    :: idx_type
+    INTEGER         , INTENT(IN)    :: order
+    TYPE(C_FUNPTR)  , INTENT(IN)    :: op
+    TYPE(C_PTR)     , INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER         , INTENT(OUT)   :: return_value
+    INTEGER       , INTENT(OUT)     :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
 
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT)  :: return_value_c
 
     INTERFACE
-       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data, lapl_id_default) &
+       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data, lapl_id) &
             BIND(C, NAME='H5Lvisit_by_name2')
          IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(hid_t), VALUE :: loc_id
+         INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
-         INTEGER       , VALUE :: idx_type
-         INTEGER       , VALUE :: order
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR)   , VALUE :: op_data
-         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id
        END FUNCTION H5Lvisit_by_name
     END INTERFACE
 
@@ -1605,7 +1621,14 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
+    return_value_c = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
+    return_value = INT(return_value_c)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
 
   END SUBROUTINE H5Lvisit_by_name_f
 

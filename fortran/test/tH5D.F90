@@ -1021,7 +1021,7 @@ CONTAINS
     INTEGER(SIZE_T), PARAMETER :: CHUNK1 = DIM1/2
     INTEGER(HSIZE_T), DIMENSION(2) :: offset
     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/DIM0,DIM1/)
-    INTEGER(C_INT), DIMENSION(CHUNK0,CHUNK1), TARGET :: wdata1, rdata1, wdata2, rdata2
+    INTEGER, DIMENSION(CHUNK0,CHUNK1), TARGET :: wdata1, rdata1, wdata2, rdata2
     INTEGER(HSIZE_T), DIMENSION(2) :: chunk = (/CHUNK0, CHUNK1/)
     INTEGER :: i, j, n
     INTEGER :: error
