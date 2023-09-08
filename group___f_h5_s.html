@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
+   &#160;<span id="projectnumber">1.15.0.08e115b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -146,6 +146,12 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga84776578be15865d60d7ee1c0f746f9d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_s.html#ga84776578be15865d60d7ee1c0f746f9d">h5sselect_all_f</a> (space_id, hdferr)</td></tr>
 <tr class="memdesc:ga84776578be15865d60d7ee1c0f746f9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects the entire dataspace.  <a href="group___f_h5_s.html#ga84776578be15865d60d7ee1c0f746f9d">More...</a><br /></td></tr>
 <tr class="separator:ga84776578be15865d60d7ee1c0f746f9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga194f03cd379e0447e07b3e33cfcf0429"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_s.html#ga194f03cd379e0447e07b3e33cfcf0429">h5sselect_shape_same_f</a> (space1_id, space2_id, same, hdferr)</td></tr>
+<tr class="memdesc:ga194f03cd379e0447e07b3e33cfcf0429"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if two selections are the same shape.  <a href="group___f_h5_s.html#ga194f03cd379e0447e07b3e33cfcf0429">More...</a><br /></td></tr>
+<tr class="separator:ga194f03cd379e0447e07b3e33cfcf0429"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacd26ded055fbdf69423b9ad7a05dfef0"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_s.html#gacd26ded055fbdf69423b9ad7a05dfef0">h5sselect_intersect_block_f</a> (space_id, istart, iend, intersects, hdferr)</td></tr>
+<tr class="memdesc:gacd26ded055fbdf69423b9ad7a05dfef0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if current selection intersects with a block.  <a href="group___f_h5_s.html#gacd26ded055fbdf69423b9ad7a05dfef0">More...</a><br /></td></tr>
+<tr class="separator:gacd26ded055fbdf69423b9ad7a05dfef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga722cb48e4a74db237a1997be8528c41c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_s.html#ga722cb48e4a74db237a1997be8528c41c">h5sselect_none_f</a> (space_id, hdferr)</td></tr>
 <tr class="memdesc:ga722cb48e4a74db237a1997be8528c41c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the selection region to include no elements.  <a href="group___f_h5_s.html#ga722cb48e4a74db237a1997be8528c41c">More...</a><br /></td></tr>
 <tr class="separator:ga722cb48e4a74db237a1997be8528c41c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1586,7 +1592,7 @@ Variables</h2></td></tr>
 <li>H5S_SELECT_OR_F </li>
 </ul>
 </td></tr>
-    <tr><td class="paramname">start</td><td>Array with hyperslab offsets. </td></tr>
+    <tr><td class="paramname">start</td><td>Array with hyperslab offsets, <b>0-based indices</b>. </td></tr>
     <tr><td class="paramname">count</td><td>Number of blocks included in the hyperslab. </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
     <tr><td class="paramname">stride</td><td>Array with hyperslab strides. </td></tr>
@@ -1595,6 +1601,65 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d">H5Sselect_hyperslab()</a> </p>
+
+</div>
+</div>
+<a id="gacd26ded055fbdf69423b9ad7a05dfef0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacd26ded055fbdf69423b9ad7a05dfef0">&#9670;&nbsp;</a></span>h5sselect_intersect_block_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5s::h5sselect_intersect_block_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>space_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), dimension(*), intent(in)&#160;</td>
+          <td class="paramname"><em>istart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), dimension(*), intent(in)&#160;</td>
+          <td class="paramname"><em>iend</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(out)&#160;</td>
+          <td class="paramname"><em>intersects</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if current selection intersects with a block. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">space_id</td><td>Dataspace identifier </td></tr>
+    <tr><td class="paramname">istart</td><td>Starting coordinate of the block </td></tr>
+    <tr><td class="paramname">iend</td><td>Opposite ("ending") coordinate of the block </td></tr>
+    <tr><td class="paramname">intersects</td><td>Dataspace intersects with the block specified </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_s.html#ga51472bcb9af024675fba6294a6aefa5e">H5Sselect_intersect_block()</a> </p>
 
 </div>
 </div>
@@ -1633,6 +1698,58 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___h5_s.html#gac59773d4a0953cb2db0ed57a05699095">H5Sselect_none()</a> </p>
+
+</div>
+</div>
+<a id="ga194f03cd379e0447e07b3e33cfcf0429"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga194f03cd379e0447e07b3e33cfcf0429">&#9670;&nbsp;</a></span>h5sselect_shape_same_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5s::h5sselect_shape_same_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>space1_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>space2_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(out)&#160;</td>
+          <td class="paramname"><em>same</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks if two selections are the same shape. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">space1_id</td><td>Dataspace identifier </td></tr>
+    <tr><td class="paramname">space2_id</td><td>Dataspace identifier </td></tr>
+    <tr><td class="paramname">same</td><td>Value of check </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_s.html#gafc6cafae877900ee060709eaa0b9b261">H5Sselect_shape_same()</a> </p>
 
 </div>
 </div>
@@ -2104,7 +2221,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Sep 6 2023 00:28:36 for HDF5 by
+    <li class="footer">Generated on Fri Sep 8 2023 00:28:16 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

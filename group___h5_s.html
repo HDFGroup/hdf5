@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
+   &#160;<span id="projectnumber">1.15.0.08e115b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1882,7 +1882,7 @@ Functions</h2></td></tr>
 <p>The <code>stride</code> array chooses array locations from the dataspace with each value in the <code>stride</code> array determining how many elements to move in each dimension. Setting a value in the <code>stride</code> array to <code>1</code> moves to each element in that dimension of the dataspace; setting a value of <code>2</code> in allocation in the <code>stride</code> array moves to every other element in that dimension of the dataspace. In other words, the <code>stride</code> determines the number of elements to move from the <code>start</code> location in each dimension. Stride values of <code>0</code> are not allowed. If the <code>stride</code> parameter is NULL, a contiguous hyperslab is selected (as if each value in the <code>stride</code> array were set to <code>1</code>).</p>
 <p>The <code>count</code> array determines how many blocks to select from the dataspace, in each dimension.</p>
 <p>The <code>block</code> array determines the size of the element block selected from the dataspace. If the <code>block</code> parameter is set to NULL, the block size defaults to a single element in each dimension (as if each value in the <code>block</code> array were set to <code>1</code>).</p>
-<p>For example, consider a 2-dimensional dataspace with hyperslab selection settings as follows: the <code>start</code> offset is specified as [1,1], <code>stride</code> is [4,4], <code>count</code> is [3,7], and <code>block</code> is [2,2]. In C, these settings will specify a hyperslab consisting of 21 2x2 blocks of array elements starting with location (1,1) with the selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.; in Fortran, they will specify a hyperslab consisting of 21 2x2 blocks of array elements starting with location (2,2) with the selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.</p>
+<p>For example, consider a 2-dimensional dataspace with hyperslab selection settings as follows: the <code>start</code> offset is specified as [1,1], <code>stride</code> is [4,4], <code>count</code> is [3,7], and <code>block</code> is [2,2]. In C, these settings will specify a hyperslab consisting of 21 2x2 blocks of array elements starting with location (1,1) with the selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.; in Fortran, they will specify a hyperslab consisting of 21 2x2 blocks of array elements starting with location (2,2), since <code>start</code> is 0-based indexed, with the selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.</p>
 <p>Regions selected with this function call default to C order iteration when I/O is performed.</p>
 <dl class="section version"><dt>Version</dt><dd>1.4.0 Fortran subroutine introduced in this release. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
@@ -2178,7 +2178,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Sep 6 2023 00:28:35 for HDF5 by
+    <li class="footer">Generated on Fri Sep 8 2023 00:28:15 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

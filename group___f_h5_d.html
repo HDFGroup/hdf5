@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
+   &#160;<span id="projectnumber">1.15.0.08e115b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -206,6 +206,12 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga6badceb18dbcd2d1c1c606f50adf1609"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga6badceb18dbcd2d1c1c606f50adf1609">h5dwrite_multi_f</a> (count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)</td></tr>
 <tr class="memdesc:ga6badceb18dbcd2d1c1c606f50adf1609"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes data in memory to a file for multiple datasets.  <a href="group___f_h5_d.html#ga6badceb18dbcd2d1c1c606f50adf1609">More...</a><br /></td></tr>
 <tr class="separator:ga6badceb18dbcd2d1c1c606f50adf1609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga09798bbc411daf6a98f7cd14146312e5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga09798bbc411daf6a98f7cd14146312e5">h5dread_chunk_f</a> (dset_id, offset, filters, buf, hdferr, dxpl_id)</td></tr>
+<tr class="memdesc:ga09798bbc411daf6a98f7cd14146312e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a raw data chunk directly from a dataset in a file into a buffer.  <a href="group___f_h5_d.html#ga09798bbc411daf6a98f7cd14146312e5">More...</a><br /></td></tr>
+<tr class="separator:ga09798bbc411daf6a98f7cd14146312e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8f4882ec50eb48b6976109f9ff63ab8a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga8f4882ec50eb48b6976109f9ff63ab8a">h5dwrite_chunk_f</a> (dset_id, filters, offset, data_size, buf, hdferr, dxpl_id)</td></tr>
+<tr class="memdesc:ga8f4882ec50eb48b6976109f9ff63ab8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a raw data chunk from a buffer directly to a dataset in a file.  <a href="group___f_h5_d.html#ga8f4882ec50eb48b6976109f9ff63ab8a">More...</a><br /></td></tr>
+<tr class="separator:ga8f4882ec50eb48b6976109f9ff63ab8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -303,14 +309,89 @@ Variables</h2></td></tr>
 <tr class="memdesc:gaa9b228f28c3acd5358e9b983d6f113a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_VIRTUAL.  <a href="group___f_h5_d.html#gaa9b228f28c3acd5358e9b983d6f113a3">More...</a><br /></td></tr>
 <tr class="separator:gaa9b228f28c3acd5358e9b983d6f113a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a1cdbf6faaf389149cff33ba5237290"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga9a1cdbf6faaf389149cff33ba5237290">h5d_selection_io_mode_default_f</a></td></tr>
-<tr class="memdesc:ga9a1cdbf6faaf389149cff33ba5237290"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SELECTION_IO_MODE_DEFAULT_F.  <a href="group___f_h5_d.html#ga9a1cdbf6faaf389149cff33ba5237290">More...</a><br /></td></tr>
+<tr class="memdesc:ga9a1cdbf6faaf389149cff33ba5237290"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SELECTION_IO_MODE_DEFAULT.  <a href="group___f_h5_d.html#ga9a1cdbf6faaf389149cff33ba5237290">More...</a><br /></td></tr>
 <tr class="separator:ga9a1cdbf6faaf389149cff33ba5237290"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga061e388615c930c8da41d28f43c55bcd"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga061e388615c930c8da41d28f43c55bcd">h5d_selection_io_mode_off_f</a></td></tr>
-<tr class="memdesc:ga061e388615c930c8da41d28f43c55bcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SELECTION_IO_MODE_OFF_F.  <a href="group___f_h5_d.html#ga061e388615c930c8da41d28f43c55bcd">More...</a><br /></td></tr>
+<tr class="memdesc:ga061e388615c930c8da41d28f43c55bcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SELECTION_IO_MODE_OFF.  <a href="group___f_h5_d.html#ga061e388615c930c8da41d28f43c55bcd">More...</a><br /></td></tr>
 <tr class="separator:ga061e388615c930c8da41d28f43c55bcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa4959bdd0a1bb137771f5d8e6d3fd1c6"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gaa4959bdd0a1bb137771f5d8e6d3fd1c6">h5d_selection_io_mode_on_f</a></td></tr>
-<tr class="memdesc:gaa4959bdd0a1bb137771f5d8e6d3fd1c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SELECTION_IO_MODE_ON_F.  <a href="group___f_h5_d.html#gaa4959bdd0a1bb137771f5d8e6d3fd1c6">More...</a><br /></td></tr>
+<tr class="memdesc:gaa4959bdd0a1bb137771f5d8e6d3fd1c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SELECTION_IO_MODE_ON.  <a href="group___f_h5_d.html#gaa4959bdd0a1bb137771f5d8e6d3fd1c6">More...</a><br /></td></tr>
 <tr class="separator:gaa4959bdd0a1bb137771f5d8e6d3fd1c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf5e2c6c3fdcbb7efa132470edbf1a440"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gaf5e2c6c3fdcbb7efa132470edbf1a440">h5d_mpio_collective_f</a></td></tr>
+<tr class="memdesc:gaf5e2c6c3fdcbb7efa132470edbf1a440"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_COLLECTIVE.  <a href="group___f_h5_d.html#gaf5e2c6c3fdcbb7efa132470edbf1a440">More...</a><br /></td></tr>
+<tr class="separator:gaf5e2c6c3fdcbb7efa132470edbf1a440"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1f9f5b6f7e1e2e37f9dcbc0095020300"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga1f9f5b6f7e1e2e37f9dcbc0095020300">h5d_mpio_set_independent_f</a></td></tr>
+<tr class="memdesc:ga1f9f5b6f7e1e2e37f9dcbc0095020300"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_SET_INDEPENDENT.  <a href="group___f_h5_d.html#ga1f9f5b6f7e1e2e37f9dcbc0095020300">More...</a><br /></td></tr>
+<tr class="separator:ga1f9f5b6f7e1e2e37f9dcbc0095020300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga28b4a83f10cca56082b77c4b7bd353a8"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga28b4a83f10cca56082b77c4b7bd353a8">h5d_mpio_datatype_conversion_f</a></td></tr>
+<tr class="memdesc:ga28b4a83f10cca56082b77c4b7bd353a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_DATATYPE_CONVERSION.  <a href="group___f_h5_d.html#ga28b4a83f10cca56082b77c4b7bd353a8">More...</a><br /></td></tr>
+<tr class="separator:ga28b4a83f10cca56082b77c4b7bd353a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga15191b694c77250701d0304a167d8acb"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga15191b694c77250701d0304a167d8acb">h5d_mpio_data_transforms_f</a></td></tr>
+<tr class="memdesc:ga15191b694c77250701d0304a167d8acb"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_DATA_TRANSFORMS.  <a href="group___f_h5_d.html#ga15191b694c77250701d0304a167d8acb">More...</a><br /></td></tr>
+<tr class="separator:ga15191b694c77250701d0304a167d8acb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab41d408b7a3ac9da76cd643f4d9d9c31"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gab41d408b7a3ac9da76cd643f4d9d9c31">h5d_mpio_mpi_opt_types_env_var_disabled_f</a></td></tr>
+<tr class="memdesc:gab41d408b7a3ac9da76cd643f4d9d9c31"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED.  <a href="group___f_h5_d.html#gab41d408b7a3ac9da76cd643f4d9d9c31">More...</a><br /></td></tr>
+<tr class="separator:gab41d408b7a3ac9da76cd643f4d9d9c31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4d5412219b45e77b48ffe15ea95cf0a5"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga4d5412219b45e77b48ffe15ea95cf0a5">h5d_mpio_not_simple_or_scalar_dataspaces_f</a></td></tr>
+<tr class="memdesc:ga4d5412219b45e77b48ffe15ea95cf0a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES.  <a href="group___f_h5_d.html#ga4d5412219b45e77b48ffe15ea95cf0a5">More...</a><br /></td></tr>
+<tr class="separator:ga4d5412219b45e77b48ffe15ea95cf0a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga285858777751385d60c69570e0869da2"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga285858777751385d60c69570e0869da2">h5d_mpio_not_contiguous_or_chunked_dataset_f</a></td></tr>
+<tr class="memdesc:ga285858777751385d60c69570e0869da2"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET.  <a href="group___f_h5_d.html#ga285858777751385d60c69570e0869da2">More...</a><br /></td></tr>
+<tr class="separator:ga285858777751385d60c69570e0869da2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga56761dcb023f6624d37e81e8318b07f0"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga56761dcb023f6624d37e81e8318b07f0">h5d_mpio_parallel_filtered_writes_disabled_f</a></td></tr>
+<tr class="memdesc:ga56761dcb023f6624d37e81e8318b07f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED.  <a href="group___f_h5_d.html#ga56761dcb023f6624d37e81e8318b07f0">More...</a><br /></td></tr>
+<tr class="separator:ga56761dcb023f6624d37e81e8318b07f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab788b264b951685c4cd1c28643b78a0a"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gab788b264b951685c4cd1c28643b78a0a">h5d_mpio_error_while_checking_collective_possible_f</a></td></tr>
+<tr class="memdesc:gab788b264b951685c4cd1c28643b78a0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE.  <a href="group___f_h5_d.html#gab788b264b951685c4cd1c28643b78a0a">More...</a><br /></td></tr>
+<tr class="separator:gab788b264b951685c4cd1c28643b78a0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga12a6699541e64ac8c02d1c534cd9e0bc"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga12a6699541e64ac8c02d1c534cd9e0bc">h5d_mpio_no_selection_io_f</a></td></tr>
+<tr class="memdesc:ga12a6699541e64ac8c02d1c534cd9e0bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_NO_SELECTION_IO.  <a href="group___f_h5_d.html#ga12a6699541e64ac8c02d1c534cd9e0bc">More...</a><br /></td></tr>
+<tr class="separator:ga12a6699541e64ac8c02d1c534cd9e0bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga101e1f0179c22bbfa82174f1e813b818"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga101e1f0179c22bbfa82174f1e813b818">h5d_mpio_no_collective_max_cause_f</a></td></tr>
+<tr class="memdesc:ga101e1f0179c22bbfa82174f1e813b818"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE.  <a href="group___f_h5_d.html#ga101e1f0179c22bbfa82174f1e813b818">More...</a><br /></td></tr>
+<tr class="separator:ga101e1f0179c22bbfa82174f1e813b818"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae427edb74a4fe325e5bf66c3dfae0321"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gae427edb74a4fe325e5bf66c3dfae0321">h5d_sel_io_disable_by_api_f</a></td></tr>
+<tr class="memdesc:gae427edb74a4fe325e5bf66c3dfae0321"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_DISABLE_BY_API.  <a href="group___f_h5_d.html#gae427edb74a4fe325e5bf66c3dfae0321">More...</a><br /></td></tr>
+<tr class="separator:gae427edb74a4fe325e5bf66c3dfae0321"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga65efb0fe051015cff593d9c0df2b1d03"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga65efb0fe051015cff593d9c0df2b1d03">h5d_sel_io_not_contiguous_or_chunked_dataset_f</a></td></tr>
+<tr class="memdesc:ga65efb0fe051015cff593d9c0df2b1d03"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET.  <a href="group___f_h5_d.html#ga65efb0fe051015cff593d9c0df2b1d03">More...</a><br /></td></tr>
+<tr class="separator:ga65efb0fe051015cff593d9c0df2b1d03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0b727ae43070830d2e1861983ee7bbfe"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga0b727ae43070830d2e1861983ee7bbfe">h5d_sel_io_contiguous_sieve_buffer_f</a></td></tr>
+<tr class="memdesc:ga0b727ae43070830d2e1861983ee7bbfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER.  <a href="group___f_h5_d.html#ga0b727ae43070830d2e1861983ee7bbfe">More...</a><br /></td></tr>
+<tr class="separator:ga0b727ae43070830d2e1861983ee7bbfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaca6c1b9f481a42b1f1e00587ee5ba43b"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gaca6c1b9f481a42b1f1e00587ee5ba43b">h5d_sel_io_no_vector_or_selection_io_cb_f</a></td></tr>
+<tr class="memdesc:gaca6c1b9f481a42b1f1e00587ee5ba43b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB.  <a href="group___f_h5_d.html#gaca6c1b9f481a42b1f1e00587ee5ba43b">More...</a><br /></td></tr>
+<tr class="separator:gaca6c1b9f481a42b1f1e00587ee5ba43b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga397c3c7790a926481a30df0c393a8e27"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga397c3c7790a926481a30df0c393a8e27">h5d_sel_io_page_buffer_f</a></td></tr>
+<tr class="memdesc:ga397c3c7790a926481a30df0c393a8e27"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_PAGE_BUFFER.  <a href="group___f_h5_d.html#ga397c3c7790a926481a30df0c393a8e27">More...</a><br /></td></tr>
+<tr class="separator:ga397c3c7790a926481a30df0c393a8e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1b8d5ebab0909025929ebb3da6d92dd0"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga1b8d5ebab0909025929ebb3da6d92dd0">h5d_sel_io_dataset_filter_f</a></td></tr>
+<tr class="memdesc:ga1b8d5ebab0909025929ebb3da6d92dd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_DATASET_FILTER.  <a href="group___f_h5_d.html#ga1b8d5ebab0909025929ebb3da6d92dd0">More...</a><br /></td></tr>
+<tr class="separator:ga1b8d5ebab0909025929ebb3da6d92dd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8ecea99f592eccb6661d37048255c11e"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga8ecea99f592eccb6661d37048255c11e">h5d_sel_io_chunk_cache_f</a></td></tr>
+<tr class="memdesc:ga8ecea99f592eccb6661d37048255c11e"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_CHUNK_CACHE.  <a href="group___f_h5_d.html#ga8ecea99f592eccb6661d37048255c11e">More...</a><br /></td></tr>
+<tr class="separator:ga8ecea99f592eccb6661d37048255c11e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7327c605a262d024dafbf093bad8bc98"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga7327c605a262d024dafbf093bad8bc98">h5d_sel_io_tconv_buf_too_small_f</a></td></tr>
+<tr class="memdesc:ga7327c605a262d024dafbf093bad8bc98"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_TCONV_BUF_TOO_SMALL.  <a href="group___f_h5_d.html#ga7327c605a262d024dafbf093bad8bc98">More...</a><br /></td></tr>
+<tr class="separator:ga7327c605a262d024dafbf093bad8bc98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae5f995c97a3f79a048c857b2619caf66"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gae5f995c97a3f79a048c857b2619caf66">h5d_sel_io_bkg_buf_too_small_f</a></td></tr>
+<tr class="memdesc:gae5f995c97a3f79a048c857b2619caf66"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_BKG_BUF_TOO_SMALL.  <a href="group___f_h5_d.html#gae5f995c97a3f79a048c857b2619caf66">More...</a><br /></td></tr>
+<tr class="separator:gae5f995c97a3f79a048c857b2619caf66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac4d261d6324f2c363bb0b17b76ee5cc8"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#gac4d261d6324f2c363bb0b17b76ee5cc8">h5d_sel_io_default_off_f</a></td></tr>
+<tr class="memdesc:gac4d261d6324f2c363bb0b17b76ee5cc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_SEL_IO_DEFAULT_OFF.  <a href="group___f_h5_d.html#gac4d261d6324f2c363bb0b17b76ee5cc8">More...</a><br /></td></tr>
+<tr class="separator:gac4d261d6324f2c363bb0b17b76ee5cc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9976e18e0a0c2f740603a665700728e1"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga9976e18e0a0c2f740603a665700728e1">h5d_mpio_no_selection_io_causes_f</a></td></tr>
+<tr class="memdesc:ga9976e18e0a0c2f740603a665700728e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_NO_SELECTION_IO_CAUSES.  <a href="group___f_h5_d.html#ga9976e18e0a0c2f740603a665700728e1">More...</a><br /></td></tr>
+<tr class="separator:ga9976e18e0a0c2f740603a665700728e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4ec2ce5ee845cf42b128069079379a5b"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga4ec2ce5ee845cf42b128069079379a5b">h5d_mpio_no_chunk_optimization_f</a></td></tr>
+<tr class="memdesc:ga4ec2ce5ee845cf42b128069079379a5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_NO_CHUNK_OPTIMIZATION.  <a href="group___f_h5_d.html#ga4ec2ce5ee845cf42b128069079379a5b">More...</a><br /></td></tr>
+<tr class="separator:ga4ec2ce5ee845cf42b128069079379a5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga38219c59c927231129222fb7036b97ee"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga38219c59c927231129222fb7036b97ee">h5d_mpio_link_chunk_f</a></td></tr>
+<tr class="memdesc:ga38219c59c927231129222fb7036b97ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_LINK_CHUNK.  <a href="group___f_h5_d.html#ga38219c59c927231129222fb7036b97ee">More...</a><br /></td></tr>
+<tr class="separator:ga38219c59c927231129222fb7036b97ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga450a9eebccf64f4828d381ba10b7b1f3"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d.html#ga450a9eebccf64f4828d381ba10b7b1f3">h5d_mpio_multi_chunk_f</a></td></tr>
+<tr class="memdesc:ga450a9eebccf64f4828d381ba10b7b1f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5D_MPIO_MULTI_CHUNK.  <a href="group___f_h5_d.html#ga450a9eebccf64f4828d381ba10b7b1f3">More...</a><br /></td></tr>
+<tr class="separator:ga450a9eebccf64f4828d381ba10b7b1f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function/Subroutine Documentation</h2>
 <a id="ga0006593a47d1cb482653520cc9137e66"></a>
@@ -1453,6 +1534,72 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ga09798bbc411daf6a98f7cd14146312e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga09798bbc411daf6a98f7cd14146312e5">&#9670;&nbsp;</a></span>h5dread_chunk_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5d::h5dread_chunk_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>dset_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), dimension(:), intent(in)&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int32_t), intent(inout)&#160;</td>
+          <td class="paramname"><em>filters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>dxpl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reads a raw data chunk directly from a dataset in a file into a buffer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dset_id</td><td>Identifier of the dataset to read from </td></tr>
+    <tr><td class="paramname">offset</td><td>Logical position of the chunk's first element in the dataspace, <b>0-based indices</b> </td></tr>
+    <tr><td class="paramname">filters</td><td>Mask for identifying the filters in use </td></tr>
+    <tr><td class="paramname">buf</td><td>Buffer containing data to be read from the chunk </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">dxpl_id</td><td>Dataset transfer property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60">H5Dread_chunk()</a> </p>
+
+</div>
+</div>
 <a id="ga652d31ef398eeed35e32c3de0de273d0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga652d31ef398eeed35e32c3de0de273d0">&#9670;&nbsp;</a></span>h5dread_f()</h2>
 
@@ -1683,10 +1830,11 @@ Variables</h2></td></tr>
     <tr><td class="paramname">file_space_id</td><td>Identifier of the dataset's dataspace in the file. </td></tr>
     <tr><td class="paramname">buf</td><td>Buffer with data to be written to the file. </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
-    <tr><td class="paramname">xfer_prp</td><td>Identifier of a transfer property list for this I/O operation. </td></tr>
+    <tr><td class="paramname">xfer_prp</td><td>Identifier of a transfer property list for this I/O operation.</td></tr>
   </table>
   </dd>
 </dl>
+<p>See C API: <a class="el" href="group___h5_d.html#ga8eb1c838aff79a17de385d0707709915">H5Dread_multi()</a> </p>
 
 </div>
 </div>
@@ -2117,6 +2265,79 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ga8f4882ec50eb48b6976109f9ff63ab8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8f4882ec50eb48b6976109f9ff63ab8a">&#9670;&nbsp;</a></span>h5dwrite_chunk_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5d::h5dwrite_chunk_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>dset_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int32_t), intent(in)&#160;</td>
+          <td class="paramname"><em>filters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), dimension(:), intent(in)&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in)&#160;</td>
+          <td class="paramname"><em>data_size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(c_ptr)&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in), optional&#160;</td>
+          <td class="paramname"><em>dxpl_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Writes a raw data chunk from a buffer directly to a dataset in a file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dset_id</td><td>Identifier of the dataset to write to </td></tr>
+    <tr><td class="paramname">filters</td><td>Mask for identifying the filters in use </td></tr>
+    <tr><td class="paramname">offset</td><td>Logical position of the chunk's first element in the dataspace, <b>0-based indices</b> </td></tr>
+    <tr><td class="paramname">data_size</td><td>Size of the actual data to be written in bytes </td></tr>
+    <tr><td class="paramname">buf</td><td>Buffer containing data to be written to the chunk </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">dxpl_id</td><td>Dataset transfer property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109">H5Dwrite_chunk()</a> </p>
+
+</div>
+</div>
 <a id="ga474d18ed38c193fd1eb36b1b73f65ea8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga474d18ed38c193fd1eb36b1b73f65ea8">&#9670;&nbsp;</a></span>h5dwrite_f()</h2>
 
@@ -2347,10 +2568,11 @@ Variables</h2></td></tr>
     <tr><td class="paramname">file_space_id</td><td>Identifier of the dataset's dataspace in the file. </td></tr>
     <tr><td class="paramname">buf</td><td>Buffer with data to be written to the file. </td></tr>
     <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
-    <tr><td class="paramname">xfer_prp</td><td>Identifier of a transfer property list for this I/O operation. </td></tr>
+    <tr><td class="paramname">xfer_prp</td><td>Identifier of a transfer property list for this I/O operation.</td></tr>
   </table>
   </dd>
 </dl>
+<p>See C API: <a class="el" href="group___h5_d.html#gaf6213bf3a876c1741810037ff2bb85d8">H5Dwrite_multi()</a> </p>
 
 </div>
 </div>
@@ -2782,6 +3004,22 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gaf5e2c6c3fdcbb7efa132470edbf1a440"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf5e2c6c3fdcbb7efa132470edbf1a440">&#9670;&nbsp;</a></span>h5d_mpio_collective_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_collective_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_COLLECTIVE. </p>
+
+</div>
+</div>
 <a id="gac006b1dab7aab8e735379933f3f0de42"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gac006b1dab7aab8e735379933f3f0de42">&#9670;&nbsp;</a></span>h5d_mpio_contig_collective_f</h2>
 
@@ -2795,6 +3033,118 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>H5D_MPIO_CONTIGUOUS_COLLECTIVE. </p>
+
+</div>
+</div>
+<a id="ga15191b694c77250701d0304a167d8acb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga15191b694c77250701d0304a167d8acb">&#9670;&nbsp;</a></span>h5d_mpio_data_transforms_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_data_transforms_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_DATA_TRANSFORMS. </p>
+
+</div>
+</div>
+<a id="ga28b4a83f10cca56082b77c4b7bd353a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga28b4a83f10cca56082b77c4b7bd353a8">&#9670;&nbsp;</a></span>h5d_mpio_datatype_conversion_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_datatype_conversion_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_DATATYPE_CONVERSION. </p>
+
+</div>
+</div>
+<a id="gab788b264b951685c4cd1c28643b78a0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab788b264b951685c4cd1c28643b78a0a">&#9670;&nbsp;</a></span>h5d_mpio_error_while_checking_collective_possible_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_error_while_checking_collective_possible_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE. </p>
+
+</div>
+</div>
+<a id="ga38219c59c927231129222fb7036b97ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga38219c59c927231129222fb7036b97ee">&#9670;&nbsp;</a></span>h5d_mpio_link_chunk_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_link_chunk_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_LINK_CHUNK. </p>
+
+</div>
+</div>
+<a id="gab41d408b7a3ac9da76cd643f4d9d9c31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab41d408b7a3ac9da76cd643f4d9d9c31">&#9670;&nbsp;</a></span>h5d_mpio_mpi_opt_types_env_var_disabled_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_mpi_opt_types_env_var_disabled_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED. </p>
+
+</div>
+</div>
+<a id="ga450a9eebccf64f4828d381ba10b7b1f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga450a9eebccf64f4828d381ba10b7b1f3">&#9670;&nbsp;</a></span>h5d_mpio_multi_chunk_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_multi_chunk_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_MULTI_CHUNK. </p>
+
+</div>
+</div>
+<a id="ga4ec2ce5ee845cf42b128069079379a5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4ec2ce5ee845cf42b128069079379a5b">&#9670;&nbsp;</a></span>h5d_mpio_no_chunk_optimization_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_no_chunk_optimization_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_NO_CHUNK_OPTIMIZATION. </p>
 
 </div>
 </div>
@@ -2814,6 +3164,278 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ga101e1f0179c22bbfa82174f1e813b818"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga101e1f0179c22bbfa82174f1e813b818">&#9670;&nbsp;</a></span>h5d_mpio_no_collective_max_cause_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_no_collective_max_cause_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE. </p>
+
+</div>
+</div>
+<a id="ga9976e18e0a0c2f740603a665700728e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9976e18e0a0c2f740603a665700728e1">&#9670;&nbsp;</a></span>h5d_mpio_no_selection_io_causes_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_no_selection_io_causes_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_NO_SELECTION_IO_CAUSES. </p>
+
+</div>
+</div>
+<a id="ga12a6699541e64ac8c02d1c534cd9e0bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga12a6699541e64ac8c02d1c534cd9e0bc">&#9670;&nbsp;</a></span>h5d_mpio_no_selection_io_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_no_selection_io_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_NO_SELECTION_IO. </p>
+
+</div>
+</div>
+<a id="ga285858777751385d60c69570e0869da2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga285858777751385d60c69570e0869da2">&#9670;&nbsp;</a></span>h5d_mpio_not_contiguous_or_chunked_dataset_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_not_contiguous_or_chunked_dataset_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET. </p>
+
+</div>
+</div>
+<a id="ga4d5412219b45e77b48ffe15ea95cf0a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4d5412219b45e77b48ffe15ea95cf0a5">&#9670;&nbsp;</a></span>h5d_mpio_not_simple_or_scalar_dataspaces_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_not_simple_or_scalar_dataspaces_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES. </p>
+
+</div>
+</div>
+<a id="ga56761dcb023f6624d37e81e8318b07f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga56761dcb023f6624d37e81e8318b07f0">&#9670;&nbsp;</a></span>h5d_mpio_parallel_filtered_writes_disabled_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_parallel_filtered_writes_disabled_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED. </p>
+
+</div>
+</div>
+<a id="ga1f9f5b6f7e1e2e37f9dcbc0095020300"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1f9f5b6f7e1e2e37f9dcbc0095020300">&#9670;&nbsp;</a></span>h5d_mpio_set_independent_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_mpio_set_independent_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_MPIO_SET_INDEPENDENT. </p>
+
+</div>
+</div>
+<a id="gae5f995c97a3f79a048c857b2619caf66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae5f995c97a3f79a048c857b2619caf66">&#9670;&nbsp;</a></span>h5d_sel_io_bkg_buf_too_small_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_bkg_buf_too_small_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_BKG_BUF_TOO_SMALL. </p>
+
+</div>
+</div>
+<a id="ga8ecea99f592eccb6661d37048255c11e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8ecea99f592eccb6661d37048255c11e">&#9670;&nbsp;</a></span>h5d_sel_io_chunk_cache_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_chunk_cache_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_CHUNK_CACHE. </p>
+
+</div>
+</div>
+<a id="ga0b727ae43070830d2e1861983ee7bbfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0b727ae43070830d2e1861983ee7bbfe">&#9670;&nbsp;</a></span>h5d_sel_io_contiguous_sieve_buffer_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_contiguous_sieve_buffer_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER. </p>
+
+</div>
+</div>
+<a id="ga1b8d5ebab0909025929ebb3da6d92dd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1b8d5ebab0909025929ebb3da6d92dd0">&#9670;&nbsp;</a></span>h5d_sel_io_dataset_filter_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_dataset_filter_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_DATASET_FILTER. </p>
+
+</div>
+</div>
+<a id="gac4d261d6324f2c363bb0b17b76ee5cc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac4d261d6324f2c363bb0b17b76ee5cc8">&#9670;&nbsp;</a></span>h5d_sel_io_default_off_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_default_off_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_DEFAULT_OFF. </p>
+
+</div>
+</div>
+<a id="gae427edb74a4fe325e5bf66c3dfae0321"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae427edb74a4fe325e5bf66c3dfae0321">&#9670;&nbsp;</a></span>h5d_sel_io_disable_by_api_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_disable_by_api_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_DISABLE_BY_API. </p>
+
+</div>
+</div>
+<a id="gaca6c1b9f481a42b1f1e00587ee5ba43b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaca6c1b9f481a42b1f1e00587ee5ba43b">&#9670;&nbsp;</a></span>h5d_sel_io_no_vector_or_selection_io_cb_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_no_vector_or_selection_io_cb_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB. </p>
+
+</div>
+</div>
+<a id="ga65efb0fe051015cff593d9c0df2b1d03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga65efb0fe051015cff593d9c0df2b1d03">&#9670;&nbsp;</a></span>h5d_sel_io_not_contiguous_or_chunked_dataset_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_not_contiguous_or_chunked_dataset_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET. </p>
+
+</div>
+</div>
+<a id="ga397c3c7790a926481a30df0c393a8e27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga397c3c7790a926481a30df0c393a8e27">&#9670;&nbsp;</a></span>h5d_sel_io_page_buffer_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_page_buffer_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_PAGE_BUFFER. </p>
+
+</div>
+</div>
+<a id="ga7327c605a262d024dafbf093bad8bc98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7327c605a262d024dafbf093bad8bc98">&#9670;&nbsp;</a></span>h5d_sel_io_tconv_buf_too_small_f</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer h5d_sel_io_tconv_buf_too_small_f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>H5D_SEL_IO_TCONV_BUF_TOO_SMALL. </p>
+
+</div>
+</div>
 <a id="ga9a1cdbf6faaf389149cff33ba5237290"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga9a1cdbf6faaf389149cff33ba5237290">&#9670;&nbsp;</a></span>h5d_selection_io_mode_default_f</h2>
 
@@ -2826,7 +3448,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>H5D_SELECTION_IO_MODE_DEFAULT_F. </p>
+<p>H5D_SELECTION_IO_MODE_DEFAULT. </p>
 
 </div>
 </div>
@@ -2842,7 +3464,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>H5D_SELECTION_IO_MODE_OFF_F. </p>
+<p>H5D_SELECTION_IO_MODE_OFF. </p>
 
 </div>
 </div>
@@ -2858,7 +3480,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>H5D_SELECTION_IO_MODE_ON_F. </p>
+<p>H5D_SELECTION_IO_MODE_ON. </p>
 
 </div>
 </div>
@@ -2995,7 +3617,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Sep 6 2023 00:28:36 for HDF5 by
+    <li class="footer">Generated on Fri Sep 8 2023 00:28:16 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

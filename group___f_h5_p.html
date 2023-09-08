@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.8253ab9</span>
+   &#160;<span id="projectnumber">1.15.0.08e115b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -543,6 +543,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gafd8da96dcb95bc604dab7cc58abf7b8c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#gafd8da96dcb95bc604dab7cc58abf7b8c">h5pget_fapl_ioc_f</a> (prp_id, vfd_config, hdferr)</td></tr>
 <tr class="memdesc:gafd8da96dcb95bc604dab7cc58abf7b8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dioc_8h.html#a9d6649a67050fb1101cca3596421b986">H5FD_IOC</a> file driver properties.  <a href="group___f_h5_p.html#gafd8da96dcb95bc604dab7cc58abf7b8c">More...</a><br /></td></tr>
 <tr class="separator:gafd8da96dcb95bc604dab7cc58abf7b8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabdbda2e87b3395f343ff62e0cf29b8a5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#gabdbda2e87b3395f343ff62e0cf29b8a5">h5pget_mpio_no_collective_cause_f</a> (plist_id, local_no_collective_cause, global_no_collective_cause, hdferr)</td></tr>
+<tr class="memdesc:gabdbda2e87b3395f343ff62e0cf29b8a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves local and global causes that broke collective I/O on the last parallel I/O call.  <a href="group___f_h5_p.html#gabdbda2e87b3395f343ff62e0cf29b8a5">More...</a><br /></td></tr>
+<tr class="separator:gabdbda2e87b3395f343ff62e0cf29b8a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6a7580b842f338ae5ecc903c11a444d2"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#ga6a7580b842f338ae5ecc903c11a444d2">h5pset_mpi_params_f</a> (prp_id, comm, info, hdferr)</td></tr>
 <tr class="memdesc:ga6a7580b842f338ae5ecc903c11a444d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the MPI communicator and info.  <a href="group___f_h5_p.html#ga6a7580b842f338ae5ecc903c11a444d2">More...</a><br /></td></tr>
 <tr class="separator:ga6a7580b842f338ae5ecc903c11a444d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -621,6 +624,21 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga9e824b9615b9a29f1a5c60002c3ee413"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#ga9e824b9615b9a29f1a5c60002c3ee413">h5pset_file_locking_f</a> (fapl_id, use_file_locking, ignore_disabled_locks, hdferr)</td></tr>
 <tr class="memdesc:ga9e824b9615b9a29f1a5c60002c3ee413"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file locking properties. File locking is mainly used to help enforce SWMR semantics.  <a href="group___f_h5_p.html#ga9e824b9615b9a29f1a5c60002c3ee413">More...</a><br /></td></tr>
 <tr class="separator:ga9e824b9615b9a29f1a5c60002c3ee413"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3d1890a01e6de4445ca84509ead857e1"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#ga3d1890a01e6de4445ca84509ead857e1">h5pget_no_selection_io_cause_f</a> (plist_id, no_selection_io_cause, hdferr)</td></tr>
+<tr class="memdesc:ga3d1890a01e6de4445ca84509ead857e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call.  <a href="group___f_h5_p.html#ga3d1890a01e6de4445ca84509ead857e1">More...</a><br /></td></tr>
+<tr class="separator:ga3d1890a01e6de4445ca84509ead857e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacadd51e5adb1f490fc6b4c95f2c7c8d5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#gacadd51e5adb1f490fc6b4c95f2c7c8d5">h5pset_file_space_strategy_f</a> (plist_id, strategy, persist, threshold, hdferr)</td></tr>
+<tr class="memdesc:gacadd51e5adb1f490fc6b4c95f2c7c8d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file space handling strategy and persisting free-space values for a file creation property list.  <a href="group___f_h5_p.html#gacadd51e5adb1f490fc6b4c95f2c7c8d5">More...</a><br /></td></tr>
+<tr class="separator:gacadd51e5adb1f490fc6b4c95f2c7c8d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0fcccea2af3ec8a5c91186a71001cb02"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#ga0fcccea2af3ec8a5c91186a71001cb02">h5pget_file_space_strategy_f</a> (plist_id, strategy, persist, threshold, hdferr)</td></tr>
+<tr class="memdesc:ga0fcccea2af3ec8a5c91186a71001cb02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the file space handling strategy and persisting free-space values for a file creation property list.  <a href="group___f_h5_p.html#ga0fcccea2af3ec8a5c91186a71001cb02">More...</a><br /></td></tr>
+<tr class="separator:ga0fcccea2af3ec8a5c91186a71001cb02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga45153d1c23036c305a409412b3b7fd78"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#ga45153d1c23036c305a409412b3b7fd78">h5pset_file_space_page_size_f</a> (prp_id, fsp_size, hdferr)</td></tr>
+<tr class="memdesc:ga45153d1c23036c305a409412b3b7fd78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file space page size for a file creation property list.  <a href="group___f_h5_p.html#ga45153d1c23036c305a409412b3b7fd78">More...</a><br /></td></tr>
+<tr class="separator:ga45153d1c23036c305a409412b3b7fd78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaee87ee3b40b0ada87dd51f6eb681052c"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_p.html#gaee87ee3b40b0ada87dd51f6eb681052c">h5pget_file_space_page_size_f</a> (prp_id, fsp_size, hdferr)</td></tr>
+<tr class="memdesc:gaee87ee3b40b0ada87dd51f6eb681052c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the file space page size for a file creation property list.  <a href="group___f_h5_p.html#gaee87ee3b40b0ada87dd51f6eb681052c">More...</a><br /></td></tr>
+<tr class="separator:gaee87ee3b40b0ada87dd51f6eb681052c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -3185,6 +3203,110 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gaee87ee3b40b0ada87dd51f6eb681052c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaee87ee3b40b0ada87dd51f6eb681052c">&#9670;&nbsp;</a></span>h5pget_file_space_page_size_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5p::h5pget_file_space_page_size_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>prp_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>fsp_size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the file space page size for a file creation property list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">prp_id</td><td>File creation property list identifier </td></tr>
+    <tr><td class="paramname">fsp_size</td><td>File space page size </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___f_c_p_l.html#gaab5e8c08e4f588e0af1d937fcebfc885">H5Pget_file_space_page_size()</a> </p>
+
+</div>
+</div>
+<a id="ga0fcccea2af3ec8a5c91186a71001cb02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0fcccea2af3ec8a5c91186a71001cb02">&#9670;&nbsp;</a></span>h5pget_file_space_strategy_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5p::h5pget_file_space_strategy_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>plist_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int), intent(out)&#160;</td>
+          <td class="paramname"><em>strategy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(out)&#160;</td>
+          <td class="paramname"><em>persist</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>threshold</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the file space handling strategy and persisting free-space values for a file creation property list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plist_id</td><td>File creation property list identifier </td></tr>
+    <tr><td class="paramname">strategy</td><td>The file space handling strategy to be used. </td></tr>
+    <tr><td class="paramname">persist</td><td>Indicate whether free space should be persistent or not </td></tr>
+    <tr><td class="paramname">threshold</td><td>The free-space section size threshold value </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___f_c_p_l.html#ga54cf6ca4f897ba9ee3695a15fe8e6029">H5Pget_file_space_strategy()</a> </p>
+
+</div>
+</div>
 <a id="gae69252ce63a8d49283beb390cd57bf2d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gae69252ce63a8d49283beb390cd57bf2d">&#9670;&nbsp;</a></span>h5pget_fill_time_f()</h2>
 
@@ -4074,6 +4196,58 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gabdbda2e87b3395f343ff62e0cf29b8a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabdbda2e87b3395f343ff62e0cf29b8a5">&#9670;&nbsp;</a></span>h5pget_mpio_no_collective_cause_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5p::h5pget_mpio_no_collective_cause_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>plist_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int32_t), intent(out)&#160;</td>
+          <td class="paramname"><em>local_no_collective_cause</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int32_t), intent(out)&#160;</td>
+          <td class="paramname"><em>global_no_collective_cause</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves local and global causes that broke collective I/O on the last parallel I/O call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plist_id</td><td>Dataset transfer property list identifier </td></tr>
+    <tr><td class="paramname">local_no_collective_cause</td><td>An enumerated set value indicating the causes that prevented collective I/O in the local process </td></tr>
+    <tr><td class="paramname">global_no_collective_cause</td><td>An enumerated set value indicating the causes across all processes that prevented collective I/O </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___d_x_p_l.html#ga29707de7c06733295086daa3a2db4979">H5Pget_mpio_no_collective_cause()</a> </p>
+
+</div>
+</div>
 <a id="ga6875dd87b0fde77da5f6c70a2c092985"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga6875dd87b0fde77da5f6c70a2c092985">&#9670;&nbsp;</a></span>h5pget_nfilters_f()</h2>
 
@@ -4160,6 +4334,51 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___l_a_p_l.html#ga6bfa33fa9a77011cbdc06d0fbc907177">H5Pget_nlinks()</a> </p>
+
+</div>
+</div>
+<a id="ga3d1890a01e6de4445ca84509ead857e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3d1890a01e6de4445ca84509ead857e1">&#9670;&nbsp;</a></span>h5pget_no_selection_io_cause_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5p::h5pget_no_selection_io_cause_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>plist_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int32_t), intent(out)&#160;</td>
+          <td class="paramname"><em>no_selection_io_cause</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plist_id</td><td>Dataset transfer property list identifier </td></tr>
+    <tr><td class="paramname">no_selection_io_cause</td><td>A bitwise set value indicating the relevant causes that prevented selection I/O from being performed </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___d_x_p_l.html#gad6fa6bfa5956e8c0bd69c22bde65f84c">H5Pget_no_selection_io_cause()</a> </p>
 
 </div>
 </div>
@@ -4687,7 +4906,7 @@ Variables</h2></td></tr>
 <p>Retrieves the version information of various objects for a file creation property list. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">prp_id</td><td>File createion property list identifier. </td></tr>
+    <tr><td class="paramname">prp_id</td><td>File creation property list identifier. </td></tr>
     <tr><td class="paramname">boot</td><td>Super block version number. </td></tr>
     <tr><td class="paramname">freelist</td><td>Global freelist version number. </td></tr>
     <tr><td class="paramname">stab</td><td>Symbol table version number. </td></tr>
@@ -7405,6 +7624,110 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391">H5Pset_file_locking()</a> </p>
+
+</div>
+</div>
+<a id="ga45153d1c23036c305a409412b3b7fd78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga45153d1c23036c305a409412b3b7fd78">&#9670;&nbsp;</a></span>h5pset_file_space_page_size_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5p::h5pset_file_space_page_size_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>prp_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>fsp_size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the file space page size for a file creation property list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">prp_id</td><td>File creation property list identifier </td></tr>
+    <tr><td class="paramname">fsp_size</td><td>File space page size </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963">H5Pset_file_space_page_size()</a> </p>
+
+</div>
+</div>
+<a id="gacadd51e5adb1f490fc6b4c95f2c7c8d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacadd51e5adb1f490fc6b4c95f2c7c8d5">&#9670;&nbsp;</a></span>h5pset_file_space_strategy_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5p::h5pset_file_space_strategy_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>plist_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(c_int), intent(in)&#160;</td>
+          <td class="paramname"><em>strategy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">logical, intent(in)&#160;</td>
+          <td class="paramname"><em>persist</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>threshold</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the file space handling strategy and persisting free-space values for a file creation property list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plist_id</td><td>File creation property list identifier </td></tr>
+    <tr><td class="paramname">strategy</td><td>The file space handling strategy to be used. See: H5F_fspace_strategy_t </td></tr>
+    <tr><td class="paramname">persist</td><td>Indicates whether free space should be persistent or not </td></tr>
+    <tr><td class="paramname">threshold</td><td>The smallest free-space section size that the free space manager will track </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70">H5Pset_file_space_strategy()</a> </p>
 
 </div>
 </div>
@@ -10156,7 +10479,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Sep 6 2023 00:28:36 for HDF5 by
+    <li class="footer">Generated on Fri Sep 8 2023 00:28:17 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
