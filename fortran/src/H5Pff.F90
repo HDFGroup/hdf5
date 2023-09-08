@@ -6405,12 +6405,13 @@ END SUBROUTINE h5pget_virtual_dsetname_f
    SUBROUTINE h5pget_file_space_strategy_f(plist_id, strategy, persist, threshold, hdferr)
      IMPLICIT NONE
      INTEGER(HID_T)  , INTENT(IN)  :: plist_id
-     INTEGER(C_INT)  , INTENT(OUT) :: strategy
+     INTEGER         , INTENT(OUT) :: strategy
      LOGICAL         , INTENT(OUT) :: persist
      INTEGER(HSIZE_T), INTENT(OUT) :: threshold
      INTEGER         , INTENT(OUT) :: hdferr
 
      LOGICAL(C_BOOL) :: c_persist
+     INTEGER(C_INT)  :: c_strategy
 
      INTERFACE
         INTEGER(C_INT) FUNCTION H5Pget_file_space_strategy(plist_id, strategy, persist, threshold) &
@@ -6424,11 +6425,16 @@ END SUBROUTINE h5pget_virtual_dsetname_f
         END FUNCTION H5Pget_file_space_strategy
      END INTERFACE
 
-     hdferr = INT( H5Pget_file_space_strategy(plist_id, strategy, c_persist, threshold) )
+
+     hdferr = INT( H5Pget_file_space_strategy(plist_id, c_strategy, c_persist, threshold) )
 
      ! Transfer value of Fortran LOGICAL and C C_BOOL type
      persist = .FALSE.
-     IF(hdferr .GE. 0) persist = c_persist
+     strategy = -1
+     IF(hdferr .GE. 0)THEN
+        persist = c_persist
+        strategy = INT(c_strategy)
+     ENDIF
 
    END SUBROUTINE h5pget_file_space_strategy_f
 

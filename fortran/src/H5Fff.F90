@@ -73,8 +73,8 @@ MODULE H5F
 
 !> @brief H5_ih_info_t derived type.
   TYPE, BIND(C) :: H5_ih_info_t
-     INTEGER(HSIZE_T) :: heap_size  !< Heap size
      INTEGER(HSIZE_T) :: index_size !< btree and/or list
+     INTEGER(HSIZE_T) :: heap_size  !< Heap size
   END TYPE H5_ih_info_t
 
 !> @brief H5F_info_t_sohm derived type.
@@ -1139,20 +1139,24 @@ CONTAINS
 !!
   SUBROUTINE H5Fget_info_f(obj_id, file_info, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)  :: obj_id
-    TYPE(H5F_INFO_T), INTENT(OUT) :: file_info
-    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)          :: obj_id
+    TYPE(H5F_INFO_T), INTENT(OUT), TARGET :: file_info
+    INTEGER         , INTENT(OUT)         :: hdferr
+
+    TYPE(C_PTR) :: f_ptr
 
     INTERFACE
        INTEGER(C_INT) FUNCTION  H5Fget_info(obj_id, file_info) BIND(C, NAME='H5Fget_info2')
-         IMPORT :: HID_T, C_INT, H5F_INFO_T
+         IMPORT :: HID_T, C_PTR, C_INT, H5F_INFO_T
          IMPLICIT NONE
-         INTEGER(HID_T)     , VALUE :: obj_id
-         TYPE(H5F_INFO_T), VALUE :: file_info
+         INTEGER(HID_T), VALUE :: obj_id
+         TYPE(C_PTR),   VALUE  :: file_info
        END FUNCTION H5Fget_info
     END INTERFACE
 
-    hdferr = INT(H5Fget_info(obj_id, file_info))
+    f_ptr = C_LOC(file_info)
+
+    hdferr = INT(H5Fget_info(obj_id, f_ptr))
 
   END SUBROUTINE H5Fget_info_f
 
