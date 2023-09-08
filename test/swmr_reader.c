@@ -43,7 +43,7 @@ static int read_records(const char *filename, bool verbose, FILE *verbose_file, 
 /* Local Variables */
 /*******************/
 
-static hid_t symbol_tid = -1; /* The type ID for the SWMR datasets */
+static hid_t symbol_tid = H5I_INVALID_HID; /* The type ID for the SWMR datasets */
 
 /*-------------------------------------------------------------------------
  * Function:    check_dataset

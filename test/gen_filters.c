@@ -41,12 +41,12 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
 static herr_t
 test_filters_endianess(void)
 {
-    hid_t   fid           = -1;   /* file ID */
-    hid_t   dsid          = -1;   /* dataset ID */
-    hid_t   sid           = -1;   /* dataspace ID */
-    hid_t   dcpl          = -1;   /* dataset creation property list ID */
-    hsize_t dims[1]       = {20}; /* dataspace dimensions */
-    hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
+    hid_t   fid           = H5I_INVALID_HID; /* file ID */
+    hid_t   dsid          = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid           = H5I_INVALID_HID; /* dataspace ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* dataset creation property list ID */
+    hsize_t dims[1]       = {20};            /* dataspace dimensions */
+    hsize_t chunk_dims[1] = {10};            /* chunk dimensions */
     int     buf[20];
     int     rank = 1;
     int     i;
@@ -146,12 +146,12 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static herr_t
 create_file_with_bogus_filter(void)
 {
-    hid_t   fid           = -1;   /* file ID */
-    hid_t   dsid          = -1;   /* dataset ID */
-    hid_t   sid           = -1;   /* dataspace ID */
-    hid_t   dcpl          = -1;   /* dataset creation property list ID */
-    hsize_t dims[1]       = {20}; /* dataspace dimensions */
-    hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
+    hid_t   fid           = H5I_INVALID_HID; /* file ID */
+    hid_t   dsid          = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid           = H5I_INVALID_HID; /* dataspace ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* dataset creation property list ID */
+    hsize_t dims[1]       = {20};            /* dataspace dimensions */
+    hsize_t chunk_dims[1] = {10};            /* chunk dimensions */
     int     buf[20];
     int     rank = 1;
     int     i;

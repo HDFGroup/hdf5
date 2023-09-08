@@ -48,19 +48,23 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     char       *vfilename2              = NULL;
     char       *srcfilenamepct          = NULL;
     char       *srcfilenamepct_map      = NULL;
-    hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
-    hid_t       vfile                   = -1;               /* File with virtual dset */
-    hid_t       dcpl                    = -1;               /* Dataset creation property list */
-    hid_t       dapl                    = -1;               /* Dataset access property list */
-    hid_t       srcspace[4]             = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t       vspace[4]               = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
-    hid_t       memspace                = -1;               /* Memory dataspace */
-    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datasets */
-    hid_t       vdset                   = -1;               /* Virtual dataset */
-    hsize_t     dims[4]                 = {10, 26, 0, 0};   /* Data space current size */
-    int         buf[10][26];                                /* Write and expected read buffer */
-    int         rbuf[10][26];                               /* Read buffer */
-    int         fill = -1;                                  /* Fill value */
+    hid_t       srcfile[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t       vfile                   = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t       dcpl                    = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t       dapl                    = H5I_INVALID_HID;   /* Dataset access property list */
+    hid_t       srcspace[4]             = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                         H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t       vspace[4]               = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                       H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t       memspace                = H5I_INVALID_HID;   /* Memory dataspace */
+    hid_t       srcdset[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Source datasets */
+    hid_t       vdset                   = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t     dims[4]                 = {10, 26, 0, 0};    /* Data space current size */
+    int         buf[10][26];                                 /* Write and expected read buffer */
+    int         rbuf[10][26];                                /* Read buffer */
+    int         fill = -1;                                   /* Fill value */
     int         i, j;
     char        buffer[1024]; /* buffer to read vds_prefix       */
 

@@ -2155,17 +2155,17 @@ test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2
 static void
 test_reference_group(void)
 {
-    hid_t       fid = -1;            /* File ID */
-    hid_t       gid = -1, gid2 = -1; /* Group IDs */
-    hid_t       did;                 /* Dataset ID */
-    hid_t       sid;                 /* Dataspace ID */
-    H5R_ref_t   wref;                /* Reference to write */
-    H5R_ref_t   rref;                /* Reference to read */
-    H5G_info_t  ginfo;               /* Group info struct */
-    char        objname[NAME_SIZE];  /* Buffer to store name */
-    H5O_info2_t oinfo;               /* Object info struct */
-    int         count = 0;           /* Count within iterated group */
-    ssize_t     size;                /* Name length */
+    hid_t       fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t       gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t       did;                                           /* Dataset ID */
+    hid_t       sid;                                           /* Dataspace ID */
+    H5R_ref_t   wref;                                          /* Reference to write */
+    H5R_ref_t   rref;                                          /* Reference to read */
+    H5G_info_t  ginfo;                                         /* Group info struct */
+    char        objname[NAME_SIZE];                            /* Buffer to store name */
+    H5O_info2_t oinfo;                                         /* Object info struct */
+    int         count = 0;                                     /* Count within iterated group */
+    ssize_t     size;                                          /* Name length */
     herr_t      ret;
 
     /* Create file with a group and a dataset containing an object reference to the group */

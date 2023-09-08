@@ -777,8 +777,8 @@ error:
 static int
 test_derived_flt(void)
 {
-    hid_t          file = -1, tid1 = -1, tid2 = -1;
-    hid_t          dxpl_id = -1;
+    hid_t          file = H5I_INVALID_HID, tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;
+    hid_t          dxpl_id = H5I_INVALID_HID;
     char           filename[1024];
     size_t         spos, epos, esize, mpos, msize, size;
     size_t         src_size, dst_size;
@@ -1223,8 +1223,8 @@ error:
 static int
 test_derived_integer(void)
 {
-    hid_t          file = -1, tid1 = -1, tid2 = -1;
-    hid_t          dxpl_id = -1;
+    hid_t          file = H5I_INVALID_HID, tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;
+    hid_t          dxpl_id = H5I_INVALID_HID;
     char           filename[1024];
     size_t         src_size, dst_size;
     unsigned char *buf = NULL, *saved_buf = NULL;

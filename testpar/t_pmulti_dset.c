@@ -102,10 +102,10 @@ test_pmdset(size_t niter, unsigned flags)
     size_t         max_dsets;
     size_t         buf_size;
     size_t         ndsets;
-    hid_t          file_id = -1;
-    hid_t          fapl_id = -1;
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          fapl_id = H5I_INVALID_HID;
     hid_t          dcpl_id[MAX_DSETS];
-    hid_t          dxpl_id = -1;
+    hid_t          dxpl_id = H5I_INVALID_HID;
     hsize_t        dset_dims[MAX_DSETS][3];
     hsize_t        chunk_dims[2];
     hsize_t        max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};

@@ -54,12 +54,12 @@ static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
 static hid_t
 create_file(const char *filename, hid_t fapl_id, bool swmr)
 {
-    hid_t    fid     = -1;   /* file ID                          */
-    hid_t    top_gid = -1;   /* containing group ID              */
-    hid_t    gid     = -1;   /* subgroup ID                      */
-    char     group_name[32]; /* group name                       */
-    unsigned flags;          /* file open flags                  */
-    int      i;              /* iterator                         */
+    hid_t    fid     = H5I_INVALID_HID; /* file ID                          */
+    hid_t    top_gid = H5I_INVALID_HID; /* containing group ID              */
+    hid_t    gid     = H5I_INVALID_HID; /* subgroup ID                      */
+    char     group_name[32];            /* group name                       */
+    unsigned flags;                     /* file open flags                  */
+    int      i;                         /* iterator                         */
 
     flags = H5F_ACC_TRUNC | (swmr ? H5F_ACC_SWMR_WRITE : 0);
 
@@ -110,13 +110,13 @@ error:
 static herr_t
 add_dset_to_file(hid_t fid, const char *dset_name)
 {
-    hid_t   dcpl_id       = -1;           /* dataset creation plist ID        */
-    hid_t   sid           = -1;           /* dataspace ID                     */
-    hid_t   did           = -1;           /* dataset ID                       */
-    int    *data          = NULL;         /* data buffer                      */
-    hsize_t dims[1]       = {NELEMENTS};  /* size of dataset                  */
-    hsize_t chunk_dims[1] = {CHUNK_SIZE}; /* chunk size               */
-    int     i;                            /* iterator                         */
+    hid_t   dcpl_id       = H5I_INVALID_HID; /* dataset creation plist ID        */
+    hid_t   sid           = H5I_INVALID_HID; /* dataspace ID                     */
+    hid_t   did           = H5I_INVALID_HID; /* dataset ID                       */
+    int    *data          = NULL;            /* data buffer                      */
+    hsize_t dims[1]       = {NELEMENTS};     /* size of dataset                  */
+    hsize_t chunk_dims[1] = {CHUNK_SIZE};    /* chunk size               */
+    int     i;                               /* iterator                         */
 
     /* Create a chunked dataset */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -176,12 +176,12 @@ error:
 int
 main(void)
 {
-    char *driver = NULL;     /* name of current VFD (from env var)       */
-    bool  vfd_supports_swmr; /* whether the current VFD supports SWMR    */
-    hid_t fid     = -1;      /* file ID                                  */
-    hid_t fapl_id = -1;      /* file access proplist ID                  */
-    char  filename[1024];    /* filename                                 */
-    bool  use_swmr;          /* whether or not to use SWMR I/O           */
+    char *driver = NULL;             /* name of current VFD (from env var)       */
+    bool  vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
+    hid_t fid     = H5I_INVALID_HID; /* file ID                                  */
+    hid_t fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
+    char  filename[1024];            /* filename                                 */
+    bool  use_swmr;                  /* whether or not to use SWMR I/O           */
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)

@@ -3750,7 +3750,7 @@ error:
 int
 main(void)
 {
-    hid_t file_id = (-1);
+    hid_t file_id = (H5I_INVALID_HID);
     int   nerrors = 0;
     hid_t fapl;
     char  filename0[1024];

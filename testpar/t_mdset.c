@@ -1806,9 +1806,9 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
 {
     int     i;
     int     j;
-    hid_t   file_id = -1;
-    hid_t   fapl_id = -1;
-    hid_t   dxpl_id = -1;
+    hid_t   file_id = H5I_INVALID_HID;
+    hid_t   fapl_id = H5I_INVALID_HID;
+    hid_t   dxpl_id = H5I_INVALID_HID;
     hid_t   att_id[NUM_DATA_SETS];
     hid_t   att_space[NUM_DATA_SETS];
     hid_t   lg_att_id[NUM_DATA_SETS];
@@ -2187,9 +2187,9 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 {
     int     i;
     int     j;
-    hid_t   file_id = -1;
-    hid_t   fapl_id = -1;
-    hid_t   dxpl_id = -1;
+    hid_t   file_id = H5I_INVALID_HID;
+    hid_t   fapl_id = H5I_INVALID_HID;
+    hid_t   dxpl_id = H5I_INVALID_HID;
     hid_t   lg_att_id[NUM_DATA_SETS];
     hid_t   lg_att_type[NUM_DATA_SETS];
     hid_t   disk_space[NUM_DATA_SETS];

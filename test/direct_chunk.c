@@ -120,9 +120,9 @@ static const H5Z_class2_t H5Z_BOGUS2[1] = {{
 static int
 test_direct_chunk_write(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -389,9 +389,9 @@ test_direct_chunk_overwrite_data(hid_t fid)
     int16_t  overwrite_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_NX];
     uint32_t filter_mask     = 0;
     hid_t    tid             = H5T_NATIVE_UINT16;
-    hid_t    dcpl_id         = -1;
-    hid_t    sid             = -1;
-    hid_t    did             = -1;
+    hid_t    dcpl_id         = H5I_INVALID_HID;
+    hid_t    sid             = H5I_INVALID_HID;
+    hid_t    did             = H5I_INVALID_HID;
     uint16_t fill_value      = 0;
     hsize_t  dset_dims[]     = {1, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_2NX};
     hsize_t  dset_max_dims[] = {H5S_UNLIMITED, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_2NX};
@@ -490,9 +490,9 @@ error:
 static int
 test_skip_compress_write1(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -738,9 +738,9 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static int
 test_skip_compress_write2(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -944,16 +944,16 @@ test_data_conv(hid_t file)
         int a, c[4], e;
     } dst_type_t;
 
-    hid_t         dataspace = -1, dataset = -1;
-    hid_t         mem_space = -1;
-    hid_t         cparms = -1, dxpl = -1;
+    hid_t         dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t         mem_space = H5I_INVALID_HID;
+    hid_t         cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t       dims[2]       = {NX, NY};
     hsize_t       maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t       chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     herr_t        status;
     int           i, j, n;
     const hsize_t four = 4;
-    hid_t         st = -1, dt = -1;
+    hid_t         st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t         array_dt;
 
     unsigned   filter_mask = 0;
@@ -1170,9 +1170,9 @@ error:
 static int
 test_invalid_parameters(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     herr_t  status;
@@ -1267,14 +1267,15 @@ test_invalid_parameters(hid_t file)
     /* Check invalid dataset ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if ((status = H5Dwrite_chunk((hid_t)H5I_INVALID_HID, dxpl, filter_mask, offset, buf_size,
+                                     direct_buf)) != FAIL)
             goto error;
     }
     H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dread_chunk((hid_t)-1, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
+        if ((status = H5Dread_chunk((hid_t)H5I_INVALID_HID, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
     H5E_END_TRY
@@ -1282,14 +1283,16 @@ test_invalid_parameters(hid_t file)
     /* Check invalid DXPL ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if ((status = H5Dwrite_chunk(dataset, (hid_t)H5I_INVALID_HID, filter_mask, offset, buf_size,
+                                     direct_buf)) != FAIL)
             goto error;
     }
     H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dread_chunk(dataset, (hid_t)-1, offset, &filter_mask, direct_buf)) != FAIL)
+        if ((status = H5Dread_chunk(dataset, (hid_t)H5I_INVALID_HID, offset, &filter_mask, direct_buf)) !=
+            FAIL)
             goto error;
     }
     H5E_END_TRY
@@ -1414,9 +1417,9 @@ error:
 static int
 test_direct_chunk_read_no_cache(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1, dapl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID, dapl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -1592,9 +1595,9 @@ error:
 static int
 test_direct_chunk_read_cache(hid_t file, bool flush)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -1791,9 +1794,9 @@ error:
 static int
 test_read_unfiltered_dset(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -1944,9 +1947,9 @@ error:
 static int
 test_read_unallocated_chunk(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]             = {NX, NY};
     hsize_t maxdims[2]          = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2]       = {CHUNK_NX, CHUNK_NY};

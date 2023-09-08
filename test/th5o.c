@@ -934,13 +934,13 @@ test_h5o_plist(void)
 static void
 test_h5o_link(void)
 {
-    hid_t        file_id  = -1;
-    hid_t        group_id = -1;
-    hid_t        space_id = -1;
-    hid_t        dset_id  = -1;
-    hid_t        type_id  = -1;
-    hid_t        fapl_id  = -1;
-    hid_t        lcpl_id  = -1;
+    hid_t        file_id  = H5I_INVALID_HID;
+    hid_t        group_id = H5I_INVALID_HID;
+    hid_t        space_id = H5I_INVALID_HID;
+    hid_t        dset_id  = H5I_INVALID_HID;
+    hid_t        type_id  = H5I_INVALID_HID;
+    hid_t        fapl_id  = H5I_INVALID_HID;
+    hid_t        lcpl_id  = H5I_INVALID_HID;
     char         filename[1024];
     hsize_t      dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t       committed; /* Whether the named datatype is committed */
@@ -1731,10 +1731,10 @@ visit_obj_cb(hid_t group_id, const char *name, const H5O_info1_t *oinfo1, void H
 static void
 test_h5o_getinfo_visit(void)
 {
-    hid_t       fid  = -1;            /* HDF5 File ID */
-    hid_t       gid1 = -1, gid2 = -1; /* Group IDs */
-    hid_t       sid = -1;             /* Dataspace ID */
-    hid_t       aid = -1;             /* Attribute ID */
+    hid_t       fid  = H5I_INVALID_HID;                         /* HDF5 File ID */
+    hid_t       gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t       sid = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t       aid = H5I_INVALID_HID;                          /* Attribute ID */
     char        filename[1024];
     H5O_info1_t oinfo1, oinfo2; /* Object info structs */
     char        attrname[25];   /* Attribute name */

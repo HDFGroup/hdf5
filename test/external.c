@@ -91,15 +91,15 @@ out:
 static int
 test_non_extendible(hid_t file)
 {
-    hid_t   dcpl        = -1;          /* dataset creation properties          */
-    hid_t   space       = -1;          /* data space                           */
-    hid_t   dset        = -1;          /* dataset                              */
-    hsize_t cur_size[1] = {100};       /* data space current size              */
-    hsize_t max_size[1] = {100};       /* data space maximum size              */
-    int     n           = 0;           /* number of external files             */
-    off_t   file_offset = 0;           /* external file offset                 */
-    hsize_t file_size   = 0;           /* sizeof external file segment         */
-    haddr_t dset_addr   = HADDR_UNDEF; /* address of dataset                   */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* data space current size              */
+    hsize_t max_size[1] = {100};           /* data space maximum size              */
+    int     n           = 0;               /* number of external files             */
+    off_t   file_offset = 0;               /* external file offset                 */
+    hsize_t file_size   = 0;               /* sizeof external file segment         */
+    haddr_t dset_addr   = HADDR_UNDEF;     /* address of dataset                   */
 
     TESTING("fixed-size data space, exact storage");
 
@@ -193,11 +193,11 @@ error:
 static int
 test_too_small(hid_t file)
 {
-    hid_t   dcpl        = -1;    /* dataset creation properties          */
-    hid_t   space       = -1;    /* data space                           */
-    hid_t   dset        = -1;    /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* current data space size              */
-    hsize_t max_size[1] = {100}; /* maximum data space size              */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* current data space size              */
+    hsize_t max_size[1] = {100};           /* maximum data space size              */
 
     TESTING("external storage is too small");
 
@@ -250,11 +250,11 @@ error:
 static int
 test_large_enough_current_eventual(hid_t file)
 {
-    hid_t   dcpl        = -1;    /* dataset creation properties          */
-    hid_t   space       = -1;    /* data space                           */
-    hid_t   dset        = -1;    /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* current data space size              */
-    hsize_t max_size[1] = {200}; /* maximum data space size              */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* current data space size              */
+    hsize_t max_size[1] = {200};           /* maximum data space size              */
 
     TESTING("extendible dataspace, exact external size");
 
@@ -302,11 +302,11 @@ error:
 static int
 test_large_enough_current_not_eventual(hid_t file)
 {
-    hid_t   dcpl        = -1;    /* dataset creation properties          */
-    hid_t   space       = -1;    /* data space                           */
-    hid_t   dset        = -1;    /* dataset                              */
-    hsize_t cur_size[1] = {100}; /* current data space size              */
-    hsize_t max_size[1] = {200}; /* maximum data space size              */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space       = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                              */
+    hsize_t cur_size[1] = {100};           /* current data space size              */
+    hsize_t max_size[1] = {200};           /* maximum data space size              */
 
     TESTING("extendible dataspace, external storage is too small");
 
@@ -359,9 +359,9 @@ error:
 static int
 test_unlimited(hid_t file)
 {
-    hid_t   dcpl        = -1;              /* dataset creation properties   */
-    hid_t   space       = -1;              /* data space                    */
-    hid_t   dset        = -1;              /* dataset                       */
+    hid_t   dcpl        = H5I_INVALID_HID; /* dataset creation properties   */
+    hid_t   space       = H5I_INVALID_HID; /* data space                    */
+    hid_t   dset        = H5I_INVALID_HID; /* dataset                       */
     hsize_t cur_size[1] = {100};           /* data space current size       */
     hsize_t max_size[1] = {H5S_UNLIMITED}; /* data space maximum size       */
     int     n;                             /* number of external files      */
@@ -484,12 +484,12 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
 static int
 test_multiple_files(hid_t file)
 {
-    hid_t        dcpl        = -1;    /* dataset creation properties         */
-    hid_t        space       = -1;    /* dataspace                           */
-    hid_t        dset        = -1;    /* dataset                             */
-    hsize_t      cur_size[1] = {100}; /* data space current size             */
-    hsize_t      max_size[1] = {100}; /* data space maximum size             */
-    hsize_t      max_ext_size;        /* maximum size of external files      */
+    hid_t        dcpl        = H5I_INVALID_HID; /* dataset creation properties         */
+    hid_t        space       = H5I_INVALID_HID; /* dataspace                           */
+    hid_t        dset        = H5I_INVALID_HID; /* dataset                             */
+    hsize_t      cur_size[1] = {100};           /* data space current size             */
+    hsize_t      max_size[1] = {100};           /* data space maximum size             */
+    hsize_t      max_ext_size;                  /* maximum size of external files      */
     unsigned int n_external_files = 4;
 
     TESTING("multiple external files");
@@ -568,9 +568,9 @@ error:
 static int
 test_add_to_unlimited(void)
 {
-    hid_t  dcpl   = -1;   /* dataset creation properties          */
-    herr_t status = FAIL; /* function return status               */
-    int    n      = 0;    /* number of external files             */
+    hid_t  dcpl   = H5I_INVALID_HID; /* dataset creation properties          */
+    herr_t status = FAIL;            /* function return status               */
+    int    n      = 0;               /* number of external files             */
 
     TESTING("external file following unlimited file");
 
@@ -620,8 +620,8 @@ error:
 static int
 test_overflow(void)
 {
-    hid_t  dcpl   = -1;   /* dataset creation properties          */
-    herr_t status = FAIL; /* return status                        */
+    hid_t  dcpl   = H5I_INVALID_HID; /* dataset creation properties          */
+    herr_t status = FAIL;            /* return status                        */
 
     TESTING("address overflow in external files");
 
@@ -666,19 +666,19 @@ error:
 static int
 test_read_file_set(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dset  = -1;        /* dataset                              */
-    hid_t   grp   = -1;        /* group to emit diagnostics            */
-    size_t  i     = 0;         /* miscellaneous counter                */
-    char    filename[1024];    /* file names                           */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
-    hid_t   hs_space = -1;     /* hyperslab data space                 */
-    hsize_t hs_start = 30;     /* hyperslab starting offset            */
-    hsize_t hs_count = 25;     /* hyperslab size                       */
+    hid_t   file  = H5I_INVALID_HID;    /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID;    /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID;    /* data space                           */
+    hid_t   dset  = H5I_INVALID_HID;    /* dataset                              */
+    hid_t   grp   = H5I_INVALID_HID;    /* group to emit diagnostics            */
+    size_t  i     = 0;                  /* miscellaneous counter                */
+    char    filename[1024];             /* file names                           */
+    int     part[PART_SIZE];            /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];          /* raw data buffer (total)              */
+    hsize_t cur_size;                   /* current data space size              */
+    hid_t   hs_space = H5I_INVALID_HID; /* hyperslab data space                 */
+    hsize_t hs_start = 30;              /* hyperslab starting offset            */
+    hsize_t hs_count = 25;              /* hyperslab size                       */
 
     TESTING("read external dataset");
 
@@ -788,19 +788,19 @@ error:
 static int
 test_write_file_set(hid_t fapl)
 {
-    hid_t    file       = -1;   /* file to which to write               */
-    hid_t    dcpl       = -1;   /* dataset creation properties          */
-    hid_t    mem_space  = -1;   /* memory data space                    */
-    hid_t    file_space = -1;   /* file data space                      */
-    hid_t    dset       = -1;   /* dataset                              */
-    unsigned i          = 0;    /* miscellaneous counter                */
-    int      part[PART_SIZE];   /* raw data buffer (partial)            */
-    int      whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t  cur_size = 100;    /* current data space size              */
-    hsize_t  max_size = 200;    /* maximum data space size              */
-    hsize_t  hs_start = 100;    /* hyperslab starting offset            */
-    hsize_t  hs_count = 100;    /* hyperslab size                       */
-    char     filename[1024];    /* file name                            */
+    hid_t    file       = H5I_INVALID_HID; /* file to which to write               */
+    hid_t    dcpl       = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t    mem_space  = H5I_INVALID_HID; /* memory data space                    */
+    hid_t    file_space = H5I_INVALID_HID; /* file data space                      */
+    hid_t    dset       = H5I_INVALID_HID; /* dataset                              */
+    unsigned i          = 0;               /* miscellaneous counter                */
+    int      part[PART_SIZE];              /* raw data buffer (partial)            */
+    int      whole[TOTAL_SIZE];            /* raw data buffer (total)              */
+    hsize_t  cur_size = 100;               /* current data space size              */
+    hsize_t  max_size = 200;               /* maximum data space size              */
+    hsize_t  hs_start = 100;               /* hyperslab starting offset            */
+    hsize_t  hs_count = 100;               /* hyperslab size                       */
+    char     filename[1024];               /* file name                            */
 
     TESTING("write external dataset");
 
@@ -915,16 +915,16 @@ error:
 static int
 test_path_absolute(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dset  = -1;        /* dataset                              */
-    size_t  i     = 0;         /* miscellaneous counter                */
-    char    cwdpath[1024];     /* working directory                    */
-    char    filename[1088];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    size_t  i     = 0;               /* miscellaneous counter                */
+    char    cwdpath[1024];           /* working directory                    */
+    char    filename[1088];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
 
     TESTING("absolute filenames for external file");
 
@@ -1007,15 +1007,15 @@ error:
 static int
 test_path_relative(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dset  = -1;        /* dataset                              */
-    size_t  i     = 0;         /* miscellaneous counters               */
-    char    filename[1024];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    size_t  i     = 0;               /* miscellaneous counters               */
+    char    filename[1024];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
 
     TESTING("filenames relative to current directory for external file");
 
@@ -1096,20 +1096,20 @@ error:
 static int
 test_path_relative_cwd(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dapl  = -1;        /* dataset access property list         */
-    hid_t   dapl2 = -1;        /* copy of dapl                         */
-    hid_t   dset  = -1;        /* dataset                              */
-    hid_t   dset2 = -1;        /* dataset, opened a second time        */
-    hid_t   dset3 = -1;        /* dataset, opened with different prefix    */
-    size_t  i     = 0;         /* miscellaneous counters               */
-    char    filename[1024];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
-    char    buffer[1024];      /* buffer to read efile_prefix          */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dapl  = H5I_INVALID_HID; /* dataset access property list         */
+    hid_t   dapl2 = H5I_INVALID_HID; /* copy of dapl                         */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    hid_t   dset2 = H5I_INVALID_HID; /* dataset, opened a second time        */
+    hid_t   dset3 = H5I_INVALID_HID; /* dataset, opened with different prefix    */
+    size_t  i     = 0;               /* miscellaneous counters               */
+    char    filename[1024];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
+    char    buffer[1024];            /* buffer to read efile_prefix          */
 
     TESTING("filenames relative to HDF5 file for external file");
 
@@ -1260,14 +1260,14 @@ error:
 static int
 test_h5d_get_access_plist(hid_t fapl_id)
 {
-    hid_t   fid     = -1;   /* file to write to                     */
-    hid_t   dcpl_id = -1;   /* dataset creation properties          */
-    hid_t   dapl_id = -1;   /* dataset access properties            */
-    hid_t   sid     = -1;   /* data space                           */
-    hid_t   did     = -1;   /* dataset                              */
-    hsize_t dims    = 0;    /* dataset size                         */
-    char   *buffer  = NULL; /* saved prefix name from dapl          */
-    char    filename[1024]; /* file names                           */
+    hid_t   fid     = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl_id = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   dapl_id = H5I_INVALID_HID; /* dataset access properties            */
+    hid_t   sid     = H5I_INVALID_HID; /* data space                           */
+    hid_t   did     = H5I_INVALID_HID; /* dataset                              */
+    hsize_t dims    = 0;               /* dataset size                         */
+    char   *buffer  = NULL;            /* saved prefix name from dapl          */
+    char    filename[1024];            /* file names                           */
 
     TESTING("H5Dget_access_plist() returns correct prefix");
 
@@ -1361,13 +1361,13 @@ error:
 int
 main(void)
 {
-    hid_t    fapl_id_old = -1; /* file access properties (old format)  */
-    hid_t    fapl_id_new = -1; /* file access properties (new format)  */
-    hid_t    fid         = -1; /* file for test_1* functions           */
-    hid_t    gid         = -1; /* group to emit diagnostics            */
-    char     filename[1024];   /* file name for test_1* funcs          */
-    unsigned latest_format;    /* default or latest file format        */
-    int      nerrors = 0;      /* number of errors                     */
+    hid_t    fapl_id_old = H5I_INVALID_HID; /* file access properties (old format)  */
+    hid_t    fapl_id_new = H5I_INVALID_HID; /* file access properties (new format)  */
+    hid_t    fid         = H5I_INVALID_HID; /* file for test_1* functions           */
+    hid_t    gid         = H5I_INVALID_HID; /* group to emit diagnostics            */
+    char     filename[1024];                /* file name for test_1* funcs          */
+    unsigned latest_format;                 /* default or latest file format        */
+    int      nerrors = 0;                   /* number of errors                     */
 
     h5_reset();
 
@@ -1387,7 +1387,7 @@ main(void)
 
     /* Test with old & new format groups */
     for (latest_format = false; latest_format <= true; latest_format++) {
-        hid_t current_fapl_id = -1;
+        hid_t current_fapl_id = H5I_INVALID_HID;
 
         /* Set the fapl for different file formats */
         if (latest_format) {

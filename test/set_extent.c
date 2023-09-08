@@ -230,8 +230,8 @@ do_ranks(hid_t fapl, bool new_format, bool use_select_io)
     bool          do_fillvalue         = false;
     bool          disable_edge_filters = false;
     rank4_index_t index_type;
-    hid_t         dcpl      = -1;
-    hid_t         dxpl      = -1;
+    hid_t         dcpl      = H5I_INVALID_HID;
+    hid_t         dxpl      = H5I_INVALID_HID;
     int           fillvalue = FILL_VALUE;
     unsigned      config;
     bool          driver_is_parallel;
@@ -437,8 +437,8 @@ error:
 static int
 do_layouts(hid_t fapl, bool use_select_io)
 {
-    hid_t        new_fapl = -1;
-    hid_t        dxpl     = -1;
+    hid_t        new_fapl = H5I_INVALID_HID;
+    hid_t        dxpl     = H5I_INVALID_HID;
     H5F_libver_t low, high; /* Low and high bounds */
     herr_t       ret;       /* Generic return value */
 
@@ -514,10 +514,10 @@ test_rank1(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fill_value, bool disable_
            bool set_istore_k)
 {
 
-    hid_t   fid     = -1;
-    hid_t   did     = -1;
-    hid_t   sid     = -1;
-    hid_t   my_dcpl = -1;
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   my_dcpl = H5I_INVALID_HID;
     hid_t   fcpl;
     hsize_t dims_o[RANK1] = {DIM0};  /* original dimensions */
     hsize_t dims_s[RANK1] = {DIMS0}; /* shrinking dimensions */
@@ -848,10 +848,10 @@ test_rank2(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fill_value, bool disable_
            bool set_istore_k)
 {
 
-    hid_t   fid     = -1;
-    hid_t   did     = -1;
-    hid_t   sid     = -1;
-    hid_t   my_dcpl = -1;
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   my_dcpl = H5I_INVALID_HID;
     hid_t   fcpl;
     hsize_t dims_o[RANK2] = {DIM0, DIM1};   /* original dimensions */
     hsize_t dims_s[RANK2] = {DIMS0, DIMS1}; /* shrinking dimensions */
@@ -1343,10 +1343,10 @@ test_rank3(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fill_value, bool disable_
            bool set_istore_k)
 {
 
-    hid_t   fid     = -1;
-    hid_t   did     = -1;
-    hid_t   sid     = -1;
-    hid_t   my_dcpl = -1;
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   my_dcpl = H5I_INVALID_HID;
     hid_t   fcpl;
     hsize_t dims_o[RANK3] = {DIM0, DIM1, DIM2};    /* original dimensions */
     hsize_t dims_s[RANK3] = {DIMS0, DIMS1, DIMS2}; /* shrinking dimensions */
@@ -1777,11 +1777,11 @@ static int
 test_external(hid_t fapl, bool use_select_io)
 {
 
-    hid_t   fid           = -1;
-    hid_t   did           = -1;
-    hid_t   sid           = -1;
-    hid_t   dcpl          = -1;
-    hid_t   dxpl          = -1;
+    hid_t   fid           = H5I_INVALID_HID;
+    hid_t   did           = H5I_INVALID_HID;
+    hid_t   sid           = H5I_INVALID_HID;
+    hid_t   dcpl          = H5I_INVALID_HID;
+    hid_t   dxpl          = H5I_INVALID_HID;
     hsize_t dims_o[RANK2] = {DIM0, DIM1};   /* original dimensions */
     hsize_t dims_s[RANK2] = {DIMS0, DIMS1}; /* shrinking dimensions */
     hsize_t dims_e[RANK2] = {DIME0, DIM1};  /* extended dimensions, dimension 1 is the original */
@@ -2080,10 +2080,10 @@ static int
 test_layouts(H5D_layout_t layout, hid_t fapl, hid_t dxpl)
 {
 
-    hid_t   fid  = -1;
-    hid_t   did  = -1;
-    hid_t   sid  = -1;
-    hid_t   dcpl = -1;
+    hid_t   fid  = H5I_INVALID_HID;
+    hid_t   did  = H5I_INVALID_HID;
+    hid_t   sid  = H5I_INVALID_HID;
+    hid_t   dcpl = H5I_INVALID_HID;
     herr_t  ret;
     hsize_t dims_o[RANK2] = {DIM0, DIM1};   /* original dimensions */
     hsize_t dims_s[RANK2] = {DIMS0, DIMS1}; /* shrinking dimensions */
@@ -2296,11 +2296,11 @@ static int
 test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool disable_edge_filters,
                   bool do_sparse, rank4_index_t index_type)
 {
-    hid_t         file        = -1;
-    hid_t         dset        = -1;
-    hid_t         fspace      = -1;
-    hid_t         mspace      = -1;
-    hid_t         my_dcpl     = -1;
+    hid_t         file        = H5I_INVALID_HID;
+    hid_t         dset        = H5I_INVALID_HID;
+    hid_t         fspace      = H5I_INVALID_HID;
+    hid_t         mspace      = H5I_INVALID_HID;
+    hid_t         my_dcpl     = H5I_INVALID_HID;
     hsize_t       dims[4]     = {10, 10, 10, 10}; /* Dataset's dimensions */
     hsize_t       max_dims[4] = {10, 10, 10, 10}; /* Maximum dimensions */
     hsize_t       old_dims[4];                    /* Old dataset dimensions */
@@ -2513,12 +2513,12 @@ static int
 test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool disable_edge_filters,
                      bool do_sparse, rank4_index_t index_type)
 {
-    hid_t         file        = -1;
-    hid_t         dset        = -1;
-    hid_t         type        = -1;
-    hid_t         fspace      = -1;
-    hid_t         mspace      = -1;
-    hid_t         my_dcpl     = -1;
+    hid_t         file        = H5I_INVALID_HID;
+    hid_t         dset        = H5I_INVALID_HID;
+    hid_t         type        = H5I_INVALID_HID;
+    hid_t         fspace      = H5I_INVALID_HID;
+    hid_t         mspace      = H5I_INVALID_HID;
+    hid_t         my_dcpl     = H5I_INVALID_HID;
     hsize_t       dims[4]     = {10, 10, 10, 10}; /* Dataset's dimensions */
     hsize_t       max_dims[4] = {10, 10, 10, 10}; /* Maximum dimensions */
     hsize_t       old_dims[4];                    /* Old dataset dimensions */

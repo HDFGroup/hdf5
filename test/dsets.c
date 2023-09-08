@@ -531,9 +531,9 @@ error:
 static herr_t
 test_simple_io(const char *env_h5_drvr, hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE];
-    hid_t   file = -1, dataset = -1, space = -1, xfer = -1;
-    int     i, j, n;
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
+    int   i, j, n;
     hsize_t dims[2];
     void   *tconv_buf = NULL;
     int     f         = -1;
@@ -693,9 +693,9 @@ error:
 static herr_t
 test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    char    filename[FILENAME_BUF_SIZE];
-    hid_t   file = -1, fcpl = -1, dataset = -1, space = -1;
-    int     i, j;
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t file = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    int   i, j;
     hsize_t dims[2];
     int     f = -1;
     haddr_t offset;
@@ -836,7 +836,7 @@ test_compact_io(hid_t fapl)
     hid_t space   = H5I_INVALID_HID;
     hid_t plist   = H5I_INVALID_HID;
 
-    hid_t        verfile = -1, new_fapl = -1;
+    hid_t        verfile = H5I_INVALID_HID, new_fapl = H5I_INVALID_HID;
     hsize_t      dims[2];
     int          wbuf[16][8], rbuf[16][8];
     char         filename[FILENAME_BUF_SIZE];
@@ -1053,10 +1053,10 @@ error:
 static herr_t
 test_max_compact(hid_t fapl)
 {
-    hid_t   file    = -1;
-    hid_t   dataset = -1;
-    hid_t   space   = -1;
-    hid_t   plist   = -1;
+    hid_t   file    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   plist   = H5I_INVALID_HID;
     hsize_t dims[1];
     size_t  compact_size;
     int    *wbuf = NULL;
@@ -1215,12 +1215,13 @@ error:
 static herr_t
 test_layout_extend(hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE];                            /* File name */
-    hid_t   fid     = -1;                                           /* File id */
-    hid_t   sid_fix = -1, sid_unlim = -1;                           /* Dataspace id */
-    hid_t   dcpl_compact = -1, dcpl_contig = -1, dcpl_chunked = -1; /* Dataset creation property list id */
-    hid_t   did_fixed = -1, did_unlim = -1;                         /* Dataset id */
-    hsize_t cur_size[1]  = {10};                                    /* Current size of dataspace */
+    char  filename[FILENAME_BUF_SIZE];                            /* File name */
+    hid_t fid     = H5I_INVALID_HID;                              /* File id */
+    hid_t sid_fix = H5I_INVALID_HID, sid_unlim = H5I_INVALID_HID; /* Dataspace id */
+    hid_t dcpl_compact = H5I_INVALID_HID, dcpl_contig = H5I_INVALID_HID,
+          dcpl_chunked = H5I_INVALID_HID;                             /* Dataset creation property list id */
+    hid_t   did_fixed = H5I_INVALID_HID, did_unlim = H5I_INVALID_HID; /* Dataset id */
+    hsize_t cur_size[1]  = {10};                                      /* Current size of dataspace */
     hsize_t max_unlim[1] = {H5S_UNLIMITED}; /* Maximum size of dataspace (unlimited) */
     hsize_t max_fix[1]   = {100};           /* Maximum size of dataspace (fixed) */
     hsize_t chunk_dim[1] = {10};            /* Chunk size */
@@ -1543,7 +1544,7 @@ test_tconv(hid_t file)
 {
     char   *out = NULL, *in = NULL;
     hsize_t dims[1];
-    hid_t   space = -1, dataset = -1;
+    hid_t   space = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
     int     i;
 
     if ((out = (char *)malloc((size_t)(4 * 1000 * 1000))) == NULL)
@@ -2286,11 +2287,11 @@ error:
 static herr_t
 test_filter_noencoder(const char *dset_name)
 {
-    hid_t   file_id      = -1;
-    hid_t   dset_id      = -1;
-    hid_t   test_dset_id = -1;
-    hid_t   dcpl_id      = -1;
-    hid_t   space_id     = -1;
+    hid_t   file_id      = H5I_INVALID_HID;
+    hid_t   dset_id      = H5I_INVALID_HID;
+    hid_t   test_dset_id = H5I_INVALID_HID;
+    hid_t   dcpl_id      = H5I_INVALID_HID;
+    hid_t   space_id     = H5I_INVALID_HID;
     hsize_t dims         = 10;
     herr_t  err;
     int     test_ints[10] = {12};
@@ -4265,7 +4266,7 @@ test_nbit_compound_3(hid_t file)
     } atomic;
     hid_t         i_tid, str_tid, vl_str_tid, v_tid, o_tid;
     hid_t         cmpd_tid; /* atomic compound datatype */
-    hid_t         dataset, space, dc, obj_ref_dataset = -1;
+    hid_t         dataset, space, dc, obj_ref_dataset = H5I_INVALID_HID;
     const hsize_t size[1]       = {5};
     const hsize_t chunk_size[1] = {5};
     atomic        orig_data[5];
@@ -5622,9 +5623,9 @@ error:
 static herr_t
 test_multiopen(hid_t file)
 {
-    hid_t          dcpl = -1, space = -1, dset1 = -1, dset2 = -1;
-    hsize_t        cur_size[1] = {10};
-    hsize_t        tmp_size[1];
+    hid_t   dcpl = H5I_INVALID_HID, space = H5I_INVALID_HID, dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
+    hsize_t cur_size[1] = {10};
+    hsize_t tmp_size[1];
     static hsize_t max_size[1] = {H5S_UNLIMITED};
 
     TESTING("multi-open with extending");
@@ -5697,9 +5698,9 @@ error:
 static herr_t
 test_types(hid_t file)
 {
-    hid_t         grp = -1, type = -1, space = -1, dset = -1;
-    size_t        i;
-    hsize_t       nelmts;
+    hid_t   grp = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    size_t  i;
+    hsize_t nelmts;
     unsigned char buf[32];
 
     TESTING("various datatypes");
@@ -6714,12 +6715,13 @@ error:
 static herr_t
 test_compare_dcpl(hid_t file)
 {
-    hid_t         dsid  = (-1);                /* Dataset ID */
-    hid_t         sid   = (-1);                /* Dataspace ID */
-    hid_t         dcpl  = (-1);                /* Dataspace creation property list ID */
-    hid_t         dcpl1 = (-1), dcpl2 = (-1);  /* Dataspace creation property list IDs from datasets */
-    const hsize_t dims[2]       = {500, 4096}; /* Dataspace dimensions */
-    const hsize_t chunk_dims[2] = {250, 2048}; /* Chunk dimensions */
+    hid_t dsid                  = (H5I_INVALID_HID); /* Dataset ID */
+    hid_t sid                   = (H5I_INVALID_HID); /* Dataspace ID */
+    hid_t dcpl                  = (H5I_INVALID_HID); /* Dataspace creation property list ID */
+    hid_t dcpl1                 = (H5I_INVALID_HID),
+          dcpl2                 = (H5I_INVALID_HID); /* Dataspace creation property list IDs from datasets */
+    const hsize_t dims[2]       = {500, 4096};       /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};       /* Chunk dimensions */
 
     TESTING("comparing dataset creation property lists");
 
@@ -6814,16 +6816,17 @@ error:
 static herr_t
 test_copy_dcpl(hid_t file, hid_t fapl)
 {
-    hid_t         dsid1 = (-1), dsid2 = (-1);           /* Dataset ID */
-    hid_t         new_dsid1 = (-1), new_dsid2 = (-1);   /* Dataset ID */
-    hid_t         sid   = (-1);                         /* Dataspace ID */
-    hid_t         dcpl  = (-1);                         /* Dataset creation property list ID */
-    hid_t         dcpl1 = (-1), dcpl2 = (-1);           /* Copies of creation property list IDs */
-    hid_t         dcpl1_copy = (-1), dcpl2_copy = (-1); /* Copies of creation property list IDs */
-    const hsize_t dims[2]       = {500, 4096};          /* Dataspace dimensions */
-    const hsize_t chunk_dims[2] = {250, 2048};          /* Chunk dimensions */
+    hid_t dsid1 = (H5I_INVALID_HID), dsid2 = (H5I_INVALID_HID);         /* Dataset ID */
+    hid_t new_dsid1 = (H5I_INVALID_HID), new_dsid2 = (H5I_INVALID_HID); /* Dataset ID */
+    hid_t sid   = (H5I_INVALID_HID);                                    /* Dataspace ID */
+    hid_t dcpl  = (H5I_INVALID_HID);                            /* Dataset creation property list ID */
+    hid_t dcpl1 = (H5I_INVALID_HID), dcpl2 = (H5I_INVALID_HID); /* Copies of creation property list IDs */
+    hid_t dcpl1_copy            = (H5I_INVALID_HID),
+          dcpl2_copy            = (H5I_INVALID_HID); /* Copies of creation property list IDs */
+    const hsize_t dims[2]       = {500, 4096};       /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};       /* Chunk dimensions */
     char          filename[FILENAME_BUF_SIZE];
-    hid_t         new_file = (-1);
+    hid_t         new_file = (H5I_INVALID_HID);
 
     TESTING("copying dataset creation property lists");
 
@@ -6972,16 +6975,16 @@ static herr_t
 test_filter_delete(hid_t file)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
-    H5Z_filter_t filtn;                    /* filter identification number */
-    hid_t        dsid          = -1;       /* dataset ID */
-    hid_t        sid           = -1;       /* dataspace ID */
-    hid_t        dcpl          = -1;       /* dataset creation property list ID */
-    hid_t        dcpl1         = -1;       /* dataset creation property list ID */
-    hsize_t      dims[2]       = {20, 20}; /* dataspace dimensions */
-    hsize_t      chunk_dims[2] = {10, 10}; /* chunk dimensions */
-    int          nfilters;                 /* number of filters in DCPL */
-    unsigned     flags;                    /* flags for filter */
-    herr_t       ret;                      /* generic return value */
+    H5Z_filter_t filtn;                           /* filter identification number */
+    hid_t        dsid          = H5I_INVALID_HID; /* dataset ID */
+    hid_t        sid           = H5I_INVALID_HID; /* dataspace ID */
+    hid_t        dcpl          = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t        dcpl1         = H5I_INVALID_HID; /* dataset creation property list ID */
+    hsize_t      dims[2]       = {20, 20};        /* dataspace dimensions */
+    hsize_t      chunk_dims[2] = {10, 10};        /* chunk dimensions */
+    int          nfilters;                        /* number of filters in DCPL */
+    unsigned     flags;                           /* flags for filter */
+    herr_t       ret;                             /* generic return value */
     int          i;
 #endif
 
@@ -7121,16 +7124,16 @@ error:
 static herr_t
 auxread_fdata(hid_t fid, const char *name)
 {
-    hid_t   dset_id  = -1;      /* dataset ID */
-    hid_t   dcpl_id  = -1;      /* dataset creation property list ID */
-    hid_t   space_id = -1;      /* space ID */
-    hid_t   ftype_id = -1;      /* file data type ID */
-    hid_t   mtype_id = -1;      /* memory data type ID */
-    size_t  msize;              /* memory size of memory type */
-    void   *buf = NULL;         /* data buffer */
-    hsize_t nelmts;             /* number of elements in dataset */
-    int     rank;               /* rank of dataset */
-    hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
+    hid_t   dset_id  = H5I_INVALID_HID; /* dataset ID */
+    hid_t   dcpl_id  = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t   space_id = H5I_INVALID_HID; /* space ID */
+    hid_t   ftype_id = H5I_INVALID_HID; /* file data type ID */
+    hid_t   mtype_id = H5I_INVALID_HID; /* memory data type ID */
+    size_t  msize;                      /* memory size of memory type */
+    void   *buf = NULL;                 /* data buffer */
+    hsize_t nelmts;                     /* number of elements in dataset */
+    int     rank;                       /* rank of dataset */
+    hsize_t dims[H5S_MAX_RANK];         /* dimensions of dataset */
     int     i;
 
     if ((dset_id = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
@@ -7203,10 +7206,10 @@ error:
 static herr_t
 test_filters_endianess(void)
 {
-    hid_t       fid       = -1; /* file ID */
-    hid_t       dsid      = -1; /* dataset ID */
-    hid_t       sid       = -1; /* dataspace ID */
-    hid_t       dcpl      = -1; /* dataset creation property list ID */
+    hid_t       fid       = H5I_INVALID_HID; /* file ID */
+    hid_t       dsid      = H5I_INVALID_HID; /* dataset ID */
+    hid_t       sid       = H5I_INVALID_HID; /* dataspace ID */
+    hid_t       dcpl      = H5I_INVALID_HID; /* dataset creation property list ID */
     const char *data_file = H5_get_srcdir_filename("test_filters_le.h5"); /* Corrected test file name */
 
     TESTING("filters with big-endian/little-endian data");
@@ -7277,8 +7280,8 @@ error:
 static herr_t
 test_zero_dims(hid_t file)
 {
-    hid_t             s = -1, d = -1, dcpl = -1;
-    hid_t             s2 = -1, d2 = -1, dcpl2 = -1;
+    hid_t             s = H5I_INVALID_HID, d = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    hid_t             s2 = H5I_INVALID_HID, d2 = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID;
     hsize_t           dzero = 0, dmax = H5S_UNLIMITED, csize = 5;
     hsize_t           dzero2[2] = {0, 0};
     hsize_t           dmax2[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -7485,9 +7488,9 @@ error:
 static herr_t
 test_missing_chunk(hid_t file)
 {
-    hid_t   d = -1, did2 = -1;                                       /* Dataset IDs */
-    hid_t   dcpl = -1, dcpl2 = -1;                                   /* Dataset creation property IDs */
-    hid_t   s = -1, sid2 = -1;                                       /* Dataspace ID */
+    hid_t   d = H5I_INVALID_HID, did2 = H5I_INVALID_HID;             /* Dataset IDs */
+    hid_t   dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID;         /* Dataset creation property IDs */
+    hid_t   s = H5I_INVALID_HID, sid2 = H5I_INVALID_HID;             /* Dataspace ID */
     hsize_t hs_start[1], hs_stride[1], hs_count[1], hs_block[1];     /* Hyperslab setting */
     hsize_t hs_start2[2], hs_stride2[2], hs_count2[2], hs_block2[2]; /* Hyperslab setting */
 
@@ -7807,8 +7810,9 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 static herr_t
 test_random_chunks_real(const char *testname, bool early_alloc, hid_t fapl)
 {
-    char          filename[FILENAME_BUF_SIZE];
-    hid_t         s = -1, m = -1, d = -1, dcpl = -1, file = -1;
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t s = H5I_INVALID_HID, m = H5I_INVALID_HID, d = H5I_INVALID_HID, dcpl = H5I_INVALID_HID,
+          file = H5I_INVALID_HID;
     int           wbuf[NPOINTS], rbuf[NPOINTS], check2[20][20];
     hsize_t       coord[NPOINTS][2];
     const hsize_t dsize[2] = {100, 100}, dmax[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, csize[2] = {10, 10},
@@ -8543,10 +8547,10 @@ static herr_t
 test_huge_chunks(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = -1;              /* File ID */
-    hid_t   dcpl = -1;              /* Dataset creation property list ID */
-    hid_t   sid  = -1;              /* Dataspace ID */
-    hid_t   dsid = -1;              /* Dataset ID */
+    hid_t   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dsid = H5I_INVALID_HID; /* Dataset ID */
     hsize_t dim, chunk_dim;         /* Dataset and chunk dimensions */
     hsize_t dim2[3], chunk_dim2[3]; /* Dataset and chunk dimensions */
     herr_t  ret;                    /* Generic return value */
@@ -8671,14 +8675,14 @@ static herr_t
 test_chunk_cache(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid        = -1;                        /* File ID */
-    hid_t   fapl_local = -1;                        /* Local fapl */
-    hid_t   fapl_def   = -1;                        /* Default fapl */
-    hid_t   dcpl       = -1;                        /* Dataset creation property list ID */
-    hid_t   dapl1      = -1;                        /* Dataset access property list ID */
-    hid_t   dapl2      = -1;                        /* Dataset access property list ID */
-    hid_t   sid        = -1;                        /* Dataspace ID */
-    hid_t   dsid       = -1;                        /* Dataset ID */
+    hid_t   fid        = H5I_INVALID_HID;           /* File ID */
+    hid_t   fapl_local = H5I_INVALID_HID;           /* Local fapl */
+    hid_t   fapl_def   = H5I_INVALID_HID;           /* Default fapl */
+    hid_t   dcpl       = H5I_INVALID_HID;           /* Dataset creation property list ID */
+    hid_t   dapl1      = H5I_INVALID_HID;           /* Dataset access property list ID */
+    hid_t   dapl2      = H5I_INVALID_HID;           /* Dataset access property list ID */
+    hid_t   sid        = H5I_INVALID_HID;           /* Dataspace ID */
+    hid_t   dsid       = H5I_INVALID_HID;           /* Dataset ID */
     hsize_t dim, chunk_dim;                         /* Dataset and chunk dimensions */
     size_t  nslots_1, nslots_2, nslots_3, nslots_4; /* rdcc number of elements */
     size_t  nbytes_1, nbytes_2, nbytes_3, nbytes_4; /* rdcc number of bytes */
@@ -8940,12 +8944,12 @@ static herr_t
 test_big_chunks_bypass_cache(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid        = -1;                                  /* File ID */
-    hid_t   fapl_local = -1;                                  /* File access property list ID */
-    hid_t   dcpl = -1, t_dcpl = -1;                           /* Dataset creation property list ID */
-    hid_t   sid = -1, t_sid = -1;                             /* Dataspace ID */
+    hid_t   fid        = H5I_INVALID_HID;                     /* File ID */
+    hid_t   fapl_local = H5I_INVALID_HID;                     /* File access property list ID */
+    hid_t   dcpl = H5I_INVALID_HID, t_dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   sid = H5I_INVALID_HID, t_sid = H5I_INVALID_HID;   /* Dataspace ID */
     hid_t   mid;                                              /* Memory space ID */
-    hid_t   dsid = -1, t_dsid = -1;                           /* Dataset ID */
+    hid_t   dsid = H5I_INVALID_HID, t_dsid = H5I_INVALID_HID; /* Dataset ID */
     hsize_t dim, chunk_dim;                                   /* Dataset and chunk dimensions */
     hsize_t t_dim[2], t_max[2], t_chunk_dim[2];               /* Dataset and chunk dimensions */
     size_t  rdcc_nelmts, rdcc_nbytes;                         /* Chunk cache parameters */
@@ -9309,17 +9313,17 @@ static herr_t
 test_chunk_fast(const char *env_h5_driver, hid_t fapl)
 {
     char         filename[FILENAME_BUF_SIZE];
-    hid_t        fid        = -1;            /* File ID */
-    hid_t        my_fapl    = -1;            /* File access property list ID */
-    hid_t        dcpl       = -1;            /* Dataset creation property list ID */
-    hid_t        sid        = -1;            /* Dataspace ID */
-    hid_t        scalar_sid = -1;            /* Scalar dataspace ID */
-    hid_t        dsid       = -1;            /* Dataset ID */
-    hsize_t      fill;                       /* Temporary value, for filling arrays */
-    hsize_t      hs_size[EARRAY_MAX_RANK];   /* Hyperslab size */
-    hsize_t      chunk_dim[EARRAY_MAX_RANK]; /* Chunk dimensions */
-    H5F_libver_t low;                        /* File format low bound */
-    unsigned     swmr;                       /* Whether file should be written with SWMR access enabled */
+    hid_t        fid        = H5I_INVALID_HID; /* File ID */
+    hid_t        my_fapl    = H5I_INVALID_HID; /* File access property list ID */
+    hid_t        dcpl       = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t        sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
+    hid_t        dsid       = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t      fill;                         /* Temporary value, for filling arrays */
+    hsize_t      hs_size[EARRAY_MAX_RANK];     /* Hyperslab size */
+    hsize_t      chunk_dim[EARRAY_MAX_RANK];   /* Chunk dimensions */
+    H5F_libver_t low;                          /* File format low bound */
+    unsigned     swmr;                         /* Whether file should be written with SWMR access enabled */
 
     TESTING("datasets w/extensible array as chunk index");
 
@@ -9726,17 +9730,17 @@ static herr_t
 test_reopen_chunk_fast(hid_t fapl)
 {
     char             filename[FILENAME_BUF_SIZE];
-    hid_t            fid        = -1;         /* File ID */
-    hid_t            dcpl       = -1;         /* Dataset creation property list ID */
-    hid_t            sid        = -1;         /* Dataspace ID */
-    hid_t            scalar_sid = -1;         /* Scalar dataspace ID */
-    hid_t            dsid       = -1;         /* Dataset ID */
-    hsize_t          dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
-    hsize_t          hs_offset;               /* Hyperslab offset */
-    hsize_t          hs_size;                 /* Hyperslab size */
-    H5D_alloc_time_t alloc_time;              /* Storage allocation time */
-    unsigned         write_elem, read_elem;   /* Element written/read */
-    unsigned         u;                       /* Local index variable */
+    hid_t            fid        = H5I_INVALID_HID; /* File ID */
+    hid_t            dcpl       = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t            sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t            scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
+    hid_t            dsid       = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t          dim, max_dim, chunk_dim;      /* Dataset and chunk dimensions */
+    hsize_t          hs_offset;                    /* Hyperslab offset */
+    hsize_t          hs_size;                      /* Hyperslab size */
+    H5D_alloc_time_t alloc_time;                   /* Storage allocation time */
+    unsigned         write_elem, read_elem;        /* Element written/read */
+    unsigned         u;                            /* Local index variable */
 
     TESTING("datasets w/extensible array open/reopen with read/write");
 
@@ -9860,10 +9864,10 @@ static herr_t
 test_chunk_fast_bug1(hid_t fapl)
 {
     char             filename[FILENAME_BUF_SIZE];
-    hid_t            fid  = -1;                        /* File ID */
-    hid_t            dcpl = -1;                        /* Dataset creation property list ID */
-    hid_t            sid  = -1;                        /* Dataspace ID */
-    hid_t            dsid = -1;                        /* Dataset ID */
+    hid_t            fid  = H5I_INVALID_HID;           /* File ID */
+    hid_t            dcpl = H5I_INVALID_HID;           /* Dataset creation property list ID */
+    hid_t            sid  = H5I_INVALID_HID;           /* Dataspace ID */
+    hid_t            dsid = H5I_INVALID_HID;           /* Dataset ID */
     hsize_t          dim[2], max_dim[2], chunk_dim[2]; /* Dataset and chunk dimensions */
     H5D_alloc_time_t alloc_time;                       /* Storage allocation time */
 
@@ -10064,22 +10068,22 @@ static herr_t
 test_chunk_expand(hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;                           /* File ID */
-    hid_t             dcpl = -1, dcpl2 = -1;               /* Dataset creation property list ID */
-    hid_t             sid = -1, sid2 = -1;                 /* Dataspace ID */
-    hid_t             scalar_sid = -1;                     /* Scalar dataspace ID */
-    hid_t             dsid = -1, dsid2 = -1;               /* Dataset ID */
-    hsize_t           dim, max_dim, chunk_dim;             /* Dataset and chunk dimensions */
-    hsize_t           dim2[2], max_dim2[2], chunk_dim2[2]; /* Dataset and chunk dimensions */
-    H5D_chunk_index_t idx_type, idx_type2;                 /* Dataset chunk index type */
-    H5F_libver_t      low, high;                           /* File format bounds */
-    hsize_t           hs_offset, hs_offset2[2];            /* Hyperslab offset */
-    hsize_t           hs_size, hs_size2[2];                /* Hyperslab size */
-    H5D_alloc_time_t  alloc_time;                          /* Storage allocation time */
-    unsigned          write_elem, read_elem;               /* Element written/read */
-    unsigned          write_elem2, read_elem2;             /* Element written/read */
-    unsigned          u;                                   /* Local index variable */
-    herr_t            status;                              /* Generic return value */
+    hid_t             fid  = H5I_INVALID_HID;                          /* File ID */
+    hid_t             dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t             sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID;   /* Dataspace ID */
+    hid_t             scalar_sid = H5I_INVALID_HID;                    /* Scalar dataspace ID */
+    hid_t             dsid = H5I_INVALID_HID, dsid2 = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t           dim, max_dim, chunk_dim;                         /* Dataset and chunk dimensions */
+    hsize_t           dim2[2], max_dim2[2], chunk_dim2[2];             /* Dataset and chunk dimensions */
+    H5D_chunk_index_t idx_type, idx_type2;                             /* Dataset chunk index type */
+    H5F_libver_t      low, high;                                       /* File format bounds */
+    hsize_t           hs_offset, hs_offset2[2];                        /* Hyperslab offset */
+    hsize_t           hs_size, hs_size2[2];                            /* Hyperslab size */
+    H5D_alloc_time_t  alloc_time;                                      /* Storage allocation time */
+    unsigned          write_elem, read_elem;                           /* Element written/read */
+    unsigned          write_elem2, read_elem2;                         /* Element written/read */
+    unsigned          u;                                               /* Local index variable */
+    herr_t            status;                                          /* Generic return value */
 
     TESTING("filter expanding chunks too much");
 
@@ -10606,16 +10610,16 @@ static herr_t
 test_fixed_array(hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE]; /* File name */
-    hid_t fid  = -1;                   /* File ID */
-    hid_t dcpl = -1;                   /* Dataset creation property list ID */
+    hid_t fid  = H5I_INVALID_HID;      /* File ID */
+    hid_t dcpl = H5I_INVALID_HID;      /* Dataset creation property list ID */
 
-    hid_t sid     = -1; /* Dataspace ID for dataset with fixed dimensions */
-    hid_t sid_big = -1; /* Dataspate ID for big dataset */
-    hid_t sid_max = -1; /* Dataspace ID for dataset with maximum dimensions set */
+    hid_t sid     = H5I_INVALID_HID; /* Dataspace ID for dataset with fixed dimensions */
+    hid_t sid_big = H5I_INVALID_HID; /* Dataspate ID for big dataset */
+    hid_t sid_max = H5I_INVALID_HID; /* Dataspace ID for dataset with maximum dimensions set */
 
-    hid_t dsid     = -1; /* Dataset ID for dataset with fixed dimensions */
-    hid_t dsid_big = -1; /* Dataset ID for big dataset with fixed dimensions */
-    hid_t dsid_max = -1; /* Dataset ID for dataset with maximum dimensions set */
+    hid_t dsid     = H5I_INVALID_HID; /* Dataset ID for dataset with fixed dimensions */
+    hid_t dsid_big = H5I_INVALID_HID; /* Dataset ID for big dataset with fixed dimensions */
+    hid_t dsid_max = H5I_INVALID_HID; /* Dataset ID for dataset with maximum dimensions set */
 
     hsize_t       dim2[2]     = {48, 18};  /* Dataset dimensions */
     const hsize_t dim2_big[2] = {500, 60}; /* Big dataset dimensions */
@@ -11143,18 +11147,19 @@ static herr_t
 test_single_chunk(hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE]; /* File name */
-    hid_t fid    = -1;                 /* File ID */
-    hid_t dcpl   = -1;                 /* Dataset creation property list ID */
-    hid_t t_dcpl = -1;                 /* Dataset creation property list ID */
+    hid_t fid    = H5I_INVALID_HID;    /* File ID */
+    hid_t dcpl   = H5I_INVALID_HID;    /* Dataset creation property list ID */
+    hid_t t_dcpl = H5I_INVALID_HID;    /* Dataset creation property list ID */
 
-    hid_t   sid = -1, sid_max = -1;                     /* Dataspace ID for dataset with fixed dimensions */
-    hid_t   did = -1, did_max = -1;                     /* Dataset ID for dataset with fixed dimensions */
-    hsize_t dim2[2]   = {DSET_DIM1, DSET_DIM2};         /* Dataset dimensions */
-    hsize_t t_dim2[2] = {DSET_TMP_DIM1, DSET_TMP_DIM2}; /* Dataset dimensions */
-    int    *wbuf      = NULL;                           /* write buffer */
-    int    *t_wbuf    = NULL;                           /* write buffer */
-    int    *rbuf      = NULL;                           /* read buffer */
-    int    *t_rbuf    = NULL;                           /* read buffer */
+    hid_t sid     = H5I_INVALID_HID,
+          sid_max = H5I_INVALID_HID; /* Dataspace ID for dataset with fixed dimensions */
+    hid_t did = H5I_INVALID_HID, did_max = H5I_INVALID_HID; /* Dataset ID for dataset with fixed dimensions */
+    hsize_t dim2[2]   = {DSET_DIM1, DSET_DIM2};             /* Dataset dimensions */
+    hsize_t t_dim2[2] = {DSET_TMP_DIM1, DSET_TMP_DIM2};     /* Dataset dimensions */
+    int    *wbuf      = NULL;                               /* write buffer */
+    int    *t_wbuf    = NULL;                               /* write buffer */
+    int    *rbuf      = NULL;                               /* read buffer */
+    int    *t_rbuf    = NULL;                               /* read buffer */
 
     H5D_chunk_index_t idx_type;   /* Dataset chunk index type */
     H5F_libver_t      low, high;  /* File format bounds */
@@ -11420,11 +11425,11 @@ error:
 static herr_t
 test_idx_compatible(void)
 {
-    hid_t             fid      = -1;   /* File id */
-    hid_t             did      = -1;   /* Dataset id */
-    const char       *filename = NULL; /* old test file name */
-    unsigned          j;               /* Local index variable */
-    H5D_chunk_index_t idx_type;        /* Chunked dataset index type */
+    hid_t             fid      = H5I_INVALID_HID; /* File id */
+    hid_t             did      = H5I_INVALID_HID; /* Dataset id */
+    const char       *filename = NULL;            /* old test file name */
+    unsigned          j;                          /* Local index variable */
+    H5D_chunk_index_t idx_type;                   /* Chunked dataset index type */
 
     /* Output message about test being performed */
     TESTING("compatibility for 1.6/1.8 datasets that use B-tree indexing");
@@ -11497,10 +11502,10 @@ error:
 static herr_t
 test_unfiltered_edge_chunks(hid_t fapl)
 {
-    hid_t    fid     = -1;                     /* File id */
-    hid_t    did     = -1;                     /* Dataset id */
-    hid_t    sid     = -1;                     /* Dataspace id */
-    hid_t    dcpl    = -1;                     /* DCPL id */
+    hid_t    fid     = H5I_INVALID_HID;        /* File id */
+    hid_t    did     = H5I_INVALID_HID;        /* Dataset id */
+    hid_t    sid     = H5I_INVALID_HID;        /* Dataspace id */
+    hid_t    dcpl    = H5I_INVALID_HID;        /* DCPL id */
     hsize_t  dim[2]  = {4, 3};                 /* Dataset dimensions */
     hsize_t  cdim[2] = {2, 2};                 /* Chunk dimension */
     char     wbuf[4][3];                       /* Write buffer */
@@ -11640,15 +11645,15 @@ static herr_t
 test_large_chunk_shrink(hid_t fapl)
 {
     char     filename[FILENAME_BUF_SIZE];
-    hid_t    fid        = -1;         /* File ID */
-    hid_t    dcpl       = -1;         /* Dataset creation property list ID */
-    hid_t    sid        = -1;         /* Dataspace ID */
-    hid_t    scalar_sid = -1;         /* Scalar dataspace ID */
-    hid_t    dsid       = -1;         /* Dataset ID */
-    hsize_t  dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
-    hsize_t  hs_offset;               /* Hyperslab offset */
-    hsize_t  hs_size;                 /* Hyperslab size */
-    unsigned write_elem, read_elem;   /* Element written/read */
+    hid_t    fid        = H5I_INVALID_HID; /* File ID */
+    hid_t    dcpl       = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t    sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t    scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
+    hid_t    dsid       = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t  dim, max_dim, chunk_dim;      /* Dataset and chunk dimensions */
+    hsize_t  hs_offset;                    /* Hyperslab offset */
+    hsize_t  hs_size;                      /* Hyperslab size */
+    unsigned write_elem, read_elem;        /* Element written/read */
 
     TESTING("shrinking large chunk");
 
@@ -11773,11 +11778,11 @@ static herr_t
 test_zero_dim_dset(hid_t fapl)
 {
     char         filename[FILENAME_BUF_SIZE];
-    hid_t        fid  = -1;      /* File ID */
-    hid_t        dcpl = -1;      /* Dataset creation property list ID */
-    hid_t        sid  = -1;      /* Dataspace ID */
-    hid_t        dsid = -1;      /* Dataset ID */
-    hsize_t      dim, chunk_dim; /* Dataset and chunk dimensions */
+    hid_t        fid  = H5I_INVALID_HID; /* File ID */
+    hid_t        dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t        sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dsid = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t      dim, chunk_dim;         /* Dataset and chunk dimensions */
     int          data[1];
     H5F_libver_t low, high; /* File format bounds */
     herr_t       ret;       /* Generic return value */
@@ -11878,11 +11883,11 @@ static herr_t
 test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;                    /* File ID */
-    hid_t             gid  = -1;                    /* Group ID */
-    hid_t             dcpl = -1;                    /* Dataset creation property list ID */
-    hid_t             sid  = -1;                    /* Dataspace ID */
-    hid_t             did  = -1;                    /* Dataset ID */
+    hid_t             fid  = H5I_INVALID_HID;       /* File ID */
+    hid_t             gid  = H5I_INVALID_HID;       /* Group ID */
+    hid_t             dcpl = H5I_INVALID_HID;       /* Dataset creation property list ID */
+    hid_t             sid  = H5I_INVALID_HID;       /* Dataspace ID */
+    hid_t             did  = H5I_INVALID_HID;       /* Dataset ID */
     hsize_t           dim[1], dims2[2];             /* Size of dataset */
     hsize_t           max_dim[1], max_dims2[2];     /* Maximum size of dataset */
     hsize_t           chunk_dim[1], chunk_dims2[2]; /* Chunk dimensions */
@@ -12148,12 +12153,12 @@ static herr_t
 test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;
-    hid_t             sid  = -1;
-    hid_t             did  = -1;
-    hid_t             tid  = -1;
-    hid_t             dcpl = -1;
-    hid_t             msid = -1;
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             sid  = H5I_INVALID_HID;
+    hid_t             did  = H5I_INVALID_HID;
+    hid_t             tid  = H5I_INVALID_HID;
+    hid_t             dcpl = H5I_INVALID_HID;
+    hid_t             msid = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
     const hsize_t     shape[1]    = {8};
     const hsize_t     maxshape[1] = {H5S_UNLIMITED};
@@ -12269,12 +12274,12 @@ static herr_t
 test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;
-    hid_t             sid  = -1;
-    hid_t             did  = -1;
-    hid_t             tid  = -1;
-    hid_t             dcpl = -1;
-    hid_t             msid = -1;
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             sid  = H5I_INVALID_HID;
+    hid_t             did  = H5I_INVALID_HID;
+    hid_t             tid  = H5I_INVALID_HID;
+    hid_t             dcpl = H5I_INVALID_HID;
+    hid_t             msid = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
     const hsize_t     shape[1]    = {8};
     const hsize_t     maxshape[1] = {64};
@@ -12390,12 +12395,12 @@ static herr_t
 test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;
-    hid_t             sid  = -1;
-    hid_t             did  = -1;
-    hid_t             tid  = -1;
-    hid_t             dcpl = -1;
-    hid_t             msid = -1;
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             sid  = H5I_INVALID_HID;
+    hid_t             did  = H5I_INVALID_HID;
+    hid_t             tid  = H5I_INVALID_HID;
+    hid_t             dcpl = H5I_INVALID_HID;
+    hid_t             msid = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
     const hsize_t     shape[2]     = {8, 8};
     const hsize_t     maxshape[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -12516,13 +12521,13 @@ static herr_t
 test_storage_size(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = -1;             /* File ID */
-    hid_t   dcpl = -1, dcpl2 = -1; /* Dataset creation property list IDs */
-    hid_t   sid  = -1;             /* Dataspace ID */
-    hid_t   dsid = -1;             /* Dataset ID */
-    hsize_t dims[2], max_dims[2];  /* Dataset dimensions */
-    hsize_t new_dims[2];           /* New dataset dimensions */
-    hsize_t chunk_dims[2];         /* Chunk dimensions */
+    hid_t   fid  = H5I_INVALID_HID;                          /* File ID */
+    hid_t   dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID; /* Dataset creation property list IDs */
+    hid_t   sid  = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t   dsid = H5I_INVALID_HID;                          /* Dataset ID */
+    hsize_t dims[2], max_dims[2];                            /* Dataset dimensions */
+    hsize_t new_dims[2];                                     /* New dataset dimensions */
+    hsize_t chunk_dims[2];                                   /* Chunk dimensions */
     int     wdata[STORAGE_SIZE_DIM1][STORAGE_SIZE_DIM2];
     hsize_t ssize; /* Dataset storage size */
 
@@ -13005,15 +13010,15 @@ static herr_t
 test_power2up(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = -1;     /* File ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list */
-    hid_t   sid  = -1;     /* Dataspace ID */
-    hid_t   did  = -1;     /* Dataset ID */
-    hsize_t dims[2];       /* Dataset dimension sizes */
-    hsize_t max_dims[2];   /* Maximum dimension sizes */
-    hsize_t chunk_dims[2]; /* Chunk dimensions */
-    hsize_t ext_dims[2];   /* Extended dimension sizes */
-    herr_t  status;        /* Error status */
+    hid_t   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   did  = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t dims[2];                /* Dataset dimension sizes */
+    hsize_t max_dims[2];            /* Maximum dimension sizes */
+    hsize_t chunk_dims[2];          /* Chunk dimensions */
+    hsize_t ext_dims[2];            /* Extended dimension sizes */
+    herr_t  status;                 /* Error status */
 
     TESTING("the next power of 2");
 
@@ -13134,8 +13139,8 @@ scatter_cb(void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/, void *_sc
 static herr_t
 test_scatter(void)
 {
-    hid_t          sid         = -1;        /* Dataspace ID */
-    hsize_t        dim[3]      = {8, 5, 8}; /* Dataspace dimensions */
+    hid_t          sid         = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t        dim[3]      = {8, 5, 8};       /* Dataspace dimensions */
     hsize_t        start[3]    = {0, 0, 0};
     hsize_t        stride[3]   = {0, 0, 0};
     hsize_t        count[3]    = {0, 0, 0};
@@ -13449,8 +13454,8 @@ error:
 static herr_t
 test_gather(void)
 {
-    hid_t         sid         = -1;        /* Dataspace ID */
-    hsize_t       dim[3]      = {8, 5, 8}; /* Dataspace dimensions */
+    hid_t         sid         = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t       dim[3]      = {8, 5, 8};       /* Dataspace dimensions */
     hsize_t       start[3]    = {0, 0, 0};
     hsize_t       stride[3]   = {0, 0, 0};
     hsize_t       count[3]    = {0, 0, 0};
@@ -13813,8 +13818,8 @@ scatter_error_cb_unalign(void **src_buf /*out*/, size_t *src_buf_bytes_used /*ou
 static herr_t
 test_scatter_error(void)
 {
-    hid_t          sid      = -1;   /* Dataspace ID */
-    hsize_t        dim[1]   = {10}; /* Dataspace dimensions */
+    hid_t          sid      = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t        dim[1]   = {10};            /* Dataspace dimensions */
     hsize_t        start[3] = {2};
     hsize_t        count[3] = {6};
     int            src_buf[7];        /* Source data buffer */
@@ -14005,8 +14010,8 @@ gather_error_cb_fail(const void H5_ATTR_UNUSED *dst_buf, size_t H5_ATTR_UNUSED d
 static herr_t
 test_gather_error(void)
 {
-    hid_t         sid      = -1;   /* Dataspace ID */
-    hsize_t       dim[1]   = {10}; /* Dataspace dimensions */
+    hid_t         sid      = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t       dim[1]   = {10};            /* Dataspace dimensions */
     hsize_t       start[1] = {2};
     hsize_t       count[1] = {6};
     int           src_buf[10];       /* Source data buffer */
@@ -14453,10 +14458,10 @@ error:
 static herr_t
 test_compact_open_close_dirty(hid_t fapl)
 {
-    hid_t   fid     = -1;                /* File ID */
-    hid_t   did     = -1;                /* Dataset ID */
-    hid_t   sid     = -1;                /* Dataspace ID */
-    hid_t   dcpl    = -1;                /* Dataset creation property list */
+    hid_t   fid     = H5I_INVALID_HID;   /* File ID */
+    hid_t   did     = H5I_INVALID_HID;   /* Dataset ID */
+    hid_t   sid     = H5I_INVALID_HID;   /* Dataspace ID */
+    hid_t   dcpl    = H5I_INVALID_HID;   /* Dataset creation property list */
     hsize_t dims[1] = {10};              /* Dimension */
     int     wbuf[10];                    /* Data buffer */
     char    filename[FILENAME_BUF_SIZE]; /* Filename */
@@ -14579,15 +14584,15 @@ error:
 static herr_t
 test_versionbounds(void)
 {
-    hid_t        fapl     = -1;
-    hid_t        srcfile  = -1;  /* Files with source dsets */
-    hid_t        vfile    = -1;  /* File with virtual dset */
-    hid_t        dcpl     = -1;  /* Dataset creation property list */
-    hid_t        srcspace = -1;  /* Source dataspaces */
-    hid_t        vspace   = -1;  /* Virtual dset dataspaces */
-    hid_t        srcdset  = -1;  /* Source dataset */
-    hid_t        vdset    = -1;  /* Virtual dataset */
-    hsize_t      dims[1]  = {3}; /* Data space current size */
+    hid_t        fapl     = H5I_INVALID_HID;
+    hid_t        srcfile  = H5I_INVALID_HID; /* Files with source dsets */
+    hid_t        vfile    = H5I_INVALID_HID; /* File with virtual dset */
+    hid_t        dcpl     = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t        srcspace = H5I_INVALID_HID; /* Source dataspaces */
+    hid_t        vspace   = H5I_INVALID_HID; /* Virtual dset dataspaces */
+    hid_t        srcdset  = H5I_INVALID_HID; /* Source dataset */
+    hid_t        vdset    = H5I_INVALID_HID; /* Virtual dataset */
+    hsize_t      dims[1]  = {3};             /* Data space current size */
     char         srcfilename[FILENAME_BUF_SIZE];
     char         vfilename1[FILENAME_BUF_SIZE];
     char         vfilename2[FILENAME_BUF_SIZE];
@@ -14732,8 +14737,8 @@ error:
 static herr_t
 test_object_header_minimization_dcpl(void)
 {
-    hid_t  dcpl_id                     = -1;
-    hid_t  file_id                     = -1;
+    hid_t  dcpl_id                     = H5I_INVALID_HID;
+    hid_t  file_id                     = H5I_INVALID_HID;
     char   filename[FILENAME_BUF_SIZE] = "";
     bool   minimize                    = false;
     herr_t ret;
@@ -15407,7 +15412,7 @@ main(void)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       file, grp, fapl, fapl2;
-    hid_t       fcpl = -1, fcpl2 = -1;
+    hid_t       fcpl = H5I_INVALID_HID, fcpl2 = H5I_INVALID_HID;
     unsigned    new_format;
     unsigned    paged;
     unsigned    minimized_ohdr;

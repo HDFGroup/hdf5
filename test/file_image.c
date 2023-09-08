@@ -79,8 +79,8 @@ typedef struct {
 static int
 test_properties(void)
 {
-    hid_t  fapl_1 = -1;
-    hid_t  fapl_2 = -1;
+    hid_t  fapl_1 = H5I_INVALID_HID;
+    hid_t  fapl_2 = H5I_INVALID_HID;
     char  *buffer = 0;
     int    count  = 10;
     void  *temp   = 0;
@@ -688,19 +688,19 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     int       i;
     int       fd = -1;
     int       result;
-    hid_t     driver       = -1;
-    hid_t     file_id      = -1;
-    hid_t     dset_id      = -1;
-    hid_t     space_id     = -1;
-    hid_t     core_fapl_id = -1;
-    hid_t     core_file_id = -1;
+    hid_t     driver       = H5I_INVALID_HID;
+    hid_t     file_id      = H5I_INVALID_HID;
+    hid_t     dset_id      = H5I_INVALID_HID;
+    hid_t     space_id     = H5I_INVALID_HID;
+    hid_t     core_fapl_id = H5I_INVALID_HID;
+    hid_t     core_file_id = H5I_INVALID_HID;
     herr_t    err;
     hsize_t   dims[2];
     ssize_t   bytes_read;
     ssize_t   image_size;
     ssize_t   file_size;
     h5_stat_t stat_buf;
-    hid_t     fcpl = -1;
+    hid_t     fcpl = H5I_INVALID_HID;
     herr_t    ret;
 
     TESTING(test_banner);
@@ -958,10 +958,10 @@ test_get_file_image_error_rejection(void)
     void       *image_ptr       = NULL;
     int         data[100];
     int         i;
-    hid_t       fapl_id  = -1;
-    hid_t       file_id  = -1;
-    hid_t       dset_id  = -1;
-    hid_t       space_id = -1;
+    hid_t       fapl_id  = H5I_INVALID_HID;
+    hid_t       file_id  = H5I_INVALID_HID;
+    hid_t       dset_id  = H5I_INVALID_HID;
+    hid_t       space_id = H5I_INVALID_HID;
     herr_t      err;
     hsize_t     dims[2];
     ssize_t     bytes_read;

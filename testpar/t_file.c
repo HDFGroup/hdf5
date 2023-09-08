@@ -120,7 +120,7 @@ test_split_comm_access(void)
 void
 test_page_buffer_access(void)
 {
-    hid_t       file_id = -1; /* File ID */
+    hid_t       file_id = H5I_INVALID_HID; /* File ID */
     hid_t       fcpl, fapl;
     size_t      page_count = 0;
     int         i, num_elements = 200;

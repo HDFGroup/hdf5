@@ -61,7 +61,7 @@ typedef struct {
 static hid_t
 create_compound_type(void)
 {
-    hid_t ret_value = -1;
+    hid_t ret_value = H5I_INVALID_HID;
 
     if ((ret_value = H5Tcreate(H5T_COMPOUND, sizeof(comp_datatype))) < 0)
         goto error;
@@ -99,8 +99,8 @@ error:
 static hid_t
 create_compound_vl_type(void)
 {
-    hid_t str_id    = -1; /* Datatype for VL-string fields */
-    hid_t ret_value = -1;
+    hid_t str_id    = H5I_INVALID_HID; /* Datatype for VL-string fields */
+    hid_t ret_value = H5I_INVALID_HID;
 
     /* Create a string datatype */
     if ((str_id = H5Tcopy(H5T_C_S1)) < 0)
@@ -150,9 +150,9 @@ error:
 static int
 test_getset(void)
 {
-    hid_t dcpl = -1;
+    hid_t dcpl = H5I_INVALID_HID;
     int   fill_i;
-    hid_t type_ss = -1, type_si = -1;
+    hid_t type_ss = H5I_INVALID_HID, type_si = H5I_INVALID_HID;
     struct fill_si {
         int v1, v2;
     } fill_si;
@@ -275,12 +275,13 @@ static int
 test_getset_vl(hid_t fapl)
 {
     hsize_t dims[1] = {2};
-    hid_t   fileid = (-1), spaceid = (-1), dtypeid = (-1), datasetid = (-1), plistid = (-1);
-    char    fill_value[]      = "aaaa";
-    char    orig_fill_value[] = "aaaa";
-    char   *f1                = fill_value;
-    char   *f2;
-    char    filename[1024];
+    hid_t   fileid = (H5I_INVALID_HID), spaceid = (H5I_INVALID_HID), dtypeid = (H5I_INVALID_HID),
+          datasetid = (H5I_INVALID_HID), plistid = (H5I_INVALID_HID);
+    char  fill_value[]      = "aaaa";
+    char  orig_fill_value[] = "aaaa";
+    char *f1                = fill_value;
+    char *f2;
+    char  filename[1024];
 
     TESTING("property lists, with variable-length datatype");
 
@@ -872,7 +873,8 @@ static int
 test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_fill_time_t fill_time,
                 H5D_layout_t layout, H5T_class_t datatype, hid_t ctype_id)
 {
-    hid_t              fspace = -1, mspace = -1, dset1 = -1, dset2 = -1;
+    hid_t fspace = H5I_INVALID_HID, mspace = H5I_INVALID_HID, dset1 = H5I_INVALID_HID,
+          dset2                    = H5I_INVALID_HID;
     hsize_t            cur_size[5] = {2, 8, 8, 4, 2};
     hsize_t            one[5]      = {1, 1, 1, 1, 1};
     hsize_t            hs_size[5], hs_stride[5];
@@ -1205,7 +1207,7 @@ static int
 test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
     char          filename[1024];
-    hid_t         file = -1, dcpl = -1, ctype_id = -1;
+    hid_t         file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, ctype_id = H5I_INVALID_HID;
     hsize_t       ch_size[5] = {2, 8, 8, 4, 2};
     int           nerrors    = 0;
     int           fillval    = 0x4c70f1cd;
@@ -1563,10 +1565,10 @@ static int
 test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t *ch_size, hsize_t *start_size,
                   hsize_t *max_size, hid_t dtype, void *fillval)
 {
-    hid_t       fspace = -1, mspace = -1; /* File & memory dataspaces */
-    hid_t       dset = -1;                /* Dataset ID */
-    hid_t       dcpl = -1;                /* Dataset creation property list */
-    hsize_t     extend_size[5];           /* Dimensions to extend to */
+    hid_t       fspace = H5I_INVALID_HID, mspace = H5I_INVALID_HID; /* File & memory dataspaces */
+    hid_t       dset = H5I_INVALID_HID;                             /* Dataset ID */
+    hid_t       dcpl = H5I_INVALID_HID;                             /* Dataset creation property list */
+    hsize_t     extend_size[5];                                     /* Dimensions to extend to */
     hsize_t     one[5] = {1, 1, 1, 1, 1}; /* Dimensions of single element dataspace */
     hsize_t     hs_size[5], hs_stride[5], hs_offset[5];
     size_t      nelmts;
@@ -2029,9 +2031,9 @@ error:
 static int
 test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
-    hid_t   file          = -1; /* File ID */
-    hid_t   dcpl          = -1; /* Dataset creation property list ID */
-    hid_t   cmpd_vl_tid   = -1; /* Compound+vl datatype ID */
+    hid_t   file          = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   cmpd_vl_tid   = H5I_INVALID_HID; /* Compound+vl datatype ID */
     hsize_t start_size[5] = {8, 8, 8, 4, 2};
     hsize_t max_size[5]   = {32, 32, 32, 16, 8};
     hsize_t ch_size[5]    = {1, 8, 8, 4, 2};
@@ -2188,8 +2190,9 @@ skip:
 static int
 test_compatible(void)
 {
-    hid_t            file = -1, dset1 = -1, dset2 = -1;
-    hid_t            dcpl1 = -1, dcpl2 = -1, fspace = -1, mspace = -1;
+    hid_t file = H5I_INVALID_HID, dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
+    hid_t dcpl1 = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID, fspace = H5I_INVALID_HID,
+          mspace             = H5I_INVALID_HID;
     int              rd_fill = 0, fill_val = 4444, val_rd = 0;
     hsize_t          dims[2], one[2] = {1, 1};
     hsize_t          hs_offset[2] = {3, 4};
@@ -2339,7 +2342,7 @@ error:
 static int
 test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t fill_time)
 {
-    hid_t   fspace = -1, dset1 = -1, rspace = -1;
+    hid_t   fspace = H5I_INVALID_HID, dset1 = H5I_INVALID_HID, rspace = H5I_INVALID_HID;
     herr_t  ret;
     hsize_t ds_size[2]    = {4, 4};
     hsize_t max_size[2]   = {H5S_UNLIMITED, 4};
@@ -2461,7 +2464,7 @@ static int
 test_partalloc(hid_t fapl, const char *base_name)
 {
     char    filename[1024];
-    hid_t   file = -1, dcpl = -1;
+    hid_t   file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
     hsize_t ch_size[2] = {1, 4};
     int     nerrors    = 0;
 
@@ -2603,8 +2606,8 @@ int
 main(int argc, char *argv[])
 {
     int      nerrors = 0, argno, test_contig = 1, test_chunk = 1, test_compact = 1;
-    hid_t    fapl = (-1), fapl2 = (-1); /* File access property lists */
-    unsigned new_format;                /* Whether to use the new format or not */
+    hid_t    fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID); /* File access property lists */
+    unsigned new_format;                                          /* Whether to use the new format or not */
     bool     driver_is_default_compatible;
 
     if (argc >= 2) {

@@ -486,10 +486,11 @@ error:
 static int
 new_links(hid_t fapl, bool new_format)
 {
-    hid_t   file_a, file_b = (-1);
-    hid_t   grp1_a = (-1), grp1_b = (-1), grp2_a = (-1), grp2_b = (-1);
-    hid_t   scalar = (-1);
-    hid_t   dset1 = (-1), dset2 = (-1);
+    hid_t file_a, file_b = (H5I_INVALID_HID);
+    hid_t grp1_a = (H5I_INVALID_HID), grp1_b = (H5I_INVALID_HID), grp2_a = (H5I_INVALID_HID),
+          grp2_b   = (H5I_INVALID_HID);
+    hid_t   scalar = (H5I_INVALID_HID);
+    hid_t   dset1 = (H5I_INVALID_HID), dset2 = (H5I_INVALID_HID);
     char    filename[NAME_BUF_SIZE];
     hsize_t size[1] = {1};
 
@@ -862,11 +863,11 @@ error:
 static int
 long_links(hid_t fapl, bool new_format)
 {
-    hid_t  fid     = -1;   /* File ID */
-    hid_t  gid     = -1;   /* Group ID */
-    hid_t  gid2    = -1;   /* Datatype ID */
-    char  *objname = NULL; /* Name of object [Long] */
-    size_t u;              /* Local index variable */
+    hid_t  fid     = H5I_INVALID_HID; /* File ID */
+    hid_t  gid     = H5I_INVALID_HID; /* Group ID */
+    hid_t  gid2    = H5I_INVALID_HID; /* Datatype ID */
+    char  *objname = NULL;            /* Name of object [Long] */
+    size_t u;                         /* Local index variable */
     char   filename[NAME_BUF_SIZE];
 
     if (new_format)
@@ -941,9 +942,9 @@ error:
 static int
 toomany(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;               /* File ID */
-    hid_t gid = -1, gid2 = -1;    /* Group IDs */
-    char  objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    char  objname[NAME_BUF_SIZE];                        /* Object name */
     char  filename[NAME_BUF_SIZE];
 
     if (new_format)
@@ -1140,12 +1141,12 @@ error:
 static int
 test_lcpl(hid_t fapl, bool new_format)
 {
-    hid_t       file_id  = -1;
-    hid_t       group_id = -1;
-    hid_t       space_id = -1;
-    hid_t       dset_id  = -1;
-    hid_t       type_id  = -1;
-    hid_t       lcpl_id  = -1;
+    hid_t       file_id  = H5I_INVALID_HID;
+    hid_t       group_id = H5I_INVALID_HID;
+    hid_t       space_id = H5I_INVALID_HID;
+    hid_t       dset_id  = H5I_INVALID_HID;
+    hid_t       type_id  = H5I_INVALID_HID;
+    hid_t       lcpl_id  = H5I_INVALID_HID;
     H5L_info2_t linfo;
     char        filename[1024];
     hsize_t     dims[2];
@@ -1353,9 +1354,10 @@ error:
 static int
 test_move(hid_t fapl, bool new_format)
 {
-    hid_t file_a = -1, file_b = -1;
-    hid_t grp_1 = -1, grp_2 = -1, grp_move = -1, moved_grp = -1;
-    char  filename[1024];
+    hid_t file_a = H5I_INVALID_HID, file_b = H5I_INVALID_HID;
+    hid_t grp_1 = H5I_INVALID_HID, grp_2 = H5I_INVALID_HID, grp_move = H5I_INVALID_HID,
+          moved_grp = H5I_INVALID_HID;
+    char filename[1024];
 
     if (new_format)
         TESTING("H5Lmove (w/new group format)");
@@ -1520,9 +1522,10 @@ error:
 static int
 test_copy(hid_t fapl, bool new_format)
 {
-    hid_t file_a = -1, file_b = -1;
-    hid_t grp_1 = -1, grp_2 = -1, grp_move = -1, moved_grp = -1;
-    char  filename[1024];
+    hid_t file_a = H5I_INVALID_HID, file_b = H5I_INVALID_HID;
+    hid_t grp_1 = H5I_INVALID_HID, grp_2 = H5I_INVALID_HID, grp_move = H5I_INVALID_HID,
+          moved_grp = H5I_INVALID_HID;
+    char filename[1024];
 
     if (new_format)
         TESTING("H5Lcopy (w/new group format)");
@@ -1695,11 +1698,11 @@ error:
 static int
 test_move_preserves(hid_t fapl_id, bool new_format)
 {
-    hid_t       file_id  = -1;
-    hid_t       group_id = -1;
-    hid_t       fcpl_id  = -1; /* Group creation property list ID */
-    hid_t       lcpl_id  = -1;
-    hid_t       lcpl2_id = -1;
+    hid_t       file_id  = H5I_INVALID_HID;
+    hid_t       group_id = H5I_INVALID_HID;
+    hid_t       fcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    hid_t       lcpl_id  = H5I_INVALID_HID;
+    hid_t       lcpl2_id = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     H5L_info2_t linfo;
     H5T_cset_t  old_cset;
@@ -1935,9 +1938,9 @@ error:
 static int
 test_deprec(hid_t fapl, bool new_format)
 {
-    hid_t      file_id   = -1;
-    hid_t      group1_id = -1;
-    hid_t      group2_id = -1;
+    hid_t      file_id   = H5I_INVALID_HID;
+    hid_t      group1_id = H5I_INVALID_HID;
+    hid_t      group2_id = H5I_INVALID_HID;
     H5G_stat_t sb_hard1, sb_hard2, sb_soft1, sb_soft2;
     H5G_obj_t  obj_type; /* Object type */
     hsize_t    num_objs; /* Number of objects in a group */
@@ -2313,12 +2316,12 @@ error:
 static int
 test_lcpl_deprec(hid_t fapl, bool new_format)
 {
-    hid_t       file_id  = -1;
-    hid_t       group_id = -1;
-    hid_t       space_id = -1;
-    hid_t       dset_id  = -1;
-    hid_t       type_id  = -1;
-    hid_t       lcpl_id  = -1;
+    hid_t       file_id  = H5I_INVALID_HID;
+    hid_t       group_id = H5I_INVALID_HID;
+    hid_t       space_id = H5I_INVALID_HID;
+    hid_t       dset_id  = H5I_INVALID_HID;
+    hid_t       type_id  = H5I_INVALID_HID;
+    hid_t       lcpl_id  = H5I_INVALID_HID;
     H5L_info1_t linfo;
     char        filename[1024];
     hsize_t     dims[2];
@@ -2527,11 +2530,11 @@ error:
 static int
 test_move_preserves_deprec(hid_t fapl_id, bool new_format)
 {
-    hid_t       file_id  = -1;
-    hid_t       group_id = -1;
-    hid_t       fcpl_id  = -1; /* Group creation property list ID */
-    hid_t       lcpl_id  = -1;
-    hid_t       lcpl2_id = -1;
+    hid_t       file_id  = H5I_INVALID_HID;
+    hid_t       group_id = H5I_INVALID_HID;
+    hid_t       fcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    hid_t       lcpl_id  = H5I_INVALID_HID;
+    hid_t       lcpl2_id = H5I_INVALID_HID;
     H5O_info1_t oinfo;
     H5L_info1_t linfo;
     H5T_cset_t  old_cset;
@@ -2767,10 +2770,10 @@ error:
 static int
 external_link_root_deprec(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;               /* File ID */
-    hid_t       gid = -1, gid2 = -1;    /* Group IDs */
-    H5L_info1_t linfo;                  /* Link information */
-    char        objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t       fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t       gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info1_t linfo;                                         /* Link information */
+    char        objname[NAME_BUF_SIZE];                        /* Object name */
     char        filename1[NAME_BUF_SIZE];
     char        filename2[NAME_BUF_SIZE];
     const char *file; /* File from external link */
@@ -2986,12 +2989,12 @@ error:
 static int
 external_link_query_deprec(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;    /* File ID */
-    hid_t       gid = -1;    /* Group IDs */
-    const char *file_name;   /* Name of the file the external link points to */
-    const char *object_name; /* Name of the object the external link points to */
-    H5O_info1_t oi;          /* Object information */
-    H5L_info1_t li;          /* Link information */
+    hid_t       fid = H5I_INVALID_HID; /* File ID */
+    hid_t       gid = H5I_INVALID_HID; /* Group IDs */
+    const char *file_name;             /* Name of the file the external link points to */
+    const char *object_name;           /* Name of the object the external link points to */
+    H5O_info1_t oi;                    /* Object information */
+    H5L_info1_t li;                    /* Link information */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], /* Names of files to externally link across */
         query_buf[NAME_BUF_SIZE];                            /* Buffer to hold query result */
 
@@ -3140,9 +3143,11 @@ error:
 static int
 external_link_closing_deprec(hid_t fapl, bool new_format)
 {
-    hid_t   fid1 = (-1), fid2 = (-1), fid3 = (-1), fid4 = (-1);
-    hid_t   gid = (-1), tid = (-1), tid2 = (-1), sid = (-1), did = (-1);
-    hid_t   lcpl_id = (-1);
+    hid_t fid1 = (H5I_INVALID_HID), fid2 = (H5I_INVALID_HID), fid3 = (H5I_INVALID_HID),
+          fid4 = (H5I_INVALID_HID);
+    hid_t gid = (H5I_INVALID_HID), tid = (H5I_INVALID_HID), tid2 = (H5I_INVALID_HID), sid = (H5I_INVALID_HID),
+          did       = (H5I_INVALID_HID);
+    hid_t   lcpl_id = (H5I_INVALID_HID);
     hsize_t dims[2];
     char    filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE],
         filename4[NAME_BUF_SIZE], /* Names of files to externally link across */
@@ -3449,7 +3454,7 @@ UD_hard_create_deprec(const char H5_ATTR_UNUSED *link_name, hid_t loc_group, con
                       size_t udata_size, hid_t H5_ATTR_UNUSED lcpl_id)
 {
     haddr_t addr;
-    hid_t   target_obj = -1;
+    hid_t   target_obj = H5I_INVALID_HID;
     herr_t  ret_value  = 0;
 
     if (udata_size != sizeof(haddr_t)) {
@@ -3523,7 +3528,7 @@ UD_hard_traverse_deprec(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, c
                         size_t udata_size, hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     haddr_t addr;
-    hid_t   ret_value = -1;
+    hid_t   ret_value = H5I_INVALID_HID;
 
     if (udata_size != sizeof(haddr_t))
         return FAIL;
@@ -3540,7 +3545,7 @@ static herr_t
 UD_hard_delete_deprec(const char H5_ATTR_UNUSED *link_name, hid_t file, const void *udata, size_t udata_size)
 {
     haddr_t addr;
-    hid_t   target_obj = -1;
+    hid_t   target_obj = H5I_INVALID_HID;
     herr_t  ret_value  = 0;
 
     if (udata_size != sizeof(haddr_t)) {
@@ -3611,11 +3616,11 @@ done:
 static int
 ud_hard_links_deprec(hid_t fapl)
 {
-    hid_t          fid = -1;               /* File ID */
-    hid_t          gid = -1, gid2 = -1;    /* Group IDs */
-    H5L_info1_t    li;                     /* Link information */
-    char           objname[NAME_BUF_SIZE]; /* Object name */
-    h5_stat_size_t empty_size;             /* Size of an empty file */
+    hid_t          fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info1_t    li;                                            /* Link information */
+    char           objname[NAME_BUF_SIZE];                        /* Object name */
+    h5_stat_size_t empty_size;                                    /* Size of an empty file */
     char           filename[NAME_BUF_SIZE];
 
     TESTING("user-defined hard link using deprecated routines (w/new group format)");
@@ -3768,10 +3773,10 @@ error:
 static int
 ud_link_reregister_deprec(hid_t fapl)
 {
-    hid_t          fid = -1;               /* File ID */
-    hid_t          gid = -1, gid2 = -1;    /* Group IDs */
-    H5L_info1_t    li;                     /* Link information */
-    char           objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t          fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info1_t    li;                                            /* Link information */
+    char           objname[NAME_BUF_SIZE];                        /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
 
@@ -3952,9 +3957,9 @@ error:
 static int
 ud_callbacks_deprec(hid_t fapl, bool new_format)
 {
-    hid_t       fid  = -1;                       /* File ID */
-    hid_t       gid  = -1;                       /* Group ID */
-    hid_t       lcpl = -1;                       /* Link Creation PL */
+    hid_t       fid  = H5I_INVALID_HID;          /* File ID */
+    hid_t       gid  = H5I_INVALID_HID;          /* Group ID */
+    hid_t       lcpl = H5I_INVALID_HID;          /* Link Creation PL */
     H5L_info1_t li;                              /* Link information */
     char        ud_target_name[] = UD_CB_TARGET; /* Link target name */
     char        filename[NAME_BUF_SIZE];
@@ -4129,12 +4134,12 @@ error:
 static int
 lapl_nlinks_deprec(hid_t fapl, bool new_format)
 {
-    hid_t   fid = -1;                        /* File ID */
-    hid_t   gid = -1, gid2 = -1;             /* Group IDs */
-    hid_t   plist = -1;                      /* lapl ID */
-    hid_t   tid = -1, sid = -1, did = -1;    /* Other IDs */
-    hid_t   gapl = -1, dapl = -1, tapl = -1; /* Other property lists */
-    char    objname[NAME_BUF_SIZE];          /* Object name */
+    hid_t   fid = H5I_INVALID_HID;                                                  /* File ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;                          /* Group IDs */
+    hid_t   plist = H5I_INVALID_HID;                                                /* lapl ID */
+    hid_t   tid = H5I_INVALID_HID, sid = H5I_INVALID_HID, did = H5I_INVALID_HID;    /* Other IDs */
+    hid_t   gapl = H5I_INVALID_HID, dapl = H5I_INVALID_HID, tapl = H5I_INVALID_HID; /* Other property lists */
+    char    objname[NAME_BUF_SIZE];                                                 /* Object name */
     char    filename[NAME_BUF_SIZE];
     size_t  nlinks; /* nlinks for H5Pset_nlinks */
     hsize_t dims[2];
@@ -4436,11 +4441,11 @@ error:
 static int
 linkinfo_deprec(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;           /* File ID */
-    hid_t       gid = -1;           /* Group ID */
-    hid_t       tid = -1;           /* Type ID */
-    hid_t       sid = -1, did = -1; /* Dataspace and dataset IDs */
-    H5L_info1_t li;                 /* Link information */
+    hid_t       fid = H5I_INVALID_HID;                        /* File ID */
+    hid_t       gid = H5I_INVALID_HID;                        /* Group ID */
+    hid_t       tid = H5I_INVALID_HID;                        /* Type ID */
+    hid_t       sid = H5I_INVALID_HID, did = H5I_INVALID_HID; /* Dataspace and dataset IDs */
+    H5L_info1_t li;                                           /* Link information */
     char        filename[NAME_BUF_SIZE];
 
     if (new_format)
@@ -4549,15 +4554,15 @@ error:
 static int
 corder_create_compact_deprec(hid_t fapl)
 {
-    hid_t    file_id  = -1;                 /* File ID */
-    hid_t    group_id = -1, group_id2 = -1; /* Group IDs */
-    hid_t    gcpl_id = -1;                  /* Group creation property list ID */
-    unsigned max_compact;                   /* Maximum # of links to store in group compactly */
-    unsigned min_dense;                     /* Minimum # of links to store in group "densely" */
-    unsigned nlinks;                        /* Number of link messages in group's header */
-    char     objname[NAME_BUF_SIZE];        /* Object name */
-    char     filename[NAME_BUF_SIZE];       /* File name */
-    unsigned u;                             /* Local index variable */
+    hid_t    file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t    group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t    gcpl_id = H5I_INVALID_HID;                               /* Group creation property list ID */
+    unsigned max_compact;             /* Maximum # of links to store in group compactly */
+    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
+    unsigned nlinks;                  /* Number of link messages in group's header */
+    char     objname[NAME_BUF_SIZE];  /* Object name */
+    char     filename[NAME_BUF_SIZE]; /* File name */
+    unsigned u;                       /* Local index variable */
 
     TESTING("creating compact group with creation order indexing using deprecated routines");
 
@@ -4691,17 +4696,17 @@ error:
 static int
 corder_create_dense_deprec(hid_t fapl)
 {
-    hid_t    file_id  = -1;                 /* File ID */
-    hid_t    group_id = -1, group_id2 = -1; /* Group IDs */
-    hid_t    gcpl_id = -1;                  /* Group creation property list ID */
-    unsigned max_compact;                   /* Maximum # of links to store in group compactly */
-    unsigned min_dense;                     /* Minimum # of links to store in group "densely" */
-    unsigned nlinks;                        /* Number of link messages in group's header */
-    hsize_t  name_count;                    /* # of records in name index */
-    hsize_t  corder_count;                  /* # of records in creation order index */
-    char     objname[NAME_BUF_SIZE];        /* Object name */
-    char     filename[NAME_BUF_SIZE];       /* File name */
-    unsigned u;                             /* Local index variable */
+    hid_t    file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t    group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t    gcpl_id = H5I_INVALID_HID;                               /* Group creation property list ID */
+    unsigned max_compact;             /* Maximum # of links to store in group compactly */
+    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
+    unsigned nlinks;                  /* Number of link messages in group's header */
+    hsize_t  name_count;              /* # of records in name index */
+    hsize_t  corder_count;            /* # of records in creation order index */
+    char     objname[NAME_BUF_SIZE];  /* Object name */
+    char     filename[NAME_BUF_SIZE]; /* File name */
+    unsigned u;                       /* Local index variable */
 
     TESTING("creating dense group with creation order indexing using deprecated routines");
 
@@ -5060,21 +5065,21 @@ error:
 static int
 link_info_by_idx_deprec(hid_t fapl)
 {
-    hid_t       file_id  = -1;           /* File ID */
-    hid_t       group_id = -1;           /* Group ID */
-    hid_t       gcpl_id  = -1;           /* Group creation property list ID */
-    unsigned    hard_link;               /* Create hard or soft link? */
-    unsigned    use_index;               /* Use index on creation order values */
-    unsigned    max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned    min_dense;               /* Minimum # of links to store in group "densely" */
-    H5L_info1_t linfo;                   /* Link info struct */
-    char        objname[NAME_BUF_SIZE];  /* Object name */
-    char        valname[NAME_BUF_SIZE];  /* Link value name */
-    char        filename[NAME_BUF_SIZE]; /* File name */
-    char        tmpname[NAME_BUF_SIZE];  /* Temporary link name */
-    unsigned    u;                       /* Local index variable */
-    ssize_t     name_len;                /* Length of name */
-    herr_t      ret;                     /* Generic return value */
+    hid_t       file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t       group_id = H5I_INVALID_HID; /* Group ID */
+    hid_t       gcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    unsigned    hard_link;                  /* Create hard or soft link? */
+    unsigned    use_index;                  /* Use index on creation order values */
+    unsigned    max_compact;                /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;                  /* Minimum # of links to store in group "densely" */
+    H5L_info1_t linfo;                      /* Link info struct */
+    char        objname[NAME_BUF_SIZE];     /* Object name */
+    char        valname[NAME_BUF_SIZE];     /* Link value name */
+    char        filename[NAME_BUF_SIZE];    /* File name */
+    char        tmpname[NAME_BUF_SIZE];     /* Temporary link name */
+    unsigned    u;                          /* Local index variable */
+    ssize_t     name_len;                   /* Length of name */
+    herr_t      ret;                        /* Generic return value */
 
     /* Loop over creating hard or soft links */
     for (hard_link = false; hard_link <= true; hard_link++) {
@@ -5299,19 +5304,19 @@ error:
 static int
 link_info_by_idx_old_deprec(hid_t fapl)
 {
-    hid_t       file_id  = -1;                 /* File ID */
-    hid_t       group_id = -1, group_id2 = -1; /* Group IDs */
-    unsigned    hard_link;                     /* Create hard or soft link? */
-    H5L_info1_t linfo;                         /* Link info struct */
-    char        objname[NAME_BUF_SIZE];        /* Object name */
-    char        valname[NAME_BUF_SIZE];        /* Link value name */
-    char        filename[NAME_BUF_SIZE];       /* File name */
-    haddr_t     objno[CORDER_NLINKS];          /* Addresses of the objects created */
-    char        tmpname[NAME_BUF_SIZE];        /* Temporary link name */
-    char        tmpval[NAME_BUF_SIZE];         /* Temporary link value */
-    unsigned    u;                             /* Local index variable */
-    ssize_t     name_len;                      /* Length of name */
-    herr_t      ret;                           /* Generic return value */
+    hid_t       file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t       group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    unsigned    hard_link;                                               /* Create hard or soft link? */
+    H5L_info1_t linfo;                                                   /* Link info struct */
+    char        objname[NAME_BUF_SIZE];                                  /* Object name */
+    char        valname[NAME_BUF_SIZE];                                  /* Link value name */
+    char        filename[NAME_BUF_SIZE];                                 /* File name */
+    haddr_t     objno[CORDER_NLINKS];   /* Addresses of the objects created */
+    char        tmpname[NAME_BUF_SIZE]; /* Temporary link name */
+    char        tmpval[NAME_BUF_SIZE];  /* Temporary link value */
+    unsigned    u;                      /* Local index variable */
+    ssize_t     name_len;               /* Length of name */
+    herr_t      ret;                    /* Generic return value */
 
     /* Loop over creating hard or soft links */
     for (hard_link = false; hard_link <= true; hard_link++) {
@@ -5505,20 +5510,20 @@ error:
 static int
 delete_by_idx_deprec(hid_t fapl)
 {
-    hid_t           file_id  = -1;           /* File ID */
-    hid_t           group_id = -1;           /* Group ID */
-    hid_t           gcpl_id  = -1;           /* Group creation property list ID */
-    H5_index_t      idx_type;                /* Type of index to operate on */
-    H5_iter_order_t order;                   /* Order within in the index */
-    unsigned        use_index;               /* Use index on creation order values */
-    unsigned        max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;               /* Minimum # of links to store in group "densely" */
-    H5L_info1_t     linfo;                   /* Link info struct */
-    char            objname[NAME_BUF_SIZE];  /* Object name */
-    char            filename[NAME_BUF_SIZE]; /* File name */
-    char            tmpname[NAME_BUF_SIZE];  /* Temporary link name */
-    unsigned        u;                       /* Local index variable */
-    herr_t          ret;                     /* Generic return value */
+    hid_t           file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t           group_id = H5I_INVALID_HID; /* Group ID */
+    hid_t           gcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    H5_index_t      idx_type;                   /* Type of index to operate on */
+    H5_iter_order_t order;                      /* Order within in the index */
+    unsigned        use_index;                  /* Use index on creation order values */
+    unsigned        max_compact;                /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                  /* Minimum # of links to store in group "densely" */
+    H5L_info1_t     linfo;                      /* Link info struct */
+    char            objname[NAME_BUF_SIZE];     /* Object name */
+    char            filename[NAME_BUF_SIZE];    /* File name */
+    char            tmpname[NAME_BUF_SIZE];     /* Temporary link name */
+    unsigned        u;                          /* Local index variable */
+    herr_t          ret;                        /* Generic return value */
 
     /* Loop over operating on different indices on link fields */
     for (idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; idx_type++) {
@@ -5913,16 +5918,16 @@ error:
 static int
 delete_by_idx_old_deprec(hid_t fapl)
 {
-    hid_t           file_id  = -1;                 /* File ID */
-    hid_t           group_id = -1, group_id2 = -1; /* Group IDs */
-    H5L_info1_t     linfo;                         /* Link info struct */
-    H5_iter_order_t order;                         /* Order within in the index */
-    char            objname[NAME_BUF_SIZE];        /* Object name */
-    char            filename[NAME_BUF_SIZE];       /* File name */
-    haddr_t         objno[CORDER_NLINKS];          /* Addresses of the objects created */
-    char            tmpname[NAME_BUF_SIZE];        /* Temporary link name */
-    unsigned        u;                             /* Local index variable */
-    herr_t          ret;                           /* Generic return value */
+    hid_t           file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t           group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info1_t     linfo;                                                   /* Link info struct */
+    H5_iter_order_t order;                                                   /* Order within in the index */
+    char            objname[NAME_BUF_SIZE];                                  /* Object name */
+    char            filename[NAME_BUF_SIZE];                                 /* File name */
+    haddr_t         objno[CORDER_NLINKS];   /* Addresses of the objects created */
+    char            tmpname[NAME_BUF_SIZE]; /* Temporary link name */
+    unsigned        u;                      /* Local index variable */
+    herr_t          ret;                    /* Generic return value */
 
     /* Loop over operating in different orders */
     for (order = H5_ITER_INC; order <= H5_ITER_DEC; order++) {
@@ -6451,21 +6456,21 @@ error:
 static int
 link_iterate_deprec(hid_t fapl)
 {
-    hid_t            file_id  = (-1);         /* File ID */
-    hid_t            group_id = (-1);         /* Group ID */
-    hid_t            gcpl_id  = (-1);         /* Group creation property list ID */
-    H5_index_t       idx_type;                /* Type of index to operate on */
-    H5_iter_order_t  order;                   /* Order within in the index */
-    unsigned         use_index;               /* Use index on creation order values */
-    unsigned         max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned         min_dense;               /* Minimum # of links to store in group "densely" */
-    char             objname[NAME_BUF_SIZE];  /* Object name */
-    char             filename[NAME_BUF_SIZE]; /* File name */
-    link_iter_info_t iter_info;               /* Iterator info */
-    bool            *visited = NULL;          /* Array of flags for visiting links */
-    hsize_t          skip;                    /* # of links to skip in group */
-    unsigned         u;                       /* Local index variable */
-    herr_t           ret;                     /* Generic return value */
+    hid_t            file_id  = (H5I_INVALID_HID); /* File ID */
+    hid_t            group_id = (H5I_INVALID_HID); /* Group ID */
+    hid_t            gcpl_id  = (H5I_INVALID_HID); /* Group creation property list ID */
+    H5_index_t       idx_type;                     /* Type of index to operate on */
+    H5_iter_order_t  order;                        /* Order within in the index */
+    unsigned         use_index;                    /* Use index on creation order values */
+    unsigned         max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned         min_dense;                    /* Minimum # of links to store in group "densely" */
+    char             objname[NAME_BUF_SIZE];       /* Object name */
+    char             filename[NAME_BUF_SIZE];      /* File name */
+    link_iter_info_t iter_info;                    /* Iterator info */
+    bool            *visited = NULL;               /* Array of flags for visiting links */
+    hsize_t          skip;                         /* # of links to skip in group */
+    unsigned         u;                            /* Local index variable */
+    herr_t           ret;                          /* Generic return value */
 
     /* Create group creation property list */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -6914,7 +6919,8 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     skip = 0;
     H5E_BEGIN_TRY
     {
-        ret = H5Literate1((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_deprec_cb, NULL);
+        ret = H5Literate1((hid_t)(H5I_INVALID_HID), H5_INDEX_NAME, order, &skip, link_iterate_fail_deprec_cb,
+                          NULL);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -6922,7 +6928,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
 
     H5E_BEGIN_TRY
     {
-        ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_deprec_cb, iter_info);
+        ret = H5Giterate((hid_t)(H5I_INVALID_HID), ".", &gskip, group_iterate_old_deprec_cb, iter_info);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -6947,16 +6953,16 @@ error:
 static int
 link_iterate_old_deprec(hid_t fapl)
 {
-    hid_t            file_id  = -1;           /* File ID */
-    hid_t            group_id = -1;           /* Group ID */
-    H5_iter_order_t  order;                   /* Order within in the index */
-    char             objname[NAME_BUF_SIZE];  /* Object name */
-    char             filename[NAME_BUF_SIZE]; /* File name */
-    link_iter_info_t iter_info;               /* Iterator info */
-    bool            *visited = NULL;          /* Array of flags for visiting links */
-    hsize_t          skip;                    /* # of links to skip in group */
-    unsigned         u;                       /* Local index variable */
-    herr_t           ret;                     /* Generic return value */
+    hid_t            file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t            group_id = H5I_INVALID_HID; /* Group ID */
+    H5_iter_order_t  order;                      /* Order within in the index */
+    char             objname[NAME_BUF_SIZE];     /* Object name */
+    char             filename[NAME_BUF_SIZE];    /* File name */
+    link_iter_info_t iter_info;                  /* Iterator info */
+    bool            *visited = NULL;             /* Array of flags for visiting links */
+    hsize_t          skip;                       /* # of links to skip in group */
+    unsigned         u;                          /* Local index variable */
+    herr_t           ret;                        /* Generic return value */
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = CORDER_NLINKS;
@@ -7083,10 +7089,10 @@ error:
 static int
 external_link_root(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;               /* File ID */
-    hid_t       gid = -1, gid2 = -1;    /* Group IDs */
-    H5L_info2_t linfo;                  /* Link information */
-    char        objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t       fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t       gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info2_t linfo;                                         /* Link information */
+    char        objname[NAME_BUF_SIZE];                        /* Object name */
     char        filename1[NAME_BUF_SIZE];
     char        filename2[NAME_BUF_SIZE];
     const char *file; /* File from external link */
@@ -7302,9 +7308,9 @@ error:
 static int
 external_link_path(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;               /* File ID */
-    hid_t gid = -1, gid2 = -1;    /* Group IDs */
-    char  objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    char  objname[NAME_BUF_SIZE];                        /* Object name */
     char  filename1[NAME_BUF_SIZE];
     char  filename2[NAME_BUF_SIZE];
 
@@ -7424,9 +7430,9 @@ error:
 static int
 external_link_mult(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1, fid2 = -1;    /* File IDs */
-    hid_t gid = -1, gid2 = -1;    /* Group IDs */
-    char  objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t fid = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    char  objname[NAME_BUF_SIZE];                        /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE],
         filename4[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
@@ -7622,10 +7628,10 @@ error:
 static int
 external_link_self(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;               /* File ID */
-    hid_t gid = -1, gid2 = -1;    /* Group IDs */
-    hid_t lcpl_id = -1;           /* Link Creation Property List ID */
-    char  objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t lcpl_id = H5I_INVALID_HID;                     /* Link Creation Property List ID */
+    char  objname[NAME_BUF_SIZE];                        /* Object name */
     char  filename1[NAME_BUF_SIZE];
     char  filename2[NAME_BUF_SIZE];
     char  filename3[NAME_BUF_SIZE];
@@ -7813,8 +7819,8 @@ error:
 static int
 external_link_pingpong(hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1);                                         /* File ID */
-    hid_t gid = (-1), gid2 = (-1);                            /* Group IDs */
+    hid_t fid = (H5I_INVALID_HID);                            /* File ID */
+    hid_t gid = (H5I_INVALID_HID), gid2 = (H5I_INVALID_HID);  /* Group IDs */
     char  objname[NAME_BUF_SIZE];                             /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
@@ -7965,8 +7971,8 @@ error:
 static int
 external_link_toomany(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;                                           /* File ID */
-    hid_t gid = -1, gid2 = -1;                                /* Group IDs */
+    hid_t fid = H5I_INVALID_HID;                              /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;      /* Group IDs */
     char  objname[NAME_BUF_SIZE];                             /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
@@ -8114,10 +8120,10 @@ error:
 static int
 external_link_dangling(hid_t fapl, bool new_format)
 {
-    hid_t fid    = -1;                                        /* File ID */
-    hid_t gid    = -1;                                        /* Group IDs */
-    hid_t rid    = -1;                                        /* Root Group ID */
-    hid_t status = -1;                                        /* Status */
+    hid_t fid    = H5I_INVALID_HID;                           /* File ID */
+    hid_t gid    = H5I_INVALID_HID;                           /* Group IDs */
+    hid_t rid    = H5I_INVALID_HID;                           /* Root Group ID */
+    hid_t status = H5I_INVALID_HID;                           /* Status */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
     if (new_format)
@@ -8234,9 +8240,9 @@ error:
 static int
 external_link_prefix(hid_t fapl, bool new_format)
 {
-    hid_t fid     = -1; /* File ID */
-    hid_t gid     = -1; /* Group IDs */
-    hid_t gapl_id = -1;
+    hid_t fid     = H5I_INVALID_HID; /* File ID */
+    hid_t gid     = H5I_INVALID_HID; /* Group IDs */
+    hid_t gapl_id = H5I_INVALID_HID;
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE];
 
     if (new_format)
@@ -8331,8 +8337,8 @@ error:
 static int
 external_link_abs_mainpath(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -8427,8 +8433,8 @@ error:
 static int
 external_link_rel_mainpath(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE];
 
     if (new_format)
@@ -8515,8 +8521,8 @@ error:
 static int
 external_link_cwd(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE], cwdpath[NAME_BUF_SIZE];
 
     if (new_format)
@@ -8609,8 +8615,8 @@ error:
 static int
 external_link_abstar(hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t gid = (-1); /* Group IDs */
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t gid = (H5I_INVALID_HID); /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -8707,8 +8713,8 @@ error:
 static int
 external_link_abstar_cur(hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t gid = (-1); /* Group IDs */
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t gid = (H5I_INVALID_HID); /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -8804,8 +8810,8 @@ error:
 static int
 external_link_reltar(hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t gid = (-1); /* Group IDs */
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t gid = (H5I_INVALID_HID); /* Group IDs */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE];
 
     if (new_format)
@@ -8887,8 +8893,8 @@ error:
 static int
 external_link_chdir(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE];
 
     if (new_format)
@@ -8993,14 +8999,14 @@ error:
 static int
 external_set_elink_fapl1(hid_t fapl, bool new_format)
 {
-    hid_t fid  = (-1);
-    hid_t fidA = (-1), fidB = (-1);
-    hid_t gidA = (-1), gidB = (-1);
-    hid_t oidA = (-1), oidB = (-1);
+    hid_t fid  = (H5I_INVALID_HID);
+    hid_t fidA = (H5I_INVALID_HID), fidB = (H5I_INVALID_HID);
+    hid_t gidA = (H5I_INVALID_HID), gidB = (H5I_INVALID_HID);
+    hid_t oidA = (H5I_INVALID_HID), oidB = (H5I_INVALID_HID);
     char  filename1[NAME_BUF_SIZE], filename2A[NAME_BUF_SIZE], filename2B[NAME_BUF_SIZE],
         tmpname[NAME_BUF_SIZE], cwdpath[NAME_BUF_SIZE];
-    hid_t       fam_fapl = -1, multi_fapl = -1;
-    hid_t       lapl_idA = -1, lapl_idB = -1;
+    hid_t       fam_fapl = H5I_INVALID_HID, multi_fapl = H5I_INVALID_HID;
+    hid_t       lapl_idA = H5I_INVALID_HID, lapl_idB = H5I_INVALID_HID;
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     char        sv[H5FD_MEM_NTYPES][64];
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
@@ -9428,8 +9434,8 @@ error:
 static int
 external_set_elink_fapl3(bool new_format)
 {
-    hid_t core_fapl = -1, stdio_fapl = -1;
-    hid_t lapl_id = -1, new_lapl_id = -1, l_fapl = -1, out_fapl;
+    hid_t core_fapl = H5I_INVALID_HID, stdio_fapl = H5I_INVALID_HID;
+    hid_t lapl_id = H5I_INVALID_HID, new_lapl_id = H5I_INVALID_HID, l_fapl = H5I_INVALID_HID, out_fapl;
 
     if (new_format)
         TESTING("H5Pset/get_fapl() (w/new group format)");
@@ -9530,7 +9536,8 @@ error:
 static int
 external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t    file1 = -1, file2 = -1, group = -1, subgroup = -1, gapl = -1;
+    hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, group = H5I_INVALID_HID,
+          subgroup = H5I_INVALID_HID, gapl = H5I_INVALID_HID;
     char     filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE];
     herr_t   ret;
     unsigned flags;
@@ -9868,8 +9875,9 @@ external_set_elink_cb_cb(const char *parent_file, const char *parent_group, cons
 static int
 external_set_elink_cb(hid_t fapl, bool new_format)
 {
-    hid_t          file1 = -1, file2 = -1, group = -1, gapl = -1, fam_fapl = -1, ret_fapl = -1, base_driver;
-    set_elink_cb_t op_data, *op_data_p;
+    hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, group = H5I_INVALID_HID, gapl = H5I_INVALID_HID,
+          fam_fapl = H5I_INVALID_HID, ret_fapl = H5I_INVALID_HID, base_driver;
+    set_elink_cb_t       op_data, *op_data_p;
     H5L_elink_traverse_t cb;
     char                 filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE];
     unsigned             flags;
@@ -10099,8 +10107,8 @@ error:
 static int
 external_link_win1(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -10193,8 +10201,8 @@ error:
 static int
 external_link_win2(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -10290,8 +10298,8 @@ error:
 static int
 external_link_win3(hid_t fapl, bool new_format)
 {
-    hid_t fid   = -1; /* File ID */
-    hid_t gid   = -1; /* Group IDs */
+    hid_t fid   = H5I_INVALID_HID; /* File ID */
+    hid_t gid   = H5I_INVALID_HID; /* Group IDs */
     int   drive = 0;
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE];
 
@@ -10384,8 +10392,8 @@ error:
 static int
 external_link_win4(hid_t fapl, bool new_format)
 {
-    hid_t fid   = -1; /* File ID */
-    hid_t gid   = -1; /* Group IDs */
+    hid_t fid   = H5I_INVALID_HID; /* File ID */
+    hid_t gid   = H5I_INVALID_HID; /* Group IDs */
     int   drive = 0;
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE];
 
@@ -10475,8 +10483,8 @@ error:
 static int
 external_link_win5(hid_t fapl, bool new_format)
 {
-    hid_t fid   = -1; /* File ID */
-    hid_t gid   = -1; /* Group IDs */
+    hid_t fid   = H5I_INVALID_HID; /* File ID */
+    hid_t gid   = H5I_INVALID_HID; /* Group IDs */
     int   drive = 0;
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
@@ -10576,8 +10584,8 @@ error:
 static int
 external_link_win6(hid_t fapl, bool new_format)
 {
-    hid_t fid   = -1; /* File ID */
-    hid_t gid   = -1; /* Group IDs */
+    hid_t fid   = H5I_INVALID_HID; /* File ID */
+    hid_t gid   = H5I_INVALID_HID; /* Group IDs */
     int   drive = 0;
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE];
 
@@ -10674,8 +10682,8 @@ error:
 static int
 external_link_win7(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -10770,8 +10778,8 @@ error:
 static int
 external_link_win8(hid_t fapl, bool new_format)
 {
-    hid_t fid   = -1; /* File ID */
-    hid_t gid   = -1; /* Group IDs */
+    hid_t fid   = H5I_INVALID_HID; /* File ID */
+    hid_t gid   = H5I_INVALID_HID; /* Group IDs */
     int   drive = 0;
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
@@ -10869,8 +10877,8 @@ error:
 static int
 external_link_win9(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group IDs */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group IDs */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE], tmpname[NAME_BUF_SIZE],
         cwdpath[NAME_BUF_SIZE];
 
@@ -10962,8 +10970,8 @@ error:
 static int
 external_link_recursive(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;                 /* File ID */
-    hid_t gid = -1;                 /* Group IDs */
+    hid_t fid = H5I_INVALID_HID;    /* File ID */
+    hid_t gid = H5I_INVALID_HID;    /* Group IDs */
     char  filename1[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
     if (new_format)
@@ -11032,12 +11040,12 @@ error:
 static int
 external_link_query(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;    /* File ID */
-    hid_t       gid = -1;    /* Group IDs */
-    const char *file_name;   /* Name of the file the external link points to */
-    const char *object_name; /* Name of the object the external link points to */
-    H5O_info2_t oi;          /* Object information */
-    H5L_info2_t li;          /* Link information */
+    hid_t       fid = H5I_INVALID_HID; /* File ID */
+    hid_t       gid = H5I_INVALID_HID; /* Group IDs */
+    const char *file_name;             /* Name of the file the external link points to */
+    const char *object_name;           /* Name of the object the external link points to */
+    H5O_info2_t oi;                    /* Object information */
+    H5L_info2_t li;                    /* Link information */
     char filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], /* Names of files to externally link across */
         query_buf[NAME_BUF_SIZE];                            /* Buffer to hold query result */
 
@@ -11185,8 +11193,8 @@ error:
 static int
 external_link_unlink_compact(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;                                           /* File ID */
-    hid_t gid = -1, gid2 = -1;                                /* Group IDs */
+    hid_t fid = H5I_INVALID_HID;                              /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;      /* Group IDs */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
     if (new_format)
@@ -11278,9 +11286,9 @@ error:
 static int
 external_link_unlink_dense(hid_t fapl, bool new_format)
 {
-    hid_t fid  = -1;                                          /* File ID */
-    hid_t gcpl = -1;                                          /* Group creation property list ID */
-    hid_t gid = -1, gid2 = -1;                                /* Group IDs */
+    hid_t fid  = H5I_INVALID_HID;                             /* File ID */
+    hid_t gcpl = H5I_INVALID_HID;                             /* Group creation property list ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;      /* Group IDs */
     char  objname[NAME_BUF_SIZE];                             /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
     unsigned nmsgs;                                           /* Number of messages in group's header */
@@ -11455,8 +11463,8 @@ error:
 static int
 external_link_move(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;                                           /* File ID */
-    hid_t gid = -1, gid2 = -1;                                /* Group IDs */
+    hid_t fid = H5I_INVALID_HID;                              /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;      /* Group IDs */
     char  objname[NAME_BUF_SIZE];                             /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
 
@@ -11690,9 +11698,9 @@ error:
 static int
 external_link_ride(hid_t fapl, bool new_format)
 {
-    hid_t fid  = -1;                                          /* File ID */
-    hid_t gcpl = -1;                                          /* Group creation property list ID */
-    hid_t gid = -1, gid2 = -1;                                /* Group IDs */
+    hid_t fid  = H5I_INVALID_HID;                             /* File ID */
+    hid_t gcpl = H5I_INVALID_HID;                             /* Group creation property list ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;      /* Group IDs */
     char  objname[NAME_BUF_SIZE];                             /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE]; /* Names of files to externally link across */
     unsigned nmsgs;                                           /* Number of messages in group's header */
@@ -11922,9 +11930,11 @@ error:
 static int
 external_link_closing(hid_t fapl, bool new_format)
 {
-    hid_t   fid1 = (-1), fid2 = (-1), fid3 = (-1), fid4 = (-1);
-    hid_t   gid = (-1), tid = (-1), tid2 = (-1), sid = (-1), did = (-1);
-    hid_t   lcpl_id = (-1);
+    hid_t fid1 = (H5I_INVALID_HID), fid2 = (H5I_INVALID_HID), fid3 = (H5I_INVALID_HID),
+          fid4 = (H5I_INVALID_HID);
+    hid_t gid = (H5I_INVALID_HID), tid = (H5I_INVALID_HID), tid2 = (H5I_INVALID_HID), sid = (H5I_INVALID_HID),
+          did       = (H5I_INVALID_HID);
+    hid_t   lcpl_id = (H5I_INVALID_HID);
     hsize_t dims[2];
     char    filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE],
         filename4[NAME_BUF_SIZE], /* Names of files to externally link across */
@@ -12238,10 +12248,10 @@ error:
 static int
 external_link_endian(bool new_format)
 {
-    hid_t       fid = -1;                  /* File ID */
-    hid_t       gid = -1, gid2 = -1;       /* Group IDs */
-    hid_t       lapl_id = -1;              /* Prop List ID */
-    const char *pathbuf = H5_get_srcdir(); /* Path to the files */
+    hid_t       fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t       gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t       lapl_id = H5I_INVALID_HID;                     /* Prop List ID */
+    const char *pathbuf = H5_get_srcdir();                     /* Path to the files */
     const char *namebuf;
 
     if (new_format)
@@ -12323,10 +12333,10 @@ error:
 static int
 external_link_strong(hid_t fapl, bool new_format)
 {
-    hid_t my_fapl = (-1);           /* File access property list */
-    hid_t fid1 = (-1), fid2 = (-1); /* File ID */
-    hid_t gid1 = (-1), gid2 = (-1); /* Group IDs */
-    char  objname[NAME_BUF_SIZE];   /* Object name */
+    hid_t my_fapl = (H5I_INVALID_HID);                        /* File access property list */
+    hid_t fid1 = (H5I_INVALID_HID), fid2 = (H5I_INVALID_HID); /* File ID */
+    hid_t gid1 = (H5I_INVALID_HID), gid2 = (H5I_INVALID_HID); /* Group IDs */
+    char  objname[NAME_BUF_SIZE];                             /* Object name */
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE];
 
     if (new_format)
@@ -12727,9 +12737,9 @@ error:
 static int
 external_copy_invalid_object(hid_t fapl, bool new_format)
 {
-    hid_t fid      = -1; /* File ID */
-    hid_t gid      = -1; /* Group ID */
-    hid_t ocpyplid = -1; /* Object copy plist ID */
+    hid_t fid      = H5I_INVALID_HID; /* File ID */
+    hid_t gid      = H5I_INVALID_HID; /* Group ID */
+    hid_t ocpyplid = H5I_INVALID_HID; /* Object copy plist ID */
     char  filename[NAME_BUF_SIZE];
 
     if (new_format)
@@ -12807,9 +12817,9 @@ error:
 static int
 external_dont_fail_to_source(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group ID */
-    hid_t oid = -1; /* Object ID */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group ID */
+    hid_t oid = H5I_INVALID_HID; /* Object ID */
     char  filename[NAME_BUF_SIZE];
 
     if (new_format)
@@ -12876,12 +12886,12 @@ error:
 static int
 external_file_cache(hid_t fapl, bool new_format)
 {
-    hid_t    my_fapl = -1; /* Temporary FAPL */
-    hid_t    fid1    = -1; /* File ID */
-    hid_t    fid2    = -1; /* File ID */
-    hid_t    fid3    = -1; /* File ID */
-    hid_t    fid4    = -1; /* File ID */
-    hid_t    oid     = -1; /* Object ID */
+    hid_t    my_fapl = H5I_INVALID_HID; /* Temporary FAPL */
+    hid_t    fid1    = H5I_INVALID_HID; /* File ID */
+    hid_t    fid2    = H5I_INVALID_HID; /* File ID */
+    hid_t    fid3    = H5I_INVALID_HID; /* File ID */
+    hid_t    fid4    = H5I_INVALID_HID; /* File ID */
+    hid_t    oid     = H5I_INVALID_HID; /* Object ID */
     unsigned efc_size;
     char     filename1[NAME_BUF_SIZE];
     char     filename2[NAME_BUF_SIZE];
@@ -13234,12 +13244,12 @@ error:
 static int
 external_open_twice(hid_t fapl, bool new_format)
 {
-    hid_t fid1  = -1; /* File ID */
-    hid_t fid2  = -1; /* File ID */
-    hid_t oid1  = -1; /* Object ID */
-    hid_t oid2  = -1; /* Object ID */
-    hid_t type  = -1; /* Datatype ID */
-    hid_t space = -1; /* Dataspace ID */
+    hid_t fid1  = H5I_INVALID_HID; /* File ID */
+    hid_t fid2  = H5I_INVALID_HID; /* File ID */
+    hid_t oid1  = H5I_INVALID_HID; /* Object ID */
+    hid_t oid2  = H5I_INVALID_HID; /* Object ID */
+    hid_t type  = H5I_INVALID_HID; /* Datatype ID */
+    hid_t space = H5I_INVALID_HID; /* Dataspace ID */
     char  filename1[NAME_BUF_SIZE];
     char  filename2[NAME_BUF_SIZE];
 
@@ -13449,24 +13459,24 @@ error:
 static int
 external_link_with_committed_datatype(hid_t fapl, bool new_format)
 {
-    hid_t   fid1 = -1, fid2 = -1;     /* File IDs */
-    hid_t   gid1 = -1, gid2 = -1;     /* Group IDs */
-    hid_t   tid   = -1;               /* Datatype ID */
-    hid_t   sid   = -1;               /* Dataspace ID */
-    hid_t   sid2  = -1;               /* Dataspace ID */
-    hid_t   aid   = -1;               /* Attribute ID */
-    hid_t   atid  = -1;               /* Attribute's datatype ID */
-    hid_t   did   = -1;               /* Dataset ID */
-    hid_t   dtid  = -1;               /* Dataset's datatype ID */
-    hid_t   dcpl  = -1;               /* Dataset creation property list */
-    int     wdata = 99;               /* Attribute data written */
-    int     wbuf[60];                 /* Data buffer for writing */
-    int     rbuf[60];                 /* Data buffer for reading */
-    int     i;                        /* Local index variable */
-    char    filename1[NAME_BUF_SIZE]; /* File name for main file */
-    char    filename2[NAME_BUF_SIZE]; /* File name for target file */
-    hsize_t dims[2]   = {5, 12};      /* Dimension sizes */
-    hsize_t chunks[2] = {3, 7};       /* Chunk sizes */
+    hid_t   fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t   gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t   tid   = H5I_INVALID_HID;                        /* Datatype ID */
+    hid_t   sid   = H5I_INVALID_HID;                        /* Dataspace ID */
+    hid_t   sid2  = H5I_INVALID_HID;                        /* Dataspace ID */
+    hid_t   aid   = H5I_INVALID_HID;                        /* Attribute ID */
+    hid_t   atid  = H5I_INVALID_HID;                        /* Attribute's datatype ID */
+    hid_t   did   = H5I_INVALID_HID;                        /* Dataset ID */
+    hid_t   dtid  = H5I_INVALID_HID;                        /* Dataset's datatype ID */
+    hid_t   dcpl  = H5I_INVALID_HID;                        /* Dataset creation property list */
+    int     wdata = 99;                                     /* Attribute data written */
+    int     wbuf[60];                                       /* Data buffer for writing */
+    int     rbuf[60];                                       /* Data buffer for reading */
+    int     i;                                              /* Local index variable */
+    char    filename1[NAME_BUF_SIZE];                       /* File name for main file */
+    char    filename2[NAME_BUF_SIZE];                       /* File name for target file */
+    hsize_t dims[2]   = {5, 12};                            /* Dimension sizes */
+    hsize_t chunks[2] = {3, 7};                             /* Chunk sizes */
 
     if (new_format)
         TESTING("attach committed datatype to external group's attribute/dataset(w/new group format)");
@@ -13716,7 +13726,7 @@ error:
 static int
 external_link_public_macros(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;               /* File ID */
+    hid_t       fid = H5I_INVALID_HID;  /* File ID */
     H5L_info2_t linfo;                  /* Link information */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename1[NAME_BUF_SIZE];
@@ -13827,7 +13837,7 @@ UD_hard_create(const char H5_ATTR_UNUSED *link_name, hid_t loc_group, const void
                hid_t H5_ATTR_UNUSED lcpl_id)
 {
     H5O_token_t token;
-    hid_t       target_obj = -1;
+    hid_t       target_obj = H5I_INVALID_HID;
     herr_t      ret_value  = 0;
 
     if (udata_size != sizeof(H5O_token_t)) {
@@ -13901,7 +13911,7 @@ UD_hard_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, const vo
                  hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5O_token_t token;
-    hid_t       ret_value = -1;
+    hid_t       ret_value = H5I_INVALID_HID;
 
     if (udata_size != sizeof(H5O_token_t))
         return FAIL;
@@ -13919,7 +13929,7 @@ static herr_t
 UD_hard_delete(const char H5_ATTR_UNUSED *link_name, hid_t file, const void *udata, size_t udata_size)
 {
     H5O_token_t token;
-    hid_t       target_obj = -1;
+    hid_t       target_obj = H5I_INVALID_HID;
     herr_t      ret_value  = 0;
 
     if (udata_size != sizeof(H5O_token_t)) {
@@ -13990,11 +14000,11 @@ done:
 static int
 ud_hard_links(hid_t fapl)
 {
-    hid_t          fid = -1;               /* File ID */
-    hid_t          gid = -1, gid2 = -1;    /* Group IDs */
-    H5L_info2_t    li;                     /* Link information */
-    char           objname[NAME_BUF_SIZE]; /* Object name */
-    h5_stat_size_t empty_size;             /* Size of an empty file */
+    hid_t          fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info2_t    li;                                            /* Link information */
+    char           objname[NAME_BUF_SIZE];                        /* Object name */
+    h5_stat_size_t empty_size;                                    /* Size of an empty file */
     char           filename[NAME_BUF_SIZE];
 
     TESTING("user-defined hard link (w/new group format)");
@@ -14175,10 +14185,10 @@ error:
 static int
 ud_link_reregister(hid_t fapl)
 {
-    hid_t          fid = -1;               /* File ID */
-    hid_t          gid = -1, gid2 = -1;    /* Group IDs */
-    H5L_info2_t    li;                     /* Link information */
-    char           objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t          fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5L_info2_t    li;                                            /* Link information */
+    char           objname[NAME_BUF_SIZE];                        /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
 
@@ -14503,9 +14513,9 @@ error:
 static int
 ud_callbacks(hid_t fapl, bool new_format)
 {
-    hid_t       fid  = -1;                       /* File ID */
-    hid_t       gid  = -1;                       /* Group ID */
-    hid_t       lcpl = -1;                       /* Link Creation PL */
+    hid_t       fid  = H5I_INVALID_HID;          /* File ID */
+    hid_t       gid  = H5I_INVALID_HID;          /* Group ID */
+    hid_t       lcpl = H5I_INVALID_HID;          /* Link Creation PL */
     H5L_info2_t li;                              /* Link information */
     char        ud_target_name[] = UD_CB_TARGET; /* Link target name */
     char        filename[NAME_BUF_SIZE];
@@ -14703,9 +14713,9 @@ error:
 static int
 lapl_udata(hid_t fapl, bool new_format)
 {
-    hid_t fid = -1;            /* File ID */
-    hid_t gid = -1, gid2 = -1; /* Group IDs */
-    hid_t plist_id = -1;       /* Property List ID */
+    hid_t fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t plist_id = H5I_INVALID_HID;                    /* Property List ID */
     char  group_a_name[NAME_BUF_SIZE];
     char  group_b_name[NAME_BUF_SIZE];
     char  filename[NAME_BUF_SIZE];
@@ -15028,8 +15038,8 @@ const H5L_class_t UD_error4_class[1] = {{
 static int
 ud_link_errors(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1; /* File ID */
-    hid_t       gid = -1; /* Group IDs */
+    hid_t       fid = H5I_INVALID_HID; /* File ID */
+    hid_t       gid = H5I_INVALID_HID; /* Group IDs */
     char        group_name[NAME_BUF_SIZE];
     char        filename[NAME_BUF_SIZE];
     char        query_buf[NAME_BUF_SIZE];
@@ -15215,12 +15225,12 @@ error:
 static int
 lapl_nlinks(hid_t fapl, bool new_format)
 {
-    hid_t   fid = -1;                        /* File ID */
-    hid_t   gid = -1, gid2 = -1;             /* Group IDs */
-    hid_t   plist = -1;                      /* lapl ID */
-    hid_t   tid = -1, sid = -1, did = -1;    /* Other IDs */
-    hid_t   gapl = -1, dapl = -1, tapl = -1; /* Other property lists */
-    char    objname[NAME_BUF_SIZE];          /* Object name */
+    hid_t   fid = H5I_INVALID_HID;                                                  /* File ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;                          /* Group IDs */
+    hid_t   plist = H5I_INVALID_HID;                                                /* lapl ID */
+    hid_t   tid = H5I_INVALID_HID, sid = H5I_INVALID_HID, did = H5I_INVALID_HID;    /* Other IDs */
+    hid_t   gapl = H5I_INVALID_HID, dapl = H5I_INVALID_HID, tapl = H5I_INVALID_HID; /* Other property lists */
+    char    objname[NAME_BUF_SIZE];                                                 /* Object name */
     char    filename[NAME_BUF_SIZE];
     size_t  nlinks; /* nlinks for H5Pset_nlinks */
     hsize_t dims[2];
@@ -15522,11 +15532,11 @@ error:
 static int
 linkinfo(hid_t fapl, bool new_format)
 {
-    hid_t       fid = -1;           /* File ID */
-    hid_t       gid = -1;           /* Group ID */
-    hid_t       tid = -1;           /* Type ID */
-    hid_t       sid = -1, did = -1; /* Dataspace and dataset IDs */
-    H5L_info2_t li;                 /* Link information */
+    hid_t       fid = H5I_INVALID_HID;                        /* File ID */
+    hid_t       gid = H5I_INVALID_HID;                        /* Group ID */
+    hid_t       tid = H5I_INVALID_HID;                        /* Type ID */
+    hid_t       sid = H5I_INVALID_HID, did = H5I_INVALID_HID; /* Dataspace and dataset IDs */
+    H5L_info2_t li;                                           /* Link information */
     char        filename[NAME_BUF_SIZE];
 
     if (new_format)
@@ -15639,7 +15649,7 @@ error:
 static int
 check_all_closed(hid_t fapl, bool new_format, int stopat)
 {
-    hid_t fid = -1;
+    hid_t fid = H5I_INVALID_HID;
     char  filename[NAME_BUF_SIZE];
     int   x;
 
@@ -15686,11 +15696,11 @@ error:
 static hid_t
 build_visit_file(hid_t fapl)
 {
-    hid_t       fid = -1;            /* File ID */
-    hid_t       gid = -1, gid2 = -1; /* Group IDs */
-    hid_t       sid = -1;            /* Dataspace ID */
-    hid_t       did = -1;            /* Dataset ID */
-    hid_t       tid = -1;            /* Datatype ID */
+    hid_t       fid = H5I_INVALID_HID;                         /* File ID */
+    hid_t       gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t       sid = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t       did = H5I_INVALID_HID;                         /* Dataset ID */
+    hid_t       tid = H5I_INVALID_HID;                         /* Datatype ID */
     char        filename[NAME_BUF_SIZE];
     const char *pathname = H5_get_srcdir_filename(LINKED_FILE); /* Corrected test file name */
 
@@ -15842,8 +15852,8 @@ static int
 link_visit(hid_t fapl, bool new_format)
 {
     lvisit_ud_t udata; /* User-data for visiting */
-    hid_t       fid = -1;
-    hid_t       gid = -1; /* Group ID */
+    hid_t       fid = H5I_INVALID_HID;
+    hid_t       gid = H5I_INVALID_HID; /* Group ID */
 
     if (new_format)
         TESTING("link visiting (w/new group format)");
@@ -15919,8 +15929,8 @@ static int
 link_visit_by_name(hid_t fapl, bool new_format)
 {
     lvisit_ud_t udata; /* User-data for visiting */
-    hid_t       fid = -1;
-    hid_t       gid = -1; /* Group ID */
+    hid_t       fid = H5I_INVALID_HID;
+    hid_t       gid = H5I_INVALID_HID; /* Group ID */
 
     if (new_format)
         TESTING("link visiting by name (w/new group format)");
@@ -16033,8 +16043,8 @@ static int
 obj_visit(hid_t fapl, bool new_format)
 {
     ovisit_ud_t udata; /* User-data for visiting */
-    hid_t       fid = -1;
-    hid_t       gid = -1; /* Group ID */
+    hid_t       fid = H5I_INVALID_HID;
+    hid_t       gid = H5I_INVALID_HID; /* Group ID */
 
     if (new_format)
         TESTING("object visiting (w/new group format)");
@@ -16114,8 +16124,8 @@ static int
 obj_visit_by_name(hid_t fapl, bool new_format)
 {
     ovisit_ud_t udata; /* User-data for visiting */
-    hid_t       fid = -1;
-    hid_t       gid = -1; /* Group ID */
+    hid_t       fid = H5I_INVALID_HID;
+    hid_t       gid = H5I_INVALID_HID; /* Group ID */
 
     if (new_format)
         TESTING("object visiting by name (w/new group format)");
@@ -16232,7 +16242,7 @@ static int
 obj_visit_stop(hid_t fapl, bool new_format)
 {
     unsigned nvisited; /* User-data for visiting */
-    hid_t    fid = -1;
+    hid_t    fid = H5I_INVALID_HID;
     herr_t   ret; /* Return value */
 
     if (new_format)
@@ -16360,15 +16370,15 @@ link_filter_filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_v
 static int
 link_filters(hid_t fapl, bool new_format)
 {
-    hid_t        fid = -1, fcpl = -1;
-    hid_t        gid1 = -1, gid2 = -1, gcpl1 = -1, gcpl2 = -1;
-    hid_t        lcpl      = -1;
-    size_t       cd_nelmts = 1;
-    unsigned     cd_value  = 2112;
-    unsigned     cd_value_out;
-    unsigned     flags_out;
-    unsigned     filter_config_out;
-    int          nfilters = 0;
+    hid_t    fid = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
+    hid_t    gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gcpl1 = H5I_INVALID_HID, gcpl2 = H5I_INVALID_HID;
+    hid_t    lcpl      = H5I_INVALID_HID;
+    size_t   cd_nelmts = 1;
+    unsigned cd_value  = 2112;
+    unsigned cd_value_out;
+    unsigned flags_out;
+    unsigned filter_config_out;
+    int      nfilters = 0;
     H5Z_class2_t filter_class;
     char         name_out[24];
     char         filename[NAME_BUF_SIZE];
@@ -16772,8 +16782,8 @@ static int
 obj_exists(hid_t fapl, bool new_format)
 {
     char   filename[NAME_BUF_SIZE]; /* Buffer for file name */
-    hid_t  fid = -1;                /* File ID */
-    hid_t  gid = -1;                /* Group ID */
+    hid_t  fid = H5I_INVALID_HID;   /* File ID */
+    hid_t  gid = H5I_INVALID_HID;   /* Group ID */
     herr_t status;                  /* Generic return value */
 
     if (new_format)
@@ -17100,12 +17110,12 @@ error:
 static int
 corder_create_empty(hid_t fapl)
 {
-    hid_t    file_id  = -1;           /* File ID */
-    hid_t    group_id = -1;           /* Group ID */
-    hid_t    gcpl_id  = -1;           /* Group creation property list ID */
-    unsigned crt_order_flags;         /* Status of creation order info for GCPL */
-    herr_t   ret;                     /* Generic return value */
-    char     filename[NAME_BUF_SIZE]; /* File name */
+    hid_t    file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t    group_id = H5I_INVALID_HID; /* Group ID */
+    hid_t    gcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    unsigned crt_order_flags;            /* Status of creation order info for GCPL */
+    herr_t   ret;                        /* Generic return value */
+    char     filename[NAME_BUF_SIZE];    /* File name */
 
     TESTING("creating empty group with creation order indexing");
 
@@ -17230,15 +17240,15 @@ error:
 static int
 corder_create_compact(hid_t fapl)
 {
-    hid_t    file_id  = -1;                 /* File ID */
-    hid_t    group_id = -1, group_id2 = -1; /* Group IDs */
-    hid_t    gcpl_id = -1;                  /* Group creation property list ID */
-    unsigned max_compact;                   /* Maximum # of links to store in group compactly */
-    unsigned min_dense;                     /* Minimum # of links to store in group "densely" */
-    unsigned nlinks;                        /* Number of link messages in group's header */
-    char     objname[NAME_BUF_SIZE];        /* Object name */
-    char     filename[NAME_BUF_SIZE];       /* File name */
-    unsigned u;                             /* Local index variable */
+    hid_t    file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t    group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t    gcpl_id = H5I_INVALID_HID;                               /* Group creation property list ID */
+    unsigned max_compact;             /* Maximum # of links to store in group compactly */
+    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
+    unsigned nlinks;                  /* Number of link messages in group's header */
+    char     objname[NAME_BUF_SIZE];  /* Object name */
+    char     filename[NAME_BUF_SIZE]; /* File name */
+    unsigned u;                       /* Local index variable */
 
     TESTING("creating compact group with creation order indexing");
 
@@ -17372,17 +17382,17 @@ error:
 static int
 corder_create_dense(hid_t fapl)
 {
-    hid_t    file_id  = -1;                 /* File ID */
-    hid_t    group_id = -1, group_id2 = -1; /* Group IDs */
-    hid_t    gcpl_id = -1;                  /* Group creation property list ID */
-    unsigned max_compact;                   /* Maximum # of links to store in group compactly */
-    unsigned min_dense;                     /* Minimum # of links to store in group "densely" */
-    unsigned nlinks;                        /* Number of link messages in group's header */
-    hsize_t  name_count;                    /* # of records in name index */
-    hsize_t  corder_count;                  /* # of records in creation order index */
-    char     objname[NAME_BUF_SIZE];        /* Object name */
-    char     filename[NAME_BUF_SIZE];       /* File name */
-    unsigned u;                             /* Local index variable */
+    hid_t    file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t    group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t    gcpl_id = H5I_INVALID_HID;                               /* Group creation property list ID */
+    unsigned max_compact;             /* Maximum # of links to store in group compactly */
+    unsigned min_dense;               /* Minimum # of links to store in group "densely" */
+    unsigned nlinks;                  /* Number of link messages in group's header */
+    hsize_t  name_count;              /* # of records in name index */
+    hsize_t  corder_count;            /* # of records in creation order index */
+    char     objname[NAME_BUF_SIZE];  /* Object name */
+    char     filename[NAME_BUF_SIZE]; /* File name */
+    unsigned u;                       /* Local index variable */
 
     TESTING("creating dense group with creation order indexing");
 
@@ -17535,19 +17545,19 @@ error:
 static int
 corder_transition(hid_t fapl)
 {
-    hid_t          file_id  = -1;                 /* File ID */
-    hid_t          group_id = -1, group_id2 = -1; /* Group IDs */
-    hid_t          gcpl_id = -1;                  /* Group creation property list ID */
-    unsigned       max_compact;                   /* Maximum # of links to store in group compactly */
-    unsigned       min_dense;                     /* Minimum # of links to store in group "densely" */
-    unsigned       nlinks;                        /* Number of link messages in group's header */
-    hsize_t        name_count;                    /* # of records in name index */
-    hsize_t        corder_count;                  /* # of records in creation order index */
-    h5_stat_size_t empty_size;                    /* Size of empty file */
-    h5_stat_size_t file_size;                     /* Size of file after operating on it */
-    char           objname[NAME_BUF_SIZE];        /* Object name */
-    char           filename[NAME_BUF_SIZE];       /* File name */
-    unsigned       u;                             /* Local index variable */
+    hid_t          file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t          group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t          gcpl_id = H5I_INVALID_HID; /* Group creation property list ID */
+    unsigned       max_compact;               /* Maximum # of links to store in group compactly */
+    unsigned       min_dense;                 /* Minimum # of links to store in group "densely" */
+    unsigned       nlinks;                    /* Number of link messages in group's header */
+    hsize_t        name_count;                /* # of records in name index */
+    hsize_t        corder_count;              /* # of records in creation order index */
+    h5_stat_size_t empty_size;                /* Size of empty file */
+    h5_stat_size_t file_size;                 /* Size of file after operating on it */
+    char           objname[NAME_BUF_SIZE];    /* Object name */
+    char           filename[NAME_BUF_SIZE];   /* File name */
+    unsigned       u;                         /* Local index variable */
 
     TESTING("transitioning group with creation order indexing between dense & compact forms");
 
@@ -17832,19 +17842,19 @@ error:
 static int
 corder_delete(hid_t fapl)
 {
-    hid_t          file_id  = -1;                 /* File ID */
-    hid_t          group_id = -1, group_id2 = -1; /* Group IDs */
-    hid_t          gcpl_id = -1;                  /* Group creation property list ID */
-    unsigned       max_compact;                   /* Maximum # of links to store in group compactly */
-    unsigned       min_dense;                     /* Minimum # of links to store in group "densely" */
-    hsize_t        name_count;                    /* # of records in name index */
-    hsize_t        corder_count;                  /* # of records in creation order index */
-    unsigned       reopen_file;                   /* Whether to re-open the file before deleting group */
-    h5_stat_size_t empty_size;                    /* Size of empty file */
-    h5_stat_size_t file_size;                     /* Size of file after operating on it */
-    char           objname[NAME_BUF_SIZE];        /* Object name */
-    char           filename[NAME_BUF_SIZE];       /* File name */
-    unsigned       u;                             /* Local index variable */
+    hid_t          file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t          group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t          gcpl_id = H5I_INVALID_HID; /* Group creation property list ID */
+    unsigned       max_compact;               /* Maximum # of links to store in group compactly */
+    unsigned       min_dense;                 /* Minimum # of links to store in group "densely" */
+    hsize_t        name_count;                /* # of records in name index */
+    hsize_t        corder_count;              /* # of records in creation order index */
+    unsigned       reopen_file;               /* Whether to re-open the file before deleting group */
+    h5_stat_size_t empty_size;                /* Size of empty file */
+    h5_stat_size_t file_size;                 /* Size of file after operating on it */
+    char           objname[NAME_BUF_SIZE];    /* Object name */
+    char           filename[NAME_BUF_SIZE];   /* File name */
+    unsigned       u;                         /* Local index variable */
 
     TESTING("deleting group with creation order indexing in dense form");
 
@@ -18188,21 +18198,21 @@ error:
 static int
 link_info_by_idx(hid_t fapl)
 {
-    hid_t       file_id  = -1;           /* File ID */
-    hid_t       group_id = -1;           /* Group ID */
-    hid_t       gcpl_id  = -1;           /* Group creation property list ID */
-    unsigned    hard_link;               /* Create hard or soft link? */
-    unsigned    use_index;               /* Use index on creation order values */
-    unsigned    max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned    min_dense;               /* Minimum # of links to store in group "densely" */
-    H5L_info2_t linfo;                   /* Link info struct */
-    char        objname[NAME_BUF_SIZE];  /* Object name */
-    char        valname[NAME_BUF_SIZE];  /* Link value name */
-    char        filename[NAME_BUF_SIZE]; /* File name */
-    char        tmpname[NAME_BUF_SIZE];  /* Temporary link name */
-    unsigned    u;                       /* Local index variable */
-    ssize_t     name_len;                /* Length of name */
-    herr_t      ret;                     /* Generic return value */
+    hid_t       file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t       group_id = H5I_INVALID_HID; /* Group ID */
+    hid_t       gcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    unsigned    hard_link;                  /* Create hard or soft link? */
+    unsigned    use_index;                  /* Use index on creation order values */
+    unsigned    max_compact;                /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;                  /* Minimum # of links to store in group "densely" */
+    H5L_info2_t linfo;                      /* Link info struct */
+    char        objname[NAME_BUF_SIZE];     /* Object name */
+    char        valname[NAME_BUF_SIZE];     /* Link value name */
+    char        filename[NAME_BUF_SIZE];    /* File name */
+    char        tmpname[NAME_BUF_SIZE];     /* Temporary link name */
+    unsigned    u;                          /* Local index variable */
+    ssize_t     name_len;                   /* Length of name */
+    herr_t      ret;                        /* Generic return value */
 
     /* Loop over creating hard or soft links */
     for (hard_link = false; hard_link <= true; hard_link++) {
@@ -18423,8 +18433,8 @@ error:
 static int
 link_info_by_idx_old(hid_t fapl)
 {
-    hid_t       file_id  = -1;                 /* File ID */
-    hid_t       group_id = -1, group_id2 = -1; /* Group IDs */
+    hid_t       file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t       group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
     H5F_t      *f = NULL;
     unsigned    hard_link;               /* Create hard or soft link? */
     H5L_info2_t linfo;                   /* Link info struct */
@@ -18647,20 +18657,20 @@ error:
 static int
 delete_by_idx(hid_t fapl)
 {
-    hid_t           file_id  = -1;           /* File ID */
-    hid_t           group_id = -1;           /* Group ID */
-    hid_t           gcpl_id  = -1;           /* Group creation property list ID */
-    H5_index_t      idx_type;                /* Type of index to operate on */
-    H5_iter_order_t order;                   /* Order within in the index */
-    unsigned        use_index;               /* Use index on creation order values */
-    unsigned        max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;               /* Minimum # of links to store in group "densely" */
-    H5L_info2_t     linfo;                   /* Link info struct */
-    char            objname[NAME_BUF_SIZE];  /* Object name */
-    char            filename[NAME_BUF_SIZE]; /* File name */
-    char            tmpname[NAME_BUF_SIZE];  /* Temporary link name */
-    unsigned        u;                       /* Local index variable */
-    herr_t          ret;                     /* Generic return value */
+    hid_t           file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t           group_id = H5I_INVALID_HID; /* Group ID */
+    hid_t           gcpl_id  = H5I_INVALID_HID; /* Group creation property list ID */
+    H5_index_t      idx_type;                   /* Type of index to operate on */
+    H5_iter_order_t order;                      /* Order within in the index */
+    unsigned        use_index;                  /* Use index on creation order values */
+    unsigned        max_compact;                /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                  /* Minimum # of links to store in group "densely" */
+    H5L_info2_t     linfo;                      /* Link info struct */
+    char            objname[NAME_BUF_SIZE];     /* Object name */
+    char            filename[NAME_BUF_SIZE];    /* File name */
+    char            tmpname[NAME_BUF_SIZE];     /* Temporary link name */
+    unsigned        u;                          /* Local index variable */
+    herr_t          ret;                        /* Generic return value */
 
     /* Loop over operating on different indices on link fields */
     for (idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; idx_type++) {
@@ -19055,8 +19065,8 @@ error:
 static int
 delete_by_idx_old(hid_t fapl)
 {
-    hid_t           file_id  = -1;                 /* File ID */
-    hid_t           group_id = -1, group_id2 = -1; /* Group IDs */
+    hid_t           file_id  = H5I_INVALID_HID;                              /* File ID */
+    hid_t           group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
     H5F_t          *f = NULL;
     H5L_info2_t     linfo;                   /* Link info struct */
     H5_iter_order_t order;                   /* Order within in the index */
@@ -19631,21 +19641,21 @@ error:
 static int
 link_iterate(hid_t fapl)
 {
-    hid_t            file_id  = (-1);         /* File ID */
-    hid_t            group_id = (-1);         /* Group ID */
-    hid_t            gcpl_id  = (-1);         /* Group creation property list ID */
-    H5_index_t       idx_type;                /* Type of index to operate on */
-    H5_iter_order_t  order;                   /* Order within in the index */
-    unsigned         use_index;               /* Use index on creation order values */
-    unsigned         max_compact;             /* Maximum # of links to store in group compactly */
-    unsigned         min_dense;               /* Minimum # of links to store in group "densely" */
-    char             objname[NAME_BUF_SIZE];  /* Object name */
-    char             filename[NAME_BUF_SIZE]; /* File name */
-    link_iter_info_t iter_info;               /* Iterator info */
-    bool            *visited = NULL;          /* Array of flags for visiting links */
-    hsize_t          skip;                    /* # of links to skip in group */
-    unsigned         u;                       /* Local index variable */
-    herr_t           ret;                     /* Generic return value */
+    hid_t            file_id  = (H5I_INVALID_HID); /* File ID */
+    hid_t            group_id = (H5I_INVALID_HID); /* Group ID */
+    hid_t            gcpl_id  = (H5I_INVALID_HID); /* Group creation property list ID */
+    H5_index_t       idx_type;                     /* Type of index to operate on */
+    H5_iter_order_t  order;                        /* Order within in the index */
+    unsigned         use_index;                    /* Use index on creation order values */
+    unsigned         max_compact;                  /* Maximum # of links to store in group compactly */
+    unsigned         min_dense;                    /* Minimum # of links to store in group "densely" */
+    char             objname[NAME_BUF_SIZE];       /* Object name */
+    char             filename[NAME_BUF_SIZE];      /* File name */
+    link_iter_info_t iter_info;                    /* Iterator info */
+    bool            *visited = NULL;               /* Array of flags for visiting links */
+    hsize_t          skip;                         /* # of links to skip in group */
+    unsigned         u;                            /* Local index variable */
+    herr_t           ret;                          /* Generic return value */
 
     /* Create group creation property list */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -20108,7 +20118,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     skip = 0;
     H5E_BEGIN_TRY
     {
-        ret = H5Literate2((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
+        ret = H5Literate2((hid_t)(H5I_INVALID_HID), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -20117,7 +20127,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5E_BEGIN_TRY
     {
-        ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_cb, iter_info);
+        ret = H5Giterate((hid_t)(H5I_INVALID_HID), ".", &gskip, group_iterate_old_cb, iter_info);
     }
     H5E_END_TRY
     if (ret >= 0)
@@ -20143,16 +20153,16 @@ error:
 static int
 link_iterate_old(hid_t fapl)
 {
-    hid_t            file_id  = -1;           /* File ID */
-    hid_t            group_id = -1;           /* Group ID */
-    H5_iter_order_t  order;                   /* Order within in the index */
-    char             objname[NAME_BUF_SIZE];  /* Object name */
-    char             filename[NAME_BUF_SIZE]; /* File name */
-    link_iter_info_t iter_info;               /* Iterator info */
-    bool            *visited = NULL;          /* Array of flags for visiting links */
-    hsize_t          skip;                    /* # of links to skip in group */
-    unsigned         u;                       /* Local index variable */
-    herr_t           ret;                     /* Generic return value */
+    hid_t            file_id  = H5I_INVALID_HID; /* File ID */
+    hid_t            group_id = H5I_INVALID_HID; /* Group ID */
+    H5_iter_order_t  order;                      /* Order within in the index */
+    char             objname[NAME_BUF_SIZE];     /* Object name */
+    char             filename[NAME_BUF_SIZE];    /* File name */
+    link_iter_info_t iter_info;                  /* Iterator info */
+    bool            *visited = NULL;             /* Array of flags for visiting links */
+    hsize_t          skip;                       /* # of links to skip in group */
+    unsigned         u;                          /* Local index variable */
+    herr_t           ret;                        /* Generic return value */
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = CORDER_NLINKS;
@@ -20276,13 +20286,13 @@ static int
 open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id, H5_index_t idx_type,
                   H5_iter_order_t order, unsigned max_links, H5O_token_t *objno)
 {
-    char        mntname[NAME_BUF_SIZE]; /* Link value */
-    hid_t       group_id = -1;          /* ID of group to test */
-    H5O_info2_t oi;                     /* Buffer for querying object's info */
-    H5O_token_t mnt_root_token;         /* Token (address) of root group in file to mount */
-    hid_t       obj_id;                 /* ID of object opened */
-    unsigned    mnt_idx;                /* Index to mount group on */
-    unsigned    u, v;                   /* Local index variables */
+    char        mntname[NAME_BUF_SIZE];     /* Link value */
+    hid_t       group_id = H5I_INVALID_HID; /* ID of group to test */
+    H5O_info2_t oi;                         /* Buffer for querying object's info */
+    H5O_token_t mnt_root_token;             /* Token (address) of root group in file to mount */
+    hid_t       obj_id;                     /* ID of object opened */
+    unsigned    mnt_idx;                    /* Index to mount group on */
+    unsigned    u, v;                       /* Local index variables */
     int         token_cmp;
 
     /* Work through main & soft link groups */
@@ -20388,23 +20398,23 @@ error:
 static int
 open_by_idx(hid_t fapl)
 {
-    hid_t           file_id       = -1;         /* File ID */
-    hid_t           mount_file_id = -1;         /* File ID for file to mount */
-    hid_t           group_id      = -1;         /* Group ID */
-    hid_t           soft_group_id = -1;         /* Group ID for soft links */
-    hid_t           gcpl_id       = -1;         /* Group creation property list ID */
-    H5_index_t      idx_type;                   /* Type of index to operate on */
-    H5_iter_order_t order;                      /* Order within in the index */
-    unsigned        use_index;                  /* Use index on creation order values */
-    unsigned        max_compact;                /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;                  /* Minimum # of links to store in group "densely" */
-    H5O_info2_t     oi;                         /* Buffer for querying object's info */
-    char            filename[NAME_BUF_SIZE];    /* File name */
-    char            objname[NAME_BUF_SIZE];     /* Object name */
-    char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    H5O_token_t    *objno = NULL;               /* Tokens (addresses) of the objects created */
-    unsigned        u;                          /* Local index variable */
-    hid_t           ret;                        /* Generic return value */
+    hid_t           file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t           mount_file_id = H5I_INVALID_HID; /* File ID for file to mount */
+    hid_t           group_id      = H5I_INVALID_HID; /* Group ID */
+    hid_t           soft_group_id = H5I_INVALID_HID; /* Group ID for soft links */
+    hid_t           gcpl_id       = H5I_INVALID_HID; /* Group creation property list ID */
+    H5_index_t      idx_type;                        /* Type of index to operate on */
+    H5_iter_order_t order;                           /* Order within in the index */
+    unsigned        use_index;                       /* Use index on creation order values */
+    unsigned        max_compact;                     /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                       /* Minimum # of links to store in group "densely" */
+    H5O_info2_t     oi;                              /* Buffer for querying object's info */
+    char            filename[NAME_BUF_SIZE];         /* File name */
+    char            objname[NAME_BUF_SIZE];          /* Object name */
+    char            valname[2 * NAME_BUF_SIZE];      /* Link value */
+    H5O_token_t    *objno = NULL;                    /* Tokens (addresses) of the objects created */
+    unsigned        u;                               /* Local index variable */
+    hid_t           ret;                             /* Generic return value */
 
     /* Create group creation property list */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -20657,14 +20667,14 @@ static int
 open_by_idx_check_old(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id, H5_index_t idx_type,
                       H5_iter_order_t order, unsigned max_links, H5O_token_t *objno)
 {
-    char        mntname[NAME_BUF_SIZE]; /* Link value */
-    hid_t       group_id = -1;          /* ID of group to test */
-    H5O_info2_t oi;                     /* Buffer for querying object's info */
-    H5O_token_t mnt_root_token;         /* Token of root group in file to mount */
-    hid_t       obj_id;                 /* ID of object opened */
-    unsigned    mnt_idx;                /* Index to mount group on */
-    unsigned    u, v;                   /* Local index variables */
-    int         cmp_value;              /* Token comparison value */
+    char        mntname[NAME_BUF_SIZE];     /* Link value */
+    hid_t       group_id = H5I_INVALID_HID; /* ID of group to test */
+    H5O_info2_t oi;                         /* Buffer for querying object's info */
+    H5O_token_t mnt_root_token;             /* Token of root group in file to mount */
+    hid_t       obj_id;                     /* ID of object opened */
+    unsigned    mnt_idx;                    /* Index to mount group on */
+    unsigned    u, v;                       /* Local index variables */
+    int         cmp_value;                  /* Token comparison value */
 
     /* Work through main & soft link groups */
     for (v = 0; v < 2; v++) {
@@ -20769,18 +20779,18 @@ error:
 static int
 open_by_idx_old(hid_t fapl)
 {
-    hid_t           file_id       = -1;         /* File ID */
-    hid_t           mount_file_id = -1;         /* File ID for file to mount */
-    hid_t           group_id      = -1;         /* Group ID */
-    hid_t           soft_group_id = -1;         /* Group ID for soft links */
-    H5_iter_order_t order;                      /* Order within in the index */
-    H5O_info2_t     oi;                         /* Buffer for querying object's info */
-    char            filename[NAME_BUF_SIZE];    /* File name */
-    char            objname[NAME_BUF_SIZE];     /* Object name */
-    char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    H5O_token_t     objno[CORDER_NLINKS];       /* Tokens for the objects created */
-    unsigned        u;                          /* Local index variable */
-    hid_t           ret;                        /* Generic return value */
+    hid_t           file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t           mount_file_id = H5I_INVALID_HID; /* File ID for file to mount */
+    hid_t           group_id      = H5I_INVALID_HID; /* Group ID */
+    hid_t           soft_group_id = H5I_INVALID_HID; /* Group ID for soft links */
+    H5_iter_order_t order;                           /* Order within in the index */
+    H5O_info2_t     oi;                              /* Buffer for querying object's info */
+    char            filename[NAME_BUF_SIZE];         /* File name */
+    char            objname[NAME_BUF_SIZE];          /* Object name */
+    char            valname[2 * NAME_BUF_SIZE];      /* Link value */
+    H5O_token_t     objno[CORDER_NLINKS];            /* Tokens for the objects created */
+    unsigned        u;                               /* Local index variable */
+    hid_t           ret;                             /* Generic return value */
 
     /* Create file to mount */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -20922,10 +20932,10 @@ static int
 object_info_check(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_type, H5_iter_order_t order,
                   unsigned max_links, H5O_token_t *objno)
 {
-    char        objname[NAME_BUF_SIZE]; /* Object name */
-    hid_t       group_id = -1;          /* ID of group to test */
-    H5O_info2_t oinfo;                  /* Buffer for querying object's info */
-    unsigned    u, v;                   /* Local index variables */
+    char        objname[NAME_BUF_SIZE];     /* Object name */
+    hid_t       group_id = H5I_INVALID_HID; /* ID of group to test */
+    H5O_info2_t oinfo;                      /* Buffer for querying object's info */
+    unsigned    u, v;                       /* Local index variables */
     int         token_cmp;
 
     /* Work through main & soft link groups */
@@ -21005,24 +21015,24 @@ error:
 static int
 object_info(hid_t fapl)
 {
-    hid_t           file_id       = -1;         /* File ID */
-    hid_t           group_id      = -1;         /* Group ID */
-    hid_t           soft_group_id = -1;         /* Group ID for soft links */
-    hid_t           gcpl_id       = -1;         /* Group creation property list ID */
-    hid_t           space_id      = -1;         /* Dataspace ID (for attributes) */
-    H5_index_t      idx_type;                   /* Type of index to operate on */
-    H5_iter_order_t order;                      /* Order within in the index */
-    unsigned        use_index;                  /* Use index on creation order values */
-    unsigned        max_compact;                /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;                  /* Minimum # of links to store in group "densely" */
-    H5O_info2_t     oinfo;                      /* Buffer for querying object's info */
-    char            filename[NAME_BUF_SIZE];    /* File name */
-    char            objname[NAME_BUF_SIZE];     /* Object name */
-    char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    char            attrname[NAME_BUF_SIZE];    /* Attribute name */
-    H5O_token_t    *objno = NULL;               /* Tokens (addresses) of the objects created */
-    herr_t          ret;                        /* Generic return value */
-    unsigned        u, v;                       /* Local index variables */
+    hid_t           file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t           group_id      = H5I_INVALID_HID; /* Group ID */
+    hid_t           soft_group_id = H5I_INVALID_HID; /* Group ID for soft links */
+    hid_t           gcpl_id       = H5I_INVALID_HID; /* Group creation property list ID */
+    hid_t           space_id      = H5I_INVALID_HID; /* Dataspace ID (for attributes) */
+    H5_index_t      idx_type;                        /* Type of index to operate on */
+    H5_iter_order_t order;                           /* Order within in the index */
+    unsigned        use_index;                       /* Use index on creation order values */
+    unsigned        max_compact;                     /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                       /* Minimum # of links to store in group "densely" */
+    H5O_info2_t     oinfo;                           /* Buffer for querying object's info */
+    char            filename[NAME_BUF_SIZE];         /* File name */
+    char            objname[NAME_BUF_SIZE];          /* Object name */
+    char            valname[2 * NAME_BUF_SIZE];      /* Link value */
+    char            attrname[NAME_BUF_SIZE];         /* Attribute name */
+    H5O_token_t    *objno = NULL;                    /* Tokens (addresses) of the objects created */
+    herr_t          ret;                             /* Generic return value */
+    unsigned        u, v;                            /* Local index variables */
 
     /* Create group creation property list */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -21310,10 +21320,10 @@ static int
 object_info_check_old(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_type, H5_iter_order_t order,
                       unsigned max_links, H5O_token_t *objno)
 {
-    char        objname[NAME_BUF_SIZE]; /* Object name */
-    hid_t       group_id = -1;          /* ID of group to test */
-    H5O_info2_t oinfo;                  /* Buffer for querying object's info */
-    unsigned    u, v;                   /* Local index variables */
+    char        objname[NAME_BUF_SIZE];     /* Object name */
+    hid_t       group_id = H5I_INVALID_HID; /* ID of group to test */
+    H5O_info2_t oinfo;                      /* Buffer for querying object's info */
+    unsigned    u, v;                       /* Local index variables */
 
     /* Work through main & soft link groups */
     for (v = 0; v < 2; v++) {
@@ -21393,19 +21403,19 @@ error:
 static int
 object_info_old(hid_t fapl)
 {
-    hid_t           file_id       = -1;         /* File ID */
-    hid_t           group_id      = -1;         /* Group ID */
-    hid_t           soft_group_id = -1;         /* Group ID for soft links */
-    hid_t           space_id      = -1;         /* Dataspace ID (for attributes) */
-    H5_iter_order_t order;                      /* Order within in the index */
-    H5O_info2_t     oinfo;                      /* Buffer for querying object's info */
-    char            filename[NAME_BUF_SIZE];    /* File name */
-    char            objname[NAME_BUF_SIZE];     /* Object name */
-    char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    char            attrname[NAME_BUF_SIZE];    /* Attribute name */
-    H5O_token_t     objno[CORDER_NLINKS];       /* Tokens for the objects created */
-    herr_t          ret;                        /* Generic return value */
-    unsigned        u, v;                       /* Local index variables */
+    hid_t           file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t           group_id      = H5I_INVALID_HID; /* Group ID */
+    hid_t           soft_group_id = H5I_INVALID_HID; /* Group ID for soft links */
+    hid_t           space_id      = H5I_INVALID_HID; /* Dataspace ID (for attributes) */
+    H5_iter_order_t order;                           /* Order within in the index */
+    H5O_info2_t     oinfo;                           /* Buffer for querying object's info */
+    char            filename[NAME_BUF_SIZE];         /* File name */
+    char            objname[NAME_BUF_SIZE];          /* Object name */
+    char            valname[2 * NAME_BUF_SIZE];      /* Link value */
+    char            attrname[NAME_BUF_SIZE];         /* Attribute name */
+    H5O_token_t     objno[CORDER_NLINKS];            /* Tokens for the objects created */
+    herr_t          ret;                             /* Generic return value */
+    unsigned        u, v;                            /* Local index variables */
 
     /* Create dataspace for attributes */
     if ((space_id = H5Screate(H5S_SCALAR)) < 0)
@@ -21566,22 +21576,22 @@ error:
 static int
 group_info(hid_t fapl)
 {
-    hid_t           file_id       = -1;         /* File ID */
-    hid_t           group_id      = -1;         /* Group ID */
-    hid_t           soft_group_id = -1;         /* Group ID for soft links */
-    hid_t           gcpl_id       = -1;         /* Group creation property list ID */
-    H5_index_t      idx_type;                   /* Type of index to operate on */
-    H5_iter_order_t order;                      /* Order within in the index */
-    unsigned        use_index;                  /* Use index on creation order values */
-    unsigned        max_compact;                /* Maximum # of links to store in group compactly */
-    unsigned        min_dense;                  /* Minimum # of links to store in group "densely" */
-    H5G_info_t      grp_info;                   /* Buffer for querying object's info */
-    char            filename[NAME_BUF_SIZE];    /* File name */
-    char            objname[NAME_BUF_SIZE];     /* Object name */
-    char            objname2[NAME_BUF_SIZE];    /* Object name */
-    char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    herr_t          ret;                        /* Generic return value */
-    unsigned        u, v;                       /* Local index variables */
+    hid_t           file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t           group_id      = H5I_INVALID_HID; /* Group ID */
+    hid_t           soft_group_id = H5I_INVALID_HID; /* Group ID for soft links */
+    hid_t           gcpl_id       = H5I_INVALID_HID; /* Group creation property list ID */
+    H5_index_t      idx_type;                        /* Type of index to operate on */
+    H5_iter_order_t order;                           /* Order within in the index */
+    unsigned        use_index;                       /* Use index on creation order values */
+    unsigned        max_compact;                     /* Maximum # of links to store in group compactly */
+    unsigned        min_dense;                       /* Minimum # of links to store in group "densely" */
+    H5G_info_t      grp_info;                        /* Buffer for querying object's info */
+    char            filename[NAME_BUF_SIZE];         /* File name */
+    char            objname[NAME_BUF_SIZE];          /* Object name */
+    char            objname2[NAME_BUF_SIZE];         /* Object name */
+    char            valname[2 * NAME_BUF_SIZE];      /* Link value */
+    herr_t          ret;                             /* Generic return value */
+    unsigned        u, v;                            /* Local index variables */
 
     /* Create group creation property list */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -22115,17 +22125,17 @@ error:
 static int
 group_info_old(hid_t fapl)
 {
-    hid_t           file_id       = -1;         /* File ID */
-    hid_t           group_id      = -1;         /* Group ID */
-    hid_t           soft_group_id = -1;         /* Group ID for soft links */
-    H5_iter_order_t order;                      /* Order within in the index */
-    H5G_info_t      grp_info;                   /* Buffer for querying object's info */
-    char            filename[NAME_BUF_SIZE];    /* File name */
-    char            objname[NAME_BUF_SIZE];     /* Object name */
-    char            objname2[NAME_BUF_SIZE];    /* Object name */
-    char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    herr_t          ret;                        /* Generic return value */
-    unsigned        u, v;                       /* Local index variables */
+    hid_t           file_id       = H5I_INVALID_HID; /* File ID */
+    hid_t           group_id      = H5I_INVALID_HID; /* Group ID */
+    hid_t           soft_group_id = H5I_INVALID_HID; /* Group ID for soft links */
+    H5_iter_order_t order;                           /* Order within in the index */
+    H5G_info_t      grp_info;                        /* Buffer for querying object's info */
+    char            filename[NAME_BUF_SIZE];         /* File name */
+    char            objname[NAME_BUF_SIZE];          /* Object name */
+    char            objname2[NAME_BUF_SIZE];         /* Object name */
+    char            valname[2 * NAME_BUF_SIZE];      /* Link value */
+    herr_t          ret;                             /* Generic return value */
+    unsigned        u, v;                            /* Local index variables */
 
     /* Loop over operating in different orders */
     for (order = H5_ITER_INC; order <= H5_ITER_NATIVE; order++) {
@@ -22404,15 +22414,15 @@ error:
 static int
 timestamps(hid_t fapl)
 {
-    hid_t             file_id   = -1;          /* File ID */
-    hid_t             group_id  = -1;          /* Group ID */
-    hid_t             group_id2 = -1;          /* Group ID */
-    hid_t             gcpl_id   = -1;          /* Group creation property list ID */
-    hid_t             gcpl_id2  = -1;          /* Group creation property list ID */
-    H5O_info2_t       oinfo, oinfo2;           /* Object info for groups created */
-    H5O_native_info_t ninfo, ninfo2;           /* Native info for groups created */
-    char              filename[NAME_BUF_SIZE]; /* File name */
-    bool              track_times;             /* The object timestamp setting */
+    hid_t             file_id   = H5I_INVALID_HID; /* File ID */
+    hid_t             group_id  = H5I_INVALID_HID; /* Group ID */
+    hid_t             group_id2 = H5I_INVALID_HID; /* Group ID */
+    hid_t             gcpl_id   = H5I_INVALID_HID; /* Group creation property list ID */
+    hid_t             gcpl_id2  = H5I_INVALID_HID; /* Group creation property list ID */
+    H5O_info2_t       oinfo, oinfo2;               /* Object info for groups created */
+    H5O_native_info_t ninfo, ninfo2;               /* Native info for groups created */
+    char              filename[NAME_BUF_SIZE];     /* File name */
+    bool              track_times;                 /* The object timestamp setting */
 
     /* Print test message */
     TESTING("timestamps on objects");
@@ -22639,7 +22649,7 @@ error:
 int
 main(void)
 {
-    hid_t       fapl = -1, fapl2 = -1; /* File access property lists */
+    hid_t       fapl = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID; /* File access property lists */
     int         nerrors = 0;
     unsigned    new_format; /* Whether to use the new format or not */
     unsigned    minimize_dset_oh;

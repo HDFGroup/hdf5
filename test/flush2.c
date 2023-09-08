@@ -54,11 +54,11 @@ static bool file_ok(const char *filename, hid_t fapl_id, bool check_second_dset)
 static bool
 dset_ok(hid_t fid, const char *dset_name)
 {
-    hid_t   sid     = -1;   /* dataspace ID                     */
-    hid_t   did     = -1;   /* dataset ID                       */
-    int    *data    = NULL; /* data buffer                      */
-    hsize_t dims[1] = {0};  /* size of dataset                  */
-    int     i;              /* iterator                         */
+    hid_t   sid     = H5I_INVALID_HID; /* dataspace ID                     */
+    hid_t   did     = H5I_INVALID_HID; /* dataset ID                       */
+    int    *data    = NULL;            /* data buffer                      */
+    hsize_t dims[1] = {0};             /* size of dataset                  */
+    int     i;                         /* iterator                         */
 
     /* Open the dataset and check size */
     if ((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
@@ -113,11 +113,11 @@ error:
 static bool
 file_ok(const char *filename, hid_t fapl_id, bool check_second_dset)
 {
-    hid_t fid     = -1;   /* file ID                          */
-    hid_t top_gid = -1;   /* containing group ID              */
-    hid_t gid     = -1;   /* subgroup ID                      */
-    char  group_name[32]; /* group name                       */
-    int   i;              /* iterator                         */
+    hid_t fid     = H5I_INVALID_HID; /* file ID                          */
+    hid_t top_gid = H5I_INVALID_HID; /* containing group ID              */
+    hid_t gid     = H5I_INVALID_HID; /* subgroup ID                      */
+    char  group_name[32];            /* group name                       */
+    int   i;                         /* iterator                         */
 
     /* open file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id)) < 0)
@@ -173,8 +173,8 @@ error:
 static herr_t
 clear_status_flags(const char *filename, hid_t fapl_id)
 {
-    hid_t new_fapl_id = -1; /* copy of the file access plist ID */
-    hid_t fid         = -1; /* file ID                          */
+    hid_t new_fapl_id = H5I_INVALID_HID; /* copy of the file access plist ID */
+    hid_t fid         = H5I_INVALID_HID; /* file ID                          */
     bool  clear       = true;
 
     /* Get a copy of fapl */
@@ -223,12 +223,12 @@ error:
 int
 main(void)
 {
-    char       *driver = NULL;     /* name of current VFD (from env var)       */
-    bool        vfd_supports_swmr; /* whether the current VFD supports SWMR    */
-    hid_t       fapl_id = -1;      /* file access proplist ID                  */
-    char        filename[1024];    /* filename                                 */
-    bool        check_second_dset; /* whether or not to check the second dset  */
-    H5E_auto2_t func;              /* for shutting off error reporting         */
+    char       *driver = NULL;             /* name of current VFD (from env var)       */
+    bool        vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
+    hid_t       fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
+    char        filename[1024];            /* filename                                 */
+    bool        check_second_dset;         /* whether or not to check the second dset  */
+    H5E_auto2_t func;                      /* for shutting off error reporting         */
     bool        driver_is_default_vfd_compatible;
 
     h5_reset();

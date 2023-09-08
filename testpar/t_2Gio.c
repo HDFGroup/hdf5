@@ -245,7 +245,7 @@ parse_options(int argc, char **argv)
 hid_t
 create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 {
-    hid_t  ret_pl = -1;
+    hid_t  ret_pl = H5I_INVALID_HID;
     herr_t ret;      /* generic return value */
     int    mpi_rank; /* mpi variables */
 
@@ -3355,16 +3355,16 @@ test_actual_io_mode(int selection_mode)
     int                              i;
     MPI_Comm                         mpi_comm   = MPI_COMM_NULL;
     MPI_Info                         mpi_info   = MPI_INFO_NULL;
-    hid_t                            fid        = -1;
-    hid_t                            sid        = -1;
-    hid_t                            dataset    = -1;
+    hid_t                            fid        = H5I_INVALID_HID;
+    hid_t                            sid        = H5I_INVALID_HID;
+    hid_t                            dataset    = H5I_INVALID_HID;
     hid_t                            data_type  = H5T_NATIVE_INT;
-    hid_t                            fapl_id    = -1;
-    hid_t                            mem_space  = -1;
-    hid_t                            file_space = -1;
-    hid_t                            dcpl       = -1;
-    hid_t                            dxpl_write = -1;
-    hid_t                            dxpl_read  = -1;
+    hid_t                            fapl_id    = H5I_INVALID_HID;
+    hid_t                            mem_space  = H5I_INVALID_HID;
+    hid_t                            file_space = H5I_INVALID_HID;
+    hid_t                            dcpl       = H5I_INVALID_HID;
+    hid_t                            dxpl_write = H5I_INVALID_HID;
+    hid_t                            dxpl_read  = H5I_INVALID_HID;
     hsize_t                          dims[MAX_RANK];
     hsize_t                          chunk_dims[MAX_RANK];
     hsize_t                          start[MAX_RANK];
@@ -3867,17 +3867,17 @@ test_no_collective_cause_mode(int selection_mode)
     int         i;
     MPI_Comm    mpi_comm;
     MPI_Info    mpi_info;
-    hid_t       fid        = -1;
-    hid_t       sid        = -1;
-    hid_t       dataset    = -1;
+    hid_t       fid        = H5I_INVALID_HID;
+    hid_t       sid        = H5I_INVALID_HID;
+    hid_t       dataset    = H5I_INVALID_HID;
     hid_t       data_type  = H5T_NATIVE_INT;
-    hid_t       fapl_id    = -1;
-    hid_t       dcpl       = -1;
-    hid_t       dxpl_write = -1;
-    hid_t       dxpl_read  = -1;
+    hid_t       fapl_id    = H5I_INVALID_HID;
+    hid_t       dcpl       = H5I_INVALID_HID;
+    hid_t       dxpl_write = H5I_INVALID_HID;
+    hid_t       dxpl_read  = H5I_INVALID_HID;
     hsize_t     dims[MAX_RANK];
-    hid_t       mem_space  = -1;
-    hid_t       file_space = -1;
+    hid_t       mem_space  = H5I_INVALID_HID;
+    hid_t       file_space = H5I_INVALID_HID;
     hsize_t     chunk_dims[MAX_RANK];
     herr_t      ret;
     /* set to global value as default */

@@ -40,10 +40,10 @@
 static int
 generate_datasets(hid_t loc_id, unsigned bogus_id)
 {
-    hid_t   sid         = -1; /* Dataspace ID */
-    hid_t   dcpl        = -1; /* Dataset creation property list ID */
-    hid_t   did         = -1; /* Dataset ID */
-    uint8_t bogus_flags = 0;  /* Flags for bogus message */
+    hid_t   sid         = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dcpl        = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   did         = H5I_INVALID_HID; /* Dataset ID */
+    uint8_t bogus_flags = 0;               /* Flags for bogus message */
 
     /* Create dataspace for datasets */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
@@ -140,8 +140,8 @@ int
 main(void)
 {
 #ifdef H5O_ENABLE_BOGUS
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group ID */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group ID */
 
     /* Create file for test datasets */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)

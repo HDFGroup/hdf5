@@ -4239,7 +4239,7 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     /* Get number of attributes with bad ID */
     H5E_BEGIN_TRY
     {
-        ret = H5Aget_num_attrs((hid_t)-1);
+        ret = H5Aget_num_attrs((hid_t)H5I_INVALID_HID);
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aget_num_attrs");
@@ -4975,13 +4975,13 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
 static void
 test_attr_corder_create_reopen(hid_t fcpl, hid_t fapl)
 {
-    hid_t  fid     = -1; /* File ID */
-    hid_t  gcpl_id = -1; /* Group creation property list ID */
-    hid_t  gid     = -1; /* Group ID */
-    hid_t  sid     = -1; /* Dataspace ID */
-    hid_t  aid     = -1; /* Attribute ID */
-    int    buf;          /* Attribute data */
-    herr_t ret;          /* Generic return value    */
+    hid_t  fid     = H5I_INVALID_HID; /* File ID */
+    hid_t  gcpl_id = H5I_INVALID_HID; /* Group creation property list ID */
+    hid_t  gid     = H5I_INVALID_HID; /* Group ID */
+    hid_t  sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t  aid     = H5I_INVALID_HID; /* Attribute ID */
+    int    buf;                       /* Attribute data */
+    herr_t ret;                       /* Generic return value    */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Creating Attributes w/New & Old Format\n"));
@@ -11168,17 +11168,17 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
 static void
 test_attr_bug9(hid_t fcpl, hid_t fapl)
 {
-    hid_t    fid     = -1;      /* File ID */
-    hid_t    gid     = -1;      /* Group ID */
-    hid_t    aid     = -1;      /* Attribute ID */
-    hid_t    sid     = -1;      /* Dataspace ID */
-    hsize_t  dims[1] = {32768}; /* Attribute dimensions */
-    int      create_link;       /* Whether to create a soft link */
-    unsigned max_compact;       /* Setting from fcpl */
-    unsigned min_dense;         /* Setting from fcpl */
-    char     aname[11];         /* Attribute name */
-    unsigned i;                 /* Local index variable */
-    herr_t   ret;               /* Generic return status */
+    hid_t    fid     = H5I_INVALID_HID; /* File ID */
+    hid_t    gid     = H5I_INVALID_HID; /* Group ID */
+    hid_t    aid     = H5I_INVALID_HID; /* Attribute ID */
+    hid_t    sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t  dims[1] = {32768};         /* Attribute dimensions */
+    int      create_link;               /* Whether to create a soft link */
+    unsigned max_compact;               /* Setting from fcpl */
+    unsigned min_dense;                 /* Setting from fcpl */
+    char     aname[11];                 /* Attribute name */
+    unsigned i;                         /* Local index variable */
+    herr_t   ret;                       /* Generic return status */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing that attributes can always be added to named datatypes\n"));
@@ -11414,13 +11414,13 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
 void
 test_attr(void)
 {
-    hid_t    fapl = (-1), fapl2 = (-1); /* File access property lists */
-    hid_t    fcpl = (-1), fcpl2 = (-1); /* File creation property lists */
-    hid_t    dcpl = -1;                 /* Dataset creation property list */
-    unsigned new_format;                /* Whether to use the new format or not */
-    unsigned use_shared;                /* Whether to use shared attributes or not */
-    unsigned minimize_dset_oh;          /* Whether to use minimized dataset object headers */
-    herr_t   ret;                       /* Generic return value */
+    hid_t    fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID); /* File access property lists */
+    hid_t    fcpl = (H5I_INVALID_HID), fcpl2 = (H5I_INVALID_HID); /* File creation property lists */
+    hid_t    dcpl = H5I_INVALID_HID;                              /* Dataset creation property list */
+    unsigned new_format;                                          /* Whether to use the new format or not */
+    unsigned use_shared;       /* Whether to use shared attributes or not */
+    unsigned minimize_dset_oh; /* Whether to use minimized dataset object headers */
+    herr_t   ret;              /* Generic return value */
 
     MESSAGE(5, ("Testing Attributes\n"));
 

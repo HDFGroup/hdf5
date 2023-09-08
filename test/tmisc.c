@@ -2172,10 +2172,10 @@ misc13_verify_data_match(const unsigned *original_data, const unsigned *read_dat
 static void
 misc13_create_dataset(hid_t loc_id, const char *name, hid_t dcpl, const unsigned *data)
 {
-    hid_t   dsid = -1;         /* Dataset ID */
-    hid_t   sid  = -1;         /* Dataspace ID */
-    hsize_t dims[MISC13_RANK]; /* Dataset dimensions */
-    herr_t  ret;               /* Generic return value */
+    hid_t   dsid = H5I_INVALID_HID; /* Dataset ID */
+    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t dims[MISC13_RANK];      /* Dataset dimensions */
+    herr_t  ret;                    /* Generic return value */
 
     /* Create dataspace for use with dataset */
     dims[0] = MISC13_DIM1;
@@ -2203,9 +2203,9 @@ misc13_create_dataset(hid_t loc_id, const char *name, hid_t dcpl, const unsigned
 static void
 misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
 {
-    unsigned *read_data = NULL; /* Data to write to dataset */
-    hid_t     dsid      = -1;   /* Dataset ID */
-    herr_t    ret;              /* Generic return value */
+    unsigned *read_data = NULL;            /* Data to write to dataset */
+    hid_t     dsid      = H5I_INVALID_HID; /* Dataset ID */
+    herr_t    ret;                         /* Generic return value */
 
     /* Create a data buffer for the dataset read */
     read_data = (unsigned *)calloc(MISC13_DIM1, sizeof(unsigned));
@@ -2235,13 +2235,13 @@ misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
 static void
 misc13_create_hdf_file(const char *name, const unsigned *data)
 {
-    hid_t   fid    = -1;             /* File ID */
-    hid_t   gid1   = -1;             /* Group ID (level 1) */
-    hid_t   gid2   = -1;             /* Group ID (level 2) */
-    hid_t   tid    = -1;             /* Datatype ID */
-    hid_t   dcplid = -1;             /* Dataset creation property list ID */
-    hsize_t chunk_dims[MISC13_RANK]; /* Chunk dimensions */
-    herr_t  ret;                     /* Generic return value */
+    hid_t   fid    = H5I_INVALID_HID; /* File ID */
+    hid_t   gid1   = H5I_INVALID_HID; /* Group ID (level 1) */
+    hid_t   gid2   = H5I_INVALID_HID; /* Group ID (level 2) */
+    hid_t   tid    = H5I_INVALID_HID; /* Datatype ID */
+    hid_t   dcplid = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hsize_t chunk_dims[MISC13_RANK];  /* Chunk dimensions */
+    herr_t  ret;                      /* Generic return value */
 
     /* Create file */
     fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2382,13 +2382,13 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
 static void
 misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_size, bool check_for_new_dataset)
 {
-    hid_t   fid    = -1; /* File ID */
-    hid_t   gid1   = -1; /* Group IDs */
-    hid_t   gid2   = -1; /* Group IDs */
-    hid_t   tid    = -1; /* Datatype ID */
-    hid_t   fcplid = -1; /* File creation property list ID */
-    hsize_t ub_size_out; /* Userblock size retrieved from FCPL */
-    herr_t  ret;         /* Generic return value */
+    hid_t   fid    = H5I_INVALID_HID; /* File ID */
+    hid_t   gid1   = H5I_INVALID_HID; /* Group IDs */
+    hid_t   gid2   = H5I_INVALID_HID; /* Group IDs */
+    hid_t   tid    = H5I_INVALID_HID; /* Datatype ID */
+    hid_t   fcplid = H5I_INVALID_HID; /* File creation property list ID */
+    hsize_t ub_size_out;              /* Userblock size retrieved from FCPL */
+    herr_t  ret;                      /* Generic return value */
 
     /* Open the file */
     fid = H5Fopen(name, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -2472,8 +2472,8 @@ misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_siz
 static void
 misc13_add_to_new_file(const char *name, const unsigned *data)
 {
-    hid_t  fid = -1; /* File ID */
-    herr_t ret;      /* Generic return value */
+    hid_t  fid = H5I_INVALID_HID; /* File ID */
+    herr_t ret;                   /* Generic return value */
 
     /* Open the file */
     fid = H5Fopen(name, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -3153,23 +3153,23 @@ test_misc18(void)
 static void
 test_misc19(void)
 {
-    hid_t         fid     = -1;   /* File ID                  */
-    hid_t         sid     = -1;   /* Dataspace ID             */
-    hid_t         did     = -1;   /* Dataset ID               */
-    hid_t         tid     = -1;   /* Datatype ID              */
-    hid_t         aid     = -1;   /* Attribute ID             */
-    hid_t         plid    = -1;   /* Property List ID         */
-    hid_t         pcid    = -1;   /* Property Class ID        */
-    hid_t         gid     = -1;   /* Group ID                 */
-    hid_t         ecid    = -1;   /* Error Class ID           */
-    hid_t         emid    = -1;   /* Error Message ID         */
-    hid_t         esid    = -1;   /* Error Stack ID           */
-    hid_t         vfdid   = -1;   /* Virtual File Driver ID   */
-    hid_t         volid   = -1;   /* Virtual Object Layer ID  */
-    H5FD_class_t *vfd_cls = NULL; /* VFD class                */
-    H5VL_class_t *vol_cls = NULL; /* VOL class                */
-    int           rc;             /* Reference count          */
-    herr_t        ret;            /* Generic return value     */
+    hid_t         fid     = H5I_INVALID_HID; /* File ID                  */
+    hid_t         sid     = H5I_INVALID_HID; /* Dataspace ID             */
+    hid_t         did     = H5I_INVALID_HID; /* Dataset ID               */
+    hid_t         tid     = H5I_INVALID_HID; /* Datatype ID              */
+    hid_t         aid     = H5I_INVALID_HID; /* Attribute ID             */
+    hid_t         plid    = H5I_INVALID_HID; /* Property List ID         */
+    hid_t         pcid    = H5I_INVALID_HID; /* Property Class ID        */
+    hid_t         gid     = H5I_INVALID_HID; /* Group ID                 */
+    hid_t         ecid    = H5I_INVALID_HID; /* Error Class ID           */
+    hid_t         emid    = H5I_INVALID_HID; /* Error Message ID         */
+    hid_t         esid    = H5I_INVALID_HID; /* Error Stack ID           */
+    hid_t         vfdid   = H5I_INVALID_HID; /* Virtual File Driver ID   */
+    hid_t         volid   = H5I_INVALID_HID; /* Virtual Object Layer ID  */
+    H5FD_class_t *vfd_cls = NULL;            /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;            /* VOL class                */
+    int           rc;                        /* Reference count          */
+    herr_t        ret;                       /* Generic return value     */
 
     /* Check H5I operations on files */
 
@@ -5771,7 +5771,7 @@ test_misc32(void)
 static void
 test_misc33(void)
 {
-    hid_t       fid      = -1;                                  /* File ID */
+    hid_t       fid      = H5I_INVALID_HID;                     /* File ID */
     const char *testfile = H5_get_srcdir_filename(MISC33_FILE); /* Corrected test file name */
     H5O_info2_t oinfo; /* Structure for object metadata information */
     bool        driver_is_default_compatible;

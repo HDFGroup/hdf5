@@ -269,7 +269,7 @@ static int
 vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char *filename,
                   const char *dsetname)
 {
-    hid_t   space_out = -1;
+    hid_t   space_out = H5I_INVALID_HID;
     char    name_out[32];
     htri_t  tri_ret;
     ssize_t str_len;
@@ -358,11 +358,11 @@ static int
 test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex_dcpl, hid_t vspace,
                      char *filename, hsize_t exp_meta_size)
 {
-    hid_t              file = -1;        /* File */
-    hid_t              dset = -1;        /* Virtual dataset */
-    H5D_space_status_t space_status;     /* Dataset space status */
-    void              *plist_buf = NULL; /* Serialized property list buffer */
-    H5O_native_info_t  ninfo;            /* Object info struct */
+    hid_t              file = H5I_INVALID_HID; /* File */
+    hid_t              dset = H5I_INVALID_HID; /* Virtual dataset */
+    H5D_space_status_t space_status;           /* Dataset space status */
+    void              *plist_buf = NULL;       /* Serialized property list buffer */
+    H5O_native_info_t  ninfo;                  /* Object info struct */
     htri_t             tri_ret;
 
     assert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
@@ -519,10 +519,11 @@ static int
 test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
 {
     char        filename[FILENAME_BUF_SIZE];
-    hid_t       dcpl        = -1;               /* Dataset creation property list */
-    hid_t       ex_dcpl     = -1;               /* Temporary dcpl for examination */
-    hid_t       srcspace[4] = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t       vspace[LIST_DOUBLE_SIZE];       /* Virtual dset dataspaces */
+    hid_t       dcpl        = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t       ex_dcpl     = H5I_INVALID_HID; /* Temporary dcpl for examination */
+    hid_t       srcspace[4] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                         H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t       vspace[LIST_DOUBLE_SIZE];        /* Virtual dset dataspaces */
     const char *src_file[4] = {"src_file1", "src_file2.", "src_file3..",
                                "src_file4..."}; /* Source file names (different lengths) */
     const char *src_dset[4] = {"src_dset1....", "src_dset2.....", "src_dset3......",
@@ -1186,19 +1187,23 @@ test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     char       *srcfilenamepct          = NULL;
     char       *srcfilenamepct_map      = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
-    hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
-    hid_t       vfile                   = -1;               /* File with virtual dset */
-    hid_t       dcpl                    = -1;               /* Dataset creation property list */
-    hid_t       dapl                    = -1;               /* Dataset access property list */
-    hid_t       srcspace[4]             = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t       vspace[4]               = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
-    hid_t       memspace                = -1;               /* Memory dataspace */
-    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datasets */
-    hid_t       vdset                   = -1;               /* Virtual dataset */
-    hsize_t     dims[4]                 = {10, 26, 0, 0};   /* Data space current size */
-    int         buf[10][26];                                /* Write and expected read buffer */
-    int         rbuf[10][26];                               /* Read buffer */
-    int         fill = -1;                                  /* Fill value */
+    hid_t       srcfile[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t       vfile                   = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t       dcpl                    = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t       dapl                    = H5I_INVALID_HID;   /* Dataset access property list */
+    hid_t       srcspace[4]             = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                         H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t       vspace[4]               = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                       H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t       memspace                = H5I_INVALID_HID;   /* Memory dataspace */
+    hid_t       srcdset[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Source datasets */
+    hid_t       vdset                   = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t     dims[4]                 = {10, 26, 0, 0};    /* Data space current size */
+    int         buf[10][26];                                 /* Write and expected read buffer */
+    int         rbuf[10][26];                                /* Read buffer */
+    int         fill = -1;                                   /* Fill value */
     int         i, j;
     char        buffer[1024]; /* buffer to read vds_prefix       */
 
@@ -1465,28 +1470,32 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     char       *srcfilenamepct          = NULL;
     char       *srcfilenamepct_map      = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
-    hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
-    hid_t       vfile                   = -1;               /* File with virtual dset */
-    hid_t       vfile2                  = -1;               /* File with copied virtual dset */
-    hid_t       dcpl                    = -1;               /* Dataset creation property list */
-    hid_t       srcspace[4]             = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t       vspace[4]               = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
-    hid_t       memspace                = -1;               /* Memory dataspace */
-    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datasets */
-    hid_t       vdset                   = -1;               /* Virtual dataset */
-    hsize_t     dims[4]                 = {10, 26, 0, 0};   /* Data space current size */
-    hsize_t     start[4];                                   /* Hyperslab start */
-    hsize_t     stride[4];                                  /* Hyperslab stride */
-    hsize_t     count[4];                                   /* Hyperslab count */
-    hsize_t     block[4];                                   /* Hyperslab block */
-    hssize_t    offset[2] = {0, 0};                         /* Selection offset */
-    int         buf[10][26];                                /* Write and expected read buffer */
-    int         rbuf[10][26];                               /* Read buffer */
-    int         rbuf99[9][9];                               /* 9x9 Read buffer */
-    int         evbuf[10][26];                              /* Expected VDS "buffer" */
-    int         erbuf[10][26];                              /* Expected read buffer */
-    int         fill = -1;                                  /* Fill value */
-    herr_t      ret;                                        /* Generic return value */
+    hid_t       srcfile[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t       vfile                   = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t       vfile2                  = H5I_INVALID_HID;   /* File with copied virtual dset */
+    hid_t       dcpl                    = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t       srcspace[4]             = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                         H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t       vspace[4]               = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                       H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t       memspace                = H5I_INVALID_HID;   /* Memory dataspace */
+    hid_t       srcdset[4]              = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Source datasets */
+    hid_t       vdset                   = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t     dims[4]                 = {10, 26, 0, 0};    /* Data space current size */
+    hsize_t     start[4];                                    /* Hyperslab start */
+    hsize_t     stride[4];                                   /* Hyperslab stride */
+    hsize_t     count[4];                                    /* Hyperslab count */
+    hsize_t     block[4];                                    /* Hyperslab block */
+    hssize_t    offset[2] = {0, 0};                          /* Selection offset */
+    int         buf[10][26];                                 /* Write and expected read buffer */
+    int         rbuf[10][26];                                /* Read buffer */
+    int         rbuf99[9][9];                                /* 9x9 Read buffer */
+    int         evbuf[10][26];                               /* Expected VDS "buffer" */
+    int         erbuf[10][26];                               /* Expected read buffer */
+    int         fill = -1;                                   /* Fill value */
+    herr_t      ret;                                         /* Generic return value */
     int         i, j, u, v;
 
     TESTING_2_SUPPRESSED("basic virtual dataset I/O");
@@ -4391,30 +4400,34 @@ test_unlim(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     char           srcfilename[FILENAME_BUF_SIZE];
     char           srcfilename_map[FILENAME_BUF_SIZE];
     char           vfilename[FILENAME_BUF_SIZE];
-    hid_t          srcfile[4]  = {-1, -1, -1, -1}; /* Files with source dsets */
-    hid_t          vfile       = -1;               /* File with virtual dset */
-    hid_t          dcpl        = -1;               /* Dataset creation property list */
-    hid_t          srcdcpl     = -1;               /* DCPL for source dset */
-    hid_t          dapl        = -1;               /* Dataset access property list */
-    hid_t          srcspace[4] = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t          vspace[4]   = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
-    hid_t          memspace    = -1;               /* Memory dataspace */
-    hid_t          filespace   = -1;               /* File dataspace */
-    hid_t          srcdset[4]  = {-1, -1, -1, -1}; /* Source datasets */
-    hid_t          vdset       = -1;               /* Virtual dataset */
-    hsize_t        dims[2]     = {10, 10};         /* Data space current size */
-    hsize_t        mdims[2]    = {10, 20};         /* Data space maximum size */
-    hsize_t        cdims[2]    = {4, 4};           /* Chunk dimensions */
-    hsize_t        start[4];                       /* Hyperslab start */
-    hsize_t        stride[4];                      /* Hyperslab stride */
-    hsize_t        count[4];                       /* Hyperslab count */
-    hsize_t        block[4];                       /* Hyperslab block */
-    int            buf[10][20];                    /* Write and expected read buffer */
-    int            rbuf[10][20];                   /* Read buffer */
-    int            erbuf[10][20];                  /* Expected read buffer */
-    int            ndims;                          /* Number of dimensions */
-    int            fill = -1;                      /* Fill value */
-    H5D_vds_view_t virtual_view;                   /* Virtual view property */
+    hid_t          srcfile[4]  = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t          vfile       = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t          dcpl        = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t          srcdcpl     = H5I_INVALID_HID;   /* DCPL for source dset */
+    hid_t          dapl        = H5I_INVALID_HID;   /* Dataset access property list */
+    hid_t          srcspace[4] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                         H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t          vspace[4]   = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                       H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t          memspace    = H5I_INVALID_HID;   /* Memory dataspace */
+    hid_t          filespace   = H5I_INVALID_HID;   /* File dataspace */
+    hid_t          srcdset[4]  = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Source datasets */
+    hid_t          vdset       = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t        dims[2]     = {10, 10};          /* Data space current size */
+    hsize_t        mdims[2]    = {10, 20};          /* Data space maximum size */
+    hsize_t        cdims[2]    = {4, 4};            /* Chunk dimensions */
+    hsize_t        start[4];                        /* Hyperslab start */
+    hsize_t        stride[4];                       /* Hyperslab stride */
+    hsize_t        count[4];                        /* Hyperslab count */
+    hsize_t        block[4];                        /* Hyperslab block */
+    int            buf[10][20];                     /* Write and expected read buffer */
+    int            rbuf[10][20];                    /* Read buffer */
+    int            erbuf[10][20];                   /* Expected read buffer */
+    int            ndims;                           /* Number of dimensions */
+    int            fill = -1;                       /* Fill value */
+    H5D_vds_view_t virtual_view;                    /* Virtual view property */
     int            i, j;
 
     TESTING_2_SUPPRESSED("virtual dataset I/O with unlimited selections");
@@ -7406,28 +7419,30 @@ test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     char       *srcfilenamepct_map          = NULL;
     const char *printf_srcfilename_map_orig = "vds_src_%b";
     const char *srcfilenamepct_map_orig     = "vds%%%%_src";
-    hid_t       srcfile[4]                  = {-1, -1, -1, -1};         /* Files with source dsets */
-    hid_t       vfile                       = -1;                       /* File with virtual dset */
-    hid_t       dcpl                        = -1;                       /* Dataset creation property list */
-    hid_t       dapl                        = -1;                       /* Dataset access property list */
-    hid_t       srcspace                    = -1;                       /* Source dataspace */
-    hid_t       vspace[2]                   = {-1, -1};                 /* Virtual dset dataspaces */
-    hid_t       memspace                    = -1;                       /* Memory dataspace */
-    hid_t       filespace                   = -1;                       /* File dataspace */
-    hid_t       srcdset[6]                  = {-1, -1, -1, -1, -1, -1}; /* Source datasets */
-    hid_t       vdset                       = -1;                       /* Virtual dataset */
-    hsize_t     dims[2]                     = {10, 0};                  /* Data space current size */
-    hsize_t     mdims[2]                    = {10, 20};                 /* Data space maximum size */
-    hsize_t     start[2]                    = {0, 0};                   /* Hyperslab start */
-    hsize_t     stride[2];                                              /* Hyperslab stride */
-    hsize_t     count[2];                                               /* Hyperslab count */
-    hsize_t     block[2];                                               /* Hyperslab block */
-    int         buf[10][20];                                            /* Write and expected read buffer */
-    int         rbuf[10][20];                                           /* Read buffer */
-    int         erbuf[10][20];                                          /* Expected read buffer */
-    int         ndims;                                                  /* Number of dimensions */
-    int         fill = -1;                                              /* Fill value */
-    hsize_t     gap_size;                                               /* Gap size property */
+    hid_t       srcfile[4]                  = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t       vfile                       = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t       dcpl                        = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t       dapl                        = H5I_INVALID_HID;   /* Dataset access property list */
+    hid_t       srcspace                    = H5I_INVALID_HID;   /* Source dataspace */
+    hid_t       vspace[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t       memspace   = H5I_INVALID_HID;                    /* Memory dataspace */
+    hid_t       filespace  = H5I_INVALID_HID;                    /* File dataspace */
+    hid_t       srcdset[6] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Source datasets */
+    hid_t       vdset      = H5I_INVALID_HID;                                     /* Virtual dataset */
+    hsize_t     dims[2]    = {10, 0};  /* Data space current size */
+    hsize_t     mdims[2]   = {10, 20}; /* Data space maximum size */
+    hsize_t     start[2]   = {0, 0};   /* Hyperslab start */
+    hsize_t     stride[2];             /* Hyperslab stride */
+    hsize_t     count[2];              /* Hyperslab count */
+    hsize_t     block[2];              /* Hyperslab block */
+    int         buf[10][20];           /* Write and expected read buffer */
+    int         rbuf[10][20];          /* Read buffer */
+    int         erbuf[10][20];         /* Expected read buffer */
+    int         ndims;                 /* Number of dimensions */
+    int         fill = -1;             /* Fill value */
+    hsize_t     gap_size;              /* Gap size property */
     int         i, j;
 
     TESTING_2_SUPPRESSED("virtual dataset I/O with printf source");
@@ -11114,28 +11129,29 @@ test_all(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     char    vfilename[FILENAME_BUF_SIZE];
     char    srcfilename[FILENAME_BUF_SIZE];
     char    srcfilename_map[FILENAME_BUF_SIZE];
-    hid_t   srcfile     = -1;                   /* File with source dsets */
-    hid_t   vfile       = -1;                   /* File with virtual dset */
-    hid_t   dcpl        = -1;                   /* Dataset creation property list */
-    hid_t   srcdcpl     = -1;                   /* DCPL for source dset */
-    hid_t   srcspace[3] = {-1, -1, -1};         /* Source dataspaces */
-    hid_t   vspace[3]   = {-1, -1, -1};         /* Virtual dset dataspaces */
-    hid_t   memspace    = -1;                   /* Memory dataspace */
-    hid_t   filespace   = -1;                   /* File dataspace */
-    hid_t   srcdset[5]  = {-1, -1, -1, -1, -1}; /* Source datasets */
-    hid_t   vdset       = -1;                   /* Virtual dataset */
-    hsize_t dims[2]     = {6, 6};               /* Data space current size */
-    hsize_t mdims[2]    = {10, 10};             /* Data space maximum size */
-    hsize_t cdims[2]    = {2, 2};               /* Chunk dimensions */
-    hsize_t start[2];                           /* Hyperslab start */
-    hsize_t stride[2];                          /* Hyperslab stride */
-    hsize_t count[2];                           /* Hyperslab count */
-    hsize_t block[2];                           /* Hyperslab block */
-    int     buf[10][10];                        /* Write and expected read buffer */
-    int     rbuf[10][10];                       /* Read buffer */
-    int     erbuf[10][10];                      /* Expected read buffer */
-    int     ndims;                              /* Number of dimensions */
-    int     fill = -1;                          /* Fill value */
+    hid_t   srcfile     = H5I_INVALID_HID; /* File with source dsets */
+    hid_t   vfile       = H5I_INVALID_HID; /* File with virtual dset */
+    hid_t   dcpl        = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t   srcdcpl     = H5I_INVALID_HID; /* DCPL for source dset */
+    hid_t   srcspace[3] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t   vspace[3]   = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t   memspace    = H5I_INVALID_HID;                                     /* Memory dataspace */
+    hid_t   filespace   = H5I_INVALID_HID;                                     /* File dataspace */
+    hid_t   srcdset[5]  = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                        H5I_INVALID_HID}; /* Source datasets */
+    hid_t   vdset       = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t dims[2]     = {6, 6};            /* Data space current size */
+    hsize_t mdims[2]    = {10, 10};          /* Data space maximum size */
+    hsize_t cdims[2]    = {2, 2};            /* Chunk dimensions */
+    hsize_t start[2];                        /* Hyperslab start */
+    hsize_t stride[2];                       /* Hyperslab stride */
+    hsize_t count[2];                        /* Hyperslab count */
+    hsize_t block[2];                        /* Hyperslab block */
+    int     buf[10][10];                     /* Write and expected read buffer */
+    int     rbuf[10][10];                    /* Read buffer */
+    int     erbuf[10][10];                   /* Expected read buffer */
+    int     ndims;                           /* Number of dimensions */
+    int     fill = -1;                       /* Fill value */
     int     i, j;
 
     TESTING_2_SUPPRESSED("virtual dataset I/O with mixed selection types");
@@ -12138,23 +12154,23 @@ error:
 static int
 test_dapl_values(hid_t fapl_id)
 {
-    hid_t          fid      = -1;  /* file to write to                     */
-    hid_t          dcpl_id  = -1;  /* dataset creation properties          */
-    hid_t          dapl_id1 = -1;  /* dataset access properties            */
-    hid_t          dapl_id2 = -1;  /* dataset access properties            */
-    hid_t          vds_sid  = -1;  /* vds data space                       */
-    hid_t          src_sid  = -1;  /* source data space                    */
-    hid_t          did1     = -1;  /* dataset                              */
-    hid_t          did2     = -1;  /* dataset                              */
-    hsize_t        start;          /* hyperslab start                      */
-    hsize_t        stride;         /* hyperslab count                      */
-    hsize_t        count;          /* hyperslab count                      */
-    hsize_t        block;          /* hyperslab count                      */
-    hsize_t        dims;           /* dataset size                         */
-    hsize_t        max_dims;       /* dataset max size                     */
-    H5D_vds_view_t view;           /* view from dapl                       */
-    hsize_t        gap_size;       /* gap size from dapl                   */
-    char           filename[1024]; /* file names                           */
+    hid_t          fid      = H5I_INVALID_HID; /* file to write to                     */
+    hid_t          dcpl_id  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t          dapl_id1 = H5I_INVALID_HID; /* dataset access properties            */
+    hid_t          dapl_id2 = H5I_INVALID_HID; /* dataset access properties            */
+    hid_t          vds_sid  = H5I_INVALID_HID; /* vds data space                       */
+    hid_t          src_sid  = H5I_INVALID_HID; /* source data space                    */
+    hid_t          did1     = H5I_INVALID_HID; /* dataset                              */
+    hid_t          did2     = H5I_INVALID_HID; /* dataset                              */
+    hsize_t        start;                      /* hyperslab start                      */
+    hsize_t        stride;                     /* hyperslab count                      */
+    hsize_t        count;                      /* hyperslab count                      */
+    hsize_t        block;                      /* hyperslab count                      */
+    hsize_t        dims;                       /* dataset size                         */
+    hsize_t        max_dims;                   /* dataset max size                     */
+    H5D_vds_view_t view;                       /* view from dapl                       */
+    hsize_t        gap_size;                   /* gap size from dapl                   */
+    char           filename[1024];             /* file names                           */
 
     TESTING_2("H5Dget_access_plist() returns dapl w/ correct values");
 
@@ -12295,8 +12311,8 @@ main(void)
 {
     char         filename[FILENAME_BUF_SIZE];
     hid_t        fapl;
-    hid_t        vds_fapl = -1; /* File access property list */
-    hid_t        src_fapl = -1; /* File access property list */
+    hid_t        vds_fapl = H5I_INVALID_HID; /* File access property list */
+    hid_t        src_fapl = H5I_INVALID_HID; /* File access property list */
     int          test_api_config;
     unsigned     bit_config;
     H5F_libver_t low, high;   /* Low and high bounds */

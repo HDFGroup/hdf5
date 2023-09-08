@@ -117,8 +117,8 @@ main(int argc, char *argv[])
     int   ret_value         = 0;
     int   child_ret_value;
     bool  send_wait = false;
-    hid_t fapl      = -1; /* File access property list */
-    hid_t fid       = -1; /* File ID */
+    hid_t fapl      = H5I_INVALID_HID; /* File access property list */
+    hid_t fid       = H5I_INVALID_HID; /* File ID */
 
     if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);

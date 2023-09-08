@@ -44,16 +44,16 @@ static int32_t VDS_FILL_VALUE = -9;
 int
 main(void)
 {
-    hid_t faplid = -1; /* file access property list ID (all files) */
+    hid_t faplid = H5I_INVALID_HID; /* file access property list ID (all files) */
 
-    hid_t src_sid    = -1; /* source dataset's dataspace ID            */
-    hid_t src_dcplid = -1; /* source dataset property list ID          */
+    hid_t src_sid    = H5I_INVALID_HID; /* source dataset's dataspace ID            */
+    hid_t src_dcplid = H5I_INVALID_HID; /* source dataset property list ID          */
 
-    hid_t vds_sid    = -1; /* VDS dataspace ID                         */
-    hid_t vds_dcplid = -1; /* VDS dataset property list ID             */
+    hid_t vds_sid    = H5I_INVALID_HID; /* VDS dataspace ID                         */
+    hid_t vds_dcplid = H5I_INVALID_HID; /* VDS dataset property list ID             */
 
-    hid_t fid = -1; /* HDF5 file ID                             */
-    hid_t did = -1; /* dataset ID                               */
+    hid_t fid = H5I_INVALID_HID; /* HDF5 file ID                             */
+    hid_t did = H5I_INVALID_HID; /* dataset ID                               */
 
     hsize_t start[RANK];    /* starting point for hyperslab             */
     int     map_start = -1; /* starting point in the VDS map            */

@@ -43,8 +43,8 @@
 void
 ns_grp_0(hid_t fid, const char *group_name)
 {
-    hid_t  gid  = -1;
-    hid_t  gcpl = -1;
+    hid_t  gid  = H5I_INVALID_HID;
+    hid_t  gcpl = H5I_INVALID_HID;
     herr_t ret;
 
     if (pass) {
@@ -118,8 +118,8 @@ ns_grp_0(hid_t fid, const char *group_name)
 void
 vrfy_ns_grp_0(hid_t fid, const char *group_name)
 {
-    hid_t      gid  = -1;
-    hid_t      gcpl = -1;
+    hid_t      gid  = H5I_INVALID_HID;
+    hid_t      gcpl = H5I_INVALID_HID;
     H5G_info_t grp_info;
     unsigned   crt_order_flags = 0;
     herr_t     ret;
@@ -232,8 +232,8 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
 void
 ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 {
-    hid_t    gid  = -1;
-    hid_t    gcpl = -1;
+    hid_t    gid  = H5I_INVALID_HID;
+    hid_t    gcpl = H5I_INVALID_HID;
     unsigned max_compact;
     unsigned u;
     herr_t   ret;
@@ -369,8 +369,8 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 void
 vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 {
-    hid_t      gid  = -1;
-    hid_t      gcpl = -1;
+    hid_t      gid  = H5I_INVALID_HID;
+    hid_t      gcpl = H5I_INVALID_HID;
     H5G_info_t grp_info;
     unsigned   crt_order_flags = 0;
     unsigned   u;
@@ -641,8 +641,8 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 void
 ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
-    hid_t    gid  = -1;
-    hid_t    gcpl = -1;
+    hid_t    gid  = H5I_INVALID_HID;
+    hid_t    gcpl = H5I_INVALID_HID;
     unsigned max_compact;
     unsigned u;
     herr_t   ret;
@@ -773,8 +773,8 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 void
 vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
-    hid_t      gid  = -1;
-    hid_t      gcpl = -1;
+    hid_t      gid  = H5I_INVALID_HID;
+    hid_t      gcpl = H5I_INVALID_HID;
     H5G_info_t grp_info;
     unsigned   crt_order_flags = 0;
     unsigned   u;
@@ -1042,8 +1042,8 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 void
 os_grp_0(hid_t fid, const char *group_name)
 {
-    hid_t        gid  = -1;
-    hid_t        fapl = -1;
+    hid_t        gid  = H5I_INVALID_HID;
+    hid_t        fapl = H5I_INVALID_HID;
     H5F_libver_t low = H5F_LIBVER_ERROR, high = H5F_LIBVER_ERROR;
 
     herr_t ret;
@@ -1127,8 +1127,8 @@ os_grp_0(hid_t fid, const char *group_name)
 void
 vrfy_os_grp_0(hid_t fid, const char *group_name)
 {
-    hid_t      gid  = -1;
-    hid_t      gcpl = -1;
+    hid_t      gid  = H5I_INVALID_HID;
+    hid_t      gcpl = H5I_INVALID_HID;
     H5G_info_t grp_info;
     unsigned   crt_order_flags = 0;
     herr_t     ret;
@@ -1241,9 +1241,9 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
 void
 os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
-    hid_t        gid = -1;
+    hid_t        gid = H5I_INVALID_HID;
     unsigned     u;
-    hid_t        fapl = -1;
+    hid_t        fapl = H5I_INVALID_HID;
     H5F_libver_t low = H5F_LIBVER_ERROR, high = H5F_LIBVER_ERROR;
     herr_t       ret;
 
@@ -1356,8 +1356,8 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 void
 vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
-    hid_t      gid  = -1;
-    hid_t      gcpl = -1;
+    hid_t      gid  = H5I_INVALID_HID;
+    hid_t      gcpl = H5I_INVALID_HID;
     H5G_info_t grp_info;
     unsigned   crt_order_flags = 0;
     unsigned   u;
@@ -1581,8 +1581,8 @@ ds_ctg_i(hid_t fid, const char *dset_name, bool write_data)
 {
     int     *wdata = NULL;
     unsigned u;
-    hid_t    dsid    = -1;
-    hid_t    sid     = -1;
+    hid_t    dsid    = H5I_INVALID_HID;
+    hid_t    sid     = H5I_INVALID_HID;
     hsize_t  dims[1] = {DSET_DIMS};
     herr_t   ret;
 
@@ -1673,10 +1673,10 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, bool write_data)
 {
     int               *rdata = NULL;
     unsigned           u;
-    hid_t              dsid = -1;
-    hid_t              sid  = -1;
-    hid_t              tid  = -1;
-    hid_t              dcpl = -1;
+    hid_t              dsid = H5I_INVALID_HID;
+    hid_t              sid  = H5I_INVALID_HID;
+    hid_t              tid  = H5I_INVALID_HID;
+    hid_t              dcpl = H5I_INVALID_HID;
     H5D_space_status_t allocation;
     H5D_layout_t       layout;
     int                ndims;
@@ -1889,9 +1889,9 @@ ds_chk_i(hid_t fid, const char *dset_name, bool write_data)
 {
     int     *wdata = NULL;
     unsigned u;
-    hid_t    dsid          = -1;
-    hid_t    dcpl          = -1;
-    hid_t    sid           = -1;
+    hid_t    dsid          = H5I_INVALID_HID;
+    hid_t    dcpl          = H5I_INVALID_HID;
+    hid_t    sid           = H5I_INVALID_HID;
     hsize_t  dims[1]       = {DSET_DIMS};
     hsize_t  chunk_dims[1] = {DSET_CHUNK_DIMS};
     herr_t   ret;
@@ -2011,10 +2011,10 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, bool write_data)
 {
     int               *rdata = NULL;
     unsigned           u;
-    hid_t              dsid = -1;
-    hid_t              sid  = -1;
-    hid_t              tid  = -1;
-    hid_t              dcpl = -1;
+    hid_t              dsid = H5I_INVALID_HID;
+    hid_t              sid  = H5I_INVALID_HID;
+    hid_t              tid  = H5I_INVALID_HID;
+    hid_t              dcpl = H5I_INVALID_HID;
     H5D_space_status_t allocation;
     H5D_layout_t       layout;
     int                ndims;
@@ -2242,9 +2242,9 @@ ds_cpt_i(hid_t fid, const char *dset_name, bool write_data)
 {
     int     *wdata = NULL;
     unsigned u;
-    hid_t    dsid    = -1;
-    hid_t    dcpl    = -1;
-    hid_t    sid     = -1;
+    hid_t    dsid    = H5I_INVALID_HID;
+    hid_t    dcpl    = H5I_INVALID_HID;
+    hid_t    sid     = H5I_INVALID_HID;
     hsize_t  dims[1] = {DSET_COMPACT_DIMS};
     herr_t   ret;
 
@@ -2365,10 +2365,10 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, bool write_data)
 {
     int               *rdata = NULL;
     unsigned           u;
-    hid_t              dsid = -1;
-    hid_t              sid  = -1;
-    hid_t              tid  = -1;
-    hid_t              dcpl = -1;
+    hid_t              dsid = H5I_INVALID_HID;
+    hid_t              sid  = H5I_INVALID_HID;
+    hid_t              tid  = H5I_INVALID_HID;
+    hid_t              dcpl = H5I_INVALID_HID;
     H5D_space_status_t allocation;
     H5D_layout_t       layout;
     int                ndims;
@@ -2574,9 +2574,9 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, bool write_data)
 void
 ds_ctg_v(hid_t fid, const char *dset_name, bool write_data)
 {
-    hid_t    dsid    = -1;
-    hid_t    sid     = -1;
-    hid_t    tid     = -1;
+    hid_t    dsid    = H5I_INVALID_HID;
+    hid_t    sid     = H5I_INVALID_HID;
+    hid_t    tid     = H5I_INVALID_HID;
     hsize_t  dims[1] = {DSET_SMALL_DIMS};
     herr_t   ret;
     hvl_t   *wdata = NULL;
@@ -2718,11 +2718,11 @@ ds_ctg_v(hid_t fid, const char *dset_name, bool write_data)
 void
 vrfy_ds_ctg_v(hid_t fid, const char *dset_name, bool write_data)
 {
-    hid_t              dsid    = -1;
-    hid_t              sid     = -1;
-    hid_t              tid     = -1;
-    hid_t              tmp_tid = -1;
-    hid_t              dcpl    = -1;
+    hid_t              dsid    = H5I_INVALID_HID;
+    hid_t              sid     = H5I_INVALID_HID;
+    hid_t              tid     = H5I_INVALID_HID;
+    hid_t              tmp_tid = H5I_INVALID_HID;
+    hid_t              dcpl    = H5I_INVALID_HID;
     H5D_space_status_t allocation;
     H5D_layout_t       layout;
     int                ndims;

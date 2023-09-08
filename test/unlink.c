@@ -77,7 +77,7 @@ static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_
 static int
 test_one(hid_t file)
 {
-    hid_t  work = -1, grp = -1;
+    hid_t  work = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     herr_t status;
 
     /* Create a test group */
@@ -149,7 +149,7 @@ error:
 static int
 test_many(hid_t file)
 {
-    hid_t     work = -1, grp = -1;
+    hid_t     work = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     int       i;
     const int how_many = 500;
     char      name[32];
@@ -253,7 +253,7 @@ error:
 static int
 test_symlink(hid_t file)
 {
-    hid_t work = -1;
+    hid_t work = H5I_INVALID_HID;
 
     TESTING("symlink removal");
 
@@ -295,7 +295,7 @@ error:
 static int
 test_rename(hid_t file)
 {
-    hid_t work = -1, foo = -1, inner = -1;
+    hid_t work = H5I_INVALID_HID, foo = H5I_INVALID_HID, inner = H5I_INVALID_HID;
 
     /* Create a test group and rename something */
     TESTING("object renaming");
@@ -356,9 +356,10 @@ error:
 static int
 test_new_move(hid_t fapl)
 {
-    hid_t file_a, file_b = (-1);
-    hid_t grp_1 = (-1), grp_2 = (-1), grp_move = (-1), moved_grp = (-1);
-    char  filename[1024];
+    hid_t file_a, file_b = (H5I_INVALID_HID);
+    hid_t grp_1 = (H5I_INVALID_HID), grp_2 = (H5I_INVALID_HID), grp_move = (H5I_INVALID_HID),
+          moved_grp = (H5I_INVALID_HID);
+    char filename[1024];
 
     TESTING("new move");
 
@@ -1691,11 +1692,11 @@ delete_node(hid_t pid, hid_t id)
 static int
 test_unlink_rightleaf(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 150;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 150;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
@@ -1775,11 +1776,11 @@ error:
 static int
 test_unlink_rightnode(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 150;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 150;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
@@ -1862,11 +1863,11 @@ error:
 static int
 test_unlink_middlenode(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 250;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 250;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
@@ -2235,7 +2236,7 @@ error:
 static int
 test_resurrect_dataset(hid_t fapl)
 {
-    hid_t f = -1, s = -1, d = -1;
+    hid_t f = H5I_INVALID_HID, s = H5I_INVALID_HID, d = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting dataset after deletion");
@@ -2315,7 +2316,7 @@ error:
 static int
 test_resurrect_datatype(hid_t fapl)
 {
-    hid_t file = -1, type = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting datatype after deletion");
@@ -2392,7 +2393,7 @@ error:
 static int
 test_resurrect_group(hid_t fapl)
 {
-    hid_t file = -1, group = -1;
+    hid_t file = H5I_INVALID_HID, group = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting group after deletion");
@@ -2466,10 +2467,10 @@ error:
 static int
 test_unlink_chunked_dataset(hid_t fapl)
 {
-    hid_t   file_id                     = -1;
-    hid_t   dset_id                     = -1;
-    hid_t   space_id                    = -1;
-    hid_t   dcpl_id                     = -1;
+    hid_t   file_id                     = H5I_INVALID_HID;
+    hid_t   dset_id                     = H5I_INVALID_HID;
+    hid_t   space_id                    = H5I_INVALID_HID;
+    hid_t   dcpl_id                     = H5I_INVALID_HID;
     hsize_t dims[FILESPACE_NDIMS]       = {FILESPACE_DIM0, FILESPACE_DIM1, FILESPACE_DIM2};
     hsize_t max_dims[FILESPACE_NDIMS]   = {H5S_UNLIMITED, H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[FILESPACE_NDIMS] = {FILESPACE_CHUNK0, FILESPACE_CHUNK1, FILESPACE_CHUNK2};
@@ -2561,15 +2562,15 @@ error:
 static int
 test_full_group_compact(hid_t fapl)
 {
-    hid_t          file_id = -1;
-    hid_t          gid = -1, gid2 = -1; /* Group IDs */
-    H5O_info2_t    oi;                  /* Stat buffer for object */
-    char           objname[128];        /* Buffer for name of objects to create */
-    char           objname2[128];       /* Buffer for name of objects to create */
-    char           filename[1024];      /* Buffer for filename */
-    h5_stat_size_t keep_size;           /* Size of the file with objects to keep */
-    h5_stat_size_t file_size;           /* Size of each file created */
-    unsigned       u;                   /* Local index variable */
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info2_t    oi;                                            /* Stat buffer for object */
+    char           objname[128];                                  /* Buffer for name of objects to create */
+    char           objname2[128];                                 /* Buffer for name of objects to create */
+    char           filename[1024];                                /* Buffer for filename */
+    h5_stat_size_t keep_size;                                     /* Size of the file with objects to keep */
+    h5_stat_size_t file_size;                                     /* Size of each file created */
+    unsigned       u;                                             /* Local index variable */
 
     TESTING("unlinking non-empty compact group");
 
@@ -2719,16 +2720,16 @@ error:
 static int
 test_full_group_dense(hid_t fapl)
 {
-    hid_t          file_id = -1;
-    hid_t          gcpl    = (-1);      /* Group creation property list ID */
-    hid_t          gid = -1, gid2 = -1; /* Group IDs */
-    H5O_info2_t    oi;                  /* Stat buffer for object */
-    char           objname[128];        /* Buffer for name of objects to create */
-    char           objname2[128];       /* Buffer for name of objects to create */
-    char           filename[1024];      /* Buffer for filename */
-    h5_stat_size_t keep_size;           /* Size of the file with objects to keep */
-    h5_stat_size_t file_size;           /* Size of each file created */
-    unsigned       u;                   /* Local index variable */
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          gcpl    = (H5I_INVALID_HID);                   /* Group creation property list ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info2_t    oi;                                            /* Stat buffer for object */
+    char           objname[128];                                  /* Buffer for name of objects to create */
+    char           objname2[128];                                 /* Buffer for name of objects to create */
+    char           filename[1024];                                /* Buffer for filename */
+    h5_stat_size_t keep_size;                                     /* Size of the file with objects to keep */
+    h5_stat_size_t file_size;                                     /* Size of each file created */
+    unsigned       u;                                             /* Local index variable */
 
     TESTING("unlinking non-empty dense group");
 

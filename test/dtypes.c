@@ -750,7 +750,7 @@ test_compound_2(void)
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t          array_dt;
     int64_t        nmembs;
     int            i;
@@ -875,7 +875,7 @@ test_compound_3(void)
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t          array_dt;
     int64_t        nmembs;
     int            i;
@@ -1000,7 +1000,7 @@ test_compound_4(void)
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t          array_dt;
     int64_t        nmembs;
     int            i;
@@ -1225,7 +1225,7 @@ test_compound_6(void)
 
     const size_t   nelmts = NTESTELEM;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     int64_t        nmembs;
     int            i;
 
@@ -3688,12 +3688,12 @@ error:
 static int
 test_compound_18(void)
 {
-    hid_t       file     = -1;
-    hid_t       gid      = -1;
-    hid_t       did      = -1;
-    hid_t       aid      = -1;
-    hid_t       tid      = -1;
-    hid_t       sid      = -1;
+    hid_t       file     = H5I_INVALID_HID;
+    hid_t       gid      = H5I_INVALID_HID;
+    hid_t       did      = H5I_INVALID_HID;
+    hid_t       aid      = H5I_INVALID_HID;
+    hid_t       tid      = H5I_INVALID_HID;
+    hid_t       sid      = H5I_INVALID_HID;
     hsize_t     dim      = 1;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     char        filename[1024];
@@ -3842,7 +3842,7 @@ test_query(void)
         long   c;
         double d;
     };
-    hid_t file = -1, tid1 = -1, tid2 = -1;
+    hid_t file = H5I_INVALID_HID, tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;
     char  filename[1024];
     char  compnd_type[] = "Compound_type", enum_type[] = "Enum_type";
     short enum_val;
@@ -4081,10 +4081,11 @@ static int
 test_transient(hid_t fapl)
 {
     static hsize_t ds_size[2] = {10, 20};
-    hid_t          file = -1, type = -1, space = -1, dset = -1, t2 = -1;
-    char           filename[1024];
-    hid_t          ret_id; /* Generic hid_t return value    */
-    herr_t         status;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID,
+          t2 = H5I_INVALID_HID;
+    char   filename[1024];
+    hid_t  ret_id; /* Generic hid_t return value    */
+    herr_t status;
 
     TESTING("transient datatypes");
 
@@ -4232,7 +4233,8 @@ error:
 static int
 test_named(hid_t fapl)
 {
-    hid_t          file = -1, type = -1, space = -1, dset = -1, t2 = -1, t3 = -1, attr1 = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID,
+          t2 = H5I_INVALID_HID, t3 = H5I_INVALID_HID, attr1 = H5I_INVALID_HID;
     herr_t         status;
     static hsize_t ds_size[2] = {10, 20};
     size_t         i, j;
@@ -4631,8 +4633,8 @@ static int
 test_conv_str_1(void)
 {
     char *buf      = NULL;
-    hid_t src_type = -1;
-    hid_t dst_type = -1;
+    hid_t src_type = H5I_INVALID_HID;
+    hid_t dst_type = H5I_INVALID_HID;
 
     TESTING("string conversions");
 
@@ -4962,8 +4964,8 @@ static int
 test_conv_str_2(void)
 {
     char        *buf    = NULL, s[80];
-    hid_t        c_type = -1;
-    hid_t        f_type = -1;
+    hid_t        c_type = H5I_INVALID_HID;
+    hid_t        f_type = H5I_INVALID_HID;
     const size_t nelmts = NTESTELEM;
     size_t       i, j, nchars;
     int          ret_value = 1;
@@ -5031,8 +5033,8 @@ static int
 test_conv_str_3(void)
 {
     char        *buf    = NULL;
-    hid_t        type   = -1;
-    hid_t        super  = -1;
+    hid_t        type   = H5I_INVALID_HID;
+    hid_t        super  = H5I_INVALID_HID;
     const size_t nelmts = NTESTELEM;
     size_t       i, j, nchars;
     int          ret_value = 1;
@@ -5168,8 +5170,8 @@ test_conv_enum_1(void)
 {
     const size_t nelmts = NTESTELEM;
     int          i, val, *buf = NULL;
-    hid_t        t1 = -1;
-    hid_t        t2 = -1;
+    hid_t        t1 = H5I_INVALID_HID;
+    hid_t        t2 = H5I_INVALID_HID;
     char         s[80];
     int          ret_value = 1;
     size_t       u;
@@ -5243,7 +5245,7 @@ error:
 static int
 test_conv_enum_2(void)
 {
-    hid_t       srctype = -1, dsttype = -1, oddsize = -1;
+    hid_t       srctype = H5I_INVALID_HID, dsttype = H5I_INVALID_HID, oddsize = H5I_INVALID_HID;
     int        *data = NULL, i, nerrors = 0;
     const char *mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
 
@@ -5317,7 +5319,7 @@ static int
 test_conv_bitfield(void)
 {
     unsigned char buf[4];
-    hid_t         st = -1, dt = -1;
+    hid_t         st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
 
     TESTING("bitfield conversions");
 
@@ -5411,7 +5413,7 @@ error:
 static int
 test_bitfield_funcs(void)
 {
-    hid_t      type = -1, ntype = -1, super = -1;
+    hid_t      type = H5I_INVALID_HID, ntype = H5I_INVALID_HID, super = H5I_INVALID_HID;
     size_t     size;
     char      *tag = 0;
     H5T_pad_t  inpad;
@@ -5613,7 +5615,7 @@ static int
 opaque_check(int tag_it)
 {
 #define OPAQUE_NELMTS 1000
-    hid_t  st = -1, dt = -1;
+    hid_t  st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     herr_t status;
     char   buf[1]; /*not really used*/
     int    saved;
@@ -5689,7 +5691,7 @@ static int
 opaque_long(void)
 {
     char  *long_tag = NULL;
-    hid_t  dt       = -1;
+    hid_t  dt       = H5I_INVALID_HID;
     herr_t ret;
 
     /* Build opaque type */
@@ -5743,7 +5745,7 @@ error:
 static int
 opaque_funcs(void)
 {
-    hid_t      type = -1, super = -1;
+    hid_t      type = H5I_INVALID_HID, super = H5I_INVALID_HID;
     size_t     size;
     H5T_pad_t  inpad;
     H5T_cset_t cset;
@@ -6455,9 +6457,9 @@ test_latest(void)
         long   c;
         double d;
     };
-    hid_t             file = (-1);                     /* File ID */
-    hid_t             tid1 = (-1), tid2 = (-1);        /* Datatype ID */
-    hid_t             fapl = (-1);                     /* File access property list */
+    hid_t             file = (H5I_INVALID_HID);                           /* File ID */
+    hid_t             tid1 = (H5I_INVALID_HID), tid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t             fapl = (H5I_INVALID_HID);                           /* File access property list */
     H5O_native_info_t oi;                              /* Stat buffer for committed datatype */
     hsize_t           old_dtype_oh_size;               /* Size of object header with "old" format */
     hsize_t           new_dtype_oh_size;               /* Size of object header with "new" format */
@@ -7073,9 +7075,10 @@ test_set_order_compound(hid_t fapl)
         atomic_cmpd d[3][4];
     } complex_cmpd;
 
-    hid_t   file = -1;
-    hid_t   cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
-    hid_t   vl_id   = -1;
+    hid_t file = H5I_INVALID_HID;
+    hid_t cmpd = H5I_INVALID_HID, memb_cmpd = H5I_INVALID_HID, memb_array1 = H5I_INVALID_HID,
+          memb_array2 = H5I_INVALID_HID, cmpd_array = H5I_INVALID_HID;
+    hid_t   vl_id   = H5I_INVALID_HID;
     hsize_t dims[2] = {3, 4}; /* Array dimensions */
     char    filename[1024];
     herr_t  ret; /* Generic return value */
@@ -7224,7 +7227,8 @@ error:
 static int
 test_named_indirect_reopen(hid_t fapl)
 {
-    hid_t          file = -1, type = -1, reopened_type = -1, strtype = -1, dset = -1, space = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID, reopened_type = H5I_INVALID_HID,
+          strtype = H5I_INVALID_HID, dset = H5I_INVALID_HID, space = H5I_INVALID_HID;
     static hsize_t dims[1] = {3};
     size_t         dt_size;
     int            enum_value;
@@ -7592,11 +7596,11 @@ create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t lo
 static int
 test_delete_obj_named(hid_t fapl)
 {
-    hid_t        filea1 = -1, filea2 = -1, fileb = -1; /* File IDs */
-    hid_t        attr  = -1;                           /* Attribute ID */
-    hid_t        dset  = -1;                           /* Dataset ID */
-    hid_t        fapl2 = -1;                           /* File access property list ID */
-    H5F_libver_t low, high;                            /* File format bounds */
+    hid_t        filea1 = H5I_INVALID_HID, filea2 = H5I_INVALID_HID, fileb = H5I_INVALID_HID; /* File IDs */
+    hid_t        attr  = H5I_INVALID_HID; /* Attribute ID */
+    hid_t        dset  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl2 = H5I_INVALID_HID; /* File access property list ID */
+    H5F_libver_t low, high;               /* File format bounds */
     char         filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -7709,15 +7713,15 @@ error:
 static int
 test_delete_obj_named_fileid(hid_t fapl)
 {
-    hid_t        filea1 = -1, filea2 = -1, fileb = -1; /* File IDs */
-    hid_t        dset_fid = -1;                        /* File ID from dataset */
-    hid_t        type_fid = -1;                        /* File ID from datatype */
-    hid_t        attr_fid = -1;                        /* File ID from attribute */
-    hid_t        type     = -1;                        /* Datatype ID */
-    hid_t        attr     = -1;                        /* Attribute ID */
-    hid_t        dset     = -1;                        /* Dataset ID */
-    hid_t        fapl2    = -1;                        /* File access property list ID */
-    H5F_libver_t low, high;                            /* File format bounds */
+    hid_t        filea1 = H5I_INVALID_HID, filea2 = H5I_INVALID_HID, fileb = H5I_INVALID_HID; /* File IDs */
+    hid_t        dset_fid = H5I_INVALID_HID; /* File ID from dataset */
+    hid_t        type_fid = H5I_INVALID_HID; /* File ID from datatype */
+    hid_t        attr_fid = H5I_INVALID_HID; /* File ID from attribute */
+    hid_t        type     = H5I_INVALID_HID; /* Datatype ID */
+    hid_t        attr     = H5I_INVALID_HID; /* Attribute ID */
+    hid_t        dset     = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl2    = H5I_INVALID_HID; /* File access property list ID */
+    H5F_libver_t low, high;                  /* File format bounds */
     char         filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -7908,14 +7912,14 @@ error:
 static int
 test_deprec(hid_t fapl)
 {
-    hid_t    file     = -1;       /* File ID */
-    hid_t    type     = -1;       /* Datatype ID */
-    unsigned rank     = 2;        /* Rank for array datatype */
-    hsize_t  dims[2]  = {3, 3};   /* Dimensions for array datatype */
-    int      perm[2]  = {0, 1};   /* Dimensions permutations for array datatype */
-    hsize_t  rdims[2] = {0, 0};   /* Dimensions for querying array datatype */
-    int      rperm[2] = {-2, -2}; /* Dimensions permutations for array datatype */
-    bool     dim_mismatch;        /* Whether any dimensions didn't match */
+    hid_t    file     = H5I_INVALID_HID; /* File ID */
+    hid_t    type     = H5I_INVALID_HID; /* Datatype ID */
+    unsigned rank     = 2;               /* Rank for array datatype */
+    hsize_t  dims[2]  = {3, 3};          /* Dimensions for array datatype */
+    int      perm[2]  = {0, 1};          /* Dimensions permutations for array datatype */
+    hsize_t  rdims[2] = {0, 0};          /* Dimensions for querying array datatype */
+    int      rperm[2] = {-2, -2};        /* Dimensions permutations for array datatype */
+    bool     dim_mismatch;               /* Whether any dimensions didn't match */
     char     filename[1024];
     unsigned u;      /* Local index variable */
     herr_t   status; /* Generic routine value */
@@ -8076,13 +8080,13 @@ error:
 static int
 test_utf_ascii_conv(void)
 {
-    hid_t       fid        = -1;
-    hid_t       did        = -1;
-    hid_t       utf8_vtid  = -1;
-    hid_t       ascii_vtid = -1;
-    hid_t       utf8_tid   = -1;
-    hid_t       ascii_tid  = -1;
-    hid_t       sid        = -1;
+    hid_t       fid        = H5I_INVALID_HID;
+    hid_t       did        = H5I_INVALID_HID;
+    hid_t       utf8_vtid  = H5I_INVALID_HID;
+    hid_t       ascii_vtid = H5I_INVALID_HID;
+    hid_t       utf8_tid   = H5I_INVALID_HID;
+    hid_t       ascii_tid  = H5I_INVALID_HID;
+    hid_t       sid        = H5I_INVALID_HID;
     const char *utf8_w     = "foo!";
     char       *ascii_r    = NULL;
     const char *ascii_w    = "bar!";
@@ -8340,8 +8344,8 @@ error:
 static herr_t
 verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
 {
-    hid_t       base_dtype = -1;
-    hid_t       mem_dtype  = -1;
+    hid_t       base_dtype = H5I_INVALID_HID;
+    hid_t       mem_dtype  = H5I_INVALID_HID;
     H5T_t      *dtypep     = NULL;         /* Internal structure of a datatype */
     H5T_class_t type_cls   = H5T_NO_CLASS; /* Temporary var for datatype class */
     int         nmembers   = 0;
@@ -8509,25 +8513,25 @@ test_versionbounds(void)
         color_t     enum_color;
     } outer_cmp_t;
 
-    hid_t        file            = -1;          /* File ID */
-    hid_t        space           = -1;          /* Dataspace ID */
-    hid_t        dset            = -1;          /* Dataset ID */
-    hid_t        fcpl            = -1;          /* File creation property list ID */
-    hid_t        fapl            = -1;          /* Copy of file access property list ID */
-    hid_t        dcpl            = -1;          /* Dataset creation property list ID */
-    hid_t        dset_dtype      = -1;          /* Dataset's datatype */
-    hid_t        arr_chartype    = -1;          /* Array of characters datatype */
-    hid_t        vlen_floattype  = -1;          /* Vlen of float datatype */
-    hid_t        enum_type       = -1;          /* Enumeration datatype */
-    hid_t        outer_cmp_type  = -1;          /* Outer compound datatype */
-    hid_t        inner_cmp_type  = -1;          /* Inner compound datatype */
-    hid_t        simple_cmp_type = -1;          /* Simple cmpd dtype, contains no other cmpd */
-    hid_t        outer_arr_type  = -1;          /* Outermost array datatype */
-    hid_t        inner_arr_type  = -1;          /* Inner array datatype */
-    H5F_t       *filep           = NULL;        /* Pointer to internal structure of a file */
-    H5T_t       *dtypep          = NULL;        /* Pointer to internal structure of a datatype */
-    hsize_t      arr_dim[]       = {ARRAY_LEN}; /* Length of the array */
-    int          low, high;                     /* Indices for iterating over versions */
+    hid_t        file            = H5I_INVALID_HID; /* File ID */
+    hid_t        space           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dset            = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fcpl            = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t        fapl            = H5I_INVALID_HID; /* Copy of file access property list ID */
+    hid_t        dcpl            = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t        dset_dtype      = H5I_INVALID_HID; /* Dataset's datatype */
+    hid_t        arr_chartype    = H5I_INVALID_HID; /* Array of characters datatype */
+    hid_t        vlen_floattype  = H5I_INVALID_HID; /* Vlen of float datatype */
+    hid_t        enum_type       = H5I_INVALID_HID; /* Enumeration datatype */
+    hid_t        outer_cmp_type  = H5I_INVALID_HID; /* Outer compound datatype */
+    hid_t        inner_cmp_type  = H5I_INVALID_HID; /* Inner compound datatype */
+    hid_t        simple_cmp_type = H5I_INVALID_HID; /* Simple cmpd dtype, contains no other cmpd */
+    hid_t        outer_arr_type  = H5I_INVALID_HID; /* Outermost array datatype */
+    hid_t        inner_arr_type  = H5I_INVALID_HID; /* Inner array datatype */
+    H5F_t       *filep           = NULL;            /* Pointer to internal structure of a file */
+    H5T_t       *dtypep          = NULL;            /* Pointer to internal structure of a datatype */
+    hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
+    int          low, high;                         /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
                                H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
     int          versions_count = 6; /* Number of version bounds in the array */

@@ -1003,11 +1003,11 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
 static void
 test_corrupted_attnamelen(void)
 {
-    hid_t          fid = -1;   /* File ID */
-    hid_t          did = -1;   /* Dataset ID */
-    searched_err_t err_caught; /* Data to be passed to callback func */
-    int            err_status; /* Status returned by H5Aiterate2 */
-    herr_t         ret;        /* Return value */
+    hid_t          fid = H5I_INVALID_HID; /* File ID */
+    hid_t          did = H5I_INVALID_HID; /* Dataset ID */
+    searched_err_t err_caught;            /* Data to be passed to callback func */
+    int            err_status;            /* Status returned by H5Aiterate2 */
+    herr_t         ret;                   /* Return value */
     bool           driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 

@@ -183,7 +183,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     size_t      max_dsets;
     size_t      buf_size;
     size_t      ndsets;
-    hid_t       file_id = -1;
+    hid_t       file_id = H5I_INVALID_HID;
     hid_t       dcpl_id[MAX_DSETS];
     hsize_t     dset_dims[MAX_DSETS][3];
     hsize_t     chunk_dims[2];

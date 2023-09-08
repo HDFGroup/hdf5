@@ -89,9 +89,9 @@ static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *cl
 static herr_t
 test_error(hid_t file)
 {
-    hid_t       dataset   = -1;
-    hid_t       space     = -1;
-    hid_t       estack_id = -1;
+    hid_t       dataset   = H5I_INVALID_HID;
+    hid_t       space     = H5I_INVALID_HID;
+    hid_t       estack_id = H5I_INVALID_HID;
     hsize_t     dims[2];
     const char *FUNC_test_error = "test_error";
     H5E_auto2_t old_func;
@@ -456,10 +456,10 @@ error:
 static herr_t
 test_create(void)
 {
-    const char *err_func = "test_create";   /* Function name for pushing error */
-    const char *err_msg  = "Error message"; /* Error message for pushing error */
-    ssize_t     err_num;                    /* Number of errors on stack */
-    hid_t       estack_id = -1;             /* Error stack ID */
+    const char *err_func = "test_create";    /* Function name for pushing error */
+    const char *err_msg  = "Error message";  /* Error message for pushing error */
+    ssize_t     err_num;                     /* Number of errors on stack */
+    hid_t       estack_id = H5I_INVALID_HID; /* Error stack ID */
 
     /* Create an empty error stack */
     if ((estack_id = H5Ecreate_stack()) < 0)
@@ -512,11 +512,11 @@ error:
 static herr_t
 test_copy(void)
 {
-    const char *err_func = "test_copy";     /* Function name for pushing error */
-    const char *err_msg  = "Error message"; /* Error message for pushing error */
-    ssize_t     err_num;                    /* Number of errors on stack */
-    hid_t       estack_id = -1;             /* Error stack ID */
-    herr_t      ret;                        /* Generic return value */
+    const char *err_func = "test_copy";      /* Function name for pushing error */
+    const char *err_msg  = "Error message";  /* Error message for pushing error */
+    ssize_t     err_num;                     /* Number of errors on stack */
+    hid_t       estack_id = H5I_INVALID_HID; /* Error stack ID */
+    herr_t      ret;                         /* Generic return value */
 
     /* Push an error with a long description */
     if (H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
@@ -585,8 +585,8 @@ test_append(void)
     const char *err_msg1 = "Error message #1"; /* Error message #1 for pushing error */
     const char *err_msg2 = "Error message #2"; /* Error message #2 for pushing error */
     ssize_t     err_num;                       /* Number of errors on stack */
-    hid_t       estack_id1 = -1;               /* Error stack ID */
-    hid_t       estack_id2 = -1;               /* Error stack ID */
+    hid_t       estack_id1 = H5I_INVALID_HID;  /* Error stack ID */
+    hid_t       estack_id2 = H5I_INVALID_HID;  /* Error stack ID */
     herr_t      ret;                           /* Generic return value */
 
     /* Push an error */
@@ -737,8 +737,8 @@ static herr_t
 test_filter_error(const char *fname, hid_t fapl)
 {
     const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
-    hid_t       file     = -1;
-    hid_t       dataset  = -1;
+    hid_t       file     = H5I_INVALID_HID;
+    hid_t       dataset  = H5I_INVALID_HID;
     int         buf[20];
 
     fprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
@@ -777,9 +777,9 @@ error:
 int
 main(void)
 {
-    hid_t       file      = -1;
-    hid_t       fapl      = -1;
-    hid_t       estack_id = -1;
+    hid_t       file      = H5I_INVALID_HID;
+    hid_t       fapl      = H5I_INVALID_HID;
+    hid_t       estack_id = H5I_INVALID_HID;
     char        filename[1024];
     const char *env_h5_drvr; /* File driver value from environment */
     const char *FUNC_main = "main";

@@ -397,7 +397,7 @@ test_fapl_config_validation(void)
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id = -1; /* file access property list ID */
+    hid_t            fapl_id = H5I_INVALID_HID; /* file access property list ID */
     H5FD_hdfs_fapl_t config;
     H5FD_hdfs_fapl_t fa_fetch;
     herr_t           success  = SUCCEED;
@@ -588,9 +588,9 @@ test_hdfs_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;             /* file access property list ID */
-    hid_t driver_id = -1;           /* ID for this VFD              */
-    unsigned long driver_flags = 0; /* VFD feature flags            */
+    hid_t fapl_id = H5I_INVALID_HID;   /* file access property list ID */
+    hid_t driver_id = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;    /* VFD feature flags            */
     H5FD_hdfs_fapl_t hdfs_fa_0 = {
         1,    /* version*/
         "",   /* node name */
@@ -779,8 +779,8 @@ test_vfd_open(void)
     unsigned i = 0;
     unsigned failing_conditions_count = 10;
     H5FD_t *fd = NULL;
-    hid_t fapl_hdfs = -1;
-    hid_t fapl_unconfigured = -1;
+    hid_t fapl_hdfs = H5I_INVALID_HID;
+    hid_t fapl_unconfigured = H5I_INVALID_HID;
 
     TESTING("HDFS VFD-level open");
 
@@ -934,7 +934,7 @@ test_eof_eoa(void)
      ************************/
 
     H5FD_t *fd_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS eof/eoa gets and sets");
 
@@ -1034,7 +1034,7 @@ test_H5FDread_without_eoa_set_fails(void)
     char buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int i = 0;
     H5FD_t *file_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
 
@@ -1206,7 +1206,7 @@ test_read(void)
     char buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int i = 0;
     H5FD_t *file_raven = NULL;
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read/range-gets");
 
@@ -1349,7 +1349,7 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
     H5FD_t *file = NULL;
     const char data[36] = "The Force shall be with you, always";
 
@@ -1485,8 +1485,8 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file = -1;
-    hid_t fapl_id = -1;
+    hid_t file = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS file access through HD5F library (H5F API)");
 

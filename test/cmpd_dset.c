@@ -1920,10 +1920,10 @@ error:
 static unsigned
 test_ooo_order(char *filename, hid_t fapl_id)
 {
-    hid_t  file      = -1;   /* File ID */
-    hid_t  dtype     = -1;   /* Datatype IDs */
-    hid_t  dtype_tmp = -1;   /* Temp Datatype ID */
-    H5T_t *dt        = NULL; /* Datatype pointer */
+    hid_t  file      = H5I_INVALID_HID; /* File ID */
+    hid_t  dtype     = H5I_INVALID_HID; /* Datatype IDs */
+    hid_t  dtype_tmp = H5I_INVALID_HID; /* Temp Datatype ID */
+    H5T_t *dt        = NULL;            /* Datatype pointer */
 
     TESTING("that compound member insertion order is preserved");
 

@@ -25,10 +25,10 @@ static int test_set(void);
 static int test_getset(hid_t dxpl_id_simple);
 
 /* These are needed for multiple tests, so are declared here globally and are init'ed in init_test */
-hid_t dset_id_int         = -1;
-hid_t dset_id_float       = -1;
-hid_t dset_id_int_chunk   = -1;
-hid_t dset_id_float_chunk = -1;
+hid_t dset_id_int         = H5I_INVALID_HID;
+hid_t dset_id_float       = H5I_INVALID_HID;
+hid_t dset_id_int_chunk   = H5I_INVALID_HID;
+hid_t dset_id_float_chunk = H5I_INVALID_HID;
 
 const float windchillFfloat[ROWS][COLS] = {
     {36.0F, 31.0F, 25.0F, 19.0F, 13.0F, 7.0F, 1.0F, -5.0F, -11.0F, -16.0F, -22.0F, -28.0F, -34.0F, -40.0F,
@@ -315,13 +315,13 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
 int
 main(void)
 {
-    hid_t dxpl_id_c_to_f          = -1;
+    hid_t dxpl_id_c_to_f          = H5I_INVALID_HID;
     hid_t dxpl_id_c_to_f_copy     = 1;
-    hid_t dxpl_id_simple          = -1;
-    hid_t dxpl_id_polynomial      = -1;
-    hid_t dxpl_id_polynomial_copy = -1;
-    hid_t dxpl_id_utrans_inv      = -1;
-    hid_t file_id                 = -1;
+    hid_t dxpl_id_simple          = H5I_INVALID_HID;
+    hid_t dxpl_id_polynomial      = H5I_INVALID_HID;
+    hid_t dxpl_id_polynomial_copy = H5I_INVALID_HID;
+    hid_t dxpl_id_utrans_inv      = H5I_INVALID_HID;
+    hid_t file_id                 = H5I_INVALID_HID;
 
     const char *c_to_f     = "(9/5.0)*x + 32";
     const char *simple     = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
@@ -452,11 +452,11 @@ init_test(hid_t file_id)
     /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */
     const char *utrans = "(x/4+25)*3";
 
-    hid_t   dataspace      = -1;
-    hid_t   dxpl_id_f_to_c = -1;
-    hid_t   dxpl_id_utrans = -1;
-    hid_t   cparms         = -1;
-    hid_t   filespace      = -1;
+    hid_t   dataspace      = H5I_INVALID_HID;
+    hid_t   dxpl_id_f_to_c = H5I_INVALID_HID;
+    hid_t   dxpl_id_utrans = H5I_INVALID_HID;
+    hid_t   cparms         = H5I_INVALID_HID;
+    hid_t   filespace      = H5I_INVALID_HID;
     hsize_t dim[2]         = {ROWS, COLS};
     hsize_t offset[2]      = {0, 0};
 
@@ -912,7 +912,7 @@ error:
 static int
 test_set(void)
 {
-    hid_t       dxpl_id = -1;
+    hid_t       dxpl_id = H5I_INVALID_HID;
     H5E_auto2_t func;
     const char *str        = "(9/5.0)*x + 32";
     char       *ptrgetTest = NULL;

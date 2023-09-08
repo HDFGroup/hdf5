@@ -3585,7 +3585,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
 {
     bool                success        = false; /* will set to true if appropriate. */
     bool                enable_rpt_fcn = false;
-    hid_t               fid            = -1;
+    hid_t               fid            = H5I_INVALID_HID;
     H5AC_cache_config_t config;
     H5AC_cache_config_t test_config;
     H5F_t              *file_ptr  = NULL;
@@ -4902,7 +4902,7 @@ smoke_check_1(int metadata_write_strategy)
     bool          success = true;
     int           i;
     int           max_nerrors;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5064,7 +5064,7 @@ smoke_check_2(int metadata_write_strategy)
     bool          success = true;
     int           i;
     int           max_nerrors;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5267,7 +5267,7 @@ smoke_check_3(int metadata_write_strategy)
     int           max_count;
     int           min_idx;
     int           max_idx;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5550,7 +5550,7 @@ smoke_check_4(int metadata_write_strategy)
     int           max_count;
     int           min_idx;
     int           max_idx;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -5823,7 +5823,7 @@ smoke_check_5(int metadata_write_strategy)
     bool          success = true;
     int           i;
     int           max_nerrors;
-    hid_t         fid       = -1;
+    hid_t         fid       = H5I_INVALID_HID;
     H5F_t        *file_ptr  = NULL;
     H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
@@ -6095,7 +6095,7 @@ trace_file_check(int metadata_write_strategy)
     int                 max_nerrors;
     size_t              expected_line_len;
     size_t              actual_line_len;
-    hid_t               fid            = -1;
+    hid_t               fid            = H5I_INVALID_HID;
     H5F_t              *file_ptr       = NULL;
     H5C_t              *cache_ptr      = NULL;
     FILE               *trace_file_ptr = NULL;
@@ -6411,7 +6411,7 @@ smoke_check_6(int metadata_write_strategy)
     bool                    success = true;
     int                     i;
     int                     max_nerrors;
-    hid_t                   fid       = -1;
+    hid_t                   fid       = H5I_INVALID_HID;
     H5F_t                  *file_ptr  = NULL;
     H5C_t                  *cache_ptr = NULL;
     struct mssg_t           mssg;

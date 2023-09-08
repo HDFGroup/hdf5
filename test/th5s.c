@@ -1210,8 +1210,8 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 {
     hid_t          sid1, sid2, sid3; /* Dataspace ID        */
     hid_t          decoded_sid1, decoded_sid2, decoded_sid3;
-    int            rank;           /* Logical rank of dataspace    */
-    hid_t          fapl      = -1; /* File access property list ID */
+    int            rank;                        /* Logical rank of dataspace    */
+    hid_t          fapl      = H5I_INVALID_HID; /* File access property list ID */
     hsize_t        dims1[]   = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     size_t         sbuf_size = 0, null_size = 0, scalar_size = 0;
     unsigned char *sbuf = NULL, *null_sbuf = NULL, *scalar_buf = NULL;
@@ -1608,9 +1608,9 @@ static herr_t
 test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, uint8_t expected_enc_size,
                         bool expected_to_fail)
 {
-    char   *buf = NULL; /* Pointer to the encoded buffer */
-    size_t  buf_size;   /* Size of the encoded buffer */
-    hid_t   d_sid = -1; /* The decoded dataspace ID */
+    char   *buf = NULL;              /* Pointer to the encoded buffer */
+    size_t  buf_size;                /* Size of the encoded buffer */
+    hid_t   d_sid = H5I_INVALID_HID; /* The decoded dataspace ID */
     htri_t  check;
     hsize_t in_low_bounds[1];  /* The low bounds for the selection for in_sid */
     hsize_t in_high_bounds[1]; /* The high bounds for the selection for in_sid */
@@ -1711,10 +1711,10 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, 
 static void
 test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t    fapl            = -1;      /* File access property list ID */
-    hid_t    sid             = -1;      /* Dataspace ID */
-    hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
-    unsigned num_dsets       = 513;     /* Used to calculate dimension size */
+    hid_t    fapl            = H5I_INVALID_HID; /* File access property list ID */
+    hid_t    sid             = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t  numparticles    = 8388608;         /* Used to calculate dimension size */
+    unsigned num_dsets       = 513;             /* Used to calculate dimension size */
     hsize_t  total_particles = numparticles * num_dsets;
     hsize_t  vdsdims[1]      = {total_particles}; /* Dimension size */
     hsize_t  start, stride, count, block;         /* Selection info */
@@ -1906,7 +1906,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 static void
 test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t    fapl = -1;                 /* File access property list ID */
+    hid_t    fapl = H5I_INVALID_HID;    /* File access property list ID */
     hid_t    sid;                       /* Dataspace ID */
     hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
     unsigned num_dsets       = 513;     /* Used to calculate dimension size */
@@ -2031,7 +2031,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
 static void
 test_h5s_encode_points(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t    fapl = -1;                 /* File access property list ID */
+    hid_t    fapl = H5I_INVALID_HID;    /* File access property list ID */
     hid_t    sid;                       /* Dataspace ID */
     hsize_t  numparticles    = 8388608; /* Used to calculate dimension size */
     unsigned num_dsets       = 513;     /* used to calculate dimension size */
@@ -3120,8 +3120,11 @@ test_h5s_extent_equal(void)
 static void
 test_h5s_extent_copy(void)
 {
-    hid_t spaces[14] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; /* Array of all dataspaces */
-    hid_t tmp_space  = -1;
+    hid_t spaces[14] = {
+        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+        H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID}; /* Array of all dataspaces */
+    hid_t   tmp_space   = H5I_INVALID_HID;
     hsize_t d1_dims1[1] = {10}, /* 1-D dimensions */
         d1_dims2[1] = {20}, d1_dims3[1] = {H5S_UNLIMITED};
     hsize_t d2_dims1[2] = {10, 10}, /* 2-D dimensions */
@@ -3342,15 +3345,15 @@ test_h5s_bug2(void)
 static void
 test_versionbounds(void)
 {
-    hid_t        file       = -1; /* File ID */
-    hid_t        space      = -1; /* Dataspace ID */
-    hid_t        dset       = -1; /* Dataset ID */
-    hid_t        fapl       = -1; /* File access property list ID */
-    hid_t        dset_space = -1; /* Retrieved dataset's dataspace ID */
-    hsize_t      dim[1];          /* Dataset dimensions */
-    H5F_libver_t low, high;       /* File format bounds */
-    H5S_t       *spacep = NULL;   /* Pointer to internal dataspace */
-    herr_t       ret    = 0;      /* Generic return value */
+    hid_t        file       = H5I_INVALID_HID; /* File ID */
+    hid_t        space      = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dset       = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl       = H5I_INVALID_HID; /* File access property list ID */
+    hid_t        dset_space = H5I_INVALID_HID; /* Retrieved dataset's dataspace ID */
+    hsize_t      dim[1];                       /* Dataset dimensions */
+    H5F_libver_t low, high;                    /* File format bounds */
+    H5S_t       *spacep = NULL;                /* Pointer to internal dataspace */
+    herr_t       ret    = 0;                   /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Version Bounds\n"));

@@ -176,19 +176,19 @@ compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ bool *
 static herr_t
 ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
 {
-    hid_t  did           = -1;           /* Dataset ID                                   */
-    hid_t  dxpl_id       = -1;           /* Dataset xfer property list ID                */
-    hid_t  write_dxpl_id = -1;           /* Dataset xfer property list ID for writing    */
-    hid_t  sid           = -1;           /* Dataspace ID                                 */
-    void  *tconv_buf     = NULL;         /* Temporary conversion buffer                  */
-    int  **orig          = NULL;         /* Data written to the dataset                  */
-    int  **read          = NULL;         /* Data read from the dataset                   */
-    size_t r, c;                         /* Data rows and columns                        */
-    size_t hs_r, hs_c, hs_offr, hs_offc; /* Hypserslab sizes and offsets                 */
-    size_t i, j;                         /* Local index variables                        */
-    int    n = 0;                        /* Value written to point array                 */
-    bool   are_same;                     /* Output from dataset compare function         */
-    int ***save_array = NULL;            /* (Global) array where the final data go       */
+    hid_t  did           = H5I_INVALID_HID; /* Dataset ID                                   */
+    hid_t  dxpl_id       = H5I_INVALID_HID; /* Dataset xfer property list ID                */
+    hid_t  write_dxpl_id = H5I_INVALID_HID; /* Dataset xfer property list ID for writing    */
+    hid_t  sid           = H5I_INVALID_HID; /* Dataspace ID                                 */
+    void  *tconv_buf     = NULL;            /* Temporary conversion buffer                  */
+    int  **orig          = NULL;            /* Data written to the dataset                  */
+    int  **read          = NULL;            /* Data read from the dataset                   */
+    size_t r, c;                            /* Data rows and columns                        */
+    size_t hs_r, hs_c, hs_offr, hs_offc;    /* Hypserslab sizes and offsets                 */
+    size_t i, j;                            /* Local index variables                        */
+    int    n = 0;                           /* Value written to point array                 */
+    bool   are_same;                        /* Output from dataset compare function         */
+    int ***save_array = NULL;               /* (Global) array where the final data go       */
 
     /* initialize */
     r = (size_t)sizes_g[0];
@@ -437,9 +437,9 @@ error:
 static herr_t
 test_dataset_write_with_filters(hid_t fid)
 {
-    hid_t        dcpl_id = -1;     /* Dataset creation property list ID        */
-    unsigned int filter1_data;     /* Data used by filter 1                    */
-    unsigned int libver_values[4]; /* Used w/ the filter that makes HDF5 calls */
+    hid_t        dcpl_id = H5I_INVALID_HID; /* Dataset creation property list ID        */
+    unsigned int filter1_data;              /* Data used by filter 1                    */
+    unsigned int libver_values[4];          /* Used w/ the filter that makes HDF5 calls */
 #ifdef H5_HAVE_FILTER_DEFLATE
     unsigned int compress_level; /* Deflate compression level */
 #endif
@@ -633,7 +633,7 @@ error:
 static herr_t
 test_dataset_read_with_filters(hid_t fid)
 {
-    hid_t did = -1; /* Dataset ID */
+    hid_t did = H5I_INVALID_HID; /* Dataset ID */
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -768,8 +768,8 @@ error:
 static herr_t
 test_no_read_when_plugins_disabled(hid_t fid)
 {
-    hid_t    did = -1;     /* Dataset ID */
-    unsigned plugin_flags; /* Plugin access flags */
+    hid_t    did = H5I_INVALID_HID; /* Dataset ID */
+    unsigned plugin_flags;          /* Plugin access flags */
 
     TESTING("filter plugin 1 with filter plugins disabled");
 
@@ -826,9 +826,9 @@ error:
 static herr_t
 test_creating_groups_using_plugins(hid_t fid)
 {
-    hid_t gcpl_id = -1;
-    hid_t gid     = -1;
-    hid_t sub_gid = -1;
+    hid_t gcpl_id = H5I_INVALID_HID;
+    hid_t gid     = H5I_INVALID_HID;
+    hid_t sub_gid = H5I_INVALID_HID;
     int   i;
     char  subgroup_name[256];
 
@@ -893,8 +893,8 @@ error:
 static herr_t
 test_opening_groups_using_plugins(hid_t fid)
 {
-    hid_t gid     = -1;
-    hid_t sub_gid = -1;
+    hid_t gid     = H5I_INVALID_HID;
+    hid_t sub_gid = H5I_INVALID_HID;
     int   i;
     char  subgroup_name[256];
 
@@ -1433,9 +1433,9 @@ int
 main(void)
 {
     char     filename[FILENAME_BUF_SIZE];
-    hid_t    fid            = -1;
-    hid_t    old_ff_fapl_id = -1;
-    hid_t    new_ff_fapl_id = -1;
+    hid_t    fid            = H5I_INVALID_HID;
+    hid_t    old_ff_fapl_id = H5I_INVALID_HID;
+    hid_t    new_ff_fapl_id = H5I_INVALID_HID;
     unsigned new_format;
     int      nerrors = 0;
 

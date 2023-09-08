@@ -41,7 +41,7 @@ static int bm[NX][NY]; /* Data buffers */
 static int
 setup(hid_t fapl)
 {
-    hid_t file = -1;
+    hid_t file = H5I_INVALID_HID;
     char  filename[1024];
 
     /* file 1 */
@@ -111,7 +111,7 @@ error:
 static int
 test_basic(hid_t fapl)
 {
-    hid_t file1 = -1, file2 = -1, grp = -1;
+    hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     char  filename1[1024], filename2[1024];
 
     TESTING("basic functionality");
@@ -162,7 +162,8 @@ error:
 static int
 test_illegal(hid_t fapl)
 {
-    hid_t  file1 = -1, file1b = -1, file2 = -1, file3 = -1, file3b = -1, mnt = -1;
+    hid_t file1 = H5I_INVALID_HID, file1b = H5I_INVALID_HID, file2 = H5I_INVALID_HID, file3 = H5I_INVALID_HID,
+          file3b = H5I_INVALID_HID, mnt = H5I_INVALID_HID;
     char   filename1[1024], filename2[1024], filename3[1024];
     herr_t status;
 
@@ -301,8 +302,9 @@ error:
 static int
 test_samefile(hid_t fapl)
 {
-    hid_t      file1a = -1, file1b = -1, file2 = -1, file3 = -1;
-    hid_t      mnt1a = -1, mnt1b = -1;
+    hid_t file1a = H5I_INVALID_HID, file1b = H5I_INVALID_HID, file2 = H5I_INVALID_HID,
+          file3      = H5I_INVALID_HID;
+    hid_t      mnt1a = H5I_INVALID_HID, mnt1b = H5I_INVALID_HID;
     char       filename1[1024], filename2[1024], filename3[1024];
     H5G_info_t grp_info;
     herr_t     status;
@@ -443,7 +445,7 @@ error:
 static int
 test_hide(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1, grp = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     H5O_info2_t oi1, oi2;
     char        filename1[1024], filename2[1024];
     bool        same_obj;
@@ -538,7 +540,7 @@ error:
 static int
 test_assoc(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
     H5O_info2_t oi1, oi2;
     char        filename1[1024], filename2[1024];
     bool        same_obj;
@@ -622,7 +624,7 @@ error:
 static int
 test_mntlnk(hid_t fapl)
 {
-    hid_t file1 = -1, file2 = -1, grp = -1;
+    hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     char  filename1[1024], filename2[1024];
 
     TESTING("multi-linked mount point");
@@ -687,7 +689,7 @@ error:
 static int
 test_move(hid_t fapl)
 {
-    hid_t  file1 = -1, file2 = -1;
+    hid_t  file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
     herr_t status;
     char   filename1[1024], filename2[1024];
 
@@ -752,7 +754,7 @@ error:
 static int
 test_preopen(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1, grp = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024];
 
@@ -817,7 +819,7 @@ static int
 test_postopen(hid_t fapl)
 {
 
-    hid_t       file1 = -1, file2 = -1, grp = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024];
 
@@ -886,7 +888,7 @@ error:
 static int
 test_unlink(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1, mnt = -1, root = -1;
+    hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID, mnt = H5I_INVALID_HID, root = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024];
     herr_t      status;
@@ -1035,7 +1037,7 @@ error:
 static int
 test_mvmpt(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024];
 
@@ -1093,9 +1095,9 @@ error:
 static int
 test_interlink(hid_t fapl)
 {
-    hid_t file1 = -1, file2 = -1;
+    hid_t file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
 #ifdef NOT_NOW
-    hid_t   type = -1, space = -1, dset = -1;
+    hid_t   type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID;
     hsize_t cur_dims[1] = {2};
 #endif /* NOT_NOW */
     char   filename1[1024], filename2[1024];
@@ -1210,7 +1212,7 @@ error:
 static int
 test_uniformity(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024];
 
@@ -1284,7 +1286,7 @@ error:
 static int
 test_close(hid_t fapl)
 {
-    hid_t       file1 = -1, file2 = -1;
+    hid_t       file1 = H5I_INVALID_HID, file2 = H5I_INVALID_HID;
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024];
 
@@ -1369,15 +1371,17 @@ error:
 static int
 test_mount_after_close(hid_t fapl)
 {
-    hid_t   fid1 = -1, fid2 = -1;                                      /* File IDs */
-    hid_t   gidA = -1, gidAB = -1, gidABM = -1, gidX = -1, gidXY = -1; /* Group identifiers */
-    hid_t   gidABMX = -1, gidABC = -1, gidABT = -1;                    /* Group IDs for testing */
-    hid_t   didABMXYD = -1;                                            /* Dataset ID for testing */
-    hid_t   did = -1, sid = -1;                                        /* Dataset and dataspace identifiers */
-    char    filename1[1024], filename2[1024];                          /* Name of files to mount */
-    char    objname[NAME_BUF_SIZE];                                    /* Name of object opened */
-    hsize_t dims[] = {NX, NY};                                         /* Dataset dimensions */
-    int     i, j;                                                      /* Local index variable */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t gidA = H5I_INVALID_HID, gidAB = H5I_INVALID_HID, gidABM = H5I_INVALID_HID, gidX = H5I_INVALID_HID,
+          gidXY   = H5I_INVALID_HID; /* Group identifiers */
+    hid_t gidABMX = H5I_INVALID_HID, gidABC = H5I_INVALID_HID,
+          gidABT      = H5I_INVALID_HID;                  /* Group IDs for testing */
+    hid_t   didABMXYD = H5I_INVALID_HID;                  /* Dataset ID for testing */
+    hid_t   did = H5I_INVALID_HID, sid = H5I_INVALID_HID; /* Dataset and dataspace identifiers */
+    char    filename1[1024], filename2[1024];             /* Name of files to mount */
+    char    objname[NAME_BUF_SIZE];                       /* Name of object opened */
+    hsize_t dims[] = {NX, NY};                            /* Dataset dimensions */
+    int     i, j;                                         /* Local index variable */
 
     TESTING("mounting on group after file is closed");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
@@ -1599,16 +1603,18 @@ error:
 static int
 test_mount_after_unmount(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1, fid3 = -1, fid4 = -1;                         /* File IDs */
-    hid_t gidA = -1, gidB = -1, gidX = -1, gidY = -1, gidZ = -1;              /* Group identifiers */
-    hid_t gidBM    = -1;                                                      /* Group identifiers */
-    hid_t gidBMZ   = -1;                                                      /* Group identifiers */
-    hid_t gidAM    = -1;                                                      /* Group identifiers */
-    hid_t gidAMX   = -1;                                                      /* Group identifiers */
-    hid_t gidAMXX  = -1;                                                      /* Group identifiers */
-    hid_t gidAMXMY = -1;                                                      /* Group identifiers */
-    hid_t gidXM    = -1;                                                      /* Group identifiers */
-    hid_t gidXX    = -1;                                                      /* Group identifiers */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID,
+          fid4 = H5I_INVALID_HID; /* File IDs */
+    hid_t gidA = H5I_INVALID_HID, gidB = H5I_INVALID_HID, gidX = H5I_INVALID_HID, gidY = H5I_INVALID_HID,
+          gidZ     = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidBM    = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidBMZ   = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidAM    = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidAMX   = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidAMXX  = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidAMXMY = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidXM    = H5I_INVALID_HID;                                         /* Group identifiers */
+    hid_t gidXX    = H5I_INVALID_HID;                                         /* Group identifiers */
     char  filename1[1024], filename2[1024], filename3[1024], filename4[1024]; /* Name of files to mount */
     char  objname[NAME_BUF_SIZE];                                             /* Name of object opened */
 
@@ -1863,10 +1869,10 @@ error:
 static int
 test_missing_unmount(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1, fid3 = -1;                   /* File IDs */
-    hid_t gidA = -1, gidE = -1, gidM = -1;                   /* Group IDs */
-    hid_t gidAE = -1, gidAEM = -1;                           /* Group IDs */
-    char  filename1[1024], filename2[1024], filename3[1024]; /* Name of files to mount */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID; /* File IDs */
+    hid_t gidA = H5I_INVALID_HID, gidE = H5I_INVALID_HID, gidM = H5I_INVALID_HID; /* Group IDs */
+    hid_t gidAE = H5I_INVALID_HID, gidAEM = H5I_INVALID_HID;                      /* Group IDs */
+    char  filename1[1024], filename2[1024], filename3[1024];                      /* Name of files to mount */
 
     TESTING("missing unmount");
 
@@ -2010,8 +2016,8 @@ error:
 static int
 test_hold_open_file(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1;             /* File IDs */
-    hid_t gidA = -1, gidM = -1, gidAM = -1; /* Group IDs */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;                          /* File IDs */
+    hid_t gidA = H5I_INVALID_HID, gidM = H5I_INVALID_HID, gidAM = H5I_INVALID_HID; /* Group IDs */
     char  filename1[1024], filename2[1024]; /* Name of files to mount */
 
     TESTING("hold open w/file");
@@ -2135,9 +2141,10 @@ error:
 static int
 test_hold_open_group(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1;                                    /* File IDs */
-    hid_t gid = -1, gidA = -1, gidM = -1, gidAM = -1, gidAM2 = -1; /* Group IDs */
-    char  filename1[1024], filename2[1024];                        /* Name of files to mount */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t gid = H5I_INVALID_HID, gidA = H5I_INVALID_HID, gidM = H5I_INVALID_HID, gidAM = H5I_INVALID_HID,
+          gidAM2 = H5I_INVALID_HID;        /* Group IDs */
+    char filename1[1024], filename2[1024]; /* Name of files to mount */
 
     TESTING("hold open w/group");
 
@@ -2286,10 +2293,10 @@ error:
 static int
 test_fcdegree_same(hid_t fapl)
 {
-    hid_t  fid1 = -1, fid2 = -1;             /* File IDs */
-    hid_t  gidA = -1, gidM = -1, gidAM = -1; /* Group IDs */
-    hid_t  fapl_id = -1;                     /* FAPL IDs */
-    herr_t ret;                              /* Generic return value */
+    hid_t  fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;                          /* File IDs */
+    hid_t  gidA = H5I_INVALID_HID, gidM = H5I_INVALID_HID, gidAM = H5I_INVALID_HID; /* Group IDs */
+    hid_t  fapl_id = H5I_INVALID_HID;                                               /* FAPL IDs */
+    herr_t ret;                                                                     /* Generic return value */
     char   filename1[1024], filename2[1024]; /* Name of files to mount */
 
     TESTING("file close degrees must be same");
@@ -2425,10 +2432,10 @@ error:
 static int
 test_fcdegree_semi(hid_t fapl)
 {
-    hid_t  fid1 = -1, fid2 = -1;             /* File IDs */
-    hid_t  gidA = -1, gidM = -1, gidAM = -1; /* Group IDs */
-    hid_t  fapl_id = -1;                     /* FAPL IDs */
-    herr_t ret;                              /* Generic return value */
+    hid_t  fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;                          /* File IDs */
+    hid_t  gidA = H5I_INVALID_HID, gidM = H5I_INVALID_HID, gidAM = H5I_INVALID_HID; /* Group IDs */
+    hid_t  fapl_id = H5I_INVALID_HID;                                               /* FAPL IDs */
+    herr_t ret;                                                                     /* Generic return value */
     char   filename1[1024], filename2[1024]; /* Name of files to mount */
 
     TESTING("'semi' file close degree");
@@ -2563,9 +2570,9 @@ error:
 static int
 test_fcdegree_strong(hid_t fapl)
 {
-    hid_t       fid1 = -1, fid2 = -1;             /* File IDs */
-    hid_t       gidA = -1, gidM = -1, gidAM = -1; /* Group IDs */
-    hid_t       fapl_id = -1;                     /* FAPL IDs */
+    hid_t       fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;                          /* File IDs */
+    hid_t       gidA = H5I_INVALID_HID, gidM = H5I_INVALID_HID, gidAM = H5I_INVALID_HID; /* Group IDs */
+    hid_t       fapl_id = H5I_INVALID_HID;                                               /* FAPL IDs */
     H5O_info2_t oinfo;
     char        filename1[1024], filename2[1024]; /* Name of files to mount */
     herr_t      ret;                              /* Generic return value */
@@ -2700,9 +2707,10 @@ error:
 static int
 test_acc_perm(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1, fid3 = -1;                                     /* File IDs */
-    hid_t gidA = -1, gidB = -1, gidC = -1, gidM = -1, gidAM = -1, gidAMZ = -1; /* Group IDs */
-    hid_t bad_id = -1;                                                         /* Bad ID from object create */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID; /* File IDs */
+    hid_t gidA = H5I_INVALID_HID, gidB = H5I_INVALID_HID, gidC = H5I_INVALID_HID, gidM = H5I_INVALID_HID,
+          gidAM = H5I_INVALID_HID, gidAMZ = H5I_INVALID_HID; /* Group IDs */
+    hid_t bad_id = H5I_INVALID_HID;                          /* Bad ID from object create */
     char  name[NAME_BUF_SIZE];                               /* Buffer for filename retrieved */
     char  filename1[1024], filename2[1024], filename3[1024]; /* Name of files to mount */
 
@@ -2899,12 +2907,14 @@ error:
 static int
 test_mult_mount(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1, fid3 = -1, fid3_2 = -1;             /* File IDs */
-    hid_t gidA = -1, gidB = -1;                                     /* Group IDs in file #1 */
-    hid_t gidM = -1, gidN = -1, gidAM = -1;                         /* Group IDs in file #2 */
-    hid_t gidS = -1, gidT = -1, gidU = -1, gidBS = -1, gidAMT = -1; /* Group IDs in file #3 */
-    char  name[NAME_BUF_SIZE];                                      /* Buffer for filename retrieved */
-    char  filename1[1024], filename2[1024], filename3[1024];        /* Name of files to mount */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID,
+          fid3_2 = H5I_INVALID_HID;                                                /* File IDs */
+    hid_t gidA = H5I_INVALID_HID, gidB = H5I_INVALID_HID;                          /* Group IDs in file #1 */
+    hid_t gidM = H5I_INVALID_HID, gidN = H5I_INVALID_HID, gidAM = H5I_INVALID_HID; /* Group IDs in file #2 */
+    hid_t gidS = H5I_INVALID_HID, gidT = H5I_INVALID_HID, gidU = H5I_INVALID_HID, gidBS = H5I_INVALID_HID,
+          gidAMT = H5I_INVALID_HID;                         /* Group IDs in file #3 */
+    char name[NAME_BUF_SIZE];                               /* Buffer for filename retrieved */
+    char filename1[1024], filename2[1024], filename3[1024]; /* Name of files to mount */
 
     TESTING("multiple mounts");
 
@@ -3117,10 +3127,11 @@ error:
 static int
 test_nested_survive(hid_t fapl)
 {
-    hid_t   fid1 = -1, fid2 = -1, fid3 = -1;                   /* File IDs */
-    hid_t   gidA = -1;                                         /* Group IDs in file #1 */
-    hid_t   gidM = -1, gidAM = -1;                             /* Group IDs in file #2 */
-    hid_t   gidS = -1, gidMS = -1, gidAMS = -1;                /* Group IDs in file #3 */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID; /* File IDs */
+    hid_t gidA = H5I_INVALID_HID;                                                 /* Group IDs in file #1 */
+    hid_t gidM = H5I_INVALID_HID, gidAM = H5I_INVALID_HID;                        /* Group IDs in file #2 */
+    hid_t gidS = H5I_INVALID_HID, gidMS = H5I_INVALID_HID,
+          gidAMS = H5I_INVALID_HID;                            /* Group IDs in file #3 */
     char    name[NAME_BUF_SIZE];                               /* Buffer for filename retrieved */
     ssize_t name_len;                                          /* Filename length */
     char    filename1[1024], filename2[1024], filename3[1024]; /* Name of files to mount */
@@ -3325,12 +3336,12 @@ error:
 static int
 test_close_parent(hid_t fapl)
 {
-    hid_t   fid1 = -1, fid2 = -1;             /* File IDs */
-    hid_t   gidA = -1;                        /* Group IDs in file #1 */
-    hid_t   gidM = -1;                        /* Group IDs in file #2 */
-    char    name[NAME_BUF_SIZE];              /* Buffer for filename retrieved */
-    ssize_t name_len;                         /* Filename length */
-    char    filename1[1024], filename2[1024]; /* Name of files to mount */
+    hid_t   fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t   gidA = H5I_INVALID_HID;                         /* Group IDs in file #1 */
+    hid_t   gidM = H5I_INVALID_HID;                         /* Group IDs in file #2 */
+    char    name[NAME_BUF_SIZE];                            /* Buffer for filename retrieved */
+    ssize_t name_len;                                       /* Filename length */
+    char    filename1[1024], filename2[1024];               /* Name of files to mount */
 
     TESTING("close parent");
 
@@ -3491,17 +3502,18 @@ error:
 static int
 test_cut_graph(hid_t fapl)
 {
-    hid_t   fid1 = -1, fid2 = -1, fid3 = -1, fid4 = -1, fid5 = -1, fid6 = -1, fid7 = -1; /* File IDs */
-    hid_t   gidA = -1, gidB = -1; /* Group IDs in file #1 */
-    hid_t   gidD = -1, gidE = -1; /* Group IDs in file #2 */
-    hid_t   gidH = -1, gidI = -1; /* Group IDs in file #3 */
-    hid_t   gidK = -1;            /* Group IDs in file #4 */
-    hid_t   gidM = -1;            /* Group IDs in file #5 */
-    hid_t   gidO = -1;            /* Group IDs in file #6 */
-    hid_t   gidQ = -1;            /* Group IDs in file #7 */
-    char    name[NAME_BUF_SIZE];  /* Buffer for filename retrieved */
-    ssize_t name_len;             /* Filename length */
-    ssize_t obj_count;            /* Number of objects open */
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID, fid4 = H5I_INVALID_HID,
+          fid5 = H5I_INVALID_HID, fid6 = H5I_INVALID_HID, fid7 = H5I_INVALID_HID; /* File IDs */
+    hid_t   gidA = H5I_INVALID_HID, gidB = H5I_INVALID_HID;                       /* Group IDs in file #1 */
+    hid_t   gidD = H5I_INVALID_HID, gidE = H5I_INVALID_HID;                       /* Group IDs in file #2 */
+    hid_t   gidH = H5I_INVALID_HID, gidI = H5I_INVALID_HID;                       /* Group IDs in file #3 */
+    hid_t   gidK = H5I_INVALID_HID;                                               /* Group IDs in file #4 */
+    hid_t   gidM = H5I_INVALID_HID;                                               /* Group IDs in file #5 */
+    hid_t   gidO = H5I_INVALID_HID;                                               /* Group IDs in file #6 */
+    hid_t   gidQ = H5I_INVALID_HID;                                               /* Group IDs in file #7 */
+    char    name[NAME_BUF_SIZE]; /* Buffer for filename retrieved */
+    ssize_t name_len;            /* Filename length */
+    ssize_t obj_count;           /* Number of objects open */
     char    filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE],
         filename4[NAME_BUF_SIZE], filename5[NAME_BUF_SIZE], filename6[NAME_BUF_SIZE],
         filename7[NAME_BUF_SIZE]; /* Name of files to mount */
@@ -3878,13 +3890,13 @@ error:
 static int
 test_symlink(hid_t fapl)
 {
-    hid_t   fid1 = -1, fid2 = -1, fid3 = -1; /* File IDs */
-    hid_t   gidA = -1, gidB = -1;            /* Group IDs in file #1 */
-    hid_t   gidD = -1, gidE = -1;            /* Group IDs in file #2 */
-    hid_t   gidH = -1, gidI = -1;            /* Group IDs in file #3 */
-    hid_t   gidL = -1;                       /* Group IDs through soft link to file #3 */
-    char    name[NAME_BUF_SIZE];             /* Buffer for filename retrieved */
-    ssize_t name_len;                        /* Filename length */
+    hid_t   fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = H5I_INVALID_HID; /* File IDs */
+    hid_t   gidA = H5I_INVALID_HID, gidB = H5I_INVALID_HID;                         /* Group IDs in file #1 */
+    hid_t   gidD = H5I_INVALID_HID, gidE = H5I_INVALID_HID;                         /* Group IDs in file #2 */
+    hid_t   gidH = H5I_INVALID_HID, gidI = H5I_INVALID_HID;                         /* Group IDs in file #3 */
+    hid_t   gidL = H5I_INVALID_HID; /* Group IDs through soft link to file #3 */
+    char    name[NAME_BUF_SIZE];    /* Buffer for filename retrieved */
+    ssize_t name_len;               /* Filename length */
     char    filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Name of files to mount */
 
@@ -4038,8 +4050,9 @@ error:
 static int
 test_sharedacc(hid_t fapl)
 {
-    hid_t fid1[2] = {-1, -1}, fid2[2] = {-1, -1}; /* File IDs */
-    hid_t gid = -1;
+    hid_t fid1[2] = {H5I_INVALID_HID, H5I_INVALID_HID},
+          fid2[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* File IDs */
+    hid_t gid     = H5I_INVALID_HID;
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Name of files to mount */
     int i, j, k;                  /* Counters */
@@ -4139,8 +4152,8 @@ error:
 static int
 test_sharedclose(hid_t fapl)
 {
-    hid_t fid1a = -1, fid1b = -1, fid2 = -1, fid3 = -2; /* File IDs */
-    hid_t gid1 = -1, gid2 = -1, gid3 = -1;
+    hid_t fid1a = H5I_INVALID_HID, fid1b = H5I_INVALID_HID, fid2 = H5I_INVALID_HID, fid3 = -2; /* File IDs */
+    hid_t gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gid3 = H5I_INVALID_HID;
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Name of files to mount */
 
@@ -4293,8 +4306,8 @@ error:
 static int
 test_multisharedclose(hid_t fapl)
 {
-    hid_t fid1 = -1, fid2 = -1; /* File IDs */
-    hid_t gid1 = -1, gid2 = -1, gid3 = -1;
+    hid_t fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gid3 = H5I_INVALID_HID;
     char  filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE], filename3[NAME_BUF_SIZE],
         filename4[NAME_BUF_SIZE]; /* Name of files to mount */
 
@@ -4443,7 +4456,7 @@ int
 main(void)
 {
     int   nerrors = 0;
-    hid_t fapl    = -1;
+    hid_t fapl    = H5I_INVALID_HID;
 
     h5_reset();
     fapl = h5_fileaccess();
