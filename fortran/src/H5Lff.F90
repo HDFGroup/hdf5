@@ -1540,8 +1540,8 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(hid_t), VALUE :: grp_id
-         INTEGER       , VALUE :: idx_type
-         INTEGER       , VALUE :: order
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR)   , VALUE :: op_data
        END FUNCTION H5Lvisit
@@ -1592,8 +1592,8 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(hid_t), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
-         INTEGER       , VALUE :: idx_type
-         INTEGER       , VALUE :: order
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR)   , VALUE :: op_data
          INTEGER(HID_T), VALUE :: lapl_id_default
