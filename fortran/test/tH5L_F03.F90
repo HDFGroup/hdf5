@@ -425,6 +425,7 @@ SUBROUTINE test_visit(cleanup, total_error)
   CHARACTER(LEN=MAX_CHAR_LEN) :: tmp
   INTEGER :: error
   INTEGER :: istart, iend, i, j
+  INTEGER :: ret_val
 
   obj_list(1) = "Dataset_zero"
   obj_list(2) = "Group1"
@@ -519,8 +520,11 @@ SUBROUTINE test_visit(cleanup, total_error)
 
   udata%n_obj = 0
   udata%name(:) = " "
-  CALL h5lvisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, f1, f2, error)
+  CALL h5lvisit_f(fid, H5_INDEX_NAME_F, H5_ITER_INC_F, f1, f2, ret_val, error)
   CALL check("h5lvisit_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5lvisit_f", -1, total_error)
+  ENDIF
 
   IF(udata%n_obj.NE.11)THEN
      CALL check("h5lvisit_f: Wrong number of objects visited", -1, total_error)
@@ -545,8 +549,11 @@ SUBROUTINE test_visit(cleanup, total_error)
 
   udata%n_obj = 0
   udata%name(:) = " "
-  CALL h5lvisit_by_name_f(fid, "/", H5_INDEX_NAME_F, H5_ITER_INC_F, f1, f2, error)
+  CALL h5lvisit_by_name_f(fid, "/", H5_INDEX_NAME_F, H5_ITER_INC_F, f1, f2, ret_val, error)
   CALL check("h5lvisit_by_name_f", error, total_error)
+  IF(ret_val.LT.0)THEN
+     CALL check("h5ovisit_f", -1, total_error)
+  ENDIF
 
   IF(udata%n_obj.NE.11)THEN
      CALL check("h5lvisit_by_name_f: Wrong number of objects visited", -1, total_error)
