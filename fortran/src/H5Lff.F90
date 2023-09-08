@@ -1590,7 +1590,7 @@ CONTAINS
          IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t), VALUE :: loc_id
+         INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
          INTEGER(C_INT), VALUE :: idx_type
          INTEGER(C_INT), VALUE :: order
