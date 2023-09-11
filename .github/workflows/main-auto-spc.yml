@@ -325,7 +325,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_no_deprecated:
-  - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
+    name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -386,7 +386,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_debug_werror:
-  - name: "Ubuntu gcc DBG Autotools -Werror (build only)"
+    name: "Ubuntu gcc DBG Autotools -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -447,7 +447,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_release_werror:
-  - name: "Ubuntu gcc REL Autotools -Werror (build only)"
+    name: "Ubuntu gcc REL Autotools -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -508,7 +508,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_parallel_debug_werror:
-  - name: "Ubuntu gcc DBG Autotools parallel -Werror (build only)"
+    name: "Ubuntu gcc DBG Autotools parallel -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -568,7 +568,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_parallel_release_werror:
-  - name: "Ubuntu gcc REL Autotools parallel -Werror (build only)"
+    name: "Ubuntu gcc REL Autotools parallel -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
