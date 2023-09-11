@@ -1,0 +1,248 @@
+name: hdf5 dev cmake CI
+
+# Controls when the action will run. Triggers the workflow on a call
+on:
+  workflow_call:
+    inputs:
+      thread_safety:
+        description: "thread-safety on/off"
+        required: true
+        type: boolean
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel. We just have one job, but the matrix items defined below will
+# run in parallel.
+jobs:
+
+  # A workflow that builds the library and runs all the tests
+  build_and_test:
+    matrix:
+        name:
+          - "Windows MSVC CMake"
+          - "Ubuntu gcc CMake"
+          - "MacOS Clang CMake"
+
+        # This is where we list the bulk of the options for each configuration.
+        # The key-value pair values are usually appropriate for being CMake or
+        # Autotools configure values, so be aware of that.
+
+        include:
+
+          # Windows w/ MSVC + CMake
+          #
+          # No Fortran, parallel, or VFDs that rely on POSIX things
+          - name: "Windows MSVC CMake"
+            os: windows-2022
+            toolchain: ""
+            cpp: ON
+            fortran: OFF
+            java: ON
+            docs: OFF
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            run_tests: true
+
+          # Linux (Ubuntu) w/ gcc + CMake
+          #
+          # We might think about adding Clang, but MacOS already tests that
+          # so it's not critical
+          - name: "Ubuntu gcc CMake"
+            os: ubuntu-latest
+            cpp: ON
+            fortran: ON
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
+            ros3_vfd: ON
+            toolchain: "config/toolchain/gcc.cmake"
+            generator: "-G Ninja"
+            run_tests: true
+
+
+          # MacOS w/ Clang + CMake
+          #
+          # We could also build with the Autotools via brew installing them,
+          # but that seems unnecessary
+          - name: "MacOS Clang CMake"
+            os: macos-13
+            cpp: ON
+            fortran: OFF
+            java: ON
+            docs: OFF
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            toolchain: "config/toolchain/clang.cmake"
+            generator: "-G Ninja"
+            run_tests: true
+
+
+
+    # Sets the job's name from the properties
+    name: "${{ matrix.name }}${{ inputs.build_mode }}${{ inputs.thread_safety }}"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+      #
+      # SETUP
+      #
+
+      #Useful for debugging
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
+
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+        if: matrix.os == 'ubuntu-latest'
+
+      # CMake gets libaec from fetchcontent
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+        if: matrix.os == 'windows-latest'
+
+      - name: Install Dependencies (macOS)
+        run: brew install ninja doxygen
+        if: matrix.os == 'macos-13'
+
+      - name: Set environment for MSVC (Windows)
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+        if:  matrix.os == 'windows-latest'
+    
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v3
+
+      #
+      # CMAKE CONFIGURE
+      #
+
+      - name: CMake Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
+            -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
+            -DHDF5_BUILD_JAVA=${{ matrix.java }} \
+            -DHDF5_BUILD_DOC=${{ matrix.docs }} \
+            -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
+            -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} \
+            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: (matrix.generator != 'autogen') && ! (matrix.thread_safety)
+
+
+      - name: CMake Configure (Thread-Safe)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC=OFF \
+            -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
+            -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} \
+            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: (matrix.generator != 'autogen') && (matrix.thread_safety)
+
+      #
+      # BUILD
+      #
+
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator != 'autogen')
+
+      #
+      # RUN TESTS
+      #
+
+      # NORMAL
+
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety)
+
+      # THREAD-SAFE
+
+      - name: CMake Run Thread-Safe Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.thread_safety)
+
+      #
+      # INSTALL (note that this runs even when we don't run the tests)
+      #
