@@ -776,7 +776,7 @@ test_compounds_selection_io(void)
                         else
                             printf("without H5Pset_buffer:\n");
 
-                        nerrs += test_select_compound(fname, fapl, dxpl, set_fillvalue, set_buf); 
+                        nerrs += test_select_compound(fname, fapl, dxpl, set_fillvalue, set_buf);
                         nerrs += test_select_src_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
                         nerrs += test_select_dst_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
 
