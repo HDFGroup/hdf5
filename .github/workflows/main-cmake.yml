@@ -23,7 +23,15 @@ jobs:
 
   # A workflow that builds the library and runs all the tests
   build_and_test:
-    matrix:
+    strategy:
+      # The current matrix has one dimensions:
+      #
+      # * config name
+      #
+      # Most configuration information is added via the 'include' mechanism,
+      # which will append the key-value pairs in the configuration where the
+      # names match.
+      matrix:
         name:
           - "Windows MSVC CMake"
           - "Ubuntu gcc CMake"
