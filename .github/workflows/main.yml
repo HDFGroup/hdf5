@@ -50,7 +50,7 @@ jobs:
         thread_safety: true
         build_mode: "Release"
 
-  call-debug-autotools:
+  call-debug-cmake:
     - uses: ./.github/workflows/main-cmake.yml
       with:
         thread_safety: false
