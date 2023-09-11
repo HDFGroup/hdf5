@@ -32,25 +32,25 @@ jobs:
   call-workflow-special:
     uses: ./.github/workflows/main-auto-spc.yml
 
-  call-workflow-autotools:
-    steps:
+  call-release-autotools:
     - uses: ./.github/workflows/main-auto.yml
       with:
         thread_safety: true
         build_mode: "production"
 
+  call-debug-autotools:
     - uses: ./.github/workflows/main-auto.yml
       with:
         thread_safety: false
         build_mode: "debug"
 
-  call-workflow-cmake:
-    steps:
+  call-release-cmake:
     - uses: ./.github/workflows/main-cmake.yml
       with:
         thread_safety: true
         build_mode: "Release"
 
+  call-debug-autotools:
     - uses: ./.github/workflows/main-cmake.yml
       with:
         thread_safety: false
