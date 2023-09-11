@@ -444,6 +444,8 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     /* Restore the copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
     memcpy(rew_buf, save_rew_buf, sizeof(stype4) * NX * NY);
 
+    initialize_stype4(rew_buf, (size_t)NX * NY);
+
     /* Write data to the dataset with rew_tid */
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
