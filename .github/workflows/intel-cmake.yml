@@ -53,6 +53,7 @@ jobs:
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -72,6 +73,7 @@ jobs:
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
@@ -80,6 +82,7 @@ jobs:
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
           export SYCL_DEVICE_FILTER=opencl.cpu
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build

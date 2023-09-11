@@ -55,6 +55,7 @@ jobs:
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
@@ -68,6 +69,7 @@ jobs:
       - name: Autotools Build
         run: |
           source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           make -j3
         working-directory: ${{ runner.workspace }}/build
@@ -77,6 +79,7 @@ jobs:
       - name: Autotools Run Tests
         run: |
           source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           export SYCL_DEVICE_FILTER=opencl.cpu
           make check -j2
@@ -84,9 +87,19 @@ jobs:
 
       # INSTALL (note that this runs even when we don't run the tests)
       - name: Autotools Install
-        run: make install
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export SYCL_DEVICE_FILTER=opencl.cpu
+          make install
         working-directory: ${{ runner.workspace }}/build
 
       - name: Autotools Verify Install
-        run: make check-install
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/ifortvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export SYCL_DEVICE_FILTER=opencl.cpu
+          make check-install
         working-directory: ${{ runner.workspace }}/build
