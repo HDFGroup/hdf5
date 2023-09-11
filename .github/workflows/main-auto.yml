@@ -159,7 +159,7 @@ jobs:
             --${{ matrix.ros3_vfd }}-ros3-vfd \
             --with-szlib=${{ matrix.szip }}
         shell: bash
-        if: ! (inputs.thread_safety)
+        if: "! (inputs.thread_safety)"
 
       - name: Autotools Configure (Thread-Safe)
         run: |
