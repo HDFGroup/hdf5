@@ -22,7 +22,7 @@ permissions:
 jobs:
 
   # A workflow that builds the library and runs all the tests
-  build_and_test:
+  Autotools_build_and_test:
     strategy:
       # The current matrix has one dimensions:
       #
@@ -136,10 +136,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v3
 
-      #
       # AUTOTOOLS CONFIGURE
-      #
-
       - name: Autotools Configure
         run: |
           sh ./autogen.sh
@@ -179,27 +176,19 @@ jobs:
         shell: bash
         if: (inputs.thread_safety)
 
-      #
       # BUILD
-      #
-
       - name: Autotools Build
         run: make -j3
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS
-      #
-
       # NORMAL
-
       - name: Autotools Run Tests
         run: make check -j2
         working-directory: ${{ runner.workspace }}/build
         if: (matrix.run_tests) && ! (inputs.thread_safety)
 
       # THREAD-SAFE
-
       - name: Autotools Run Thread-Safe Tests
         run: |
           cd test
@@ -207,10 +196,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
         if: (matrix.run_tests) && (inputs.thread_safety)
 
-      #
       # INSTALL (note that this runs even when we don't run the tests)
-      #
-
       - name: Autotools Install
         run: make install
         working-directory: ${{ runner.workspace }}/build
