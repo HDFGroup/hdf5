@@ -19,7 +19,7 @@ jobs:
   # names (so make sure the names are UNIQUE).
   #
 
-  build_v1.6:
+  build_v1_6:
     name: "Ubuntu gcc DBG Autotools v1.6 default API (build only)"
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +80,7 @@ jobs:
         run: make check-install
         working-directory: ${{ runner.workspace }}/build
 
-  build_v1.8:
+  build_v1_8:
     name: "Ubuntu gcc DBG Autotools v1.8 default API (build only)"
     runs-on: ubuntu-latest
     steps:
@@ -141,7 +141,7 @@ jobs:
         run: make check-install
         working-directory: ${{ runner.workspace }}/build
 
-  build_v1.10:
+  build_v1_10:
     name: "Ubuntu gcc DBG Autotools v1.10 default API (build only)"
     runs-on: ubuntu-latest
     steps:
@@ -202,7 +202,7 @@ jobs:
         run: make check-install
         working-directory: ${{ runner.workspace }}/build
 
-  build_v1.12:
+  build_v1_12:
     name: "Ubuntu gcc DBG Autotools v1.12 default API (build only)"
     runs-on: ubuntu-latest
     steps:
@@ -263,7 +263,7 @@ jobs:
         run: make check-install
         working-directory: ${{ runner.workspace }}/build
 
-  build_v1.14:
+  build_v1_14:
     name: "Ubuntu gcc DBG Autotools v1.14 default API (build only)"
     runs-on: ubuntu-latest
     steps:
