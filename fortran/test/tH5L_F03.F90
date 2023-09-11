@@ -174,13 +174,9 @@ CONTAINS
     IF(nlen.NE.0)THEN
        istart = (op_data%n_obj-1)*MAX_CHAR_LEN + 1
        iend = istart + MAX_CHAR_LEN - 1
-       !PRINT*,istart, iend, name(1:nlen)
        op_data%name(istart:istart+nlen-1) = name(1:nlen)
-       !op_data%name((op_data%n_obj-1)*MAX_CHAR_LEN)(1:nlen) = name(1:nlen)
-       !PRINT*,op_data%name(istart:istart+nlen)
     ENDIF
 
-   ! PRINT*,op_data%name
     lvisit_cb = 0
 
   END FUNCTION lvisit_cb
@@ -210,10 +206,10 @@ SUBROUTINE test_iter_group(cleanup, total_error)
 
   INTEGER(HID_T) :: fapl
   INTEGER(HID_T) :: file             !  File ID
-  INTEGER(hid_t) :: dataset          ! Dataset ID
-  INTEGER(hid_t) :: datatype         ! Common datatype ID
-  INTEGER(hid_t) :: filespace        ! Common dataspace ID
-  INTEGER(hid_t) :: grp              ! Group ID
+  INTEGER(HID_T) :: dataset          ! Dataset ID
+  INTEGER(HID_T) :: datatype         ! Common datatype ID
+  INTEGER(HID_T) :: filespace        ! Common dataspace ID
+  INTEGER(HID_T) :: grp              ! Group ID
   INTEGER i,j                        ! counting variable
   INTEGER(hsize_t) idx               ! Index in the group
   CHARACTER(LEN=11) :: DATAFILE = "titerate.h5"
@@ -541,7 +537,7 @@ SUBROUTINE test_visit(cleanup, total_error)
            EXIT
         ENDIF
      ENDDO
-     IF( TRIM(tmp) .NE. TRIM(obj_list(i)(:)) )THEN
+     IF( TRIM(tmp) .NE. TRIM(obj_list(i)) )THEN
         CALL check("h5lvisit_f: Wrong object list from visit", -1, total_error)
         EXIT
      ENDIF
@@ -570,7 +566,7 @@ SUBROUTINE test_visit(cleanup, total_error)
            EXIT
         ENDIF
      ENDDO
-     IF( TRIM(tmp) .NE. TRIM(obj_list(i)(:)) )THEN
+     IF( TRIM(tmp) .NE. TRIM(obj_list(i)) )THEN
         CALL check("h5lvisit_by_name_f: Wrong object list from visit", -1, total_error)
         EXIT
      ENDIF
