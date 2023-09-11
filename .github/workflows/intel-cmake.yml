@@ -56,7 +56,7 @@ jobs:
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja\
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DCMAKE_TOOLCHAIN_FILE=config/toolchain/intel.cmake \
           -DMKL_ROOT="/opt/intel/oneapi/mkl/latest" \
