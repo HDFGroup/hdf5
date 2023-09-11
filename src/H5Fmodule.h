@@ -998,7 +998,7 @@
  * Additional parameters may be added to these functions in the future.
  *
  * \subsubsection subsubsec_file_alternate_drivers_split The Split Driver
- * The Split driver, H5FD_SPLIT, is a limited case of the Multi driver where only two files are
+ * The Split driver is a limited case of the Multi driver where only two files are
  * created. One file holds metadata, and the other file holds raw data.
  * The function #H5Pset_fapl_split is used to manage Split file access properties. See the example
  * below.
