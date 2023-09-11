@@ -28,9 +28,11 @@ permissions:
 # run in parallel.
 jobs:
 
-  # A workflow that builds the library and runs all the tests
   call-workflow-special:
     uses: ./.github/workflows/main-auto-spc.yml
+
+  call-parallel-special:
+    uses: ./.github/workflows/main-auto-par.yml
 
   call-release-autotools:
     uses: ./.github/workflows/main-auto.yml
