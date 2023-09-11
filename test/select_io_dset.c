@@ -726,7 +726,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     s2_t   *s2_wbuf_bak = NULL;
     s2_t   *s2_rbuf     = NULL;
     char    dset_name[DSET_NAME_LEN];
-    int    fillvalue = -1;
+    int     fillvalue = -1;
 
     /* Create dataset transfer property list */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -2741,7 +2741,7 @@ error:
 static herr_t
 test_set_get_select_io_mode(const char *filename, hid_t fapl)
 {
-    hid_t                   fid = H5I_INVALID_HID;
+    hid_t                   fid  = H5I_INVALID_HID;
     hid_t                   did  = H5I_INVALID_HID;
     hid_t                   sid  = H5I_INVALID_HID;
     hid_t                   dcpl = H5I_INVALID_HID;
@@ -3140,9 +3140,9 @@ main(void)
 {
     int      nerrors = 0;
     char     filename[FILENAME_BUF_SIZE];
-    hid_t    fapl = H5I_INVALID_HID;
+    hid_t    fapl  = H5I_INVALID_HID;
     hid_t    fapl2 = H5I_INVALID_HID;
-    hid_t    fid  = H5I_INVALID_HID;
+    hid_t    fid   = H5I_INVALID_HID;
     int      test_select_config;
     unsigned set_cache; /* Set chunk cache to 0 or not */
     unsigned chunked;   /* Set to chunked dataset or not */
@@ -3155,7 +3155,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     if ((fapl2 = H5Pcopy(fapl)) < 0)
-         TEST_ERROR;
+        TEST_ERROR;
 
     for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
 
@@ -3181,7 +3181,7 @@ main(void)
                     /* Print configuration message */
                     printf("Testing for selection I/O ");
 
-                    if(set_cache)
+                    if (set_cache)
                         printf("with 0 chunk cache, ");
                     else
                         printf("with default chunk cache, ");
@@ -3226,7 +3226,8 @@ main(void)
                             case TEST_LARGER_MEM_NO_BKG: /* case 3 */
                                 TESTING_2("Larger memory type, no background buffer");
 
-                                nerrors += (test_larger_mem_type_no_bkg(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                nerrors +=
+                                    (test_larger_mem_type_no_bkg(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
 
                                 break;
 

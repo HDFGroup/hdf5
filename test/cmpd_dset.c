@@ -108,21 +108,21 @@ typedef struct {
 #define NY          2000U
 #define PACK_NMEMBS 100
 
-static void initialize_stype1(unsigned char *buf, size_t num);
-static void initialize_stype2(unsigned char *buf, size_t num);
-static void initialize_stype3(unsigned char *buf, size_t num);
-static void initialize_stype4(unsigned char *buf, size_t num);
+static void  initialize_stype1(unsigned char *buf, size_t num);
+static void  initialize_stype2(unsigned char *buf, size_t num);
+static void  initialize_stype3(unsigned char *buf, size_t num);
+static void  initialize_stype4(unsigned char *buf, size_t num);
 static hid_t create_stype1(void);
 static hid_t create_stype2(void);
 static hid_t create_stype3(void);
 static hid_t create_stype4(void);
-static int compare_data(void *src_data, void *dst_data, hbool_t src_subset);
-static int compare_stype4_data(void *expect_buf, void *rbuf);
+static int   compare_data(void *src_data, void *dst_data, hbool_t src_subset);
+static int   compare_stype4_data(void *expect_buf, void *rbuf);
 
 /*-------------------------------------------------------------------------
  * Function:    compare_stype4_data
  *
- * Purpose:     Compare data (stype4) read in rbuf with expected data 
+ * Purpose:     Compare data (stype4) read in rbuf with expected data
  *              in expect_buf.
  *
  * Return:      Success:        0
@@ -139,29 +139,29 @@ compare_stype4_data(void *expect_buf, void *rbuf)
     for (i = 0; i < (int)(NX * NY); i++) {
         stype4 *s1_ptr;
         stype4 *s2_ptr;
-        s1_ptr    = ((stype4 *)expect_buf)+ i;
-        s2_ptr    = ((stype4 *)rbuf) + i;
+        s1_ptr = ((stype4 *)expect_buf) + i;
+        s2_ptr = ((stype4 *)rbuf) + i;
 
-        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b ||
-            s1_ptr->c[0] != s2_ptr->c[0] || s1_ptr->c[2] != s2_ptr->c[2] ||
-            s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[6] != s2_ptr->c[6] ||
-            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e || 
-            !H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f) || !H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g) || 
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3]) || 
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7]) || 
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11]) || 
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15]) || 
-            !H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i) || !H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j) || 
-            !H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k) || !H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l) || 
-            !H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m) || !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n) ||
-            s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p || s1_ptr->q != s2_ptr->q)  {
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
+            s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[6] != s2_ptr->c[6] ||
+            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e || !H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g) || !H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15]) || !H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j) || !H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k) ||
+            !H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l) || !H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m) ||
+            !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n) || s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p ||
+            s1_ptr->q != s2_ptr->q) {
 
             H5_FAILED();
             printf("    i=%d\n", i);
             goto error;
         }
     } /* end for */
-    
+
     return SUCCEED;
 
 error:
@@ -203,8 +203,8 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
-    int fillvalue = (-1);
-    size_t ss, ss1, ss2;
+    int            fillvalue = (-1);
+    size_t         ss, ss1, ss2;
 
     /* Create the file for this test */
     if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -250,7 +250,7 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (set_buf) {
         ss1 = H5Tget_size(rew_tid);
         ss2 = H5Tget_size(src_tid);
-        ss = MAX(ss1, ss2) * NX * NY;
+        ss  = MAX(ss1, ss2) * NX * NY;
 
         if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
             goto error;
@@ -296,7 +296,6 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     PASSED();
 
-
     /* Finishing test and release resources */
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
@@ -321,14 +320,16 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     return 0;
 
 error:
-    if (rbuf) free(rbuf);
-    if (rew_buf) free(rew_buf);
-    if (save_rew_buf) free(save_rew_buf);
+    if (rbuf)
+        free(rbuf);
+    if (rew_buf)
+        free(rew_buf);
+    if (save_rew_buf)
+        free(save_rew_buf);
 
     HDputs("*** SELECT SRC SUBSET TEST FAILED ***");
     return 1;
 } /* test_select_src_subset() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_select_dst_subset
@@ -364,8 +365,8 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
-    int fillvalue = (-1);
-    size_t ss, ss1, ss2;
+    int            fillvalue = (-1);
+    size_t         ss, ss1, ss2;
 
     /* Create the file for this test */
     if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -409,7 +410,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (set_buf) {
         ss1 = H5Tget_size(rew_tid);
         ss2 = H5Tget_size(src_tid);
-        ss = MAX(ss1, ss2) * NX * NY;
+        ss  = MAX(ss1, ss2) * NX * NY;
 
         if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
             goto error;
@@ -441,7 +442,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
 
     /* Restore the copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
-    memcpy(rew_buf, save_rew_buf, sizeof(stype4) * NX* NY);
+    memcpy(rew_buf, save_rew_buf, sizeof(stype4) * NX * NY);
 
     /* Write data to the dataset with rew_tid */
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
@@ -479,9 +480,12 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     return 0;
 
 error:
-    if (rbuf) free(rbuf);
-    if (rew_buf) free(rew_buf);
-    if (save_rew_buf) free(save_rew_buf);
+    if (rbuf)
+        free(rbuf);
+    if (rew_buf)
+        free(rew_buf);
+    if (save_rew_buf)
+        free(save_rew_buf);
 
     HDputs("*** SELECT DST SUBSET TEST FAILED ***");
     return 1;
@@ -510,19 +514,19 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     hid_t s3_tid;
 
     /* Buffers */
-    s3_t *s3 = NULL;
+    s3_t *s3      = NULL;
     s3_t *save_s3 = NULL;
-    s1_t *rbuf1 = NULL;
-    s3_t *rbuf3 = NULL;
+    s1_t *rbuf1   = NULL;
+    s3_t *rbuf3   = NULL;
 
     /* Other variables */
     unsigned int   i;
-    hid_t fid, did, sid, dcpl, dxpl;
-    hid_t array_dt;
-    static hsize_t dim[] = {NX, NY};
-    int fillvalue = (-1);
-    size_t ss, ss1, ss2;
-    hsize_t memb_size[1] = {4};
+    hid_t          fid, did, sid, dcpl, dxpl;
+    hid_t          array_dt;
+    static hsize_t dim[]     = {NX, NY};
+    int            fillvalue = (-1);
+    size_t         ss, ss1, ss2;
+    hsize_t        memb_size[1] = {4};
 
     /* Allocate buffers */
     if (NULL == (s1 = (s1_t *)malloc(sizeof(s1_t) * NX * NY)))
@@ -635,12 +639,12 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     }
 
     /* Save a copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
-    memcpy(save_s3, s3, sizeof(s3_t) * NX* NY);
+    memcpy(save_s3, s3, sizeof(s3_t) * NX * NY);
 
     if (set_buf) {
         ss1 = H5Tget_size(s1_tid);
         ss2 = H5Tget_size(s3_tid);
-        ss = MAX(ss1, ss2) * NX * NY;
+        ss  = MAX(ss1, ss2) * NX * NY;
 
         if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
             goto error;
@@ -696,35 +700,35 @@ error:
 
 /*
  * Purpose:     Tests for selection I/O with compound types:
- *              --set_cache: set chunk cache to 0 or not 
+ *              --set_cache: set chunk cache to 0 or not
  *                via H5Pset_cache(fapl...)
- *              --set_fillvalue: set fill value or not 
+ *              --set_fillvalue: set fill value or not
  *                via H5Pset_fill_value(dcpl...)
- *              --select_io: enable selection I/O or not 
+ *              --select_io: enable selection I/O or not
  *                via H5Pset_selection_io(dxpl...)
- *              --mwbuf: with or without modifying write buffers 
+ *              --mwbuf: with or without modifying write buffers
  *                via H5Pset_modify_write_buf(dxpl...)
- *              --set_buf: with or without setting the maximum size 
+ *              --set_buf: with or without setting the maximum size
  *                for the type conversion buffer and background buffer
  *                via H5Pset_buffer(dxpl...)
  *
  *              These tests will test the selection I/O pipeline in particular
- *              triggering H5D__scatgath_read()/write(), 
+ *              triggering H5D__scatgath_read()/write(),
  *              H5D__scatgath_write_select_read()/write(),
- *              and with/without the optimized compound read/write.  
+ *              and with/without the optimized compound read/write.
  */
 static unsigned
 test_compounds_selection_io(void)
 {
     unsigned nerrs = 0;
-    unsigned set_cache;         /* Set cache to 0 or not */
-    unsigned set_fillvalue;     /* Set fill value or not */
-    unsigned select_io;         /* Enable selection I/O or not */
-    unsigned mwbuf;             /* With or without modifying write buffers */
-    unsigned set_buf;           /* With or without H5Pset_buffer */
-    hid_t fapl = -1;
-    hid_t dxpl = -1;
-    char fname[256];
+    unsigned set_cache;     /* Set cache to 0 or not */
+    unsigned set_fillvalue; /* Set fill value or not */
+    unsigned select_io;     /* Enable selection I/O or not */
+    unsigned mwbuf;         /* With or without modifying write buffers */
+    unsigned set_buf;       /* With or without H5Pset_buffer */
+    hid_t    fapl = -1;
+    hid_t    dxpl = -1;
+    char     fname[256];
 
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[3], fapl, fname, sizeof(fname));
@@ -742,10 +746,11 @@ test_compounds_selection_io(void)
                             printf("  With chunk cache set 0, ");
                             if (H5Pset_cache(fapl, 0, (size_t)0, (size_t)0, 0.0) < 0)
                                 goto error;
-                        } else
+                        }
+                        else
                             printf("  With default chunk cache, ");
 
-                        if (set_fillvalue) 
+                        if (set_fillvalue)
                             printf("set fill value, ");
                         else
                             printf("not set fill value, ");
@@ -754,17 +759,19 @@ test_compounds_selection_io(void)
                             printf("selection I/O ON, ");
                             if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
                                 goto error;
-                        } else
+                        }
+                        else
                             printf("selection I/O OFF, ");
-        
+
                         if (mwbuf) {
                             printf("with modify write buf, ");
                             if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
                                 goto error;
-                        } else
+                        }
+                        else
                             printf("without modify write buf, ");
 
-                        if (set_buf) 
+                        if (set_buf)
                             printf("with H5Pset_buffer:\n");
                         else
                             printf("without H5Pset_buffer:\n");
@@ -777,15 +784,15 @@ test_compounds_selection_io(void)
                             goto error;
 
                     } /* set_buf */
-                } /* mwbuf */
-            } /* select_io */
-        } /* set_fillvalue */
-    } /* set_cache */
+                }     /* mwbuf */
+            }         /* select_io */
+        }             /* set_fillvalue */
+    }                 /* set_cache */
 
-    if(H5Pclose(fapl) < 0)
+    if (H5Pclose(fapl) < 0)
         goto error;
 
-    if (nerrs)    
+    if (nerrs)
         goto error;
 
     return 0;
