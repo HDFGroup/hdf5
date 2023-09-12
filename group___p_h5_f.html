@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.117d579</span>
+   &#160;<span id="projectnumber">1.15.0.a0edeee</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -217,7 +217,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity()</a> sets MPI consistency semantics for data access to the file, <code>file_id</code>.</p>
 <p>If <code>flag</code> is set to <code>1</code>, all file access operations will appear atomic, guaranteeing sequential consistency. If <code>flag</code> is set to <code>0</code>, enforcement of atomic file access will be turned off.</p>
 <p><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity()</a> is a collective function and all participating processes must pass the same values for <code>file_id</code> and <code>flag</code>.</p>
-<p>This function is available only when the HDF5 library is configured with parallel support (<code>&ndash;enable-parallel</code>). It is useful only when used with the <a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a> driver (see <a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio()</a>). </p>
+<p>This function is available only when the HDF5 library is configured with parallel support (<code>&ndash;enable-parallel | HDF5_ENABLE_PARALLEL</code>). It is useful only when used with the <a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a> driver (see <a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio()</a>). </p>
 <dl class="section attention"><dt>Attention</dt><dd><p class="startdd"><a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity()</a> calls <code>MPI_File_set_atomicity</code> underneath and is not supported if the execution platform does not support <code>MPI_File_set_atomicity</code>. When it is supported and used, the performance of data access operations may drop significantly.</p>
 <p class="enddd">In certain scenarios, even when <code>MPI_File_set_atomicity</code> is supported, setting atomicity with <a class="el" href="group___p_h5_f.html#ga087dbbf37cb5c451ae8a6f66b227f0fc" title="Sets the MPI atomicity mode.">H5Fset_mpi_atomicity()</a> and <code>flag</code> set to 1 does not always yield strictly atomic updates. For example, some <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a> calls translate to multiple <code>MPI_File_write_at</code> calls. This happens in all cases where the high-level file access routine translates to multiple lower level file access routines. The following scenarios will raise this issue: </p><ul>
 <li>Non-contiguous file access using independent I/O </li>
@@ -236,7 +236,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 9 2023 00:28:33 for HDF5 by
+    <li class="footer">Generated on Tue Sep 12 2023 00:28:17 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>

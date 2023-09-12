@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.117d579</span>
+   &#160;<span id="projectnumber">1.15.0.a0edeee</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -286,7 +286,7 @@ $(document).ready(function(){initNavTree('group___h5_p.html',''); initResizable(
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga714340ec9cbb65cb0a819e1d775825f0" title="Modifies the specified File Access Property List to use the H5FD_IOC driver.">H5Pset_fapl_ioc</a>/<a class="el" href="group___f_a_p_l.html#ga8482cdac1272818e4e0f86a665f8ef98" title="Queries a File Access Property List for H5FD_IOC file driver properties.">H5Pget_fapl_ioc</a> </td><td>Modifies/queries the file driver properties of the I/O concentrator driver.  </td></tr>
 <tr>
-<td><a class="el" href="group___f_a_p_l.html#ga4e03be2fe83ed02b32266a6c81427beb" title="Sets up the logging virtual file driver (H5FD_LOG) for use.">H5Pset_fapl_log</a> </td><td>Sets logging driver.  </td></tr>
+<td><a class="el" href="group___f_a_p_l.html#ga4e03be2fe83ed02b32266a6c81427beb" title="Sets up the logging virtual file driver (H5FD_LOG) for use.">H5Pset_fapl_log</a> </td><td>The logging driver is a clone of the standard SEC2 (<a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a>) driver with additional facilities for logging metrics and activity to a file.  </td></tr>
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga8491676811ccc7ba582e30fb63da6563">H5Pset_fapl_mirror</a>/<a class="el" href="group___f_a_p_l.html#ga2c0636d9bb9c50d381afbd0d3140e593">H5Pget_fapl_mirror</a> </td><td>Modifies/queries the file driver properties of the mirror driver.  </td></tr>
 <tr>
@@ -298,9 +298,13 @@ $(document).ready(function(){initNavTree('group___h5_p.html',''); initResizable(
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga4d053c7682e54287e550113972b7dda6" title="set the onion info for the file access property list">H5Pset_fapl_onion</a>/<a class="el" href="group___f_a_p_l.html#ga89b9f918d53dee5e6c80060667b8d32f" title="get the onion info from the file access property list">H5Pget_fapl_onion</a> </td><td>Modifies/queries the file driver properties of the onion driver.  </td></tr>
 <tr>
+<td><a class="el" href="group___f_a_p_l.html#gaad28d8c24f236590193215c5ae7a8f18" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3</a>/<a class="el" href="group___f_a_p_l.html#ga13e273711e160cbd58e60c701b4f50e6" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3</a> </td><td>Modifies/queries the file driver properties of the ros3 driver.  </td></tr>
+<tr>
 <td><a class="el" href="_h5_f_dsec2_8h.html#af581bceca36ad4eef3cd45b16eabbb20">H5Pset_fapl_sec2</a> </td><td>Sets driver for unbuffered permanent files or retrieves information regarding driver.  </td></tr>
 <tr>
-<td><a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed" title="Emulates the old split file driver.">H5Pset_fapl_split</a> </td><td>Sets driver for split files, a limited case of multiple files with one metadata file and one raw data file.  </td></tr>
+<td><a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed" title="Emulates the old split file driver.">H5Pset_fapl_split</a> </td><td>Sets driver for split files, a limited case of multi driver with one metadata file and one raw data file.  </td></tr>
+<tr>
+<td><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">H5Pset_fapl_splitter</a>/<a class="el" href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac">H5Pget_fapl_splitter</a> </td><td>Modifies/queries the file driver properties of the splitter driver.  </td></tr>
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052" title="Sets the standard I/O driver.">H5Pset_fapl_stdio</a> </td><td>Sets driver for buffered permanent files.  </td></tr>
 <tr>
@@ -597,7 +601,7 @@ Modules</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 9 2023 00:28:33 for HDF5 by
+    <li class="footer">Generated on Tue Sep 12 2023 00:28:17 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
