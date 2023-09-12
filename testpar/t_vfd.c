@@ -5902,7 +5902,7 @@ main(int argc, char **argv)
     int provided = 0;
 #endif
     int mpi_size;
-    int mpi_rank;
+    int mpi_rank = 0;
     int ret;
 
 #ifdef H5_HAVE_SUBFILING_VFD
