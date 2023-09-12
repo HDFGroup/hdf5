@@ -3484,7 +3484,7 @@ done:
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_set_no_selecction_io_cause
+ * Function:    H5CX_set_no_selection_io_cause
  *
  * Purpose:     Sets the reason for not performing selection I/O for
  *              the current API call context.
@@ -3516,7 +3516,7 @@ H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause)
 } /* end H5CX_set_no_selection_io_cause() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_set_actual_selecction_io_mode
+ * Function:    H5CX_set_actual_selection_io_mode
  *
  * Purpose:     Sets the actual selection I/O mode for the current API
  *              call context.

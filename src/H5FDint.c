@@ -486,13 +486,13 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
 
     /* if the underlying VFD supports vector read, make the call */
     if (file->cls->read_vector) {
-        uint32_t actual_selection_io_mode;
-
         if ((file->cls->read_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
 
         /* Set actual selection I/O mode, if this is a raw data operation */
         if (is_raw) {
+            uint32_t actual_selection_io_mode;
+
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_VECTOR_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -711,14 +711,13 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
 
     /* if the underlying VFD supports vector write, make the call */
     if (file->cls->write_vector) {
-
-        uint32_t actual_selection_io_mode;
-
         if ((file->cls->write_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
 
         /* Set actual selection I/O mode, if this is a raw data operation */
         if (is_raw) {
+            uint32_t actual_selection_io_mode;
+
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_VECTOR_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
