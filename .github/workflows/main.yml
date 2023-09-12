@@ -30,57 +30,57 @@ jobs:
   workflow-autotools:
     name: "Autotools Workflows"
     steps:
-        uses: ./.github/workflows/main-auto-spc.yml
+      - uses: ./.github/workflows/main-auto-spc.yml
 
-        uses: ./.github/workflows/main-auto-par.yml
+      - uses: ./.github/workflows/main-auto-par.yml
 
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "debug"
 
-        uses: ./.github/workflows/main-auto.yml
+      - uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "production"
 
-        uses: ./.github/workflows/main-auto.yml
+      - uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: false
             build_mode: "debug"
 
-        uses: ./.github/workflows/main-auto.yml
+      - uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: false
             build_mode: "production"
 
-        uses: ./.github/workflows/intel-auto.yml
+      - uses: ./.github/workflows/intel-auto.yml
         with:
             build_mode: "production"
 
   workflow-cmake:
     name: "CMake Workflows"
     steps:
-        uses: ./.github/workflows/main-cmake.yml
+      - uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Debug"
 
-        uses: ./.github/workflows/main-cmake.yml
+      - uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Release"
 
-        uses: ./.github/workflows/main-cmake.yml
+      - uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Debug"
 
-        uses: ./.github/workflows/main-cmake.yml
+      - uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Release"
 
-        uses: ./.github/workflows/intel-cmake.yml
+      - uses: ./.github/workflows/intel-cmake.yml
         with:
             build_mode: "Release"
