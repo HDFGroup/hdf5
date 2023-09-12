@@ -30,10 +30,6 @@ static void ph5diff_worker(int);
  * Return: An exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 9, 2003
- *
  * Comments:
  *
  * This function drives the diff process and will do a serial or parallel diff depending
@@ -67,7 +63,7 @@ main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 
     if (g_nTasks == 1) {
-        HDprintf("Only 1 task available...doing serial diff\n");
+        fprintf(stderr, "Only 1 task available...doing serial diff\n");
 
         g_Parallel = 0;
 
@@ -113,9 +109,6 @@ main(int argc, char *argv[])
  *
  * Return: none
  *
- * Programmer: Leon Arber
- * Date: January 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -141,16 +134,16 @@ ph5diff_worker(int nID)
             {
                 /* Open the files */
                 if ((file1_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
-                    HDprintf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[0]);
+                    printf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[0]);
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 }
                 if ((file2_id = H5Fopen(filenames[1], H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
-                    HDprintf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[1]);
+                    printf("h5diff Task [%d]: <%s>: unable to open file\n", nID, filenames[1]);
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 }
                 /* enable error reporting */
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
         /* Check for work */
         else if (Status.MPI_TAG == MPI_TAG_ARGS) {
@@ -160,7 +153,7 @@ ph5diff_worker(int nID)
 
             /* Make certain we've received the filenames and opened the files already */
             if (file1_id < 0 || file2_id < 0) {
-                HDprintf("ph5diff_worker: ERROR: work received before/without filenames\n");
+                printf("ph5diff_worker: ERROR: work received before/without filenames\n");
                 break;
             }
 
@@ -188,7 +181,7 @@ ph5diff_worker(int nID)
                     char out_data[PRINT_DATA_MAX_SIZE];
                     int  tmp;
 
-                    HDmemset(out_data, 0, PRINT_DATA_MAX_SIZE);
+                    memset(out_data, 0, PRINT_DATA_MAX_SIZE);
                     i = 0;
 
                     rewind(overflow_file);
@@ -198,7 +191,7 @@ ph5diff_worker(int nID)
                             MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA,
                                      MPI_COMM_WORLD);
                             i = 0;
-                            HDmemset(out_data, 0, PRINT_DATA_MAX_SIZE);
+                            memset(out_data, 0, PRINT_DATA_MAX_SIZE);
                         }
                     }
 
@@ -210,8 +203,8 @@ ph5diff_worker(int nID)
                     overflow_file = NULL;
                 }
 
-                HDfflush(stdout);
-                HDmemset(outBuff, 0, OUTBUFF_SIZE);
+                fflush(stdout);
+                memset(outBuff, 0, OUTBUFF_SIZE);
                 outBuffOffset = 0;
 
                 MPI_Send(&diffs, sizeof(diffs), MPI_BYTE, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
@@ -225,7 +218,7 @@ ph5diff_worker(int nID)
             break;
         }
         else {
-            HDprintf("ph5diff_worker: ERROR: invalid tag (%d) received\n", Status.MPI_TAG);
+            printf("ph5diff_worker: ERROR: invalid tag (%d) received\n", Status.MPI_TAG);
             break;
         }
     }
@@ -241,10 +234,6 @@ ph5diff_worker(int nID)
  *
  * Return: none
  *
- * Programmer: Leon Arber
- *
- * Date: Feb 7, 2005
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -252,7 +241,7 @@ print_manager_output(void)
 {
     /* If there was something we buffered, let's print it now */
     if ((outBuffOffset > 0) && g_Parallel) {
-        HDprintf("%s", outBuff);
+        printf("%s", outBuff);
 
         if (overflow_file) {
             int tmp;
@@ -263,12 +252,12 @@ print_manager_output(void)
             overflow_file = NULL;
         }
 
-        HDfflush(stdout);
-        HDmemset(outBuff, 0, OUTBUFF_SIZE);
+        fflush(stdout);
+        memset(outBuff, 0, OUTBUFF_SIZE);
         outBuffOffset = 0;
     }
     else if ((outBuffOffset > 0) && !g_Parallel) {
-        HDfprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
+        fprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
     }
 }
 
@@ -278,9 +267,6 @@ print_manager_output(void)
  * Purpose: dismiss phdiff worker processes and exit
  *
  * Return: none
- *
- * Programmer: Albert Cheng
- * Date: Feb 6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -293,15 +279,17 @@ h5diff_exit(int status)
             phdiff_dismiss_workers();
             MPI_Barrier(MPI_COMM_WORLD);
         }
-        MPI_Finalize();
-        status = EXIT_SUCCESS; /* Reset exit status, since some mpiexec commands generate output on failure
-                                  status */
     }
+
+    MPI_Finalize();
+
+    status =
+        EXIT_SUCCESS; /* Reset exit status, since some mpiexec commands generate output on failure status */
 
     h5tools_close();
 
     /* Always exit(0), since MPI implementations do weird stuff when they
      *  receive a non-zero exit value. - QAK
      */
-    HDexit(status);
+    exit(status);
 }

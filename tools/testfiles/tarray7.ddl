@@ -1,7 +1,7 @@
 HDF5 "tarray7.h5" {
 GROUP "/" {
    DATASET "Dataset1" {
-      DATATYPE  H5T_ARRAY { [4] H5T_VLEN { H5T_ARRAY { [4] H5T_STD_U32LE }} }
+      DATATYPE  H5T_ARRAY { [4] H5T_VLEN { H5T_ARRAY { [4] H5T_STD_U32LE } } }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
       (0): [ ([ 0, 1, 2, 3 ]),

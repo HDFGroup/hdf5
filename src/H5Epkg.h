@@ -63,7 +63,7 @@
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 typedef struct {
     unsigned    vers;          /* Which version callback to use */
-    hbool_t     is_default;    /* If the printing function is the library's own. */
+    bool        is_default;    /* If the printing function is the library's own. */
     H5E_auto1_t func1;         /* Old-style callback, NO error stack param. */
     H5E_auto2_t func2;         /* New-style callback, with error stack param. */
     H5E_auto1_t func1_default; /* The saved library's default function - old style. */
@@ -129,7 +129,7 @@ H5_DLL H5E_t *H5E__get_stack(void);
 H5_DLL herr_t  H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
                                hid_t maj_id, hid_t min_id, const char *desc);
 H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
-H5_DLL herr_t  H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compat);
+H5_DLL herr_t  H5E__print(const H5E_t *estack, FILE *stream, bool bk_compat);
 H5_DLL herr_t  H5E__walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
                          void *client_data);
 H5_DLL herr_t  H5E__get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data);

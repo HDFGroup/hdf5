@@ -38,7 +38,6 @@
 
 MODULE H5T
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR,  C_CHAR, C_NULL_PTR
   USE H5GLOBAL
   IMPLICIT NONE
 
@@ -1409,14 +1408,6 @@ CONTAINS
 !                               Success:  0
 !                               Failure: -1
 !
-! AUTHOR
-!      Elena Pourmal
-!            August 12, 1999
-!
-! HISTORY
-!       Explicit Fortran interfaces were added for
-!                  called C functions (it is needed for Windows
-!                  port).  March 7, 2001
 ! SOURCE
 !  SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm)
 !  IMPLICIT NONE
@@ -1954,7 +1945,7 @@ CONTAINS
 !>
 !! \ingroup FH5T
 !!
-!! \brief Check whether the library’s default conversion is hard conversion.
+!! \brief Check whether the library&apos;s default conversion is hard conversion.
 !!
 !! \param src_id Identifier for the source datatype.
 !! \param dst_id Identifier for the destination datatype.

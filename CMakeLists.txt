@@ -596,16 +596,6 @@ if (MSVC)
   set (WIN_LINK_FLAGS "")
 endif ()
 
-set (MAKE_SYSTEM)
-if (CMAKE_MAKE_PROGRAM MATCHES "make")
-  set (MAKE_SYSTEM 1)
-endif ()
-
-set (CFG_INIT "/${CMAKE_CFG_INTDIR}")
-if (MAKE_SYSTEM)
-  set (CFG_INIT "")
-endif ()
-
 # Do not generate test programs by default
 option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 
@@ -770,13 +760,27 @@ if (HDF5_ENABLE_SUBFILING_VFD)
       ${HDF5_SRC_INCLUDE_DIRS}
       ${H5FD_SUBFILING_MERCURY_DIR}
   )
-  set (H5_HAVE_MERCURY_H 1)
   set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_MERCURY_DIR}")
+
+  # Run some configure checks for the Mercury util files
+  set (CMAKE_EXTRA_INCLUDE_FILES pthread.h)
+  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+
+  check_type_size(PTHREAD_MUTEX_ADAPTIVE_NP PTHREAD_MUTEX_ADAPTIVE_NP_SIZE)
+  if (HAVE_PTHREAD_MUTEX_ADAPTIVE_NP_SIZE)
+    set (${HDF_PREFIX}_HAVE_PTHREAD_MUTEX_ADAPTIVE_NP 1)
+  endif ()
+
+  check_symbol_exists(pthread_condattr_setclock pthread.h
+    ${HDF_PREFIX}_HAVE_PTHREAD_CONDATTR_SETCLOCK)
+
+  unset (CMAKE_EXTRA_INCLUDE_FILES)
+  unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
-#option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
-set (DEFAULT_API_VERSION "v114" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114)
+#option (DEFAULT_API_VERSION "Enable v1.16 API (v16, v18, v110, v112, v114, v116)" "v116")
+set (DEFAULT_API_VERSION "v116" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -804,9 +808,6 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.12.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v112")
-endif ()
 set (H5_USE_112_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v112")
   set (H5_USE_112_API_DEFAULT 1)
@@ -815,9 +816,6 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.14.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v114")
-endif ()
 set (H5_USE_114_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v114")
   set (H5_USE_114_API_DEFAULT 1)
@@ -843,6 +841,11 @@ include (UserMacros.cmake)
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
 include (CMakeFilters.cmake)
+
+#-----------------------------------------------------------------------------
+# Include external VOL connectors
+#-----------------------------------------------------------------------------
+include (CMakeVOL.cmake)
 
 #-----------------------------------------------------------------------------
 # Option for external libraries on windows
@@ -1228,11 +1231,5 @@ endif ()
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
-
-#-----------------------------------------------------------------------------
-# Options for use by cross compiling and toolchains
-#-----------------------------------------------------------------------------
-option (HDF5_USE_PREGEN "Use pre-generated Files" OFF)
-option (HDF5_BATCH_H5DETECT "Use a batch command for running h5detect" OFF)
 
 include (CMakeInstallation.cmake)

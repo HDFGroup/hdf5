@@ -1,4 +1,4 @@
-name: hdfeos5
+name: hdfeos5 dev
 
 on:
   workflow_dispatch:
@@ -19,6 +19,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build hdfeos5
@@ -33,7 +36,7 @@ jobs:
       - name: Install HDF5
         run: |
           ./autogen.sh
-          ./configure --prefix=/usr/local  --with-default-api-version=v16
+          ./configure --prefix=/usr/local --disable-tests --with-default-api-version=v16
           make
           sudo make install
       - name: Install HDF-EOS5

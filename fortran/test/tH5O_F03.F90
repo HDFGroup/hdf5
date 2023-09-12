@@ -41,11 +41,6 @@ MODULE visit_cb
   !
   ! Return:      Success:        0
   !              Failure:        -1
-  !
-  ! Programmer:  M.S. Breitenfeld
-  !              July 12, 2012
-  !              Adopted from C test.
-  !
   !-------------------------------------------------------------------------
   !
   ! Object visit structs
@@ -702,11 +697,6 @@ END SUBROUTINE test_obj_info
 ! Function:    build_visit_file
 !
 ! Purpose:     Build an "interesting" file to use for visiting links & objects
-!
-! Programmer:  M. Scot Breitenfeld
-!              July 12, 2012
-!              NOTE: Adapted from C test.
-!
 !-------------------------------------------------------------------------
 !
 

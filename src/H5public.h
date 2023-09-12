@@ -237,6 +237,12 @@ typedef int herr_t;
 /**
  * C99-style Boolean type. Successful return values are zero (false) or positive
  * (true). The typical true value is 1 but don't bet on it.
+ *
+ * \deprecated Now that we require C99, hbool_t is typedef'd to C99's bool
+ *             and hbool_t is considered deprecated. Due to its long-standing,
+ *             widespread use, we have no plans to remove the hbool_t typedef
+ *             from the public API, though we will probably switch to using
+ *             bool in the public API starting in the next major release of HDF5.
  * \attention Boolean functions cannot fail.
  */
 #include <stdbool.h>
@@ -647,7 +653,7 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
  *
  * \details H5is_library_terminating() queries whether the HDF5 library is in
  *          the process of shutting down.  The \p is_terminating flag will only
- *          be set to TRUE after shutdown starts, it will be FALSE before the
+ *          be set to true after shutdown starts, it will be false before the
  *          library has been initialized, while the library is initialized, and
  *          after it has been closed.  The value of \p is_terminating is
  *          undefined if this routine fails.
@@ -684,7 +690,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
  *
  *          H5Tget_member_name() provides an example of memory allocation on
  *          behalf of the caller: The function returns a buffer containing the
- *          name of a compound datatype member. It is the caller’s
+ *          name of a compound datatype member. It is the caller's
  *          responsibility to eventually free that buffer with H5free_memory().
  *
  * \attention It is especially important to use this function to free memory
@@ -710,7 +716,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 H5_DLL herr_t H5free_memory(void *mem);
 /**
  * \ingroup H5
- * \brief Frees memory allocated by the HDF5 library
+ * \brief Allocates memory that will be freed later internally.
  *
  * \param[in] size The size in bytes of the buffer to be allocated
  * \param[in] clear Flag whether the new buffer is to be initialized with 0
@@ -723,8 +729,8 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          will later be freed internally by the HDF5 library.
  *
  *          The boolean \p clear parameter specifies whether the buffer should
- *          be initialized. If clear is \c TRUE, all bits in the buffer are to be
- *          set to 0 (zero); if clear is \c FALSE, the buffer will not be
+ *          be initialized. If clear is \c true, all bits in the buffer are to be
+ *          set to 0 (zero); if clear is \c false, the buffer will not be
  *          initialized.
  *
  *          This function is intended to have the semantics of malloc() and

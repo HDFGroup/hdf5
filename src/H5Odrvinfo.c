@@ -10,11 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Thursday, March  1, 2007
- *
- * Purpose:	A message holding driver info settings
- *              in the superblock extension.
+/*
+ * Purpose: A message holding driver info settings in the superblock extension
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
@@ -26,9 +23,9 @@
 
 static void  *H5O__drvinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                   size_t p_size, const uint8_t *p);
-static herr_t H5O__drvinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__drvinfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__drvinfo_copy(const void *_mesg, void *_dest);
-static size_t H5O__drvinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__drvinfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__drvinfo_reset(void *_mesg);
 static herr_t H5O__drvinfo_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -80,18 +77,18 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_DRVINFO_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (mesg = (H5O_drvinfo_t *)H5MM_calloc(sizeof(H5O_drvinfo_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info message")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info message");
 
     /* Retrieve driver name */
     if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
@@ -109,7 +106,7 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     /* Allocate space for buffer */
     if (NULL == (mesg->buf = (uint8_t *)H5MM_malloc(mesg->len)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info buffer")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info buffer");
 
     /* Copy encoded driver info into buffer */
     if (H5_IS_BUFFER_OVERFLOW(p, mesg->len, p_end))
@@ -135,13 +132,10 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p,
                     const void *_mesg)
 {
     const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
@@ -149,15 +143,15 @@ H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* Store version, driver name, buffer length, & encoded buffer */
     *p++ = H5O_DRVINFO_VERSION;
     H5MM_memcpy(p, mesg->name, 8);
     p += 8;
-    HDassert(mesg->len <= 65535);
+    assert(mesg->len <= 65535);
     UINT16ENCODE(p, mesg->len);
     H5MM_memcpy(p, mesg->buf, mesg->len);
 
@@ -173,9 +167,6 @@ H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
  * Return:	Success:	Ptr to _DEST
  *		Failure:	NULL
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -188,11 +179,11 @@ H5O__drvinfo_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(mesg);
+    assert(mesg);
 
     if (!dest && NULL == (dest = (H5O_drvinfo_t *)H5MM_malloc(sizeof(H5O_drvinfo_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* Shallow copy the fields */
     *dest = *mesg;
@@ -201,7 +192,7 @@ H5O__drvinfo_copy(const void *_mesg, void *_dest)
     if (NULL == (dest->buf = (uint8_t *)H5MM_malloc(mesg->len))) {
         if (dest != _dest)
             dest = (H5O_drvinfo_t *)H5MM_xfree(dest);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     } /* end if */
     H5MM_memcpy(dest->buf, mesg->buf, mesg->len);
 
@@ -221,13 +212,10 @@ done:
  * Return:	Success:	Message data size in bytes w/o alignment.
  *		Failure:	0
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_drvinfo_t *mesg      = (const H5O_drvinfo_t *)_mesg;
     size_t               ret_value = 0; /* Return value */
@@ -235,8 +223,8 @@ H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     ret_value = 1 +        /* Version number */
                 8 +        /* Driver name */
@@ -254,9 +242,6 @@ H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  1 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -267,7 +252,7 @@ H5O__drvinfo_reset(void *_mesg)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* reset */
     mesg->buf = (uint8_t *)H5MM_xfree(mesg->buf);
@@ -282,9 +267,6 @@ H5O__drvinfo_reset(void *_mesg)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -295,14 +277,14 @@ H5O__drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__drvinfo_debug() */

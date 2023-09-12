@@ -11,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Friday, April 28, 2006
  *
  * Purpose:     Test support stuff.
  */
@@ -29,13 +27,13 @@
 /* Macros used in HL tests */
 #define HL_TESTING2(WHAT)                                                                                    \
     do {                                                                                                     \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
     } while (0)
 #define HL_TESTING3(WHAT)                                                                                    \
     do {                                                                                                     \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
     } while (0)
 
 /* Implements verbose 'assert' with 'goto error' exit  */

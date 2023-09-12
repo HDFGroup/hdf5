@@ -277,7 +277,7 @@ done:
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1info(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf  = {H5L_TYPE_ERROR, false, -1, H5T_CSET_ERROR, {{{0}}}};
     const char *linkName = NULL;
     jvalue      args[5];
     herr_t      status  = FAIL;
@@ -302,7 +302,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1info(JNIEnv *env, jclass clss, jlong loc_id, jstring
         jobject token;
 
         /* Create an H5O_token_t object */
-        if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.u.token, FALSE)))
+        if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.u.token, false)))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         args[0].i = infobuf.type;
@@ -340,7 +340,7 @@ JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
                                           jint index_field, jint order, jlong link_n, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf   = {H5L_TYPE_ERROR, false, -1, H5T_CSET_ERROR, {{{0}}}};
     const char *groupName = NULL;
     jvalue      args[5];
     herr_t      status  = FAIL;
@@ -367,7 +367,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
         jobject token;
 
         /* Create an H5O_token_t object */
-        if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.u.token, FALSE)))
+        if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.u.token, false)))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         args[0].i = infobuf.type;
@@ -424,7 +424,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* add extra space for the null terminator */
-    if (NULL == (linkName = (char *)HDmalloc(sizeof(char) * (size_t)status_size + 1)))
+    if (NULL == (linkName = (char *)malloc(sizeof(char) * (size_t)status_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_name_by_idx: failed to allocate buffer for link name");
 
     if ((H5Lget_name_by_idx((hid_t)loc_id, groupName, (H5_index_t)index_field, (H5_iter_order_t)order,
@@ -438,7 +438,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
 
 done:
     if (linkName)
-        HDfree(linkName);
+        free(linkName);
     if (groupName)
         UNPIN_JAVA_STRING(ENVONLY, name, groupName);
 
@@ -454,7 +454,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
                                   jobjectArray link_value, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf   = {H5L_TYPE_ERROR, false, -1, H5T_CSET_ERROR, {{{0}}}};
     const char *file_name = NULL;
     const char *obj_name  = NULL;
     const char *linkName  = NULL;
@@ -478,7 +478,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstrin
     if (H5L_TYPE_HARD == infobuf.type)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Lget_val: hard links are unsupported");
 
-    if (NULL == (linkValue = (char *)HDmalloc(sizeof(char) * infobuf.u.val_size + 1)))
+    if (NULL == (linkValue = (char *)malloc(sizeof(char) * infobuf.u.val_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_val: failed to allocate buffer for link value");
 
     if ((status = H5Lget_val((hid_t)loc_id, linkName, (void *)linkValue, infobuf.u.val_size + 1,
@@ -527,7 +527,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstrin
 
 done:
     if (linkValue)
-        HDfree(linkValue);
+        free(linkValue);
     if (linkName)
         UNPIN_JAVA_STRING(ENVONLY, name, linkName);
 
@@ -544,7 +544,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
                                            jint index_field, jint order, jlong link_n,
                                            jobjectArray link_value, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf   = {H5L_TYPE_ERROR, false, -1, H5T_CSET_ERROR, {{{0}}}};
     const char *file_name = NULL;
     const char *obj_name  = NULL;
     const char *grpName   = NULL;
@@ -572,7 +572,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
     if (!infobuf.u.val_size)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (linkValue = (void *)HDmalloc(infobuf.u.val_size + 1)))
+    if (NULL == (linkValue = (void *)malloc(infobuf.u.val_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Lget_val_by_idx: failed to allocate buffer for link value");
 
     if ((status = H5Lget_val_by_idx((hid_t)loc_id, grpName, (H5_index_t)index_field, (H5_iter_order_t)order,
@@ -622,7 +622,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
 
 done:
     if (linkValue)
-        HDfree(linkValue);
+        free(linkValue);
     if (grpName)
         UNPIN_JAVA_STRING(ENVONLY, name, grpName);
 
@@ -706,7 +706,7 @@ H5L_iterate_cb(hid_t g_id, const char *name, const H5L_info2_t *info, void *cb_d
         jobject token;
 
         /* Create an H5O_token_t object */
-        if (NULL == (token = create_H5O_token_t(CBENVONLY, &info->u.token, FALSE)))
+        if (NULL == (token = create_H5O_token_t(CBENVONLY, &info->u.token, false)))
             CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
         args[0].i = info->type;

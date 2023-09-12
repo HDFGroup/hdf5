@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  James Laird
- *              Tuesday, June 6, 2006
- *
  *  This program creates HDF5 files with user-defined links.  These files
  *  should be created on a little-endian and a big-endian machine.
  *  They will be named according to the platform and should
@@ -33,9 +30,9 @@
 int
 main(void)
 {
-    hid_t fid1 = -1;
-    hid_t fid2 = -1;
-    hid_t gid  = -1;
+    hid_t fid1 = H5I_INVALID_HID;
+    hid_t fid2 = H5I_INVALID_HID;
+    hid_t gid  = H5I_INVALID_HID;
     char  filename1[NAME_BUF_SIZE];
     char  filename2[NAME_BUF_SIZE];
 

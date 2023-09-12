@@ -55,7 +55,7 @@
 static herr_t H5HG__cache_heap_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5HG__cache_heap_get_final_load_size(const void *_image, size_t image_len, void *udata,
                                                    size_t *actual_len);
-static void  *H5HG__cache_heap_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HG__cache_heap_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len);
 static herr_t H5HG__cache_heap_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HG__cache_heap_free_icr(void *thing);
@@ -109,22 +109,22 @@ H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, size_t len, const
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(heap);
-    HDassert(image);
-    HDassert(f);
+    assert(heap);
+    assert(image);
+    assert(f);
 
     /* Magic number */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature")
+    if (memcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     if (H5HG_VERSION != *image++)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in global heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in global heap");
 
     /* Reserved */
     if (H5_IS_BUFFER_OVERFLOW(image, 3, p_end))
@@ -159,7 +159,7 @@ H5HG__cache_heap_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *imag
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(image_len);
+    assert(image_len);
 
     *image_len = H5HG_MINSIZE;
 
@@ -183,15 +183,16 @@ H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len, void *
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(image);
-    HDassert(udata);
-    HDassert(actual_len);
-    HDassert(*actual_len == image_len);
-    HDassert(image_len == H5HG_MINSIZE);
+    assert(image);
+    assert(udata);
+    assert(actual_len);
+    assert(*actual_len == image_len);
+    assert(image_len == H5HG_MINSIZE);
 
     /* Deserialize the heap's header */
+    heap.size = 0;
     if (H5HG__hdr_deserialize(&heap, (const uint8_t *)image, image_len, (const H5F_t *)udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode global heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode global heap prefix");
 
     /* Set the actual global heap size */
     *actual_len = heap.size;
@@ -213,7 +214,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5F_t         *f         = (H5F_t *)_udata; /* File pointer */
     H5HG_heap_t   *heap      = NULL;            /* New global heap */
@@ -225,17 +226,17 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(_image);
-    HDassert(len >= (size_t)H5HG_MINSIZE);
-    HDassert(f);
-    HDassert(dirty);
+    assert(_image);
+    assert(len >= (size_t)H5HG_MINSIZE);
+    assert(f);
+    assert(dirty);
 
     /* Allocate a new global heap */
     if (NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->shared = H5F_SHARED(f);
     if (NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, len)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the image buffer into the newly allocated chunk */
     H5MM_memcpy(heap->chunk, _image, len);
@@ -251,7 +252,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
     if (H5_IS_BUFFER_OVERFLOW(heap->chunk, H5HG_SIZEOF_HDR(f), p_end))
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (H5HG__hdr_deserialize(heap, (const uint8_t *)heap->chunk, len, f) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode global heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode global heap header");
 
     /* Decode each object */
 
@@ -265,7 +266,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
      * about the order of the objects, and unused slots must be set to zero.
      */
     if (NULL == (heap->obj = H5FL_SEQ_CALLOC(H5HG_obj_t, nalloc)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->nalloc = nalloc;
 
     while (p < (heap->chunk + heap->size)) {
@@ -304,20 +305,20 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
                 /* Determine the new number of objects to index */
                 new_alloc = MAX(heap->nalloc * 2, (idx + 1));
                 if (idx >= new_alloc)
-                    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "inappropriate heap index")
+                    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "inappropriate heap index");
 
                 /* Reallocate array of objects */
                 if (NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
                 /* Clear newly allocated space */
-                HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+                memset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
 
                 /* Update heap information */
                 heap->nalloc = new_alloc;
                 heap->obj    = new_obj;
                 if (heap->nalloc <= heap->nused)
-                    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "inappropriate # allocated slots")
+                    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "inappropriate # allocated slots");
             }
 
             /* Number of references */
@@ -368,7 +369,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
     /* Post-parse checks */
     if (p != heap->chunk + heap->size)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "partially decoded global heap");
-    if (FALSE == H5HG_ISALIGNED(heap->obj[0].size))
+    if (false == H5HG_ISALIGNED(heap->obj[0].size))
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "decoded global heap is not aligned");
 
     /* Set the next index value to use when creating a new object */
@@ -382,14 +383,14 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
 
     /* Add the new heap to the CWFS list for the file */
     if (H5F_cwfs_add(f, heap) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "unable to add global heap collection to file's CWFS")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "unable to add global heap collection to file's CWFS");
 
     ret_value = heap;
 
 done:
     if (!ret_value && heap)
         if (H5HG__free(heap) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG__cache_heap_deserialize() */
@@ -410,10 +411,10 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(heap);
-    HDassert(heap->cache_info.type == H5AC_GHEAP);
-    HDassert(heap->size >= H5HG_MINSIZE);
-    HDassert(image_len);
+    assert(heap);
+    assert(heap->cache_info.type == H5AC_GHEAP);
+    assert(heap->size >= H5HG_MINSIZE);
+    assert(image_len);
 
     *image_len = heap->size;
 
@@ -438,12 +439,12 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(image);
-    HDassert(heap);
-    HDassert(heap->cache_info.type == H5AC_GHEAP);
-    HDassert(heap->size == len);
-    HDassert(heap->chunk);
+    assert(f);
+    assert(image);
+    assert(heap);
+    assert(heap->cache_info.type == H5AC_GHEAP);
+    assert(heap->size == len);
+    assert(heap->chunk);
 
     /* Copy the image into the buffer */
     H5MM_memcpy(image, heap->chunk, len);
@@ -467,12 +468,12 @@ H5HG__cache_heap_free_icr(void *_thing)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(heap);
-    HDassert(heap->cache_info.type == H5AC_GHEAP);
+    assert(heap);
+    assert(heap->cache_info.type == H5AC_GHEAP);
 
     /* Destroy global heap collection */
     if (H5HG__free(heap) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

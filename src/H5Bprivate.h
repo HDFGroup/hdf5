@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Bprivate.h
- *			Jul 10 1997
- *			Robb Matzke
  *
  * Purpose:		Private non-prototype header.
  *
@@ -108,20 +106,20 @@ typedef struct H5B_class_t {
     herr_t (*new_node)(H5F_t *, H5B_ins_t, void *, void *, void *, haddr_t *);
     int (*cmp2)(void *, void *, void *); /*compare 2 keys */
     int (*cmp3)(void *, void *, void *); /*compare 3 keys */
-    htri_t (*found)(H5F_t *, haddr_t, const void *, hbool_t *, void *);
+    htri_t (*found)(H5F_t *, haddr_t, const void *, bool *, void *);
 
     /* insert new data */
-    H5B_ins_t (*insert)(H5F_t *, haddr_t, void *, hbool_t *, void *, void *, void *, hbool_t *, haddr_t *);
+    H5B_ins_t (*insert)(H5F_t *, haddr_t, void *, bool *, void *, void *, void *, bool *, haddr_t *);
 
     /* min insert uses min leaf, not new(), similarly for max insert */
-    hbool_t follow_min;
-    hbool_t follow_max;
+    bool follow_min;
+    bool follow_max;
 
     /* The direction of the key that is intrinsically associated with each node */
     H5B_dir_t critical_key;
 
     /* remove existing data */
-    H5B_ins_t (*remove)(H5F_t *, haddr_t, void *, hbool_t *, void *, void *, hbool_t *);
+    H5B_ins_t (*remove)(H5F_t *, haddr_t, void *, bool *, void *, void *, bool *);
 
     /* encode, decode, debug key values */
     herr_t (*decode)(const H5B_shared_t *, const uint8_t *, void *);
@@ -143,7 +141,7 @@ typedef struct H5B_info_t {
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL herr_t H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out*/);
-H5_DLL herr_t H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, hbool_t *found, void *udata);
+H5_DLL herr_t H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, bool *found, void *udata);
 H5_DLL herr_t H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata);
 H5_DLL herr_t H5B_iterate(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operator_t op, void *udata);
 H5_DLL herr_t H5B_get_info(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_info_t *bt_info,

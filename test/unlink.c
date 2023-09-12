@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, September 25, 1998
- *
  * Purpose:    Test unlinking operations.
  */
 
@@ -25,9 +22,9 @@
 #include "h5test.h"
 #include "H5Gpkg.h" /* Groups                */
 
-const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    "lunlink",
-                          "filespace",       "slashes",        "resurrect_set", "resurrect_type",
-                          "resurrect_group", "unlink_chunked", "full_group",    NULL};
+static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    "lunlink",
+                                 "filespace",       "slashes",        "resurrect_set", "resurrect_type",
+                                 "resurrect_group", "unlink_chunked", "full_group",    NULL};
 
 /* Macros for test_create_unlink() & test_filespace */
 #define GROUPNAME                     "group"
@@ -75,15 +72,12 @@ const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_one(hid_t file)
 {
-    hid_t  work = -1, grp = -1;
+    hid_t  work = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     herr_t status;
 
     /* Create a test group */
@@ -118,7 +112,7 @@ test_one(hid_t file)
     {
         status = H5Ldelete(grp, ".", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Unlinking object w/o a name should have failed.");
     if (H5Gclose(grp) < 0)
@@ -137,7 +131,7 @@ error:
         H5Gclose(work);
         H5Gclose(grp);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_one() */
 
@@ -150,15 +144,12 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_many(hid_t file)
 {
-    hid_t     work = -1, grp = -1;
+    hid_t     work = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     int       i;
     const int how_many = 500;
     char      name[32];
@@ -244,7 +235,7 @@ error:
         H5Gclose(work);
         H5Gclose(grp);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -257,15 +248,12 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_symlink(hid_t file)
 {
-    hid_t work = -1;
+    hid_t work = H5I_INVALID_HID;
 
     TESTING("symlink removal");
 
@@ -289,7 +277,7 @@ error:
     {
         H5Gclose(work);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_symlink() */
 
@@ -302,15 +290,12 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_rename(hid_t file)
 {
-    hid_t work = -1, foo = -1, inner = -1;
+    hid_t work = H5I_INVALID_HID, foo = H5I_INVALID_HID, inner = H5I_INVALID_HID;
 
     /* Create a test group and rename something */
     TESTING("object renaming");
@@ -353,7 +338,7 @@ error:
         H5Gclose(foo);
         H5Gclose(inner);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_rename() */
 
@@ -366,17 +351,15 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_new_move(hid_t fapl)
 {
-    hid_t file_a, file_b = (-1);
-    hid_t grp_1 = (-1), grp_2 = (-1), grp_move = (-1), moved_grp = (-1);
-    char  filename[1024];
+    hid_t file_a, file_b = (H5I_INVALID_HID);
+    hid_t grp_1 = (H5I_INVALID_HID), grp_2 = (H5I_INVALID_HID), grp_move = (H5I_INVALID_HID),
+          moved_grp = (H5I_INVALID_HID);
+    char filename[1024];
 
     TESTING("new move");
 
@@ -410,7 +393,7 @@ test_new_move(hid_t fapl)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Move a group across files.  Should fail. */
     H5E_BEGIN_TRY
@@ -418,7 +401,7 @@ test_new_move(hid_t fapl)
         if (H5Lmove(grp_1, "group_move", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Move a group across groups in the same file. */
     if (H5Lmove(grp_1, "group_move", grp_2, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -454,7 +437,7 @@ error:
         H5Fclose(file_a);
         H5Fclose(file_b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -466,9 +449,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -526,9 +506,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 22, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -649,7 +626,7 @@ test_filespace(hid_t fapl)
         TEST_ERROR;
 
     /* Create buffer for writing dataset */
-    if (NULL == (data = (int *)HDmalloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
+    if (NULL == (data = (int *)malloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
         TEST_ERROR;
 
     /* Create single dataset (with contiguous storage & late allocation), remove it & verify file size */
@@ -1243,7 +1220,7 @@ test_filespace(hid_t fapl)
     {
         dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dataset >= 0) {
         H5Dclose(dataset);
         TEST_ERROR;
@@ -1285,7 +1262,7 @@ test_filespace(hid_t fapl)
     {
         group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (group >= 0) {
         H5Gclose(group);
         TEST_ERROR;
@@ -1335,7 +1312,7 @@ test_filespace(hid_t fapl)
     {
         status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         TEST_ERROR;
     if (H5Tclose(type) < 0)
@@ -1390,7 +1367,7 @@ test_filespace(hid_t fapl)
     {
         attr = H5Acreate2(dataset, ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (attr >= 0) {
         H5Aclose(attr);
         TEST_ERROR;
@@ -1425,7 +1402,7 @@ test_filespace(hid_t fapl)
     /* Cleanup common objects */
 
     /* Release dataset buffer */
-    HDfree(data);
+    free(data);
 
     /* Close property lists */
     if (H5Pclose(fapl_nocache) < 0)
@@ -1452,7 +1429,7 @@ test_filespace(hid_t fapl)
 error:
     /* Release dataset buffer */
     if (data)
-        HDfree(data);
+        free(data);
 
     return 1;
 } /* end test_filespace() */
@@ -1464,9 +1441,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Friday, April 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1490,12 +1464,12 @@ test_create_unlink(const char *msg, hid_t fapl)
         HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if ((group = H5Gcreate2(file, groupname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
-            HDprintf("group %s creation failed\n", groupname);
+            printf("group %s creation failed\n", groupname);
             goto error;
         } /* end if */
         if (H5Gclose(group) < 0) {
             H5_FAILED();
-            HDprintf("closing group %s failed\n", groupname);
+            printf("closing group %s failed\n", groupname);
             goto error;
         } /* end if */
     }     /* end for */
@@ -1505,7 +1479,7 @@ test_create_unlink(const char *msg, hid_t fapl)
         HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if (H5Ldelete(file, groupname, H5P_DEFAULT) < 0) {
             H5_FAILED();
-            HDprintf("Unlinking group %s failed\n", groupname);
+            printf("Unlinking group %s failed\n", groupname);
             goto error;
         } /* end if */
     }     /* end for */
@@ -1528,9 +1502,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1607,9 +1578,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1719,24 +1687,21 @@ delete_node(hid_t pid, hid_t id)
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_unlink_rightleaf(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 150;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 150;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1770,7 +1735,7 @@ test_unlink_rightleaf(hid_t fid)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1784,15 +1749,15 @@ error:
                 {
                     H5Gclose(gids[n]);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
         H5Gclose(rootid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlink_rightleaf() */
@@ -1806,24 +1771,21 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_unlink_rightnode(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 150;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 150;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1860,7 +1822,7 @@ test_unlink_rightnode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1874,15 +1836,15 @@ error:
                 {
                     H5Gclose(gids[n]);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
         H5Gclose(rootid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlink_rightnode() */
@@ -1896,24 +1858,21 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_unlink_middlenode(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 250;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 250;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -2236,7 +2195,7 @@ test_unlink_middlenode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -2250,15 +2209,15 @@ error:
                 {
                     H5Gclose(gids[n]);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
         H5Gclose(rootid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_unlink_middlenode() */
@@ -2272,15 +2231,12 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, July 14, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_resurrect_dataset(hid_t fapl)
 {
-    hid_t f = -1, s = -1, d = -1;
+    hid_t f = H5I_INVALID_HID, s = H5I_INVALID_HID, d = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting dataset after deletion");
@@ -2342,7 +2298,7 @@ error:
         H5Dclose(d);
         H5Fclose(f);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_resurrect_dataset() */
 
@@ -2355,15 +2311,12 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  James Laird
- *              Wednesday, July 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_resurrect_datatype(hid_t fapl)
 {
-    hid_t file = -1, type = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting datatype after deletion");
@@ -2422,7 +2375,7 @@ error:
         H5Tclose(type);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_resurrect_datatype() */
 
@@ -2435,15 +2388,12 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  James Laird
- *              Wednesday, July 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_resurrect_group(hid_t fapl)
 {
-    hid_t file = -1, group = -1;
+    hid_t file = H5I_INVALID_HID, group = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting group after deletion");
@@ -2500,7 +2450,7 @@ error:
         H5Gclose(group);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_resurrect_group() */
 
@@ -2512,18 +2462,15 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, September 27, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_unlink_chunked_dataset(hid_t fapl)
 {
-    hid_t   file_id                     = -1;
-    hid_t   dset_id                     = -1;
-    hid_t   space_id                    = -1;
-    hid_t   dcpl_id                     = -1;
+    hid_t   file_id                     = H5I_INVALID_HID;
+    hid_t   dset_id                     = H5I_INVALID_HID;
+    hid_t   space_id                    = H5I_INVALID_HID;
+    hid_t   dcpl_id                     = H5I_INVALID_HID;
     hsize_t dims[FILESPACE_NDIMS]       = {FILESPACE_DIM0, FILESPACE_DIM1, FILESPACE_DIM2};
     hsize_t max_dims[FILESPACE_NDIMS]   = {H5S_UNLIMITED, H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[FILESPACE_NDIMS] = {FILESPACE_CHUNK0, FILESPACE_CHUNK1, FILESPACE_CHUNK2};
@@ -2598,7 +2545,7 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlink_chunked_dataset() */
 
@@ -2610,23 +2557,20 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_full_group_compact(hid_t fapl)
 {
-    hid_t          file_id = -1;
-    hid_t          gid = -1, gid2 = -1; /* Group IDs */
-    H5O_info2_t    oi;                  /* Stat buffer for object */
-    char           objname[128];        /* Buffer for name of objects to create */
-    char           objname2[128];       /* Buffer for name of objects to create */
-    char           filename[1024];      /* Buffer for filename */
-    h5_stat_size_t keep_size;           /* Size of the file with objects to keep */
-    h5_stat_size_t file_size;           /* Size of each file created */
-    unsigned       u;                   /* Local index variable */
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info2_t    oi;                                            /* Stat buffer for object */
+    char           objname[128];                                  /* Buffer for name of objects to create */
+    char           objname2[128];                                 /* Buffer for name of objects to create */
+    char           filename[1024];                                /* Buffer for filename */
+    h5_stat_size_t keep_size;                                     /* Size of the file with objects to keep */
+    h5_stat_size_t file_size;                                     /* Size of each file created */
+    unsigned       u;                                             /* Local index variable */
 
     TESTING("unlinking non-empty compact group");
 
@@ -2696,11 +2640,11 @@ test_full_group_compact(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) != TRUE)
+    if (H5G__has_links_test(gid, NULL) != true)
         TEST_ERROR;
-    if (H5G__has_stab_test(gid) == TRUE)
+    if (H5G__has_stab_test(gid) == true)
         TEST_ERROR;
 
     /* Close group with objects to delete */
@@ -2759,7 +2703,7 @@ error:
         H5Gclose(gid);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_full_group_compact() */
 
@@ -2771,24 +2715,21 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_full_group_dense(hid_t fapl)
 {
-    hid_t          file_id = -1;
-    hid_t          gcpl    = (-1);      /* Group creation property list ID */
-    hid_t          gid = -1, gid2 = -1; /* Group IDs */
-    H5O_info2_t    oi;                  /* Stat buffer for object */
-    char           objname[128];        /* Buffer for name of objects to create */
-    char           objname2[128];       /* Buffer for name of objects to create */
-    char           filename[1024];      /* Buffer for filename */
-    h5_stat_size_t keep_size;           /* Size of the file with objects to keep */
-    h5_stat_size_t file_size;           /* Size of each file created */
-    unsigned       u;                   /* Local index variable */
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          gcpl    = (H5I_INVALID_HID);                   /* Group creation property list ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info2_t    oi;                                            /* Stat buffer for object */
+    char           objname[128];                                  /* Buffer for name of objects to create */
+    char           objname2[128];                                 /* Buffer for name of objects to create */
+    char           filename[1024];                                /* Buffer for filename */
+    h5_stat_size_t keep_size;                                     /* Size of the file with objects to keep */
+    h5_stat_size_t file_size;                                     /* Size of each file created */
+    unsigned       u;                                             /* Local index variable */
 
     TESTING("unlinking non-empty dense group");
 
@@ -2873,11 +2814,11 @@ test_full_group_dense(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Close group with objects to delete */
@@ -2937,7 +2878,7 @@ error:
         H5Pclose(gcpl);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_full_group_dense() */
 
@@ -2947,9 +2888,6 @@ error:
  * Purpose:     Test unlinking operations
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2983,7 +2921,7 @@ main(void)
         TEST_ERROR;
 
     /* Test with old & new format groups */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t my_fapl;
 
         /* Set the FAPL for the type of format */
@@ -3022,12 +2960,12 @@ main(void)
 
             /* Get FAPL cache settings */
             if (H5Pget_cache(fapl_small_mdc, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
-                HDprintf("H5Pget_cache failed\n");
+                printf("H5Pget_cache failed\n");
 
             /* Change FAPL cache settings */
             mdc_nelmts = 1;
             if (H5Pset_cache(fapl_small_mdc, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
-                HDprintf("H5Pset_cache failed\n");
+                printf("H5Pset_cache failed\n");
 
             /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
             nerrors += test_create_unlink("create and unlink large number of objects with small cache",
@@ -3075,16 +3013,16 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All unlink tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

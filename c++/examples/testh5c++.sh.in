@@ -11,10 +11,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the h5c++ compiler tool
-# Created: Albert Cheng, 2007/3/14
-#
-# Modification:
-#
 
 srcdir=@srcdir@
 

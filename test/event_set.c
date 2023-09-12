@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
  * Purpose:    Tests event sets.
  */
 #include "h5test.h"
@@ -21,9 +18,9 @@
 
 #define EVENT_SET_NUM_CONNECTOR_IDS 2
 
-const char *FILENAME[] = {"event_set_1", NULL};
+static const char *FILENAME[] = {"event_set_1", NULL};
 
-hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
+static hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
 
 herr_t fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
 herr_t fake_wait_request_free(void *req);
@@ -178,9 +175,6 @@ fake_wait_request_free(void H5_ATTR_UNUSED *req)
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Quincey Koziol
- *              Thursday, April 9, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -190,7 +184,7 @@ test_es_create(void)
     size_t   count;        /* # of events in set */
     size_t   num_errs;     /* # of failed events in set */
     uint64_t num_ops;      /* # of events inserted into set */
-    hbool_t  err_occurred; /* Whether an error has occurred */
+    bool     err_occurred; /* Whether an error has occurred */
 
     TESTING("event set creation");
 
@@ -206,7 +200,7 @@ test_es_create(void)
         FAIL_PUTS_ERROR("should be empty event set");
 
     /* Check for errors */
-    err_occurred = FALSE;
+    err_occurred = false;
     if (H5ESget_err_status(es_id, &err_occurred) < 0)
         TEST_ERROR;
     if (err_occurred)
@@ -238,7 +232,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -249,9 +243,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    number of errors
- *
- * Programmer:  Quincey Koziol
- *              Friday, February 26, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -315,20 +306,17 @@ error:
  * Return:      Success:    0
  *              Failure:    number of errors
  *
- * Programmer:  Neil Fortner
- *              Wednesday, November 24, 2021
- *
  *-------------------------------------------------------------------------
  */
 static int
 test_es_get_requests(void)
 {
-    hid_t   es_id;            /* Event set ID */
-    hid_t   connector_ids[2]; /* Connector IDs */
-    void   *requests[2];      /* Requests */
-    int     req_targets[2];   /* Dummy targets for void * requests */
-    size_t  count;            /* # of events in set */
-    hbool_t op_failed;        /* Whether an operation failed (unused) */
+    hid_t  es_id;            /* Event set ID */
+    hid_t  connector_ids[2]; /* Connector IDs */
+    void  *requests[2];      /* Requests */
+    int    req_targets[2];   /* Dummy targets for void * requests */
+    size_t count;            /* # of events in set */
+    bool   op_failed;        /* Whether an operation failed (unused) */
 
     TESTING("event set get requests");
 
@@ -645,7 +633,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -656,9 +644,6 @@ error:
  *
  * Return:      Success: EXIT_SUCCESS
  *              Failure: EXIT_FAILURE
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -698,9 +683,9 @@ main(void)
     /* Report status */
     HDputs("All event set tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("***** EVENT SET TESTS FAILED *****");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

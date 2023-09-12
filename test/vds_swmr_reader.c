@@ -18,11 +18,11 @@ static hsize_t VDS_PLANE[RANK] = {1, FULL_HEIGHT, WIDTH};
 int
 main(void)
 {
-    hid_t fid    = -1; /* HDF5 file ID                     */
-    hid_t faplid = -1; /* file access property list ID                */
-    hid_t did    = -1; /* dataset ID                       */
-    hid_t msid   = -1; /* memory dataspace ID              */
-    hid_t fsid   = -1; /* file dataspace ID                */
+    hid_t fid    = H5I_INVALID_HID; /* HDF5 file ID                     */
+    hid_t faplid = H5I_INVALID_HID; /* file access property list ID                */
+    hid_t did    = H5I_INVALID_HID; /* dataset ID                       */
+    hid_t msid   = H5I_INVALID_HID; /* memory dataspace ID              */
+    hid_t fsid   = H5I_INVALID_HID; /* file dataspace ID                */
 
     hsize_t start[RANK]; /* hyperslab start point            */
 
@@ -47,7 +47,7 @@ main(void)
         TEST_ERROR;
     n_elements = (int)(VDS_PLANE[1] * VDS_PLANE[2]);
     size       = (size_t)n_elements * sizeof(int);
-    if (NULL == (buffer = (int *)HDmalloc(size)))
+    if (NULL == (buffer = (int *)malloc(size)))
         TEST_ERROR;
 
     /* Create memory dataspace */
@@ -117,9 +117,9 @@ main(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buffer);
+    free(buffer);
 
-    HDfprintf(stderr, "SWMR reader exited successfully\n");
+    fprintf(stderr, "SWMR reader exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -139,9 +139,9 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buffer);
+    free(buffer);
 
-    HDfprintf(stderr, "ERROR: SWMR reader exited with errors\n");
+    fprintf(stderr, "ERROR: SWMR reader exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

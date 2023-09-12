@@ -25,13 +25,13 @@ static void usage(void);
 static void
 usage(void)
 {
-    HDfprintf(stderr, "usage: h5delete [-f] <filename>\n");
+    fprintf(stderr, "usage: h5delete [-f] <filename>\n");
 }
 
 int
 main(int argc, char *argv[])
 {
-    hbool_t     quiet = FALSE;
+    bool        quiet = false;
     const char *name  = NULL;
     int         ret   = 0;
 
@@ -41,7 +41,7 @@ main(int argc, char *argv[])
                 usage();
                 return EXIT_FAILURE;
             }
-            quiet = TRUE;
+            quiet = true;
             name  = argv[2];
             break;
         case 2:
@@ -57,10 +57,10 @@ main(int argc, char *argv[])
         /* Only uses the environment variable at this time */
         ret = (int)H5Fdelete(name, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (ret < 0 && !quiet)
-        HDfprintf(stderr, "Unable to delete storage at: %s\n", name);
+        fprintf(stderr, "Unable to delete storage at: %s\n", name);
 
     return ret < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }

@@ -17,7 +17,6 @@
 
 #include "H5private.h"
 #include "testpar.h"
-#include "H5_api_tests_disabled.h"
 
 /*
  * Define parameters for various tests since we do not have access to
@@ -40,12 +39,12 @@ enum H5TEST_COLL_CHUNK_API {
     API_MULTI_IND
 };
 
-#ifndef FALSE
-#define FALSE 0
+#ifndef false
+#define false 0
 #endif
 
-#ifndef TRUE
-#define TRUE 1
+#ifndef true
+#define true 1
 #endif
 
 /* Constants definitions */
@@ -95,8 +94,8 @@ enum H5TEST_COLL_CHUNK_API {
 #define LINK_TRUE_NUM_CHUNK   2
 #define LINK_FALSE_NUM_CHUNK  6
 #define MULTI_TRUE_PERCENT    50
-#define LINK_TRUE_CHUNK_NAME  "h5_link_chunk_true"
-#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_false"
+#define LINK_TRUE_CHUNK_NAME  "h5_link_chunk_TRUE"
+#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_FALSE"
 #define LINK_HARD_CHUNK_NAME  "h5_link_chunk_hard"
 #define MULTI_HARD_CHUNK_NAME "h5_multi_chunk_hard"
 #define MULTI_COLL_CHUNK_NAME "h5_multi_chunk_coll"
@@ -218,8 +217,8 @@ enum H5TEST_COLL_CHUNK_API {
 /* Collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME        "coll_chunk_link_hard"
 #define H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME       "coll_chunk_multi_hard"
-#define H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME    "coll_chunk_link_true"
-#define H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME   "coll_chunk_link_false"
+#define H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME    "coll_chunk_link_TRUE"
+#define H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME   "coll_chunk_link_FALSE"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME "coll_chunk_multi_coll"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME  "coll_chunk_multi_ind"
 
@@ -231,8 +230,8 @@ enum H5TEST_COLL_CHUNK_API {
 #define H5D_XFER_COLL_RANK0_BCAST_NAME "coll_rank0_bcast"
 
 /* Definitions for general collective I/O instrumentation properties */
-#define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(hbool_t)
-#define H5D_XFER_COLL_RANK0_BCAST_DEF  FALSE
+#define H5D_XFER_COLL_RANK0_BCAST_SIZE sizeof(bool)
+#define H5D_XFER_COLL_RANK0_BCAST_DEF  false
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* type definitions */

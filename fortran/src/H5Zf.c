@@ -29,11 +29,6 @@
  *  filter identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -65,11 +60,6 @@ h5zunregister_c(int_f *filter)
  *  flag - status flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -101,11 +91,6 @@ h5zfilter_avail_c(int_f *filter, int_f *flag)
  *  flag - status flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Nat Furrer and James Laird
- *  Wednesday, June 16, 2004
- * HISTORY
- *
  * SOURCE
  */
 

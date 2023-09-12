@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pocpypl.c
- *			Mar 13 2006
- *			Peter Cao
  *
  * Purpose:		Object copying property list class routines
  *
@@ -145,8 +143,6 @@ H5FL_DEFINE(H5O_copy_dtype_merge_list_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -159,7 +155,7 @@ H5P__ocpy_reg_prop(H5P_genclass_t *pclass)
     /* Register copy options property */
     if (H5P__register_real(pclass, H5O_CPY_OPTION_NAME, H5O_CPY_OPTION_SIZE, &H5O_def_ocpy_option_g, NULL,
                            NULL, NULL, H5O_CPY_OPTION_ENC, H5O_CPY_OPTION_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register merge named dtype list property */
     if (H5P__register_real(pclass, H5O_CPY_MERGE_COMM_DT_LIST_NAME, H5O_CPY_MERGE_COMM_DT_LIST_SIZE,
@@ -168,14 +164,14 @@ H5P__ocpy_reg_prop(H5P_genclass_t *pclass)
                            H5O_CPY_MERGE_COMM_DT_LIST_DEC, H5O_CPY_MERGE_COMM_DT_LIST_DEL,
                            H5O_CPY_MERGE_COMM_DT_LIST_COPY, H5O_CPY_MERGE_COMM_DT_LIST_CMP,
                            H5O_CPY_MERGE_COMM_DT_LIST_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register property for callback when completing the search for a matching named datatype from the named
      * dtype list */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5O_CPY_MCDT_SEARCH_CB_NAME, H5O_CPY_MCDT_SEARCH_CB_SIZE,
                            &H5O_def_mcdt_cb_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -187,9 +183,6 @@ done:
  * Purpose:     Frees the provided merge named dtype list
  *
  * Return:      NULL
- *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -210,7 +203,7 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
         dt_list = tmp_node;
     } /* end while */
 
-    FUNC_LEAVE_NOAPI(NULL);
+    FUNC_LEAVE_NOAPI(NULL)
 } /* H5P__free_merge_comm_dtype_list */
 
 /*--------------------------------------------------------------------------
@@ -220,9 +213,6 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
  *
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, September 2, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -238,16 +228,16 @@ H5P__copy_merge_comm_dt_list(H5O_copy_dtype_merge_list_t **value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     src_dt_list = *value;
     while (src_dt_list) {
         /* Copy src_dt_list */
         if (NULL == (tmp_dt_list = H5FL_CALLOC(H5O_copy_dtype_merge_list_t)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed");
         if (NULL == (tmp_dt_list->path = H5MM_strdup(src_dt_list->path)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
         /* Add copied node to dest dtype list */
         if (dst_dt_list_tail) {
@@ -287,9 +277,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -301,11 +288,11 @@ H5P__ocpy_merge_comm_dt_list_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -319,9 +306,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, Sept 2, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -333,11 +317,11 @@ H5P__ocpy_merge_comm_dt_list_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -353,9 +337,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -368,8 +349,8 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt_list_ptr);
-    HDassert(size);
+    assert(dt_list_ptr);
+    assert(size);
 
     /* Iterate over merge committed dtype list */
     dt_list = *dt_list_ptr;
@@ -410,9 +391,6 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 31, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -429,9 +407,9 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(dt_list);
+    assert(pp);
+    assert(*pp);
+    assert(dt_list);
 
     /* Start off with NULL (default value) */
     *dt_list = NULL;
@@ -441,11 +419,11 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
     while (len > 0) {
         /* Create new node & duplicate string */
         if (NULL == (tmp_dt_list = H5FL_CALLOC(H5O_copy_dtype_merge_list_t)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed");
         if (NULL == (tmp_dt_list->path = H5MM_strdup(*(const char **)pp)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed");
         *pp += len + 1;
-        HDassert(len == HDstrlen(tmp_dt_list->path));
+        assert(len == HDstrlen(tmp_dt_list->path));
 
         /* Add copied node to dtype list */
         if (dt_list_tail) {
@@ -485,9 +463,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, September 2, 2015
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -497,7 +472,7 @@ H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Free the merge named dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
@@ -513,9 +488,6 @@ H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATT
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -526,11 +498,11 @@ H5P__ocpy_merge_comm_dt_list_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATT
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of merge committed dtype list */
     if (H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -547,9 +519,6 @@ done:
  *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
  *                      VALUE2 are equal.
  *
- * Programmer:     Neil Fortner
- *                 Friday, October 28, 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -563,20 +532,20 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(_dt_list1);
-    HDassert(_dt_list2);
-    HDassert(size == sizeof(H5O_copy_dtype_merge_list_t *));
+    assert(_dt_list1);
+    assert(_dt_list2);
+    assert(size == sizeof(H5O_copy_dtype_merge_list_t *));
 
     /* Walk through the lists, comparing each path.  For the lists to be the
      * same, the paths must be in the same order. */
     while (dt_list1 && dt_list2) {
-        HDassert(dt_list1->path);
-        HDassert(dt_list2->path);
+        assert(dt_list1->path);
+        assert(dt_list2->path);
 
         /* Compare paths */
         ret_value = HDstrcmp(dt_list1->path, dt_list2->path);
         if (ret_value != 0)
-            HGOTO_DONE(ret_value)
+            HGOTO_DONE(ret_value);
 
         /* Advance to next node */
         dt_list1 = dt_list1->next;
@@ -585,9 +554,9 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2, s
 
     /* Check if one list is longer than the other */
     if (dt_list1)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (dt_list2)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -601,9 +570,6 @@ done:
  * Return:	Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 31, 2012
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -611,7 +577,7 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(value);
+    assert(value);
 
     /* Free the merge named dtype list */
     H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
@@ -636,8 +602,6 @@ H5P__ocpy_merge_comm_dt_list_close(const char H5_ATTR_UNUSED *name, size_t H5_AT
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -651,15 +615,15 @@ H5Pset_copy_object(hid_t plist_id, unsigned cpy_option)
 
     /* Check parameters */
     if (cpy_option & ~H5O_COPY_ALL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown option specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown option specified");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value */
     if (H5P_set(plist, H5O_CPY_OPTION_NAME, &cpy_option) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set copy object flag")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set copy object flag");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -673,8 +637,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              March 13, 2006
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -688,12 +650,12 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
     if (cpy_option)
         if (H5P_get(plist, H5O_CPY_OPTION_NAME, cpy_option) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -706,7 +668,7 @@ done:
  *              target file when merging committed datatypes during H5Ocopy
  *              (i.e. when using the H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG flag
  *              as set by H5Pset_copy_object).  If the source named
- *              dataype is not found in the list of paths created by this
+ *              datatype is not found in the list of paths created by this
  *              function, the entire file will be searched.
  *
  * Usage:       H5Padd_merge_committed_dtype_path(plist_id, path)
@@ -715,8 +677,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -732,28 +692,28 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
 
     /* Check parameters */
     if (!path)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no path specified")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no path specified");
     if (path[0] == '\0')
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path is empty string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path is empty string");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get dtype list */
     if (H5P_peek(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &old_list) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge named dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge named dtype list");
 
     /* Add the new path to the list */
     if (NULL == (new_obj = H5FL_CALLOC(H5O_copy_dtype_merge_list_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     if (NULL == (new_obj->path = H5MM_strdup(path)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     new_obj->next = old_list;
 
     /* Update the list stored in the property list */
     if (H5P_poke(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &new_obj) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set merge named dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set merge named dtype list");
 
 done:
     if (ret_value < 0)
@@ -777,8 +737,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              October 27, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -793,18 +751,18 @@ H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get dtype list */
     if (H5P_peek(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed dtype list");
 
     /* Free dtype list */
     dt_list = H5P__free_merge_comm_dtype_list(dt_list);
 
     /* Update the list stored in the property list (to NULL) */
     if (H5P_poke(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set merge committed dtype list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set merge committed dtype list");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -825,7 +783,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; November 28, 2011
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -841,11 +798,11 @@ H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
     if (!func && op_data)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Populate the callback info struct */
     cb_info.func      = func;
@@ -853,7 +810,7 @@ H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
 
     /* Set callback info */
     if (H5P_set(plist, H5O_CPY_MCDT_SEARCH_CB_NAME, &cb_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set callback info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set callback info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -872,8 +829,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; November 29, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -888,11 +843,11 @@ H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func /*out*/, void *
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get callback info */
     if (H5P_get(plist, H5O_CPY_MCDT_SEARCH_CB_NAME, &cb_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info");
 
     if (func)
         *func = cb_info.func;

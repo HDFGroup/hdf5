@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5ESlist.c
- *              Nov  7 2020
- *	            Quincey Koziol
  *
  * Purpose:     Operations on "event lists" for managing asynchronous
  *                      operations.
@@ -74,9 +72,6 @@
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -85,8 +80,8 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
-    HDassert(ev);
+    assert(el);
+    assert(ev);
 
     ev->next = NULL;
 
@@ -112,9 +107,6 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE size_t
@@ -123,7 +115,7 @@ H5ES__list_count(const H5ES_event_list_t *el)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
+    assert(el);
 
     FUNC_LEAVE_NOAPI(el->count)
 } /* end H5ES__list_count() */
@@ -142,9 +134,6 @@ H5ES__list_count(const H5ES_event_list_t *el)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -156,8 +145,8 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
-    HDassert(cb);
+    assert(el);
+    assert(cb);
 
     /* Iterate over events in list */
     ev = (order == H5_ITER_DEC) ? el->tail : el->head;
@@ -188,9 +177,6 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Houjun Tang
- *              Thursday, July 30, 2020
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -199,9 +185,9 @@ H5ES__list_remove(H5ES_event_list_t *el, const H5ES_event_t *ev)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(el);
-    HDassert(el->head);
-    HDassert(ev);
+    assert(el);
+    assert(el->head);
+    assert(ev);
 
     /* Stitch event out of list */
     if (ev == el->head)

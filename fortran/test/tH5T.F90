@@ -949,10 +949,6 @@ CONTAINS
 ! * Return:      Success:        0
 ! *
 ! *              Failure:        number of errors
-! *
-! * Fortran Programmer:  M.S. Breitenfeld
-! *                      September 9, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 

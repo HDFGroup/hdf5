@@ -30,13 +30,13 @@ DATASET "Dataset1" {
 }
 HDF5 "tarray6.h5" {
 DATASET "Dataset1" {
-   DATATYPE  H5T_ARRAY { [4] H5T_VLEN { H5T_STD_U32LE} }
+   DATATYPE  H5T_ARRAY { [4] H5T_VLEN { H5T_STD_U32LE } }
    DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
 }
 }
 HDF5 "tarray7.h5" {
 DATASET "Dataset1" {
-   DATATYPE  H5T_ARRAY { [4] H5T_VLEN { H5T_ARRAY { [4] H5T_STD_U32LE }} }
+   DATATYPE  H5T_ARRAY { [4] H5T_VLEN { H5T_ARRAY { [4] H5T_STD_U32LE } } }
    DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
 }
 }

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Jan  5, 2008
- *
  * Purpose:     This program is run to generate an HDF5 data file with a
  *              root group that contains the incorrect # of object header
  *              messages.  It must be built/run with a copy of the library
@@ -32,23 +29,23 @@
 #define ATTRNAME2 "Attribute #2"
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
+#ifndef true
+#define true 1
+#endif /* true */
+#ifndef false
+#define false 0
+#endif /* false */
 
 int
 main(void)
 {
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
-    hid_t   fid  = -1;            /* File ID */
-    hid_t   gid  = -1;            /* Group ID */
-    hid_t   sid  = -1;            /* Dataspace ID */
-    hid_t   aid  = -1;            /* Attribute ID */
-    hid_t   gcpl = -1;            /* Group creation property list ID */
-    hbool_t store_bad_mesg_count; /* Flag for storing a bad message count */
+    hid_t fid  = H5I_INVALID_HID; /* File ID */
+    hid_t gid  = H5I_INVALID_HID; /* Group ID */
+    hid_t sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t aid  = H5I_INVALID_HID; /* Attribute ID */
+    hid_t gcpl = H5I_INVALID_HID; /* Group creation property list ID */
+    bool  store_bad_mesg_count;   /* Flag for storing a bad message count */
 
     /* Create test file */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -59,7 +56,7 @@ main(void)
         goto error;
 
     /* Add property for storing bad message count */
-    store_bad_mesg_count = TRUE;
+    store_bad_mesg_count = true;
     if (H5Pinsert2(gcpl, H5O_BAD_MESG_COUNT_NAME, H5O_BAD_MESG_COUNT_SIZE, &store_bad_mesg_count, NULL, NULL,
                    NULL, NULL, NULL, NULL) < 0)
         goto error;
@@ -110,7 +107,7 @@ error:
         H5Pclose(gcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 #else  /* H5O_ENABLE_BAD_MESG_COUNT */
     HDputs("H5O_BAD_MESG_COUNT compiler macro not defined!");
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */

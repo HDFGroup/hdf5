@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gloc.c
- *			Sep 13 2005
- *			Quincey Koziol
  *
  * Purpose:		Functions for working with group "locations"
  *
@@ -153,7 +151,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
 
             /* Construct a group location for root group of the file */
             if (H5G_root_loc(f, loc) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
+                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file");
             break;
         }
 
@@ -161,9 +159,9 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
             H5G_t *group = (H5G_t *)obj;
 
             if (NULL == (loc->oloc = H5G_oloc(group)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group");
             if (NULL == (loc->path = H5G_nameof(group)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group");
             break;
         }
 
@@ -174,9 +172,9 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
             dt = H5T_get_actual_type((H5T_t *)obj);
 
             if (NULL == (loc->oloc = H5T_oloc(dt)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype");
             if (NULL == (loc->path = H5T_nameof(dt)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype");
             break;
         }
 
@@ -184,9 +182,9 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
             H5D_t *dset = (H5D_t *)obj;
 
             if (NULL == (loc->oloc = H5D_oloc(dset)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset");
             if (NULL == (loc->path = H5D_nameof(dset)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset");
             break;
         }
 
@@ -194,48 +192,48 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
             H5A_t *attr = (H5A_t *)obj;
 
             if (NULL == (loc->oloc = H5A_oloc(attr)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute");
             if (NULL == (loc->path = H5A_nameof(attr)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute");
             break;
         }
 
         case H5I_DATASPACE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace");
 
         case H5I_MAP:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "maps not supported in native VOL connector")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "maps not supported in native VOL connector");
 
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of property list");
 
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of error class, message or stack")
+                        "unable to get group location of error class, message or stack");
 
         case H5I_VFL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a virtual file driver (VFD)")
+                        "unable to get group location of a virtual file driver (VFD)");
 
         case H5I_VOL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a virtual object layer (VOL) connector")
+                        "unable to get group location of a virtual object layer (VOL) connector");
 
         case H5I_SPACE_SEL_ITER:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "unable to get group location of a dataspace selection iterator")
+                        "unable to get group location of a dataspace selection iterator");
 
         case H5I_EVENTSET:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a event set")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a event set");
 
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location ID")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location ID");
     } /* end switch */
 
 done:
@@ -261,11 +259,11 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 
     /* Get the object from the VOL */
     if (NULL == (obj = H5VL_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Fill in the struct */
     if (H5G_loc_real(obj, H5I_get_type(loc_id), loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to fill in location struct")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to fill in location struct");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -278,9 +276,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -291,14 +286,14 @@ H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(dst);
-    HDassert(src);
+    assert(dst);
+    assert(src);
 
     /* Copy components of the location */
     if (H5O_loc_copy(dst->oloc, src->oloc, depth) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
     if (H5G_name_copy(dst->path, src->path, depth) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy path")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -311,9 +306,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -324,13 +316,13 @@ H5G_loc_reset(H5G_loc_t *loc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
+    assert(loc);
 
     /* Reset components of the location */
     if (H5O_loc_reset(loc->oloc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset entry")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset entry");
     if (H5G_name_reset(loc->path) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset path")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset path");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -343,9 +335,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -356,13 +345,13 @@ H5G_loc_free(H5G_loc_t *loc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
+    assert(loc);
 
     /* Reset components of the location */
     if (H5G_name_free(loc->path) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free path")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free path");
     if (H5O_loc_free(loc->oloc) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free object header location")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free object header location");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -374,9 +363,6 @@ done:
  * Purpose:	Callback for retrieving object location for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, October 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -392,7 +378,7 @@ H5G__loc_find_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name,
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object '%s' doesn't exist", name)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object '%s' doesn't exist", name);
 
     /* Take ownership of the object's group location */
     /* (Group traversal callbacks are responsible for either taking ownership
@@ -412,9 +398,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -426,16 +409,16 @@ H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc /*out*/)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(obj_loc);
+    assert(loc);
+    assert(name && *name);
+    assert(obj_loc);
 
     /* Set up user data for locating object */
     udata.loc = obj_loc;
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_find_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -449,9 +432,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -461,32 +441,32 @@ H5G__loc_find_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 {
     H5G_loc_fbi_t *udata = (H5G_loc_fbi_t *)_udata; /* User data passed in */
     H5O_link_t     fnd_lnk;                         /* Link within group */
-    hbool_t        lnk_copied    = FALSE;           /* Whether the link was copied */
-    hbool_t        obj_loc_valid = FALSE;           /* Flag to indicate that the object location is valid */
-    hbool_t        obj_exists    = FALSE;           /* Whether the object exists (unused) */
+    bool           lnk_copied    = false;           /* Whether the link was copied */
+    bool           obj_loc_valid = false;           /* Flag to indicate that the object location is valid */
+    bool           obj_exists    = false;           /* Whether the object exists (unused) */
     herr_t         ret_value     = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group doesn't exist");
 
     /* Query link */
     if (H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, &fnd_lnk) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
-    lnk_copied = TRUE;
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found");
+    lnk_copied = true;
 
     /* Build the initial object location for the link */
     if (H5G__link_to_loc(obj_loc, &fnd_lnk, udata->loc) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location")
-    obj_loc_valid = TRUE;
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location");
+    obj_loc_valid = true;
 
     /* Perform any special traversals that the link needs */
     /* (soft links, user-defined links, file mounting, etc.) */
     /* (may modify the object location) */
-    if (H5G__traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, TRUE, udata->loc, &obj_exists) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed")
+    if (H5G__traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, true, udata->loc, &obj_exists) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed");
 
 done:
     /* Reset the link information, if we have a copy */
@@ -496,7 +476,7 @@ done:
     /* Release the object location if we failed after copying it */
     if (ret_value < 0 && obj_loc_valid)
         if (H5G_loc_free(udata->loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location");
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -512,9 +492,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Monday, November 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -527,9 +504,9 @@ H5G_loc_find_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(group_name && *group_name);
-    HDassert(obj_loc);
+    assert(loc);
+    assert(group_name && *group_name);
+    assert(obj_loc);
 
     /* Set up user data for locating object */
     udata.idx_type = idx_type;
@@ -539,7 +516,7 @@ H5G_loc_find_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, group_name, H5G_TARGET_NORMAL, H5G__loc_find_by_idx_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -552,9 +529,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -566,25 +540,25 @@ H5G__loc_insert(H5G_loc_t *grp_loc, char *name, H5G_loc_t *obj_loc, H5O_type_t o
     FUNC_ENTER_PACKAGE
 
     /* Check args. */
-    HDassert(grp_loc);
-    HDassert(name && *name);
-    HDassert(obj_loc);
+    assert(grp_loc);
+    assert(name && *name);
+    assert(obj_loc);
 
     /* Create link object for the object location */
     lnk.type         = H5L_TYPE_HARD;
     lnk.cset         = H5F_DEFAULT_CSET;
     lnk.corder       = 0;     /* Will be reset if the group is tracking creation order */
-    lnk.corder_valid = FALSE; /* Indicate that the creation order isn't valid (yet) */
+    lnk.corder_valid = false; /* Indicate that the creation order isn't valid (yet) */
     lnk.name         = name;
     lnk.u.hard.addr  = obj_loc->oloc->addr;
 
     /* Insert new group into current group's symbol table */
-    if (H5G_obj_insert(grp_loc->oloc, name, &lnk, TRUE, obj_type, crt_info) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert object")
+    if (H5G_obj_insert(grp_loc->oloc, name, &lnk, true, obj_type, crt_info) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert object");
 
     /* Set the name of the object location */
     if (H5G_name_set(grp_loc->path, obj_loc->path, name) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -597,9 +571,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, February 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -607,19 +578,19 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                    H5G_own_loc_t *own_loc /*out*/)
 {
-    hbool_t *exists    = (hbool_t *)_udata; /* User data passed in */
-    herr_t   ret_value = SUCCEED;           /* Return value */
+    bool  *exists    = (bool *)_udata; /* User data passed in */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
         if (lnk)
-            *exists = FALSE;
+            *exists = false;
         else
-            HGOTO_ERROR(H5E_SYM, H5E_INTERNAL, FAIL, "no object or link info?")
+            HGOTO_ERROR(H5E_SYM, H5E_INTERNAL, FAIL, "no object or link info?");
     else
-        *exists = TRUE;
+        *exists = true;
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -634,29 +605,26 @@ done:
  *
  * Purpose:	Check if an object actually exists at a location
  *
- * Return:	Success:	TRUE/FALSE
+ * Return:	Success:	true/false
  * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, February 2, 2010
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
+H5G_loc_exists(const H5G_loc_t *loc, const char *name, bool *exists)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(exists);
+    assert(loc);
+    assert(name && *name);
+    assert(exists);
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G__loc_exists_cb, exists) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't check if object exists")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't check if object exists");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -668,9 +636,6 @@ done:
  * Purpose:	Callback for retrieving the address for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Saturday, December 21, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -686,7 +651,7 @@ H5G__loc_addr_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UN
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Set address of object */
     *udata = obj_loc->oloc->addr;
@@ -707,9 +672,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, November 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -720,13 +682,13 @@ H5G__loc_addr(const H5G_loc_t *loc, const char *name, haddr_t *addr /*out*/)
     FUNC_ENTER_PACKAGE
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(addr);
+    assert(loc);
+    assert(name && *name);
+    assert(addr);
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_addr_cb, addr) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -738,9 +700,6 @@ done:
  * Purpose:	Callback for retrieving data model info for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 23, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -756,11 +715,11 @@ H5G__loc_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UN
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Query object information */
     if (H5O_get_info(obj_loc->oloc, udata->oinfo, udata->fields) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -778,9 +737,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, November 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -792,9 +748,9 @@ H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info2_t *oinfo /*out*/,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(oinfo);
+    assert(loc);
+    assert(name && *name);
+    assert(oinfo);
 
     /* Set up user data for locating object */
     udata.fields = fields;
@@ -802,7 +758,7 @@ H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info2_t *oinfo /*out*/,
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_info_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -814,9 +770,6 @@ done:
  * Purpose:	Callback for retrieving native info for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 23, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -832,11 +785,11 @@ H5G__loc_native_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Query object information */
     if (H5O_get_native_info(obj_loc->oloc, udata->oinfo, udata->fields) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -854,9 +807,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, November 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -868,9 +818,9 @@ H5G_loc_native_info(const H5G_loc_t *loc, const char *name, H5O_native_info_t *o
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(oinfo);
+    assert(loc);
+    assert(name && *name);
+    assert(oinfo);
 
     /* Set up user data for locating object */
     udata.fields = fields;
@@ -878,7 +828,7 @@ H5G_loc_native_info(const H5G_loc_t *loc, const char *name, H5O_native_info_t *o
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_native_info_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -890,9 +840,6 @@ done:
  * Purpose:	Callback for (re)setting object comment for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 30, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -910,28 +857,28 @@ H5G__loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Check for existing comment message */
     if ((exists = H5O_msg_exists(obj_loc->oloc, H5O_NAME_ID)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read object header")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read object header");
 
     /* Remove the previous comment message if any */
     if (exists)
-        if (H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, TRUE) < 0)
+        if (H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, true) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL,
-                        "unable to delete existing comment object header message")
+                        "unable to delete existing comment object header message");
 
     /* Add the new message */
     if (udata->comment && *udata->comment) {
         if (NULL == (comment.s = HDstrdup(udata->comment)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy group comment")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy group comment");
         if (H5O_msg_create(obj_loc->oloc, H5O_NAME_ID, 0, H5O_UPDATE_TIME, &comment) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
     } /* end if */
 
 done:
-    HDfree(comment.s);
+    free(comment.s);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -948,9 +895,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, August 30, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -962,15 +906,15 @@ H5G_loc_set_comment(const H5G_loc_t *loc, const char *name, const char *comment)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for locating object */
     udata.comment = comment;
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_set_comment_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -982,9 +926,6 @@ done:
  * Purpose:	Callback for retrieving object comment for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 30, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1001,7 +942,7 @@ H5G__loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Query object comment */
     comment.s = NULL;
@@ -1034,9 +975,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, August 30, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1049,8 +987,8 @@ H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for locating object */
     udata.comment      = comment;
@@ -1059,7 +997,7 @@ H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_get_comment_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't find object");
 
     /* Set value to return */
     if (comment_len)

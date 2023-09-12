@@ -34,8 +34,6 @@
  *              full_name - buffer to return full name
  *              full_namelen - name length
  * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Friday, September 13, 2002
  *---------------------------------------------------------------------------*/
 int_f
 nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name, size_t_f *full_namelen)
@@ -48,22 +46,22 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_n
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_base_name = (char *)HD5f2cstring(base_name, (size_t)*base_namelen)))
-        HGOTO_DONE(FAIL)
-    if (NULL == (c_full_name = (char *)HDmalloc((size_t)*full_namelen + 1)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
+    if (NULL == (c_full_name = (char *)malloc((size_t)*full_namelen + 1)))
+        HGOTO_DONE(FAIL);
 
     /*
      * Call h5_fixname function.
      */
     if (NULL == h5_fixname(c_base_name, (hid_t)*fapl, c_full_name, (size_t)*full_namelen + 1))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);
 
 done:
     if (c_base_name)
-        HDfree(c_base_name);
+        free(c_base_name);
     if (c_full_name)
-        HDfree(c_full_name);
+        free(c_full_name);
 
     return ret_value;
 }
@@ -75,8 +73,6 @@ done:
  *              base_namelen - name length
  *              fapl - file access property list
  * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Thursday, September 19, 2002
  *---------------------------------------------------------------------------*/
 int_f
 nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl)
@@ -112,7 +108,7 @@ nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl)
 
 DONE:
     if (NULL != c_base_name[0])
-        HDfree(c_base_name[0]);
+        free(c_base_name[0]);
     return ret_value;
 }
 
@@ -124,13 +120,11 @@ DONE:
  *              up as exit(0).
  * Inputs:      status - status for exit() to return
  * Returns:     none
- * Programmer:  Quincey Koziol
- *              Tuesday, December 14, 2004
  *---------------------------------------------------------------------------*/
 void
 nh5_exit_c(int_f *status)
 {
-    HDexit((int)*status);
+    exit((int)*status);
 } /* h5_exit_c */
 
 /*----------------------------------------------------------------------------
@@ -140,13 +134,11 @@ nh5_exit_c(int_f *status)
  * Output:      status:  1 - HDF5_NOCLEANUP is set
  *                       0 - HDF5_NOCLEANUP is not set
  * Returns:     none
- * Programmer:  M.S. Breitenfeld
- *              September 30, 2008
  *---------------------------------------------------------------------------*/
 void
 nh5_env_nocleanup_c(int_f *status)
 {
     *status = (int_f)0;
-    if (HDgetenv(HDF5_NOCLEANUP))
+    if (getenv(HDF5_NOCLEANUP))
         *status = (int_f)1;
 } /* h5_env_nocleanup_c */

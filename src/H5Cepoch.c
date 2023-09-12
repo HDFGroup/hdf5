@@ -13,19 +13,26 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cepoch.c
- *              June 5 2004
- *              Quincey Koziol
  *
- * Purpose:     Metadata cache epoch callbacks.
+ * Purpose:     Metadata cache epoch callbacks
  *
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+#include "H5Cmodule.h" /* This source code file is part of the H5C module */
+
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
 
 /****************/
 /* Local Macros */
@@ -53,8 +60,7 @@ static herr_t H5C__epoch_marker_get_initial_load_size(void *udata_ptr, size_t *i
 static herr_t H5C__epoch_marker_get_final_load_size(const void *image_ptr, size_t image_len_ptr,
                                                     void *udata_ptr, size_t *actual_len);
 static htri_t H5C__epoch_marker_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void  *H5C__epoch_marker_deserialize(const void *image_ptr, size_t len, void *udata,
-                                            hbool_t *dirty_ptr);
+static void  *H5C__epoch_marker_deserialize(const void *image_ptr, size_t len, void *udata, bool *dirty_ptr);
 static herr_t H5C__epoch_marker_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5C__epoch_marker_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len,
                                               haddr_t *new_addr_ptr, size_t *new_len_ptr,
@@ -130,12 +136,12 @@ H5C__epoch_marker_verify_chksum(const void H5_ATTR_UNUSED *image_ptr, size_t H5_
 
         HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
-    FUNC_LEAVE_NOAPI(FALSE)
+    FUNC_LEAVE_NOAPI(false)
 } /* end H5C__epoch_marker_verify_chksum() */
 
 static void *
 H5C__epoch_marker_deserialize(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED len,
-                              void H5_ATTR_UNUSED *udata, hbool_t H5_ATTR_UNUSED *dirty_ptr)
+                              void H5_ATTR_UNUSED *udata, bool H5_ATTR_UNUSED *dirty_ptr)
 {
     FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 

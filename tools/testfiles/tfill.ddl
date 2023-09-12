@@ -124,7 +124,7 @@ GROUP "/" {
       }
    }
    DATASET "fill_vlen" {
-      DATATYPE  H5T_VLEN { H5T_STD_I32LE}
+      DATATYPE  H5T_VLEN { H5T_STD_I32LE }
       DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
       STORAGE_LAYOUT {
          CONTIGUOUS

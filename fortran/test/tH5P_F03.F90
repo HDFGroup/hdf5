@@ -81,10 +81,6 @@ CONTAINS
 ! * Return:	Success:	0
 ! *
 ! *		Failure:	number of errors
-! *
-! * Programmer:	M. Scot Breitenfeld
-! *             June 24, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -158,8 +154,6 @@ SUBROUTINE test_create(total_error)
   fill_ctype%z = 'S'
   fill_ctype%a = 5555.
   fill_ctype%x = 55
-
-  f_ptr = C_LOC(fill_ctype)
 
   ! Test various fill values
   CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_CHARACTER, 'X', error)
@@ -442,9 +436,6 @@ END SUBROUTINE test_genprop_class_callback
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     April 1, 2014
 !-------------------------------------------------------------------------
 
 SUBROUTINE test_h5p_file_image(total_error)
@@ -514,9 +505,6 @@ END SUBROUTINE test_h5p_file_image
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     January 10, 2012
 !-------------------------------------------------------------------------
 !
 SUBROUTINE external_test_offset(cleanup,total_error)
@@ -532,6 +520,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   INTEGER(hid_t) :: dset=-1   ! dataset
   INTEGER(hid_t) :: grp=-1    ! group to emit diagnostics
   INTEGER(size_t) :: i, j     ! miscellaneous counters
+  INTEGER :: k
   CHARACTER(LEN=180) :: filename   ! file names
   INTEGER, DIMENSION(1:25) :: part
   INTEGER, DIMENSION(1:100), TARGET :: whole ! raw data buffers
@@ -598,8 +587,9 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CALL h5dread_f(dset, H5T_NATIVE_INTEGER, f_ptr, error, mem_space_id=space, file_space_id=space)
   CALL check("h5dread_f", error, total_error)
 
-  DO i = 1, 100
-     IF(whole(i) .NE. i-1)THEN
+  DO k = 1, 100
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -619,8 +609,10 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
   CALL h5sclose_f(hs_space, error)
   CALL check("h5sclose_f", error, total_error)
-  DO i = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
-     IF(whole(i) .NE. i-1)THEN
+
+  DO k = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -658,10 +650,6 @@ END SUBROUTINE external_test_offset
 ! RETURNS:
 !   Success:	0
 !   Failure:	number of errors
-!
-! FORTRAN Programmer:  M. Scot Breitenfeld
-!                      February 1, 2016
-!
 !-------------------------------------------------------------------------
 !
 SUBROUTINE test_vds(total_error)

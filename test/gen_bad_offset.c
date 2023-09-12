@@ -50,10 +50,10 @@
 int
 main(void)
 {
-    hid_t   fid = -1, gid1 = -1, gid2 = -1; /* File and group IDs */
-    hid_t   did = -1, sid = -1;             /* Dataset and dataspace IDs */
-    int     fd  = -1;                       /* File descriptor */
-    int64_t val = 999;                      /* Bad offset value */
+    hid_t   fid = H5I_INVALID_HID, gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* File and group IDs */
+    hid_t   did = H5I_INVALID_HID, sid = H5I_INVALID_HID; /* Dataset and dataspace IDs */
+    int     fd  = -1;                                     /* File descriptor */
+    int64_t val = 999;                                    /* Bad offset value */
 
     /* Create the test file */
     if ((fid = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -139,7 +139,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return EXIT_FAILURE;
 } /* end main() */

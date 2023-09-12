@@ -28,7 +28,7 @@
         else {                                                                                               \
             PRINTSTREAM(rawoutstream, "%s %s", (obj), (begin));                                              \
         }                                                                                                    \
-    } while (0);
+    } while (0)
 
 #define end_obj(obj, end)                                                                                    \
     do {                                                                                                     \
@@ -39,7 +39,7 @@
         }                                                                                                    \
         if (HDstrlen(obj))                                                                                   \
             PRINTSTREAM(rawoutstream, "%s", obj);                                                            \
-    } while (0);
+    } while (0)
 
 /* 3 private values: can't be set, but can be read.
    Note: these are defined in H5Zprivate, they are

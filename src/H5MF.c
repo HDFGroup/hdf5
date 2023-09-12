@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5MF.c
- *                      Jul 11 1997
- *                      Robb Matzke
  *
  * Purpose:             File memory management functions.
  *
@@ -49,9 +47,9 @@
 
 #define H5MF_CHECK_FSM(FSM, CF)                                                                              \
     do {                                                                                                     \
-        HDassert(*CF == FALSE);                                                                              \
-        if (!H5F_addr_defined(FSM->addr) || !H5F_addr_defined(FSM->sect_addr))                               \
-            *CF = TRUE;                                                                                      \
+        assert(*CF == false);                                                                                \
+        if (!H5_addr_defined(FSM->addr) || !H5_addr_defined(FSM->sect_addr))                                 \
+            *CF = true;                                                                                      \
     } while (0)
 
 /* For non-paged aggregation: map allocation request type to tracked free-space type */
@@ -94,12 +92,12 @@ static herr_t H5MF__close_pagefs(H5F_t *f);
 static herr_t H5MF__close_shrink_eoa(H5F_t *f);
 
 /* General routines */
-static herr_t  H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, size_t *nums);
-static hbool_t H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type);
-static hbool_t H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace);
-static herr_t  H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace,
-                                        H5FS_t *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace,
-                                        hbool_t *continue_alloc_fsm);
+static herr_t H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, size_t *nums);
+static bool   H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type);
+static bool   H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace);
+static herr_t H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace,
+                                       H5FS_t *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace,
+                                       bool *continue_alloc_fsm);
 
 /* Free-space type manager routines */
 static herr_t H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type);
@@ -130,9 +128,6 @@ static herr_t H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata);
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, February  1, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -140,23 +135,23 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
 {
     H5MF_aggr_merge_t mapping_type;        /* Type of free list mapping */
     H5FD_mem_t        type;                /* Memory type for iteration */
-    hbool_t           all_same;            /* Whether all the types map to the same value */
+    bool              all_same;            /* Whether all the types map to the same value */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(f_sh);
-    HDassert(f_sh->lf);
+    assert(f_sh);
+    assert(f_sh->lf);
 
     /* Iterate over all the free space types to determine if sections of that type
      *  can merge with the metadata or small 'raw' data aggregator
      */
-    all_same = TRUE;
+    all_same = true;
     for (type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
         /* Check for any different type mappings */
         if (f_sh->fs_type_map[type] != f_sh->fs_type_map[H5FD_MEM_DEFAULT]) {
-            all_same = FALSE;
+            all_same = false;
             break;
         } /* end if */
 
@@ -172,18 +167,18 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
         if (f_sh->fs_type_map[H5FD_MEM_DRAW] == f_sh->fs_type_map[H5FD_MEM_SUPER])
             mapping_type = H5MF_AGGR_MERGE_SEPARATE;
         else {
-            hbool_t all_metadata_same; /* Whether all metadata go in same free list */
+            bool all_metadata_same; /* Whether all metadata go in same free list */
 
             /* One or more allocation type don't map to the same free list type */
             /* Check if all the metadata allocation types map to the same type */
-            all_metadata_same = TRUE;
+            all_metadata_same = true;
             for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++)
                 /* Skip checking raw data free list mapping */
                 /* (global heap is treated as raw data) */
                 if (type != H5FD_MEM_DRAW && type != H5FD_MEM_GHEAP) {
                     /* Check for any different type mappings */
                     if (f_sh->fs_type_map[type] != f_sh->fs_type_map[H5FD_MEM_SUPER]) {
-                        all_metadata_same = FALSE;
+                        all_metadata_same = false;
                         break;
                     } /* end if */
                 }     /* end if */
@@ -200,7 +195,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
     switch (mapping_type) {
         case H5MF_AGGR_MERGE_SEPARATE:
             /* Don't merge any metadata together */
-            HDmemset(f_sh->fs_aggr_merge, 0, sizeof(f_sh->fs_aggr_merge));
+            memset(f_sh->fs_aggr_merge, 0, sizeof(f_sh->fs_aggr_merge));
 
             /* Check if merging raw data should be allowed */
             /* (treat global heaps as raw data) */
@@ -213,7 +208,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
 
         case H5MF_AGGR_MERGE_DICHOTOMY:
             /* Merge all metadata together (but not raw data) */
-            HDmemset(f_sh->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f_sh->fs_aggr_merge));
+            memset(f_sh->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f_sh->fs_aggr_merge));
 
             /* Allow merging raw data allocations together */
             /* (treat global heaps as raw data) */
@@ -223,12 +218,12 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
 
         case H5MF_AGGR_MERGE_TOGETHER:
             /* Merge all allocation types together */
-            HDmemset(f_sh->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA),
-                     sizeof(f_sh->fs_aggr_merge));
+            memset(f_sh->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA),
+                   sizeof(f_sh->fs_aggr_merge));
             break;
 
         default:
-            HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "invalid mapping type")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_BADVALUE, FAIL, "invalid mapping type");
     } /* end switch */
 
 done:
@@ -243,8 +238,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer: Vailin Choi; Nov 2016
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -253,8 +246,8 @@ H5MF__alloc_to_fs_type(H5F_shared_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(f_sh);
-    HDassert(fs_type);
+    assert(f_sh);
+    assert(fs_type);
 
     if (H5F_SHARED_PAGED_AGGR(f_sh)) { /* paged aggregation */
         if (size >= f_sh->fs_page_size) {
@@ -289,9 +282,6 @@ H5MF__alloc_to_fs_type(H5F_shared_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, 
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Jan  8 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -311,16 +301,16 @@ H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type)
     /*
      * Check arguments.
      */
-    HDassert(f);
+    assert(f);
     if (H5F_PAGED_AGGR(f))
-        HDassert(type < H5F_MEM_PAGE_NTYPES);
+        assert(type < H5F_MEM_PAGE_NTYPES);
     else {
-        HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
-        HDassert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
+        assert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
+        assert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
     } /* end else */
-    HDassert(f->shared);
-    HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
-    HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
+    assert(f->shared);
+    assert(H5_addr_defined(f->shared->fs_addr[type]));
+    assert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
     /* Set up the alignment and threshold to use depending on the manager type */
     if (H5F_PAGED_AGGR(f)) {
@@ -342,7 +332,7 @@ H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type)
     /* Open an existing free space structure for the file */
     if (NULL == (f->shared->fs_man[type] = H5FS_open(f, f->shared->fs_addr[type], NELMTS(classes), classes, f,
                                                      alignment, threshold)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info");
 
     /* Set the state for the free space manager to "open", if it is now */
     if (f->shared->fs_man[type])
@@ -366,9 +356,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Jan  8 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -389,16 +376,16 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
     /*
      * Check arguments.
      */
-    HDassert(f);
+    assert(f);
     if (H5F_PAGED_AGGR(f))
-        HDassert(type < H5F_MEM_PAGE_NTYPES);
+        assert(type < H5F_MEM_PAGE_NTYPES);
     else {
-        HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
-        HDassert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
+        assert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
+        assert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
     } /* end else */
-    HDassert(f->shared);
-    HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
-    HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
+    assert(f->shared);
+    assert(!H5_addr_defined(f->shared->fs_addr[type]));
+    assert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
     /* Set the free space creation parameters */
     fs_create.client         = H5FS_CLIENT_FILE_ID;
@@ -426,7 +413,7 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
 
     if (NULL == (f->shared->fs_man[type] =
                      H5FS_create(f, NULL, &fs_create, NELMTS(classes), classes, f, alignment, threshold)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info");
 
     /* Set the state for the free space manager to "open", if it is now */
     if (f->shared->fs_man[type])
@@ -449,9 +436,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Jan  8 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -464,25 +448,25 @@ H5MF__start_fstype(H5F_t *f, H5F_mem_page_t type)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     if (H5F_PAGED_AGGR(f))
-        HDassert(type < H5F_MEM_PAGE_NTYPES);
+        assert(type < H5F_MEM_PAGE_NTYPES);
     else {
-        HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
-        HDassert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
+        assert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
+        assert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
     } /* end else */
 
     /* Check if the free space manager exists already */
-    if (H5F_addr_defined(f->shared->fs_addr[type])) {
+    if (H5_addr_defined(f->shared->fs_addr[type])) {
         /* Open existing free space manager */
         if (H5MF__open_fstype(f, type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, FAIL, "can't initialize file free space")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, FAIL, "can't initialize file free space");
     } /* end if */
     else {
         /* Create new free space manager */
         if (H5MF__create_fstype(f, type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, FAIL, "can't initialize file free space")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, FAIL, "can't initialize file free space");
     } /* end else */
 
 done:
@@ -498,8 +482,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer: 	Vailin Choi; April 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -513,12 +495,12 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
+    assert(f);
     if (H5F_PAGED_AGGR(f))
-        HDassert(type < H5F_MEM_PAGE_NTYPES);
+        assert(type < H5F_MEM_PAGE_NTYPES);
     else
-        HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
-    HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
+        assert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
+    assert(H5_addr_defined(f->shared->fs_addr[type]));
 
     /* Put address into temporary variable and reset it */
     /* (Avoids loopback in file space freeing routine) */
@@ -538,19 +520,19 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
     H5AC_set_ring(fsm_ring, &orig_ring);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Before deleting free space manager\n", __func__);
+    fprintf(stderr, "%s: Before deleting free space manager\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Delete free space manager for this type */
     if (H5FS_delete(f, tmp_fs_addr) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't delete free space manager")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't delete free space manager");
 
     /* Shift [back] to closed state */
-    HDassert(f->shared->fs_state[type] == H5F_FS_STATE_DELETING);
+    assert(f->shared->fs_state[type] == H5F_FS_STATE_DELETING);
     f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
 
     /* Sanity check that the free space manager for this type wasn't started up again */
-    HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
+    assert(!H5_addr_defined(f->shared->fs_addr[type]));
 
 done:
     /* Reset the ring in the API context */
@@ -569,8 +551,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer: Vailin Choi; July 1st, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -583,22 +563,22 @@ H5MF__close_fstype(H5F_t *f, H5F_mem_page_t type)
     /*
      * Check arguments.
      */
-    HDassert(f);
+    assert(f);
     if (H5F_PAGED_AGGR(f))
-        HDassert(type < H5F_MEM_PAGE_NTYPES);
+        assert(type < H5F_MEM_PAGE_NTYPES);
     else
-        HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
-    HDassert(f->shared);
-    HDassert(f->shared->fs_man[type]);
-    HDassert(f->shared->fs_state[type] != H5F_FS_STATE_CLOSED);
+        assert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
+    assert(f->shared);
+    assert(f->shared->fs_man[type]);
+    assert(f->shared->fs_state[type] != H5F_FS_STATE_CLOSED);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Before closing free space manager\n", __func__);
+    fprintf(stderr, "%s: Before closing free space manager\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Close an existing free space structure for the file */
     if (H5FS_close(f, f->shared->fs_man[type]) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't release free space info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't release free space info");
     f->shared->fs_man[type]   = NULL;
     f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
 
@@ -614,8 +594,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; April 2013
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -629,17 +607,17 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(fspace);
-    HDassert(node);
+    assert(f);
+    assert(fspace);
+    assert(node);
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, node->sect_info.size, &fs_type);
 
     /* Construct user data for callbacks */
     udata.f                     = f;
     udata.alloc_type            = alloc_type;
-    udata.allow_sect_absorb     = TRUE;
-    udata.allow_eoa_shrink_only = FALSE;
+    udata.allow_sect_absorb     = true;
+    udata.allow_eoa_shrink_only = false;
 
     /* Set the ring type in the API context */
     if (H5MF__fsm_is_self_referential(f->shared, fspace))
@@ -649,14 +627,13 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     H5AC_set_ring(fsm_ring, &orig_ring);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr,
-              "%s: adding node, node->sect_info.addr = %" PRIuHADDR ", node->sect_info.size = %" PRIuHSIZE
-              "\n",
-              __func__, node->sect_info.addr, node->sect_info.size);
+    fprintf(stderr,
+            "%s: adding node, node->sect_info.addr = %" PRIuHADDR ", node->sect_info.size = %" PRIuHSIZE "\n",
+            __func__, node->sect_info.addr, node->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     /* Add the section */
     if (H5FS_sect_add(f, fspace, (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space");
 
 done:
     /* Reset the ring in the API context */
@@ -672,10 +649,8 @@ done:
  * Purpose:	To find a section from the specified free-space manager to fulfill the request.
  *		    If found, re-add the left-over space back to the manager.
  *
- * Return:	TRUE if a section is found to fulfill the request
- *		    FALSE if not
- *
- * Programmer:  Vailin Choi; April 2013
+ * Return:	true if a section is found to fulfill the request
+ *		    false if not
  *
  *-------------------------------------------------------------------------
  */
@@ -689,8 +664,8 @@ H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, h
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(fspace);
+    assert(f);
+    assert(fspace);
 
     /* Set the ring type in the API context */
     if (H5MF__fsm_is_self_referential(f->shared, fspace))
@@ -701,16 +676,16 @@ H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, h
 
     /* Try to get a section from the free space manager */
     if ((ret_value = H5FS_sect_find(f, fspace, size, (H5FS_section_info_t **)&node)) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "error locating free space in file")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "error locating free space in file");
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: section found = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: section found = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Check for actually finding section */
     if (ret_value) {
         /* Sanity check */
-        HDassert(node);
+        assert(node);
 
         /* Retrieve return value */
         if (addr)
@@ -719,12 +694,12 @@ H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, h
         /* Check for eliminating the section */
         if (node->sect_info.size == size) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
-            HDfprintf(stderr, "%s: freeing node\n", __func__);
+            fprintf(stderr, "%s: freeing node\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
             /* Free section node */
             if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
         } /* end if */
         else {
             /* Adjust information for section */
@@ -732,13 +707,13 @@ H5MF__find_sect(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size, H5FS_t *fspace, h
             node->sect_info.size -= size;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-            HDfprintf(stderr, "%s: re-adding node, node->sect_info.size = %" PRIuHSIZE "\n", __func__,
-                      node->sect_info.size);
+            fprintf(stderr, "%s: re-adding node, node->sect_info.size = %" PRIuHSIZE "\n", __func__,
+                    node->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
             /* Re-add the section to the free-space manager */
             if (H5MF__add_sect(f, alloc_type, fspace, node) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space");
         } /* end else */
     }     /* end if */
 
@@ -761,9 +736,6 @@ done:
  * Return:      Success:        The file address of new chunk.
  *              Failure:        HADDR_UNDEF
  *
- * Programmer:  Robb Matzke
- *              Jul 11 1997
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -776,19 +748,19 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)alloc_type, size);
+    fprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check arguments */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(size > 0);
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Check 1.0\n", __func__);
+    fprintf(stderr, "%s: Check 1.0\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Set the ring type in the API context */
@@ -806,41 +778,41 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
          */
         if (H5AC_unsettle_ring(f, fsm_ring) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, HADDR_UNDEF,
-                        "attempt to notify cache that ring is unsettled failed")
+                        "attempt to notify cache that ring is unsettled failed");
 
         /* Check if the free space manager for the file has been initialized */
-        if (!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type])) {
+        if (!f->shared->fs_man[fs_type] && H5_addr_defined(f->shared->fs_addr[fs_type])) {
             /* Open the free-space manager */
             if (H5MF__open_fstype(f, fs_type) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space")
-            HDassert(f->shared->fs_man[fs_type]);
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space");
+            assert(f->shared->fs_man[fs_type]);
         } /* end if */
 
         /* Search for large enough space in the free space manager */
         if (f->shared->fs_man[fs_type])
             if (H5MF__find_sect(f, alloc_type, size, f->shared->fs_man[fs_type], &ret_value) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "error locating a node")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "error locating a node");
     } /* end if */
 
     /* If no space is found from the free-space manager, continue further action */
-    if (!H5F_addr_defined(ret_value)) {
+    if (!H5_addr_defined(ret_value)) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: Check 2.0\n", __func__);
+        fprintf(stderr, "%s: Check 2.0\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
         if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE) {
-            HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
+            assert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
             if (HADDR_UNDEF == (ret_value = H5MF__alloc_pagefs(f, alloc_type, size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF,
-                            "allocation failed from paged aggregation")
+                            "allocation failed from paged aggregation");
         }      /* end if */
         else { /* For non-paged aggregation, continue further action */
             if (HADDR_UNDEF == (ret_value = H5MF_aggr_vfd_alloc(f, alloc_type, size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed from aggr/vfd")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed from aggr/vfd");
         } /* end else */
     }     /* end if */
-    HDassert(H5F_addr_defined(ret_value));
+    assert(H5_addr_defined(ret_value));
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Check 3.0\n", __func__);
+    fprintf(stderr, "%s: Check 3.0\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
 done:
@@ -849,8 +821,8 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving: ret_value = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__, ret_value,
-              size);
+    fprintf(stderr, "%s: Leaving: ret_value = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__, ret_value,
+            size);
 #endif /* H5MF_ALLOC_DEBUG */
 #ifdef H5MF_ALLOC_DEBUG_DUMP
     H5MF__sects_dump(f, stderr);
@@ -876,8 +848,6 @@ done:
  * Return:      Success:        The file address of new chunk.
  *              Failure:        HADDR_UNDEF
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -890,7 +860,7 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     FUNC_ENTER_PACKAGE
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)alloc_type, size);
+    fprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &ptype);
@@ -907,14 +877,14 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
             /* Get the EOA for the file */
             if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, alloc_type)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
-            HDassert(!(eoa % f->shared->fs_page_size));
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa");
+            assert(!(eoa % f->shared->fs_page_size));
 
             H5MF_EOA_MISALIGN(f, (eoa + size), f->shared->fs_page_size, frag_size);
 
             /* Allocate from VFD */
             if (HADDR_UNDEF == (ret_value = H5F__alloc(f, alloc_type, size + frag_size, NULL, NULL)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space");
 
             /* If there is a mis-aligned fragment at EOA */
             if (frag_size) {
@@ -923,17 +893,17 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
                 if (!(f->shared->fs_man[ptype]))
                     if (H5MF__start_fstype(f, ptype) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF,
-                                    "can't initialize file free space")
+                                    "can't initialize file free space");
 
                 /* Create free space section for the fragment */
                 if (NULL == (node = H5MF__sect_new(H5MF_FSPACE_SECT_LARGE, ret_value + size, frag_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF,
-                                "can't initialize free space section")
+                                "can't initialize free space section");
 
                 /* Add the fragment to the large free-space manager */
                 if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[ptype], node) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF,
-                                "can't re-add section to file free space")
+                                "can't re-add section to file free space");
 
                 node = NULL;
             } /* end if */
@@ -949,22 +919,22 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
             /* Allocate one file space page */
             if (HADDR_UNDEF == (new_page = H5MF_alloc(f, alloc_type, f->shared->fs_page_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space");
 
             /* Start up the free-space manager */
             if (!(f->shared->fs_man[ptype]))
                 if (H5MF__start_fstype(f, ptype) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize file free space")
-            HDassert(f->shared->fs_man[ptype]);
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize file free space");
+            assert(f->shared->fs_man[ptype]);
 
             if (NULL == (node = H5MF__sect_new(H5MF_FSPACE_SECT_SMALL, (new_page + size),
                                                (f->shared->fs_page_size - size))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space section")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize free space section");
 
             /* Add the remaining space in the page to the manager */
             if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[ptype], node) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF,
-                            "can't re-add section to file free space")
+                            "can't re-add section to file free space");
 
             node = NULL;
 
@@ -972,7 +942,7 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
                we don't read an empty page from disk */
             if (f->shared->page_buf != NULL && H5PB_add_new_page(f->shared, alloc_type, new_page) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF,
-                            "can't add new page to Page Buffer new page list")
+                            "can't add new page to Page Buffer new page list");
 
             ret_value = new_page;
         } break;
@@ -981,14 +951,14 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
         case H5F_MEM_PAGE_DEFAULT:
         default:
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF,
-                        "can't allocate file space: unrecognized type")
+                        "can't allocate file space: unrecognized type");
             break;
     } /* end switch */
 
 done:
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving: ret_value = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__, ret_value,
-              size);
+    fprintf(stderr, "%s: Leaving: ret_value = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__, ret_value,
+            size);
 #endif /* H5MF_ALLOC_DEBUG */
 #ifdef H5MF_ALLOC_DEBUG_DUMP
     H5MF__sects_dump(f, stderr);
@@ -997,7 +967,7 @@ done:
     /* Release section node, if allocated and not added to section list or merged */
     if (node)
         if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free section node");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__alloc_pagefs() */
@@ -1021,9 +991,6 @@ done:
  * Return:      Success:        Temporary file address
  *              Failure:        HADDR_UNDEF
  *
- * Programmer:  Quincey Koziol
- *              Thursday, June  4, 2009
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -1034,25 +1001,25 @@ H5MF_alloc_tmp(H5F_t *f, hsize_t size)
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: size = %" PRIuHSIZE "\n", __func__, size);
+    fprintf(stderr, "%s: size = %" PRIuHSIZE "\n", __func__, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(size > 0);
 
     /* Retrieve the 'eoa' for the file */
     if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed");
 
     /* Compute value to return */
     ret_value = f->shared->tmp_addr - size;
 
     /* Check for overlap into the actual allocated space in the file */
-    if (H5F_addr_le(ret_value, eoa))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
+    if (H5_addr_le(ret_value, eoa))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed");
 
     /* Adjust temporary address allocator in the file */
     f->shared->tmp_addr = ret_value;
@@ -1069,9 +1036,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Jul 17 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1086,15 +1050,15 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
-              __func__, (unsigned)alloc_type, addr, size);
+    fprintf(stderr, "%s: Entering - alloc_type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
+            __func__, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check arguments */
-    HDassert(f);
-    if (!H5F_addr_defined(addr) || 0 == size)
-        HGOTO_DONE(SUCCEED)
-    HDassert(addr != 0); /* Can't deallocate the superblock :-) */
+    assert(f);
+    if (!H5_addr_defined(addr) || 0 == size)
+        HGOTO_DONE(SUCCEED);
+    assert(addr != 0); /* Can't deallocate the superblock :-) */
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
@@ -1113,11 +1077,11 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     if (H5F_HAVE_FREE_SPACE_MANAGER(f))
         if (H5AC_unsettle_ring(f, fsm_ring) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL,
-                        "attempt to notify cache that ring is unsettled failed")
+                        "attempt to notify cache that ring is unsettled failed");
 
     /* Check for attempting to free space that's a 'temporary' file address */
-    if (H5F_addr_le(f->shared->tmp_addr, addr))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
+    if (H5_addr_le(f->shared->tmp_addr, addr))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space");
 
     /* If it's metadata, check if the space to free intersects with the file's
      * metadata accumulator
@@ -1126,7 +1090,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
         /* Check if the space to free intersects with the file's metadata accumulator */
         if (H5F__accum_free(f->shared, alloc_type, addr, size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL,
-                        "can't check free space intersection w/metadata accumulator")
+                        "can't check free space intersection w/metadata accumulator");
     } /* end if */
 
     /* Check if the free space manager for the file has been initialized */
@@ -1136,27 +1100,26 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
          *  space is at the end of the file
          */
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: fs_addr = %" PRIuHADDR "\n", __func__, f->shared->fs_addr[fs_type]);
+        fprintf(stderr, "%s: fs_addr = %" PRIuHADDR "\n", __func__, f->shared->fs_addr[fs_type]);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-        if (!H5F_addr_defined(f->shared->fs_addr[fs_type])) {
+        if (!H5_addr_defined(f->shared->fs_addr[fs_type])) {
             htri_t status; /* "can absorb" status for section into */
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-            HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", __func__);
+            fprintf(stderr, "%s: Trying to avoid starting up free space manager\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
             /* Try to shrink the file or absorb the block into a block aggregator */
             if ((status = H5MF_try_shrink(f, alloc_type, addr, size)) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block");
             else if (status > 0)
                 /* Indicate success */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             else if (size < f->shared->fs_threshold) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr,
-                          "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
-                          __func__, addr, size);
+                fprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
+                        __func__, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             } /* end else-if */
         }     /* end if */
 
@@ -1171,10 +1134,10 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
          */
         if (f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING || !H5F_HAVE_FREE_SPACE_MANAGER(f)) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
-            HDfprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
-                      __func__, addr, size);
+            fprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
+                    __func__, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
         /* There's either already a free space manager, or the freed
@@ -1182,29 +1145,29 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
          *  the file space manager
          */
         if (H5MF__start_fstype(f, fs_type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space");
     } /* end if */
 
     /* Create the free-space section for the freed section */
     ctype = H5MF_SECT_CLASS_TYPE(f, size);
     if (NULL == (node = H5MF__sect_new(ctype, addr, size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section");
 
     /* If size of the freed section is larger than threshold, add it to the free space manager */
     if (size >= f->shared->fs_threshold) {
-        HDassert(f->shared->fs_man[fs_type]);
+        assert(f->shared->fs_man[fs_type]);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: Before H5FS_sect_add()\n", __func__);
+        fprintf(stderr, "%s: Before H5FS_sect_add()\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Add to the free space for the file */
         if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't add section to file free space")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't add section to file free space");
         node = NULL;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: After H5FS_sect_add()\n", __func__);
+        fprintf(stderr, "%s: After H5FS_sect_add()\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     }  /* end if */
     else {
@@ -1214,14 +1177,14 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
         /* Construct user data for callbacks */
         udata.f                     = f;
         udata.alloc_type            = alloc_type;
-        udata.allow_sect_absorb     = TRUE;
-        udata.allow_eoa_shrink_only = FALSE;
+        udata.allow_sect_absorb     = true;
+        udata.allow_eoa_shrink_only = false;
 
         /* Try to merge the section that is smaller than threshold */
         if ((merged = H5FS_sect_try_merge(f, f->shared->fs_man[fs_type], (H5FS_section_info_t *)node,
                                           H5FS_ADD_RETURNED_SPACE, &udata)) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't merge section to file free space")
-        else if (merged == TRUE) /* successfully merged */
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't merge section to file free space");
+        else if (merged == true) /* successfully merged */
                                  /* Indicate that the node was used */
             node = NULL;
     } /* end else */
@@ -1234,10 +1197,10 @@ done:
     /* Release section node, if allocated and not added to section list or merged */
     if (node)
         if (H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG */
 #ifdef H5MF_ALLOC_DEBUG_DUMP
     H5MF__sects_dump(f, stderr);
@@ -1258,12 +1221,9 @@ done:
  *          --try to extend into a free-space section if adjoined
  *          --try to extend into the page end threshold if a metadata block
  *
- * Return:	Success:	TRUE(1)  - Block was extended
- *                              FALSE(0) - Block could not be extended
+ * Return:	Success:	true(1)  - Block was extended
+ *                              false(0) - Block could not be extended
  * 		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *              Friday, June 11, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1275,21 +1235,21 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
     haddr_t        end;                       /* End of block to extend */
     H5FD_mem_t     map_type;                  /* Mapped type */
     H5F_mem_page_t fs_type;                   /* free space type */
-    htri_t         allow_extend = TRUE;       /* Possible to extend the block */
+    htri_t         allow_extend = true;       /* Possible to extend the block */
     hsize_t        frag_size    = 0;          /* Size of mis-aligned fragment */
-    htri_t         ret_value    = FALSE;      /* Return value */
+    htri_t         ret_value    = false;      /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr,
-              "%s: Entering: alloc_type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE
-              ", extra_requested = %" PRIuHSIZE "\n",
-              __func__, (unsigned)alloc_type, addr, size, extra_requested);
+    fprintf(stderr,
+            "%s: Entering: alloc_type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE
+            ", extra_requested = %" PRIuHSIZE "\n",
+            __func__, (unsigned)alloc_type, addr, size, extra_requested);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    assert(f);
+    assert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
     /* Set mapped type, treating global heap as raw data */
     map_type = (alloc_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : alloc_type;
@@ -1306,7 +1266,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
         if (size < f->shared->fs_page_size) {
             /* To extend a small block: cannot cross page boundary */
             if ((addr / f->shared->fs_page_size) != (((end + extra_requested) - 1) / f->shared->fs_page_size))
-                allow_extend = FALSE;
+                allow_extend = false;
         } /* end if */
         else {
             haddr_t eoa; /* EOA for the file */
@@ -1314,8 +1274,8 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
             /*   To extend a large block: calculate in advance the mis-aligned fragment so EOA will end at
              * page boundary if extended */
             if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, alloc_type)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "Unable to get eoa")
-            HDassert(!(eoa % f->shared->fs_page_size));
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "Unable to get eoa");
+            assert(!(eoa % f->shared->fs_page_size));
 
             H5MF_EOA_MISALIGN(f, (eoa + extra_requested), f->shared->fs_page_size, frag_size);
         } /* end else */
@@ -1334,52 +1294,52 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
     if (allow_extend) {
         /* Try extending the block at EOA */
         if ((ret_value = H5F__try_extend(f, map_type, end, extra_requested + frag_size)) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file");
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: extended = %d\n", __func__, ret_value);
+        fprintf(stderr, "%s: extended = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* If extending at EOA succeeds: */
         /*   for paged aggregation, put the fragment into the large-sized free-space manager */
-        if (ret_value == TRUE && H5F_PAGED_AGGR(f) && frag_size) {
+        if (ret_value == true && H5F_PAGED_AGGR(f) && frag_size) {
             H5MF_free_section_t *node = NULL; /* Free space section pointer */
 
             /* Should be large-sized block */
-            HDassert(size >= f->shared->fs_page_size);
+            assert(size >= f->shared->fs_page_size);
 
             /* Start up the free-space manager */
             if (!(f->shared->fs_man[fs_type]))
                 if (H5MF__start_fstype(f, fs_type) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space");
 
             /* Create free space section for the fragment */
             if (NULL == (node = H5MF__sect_new(H5MF_FSPACE_SECT_LARGE, end + extra_requested, frag_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section");
 
             /* Add the fragment to the large-sized free-space manager */
             if (H5MF__add_sect(f, alloc_type, f->shared->fs_man[fs_type], node) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, FAIL, "can't re-add section to file free space");
 
             node = NULL;
         } /* end if */
 
         /* For non-paged aggregation: try to extend into the aggregators */
-        if (ret_value == FALSE && (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR ||
+        if (ret_value == false && (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR ||
                                    f->shared->fs_strategy == H5F_FSPACE_STRATEGY_AGGR)) {
             H5F_blk_aggr_t *aggr; /* Aggregator to use */
 
             /* Check if the block is able to extend into aggregation block */
             aggr = (map_type == H5FD_MEM_DRAW) ? &(f->shared->sdata_aggr) : &(f->shared->meta_aggr);
             if ((ret_value = H5MF__aggr_try_extend(f, aggr, map_type, end, extra_requested)) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending aggregation block")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending aggregation block");
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-            HDfprintf(stderr, "%s: H5MF__aggr_try_extend = %d\n", __func__, ret_value);
+            fprintf(stderr, "%s: H5MF__aggr_try_extend = %d\n", __func__, ret_value);
 #endif    /* H5MF_ALLOC_DEBUG_MORE */
         } /* end if */
 
         /* If no extension so far, try to extend into a free-space section */
-        if (ret_value == FALSE &&
+        if (ret_value == false &&
             ((f->shared->fs_strategy == H5F_FSPACE_STRATEGY_FSM_AGGR) || (H5F_PAGED_AGGR(f)))) {
             H5MF_sect_ud_t udata; /* User data */
 
@@ -1388,31 +1348,30 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
             udata.alloc_type = alloc_type;
 
             /* Check if the free space for the file has been initialized */
-            if (!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
+            if (!f->shared->fs_man[fs_type] && H5_addr_defined(f->shared->fs_addr[fs_type]))
                 /* Open the free-space manager */
                 if (H5MF__open_fstype(f, fs_type) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space");
 
             /* Try to extend the block into a free-space section */
             if (f->shared->fs_man[fs_type]) {
                 if ((ret_value = H5FS_sect_try_extend(f, f->shared->fs_man[fs_type], addr, size,
                                                       extra_requested, H5FS_ADD_RETURNED_SPACE, &udata)) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL,
-                                "error extending block in free space manager")
+                                "error extending block in free space manager");
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr, "%s: Try to H5FS_sect_try_extend = %d\n", __func__, ret_value);
+                fprintf(stderr, "%s: Try to H5FS_sect_try_extend = %d\n", __func__, ret_value);
 #endif        /* H5MF_ALLOC_DEBUG_MORE */
             } /* end if */
 
             /* For paged aggregation and a metadata block: try to extend into page end threshold */
-            if (ret_value == FALSE && H5F_PAGED_AGGR(f) && map_type != H5FD_MEM_DRAW) {
+            if (ret_value == false && H5F_PAGED_AGGR(f) && map_type != H5FD_MEM_DRAW) {
                 H5MF_EOA_MISALIGN(f, end, f->shared->fs_page_size, frag_size);
 
                 if (frag_size <= H5F_PGEND_META_THRES(f) && extra_requested <= frag_size)
-                    ret_value = TRUE;
+                    ret_value = true;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr, "%s: Try to extend into the page end threshold = %d\n", __func__,
-                          ret_value);
+                fprintf(stderr, "%s: Try to extend into the page end threshold = %d\n", __func__, ret_value);
 #endif        /* H5MF_ALLOC_DEBUG_MORE */
             } /* end if */
         }     /* end if */
@@ -1424,7 +1383,7 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG */
 #ifdef H5MF_ALLOC_DEBUG_DUMP
     H5MF__sects_dump(f, stderr);
@@ -1441,9 +1400,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Feb 14 2008
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1455,24 +1411,24 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     H5AC_ring_t                 orig_ring = H5AC_RING_INV; /* Original ring value */
     H5AC_ring_t                 fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
     H5F_mem_page_t              fs_type;                   /* Free space type */
-    htri_t                      ret_value = FALSE;         /* Return value */
+    htri_t                      ret_value = false;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
-              __func__, (unsigned)alloc_type, addr, size);
+    fprintf(stderr, "%s: Entering - alloc_type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
+            __func__, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check arguments */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(size > 0);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(H5_addr_defined(addr));
+    assert(size > 0);
 
     /* Set up free-space section class information */
     sect_cls = H5MF_SECT_CLS_TYPE(f, size);
-    HDassert(sect_cls);
+    assert(sect_cls);
 
     /* Get free space type from allocation type */
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
@@ -1486,23 +1442,23 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 
     /* Create free-space section for block */
     if (NULL == (node = H5MF__sect_new(sect_cls->type, addr, size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space section");
 
     /* Construct user data for callbacks */
     udata.f                     = f;
     udata.alloc_type            = alloc_type;
-    udata.allow_sect_absorb     = FALSE; /* Force section to be absorbed into aggregator */
-    udata.allow_eoa_shrink_only = FALSE;
+    udata.allow_sect_absorb     = false; /* Force section to be absorbed into aggregator */
+    udata.allow_eoa_shrink_only = false;
 
     /* Check if the block can shrink the container */
     if (sect_cls->can_shrink) {
         if ((ret_value = (*sect_cls->can_shrink)((const H5FS_section_info_t *)node, &udata)) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check if section can shrink container")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check if section can shrink container");
         if (ret_value > 0) {
-            HDassert(sect_cls->shrink);
+            assert(sect_cls->shrink);
 
             if ((*sect_cls->shrink)((H5FS_section_info_t **)&node, &udata) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink container")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink container");
         } /* end if */
     }     /* end if */
 
@@ -1513,10 +1469,10 @@ done:
 
     /* Free section node allocated */
     if (node && H5MF__sect_free((H5FS_section_info_t *)node) < 0)
-        HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node")
+        HDONE_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free simple section node");
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving, ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF_try_shrink() */
@@ -1529,8 +1485,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1540,25 +1494,27 @@ H5MF_close(H5F_t *f)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering\n", __func__);
+    fprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     if (H5F_PAGED_AGGR(f)) {
         if ((ret_value = H5MF__close_pagefs(f)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'page' file space")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL,
+                        "can't close free-space managers for 'page' file space");
     }
     else {
         if ((ret_value = H5MF__close_aggrfs(f)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't close free-space managers for 'aggr' file space")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL,
+                        "can't close free-space managers for 'aggr' file space");
     }
 
 done:
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving\n", __func__);
+    fprintf(stderr, "%s: Leaving\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF_close() */
@@ -1572,9 +1528,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
- *              Jan 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1584,42 +1537,42 @@ H5MF__close_delete_fstype(H5F_t *f, H5F_mem_page_t type)
 
     FUNC_ENTER_PACKAGE
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering\n", __func__);
+    fprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     if (H5F_PAGED_AGGR(f))
-        HDassert(type < H5F_MEM_PAGE_NTYPES);
+        assert(type < H5F_MEM_PAGE_NTYPES);
     else
-        HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
+        assert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Check 1.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %" PRIuHADDR "\n",
-              __func__, (unsigned)type, (void *)f->shared->fs_man[type], (unsigned)type,
-              f->shared->fs_addr[type]);
+    fprintf(stderr, "%s: Check 1.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %" PRIuHADDR "\n",
+            __func__, (unsigned)type, (void *)f->shared->fs_man[type], (unsigned)type,
+            f->shared->fs_addr[type]);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* If the free space manager for this type is open, close it */
     if (f->shared->fs_man[type])
         if (H5MF__close_fstype(f, type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager");
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Check 2.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %" PRIuHADDR "\n",
-              __func__, (unsigned)type, (void *)f->shared->fs_man[type], (unsigned)type,
-              f->shared->fs_addr[type]);
+    fprintf(stderr, "%s: Check 2.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %" PRIuHADDR "\n",
+            __func__, (unsigned)type, (void *)f->shared->fs_man[type], (unsigned)type,
+            f->shared->fs_addr[type]);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* If there is free space manager info for this type, delete it */
-    if (H5F_addr_defined(f->shared->fs_addr[type]))
+    if (H5_addr_defined(f->shared->fs_addr[type]))
         if (H5MF__delete_fstype(f, type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't delete the free space manager")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't delete the free space manager");
 
 done:
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving\n", __func__);
+    fprintf(stderr, "%s: Leaving\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MF__close_delete() */
@@ -1633,9 +1586,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
- *              Jan 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1648,11 +1598,11 @@ H5MF_try_close(H5F_t *f)
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering\n", __func__);
+    fprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(f);
+    assert(f);
 
     /* If there have been no file space allocations / deallocation so
      * far, must call H5MF_tidy_self_referential_fsm_hack() to float
@@ -1695,7 +1645,7 @@ H5MF_try_close(H5F_t *f)
             } /* end if */
 
             if (H5MF__close_delete_fstype(f, ptype) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager");
         } /* end for */
     }     /* end if */
     else {
@@ -1717,7 +1667,7 @@ H5MF_try_close(H5F_t *f)
             } /* end if */
 
             if (H5MF__close_delete_fstype(f, (H5F_mem_page_t)type) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager");
         } /* end for */
     }     /* end else */
 
@@ -1727,7 +1677,7 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving\n", __func__);
+    fprintf(stderr, "%s: Leaving\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* H5MF_try_close() */
@@ -1738,9 +1688,6 @@ done:
  * Purpose:     Close the free space tracker(s) for a file: non-paged aggregation
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, January 22, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1755,14 +1702,14 @@ H5MF__close_aggrfs(H5F_t *f)
 
     FUNC_ENTER_PACKAGE
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering\n", __func__);
+    fprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(f->shared->sblock);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(f->shared->sblock);
 
     /* Set the ring type in the API context.  In most cases, we will
      * need H5AC_RING_RDFSM, so initially set the ring in
@@ -1774,11 +1721,11 @@ H5MF__close_aggrfs(H5F_t *f)
     /* Free the space in aggregators */
     /* (for space not at EOA, it may be put into free space managers) */
     if (H5MF_free_aggrs(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators");
 
     /* Trying shrinking the EOA for the file */
     if (H5MF__close_shrink_eoa(f) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
     /* Making free-space managers persistent for superblock version >= 2 */
     if (f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 && f->shared->fs_persist) {
@@ -1789,7 +1736,7 @@ H5MF__close_aggrfs(H5F_t *f)
         /* superblock extension and free space manager message should
          * exist at this point -- verify at least the former.
          */
-        HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));
+        assert(H5_addr_defined(f->shared->sblock->ext_addr));
 
         /* file space for all non-empty free space managers should be
          * allocated at this point, and these free space managers should
@@ -1814,9 +1761,9 @@ H5MF__close_aggrfs(H5F_t *f)
         fsinfo.version             = f->shared->fs_version;
 
         /* Write the free space manager message -- message must already exist */
-        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, false, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
-                        "error in writing message to superblock extension")
+                        "error in writing message to superblock extension");
 
         /* Close the free space managers */
         for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
@@ -1832,10 +1779,10 @@ H5MF__close_aggrfs(H5F_t *f)
                     curr_ring = needed_ring;
                 } /* end if */
 
-                HDassert(f->shared->fs_state[type] == H5F_FS_STATE_OPEN);
+                assert(f->shared->fs_state[type] == H5F_FS_STATE_OPEN);
 
                 if (H5FS_close(f, f->shared->fs_man[type]) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close free space manager")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close free space manager");
                 f->shared->fs_man[type]   = NULL;
                 f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
             } /* end if */
@@ -1845,47 +1792,47 @@ H5MF__close_aggrfs(H5F_t *f)
         /* verify that we haven't dirtied any metadata cache entries
          * from the metadata free space manager ring out.
          */
-        HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+        assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
         /* verify that the aggregators are still shutdown. */
-        HDassert(f->shared->sdata_aggr.tot_size == 0);
-        HDassert(f->shared->sdata_aggr.addr == 0);
-        HDassert(f->shared->sdata_aggr.size == 0);
+        assert(f->shared->sdata_aggr.tot_size == 0);
+        assert(f->shared->sdata_aggr.addr == 0);
+        assert(f->shared->sdata_aggr.size == 0);
 
-        HDassert(f->shared->meta_aggr.tot_size == 0);
-        HDassert(f->shared->meta_aggr.addr == 0);
-        HDassert(f->shared->meta_aggr.size == 0);
+        assert(f->shared->meta_aggr.tot_size == 0);
+        assert(f->shared->meta_aggr.addr == 0);
+        assert(f->shared->meta_aggr.size == 0);
 
         /* Trying shrinking the EOA for the file */
         /* (in case any free space is now at the EOA) */
         if (H5MF__close_shrink_eoa(f) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
         /* get the eoa, and verify that it has the expected value */
         if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size");
 
         /* f->shared->eoa_post_fsm_fsalloc is undefined if there has
          * been no file space allocation or deallocation since file
          * open.
          */
-        HDassert(H5F_NULL_FSM_ADDR(f) || final_eoa == f->shared->eoa_fsm_fsalloc);
+        assert(H5F_NULL_FSM_ADDR(f) || final_eoa == f->shared->eoa_fsm_fsalloc);
     }      /* end if */
     else { /* super_vers can be 0, 1, 2 */
         for (type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; type++)
             if (H5MF__close_delete_fstype(f, (H5F_mem_page_t)type) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space");
     } /* end else */
 
     /* Free the space in aggregators (again) */
     /* (in case any free space information re-started them) */
     if (H5MF_free_aggrs(f) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators");
 
     /* Trying shrinking the EOA for the file */
     /* (in case any free space is now at the EOA) */
     if (H5MF__close_shrink_eoa(f) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
 done:
     /* Reset the ring in the API context */
@@ -1893,7 +1840,7 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving\n", __func__);
+    fprintf(stderr, "%s: Leaving\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__close_aggrfs() */
@@ -1904,8 +1851,6 @@ done:
  * Purpose:     Close the free space tracker(s) for a file: paged aggregation
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1921,16 +1866,16 @@ H5MF__close_pagefs(H5F_t *f)
 
     FUNC_ENTER_PACKAGE
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Entering\n", __func__);
+    fprintf(stderr, "%s: Entering\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(f->shared->sblock);
-    HDassert(f->shared->fs_page_size);
-    HDassert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
+    assert(f->shared->sblock);
+    assert(f->shared->fs_page_size);
+    assert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
 
     /* Set the ring type in the API context.  In most cases, we will
      * need H5AC_RING_RDFSM, so initially set the ring in
@@ -1941,7 +1886,7 @@ H5MF__close_pagefs(H5F_t *f)
 
     /* Trying shrinking the EOA for the file */
     if (H5MF__close_shrink_eoa(f) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
     /* Set up file space info message */
     fsinfo.strategy            = f->shared->fs_strategy;
@@ -1961,7 +1906,7 @@ H5MF__close_pagefs(H5F_t *f)
         /* superblock extension and free space manager message should
          * exist at this point -- verify at least the former.
          */
-        HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));
+        assert(H5_addr_defined(f->shared->sblock->ext_addr));
 
         /* file space for all non-empty free space managers should be
          * allocated at this point, and these free space managers should
@@ -1979,9 +1924,9 @@ H5MF__close_pagefs(H5F_t *f)
         fsinfo.eoa_pre_fsm_fsalloc = f->shared->eoa_fsm_fsalloc;
 
         /* Write the free space manager message -- message must already exist */
-        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, false, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
-                        "error in writing message to superblock extension")
+                        "error in writing message to superblock extension");
 
         /* Close the free space managers */
         /* use H5MF__close_fstype() for this? */
@@ -1998,10 +1943,10 @@ H5MF__close_pagefs(H5F_t *f)
                     curr_ring = needed_ring;
                 } /* end if */
 
-                HDassert(f->shared->fs_state[ptype] == H5F_FS_STATE_OPEN);
+                assert(f->shared->fs_state[ptype] == H5F_FS_STATE_OPEN);
 
                 if (H5FS_close(f, f->shared->fs_man[ptype]) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close free space manager")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close free space manager");
                 f->shared->fs_man[ptype]   = NULL;
                 f->shared->fs_state[ptype] = H5F_FS_STATE_CLOSED;
             } /* end if */
@@ -2011,36 +1956,36 @@ H5MF__close_pagefs(H5F_t *f)
         /* verify that we haven't dirtied any metadata cache entries
          * from the metadata free space manager ring out.
          */
-        HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
+        assert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
         /* Trying shrinking the EOA for the file */
         /* (in case any free space is now at the EOA) */
         if (H5MF__close_shrink_eoa(f) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
         /* get the eoa, and verify that it has the expected value */
         if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size");
 
         /* f->shared->eoa_post_fsm_fsalloc is undefined if there has
          * been no file space allocation or deallocation since file
          * open.
          *
          * If there is a cache image in the file at file open,
-         * f->shared->first_alloc_dealloc will always be FALSE unless
+         * f->shared->first_alloc_dealloc will always be false unless
          * the file is opened R/O, as otherwise, the image will have been
          * read and discarded by this point.
          *
          * If a cache image was created on file close, the actual EOA
          * should be in f->shared->eoa_post_mdci_fsalloc.  Note that in
          * this case, it is conceivable that f->shared->first_alloc_dealloc
-         * will still be TRUE, as the cache image is allocated directly from
+         * will still be true, as the cache image is allocated directly from
          * the file driver layer.  However, as this possibility seems remote,
          * it is ignored in the following assert.
          */
-        HDassert((H5F_NULL_FSM_ADDR(f)) || (final_eoa == f->shared->eoa_fsm_fsalloc) ||
-                 ((H5F_addr_defined(f->shared->eoa_post_mdci_fsalloc)) &&
-                  (final_eoa == f->shared->eoa_post_mdci_fsalloc)));
+        assert((H5F_NULL_FSM_ADDR(f)) || (final_eoa == f->shared->eoa_fsm_fsalloc) ||
+               ((H5_addr_defined(f->shared->eoa_post_mdci_fsalloc)) &&
+                (final_eoa == f->shared->eoa_post_mdci_fsalloc)));
     } /* end if */
     else {
         /* Iterate over all the free space types that have managers
@@ -2048,19 +1993,19 @@ H5MF__close_pagefs(H5F_t *f)
          */
         for (ptype = H5F_MEM_PAGE_META; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
             if (H5MF__close_delete_fstype(f, ptype) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't close the free space manager");
 
         /* Write file space info message to superblock extension object header */
         /* Create the superblock extension object header in advance if needed */
-        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, false, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
-                        "error in writing message to superblock extension")
+                        "error in writing message to superblock extension");
     } /* end else */
 
     /* Trying shrinking the EOA for the file */
     /* (in case any free space is now at the EOA) */
     if (H5MF__close_shrink_eoa(f) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
 done:
     /* Reset the ring in the API context */
@@ -2068,7 +2013,7 @@ done:
         H5AC_set_ring(orig_ring, NULL);
 
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Leaving\n", __func__);
+    fprintf(stderr, "%s: Leaving\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF__close_pagefs() */
@@ -2080,9 +2025,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, July 7, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2093,7 +2035,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
     H5AC_ring_t    needed_ring = H5AC_RING_INV; /* Ring value needed for this iteration.  */
     H5F_mem_t      type;
     H5F_mem_page_t ptype;               /* Memory type for iteration */
-    hbool_t        eoa_shrank;          /* Whether an EOA shrink occurs */
+    bool           eoa_shrank;          /* Whether an EOA shrink occurs */
     htri_t         status;              /* Status value */
     H5MF_sect_ud_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -2101,13 +2043,13 @@ H5MF__close_shrink_eoa(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Construct user data for callbacks */
     udata.f                     = f;
-    udata.allow_sect_absorb     = FALSE;
-    udata.allow_eoa_shrink_only = TRUE;
+    udata.allow_sect_absorb     = false;
+    udata.allow_eoa_shrink_only = true;
 
     /* Set the ring type in the API context */
     H5AC_set_ring(H5AC_RING_RDFSM, &orig_ring);
@@ -2115,7 +2057,7 @@ H5MF__close_shrink_eoa(H5F_t *f)
 
     /* Iterate until no more EOA shrinking occurs */
     do {
-        eoa_shrank = FALSE;
+        eoa_shrank = false;
 
         if (H5F_PAGED_AGGR(f)) {
             /* Check the last section of each free-space manager */
@@ -2137,9 +2079,9 @@ H5MF__close_shrink_eoa(H5F_t *f)
                                                                          : ((ptype % H5FD_MEM_NTYPES) + 1));
 
                     if ((status = H5FS_sect_try_shrink_eoa(f, f->shared->fs_man[ptype], &udata)) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa");
                     else if (status > 0)
-                        eoa_shrank = TRUE;
+                        eoa_shrank = true;
                 } /* end if */
             }     /* end for */
         }         /* end if */
@@ -2161,17 +2103,17 @@ H5MF__close_shrink_eoa(H5F_t *f)
                     udata.alloc_type = type;
 
                     if ((status = H5FS_sect_try_shrink_eoa(f, f->shared->fs_man[type], &udata)) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa");
                     else if (status > 0)
-                        eoa_shrank = TRUE;
+                        eoa_shrank = true;
                 } /* end if */
             }     /* end for */
 
             /* check the two aggregators */
             if ((status = H5MF__aggrs_try_shrink_eoa(f)) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa");
             else if (status > 0)
-                eoa_shrank = TRUE;
+                eoa_shrank = true;
         } /* end else */
     } while (eoa_shrank);
 
@@ -2190,9 +2132,6 @@ done:
  *
  * Return:      Success:        Amount of free space in file
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Monday, October  6, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2219,9 +2158,9 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
 
     /* Set the ring type in the API context.  In most cases, we will
      * need H5AC_RING_RDFSM, so initially set the ring in
@@ -2242,28 +2181,28 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
 
     for (tt = H5FD_MEM_SUPER; tt < H5FD_MEM_NTYPES; tt++)
         if (HADDR_UNDEF == (fs_eoa[tt] = H5F_get_eoa(f, tt)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed");
 
     if (!H5F_PAGED_AGGR(f)) {
         /* Retrieve metadata aggregator info, if available */
         if (H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query metadata aggregator stats")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query metadata aggregator stats");
 
         /* Retrieve 'small data' aggregator info, if available */
         if (H5MF__aggr_query(f, &(f->shared->sdata_aggr), &sda_addr, &sda_size) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query small data aggregator stats")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query small data aggregator stats");
     } /* end if */
 
     /* Iterate over all the free space types that have managers and get each free list's space */
     for (type = start_type; type < end_type; type++) {
-        fs_started[type] = FALSE;
+        fs_started[type] = false;
 
         /* Check if the free space for the file has been initialized */
-        if (!f->shared->fs_man[type] && H5F_addr_defined(f->shared->fs_addr[type])) {
+        if (!f->shared->fs_man[type] && H5_addr_defined(f->shared->fs_addr[type])) {
             if (H5MF__open_fstype(f, type) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
-            HDassert(f->shared->fs_man[type]);
-            fs_started[type] = TRUE;
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space");
+            assert(f->shared->fs_man[type]);
+            fs_started[type] = true;
         } /* end if */
 
         /* Test to see if we need to switch rings -- do so if required */
@@ -2284,9 +2223,9 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
 
             /* Retrieve free space size from free space manager */
             if (H5FS_sect_stats(f->shared->fs_man[type], &type_fs_size, NULL) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats");
             if (H5FS_size(f->shared->fs_man[type], &type_meta_size) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space metadata stats")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space metadata stats");
 
             /* Increment total free space for types */
             tot_fs_size += type_fs_size;
@@ -2309,7 +2248,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
 
         if (fs_started[type])
             if (H5MF__close_fstype(f, type) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space");
     } /* end for */
 
     /* Set the value(s) to return */
@@ -2335,8 +2274,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2355,9 +2292,9 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->lf);
 
     /* H5MF_tidy_self_referential_fsm_hack() will fail if any self
      * referential FSM is opened prior to the call to it.  Thus call
@@ -2398,8 +2335,8 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
 
     /* Iterate over memory types, retrieving the number of sections of each type */
     for (ty = start_type; ty < end_type; ty++) {
-        hbool_t fs_started = FALSE; /* The free-space manager is opened or not */
-        size_t  nums       = 0;     /* The number of free-space sections */
+        bool   fs_started = false; /* The free-space manager is opened or not */
+        size_t nums       = 0;     /* The number of free-space sections */
 
         /* Test to see if we need to switch rings -- do so if required */
         if (H5MF__fsm_type_is_self_referential(f->shared, ty))
@@ -2412,18 +2349,18 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
             curr_ring = needed_ring;
         } /* end if */
 
-        if (!f->shared->fs_man[ty] && H5F_addr_defined(f->shared->fs_addr[ty])) {
+        if (!f->shared->fs_man[ty] && H5_addr_defined(f->shared->fs_addr[ty])) {
             if (H5MF__open_fstype(f, ty) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't open the free space manager")
-            HDassert(f->shared->fs_man[ty]);
-            fs_started = TRUE;
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't open the free space manager");
+            assert(f->shared->fs_man[ty]);
+            fs_started = true;
         } /* end if */
 
         /* Check if there's free space sections of this type */
         if (f->shared->fs_man[ty])
             if (H5MF__get_free_sects(f, f->shared->fs_man[ty], &sect_udata, &nums) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                            "can't get section info for the free space manager")
+                            "can't get section info for the free space manager");
 
         /* Increment total # of sections */
         total_sects += nums;
@@ -2431,7 +2368,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
         /* Close the free space manager of this type, if we started it here */
         if (fs_started)
             if (H5MF__close_fstype(f, ty) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space");
         if ((H5F_PAGED_AGGR(f)) && (type != H5FD_MEM_DEFAULT))
             ty = (H5F_mem_page_t)(ty + H5FD_MEM_NTYPES - 2);
     } /* end for */
@@ -2454,9 +2391,6 @@ done:
  *          Retrieve address and size into user data
  *
  * Return:	Always succeed
- *
- * Programmer:  Vailin Choi
- *              July 1st, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2485,8 +2419,6 @@ H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata)
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2498,21 +2430,21 @@ H5MF__get_free_sects(H5F_t *f, H5FS_t *fspace, H5MF_sect_iter_ud_t *sect_udata, 
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(sect_udata);
-    HDassert(nums);
-    HDassert(fspace);
+    assert(f);
+    assert(sect_udata);
+    assert(nums);
+    assert(fspace);
 
     /* Query how many sections of this type */
     if (H5FS_sect_stats(fspace, NULL, &hnums) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats");
     H5_CHECKED_ASSIGN(*nums, size_t, hnums, hsize_t);
 
     /* Check if we should retrieve the section info */
     if (sect_udata->sects && *nums > 0)
         /* Iterate over all the free space sections of this type, adding them to the user's section info */
         if (H5FS_sect_iterate(f, fspace, H5MF__sects_cb, sect_udata) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_BADITER, FAIL, "can't iterate over sections")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_BADITER, FAIL, "can't iterate over sections");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2614,13 +2546,10 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *	        5/25/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
+H5MF_settle_raw_data_fsm(H5F_t *f, bool *fsm_settled)
 {
     int            pass_count;
     hsize_t        alloc_size;
@@ -2636,36 +2565,34 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(fsm_settled);
+    assert(f);
+    assert(f->shared);
+    assert(fsm_settled);
 
     /* Initialize structs */
-    HDmemset(&fsinfo, 0, sizeof(fsinfo));
-    HDmemset(&fs_stat, 0, sizeof(fs_stat));
+    memset(&fsinfo, 0, sizeof(fsinfo));
+    memset(&fs_stat, 0, sizeof(fs_stat));
 
     /*
      * Only need to settle things if we are persisting free space and
      * the private property in f->shared->null_fsm_addr is not enabled.
      */
     if (f->shared->fs_persist && !H5F_NULL_FSM_ADDR(f)) {
-        hbool_t fsm_opened[H5F_MEM_PAGE_NTYPES];  /* State of FSM */
-        hbool_t fsm_visited[H5F_MEM_PAGE_NTYPES]; /* State of FSM */
-
-        /* Sanity check */
-        HDassert(f->shared->sblock);
+        bool fsm_opened[H5F_MEM_PAGE_NTYPES];  /* State of FSM */
+        bool fsm_visited[H5F_MEM_PAGE_NTYPES]; /* State of FSM */
 
         /* should only be called if file is opened R/W */
-        HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+        assert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
         /* shouldn't be called unless we have a superblock supporting the
          * superblock extension.
          */
-        HDassert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
+        if (f->shared->sblock)
+            assert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
 
         /* Initialize fsm_opened and fsm_visited */
-        HDmemset(fsm_opened, 0, sizeof(fsm_opened));
-        HDmemset(fsm_visited, 0, sizeof(fsm_visited));
+        memset(fsm_opened, 0, sizeof(fsm_opened));
+        memset(fsm_visited, 0, sizeof(fsm_visited));
 
         /* 1) Reduce the EOA to the extent possible. */
 
@@ -2684,7 +2611,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          */
         /* Vailin -- is this correct? */
         if (!H5F_PAGED_AGGR(f) && (H5MF_free_aggrs(f) < 0))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregators")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregators");
 
         /* Set the ring type in the DXPL.  In most cases, we will
          * need H5AC_RING_MDFSM first, so initially set the ring in
@@ -2733,32 +2660,32 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 H5MF__alloc_to_fs_type(f->shared, mem_type, alloc_size, &fsm_type);
 
                 if (pass_count == 0) { /* this is the first pass */
-                    HDassert(fsm_type > H5F_MEM_PAGE_DEFAULT);
-                    HDassert(fsm_type < H5F_MEM_PAGE_LARGE_SUPER);
+                    assert(fsm_type > H5F_MEM_PAGE_DEFAULT);
+                    assert(fsm_type < H5F_MEM_PAGE_LARGE_SUPER);
                 }                             /* end if */
                 else if (H5F_PAGED_AGGR(f)) { /* page alloc active */
-                    HDassert(fsm_type >= H5F_MEM_PAGE_LARGE_SUPER);
-                    HDassert(fsm_type < H5F_MEM_PAGE_NTYPES);
+                    assert(fsm_type >= H5F_MEM_PAGE_LARGE_SUPER);
+                    assert(fsm_type < H5F_MEM_PAGE_NTYPES);
                 }    /* end else-if */
                 else /* paged allocation disabled -- should be unreachable */
-                    HDassert(FALSE);
+                    assert(false);
 
                 if (!fsm_visited[fsm_type]) {
-                    fsm_visited[fsm_type] = TRUE;
+                    fsm_visited[fsm_type] = true;
 
                     /* If there is no active FSM for this type, but such a FSM has
                      * space allocated in file, open it so that we can free its file
                      * space.
                      */
                     if (NULL == f->shared->fs_man[fsm_type]) {
-                        if (H5F_addr_defined(f->shared->fs_addr[fsm_type])) {
+                        if (H5_addr_defined(f->shared->fs_addr[fsm_type])) {
                             /* Sanity check */
-                            HDassert(fsm_opened[fsm_type] == FALSE);
+                            assert(fsm_opened[fsm_type] == false);
 
                             if (H5MF__open_fstype(f, fsm_type) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
-                                            "can't initialize file free space manager")
-                            fsm_opened[fsm_type] = TRUE;
+                                            "can't initialize file free space manager");
+                            fsm_opened[fsm_type] = true;
                         } /* end if */
                     }     /* end if */
 
@@ -2776,17 +2703,17 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
                         /* Query free space manager info for this type */
                         if (H5FS_stat_info(f, f->shared->fs_man[fsm_type], &fs_stat) < 0)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't get free-space info")
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't get free-space info");
 
                         /* Check if the free space manager has space in the file */
-                        if (H5F_addr_defined(fs_stat.addr) || H5F_addr_defined(fs_stat.sect_addr)) {
+                        if (H5_addr_defined(fs_stat.addr) || H5_addr_defined(fs_stat.sect_addr)) {
                             /* Delete the free space manager in the file.  Will
                              * reallocate later if the free space manager contains
                              * any free space.
                              */
-                            if (H5FS_free(f, f->shared->fs_man[fsm_type], TRUE) < 0)
+                            if (H5FS_free(f, f->shared->fs_man[fsm_type], true) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                                            "can't release free-space headers")
+                                            "can't release free-space headers");
                             f->shared->fs_addr[fsm_type] = HADDR_UNDEF;
                         } /* end if */
                     }     /* end if */
@@ -2809,40 +2736,44 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *            file space manager info message is guaranteed to exist.
          *            Leave it in for now, but consider removing it.
          */
-        if (H5F_addr_defined(f->shared->sblock->ext_addr))
-            if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                            "error in removing message from superblock extension")
+        if (f->shared->sblock) {
+            if (H5_addr_defined(f->shared->sblock->ext_addr))
+                if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
+                                "error in removing message from superblock extension");
+        }
 
         /* As the final element in 1), shrink the EOA for the file */
         if (H5MF__close_shrink_eoa(f) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
-        /* 2) Ensure that space is allocated for the free space manager superblock
-         *    extension message.  Must do this now, before reallocating file space
-         *    for free space managers, as it is possible that this allocation may
-         *    grab the last section in a FSM -- making it unnecessary to
-         *    re-allocate file space for it.
-         *
-         * Do this by writing a free space manager superblock extension message.
-         *
-         * Since no free space manager has file space allocated for it, this
-         * message must be invalid since we can't save addresses of FSMs when
-         * those addresses are unknown.  This is OK -- we will write the correct
-         * values to the message at free space manager shutdown.
-         */
-        for (fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
-            fsinfo.fs_addr[fsm_type - 1] = HADDR_UNDEF;
-        fsinfo.strategy            = f->shared->fs_strategy;
-        fsinfo.persist             = f->shared->fs_persist;
-        fsinfo.threshold           = f->shared->fs_threshold;
-        fsinfo.page_size           = f->shared->fs_page_size;
-        fsinfo.pgend_meta_thres    = f->shared->pgend_meta_thres;
-        fsinfo.eoa_pre_fsm_fsalloc = HADDR_UNDEF;
+        if (f->shared->sblock) {
+            /* 2) Ensure that space is allocated for the free space manager superblock
+             *    extension message.  Must do this now, before reallocating file space
+             *    for free space managers, as it is possible that this allocation may
+             *    grab the last section in a FSM -- making it unnecessary to
+             *    re-allocate file space for it.
+             *
+             * Do this by writing a free space manager superblock extension message.
+             *
+             * Since no free space manager has file space allocated for it, this
+             * message must be invalid since we can't save addresses of FSMs when
+             * those addresses are unknown.  This is OK -- we will write the correct
+             * values to the message at free space manager shutdown.
+             */
+            for (fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
+                fsinfo.fs_addr[fsm_type - 1] = HADDR_UNDEF;
+            fsinfo.strategy            = f->shared->fs_strategy;
+            fsinfo.persist             = f->shared->fs_persist;
+            fsinfo.threshold           = f->shared->fs_threshold;
+            fsinfo.page_size           = f->shared->fs_page_size;
+            fsinfo.pgend_meta_thres    = f->shared->pgend_meta_thres;
+            fsinfo.eoa_pre_fsm_fsalloc = HADDR_UNDEF;
 
-        if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
-                        "error in writing fsinfo message to superblock extension")
+            if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, true, H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL,
+                            "error in writing fsinfo message to superblock extension");
+        }
 
         /* 3) Scan all free space managers not involved in allocating
          *    space for free space managers.  For each such free space
@@ -2865,7 +2796,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
         /* Reinitialize fsm_visited */
         for (fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
-            fsm_visited[fsm_type] = FALSE;
+            fsm_visited[fsm_type] = false;
 
         for (pass_count = 0; pass_count <= 1; pass_count++) {
             if (pass_count == 0)
@@ -2879,15 +2810,15 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 H5MF__alloc_to_fs_type(f->shared, mem_type, alloc_size, &fsm_type);
 
                 if (pass_count == 0) { /* this is the first pass */
-                    HDassert(fsm_type > H5F_MEM_PAGE_DEFAULT);
-                    HDassert(fsm_type < H5F_MEM_PAGE_LARGE_SUPER);
+                    assert(fsm_type > H5F_MEM_PAGE_DEFAULT);
+                    assert(fsm_type < H5F_MEM_PAGE_LARGE_SUPER);
                 }                             /* end if */
                 else if (H5F_PAGED_AGGR(f)) { /* page alloc active */
-                    HDassert(fsm_type >= H5F_MEM_PAGE_LARGE_SUPER);
-                    HDassert(fsm_type < H5F_MEM_PAGE_NTYPES);
+                    assert(fsm_type >= H5F_MEM_PAGE_LARGE_SUPER);
+                    assert(fsm_type < H5F_MEM_PAGE_NTYPES);
                 }    /* end else-if */
                 else /* paged allocation disabled -- should be unreachable */
-                    HDassert(FALSE);
+                    assert(false);
 
                 /* Test to see if we need to switch rings -- do so if required */
                 if (H5MF__fsm_type_is_self_referential(f->shared, fsm_type))
@@ -2905,7 +2836,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                  * more than once.
                  */
                 if (!fsm_visited[fsm_type]) {
-                    fsm_visited[fsm_type] = TRUE;
+                    fsm_visited[fsm_type] = true;
 
                     if (f->shared->fs_man[fsm_type]) {
                         /* Only allocate file space if the target free space manager
@@ -2915,11 +2846,11 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                          */
                         if (!H5MF__fsm_type_is_self_referential(f->shared, fsm_type)) {
                             /* The current ring should be H5AC_RING_RDFSM */
-                            HDassert(curr_ring == H5AC_RING_RDFSM);
+                            assert(curr_ring == H5AC_RING_RDFSM);
 
                             /* Query free space manager info for this type */
                             if (H5FS_stat_info(f, f->shared->fs_man[fsm_type], &fs_stat) < 0)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info")
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info");
 
                             /* If the free space manager contains section info,
                              * allocate space for the header and sinfo (note that
@@ -2928,39 +2859,39 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                              */
                             if (fs_stat.serial_sect_count > 0) {
                                 /* Sanity check */
-                                HDassert(!H5F_addr_defined(fs_stat.addr));
+                                assert(!H5_addr_defined(fs_stat.addr));
 
                                 /* Allocate FSM header */
                                 if (H5FS_alloc_hdr(f, f->shared->fs_man[fsm_type],
                                                    &f->shared->fs_addr[fsm_type]) < 0)
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                                "can't allocated free-space header")
+                                                "can't allocated free-space header");
 
                                 /* Allocate FSM section info */
-                                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
-                                HDassert(fs_stat.alloc_sect_size == 0);
+                                assert(!H5_addr_defined(fs_stat.sect_addr));
+                                assert(fs_stat.alloc_sect_size == 0);
                                 if (H5FS_alloc_sect(f, f->shared->fs_man[fsm_type]) < 0)
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                                "can't allocate free-space section info")
+                                                "can't allocate free-space section info");
 
 #ifndef NDEBUG
                                 /* Re-Query free space manager info for this type */
                                 if (H5FS_stat_info(f, f->shared->fs_man[fsm_type], &fs_stat) < 0)
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
-                                                "can't get free-space info")
+                                                "can't get free-space info");
 
-                                HDassert(H5F_addr_defined(fs_stat.addr));
-                                HDassert(H5F_addr_defined(fs_stat.sect_addr));
-                                HDassert(fs_stat.serial_sect_count > 0);
-                                HDassert(fs_stat.alloc_sect_size > 0);
-                                HDassert(fs_stat.alloc_sect_size == fs_stat.sect_size);
+                                assert(H5_addr_defined(fs_stat.addr));
+                                assert(H5_addr_defined(fs_stat.sect_addr));
+                                assert(fs_stat.serial_sect_count > 0);
+                                assert(fs_stat.alloc_sect_size > 0);
+                                assert(fs_stat.alloc_sect_size == fs_stat.sect_size);
 #endif                        /* NDEBUG */
                             } /* end if */
                             else {
-                                HDassert(!H5F_addr_defined(fs_stat.addr));
-                                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
-                                HDassert(fs_stat.serial_sect_count == 0);
-                                HDassert(fs_stat.alloc_sect_size == 0);
+                                assert(!H5_addr_defined(fs_stat.addr));
+                                assert(!H5_addr_defined(fs_stat.sect_addr));
+                                assert(fs_stat.serial_sect_count == 0);
+                                assert(fs_stat.alloc_sect_size == 0);
                             } /* end else */
                         }     /* end if */
                     }         /* end if */
@@ -2969,8 +2900,8 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                     if (fsm_opened[fsm_type]) {
                         if (H5MF__close_fstype(f, fsm_type) < 0)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
-                                        "can't close file free space manager")
-                        fsm_opened[fsm_type] = FALSE;
+                                        "can't close file free space manager");
+                        fsm_opened[fsm_type] = false;
                     } /* end if */
                 }     /* end if */
             }         /* end for */
@@ -2978,10 +2909,10 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
         /* verify that all opened FSMs were closed */
         for (fsm_type = H5F_MEM_PAGE_SUPER; fsm_type < H5F_MEM_PAGE_NTYPES; fsm_type++)
-            HDassert(!fsm_opened[fsm_type]);
+            assert(!fsm_opened[fsm_type]);
 
         /* Indicate that the FSM was settled successfully */
-        *fsm_settled = TRUE;
+        *fsm_settled = true;
     } /* end if */
 
 done:
@@ -3083,13 +3014,10 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *	        5/25/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
+H5MF_settle_meta_data_fsm(H5F_t *f, bool *fsm_settled)
 {
     H5F_mem_page_t sm_fshdr_fs_type;                          /* small fs hdr fsm */
     H5F_mem_page_t sm_fssinfo_fs_type;                        /* small fs sinfo fsm */
@@ -3101,16 +3029,16 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     H5FS_t        *lg_sinfo_fspace    = NULL;                 /* ptr to lg FSM sinfo alloc FSM */
     haddr_t        eoa_fsm_fsalloc;                           /* eoa after file space allocation */
                                                               /* for self referential FSMs */
-    hbool_t     continue_alloc_fsm = FALSE;         /* Continue allocating addr and sect_addr for FSMs */
+    bool        continue_alloc_fsm = false;         /* Continue allocating addr and sect_addr for FSMs */
     H5AC_ring_t orig_ring          = H5AC_RING_INV; /* Original ring value */
     herr_t      ret_value          = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(fsm_settled);
+    assert(f);
+    assert(f->shared);
+    assert(fsm_settled);
 
     /*
      * Only need to settle things if we are persisting free space and
@@ -3118,22 +3046,22 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
      */
     if (f->shared->fs_persist && !H5F_NULL_FSM_ADDR(f)) {
         /* Sanity check */
-        HDassert(f->shared->lf);
+        assert(f->shared->lf);
 
         /* should only be called if file is opened R/W */
-        HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+        assert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
         H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fs_type);
         H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fs_type);
 
-        HDassert(sm_fshdr_fs_type > H5F_MEM_PAGE_DEFAULT);
-        HDassert(sm_fshdr_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
+        assert(sm_fshdr_fs_type > H5F_MEM_PAGE_DEFAULT);
+        assert(sm_fshdr_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
 
-        HDassert(sm_fssinfo_fs_type > H5F_MEM_PAGE_DEFAULT);
-        HDassert(sm_fssinfo_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
+        assert(sm_fssinfo_fs_type > H5F_MEM_PAGE_DEFAULT);
+        assert(sm_fssinfo_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
 
-        HDassert(!H5F_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type]));
-        HDassert(!H5F_addr_defined(f->shared->fs_addr[sm_fssinfo_fs_type]));
+        assert(!H5_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type]));
+        assert(!H5_addr_defined(f->shared->fs_addr[sm_fssinfo_fs_type]));
 
         /* Note that in most cases, sm_hdr_fspace will equal sm_sinfo_fspace. */
         sm_hdr_fspace   = f->shared->fs_man[sm_fshdr_fs_type];
@@ -3145,14 +3073,14 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_FSPACE_SINFO, f->shared->fs_page_size + 1,
                                    &lg_fssinfo_fs_type);
 
-            HDassert(lg_fshdr_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
-            HDassert(lg_fshdr_fs_type < H5F_MEM_PAGE_NTYPES);
+            assert(lg_fshdr_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
+            assert(lg_fshdr_fs_type < H5F_MEM_PAGE_NTYPES);
 
-            HDassert(lg_fssinfo_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
-            HDassert(lg_fssinfo_fs_type < H5F_MEM_PAGE_NTYPES);
+            assert(lg_fssinfo_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
+            assert(lg_fssinfo_fs_type < H5F_MEM_PAGE_NTYPES);
 
-            HDassert(!H5F_addr_defined(f->shared->fs_addr[lg_fshdr_fs_type]));
-            HDassert(!H5F_addr_defined(f->shared->fs_addr[lg_fssinfo_fs_type]));
+            assert(!H5_addr_defined(f->shared->fs_addr[lg_fshdr_fs_type]));
+            assert(!H5_addr_defined(f->shared->fs_addr[lg_fssinfo_fs_type]));
 
             /* Note that in most cases, lg_hdr_fspace will equal lg_sinfo_fspace. */
             lg_hdr_fspace   = f->shared->fs_man[lg_fshdr_fs_type];
@@ -3169,22 +3097,22 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             if (sm_hdr_fspace) {
                 /* Query free space manager info for this type */
                 if (H5FS_stat_info(f, sm_hdr_fspace, &fs_stat) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info");
 
-                HDassert(!H5F_addr_defined(fs_stat.addr));
-                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
-                HDassert(fs_stat.alloc_sect_size == 0);
+                assert(!H5_addr_defined(fs_stat.addr));
+                assert(!H5_addr_defined(fs_stat.sect_addr));
+                assert(fs_stat.alloc_sect_size == 0);
             } /* end if */
 
             /* Verify that sm_sinfo_fspace is floating if it exists and is distinct */
             if ((sm_sinfo_fspace) && (sm_hdr_fspace != sm_sinfo_fspace)) {
                 /* Query free space manager info for this type */
                 if (H5FS_stat_info(f, sm_sinfo_fspace, &fs_stat) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info");
 
-                HDassert(!H5F_addr_defined(fs_stat.addr));
-                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
-                HDassert(fs_stat.alloc_sect_size == 0);
+                assert(!H5_addr_defined(fs_stat.addr));
+                assert(!H5_addr_defined(fs_stat.sect_addr));
+                assert(fs_stat.alloc_sect_size == 0);
             } /* end if */
 
             if (H5F_PAGED_AGGR(f)) {
@@ -3192,11 +3120,11 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 if (lg_hdr_fspace) {
                     /* Query free space manager info for this type */
                     if (H5FS_stat_info(f, lg_hdr_fspace, &fs_stat) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info (3)")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info (3)");
 
-                    HDassert(!H5F_addr_defined(fs_stat.addr));
-                    HDassert(!H5F_addr_defined(fs_stat.sect_addr));
-                    HDassert(fs_stat.alloc_sect_size == 0);
+                    assert(!H5_addr_defined(fs_stat.addr));
+                    assert(!H5_addr_defined(fs_stat.sect_addr));
+                    assert(fs_stat.alloc_sect_size == 0);
                 } /* end if */
 
                 /* Verify that lg_sinfo_fspace is floating if it
@@ -3205,11 +3133,11 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 if ((lg_sinfo_fspace) && (lg_hdr_fspace != lg_sinfo_fspace)) {
                     /* Query free space manager info for this type */
                     if (H5FS_stat_info(f, lg_sinfo_fspace, &fs_stat) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info (4)")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info (4)");
 
-                    HDassert(!H5F_addr_defined(fs_stat.addr));
-                    HDassert(!H5F_addr_defined(fs_stat.sect_addr));
-                    HDassert(fs_stat.alloc_sect_size == 0);
+                    assert(!H5_addr_defined(fs_stat.addr));
+                    assert(!H5_addr_defined(fs_stat.sect_addr));
+                    assert(fs_stat.alloc_sect_size == 0);
                 } /* end if */
             }     /* end if */
         }
@@ -3224,11 +3152,11 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          */
         /* (for space not at EOF, it may be put into free space managers) */
         if ((!H5F_PAGED_AGGR(f)) && (H5MF_free_aggrs(f) < 0))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregators")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregators");
 
         /* Trying shrinking the EOA for the file */
         if (H5MF__close_shrink_eoa(f) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa");
 
         /* WARNING:  This approach settling the self referential free space
          *           managers and allocating space for them in the file will
@@ -3257,30 +3185,31 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * they are all settled,
          */
         do {
-            continue_alloc_fsm = FALSE;
+            continue_alloc_fsm = false;
             if (sm_hdr_fspace)
                 if (H5FS_vfd_alloc_hdr_and_section_info_if_needed(
                         f, sm_hdr_fspace, &(f->shared->fs_addr[sm_fshdr_fs_type])) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't vfd allocate sm hdr FSM file space")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "can't vfd allocate sm hdr FSM file space");
 
             if (sm_sinfo_fspace && (sm_sinfo_fspace != sm_hdr_fspace))
                 if (H5FS_vfd_alloc_hdr_and_section_info_if_needed(
                         f, sm_sinfo_fspace, &(f->shared->fs_addr[sm_fssinfo_fs_type])) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "can't vfd allocate sm sinfo FSM file space")
+                                "can't vfd allocate sm sinfo FSM file space");
 
             if (H5F_PAGED_AGGR(f)) {
                 if (lg_hdr_fspace)
                     if (H5FS_vfd_alloc_hdr_and_section_info_if_needed(
                             f, lg_hdr_fspace, &(f->shared->fs_addr[lg_fshdr_fs_type])) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                    "can't vfd allocate lg hdr FSM file space")
+                                    "can't vfd allocate lg hdr FSM file space");
 
                 if (lg_sinfo_fspace && (lg_sinfo_fspace != lg_hdr_fspace))
                     if (H5FS_vfd_alloc_hdr_and_section_info_if_needed(
                             f, lg_sinfo_fspace, &(f->shared->fs_addr[lg_fssinfo_fs_type])) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                    "can't vfd allocate lg sinfo FSM file space")
+                                    "can't vfd allocate lg sinfo FSM file space");
             } /* end if */
 
             sm_hdr_fspace   = f->shared->fs_man[sm_fshdr_fs_type];
@@ -3292,7 +3221,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
 
             if (H5MF__continue_alloc_fsm(f->shared, sm_hdr_fspace, sm_sinfo_fspace, lg_hdr_fspace,
                                          lg_sinfo_fspace, &continue_alloc_fsm) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't vfd allocate lg sinfo FSM file space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't vfd allocate lg sinfo FSM file space");
         } while (continue_alloc_fsm);
 
         /* All free space managers should have file space allocated for them
@@ -3308,11 +3237,11 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          * final EOA of the file.
          */
         if (HADDR_UNDEF == (eoa_fsm_fsalloc = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size");
         f->shared->eoa_fsm_fsalloc = eoa_fsm_fsalloc;
 
         /* Indicate that the FSM was settled successfully */
-        *fsm_settled = TRUE;
+        *fsm_settled = true;
     } /* end if */
 
 done:
@@ -3328,23 +3257,21 @@ done:
  *
  * Purpose: 	To determine whether any of the input FSMs has allocated
  *              its "addr" and "sect_addr".
- *              Return TRUE or FALSE in *continue_alloc_fsm.
+ *              Return true or false in *continue_alloc_fsm.
  *
  * Return:	    SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              6/24/2019
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_sinfo_fspace,
-                         H5FS_t *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, hbool_t *continue_alloc_fsm)
+                         H5FS_t *lg_hdr_fspace, H5FS_t *lg_sinfo_fspace, bool *continue_alloc_fsm)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(continue_alloc_fsm);
+    assert(f_sh);
+    assert(continue_alloc_fsm);
 
     /* Check sm_hdr_fspace */
     if (sm_hdr_fspace && sm_hdr_fspace->serial_sect_count > 0 && sm_hdr_fspace->sinfo)
@@ -3373,31 +3300,28 @@ H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_s
 /*-------------------------------------------------------------------------
  * Function:    H5MF__fsm_type_is_self_referential()
  *
- * Purpose:     Return TRUE if the indicated free space manager allocates
- *		file space for free space managers.  Return FALSE otherwise.
+ * Purpose:     Return true if the indicated free space manager allocates
+ *		file space for free space managers.  Return false otherwise.
  *
- * Return:      TRUE/FALSE
- *
- * Programmer:  John Mainzer
- *              12/6/16
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
 {
     H5F_mem_page_t sm_fshdr_fsm;
     H5F_mem_page_t sm_fssinfo_fsm;
     H5F_mem_page_t lg_fshdr_fsm;
     H5F_mem_page_t lg_fssinfo_fsm;
-    hbool_t        result = FALSE;
+    bool           result = false;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f_sh);
-    HDassert(fsm_type >= H5F_MEM_PAGE_DEFAULT);
-    HDassert(fsm_type < H5F_MEM_PAGE_NTYPES);
+    assert(f_sh);
+    assert(fsm_type >= H5F_MEM_PAGE_DEFAULT);
+    assert(fsm_type < H5F_MEM_PAGE_NTYPES);
 
     H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
     H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);
@@ -3413,11 +3337,11 @@ H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
         /* In principle, fsm_type should always be less than
          * H5F_MEM_PAGE_LARGE_SUPER whenever paged aggregation
          * is not enabled.  However, since there is code that does
-         * not observe this principle, force the result to FALSE if
+         * not observe this principle, force the result to false if
          * fsm_type is greater than or equal to H5F_MEM_PAGE_LARGE_SUPER.
          */
         if (fsm_type >= H5F_MEM_PAGE_LARGE_SUPER)
-            result = FALSE;
+            result = false;
         else
             result = (fsm_type == sm_fshdr_fsm) || (fsm_type == sm_fssinfo_fsm);
     } /* end else */
@@ -3428,28 +3352,25 @@ H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
 /*-------------------------------------------------------------------------
  * Function:    H5MF__fsm_is_self_referential()
  *
- * Purpose:     Return TRUE if the indicated free space manager allocates
- *		file space for free space managers.  Return FALSE otherwise.
+ * Purpose:     Return true if the indicated free space manager allocates
+ *		file space for free space managers.  Return false otherwise.
  *
- * Return:      TRUE/FALSE
- *
- * Programmer:  John Mainzer
- *              12/6/16
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 H5MF__fsm_is_self_referential(H5F_shared_t *f_sh, H5FS_t *fspace)
 {
     H5F_mem_page_t sm_fshdr_fsm;
     H5F_mem_page_t sm_fssinfo_fsm;
-    hbool_t        result = FALSE;
+    bool           result = false;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f_sh);
-    HDassert(fspace);
+    assert(f_sh);
+    assert(fspace);
 
     H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_HDR, (size_t)1, &sm_fshdr_fsm);
     H5MF__alloc_to_fs_type(f_sh, H5FD_MEM_FSPACE_SINFO, (size_t)1, &sm_fssinfo_fsm);

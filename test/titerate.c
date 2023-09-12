@@ -52,8 +52,8 @@ typedef struct {
 #define CORRUPTED_ATNAMELEN_FILE "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
-    char    message[256];
-    hbool_t found;
+    char message[256];
+    bool found;
 } searched_err_t;
 
 /* Call back function for test_corrupted_attnamelen */
@@ -108,7 +108,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
             return (count2 > 10 ? 1 : 0);
 
         default:
-            HDprintf("invalid iteration command");
+            printf("invalid iteration command");
             return (-1);
     } /* end switch */
 } /* end liter_cb() */
@@ -119,7 +119,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
 **
 ****************************************************************/
 static void
-test_iter_group(hid_t fapl, hbool_t new_format)
+test_iter_group(hid_t fapl, bool new_format)
 {
     hid_t      file;                  /* File ID */
     hid_t      dataset;               /* Dataset ID */
@@ -194,7 +194,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -233,7 +233,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
             (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                        dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     ret = H5Gclose(root_group);
@@ -264,7 +264,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         ret = (herr_t)H5Lget_name_by_idx(file, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                          dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Test invalid indices for starting iteration */
@@ -274,7 +274,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     {
         ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping exactly as many entries as in the group */
@@ -283,7 +283,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     {
         ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping more entries than are in the group */
@@ -292,7 +292,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     {
         ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test all objects in group, when callback always returns 0 */
@@ -364,7 +364,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 
     /* Free the dataset names */
     for (i = 0; i < (NDATASETS + 2); i++)
-        HDfree(lnames[i]);
+        free(lnames[i]);
 } /* test_iter_group() */
 
 /****************************************************************
@@ -397,7 +397,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
             return (count2 > 10 ? 1 : 0);
 
         default:
-            HDprintf("invalid iteration command");
+            printf("invalid iteration command");
             return (-1);
     } /* end switch */
 } /* end aiter_cb() */
@@ -408,7 +408,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
 **
 ****************************************************************/
 static void
-test_iter_attr(hid_t fapl, hbool_t new_format)
+test_iter_attr(hid_t fapl, bool new_format)
 {
     hid_t     file;          /* File ID */
     hid_t     dataset;       /* Common Dataset ID */
@@ -473,7 +473,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     {
         ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test skipping more attributes than there are */
@@ -482,7 +482,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     {
         ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test all attributes on dataset, when callback always returns 0 */
@@ -557,7 +557,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
 
     /* Free the attribute names */
     for (i = 0; i < NATTR; i++)
-        HDfree(anames[i]);
+        free(anames[i]);
 
 } /* test_iter_attr() */
 
@@ -632,8 +632,8 @@ test_iter_group_large(hid_t fapl)
     } s1_t;
 
     /* Allocate & initialize array */
-    names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
-    CHECK_PTR(names, "HDcalloc");
+    names = (iter_info *)calloc(sizeof(iter_info), (ITER_NGROUPS + 2));
+    CHECK_PTR(names, "calloc");
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
@@ -706,7 +706,7 @@ test_iter_group_large(hid_t fapl)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Need to sort the names in the root group, cause that's what the library does */
-    HDqsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
+    qsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
 
     /* Iterate through the file to see members of the root group */
     curr_name = &names[0];
@@ -725,7 +725,7 @@ test_iter_group_large(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Release memory */
-    HDfree(names);
+    free(names);
 } /* test_iterate_group_large() */
 
 /****************************************************************
@@ -804,7 +804,7 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -857,11 +857,11 @@ test_grp_memb_funcs(hid_t fapl)
             (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3),
                                        dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Sort the dataset names */
-    HDqsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Compare object names */
     for (i = 0; i < (int)ginfo.nlinks; i++) {
@@ -877,8 +877,8 @@ test_grp_memb_funcs(hid_t fapl)
 
     /* Free the dataset names */
     for (i = 0; i < (NDATASETS + 2); i++) {
-        HDfree(dnames[i]);
-        HDfree(obj_names[i]);
+        free(dnames[i]);
+        free(obj_names[i]);
     } /* end for */
 } /* test_grp_memb_funcs() */
 
@@ -986,7 +986,7 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
 
     /* If the searched error message is found, stop the iteration */
     if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
-        searched_err->found = TRUE;
+        searched_err->found = true;
         status              = H5_ITER_STOP;
     }
 
@@ -1003,12 +1003,12 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
 static void
 test_corrupted_attnamelen(void)
 {
-    hid_t          fid = -1;   /* File ID */
-    hid_t          did = -1;   /* Dataset ID */
-    searched_err_t err_caught; /* Data to be passed to callback func */
-    int            err_status; /* Status returned by H5Aiterate2 */
-    herr_t         ret;        /* Return value */
-    hbool_t        driver_is_default_compatible;
+    hid_t          fid = H5I_INVALID_HID; /* File ID */
+    hid_t          did = H5I_INVALID_HID; /* Dataset ID */
+    searched_err_t err_caught;            /* Data to be passed to callback func */
+    int            err_status;            /* Status returned by H5Aiterate2 */
+    herr_t         ret;                   /* Return value */
+    bool           driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
     /* The error message produced when the failure occurs
@@ -1024,7 +1024,7 @@ test_corrupted_attnamelen(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -1044,14 +1044,14 @@ test_corrupted_attnamelen(void)
     if (err_status == -1) {
         /* Initialize client data */
         HDstrcpy(err_caught.message, err_message);
-        err_caught.found = FALSE;
+        err_caught.found = false;
 
         /* Look for the correct error message */
         ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
         CHECK(ret, FAIL, "H5Ewalk2");
 
         /* Fail if the indicated message is not found */
-        CHECK(err_caught.found, FALSE, "test_corrupted_attnamelen: Expected error not found");
+        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
     }
 
     /* Close the dataset and file */
@@ -1175,7 +1175,7 @@ test_iterate(void)
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* These next tests use the same file */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         test_iter_group(new_format ? fapl2 : fapl, new_format); /* Test group iteration */
         test_iter_group_large(new_format ? fapl2 : fapl); /* Test group iteration for large # of objects */
         test_iter_attr(new_format ? fapl2 : fapl, new_format); /* Test attribute iteration */
@@ -1203,9 +1203,6 @@ test_iterate(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              April 5, 2000
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1215,5 +1212,5 @@ cleanup_iterate(void)
     {
         H5Fdelete(DATAFILE, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 }

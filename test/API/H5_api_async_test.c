@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -62,7 +62,7 @@ test_one_dataset_io(void)
     hid_t   es_id    = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     int     wbuf[6][10];
     int     rbuf[6][10];
     int     i, j;
@@ -73,8 +73,7 @@ test_one_dataset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+        printf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -135,7 +134,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_eswait);
                     } /* end if */
 
@@ -177,7 +176,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_dclose);
                     } /* end if */
 
@@ -222,7 +221,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_dflush);
                     } /* end if */
 
@@ -276,7 +275,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_fclose);
                     } /* end if */
 
@@ -312,7 +311,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_one_dataset_io() */
@@ -329,7 +328,7 @@ test_multi_dataset_io(void)
     hid_t es_id      = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     char    dset_name[32];
     int     wbuf[5][6][10];
     int     rbuf[5][6][10];
@@ -341,8 +340,7 @@ test_multi_dataset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+        printf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -432,7 +430,7 @@ test_multi_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_dset_open);
                         } /* end if */
 
@@ -526,7 +524,7 @@ test_multi_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_dset_close);
                         } /* end if */
 
@@ -566,7 +564,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_multi_dataset_io() */
@@ -584,7 +582,7 @@ test_multi_file_dataset_io(void)
     hid_t es_id      = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     char    file_name[32];
     int     wbuf[5][6][10];
     int     rbuf[5][6][10];
@@ -596,8 +594,7 @@ test_multi_file_dataset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+        printf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -673,7 +670,7 @@ test_multi_file_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_dset_open);
                         } /* end if */
 
@@ -744,7 +741,7 @@ test_multi_file_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_dset_dclose);
                         } /* end if */
 
@@ -838,7 +835,7 @@ test_multi_file_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_dset_fclose);
                         } /* end if */
 
@@ -876,7 +873,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_multi_file_dataset_io() */
@@ -895,7 +892,7 @@ test_multi_file_grp_dset_io(void)
     hid_t   es_id    = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     char    file_name[32];
     int     wbuf[5][6][10];
     int     rbuf[5][6][10];
@@ -907,8 +904,7 @@ test_multi_file_grp_dset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+        printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
@@ -1028,7 +1024,7 @@ test_multi_file_grp_dset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_grp_dset_no_kick);
                         } /* end if */
 
@@ -1149,7 +1145,7 @@ test_multi_file_grp_dset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_grp_dset_kick);
                         } /* end if */
 
@@ -1186,7 +1182,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_multi_file_grp_dset_io() */
@@ -1212,7 +1208,7 @@ test_set_extent(void)
     hsize_t start[2]      = {0, 0};
     hsize_t count[2]      = {1, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     htri_t  tri_ret;
     int     wbuf[6][10];
     int     rbuf[6][10];
@@ -1224,8 +1220,8 @@ test_set_extent(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, dataset, dataset more, or flush aren't supported with "
-                 "this connector\n");
+        printf("    API functions for basic file, dataset, dataset more, or flush aren't supported with "
+               "this connector\n");
         return 0;
     }
 
@@ -1400,7 +1396,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_set_extent() */
@@ -1417,10 +1413,10 @@ test_attribute_exists(void)
     hid_t   space_id = H5I_INVALID_HID;
     hid_t   es_id    = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
-    hbool_t exists1;
-    hbool_t exists2;
+    bool    exists1;
+    bool    exists2;
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
 
     TESTING("H5Aexists()");
 
@@ -1428,8 +1424,8 @@ test_attribute_exists(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                 "supported with this connector\n");
+        printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+               "supported with this connector\n");
         return 0;
     }
 
@@ -1483,9 +1479,9 @@ test_attribute_exists(void)
 
     /* Check if H5Aexists returned the correct values */
     if (exists1)
-        FAIL_PUTS_ERROR("    H5Aexists returned TRUE for an attribute that should not exist");
+        FAIL_PUTS_ERROR("    H5Aexists returned true for an attribute that should not exist");
     if (!exists2)
-        FAIL_PUTS_ERROR("    H5Aexists returned FALSE for an attribute that should exist");
+        FAIL_PUTS_ERROR("    H5Aexists returned false for an attribute that should exist");
 
     /* Close */
     if (H5Aclose_async(attr_id, es_id) < 0)
@@ -1520,7 +1516,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io() */
@@ -1538,7 +1534,7 @@ test_attribute_io(void)
     hid_t   es_id    = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     int     wbuf[6][10];
     int     rbuf[6][10];
     int     i, j;
@@ -1549,8 +1545,8 @@ test_attribute_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                 "supported with this connector\n");
+        printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+               "supported with this connector\n");
         return 0;
     }
 
@@ -1663,7 +1659,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io() */
@@ -1680,7 +1676,7 @@ test_attribute_io_tconv(void)
     hid_t   es_id    = H5I_INVALID_HID;
     hsize_t dims[2]  = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
     int     wbuf[6][10];
     int     rbuf[6][10];
     int     i, j;
@@ -1691,7 +1687,7 @@ test_attribute_io_tconv(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf(
+        printf(
             "    API functions for basic file, attribute, or flush aren't supported with this connector\n");
         return 0;
     }
@@ -1798,7 +1794,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io_tconv() */
@@ -1825,7 +1821,7 @@ test_attribute_io_compound(void)
     hid_t        es_id     = H5I_INVALID_HID;
     hsize_t      dims[2]   = {6, 10};
     size_t       num_in_progress;
-    hbool_t      op_failed;
+    bool         op_failed;
     tattr_cmpd_t wbuf[6][10];
     tattr_cmpd_t rbuf[6][10];
     tattr_cmpd_t fbuf[6][10];
@@ -1837,7 +1833,7 @@ test_attribute_io_compound(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf(
+        printf(
             "    API functions for basic file, attribute, or flush aren't supported with this connector\n");
         return 0;
     }
@@ -2114,7 +2110,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_attribute_io_compound() */
@@ -2135,17 +2131,16 @@ test_group(void)
     H5G_info_t info2;
     H5G_info_t info3;
     size_t     num_in_progress;
-    hbool_t    op_failed;
+    bool       op_failed;
 
     TESTING("group operations");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, group more, or creation order aren't supported "
-                 "with this connector\n");
+        printf("    API functions for basic file, group, or group more aren't supported "
+               "with this connector\n");
         return 0;
     }
 
@@ -2153,9 +2148,11 @@ test_group(void)
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         TEST_ERROR;
 
-    /* Track creation order */
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0)
-        TEST_ERROR;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        /* Track creation order */
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0)
+            TEST_ERROR;
+    }
 
     /* Create event stack */
     if ((es_id = H5EScreate()) < 0)
@@ -2219,10 +2216,12 @@ test_group(void)
     if (H5Gget_info_async(group_id, &info1, es_id) < 0)
         TEST_ERROR;
 
-    /* Test H5Gget_info_by_idx_async */
-    if (H5Gget_info_by_idx_async(parent_group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &info2,
-                                 H5P_DEFAULT, es_id) < 0)
-        TEST_ERROR;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        /* Test H5Gget_info_by_idx_async */
+        if (H5Gget_info_by_idx_async(parent_group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &info2,
+                                     H5P_DEFAULT, es_id) < 0)
+            TEST_ERROR;
+    }
 
     /* Test H5Gget_info_by_name_async */
     if (H5Gget_info_by_name_async(parent_group_id, "group3", &info3, H5P_DEFAULT, es_id) < 0)
@@ -2237,8 +2236,10 @@ test_group(void)
     /* Verify group infos */
     if (info1.nlinks != 0)
         FAIL_PUTS_ERROR("    incorrect number of links");
-    if (info2.nlinks != 1)
-        FAIL_PUTS_ERROR("    incorrect number of links");
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (info2.nlinks != 1)
+            FAIL_PUTS_ERROR("    incorrect number of links");
+    }
     if (info3.nlinks != 2)
         FAIL_PUTS_ERROR("    incorrect number of links");
 
@@ -2276,7 +2277,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_group() */
@@ -2287,19 +2288,19 @@ error:
 static int
 test_link(void)
 {
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   parent_group_id = H5I_INVALID_HID;
-    hid_t   group_id        = H5I_INVALID_HID;
-    hid_t   gcpl_id         = H5I_INVALID_HID;
-    hid_t   es_id           = H5I_INVALID_HID;
-    hbool_t existsh1;
-    hbool_t existsh2;
-    hbool_t existsh3;
-    hbool_t existss1;
-    hbool_t existss2;
-    hbool_t existss3;
-    size_t  num_in_progress;
-    hbool_t op_failed;
+    hid_t  file_id         = H5I_INVALID_HID;
+    hid_t  parent_group_id = H5I_INVALID_HID;
+    hid_t  group_id        = H5I_INVALID_HID;
+    hid_t  gcpl_id         = H5I_INVALID_HID;
+    hid_t  es_id           = H5I_INVALID_HID;
+    bool   existsh1;
+    bool   existsh2;
+    bool   existsh3;
+    bool   existss1;
+    bool   existss2;
+    bool   existss3;
+    size_t num_in_progress;
+    bool   op_failed;
 
     TESTING("link operations");
 
@@ -2309,8 +2310,8 @@ test_link(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
-                 "aren't supported with this connector\n");
+        printf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
+               "aren't supported with this connector\n");
         return 0;
     }
 
@@ -2430,17 +2431,17 @@ test_link(void)
 
     /* Check if existence returns were correct */
     if (!existsh1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
+        FAIL_PUTS_ERROR("    link exists returned false for link that should exist");
     if (!existss1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
+        FAIL_PUTS_ERROR("    link exists returned false for link that should exist");
     if (!existsh2)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
+        FAIL_PUTS_ERROR("    link exists returned false for link that should exist");
     if (existss2)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
+        FAIL_PUTS_ERROR("    link exists returned true for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
+        FAIL_PUTS_ERROR("    link exists returned true for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
+        FAIL_PUTS_ERROR("    link exists returned true for link that should not exist");
 
     /* Close */
     if (H5Gclose_async(parent_group_id, es_id) < 0)
@@ -2473,7 +2474,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_link() */
@@ -2491,7 +2492,7 @@ test_ocopy_orefresh(void)
     hid_t   es_id           = H5I_INVALID_HID;
     hsize_t dims[2]         = {6, 10};
     size_t  num_in_progress;
-    hbool_t op_failed;
+    bool    op_failed;
 
     TESTING("H5Ocopy() and H5Orefresh()");
 
@@ -2500,8 +2501,8 @@ test_ocopy_orefresh(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, object more, flush, or refresh aren't "
-                 "supported with this connector\n");
+        printf("    API functions for basic file, group, dataset, object more, flush, or refresh aren't "
+               "supported with this connector\n");
         return 0;
     }
 
@@ -2588,7 +2589,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_ocopy_orefresh() */
@@ -2599,18 +2600,18 @@ error:
 static int
 test_file_reopen(void)
 {
-    hid_t   file_id          = H5I_INVALID_HID;
-    hid_t   reopened_file_id = H5I_INVALID_HID;
-    hid_t   es_id            = H5I_INVALID_HID;
-    size_t  num_in_progress;
-    hbool_t op_failed;
+    hid_t  file_id          = H5I_INVALID_HID;
+    hid_t  reopened_file_id = H5I_INVALID_HID;
+    hid_t  es_id            = H5I_INVALID_HID;
+    size_t num_in_progress;
+    bool   op_failed;
 
     TESTING("H5Freopen()");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or file more aren't supported with this connector\n");
+        printf("    API functions for basic file or file more aren't supported with this connector\n");
         return 0;
     }
 
@@ -2659,7 +2660,7 @@ error:
         H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed);
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_file_reopen() */
@@ -2686,16 +2687,16 @@ H5_api_async_test(void)
     size_t i;
     int    nerrors;
 
-    HDprintf("**********************************************\n");
-    HDprintf("*                                            *\n");
-    HDprintf("*             API Async Tests                *\n");
-    HDprintf("*                                            *\n");
-    HDprintf("**********************************************\n\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*             API Async Tests                *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC)) {
         SKIPPED();
-        HDprintf("    Async APIs aren't supported with this connector\n");
+        printf("    Async APIs aren't supported with this connector\n");
         return 0;
     }
 
@@ -2703,9 +2704,9 @@ H5_api_async_test(void)
         nerrors += (*async_tests[i])() ? 1 : 0;
     }
 
-    HDprintf("\n");
+    printf("\n");
 
-    HDprintf("Cleaning up testing files\n");
+    printf("Cleaning up testing files\n");
     cleanup_files();
 
     return nerrors;
@@ -2716,13 +2717,13 @@ H5_api_async_test(void)
 int
 H5_api_async_test(void)
 {
-    HDprintf("**********************************************\n");
-    HDprintf("*                                            *\n");
-    HDprintf("*             API Async Tests                *\n");
-    HDprintf("*                                            *\n");
-    HDprintf("**********************************************\n\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*             API Async Tests                *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
 
-    HDprintf("SKIPPED due to no async support in HDF5 library\n");
+    printf("SKIPPED due to no async support in HDF5 library\n");
 
     return 0;
 }

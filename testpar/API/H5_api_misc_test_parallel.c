@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,11 +24,11 @@ H5_api_misc_test_parallel(void)
     int    nerrors;
 
     if (MAINPROCESS) {
-        HDprintf("**********************************************\n");
-        HDprintf("*                                            *\n");
-        HDprintf("*      API Parallel Miscellaneous Tests      *\n");
-        HDprintf("*                                            *\n");
-        HDprintf("**********************************************\n\n");
+        printf("**********************************************\n");
+        printf("*                                            *\n");
+        printf("*      API Parallel Miscellaneous Tests      *\n");
+        printf("*                                            *\n");
+        printf("**********************************************\n\n");
     }
 
     for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_misc_tests); i++) {
@@ -36,12 +36,12 @@ H5_api_misc_test_parallel(void)
 
         if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    MPI_Barrier() failed!\n");
+                printf("    MPI_Barrier() failed!\n");
         }
     }
 
     if (MAINPROCESS)
-        HDprintf("\n");
+        printf("\n");
 
     return nerrors;
 }

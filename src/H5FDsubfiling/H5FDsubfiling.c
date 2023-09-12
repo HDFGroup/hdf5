@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Richard Warren
- *
- *
  * Purpose: An initial implementation of a subfiling VFD which is
  *          derived from other "stacked" VFDs such as the splitter,
  *          mirror, and family VFDs.
@@ -39,7 +36,7 @@
 static hid_t H5FD_SUBFILING_g = H5I_INVALID_HID;
 
 /* Whether the driver initialized MPI on its own */
-static hbool_t H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = false;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -85,8 +82,6 @@ static hbool_t H5FD_mpi_self_initialized = FALSE;
  *  and should be kept or not as appropriate for the sub-filing VFD.
  *
  *
- * Programmer: Richard Warren
- *
  ***************************************************************************/
 
 typedef struct H5FD_subfiling_t {
@@ -106,7 +101,7 @@ typedef struct H5FD_subfiling_t {
     uint64_t file_id;
     int64_t  context_id; /* The value used to lookup a subfiling context for the file */
 
-    hbool_t fail_to_encode; /* Used to check for failures from sb_get_size routine */
+    bool fail_to_encode; /* Used to check for failures from sb_get_size routine */
 
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
@@ -177,9 +172,9 @@ static herr_t  H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t
                                            haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
 static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                             haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
-static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 #if 0
-static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__subfiling_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
 #endif
 static herr_t H5FD__subfiling_del(const char *name, hid_t fapl);
@@ -283,8 +278,6 @@ H5FD__subfiling_mpi_finalize(void)
  * Return:      Success:    The driver ID for the subfiling driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -298,7 +291,7 @@ H5FD_subfiling_init(void)
         int provided        = 0;
         int mpi_code;
 
-        if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), FALSE)) < 0)
+        if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), false)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID,
                                     "can't register subfiling VFD");
 
@@ -328,13 +321,13 @@ H5FD_subfiling_init(void)
             if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
 
-            H5FD_mpi_self_initialized = TRUE;
+            H5FD_mpi_self_initialized = true;
 
             if (provided != required)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                                         "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
 
-            if (HDatexit(H5FD__subfiling_mpi_finalize) < 0)
+            if (atexit(H5FD__subfiling_mpi_finalize) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                                         "can't register atexit handler for MPI_Finalize");
         }
@@ -393,8 +386,8 @@ H5FD__subfiling_term(void)
             }
 #ifdef H5FD_SUBFILING_DEBUG
             else
-                HDprintf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was "
-                         "called - an HDF5 ID was probably left unclosed\n");
+                printf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was "
+                       "called - an HDF5 ID was probably left unclosed\n");
 #endif
         }
 
@@ -443,9 +436,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *              9/10/17
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -468,7 +458,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (vfd_config == NULL) {
-        if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
+        if (NULL == (subfiling_conf = calloc(1, sizeof(*subfiling_conf))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfiling VFD configuration");
         subfiling_conf->ioc_fapl_id = H5I_INVALID_HID;
@@ -516,7 +506,7 @@ done:
     if (subfiling_conf) {
         if (subfiling_conf->ioc_fapl_id >= 0 && H5I_dec_ref(subfiling_conf->ioc_fapl_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
-        HDfree(subfiling_conf);
+        free(subfiling_conf);
     }
 
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -530,9 +520,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              9/10/17
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -540,7 +527,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 {
     const H5FD_subfiling_config_t *config_ptr         = NULL;
     H5P_genplist_t                *plist              = NULL;
-    hbool_t                        use_default_config = FALSE;
+    bool                           use_default_config = false;
     herr_t                         ret_value          = SUCCEED;
 
     /*NO TRACE*/
@@ -552,11 +539,11 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (H5FD_SUBFILING != H5P_peek_driver(plist))
-        use_default_config = TRUE;
+        use_default_config = true;
     else {
         config_ptr = H5P_peek_driver_info(plist);
         if (NULL == config_ptr)
-            use_default_config = TRUE;
+            use_default_config = true;
     }
 
     if (use_default_config) {
@@ -566,7 +553,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
     }
     else {
         /* Copy the subfiling fapl data out */
-        HDmemcpy(config_out, config_ptr, sizeof(H5FD_subfiling_config_t));
+        H5MM_memcpy(config_out, config_ptr, sizeof(H5FD_subfiling_config_t));
 
         /* Copy the driver info value */
         if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(config_out->ioc_fapl_id)) < 0)
@@ -585,23 +572,23 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     char    *h5_require_ioc;
     herr_t   ret_value = SUCCEED;
 
-    HDassert(config_out);
+    assert(config_out);
 
-    HDmemset(config_out, 0, sizeof(*config_out));
+    memset(config_out, 0, sizeof(*config_out));
 
     config_out->magic       = H5FD_SUBFILING_FAPL_MAGIC;
     config_out->version     = H5FD_SUBFILING_CURR_FAPL_VERSION;
     config_out->ioc_fapl_id = H5I_INVALID_HID;
-    config_out->require_ioc = TRUE;
+    config_out->require_ioc = true;
 
     config_out->shared_cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
     config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
     config_out->shared_cfg.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
 
     if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
-        int value_check = HDatoi(h5_require_ioc);
+        int value_check = atoi(h5_require_ioc);
         if (value_check == 0)
-            config_out->require_ioc = FALSE;
+            config_out->require_ioc = false;
     }
 
     /* Check if any MPI parameters were set on the FAPL */
@@ -668,7 +655,7 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD_SUBFILING_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown H5FD_subfiling_config_t version");
@@ -706,7 +693,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
     H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
     hsize_t              ret_value  = 0;
 
-    HDassert(file);
+    assert(file);
 
     /* Configuration structure magic number */
     ret_value += sizeof(uint32_t);
@@ -733,7 +720,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
      * errors later.
      */
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id))) {
-        file->fail_to_encode = TRUE;
+        file->fail_to_encode = true;
     }
     else {
         if (sf_context->config_file_prefix) {
@@ -757,7 +744,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
      * a buffer.
      */
     if (ret_value > H5FD_SUBFILING_MAX_DRV_INFO_SIZE)
-        file->fail_to_encode = TRUE;
+        file->fail_to_encode = true;
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__subfiling_sb_size() */
@@ -824,7 +811,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
 
     /* Encode config file prefix string */
     if (sf_context->config_file_prefix) {
-        HDmemcpy(p, sf_context->config_file_prefix, prefix_len);
+        H5MM_memcpy(p, sf_context->config_file_prefix, prefix_len);
         p += prefix_len;
     }
 
@@ -832,14 +819,14 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
     if (file->sf_file) {
         char ioc_name[9];
 
-        HDmemset(ioc_name, 0, sizeof(ioc_name));
+        memset(ioc_name, 0, sizeof(ioc_name));
 
         if (H5FD_sb_encode(file->sf_file, ioc_name, p + 9) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL,
                                     "unable to encode IOC VFD's superblock information");
 
         /* Copy the IOC VFD's name into our buffer */
-        HDmemcpy(p, ioc_name, 9);
+        H5MM_memcpy(p, ioc_name, 9);
     }
 
 done:
@@ -886,7 +873,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
 
     /* Decode "require IOC" field */
     INT32DECODE(p, tmp32);
-    file->fa.require_ioc = (hbool_t)tmp32;
+    file->fa.require_ioc = (bool)tmp32;
 
     /* Decode subfiling stripe size */
     INT64DECODE(p, file->fa.shared_cfg.stripe_size);
@@ -902,13 +889,13 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     /* Decode config file prefix string */
     if (tmpu64 > 0) {
         if (!sf_context->config_file_prefix) {
-            if (NULL == (sf_context->config_file_prefix = HDmalloc(tmpu64)))
+            if (NULL == (sf_context->config_file_prefix = malloc(tmpu64)))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate space for config file prefix string");
 
-            HDmemcpy(sf_context->config_file_prefix, p, tmpu64);
+            H5MM_memcpy(sf_context->config_file_prefix, p, tmpu64);
 
-            /* Just in case.. */
+            /* Just in case... */
             sf_context->config_file_prefix[tmpu64 - 1] = '\0';
         }
 
@@ -918,7 +905,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     if (file->sf_file) {
         char ioc_name[9];
 
-        HDmemcpy(ioc_name, p, 9);
+        H5MM_memcpy(ioc_name, p, 9);
         p += 9;
 
         if (H5FD_sb_load(file->sf_file, ioc_name, p) < 0)
@@ -957,9 +944,6 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  John Mainzer
- *              9/8/17
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -976,7 +960,7 @@ H5FD__subfiling_fapl_get(H5FD_t *_file)
     }
 
     /* Copy the fields of the structure */
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
 
     /* Copy the driver info value */
     if (H5FD__copy_plist(file->fa.ioc_fapl_id, &(fa->ioc_fapl_id)) < 0)
@@ -1012,16 +996,16 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
     int             ret_value = 0;
     H5P_genplist_t *plist_ptr = NULL;
 
-    HDassert(id_out_ptr != NULL);
+    assert(id_out_ptr != NULL);
 
-    if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (false == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
 
     plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id);
     if (NULL == plist_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "unable to get property list");
 
-    *id_out_ptr = H5P_copy_plist(plist_ptr, FALSE);
+    *id_out_ptr = H5P_copy_plist(plist_ptr, false);
     if (H5I_INVALID_HID == *id_out_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
 
@@ -1038,9 +1022,6 @@ done:
  *
  *              Failure:        NULL
  *
- * Programmer:  John Mainzer
- *              9/8/17
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1055,7 +1036,7 @@ H5FD__subfiling_fapl_copy(const void *_old_fa)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
 
     if (H5FD__copy_plist(old_fa->ioc_fapl_id, &(new_fa->ioc_fapl_id)) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy the IOC FAPL");
@@ -1080,9 +1061,6 @@ done:
  *
  * Return:      SUCCEED (cannot fail)
  *
- * Programmer:  John Mainzer
- *              9/8/17
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1091,7 +1069,7 @@ H5FD__subfiling_fapl_free(void *_fa)
     H5FD_subfiling_config_t *fa        = (H5FD_subfiling_config_t *)_fa;
     herr_t                   ret_value = SUCCEED;
 
-    HDassert(fa != NULL); /* sanity check */
+    assert(fa != NULL); /* sanity check */
 
     if (fa->ioc_fapl_id >= 0 && H5I_dec_ref(fa->ioc_fapl_id) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
@@ -1112,8 +1090,6 @@ H5FD__subfiling_fapl_free(void *_fa)
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -1125,7 +1101,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t                  *driver    = NULL; /* VFD for file */
     H5P_genplist_t                *plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    hbool_t                        bcasted_eof = FALSE;
+    bool                           bcasted_eof = false;
     int64_t                        sf_eof      = -1;
     int                            mpi_code; /* MPI return code */
     H5FD_t                        *ret_value = NULL;
@@ -1146,7 +1122,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     file_ptr->context_id     = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
-    file_ptr->fail_to_encode = FALSE;
+    file_ptr->fail_to_encode = false;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1193,7 +1169,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         config_ptr = &default_config;
     }
 
-    HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
+    H5MM_memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
     if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0) {
         file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
@@ -1274,7 +1250,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code);
     }
 
-    bcasted_eof = TRUE;
+    bcasted_eof = true;
 
     if (sf_eof < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "lead MPI process failed to get file EOF");
@@ -1318,7 +1294,7 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(file_ptr);
+    assert(file_ptr);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
@@ -1343,10 +1319,10 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
     }
 
-    file_ptr->fail_to_encode = FALSE;
+    file_ptr->fail_to_encode = false;
 
 done:
-    HDfree(file_ptr->file_path);
+    free(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
     H5MM_free(file_ptr->file_dir);
@@ -1365,8 +1341,6 @@ done:
  *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL, file not closed.
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -1393,8 +1367,6 @@ done:
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1404,8 +1376,8 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_subfiling_t *f2        = (const H5FD_subfiling_t *)_f2;
     int                     ret_value = 0;
 
-    HDassert(f1);
-    HDassert(f2);
+    assert(f1);
+    assert(f2);
 
     ret_value = H5FD_cmp(f1->sf_file, f2->sf_file);
 
@@ -1423,9 +1395,6 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *              that is usable in serial builds.
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  John Mainzer
- *              11/15/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1454,8 +1423,6 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
  *
  * Return:      The end-of-address marker.
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1477,8 +1444,6 @@ H5FD__subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *              to tell the driver where the end of the HDF5 data is located.
  *
  * Return:      SUCCEED (Can't fail)
- *
- * Programmer:  Richard Warren
  *
  *-------------------------------------------------------------------------
  */
@@ -1564,8 +1529,6 @@ done:
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1581,15 +1544,15 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     int64_t             *source_data_offset = NULL;
     int64_t             *sf_data_size       = NULL;
     int64_t             *sf_offset          = NULL;
-    hbool_t              rank0_bcast        = FALSE;
+    bool                 rank0_bcast        = false;
     int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(file_ptr && file_ptr->pub.cls);
-    HDassert(buf);
+    assert(file_ptr && file_ptr->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
@@ -1636,8 +1599,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
      * underlying I/O operations.
      */
     sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->context_id);
-    HDassert(sf_context);
-    HDassert(sf_context->topology);
+    assert(sf_context);
+    assert(sf_context->topology);
 
     num_subfiles = sf_context->sf_num_subfiles;
 
@@ -1675,14 +1638,14 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
          * to contain the translation of the I/O request into a collection of
          * I/O requests.
          */
-        if (NULL == (source_data_offset =
-                         HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
+        if (NULL ==
+            (source_data_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate source data offset I/O vector");
-        if (NULL == (sf_data_size = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
+        if (NULL == (sf_data_size = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile data size I/O vector");
-        if (NULL == (sf_offset = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
+        if (NULL == (sf_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile offset I/O vector");
 
@@ -1713,16 +1676,16 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
             H5_CHECKED_ASSIGN(vector_len, uint32_t, num_subfiles_used, int);
 
             /* Allocate I/O vectors */
-            if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
+            if (NULL == (io_types = malloc(vector_len * sizeof(*io_types))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O types vector");
-            if (NULL == (io_addrs = HDmalloc(vector_len * sizeof(*io_addrs))))
+            if (NULL == (io_addrs = malloc(vector_len * sizeof(*io_addrs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O addresses vector");
-            if (NULL == (io_sizes = HDmalloc(vector_len * sizeof(*io_sizes))))
+            if (NULL == (io_sizes = malloc(vector_len * sizeof(*io_sizes))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O sizes vector");
-            if (NULL == (io_bufs = HDmalloc(vector_len * sizeof(*io_bufs))))
+            if (NULL == (io_bufs = malloc(vector_len * sizeof(*io_bufs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
@@ -1774,13 +1737,13 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     file_ptr->op  = OP_READ;
 
 done:
-    HDfree(io_bufs);
-    HDfree(io_sizes);
-    HDfree(io_addrs);
-    HDfree(io_types);
-    HDfree(sf_offset);
-    HDfree(sf_data_size);
-    HDfree(source_data_offset);
+    free(io_bufs);
+    free(io_sizes);
+    free(io_addrs);
+    free(io_types);
+    free(sf_offset);
+    free(sf_data_size);
+    free(source_data_offset);
 
     if (ret_value < 0) {
         /* Reset last file I/O information */
@@ -1800,8 +1763,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1820,11 +1781,11 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
     int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(file_ptr && file_ptr->pub.cls);
-    HDassert(buf);
+    assert(file_ptr && file_ptr->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
@@ -1868,8 +1829,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
      * underlying I/O operations.
      */
     sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->context_id);
-    HDassert(sf_context);
-    HDassert(sf_context->topology);
+    assert(sf_context);
+    assert(sf_context->topology);
 
     num_subfiles = sf_context->sf_num_subfiles;
 
@@ -1918,14 +1879,14 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
          * to contain the translation of the I/O request into a collection of
          * I/O requests.
          */
-        if (NULL == (source_data_offset =
-                         HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
+        if (NULL ==
+            (source_data_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate source data offset I/O vector");
-        if (NULL == (sf_data_size = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
+        if (NULL == (sf_data_size = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile data size I/O vector");
-        if (NULL == (sf_offset = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
+        if (NULL == (sf_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile offset I/O vector");
 
@@ -1956,16 +1917,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
             H5_CHECKED_ASSIGN(vector_len, uint32_t, num_subfiles_used, int);
 
             /* Allocate I/O vectors */
-            if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
+            if (NULL == (io_types = malloc(vector_len * sizeof(*io_types))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O types vector");
-            if (NULL == (io_addrs = HDmalloc(vector_len * sizeof(*io_addrs))))
+            if (NULL == (io_addrs = malloc(vector_len * sizeof(*io_addrs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O addresses vector");
-            if (NULL == (io_sizes = HDmalloc(vector_len * sizeof(*io_sizes))))
+            if (NULL == (io_sizes = malloc(vector_len * sizeof(*io_sizes))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O sizes vector");
-            if (NULL == (io_bufs = HDmalloc(vector_len * sizeof(*io_bufs))))
+            if (NULL == (io_bufs = malloc(vector_len * sizeof(*io_bufs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
@@ -2031,13 +1992,13 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
         file_ptr->local_eof = file_ptr->pos;
 
 done:
-    HDfree(io_bufs);
-    HDfree(io_sizes);
-    HDfree(io_addrs);
-    HDfree(io_types);
-    HDfree(sf_offset);
-    HDfree(sf_data_size);
-    HDfree(source_data_offset);
+    free(io_bufs);
+    free(io_sizes);
+    free(io_addrs);
+    free(io_types);
+    free(sf_offset);
+    free(sf_data_size);
+    free(source_data_offset);
 
     if (ret_value < 0) {
         /* Reset last file I/O information */
@@ -2068,8 +2029,6 @@ done:
  *
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
- *
- * Programmer:  RAW -- ??/??/21
  *
  * Notes:       Thus function doesn't actually implement vector read.
  *              Instead, it comverts the vector read call into a series
@@ -2120,7 +2079,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
@@ -2130,15 +2089,15 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
     /* TODO: setup real support for vector I/O */
     if (file_ptr->fa.require_ioc) {
 
-        hbool_t    extend_sizes = FALSE;
-        hbool_t    extend_types = FALSE;
+        bool       extend_sizes = false;
+        bool       extend_types = false;
         int        k;
         size_t     size;
         H5FD_mem_t type;
         haddr_t    eoa;
 
-        HDassert((count == 0) || (sizes[0] != 0));
-        HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+        assert((count == 0) || (sizes[0] != 0));
+        assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
@@ -2160,7 +2119,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
                 if (sizes[k] == 0) {
 
-                    extend_sizes = TRUE;
+                    extend_sizes = true;
                     size         = sizes[k - 1];
                 }
                 else {
@@ -2173,7 +2132,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
                 if (types[k] == H5FD_MEM_NOLIST) {
 
-                    extend_types = TRUE;
+                    extend_types = true;
                     type         = types[k - 1];
                 }
                 else {
@@ -2231,8 +2190,6 @@ done:
  *                          input arguments are not valid, or the actual
  *                          subfiling writes have failed for some reason.
  *
- * Programmer:  RAW -- ??/??/21
- *
  * Notes:       Thus function doesn't actually implement vector write.
  *              Instead, it comverts the vector write call into a series
  *              of scalar read calls.  Fix this when time permits.
@@ -2254,7 +2211,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
     H5FD_mpio_xfer_t  xfer_mode = H5FD_MPIO_INDEPENDENT;
     herr_t            ret_value = SUCCEED; /* Return value             */
 
-    HDassert(file_ptr != NULL); /* sanity check */
+    assert(file_ptr != NULL); /* sanity check */
 
     /* Check arguments
      * RAW - Do we really need to check arguments once again?
@@ -2284,21 +2241,21 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
     /* Call the subfiling IOC write*/
     if (file_ptr->fa.require_ioc) {
 
-        hbool_t    extend_sizes = FALSE;
-        hbool_t    extend_types = FALSE;
+        bool       extend_sizes = false;
+        bool       extend_types = false;
         int        k;
         size_t     size;
         H5FD_mem_t type;
         haddr_t    eoa;
 
-        HDassert((count == 0) || (sizes[0] != 0));
-        HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+        assert((count == 0) || (sizes[0] != 0));
+        assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
@@ -2320,7 +2277,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 
                 if (sizes[k] == 0) {
 
-                    extend_sizes = TRUE;
+                    extend_sizes = true;
                     size         = sizes[k - 1];
                 }
                 else {
@@ -2333,7 +2290,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 
                 if (types[k] == H5FD_MEM_NOLIST) {
 
-                    extend_types = TRUE;
+                    extend_types = true;
                     type         = types[k - 1];
                 }
                 else {
@@ -2380,20 +2337,18 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Richard Warren
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    HDassert(file);
+    assert(file);
 
     /* Extend the file to make sure it's large enough */
-    if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
+    if (!H5_addr_eq(file->eoa, file->last_eoa)) {
         int64_t sf_eof;
         int64_t eoa;
         int     mpi_code;
@@ -2453,23 +2408,21 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *      The lock type to apply depends on the parameter "rw":
- *          TRUE--opens for write: an exclusive lock
- *          FALSE--opens for read: a shared lock
+ *          true--opens for write: an exclusive lock
+ *          false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */
 #if 0
 static herr_t
-H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
+H5FD__subfiling_lock(H5FD_t *_file, bool rw)
 {
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct  */
     herr_t            ret_value = SUCCEED;                   /* Return value       */
 
-    HDassert(file);
+    assert(file);
 
     if (file->fa.require_ioc) {
 #ifdef VERBOSE
@@ -2492,8 +2445,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2502,7 +2453,7 @@ H5FD__subfiling_unlock(H5FD_t *_file)
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct */
     herr_t            ret_value = SUCCEED;                   /* Return value             */
 
-    HDassert(file);
+    assert(file);
 
     if (H5FD_unlock(file->sf_file) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file");
@@ -2569,8 +2520,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  JRM -- 8/3/21
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2581,14 +2530,14 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
     herr_t            ret_value = SUCCEED; /* Return value */
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_SUBFILING == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_SUBFILING == file->pub.driver_id);
 
     switch (op_code) {
 
         case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
 
             /*
              * Return a separate MPI communicator to the caller so
@@ -2603,14 +2552,14 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
             break;
 
         case H5FD_CTL_GET_MPI_RANK_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
         case H5FD_CTL_GET_MPI_SIZE_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((int **)output) = file->mpi_size;
             break;
 
@@ -2740,17 +2689,17 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int     num_subfiles         = 0;
     herr_t  ret_value            = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(sf_context->sf_stripe_size > 0);
-    HDassert(sf_context->sf_blocksize_per_stripe > 0);
-    HDassert(sf_context->sf_num_subfiles > 0);
-    HDassert(sf_context->topology);
-    HDassert(mem_buf_offset);
-    HDassert(target_file_offset);
-    HDassert(io_block_len);
-    HDassert(first_subfile_index);
-    HDassert(n_subfiles_used);
-    HDassert(max_io_req_per_subfile);
+    assert(sf_context);
+    assert(sf_context->sf_stripe_size > 0);
+    assert(sf_context->sf_blocksize_per_stripe > 0);
+    assert(sf_context->sf_num_subfiles > 0);
+    assert(sf_context->topology);
+    assert(mem_buf_offset);
+    assert(target_file_offset);
+    assert(io_block_len);
+    assert(first_subfile_index);
+    assert(n_subfiles_used);
+    assert(max_io_req_per_subfile);
 
     *first_subfile_index    = 0;
     *n_subfiles_used        = 0;
@@ -2808,8 +2757,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     /* Determine the size of data written to the first and last stripes */
     start_length = MIN(data_size, (stripe_size - offset_in_stripe));
     final_length = (start_length == data_size ? 0 : final_offset % stripe_size);
-    HDassert(start_length <= stripe_size);
-    HDassert(final_length <= stripe_size);
+    assert(start_length <= stripe_size);
+    assert(final_length <= stripe_size);
 
     /*
      * Determine which subfile the I/O request begins in and which
@@ -2880,8 +2829,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         int64_t *_io_block_len;
         int64_t  subfile_bytes = 0;
         int64_t  iovec_depth;
-        hbool_t  is_first = FALSE;
-        hbool_t  is_last  = FALSE;
+        bool     is_first = false;
+        bool     is_last  = false;
         size_t   output_offset;
 
         iovec_depth = curr_max_iovec_depth;
@@ -2895,9 +2844,9 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         _target_file_offset = target_file_offset + output_offset;
         _io_block_len       = io_block_len + output_offset;
 
-        HDmemset(_mem_buf_offset, 0, (max_iovec_len * sizeof(*_mem_buf_offset)));
-        HDmemset(_target_file_offset, 0, (max_iovec_len * sizeof(*_target_file_offset)));
-        HDmemset(_io_block_len, 0, (max_iovec_len * sizeof(*_io_block_len)));
+        memset(_mem_buf_offset, 0, (max_iovec_len * sizeof(*_mem_buf_offset)));
+        memset(_target_file_offset, 0, (max_iovec_len * sizeof(*_target_file_offset)));
+        memset(_io_block_len, 0, (max_iovec_len * sizeof(*_io_block_len)));
 
         if (total_bytes == data_size) {
             *n_subfiles_used = i;
@@ -2908,7 +2857,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             int64_t num_full_stripes = iovec_depth;
 
             if (k == first_subfile) {
-                is_first = TRUE;
+                is_first = true;
 
                 /*
                  * Add partial segment length if not
@@ -2921,7 +2870,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             }
 
             if (k == last_subfile) {
-                is_last = TRUE;
+                is_last = true;
 
                 /*
                  * Add partial segment length if not
@@ -2936,7 +2885,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
             /* Account for subfiles with uniform segments */
             if (!is_first && !is_last) {
-                hbool_t thin_uniform_section = FALSE;
+                bool thin_uniform_section = false;
 
                 if (last_subfile >= first_subfile) {
                     /*
@@ -2960,8 +2909,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                 }
 
                 if (thin_uniform_section) {
-                    HDassert(iovec_depth > 1);
-                    HDassert(num_full_stripes > 1);
+                    assert(iovec_depth > 1);
+                    assert(num_full_stripes > 1);
 
                     iovec_depth--;
                     num_full_stripes--;
@@ -3033,7 +2982,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             row_offset += block_size;
         }
 
-        HDassert(offset_in_block <= block_size);
+        assert(offset_in_block <= block_size);
     }
 
     if (total_bytes != data_size)
@@ -3062,9 +3011,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3077,11 +3023,11 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert(iovec_depth > 0);
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
@@ -3161,9 +3107,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3176,11 +3119,11 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert(iovec_depth > 0);
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
@@ -3292,9 +3235,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3308,11 +3248,11 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert(iovec_depth > 0);
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
@@ -3403,9 +3343,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3418,11 +3355,11 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert((iovec_depth > 0) || (target_datasize == 0));
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert((iovec_depth > 0) || (target_datasize == 0));
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;

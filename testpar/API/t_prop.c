@@ -39,7 +39,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         ret = H5Pencode2(orig_pl, NULL, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
 
-        sbuf = (uint8_t *)HDmalloc(buf_size);
+        sbuf = (uint8_t *)malloc(buf_size);
 
         ret = H5Pencode2(orig_pl, sbuf, &buf_size, H5P_DEFAULT);
         VRFY((ret >= 0), "H5Pencode succeeded");
@@ -58,7 +58,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         MPI_Recv(&recv_size, 1, MPI_INT, 0, 123, MPI_COMM_WORLD, &status);
         VRFY((recv_size >= 0), "MPI_Recv succeeded");
         buf_size = (size_t)recv_size;
-        rbuf     = (uint8_t *)HDmalloc(buf_size);
+        rbuf     = (uint8_t *)malloc(buf_size);
         MPI_Recv(rbuf, recv_size, MPI_BYTE, 0, 124, MPI_COMM_WORLD, &status);
 
         pl = H5Pdecode(rbuf);
@@ -70,7 +70,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         VRFY((ret >= 0), "H5Pclose succeeded");
 
         if (NULL != rbuf)
-            HDfree(rbuf);
+            free(rbuf);
     } /* end if */
 
     if (0 == mpi_rank) {
@@ -85,7 +85,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     }
 
     if (NULL != sbuf)
-        HDfree(sbuf);
+        free(sbuf);
 
     MPI_Barrier(MPI_COMM_WORLD);
     return 0;
@@ -119,12 +119,12 @@ test_plist_ed(void)
     hsize_t             max_size[1]; /*data space maximum size */
     const char         *c_to_f          = "x+32";
     H5AC_cache_config_t my_cache_config = {H5AC__CURR_CACHE_CONFIG_VERSION,
-                                           TRUE,
-                                           FALSE,
-                                           FALSE,
+                                           true,
+                                           false,
+                                           false,
                                            "temp",
-                                           TRUE,
-                                           FALSE,
+                                           true,
+                                           false,
                                            (2 * 2048 * 1024),
                                            0.3,
                                            (64 * 1024 * 1024),
@@ -133,7 +133,7 @@ test_plist_ed(void)
                                            H5C_incr__threshold,
                                            0.8,
                                            3.0,
-                                           TRUE,
+                                           true,
                                            (8 * 1024 * 1024),
                                            H5C_flash_incr__add_space,
                                            2.0,
@@ -141,10 +141,10 @@ test_plist_ed(void)
                                            H5C_decr__age_out_with_threshold,
                                            0.997,
                                            0.8,
-                                           TRUE,
+                                           true,
                                            (3 * 1024 * 1024),
                                            3,
-                                           FALSE,
+                                           false,
                                            0.2,
                                            (256 * 2048),
                                            1 /* H5AC__DEFAULT_METADATA_WRITE_STRATEGY */};
@@ -152,7 +152,7 @@ test_plist_ed(void)
     herr_t ret; /* Generic return value */
 
     if (VERBOSE_MED)
-        HDprintf("Encode/Decode DCPLs\n");
+        printf("Encode/Decode DCPLs\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -290,7 +290,7 @@ test_plist_ed(void)
     lcpl = H5Pcreate(H5P_LINK_CREATE);
     VRFY((lcpl >= 0), "H5Pcreate succeeded");
 
-    ret = H5Pset_create_intermediate_group(lcpl, TRUE);
+    ret = H5Pset_create_intermediate_group(lcpl, true);
     VRFY((ret >= 0), "H5Pset_create_intermediate_group succeeded");
 
     ret = test_encode_decode(lcpl, mpi_rank, recv_proc);
@@ -480,7 +480,7 @@ external_links(void)
     char        link_path[50];
 
     if (VERBOSE_MED)
-        HDprintf("Check external links\n");
+        printf("Check external links\n");
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -600,10 +600,10 @@ external_links(void)
             VRFY((ret >= 0), "H5Pset_elink_fapl succeeded");
 
             tri_status = H5Lexists(fid, link_path, H5P_DEFAULT);
-            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+            VRFY((tri_status == true), "H5Lexists succeeded");
 
             tri_status = H5Lexists(fid, link_path, lapl);
-            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+            VRFY((tri_status == true), "H5Lexists succeeded");
 
             group = H5Oopen(fid, link_path, H5P_DEFAULT);
             VRFY((group >= 0), "H5Oopen succeeded");

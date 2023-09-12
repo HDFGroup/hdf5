@@ -124,17 +124,17 @@ typedef enum H5F_close_degree_t {
 //! <!-- [H5F_info2_t_snip] -->
 typedef struct H5F_info2_t {
     struct {
-        unsigned version;        /**< Superblock version # */
+        unsigned version;        /**< Superblock version number */
         hsize_t  super_size;     /**< Superblock size */
         hsize_t  super_ext_size; /**< Superblock extension size */
     } super;
     struct {
-        unsigned version;   /**< Version # of file free space management */
+        unsigned version;   /**< Version number of file free space management */
         hsize_t  meta_size; /**< Free space manager metadata size */
         hsize_t  tot_space; /**< Amount of free space in the file */
     } free;
     struct {
-        unsigned     version;   /**< Version # of shared object header info */
+        unsigned     version;   /**< Version number of shared object header info */
         hsize_t      hdr_size;  /**< Shared object header message header size */
         H5_ih_info_t msgs_info; /**< Shared object header message index & heap size */
     } sohm;
@@ -957,7 +957,7 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  * \file_id
  * \param[out] buf_ptr Pointer to the buffer into which the image of the
  *                     HDF5 file is to be copied. If \p buf_ptr is NULL,
- *                     no data will be copied but the function’s return value
+ *                     no data will be copied but the function's return value
  *                     will still indicate the buffer size required (or a
  *                     negative value on error).
  * \param[out] buf_len Size of the supplied buffer
@@ -974,7 +974,7 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  *          file image. So if the file size is unknown, it can be safely
  *          determined with an initial H5Fget_file_image() call with buf_ptr
  *          set to NULL. The file image can then be retrieved with a second
- *          H5Fget_file_image() call with \p buf_len set to the initial call’s
+ *          H5Fget_file_image() call with \p buf_len set to the initial call's
  *          return value.
  *
  *          While the current file size can also be retrieved with
@@ -1172,7 +1172,7 @@ H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 /**
  * \ingroup H5F
  *
- * \brief Retrieves name of file to which object belongs
+ * \brief Retrieves global file information
  *
  * \fgdta_obj_id
  * \param[out] file_info Buffer for global file information
@@ -1320,7 +1320,7 @@ H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *i
  *              on a system that is not atomic.
  *          \li Turn off usage of the library's accumulator to avoid possible
  *              ordering problem on a system that is not atomic.
- *          \li Perform a flush of the file’s data buffers and metadata to set
+ *          \li Perform a flush of the file's data buffers and metadata to set
  *              a consistent state for starting SWMR write operations.
  *
  *          Library objects are groups, datasets, and committed datatypes. For
@@ -1390,7 +1390,7 @@ H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects
  * \return \herr_t
  *
  * \details H5Fclear_elink_file_cache() evicts all the cached child files in
- *          the specified file’s external file cache, causing them to be closed
+ *          the specified file's external file cache, causing them to be closed
  *          if there is nothing else holding them open.
  *
  *          H5Fclear_elink_file_cache() does not close the cache itself;
@@ -1659,7 +1659,7 @@ H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t 
  * \details H5Fget_dset_no_attrs_hint() retrieves the no dataset attributes
  *          hint setting for the file specified by the file identifier \p
  *          file_id. This setting is used to inform the library to create
- *          minimized dataset object headers when \c TRUE.
+ *          minimized dataset object headers when \c true.
  *
  *          The setting's value is returned in the boolean pointer minimized.
  *
@@ -1680,18 +1680,18 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  * \details H5Fset_dset_no_attrs_hint() sets the no dataset attributes hint
  *          setting for the file specified by the file identifier \p file_id.
- *          If the boolean flag \p minimize is set to \c TRUE, then the library
+ *          If the boolean flag \p minimize is set to \c true, then the library
  *          will create minimized dataset object headers in the file.
  *          \Bold{All} files that refer to the same file-on-disk will be
  *          affected by the most recent setting, regardless of the file
  *          identifier/handle (e.g., as returned by H5Fopen()). By setting the
- *          \p minimize flag to \c TRUE, the library expects that no attributes
+ *          \p minimize flag to \c true, the library expects that no attributes
  *          will be added to the dataset - attributes can be added, but they
  *          are appended with a continuation message, which can reduce
  *          performance.
  *
  * \attention This setting interacts with H5Pset_dset_no_attrs_hint(): if
- *            either is set to \c TRUE, then the created dataset's object header
+ *            either is set to \c true, then the created dataset's object header
  *            will be minimized.
  *
  * \since 1.10.5
@@ -1730,7 +1730,7 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * pass the same values for \p file_id and \p flag.
  *
  * This function is available only when the HDF5 library is configured with parallel support
- * (\Code{--enable-parallel}). It is useful only when used with the #H5FD_MPIO driver
+ * (\Code{--enable-parallel | HDF5_ENABLE_PARALLEL}). It is useful only when used with the #H5FD_MPIO driver
  * (see H5Pset_fapl_mpio()).
  * \endparblock
  *
@@ -1845,7 +1845,7 @@ typedef struct H5F_info1_t {
 /**
  * \ingroup H5F
  *
- * \brief Retrieves name of file to which object belongs
+ * \brief Retrieves global file information
  *
  * \fgdta_obj_id
  * \param[out] file_info Buffer for global file information

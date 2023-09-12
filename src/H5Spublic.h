@@ -1026,7 +1026,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          The \p coord parameter is a pointer to a buffer containing a
  *          serialized 2-dimensional array of size \p num_elements by the
  *          rank of the dataspace. The array lists dataset elements in the
- *          point selection; that is, it’s a list of zero-based values
+ *          point selection; that is, it's a list of zero-based values
  *          specifying the coordinates in the dataset of the selected
  *          elements. The order of the element coordinates in the \p coord
  *          array specifies the order in which the array elements are
@@ -1194,8 +1194,9 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_el
  *          2x2 blocks of array elements starting with location (1,1) with the
  *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.;
  *          in Fortran, they will specify a hyperslab consisting of 21 2x2
- *          blocks of array elements starting with location (2,2) with the
- *          selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
+ *          blocks of array elements starting with location (2,2), since \p start
+ *          is 0-based indexed, with the selected blocks at
+ *          locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
  *
  *          Regions selected with this function call default to C order
  *          iteration when I/O is performed.

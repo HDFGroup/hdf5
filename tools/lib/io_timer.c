@@ -33,14 +33,13 @@
 #define MICROSECOND 1000000.0F
 
 /* global variables */
-io_time_t *timer_g; /* timer: global for stub functions     */
+static io_time_t *timer_g; /* timer: global for stub functions     */
 
 /*
  * Function:  sub_time
  * Purpose:   Struct two time values, and return the difference, in microseconds
  *
  *         Note that the function assumes that a > b
- * Programmer: Leon Arber, 1/27/06
  */
 static double
 sub_time(struct timeval *a, struct timeval *b)
@@ -56,12 +55,11 @@ sub_time(struct timeval *a, struct timeval *b)
  *              what type of timer they want (MPI_CLOCK for MPI_Wtime or
  *              SYS_CLOCK for system time).
  * Return:      Pointer to io_time object
- * Programmer:  Bill Wendling, 01. October 2001
  */
 io_time_t *
 io_time_new(clock_type type)
 {
-    io_time_t *pt = (io_time_t *)HDcalloc(1, sizeof(struct io_time_t));
+    io_time_t *pt = (io_time_t *)calloc(1, sizeof(struct io_time_t));
 
     /* set global timer variable */
     timer_g = pt;
@@ -76,12 +74,11 @@ io_time_new(clock_type type)
  *              need to call on a pointer allocated with the ``io_time_new''
  *              function.
  * Return:      Nothing
- * Programmer:  Bill Wendling, 01. October 2001
  */
 void
 io_time_destroy(io_time_t *pt)
 {
-    HDfree(pt);
+    free(pt);
     /* reset the global timer pointer too. */
     timer_g = NULL;
 }
@@ -94,7 +91,6 @@ io_time_destroy(io_time_t *pt)
  *              This really only needs to be called if you didn't construct a
  *              timer with the pio_timer_new function (shame!).
  * Return:      Nothing
- * Programmer:  Bill Wendling, 04. October 2001
  */
 void
 set_timer_type(io_time_t *pt, clock_type type)
@@ -106,7 +102,6 @@ set_timer_type(io_time_t *pt, clock_type type)
  * Function:    get_timer_type
  * Purpose:     Get the type of the timer.
  * Return:      MPI_CLOCK or SYS_CLOCK.
- * Programmer:  Bill Wendling, 04. October 2001
  */
 clock_type
 get_timer_type(io_time_t *pt)
@@ -119,13 +114,12 @@ get_timer_type(io_time_t *pt)
  * Function:    io_time_set
  * Purpose:     Set the time in a ``io_time_t'' object.
  * Return:      Pointer to the passed in ``io_time_t'' object if SUCCEED; Null otherwise.
- * Programmer:  Bill Wendling, 01. October 2001
  */
 io_time_t *
 io_time_set(io_time_t *pt, timer_type t, int start_stop)
 {
     /* sanity check */
-    HDassert(pt);
+    assert(pt);
 
     switch (pt->type) {
 #ifdef H5_HAVE_PARALLEL
@@ -158,7 +152,7 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
             break;
 #else
         case MPI_CLOCK:
-            HDfprintf(stderr, "MPI clock set in serial library\n");
+            fprintf(stderr, "MPI clock set in serial library\n");
             return NULL;
 #endif /* H5_HAVE_PARALLEL */
         case SYS_CLOCK:
@@ -192,7 +186,7 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
             break;
 
         default:
-            HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+            fprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
             return NULL;
     } /* end switch */
 
@@ -208,13 +202,12 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
  * Function:    io_time_get
  * Purpose:     Get the time from a ``io_time_t'' object.
  * Return:      The number of seconds as a DOUBLE.
- * Programmer:  Bill Wendling, 01. October 2001
  */
 H5_ATTR_PURE double
 io_time_get(io_time_t *pt, timer_type t)
 {
     /* sanity check */
-    HDassert(pt);
+    assert(pt);
 
     return pt->total_time[t];
 }

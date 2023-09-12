@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  * Purpose:	This is the first half of a two-part test that makes sure
  *		that a file can be read after an application crashes as long
  *		as the file was flushed first.  We simulate a crash by
@@ -27,9 +24,9 @@
 #define H5FD_TESTING
 #include "H5FDpkg.h" /* File drivers             */
 
-const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
-                          "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
-                          "noflush_extend", "noflush_extend-swmr", NULL};
+static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
+                                 "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
+                                 "noflush_extend", "noflush_extend-swmr", NULL};
 
 /* Number and size of dataset dims, chunk size, etc. */
 #define NDIMS            1
@@ -41,7 +38,7 @@ const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
 /* Number of sub-groups created in the containing group */
 #define NGROUPS 100
 
-static hid_t  create_file(const char *filename, hid_t fapl_id, hbool_t swmr);
+static hid_t  create_file(const char *filename, hid_t fapl_id, bool swmr);
 static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
 
 /*-------------------------------------------------------------------------
@@ -52,20 +49,17 @@ static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
  * Return:      Success:	a valid file ID
  *              Failure:	-1
  *
- * Programmer:	Leon Arber
- *              Sept. 26, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_file(const char *filename, hid_t fapl_id, hbool_t swmr)
+create_file(const char *filename, hid_t fapl_id, bool swmr)
 {
-    hid_t    fid     = -1;   /* file ID                          */
-    hid_t    top_gid = -1;   /* containing group ID              */
-    hid_t    gid     = -1;   /* subgroup ID                      */
-    char     group_name[32]; /* group name                       */
-    unsigned flags;          /* file open flags                  */
-    int      i;              /* iterator                         */
+    hid_t    fid     = H5I_INVALID_HID; /* file ID                          */
+    hid_t    top_gid = H5I_INVALID_HID; /* containing group ID              */
+    hid_t    gid     = H5I_INVALID_HID; /* subgroup ID                      */
+    char     group_name[32];            /* group name                       */
+    unsigned flags;                     /* file open flags                  */
+    int      i;                         /* iterator                         */
 
     flags = H5F_ACC_TRUNC | (swmr ? H5F_ACC_SWMR_WRITE : 0);
 
@@ -99,7 +93,7 @@ error:
         H5Gclose(gid);
         H5Gclose(top_gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end create_file() */
@@ -111,21 +105,18 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Leon Arber
- *              Oct. 4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 add_dset_to_file(hid_t fid, const char *dset_name)
 {
-    hid_t   dcpl_id       = -1;           /* dataset creation plist ID        */
-    hid_t   sid           = -1;           /* dataspace ID                     */
-    hid_t   did           = -1;           /* dataset ID                       */
-    int    *data          = NULL;         /* data buffer                      */
-    hsize_t dims[1]       = {NELEMENTS};  /* size of dataset                  */
-    hsize_t chunk_dims[1] = {CHUNK_SIZE}; /* chunk size               */
-    int     i;                            /* iterator                         */
+    hid_t   dcpl_id       = H5I_INVALID_HID; /* dataset creation plist ID        */
+    hid_t   sid           = H5I_INVALID_HID; /* dataspace ID                     */
+    hid_t   did           = H5I_INVALID_HID; /* dataset ID                       */
+    int    *data          = NULL;            /* data buffer                      */
+    hsize_t dims[1]       = {NELEMENTS};     /* size of dataset                  */
+    hsize_t chunk_dims[1] = {CHUNK_SIZE};    /* chunk size               */
+    int     i;                               /* iterator                         */
 
     /* Create a chunked dataset */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -138,7 +129,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
         STACK_ERROR;
 
     /* Write some data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         STACK_ERROR;
     for (i = 0; i < NELEMENTS; i++)
         data[i] = i;
@@ -152,7 +143,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         STACK_ERROR;
 
-    HDfree(data);
+    free(data);
 
     return SUCCEED;
 
@@ -163,9 +154,9 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     return FAIL;
 } /* end add_dset_to_file() */
@@ -180,20 +171,17 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:	Robb Matzke
- *              Friday, October 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    char   *driver = NULL;     /* name of current VFD (from env var)       */
-    hbool_t vfd_supports_swmr; /* whether the current VFD supports SWMR    */
-    hid_t   fid     = -1;      /* file ID                                  */
-    hid_t   fapl_id = -1;      /* file access proplist ID                  */
-    char    filename[1024];    /* filename                                 */
-    hbool_t use_swmr;          /* whether or not to use SWMR I/O           */
+    char *driver = NULL;             /* name of current VFD (from env var)       */
+    bool  vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
+    hid_t fid     = H5I_INVALID_HID; /* file ID                                  */
+    hid_t fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
+    char  filename[1024];            /* filename                                 */
+    bool  use_swmr;                  /* whether or not to use SWMR I/O           */
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
@@ -210,7 +198,7 @@ main(void)
     /* Create a file and flush */
     TESTING("H5Fflush (part1 with flush)");
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -221,7 +209,7 @@ main(void)
     TESTING("H5Fflush (part1 with flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -234,7 +222,7 @@ main(void)
     /* Create a file which will not be flushed */
     TESTING("H5Fflush (part1 without flush)");
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     PASSED();
@@ -243,7 +231,7 @@ main(void)
     TESTING("H5Fflush (part1 without flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[3], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         PASSED();
@@ -254,7 +242,7 @@ main(void)
     /* Create a file, flush, add a dataset, flush */
     TESTING("H5Fflush (part1 with flush and later addition and another flush)");
     h5_fixname(FILENAME[4], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -269,7 +257,7 @@ main(void)
     TESTING("H5Fflush (part1 with flush and later addition and another flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -286,7 +274,7 @@ main(void)
     /* Create a file, flush, add a dataset, (no flush) */
     TESTING("H5Fflush (part1 with flush and later addition)");
     h5_fixname(FILENAME[6], fapl_id, filename, sizeof(filename));
-    use_swmr = FALSE;
+    use_swmr = false;
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -299,7 +287,7 @@ main(void)
     TESTING("H5Fflush (part1 with flush and later addition + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof(filename));
-        use_swmr = TRUE;
+        use_swmr = true;
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
@@ -312,25 +300,25 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     /* Flush console output streams */
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     /* DO NOT CLOSE FILE ID! */
     if (H5Pclose(fapl_id) < 0)
         STACK_ERROR;
 
     /* _exit() is necessary since we want a hard close of the library */
-    HD_exit(EXIT_SUCCESS);
+    _exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

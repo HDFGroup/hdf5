@@ -36,20 +36,17 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  *
  *		Failure:	-1
  *
- * Programmer:  Pedro Vicente
- *              Thursday, March 25, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_filters_endianess(void)
 {
-    hid_t   fid           = -1;   /* file ID */
-    hid_t   dsid          = -1;   /* dataset ID */
-    hid_t   sid           = -1;   /* dataspace ID */
-    hid_t   dcpl          = -1;   /* dataset creation property list ID */
-    hsize_t dims[1]       = {20}; /* dataspace dimensions */
-    hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
+    hid_t   fid           = H5I_INVALID_HID; /* file ID */
+    hid_t   dsid          = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid           = H5I_INVALID_HID; /* dataspace ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* dataset creation property list ID */
+    hsize_t dims[1]       = {20};            /* dataspace dimensions */
+    hsize_t chunk_dims[1] = {10};            /* chunk dimensions */
     int     buf[20];
     int     rank = 1;
     int     i;
@@ -101,7 +98,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_filters_endianess() */
 
@@ -125,9 +122,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  *		Failure:	0
  *
- * Programmer:	Raymond Lu
- *              2 June 2011
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -147,20 +141,17 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  *		Failure:	-1
  *
- * Programmer:	Raymond Lu
- *              2 June 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 create_file_with_bogus_filter(void)
 {
-    hid_t   fid           = -1;   /* file ID */
-    hid_t   dsid          = -1;   /* dataset ID */
-    hid_t   sid           = -1;   /* dataspace ID */
-    hid_t   dcpl          = -1;   /* dataset creation property list ID */
-    hsize_t dims[1]       = {20}; /* dataspace dimensions */
-    hsize_t chunk_dims[1] = {10}; /* chunk dimensions */
+    hid_t   fid           = H5I_INVALID_HID; /* file ID */
+    hid_t   dsid          = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid           = H5I_INVALID_HID; /* dataspace ID */
+    hid_t   dcpl          = H5I_INVALID_HID; /* dataset creation property list ID */
+    hsize_t dims[1]       = {20};            /* dataspace dimensions */
+    hsize_t chunk_dims[1] = {10};            /* chunk dimensions */
     int     buf[20];
     int     rank = 1;
     int     i;
@@ -217,7 +208,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -240,12 +231,12 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All tests passed.\n");
+    printf("All tests passed.\n");
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
+    printf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
     return 1;
 }

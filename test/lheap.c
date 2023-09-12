@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- *
  * Purpose:    Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
@@ -24,7 +21,7 @@
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-const char *FILENAME[] = {"lheap", NULL};
+static const char *FILENAME[] = {"lheap", NULL};
 
 #define TESTFILE "tsizeslheap.h5"
 
@@ -39,16 +36,13 @@ const char *FILENAME[] = {"lheap", NULL};
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
     hid_t       fapl = H5P_DEFAULT;     /* file access properties   */
-    hid_t       file = -1;              /* hdf5 file                */
+    hid_t       file = H5I_INVALID_HID; /* hdf5 file                */
     H5F_t      *f    = NULL;            /* hdf5 file pointer        */
     char        filename[1024];         /* file name                */
     haddr_t     heap_addr;              /* local heap address       */
@@ -57,8 +51,8 @@ main(void)
     int         i, j;                   /* miscellaneous counters   */
     char        buf[1024];              /* the value to store       */
     const char *s;                      /* value to read            */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
-    hbool_t     driver_is_default_compatible;
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    bool        driver_is_default_compatible;
 
     /* Reset library */
     h5_reset();
@@ -67,7 +61,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /*
      * Test writing to the heap...
@@ -157,9 +151,9 @@ main(void)
 
         if (HDstrcmp(s, buf) != 0) {
             H5_FAILED();
-            HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
-            HDprintf("    got: \"%s\"\n", s);
-            HDprintf("    ans: \"%s\"\n", buf);
+            printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
+            printf("    got: \"%s\"\n", s);
+            printf("    ans: \"%s\"\n", buf);
             goto error;
         }
 
@@ -182,7 +176,7 @@ main(void)
         TESTING("opening pre-created file with non-default sizes");
         {
             const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
-            hid_t       dset     = -1;
+            hid_t       dset     = H5I_INVALID_HID;
             file                 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
             if (file >= 0) {
                 if ((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
@@ -194,7 +188,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
+                printf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }
@@ -206,9 +200,9 @@ main(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     HDputs("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
@@ -221,10 +215,10 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return EXIT_FAILURE;
 }

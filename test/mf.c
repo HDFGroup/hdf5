@@ -98,7 +98,7 @@
 #define TEST_THRESHOLD10 10
 #define TEST_THRESHOLD3  3
 
-const char *FILENAME[] = {"mf", NULL};
+static const char *FILENAME[] = {"mf", NULL};
 
 typedef enum {
     TEST_NORMAL,     /* size of aggregator is >= alignment size */
@@ -133,11 +133,11 @@ static unsigned test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t 
 static unsigned test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
 static unsigned test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
 static unsigned test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
-static unsigned test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
-static unsigned test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
-static unsigned test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
-static unsigned test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
-static unsigned test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format);
+static unsigned test_mf_tmp(const char *env_h5_drvr, hid_t fapl, bool new_format);
+static unsigned test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, bool new_format);
+static unsigned test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, bool new_format);
+static unsigned test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, bool new_format);
+static unsigned test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, bool new_format);
 #ifdef PB_OUT
 static unsigned test_mf_fs_persist_split(void);
 static unsigned test_mf_fs_persist_multi(void);
@@ -159,36 +159,35 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *state)
 {
     H5FS_stat_t frspace_stats; /* Statistics about the heap */
 
-    HDassert(f);
-    HDassert(frsp);
+    assert(f);
+    assert(frsp);
 
     /* Get statistics for free-space and verify they are correct */
     if (H5FS_stat_info(f, frsp, &frspace_stats) < 0)
         FAIL_STACK_ERROR;
 
     if (frspace_stats.tot_space != state->tot_space) {
-        HDfprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_space, state->tot_space);
+        fprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
+                frspace_stats.tot_space, state->tot_space);
         TEST_ERROR;
     } /* end if */
     if (frspace_stats.tot_sect_count != state->tot_sect_count) {
-        HDfprintf(stdout,
-                  "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_sect_count, state->tot_sect_count);
+        fprintf(stdout,
+                "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.tot_sect_count, state->tot_sect_count);
         TEST_ERROR;
     } /* end if */
     if (frspace_stats.serial_sect_count != state->serial_sect_count) {
-        HDfprintf(stdout,
-                  "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.serial_sect_count, state->serial_sect_count);
+        fprintf(stdout,
+                "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
+                "\n",
+                frspace_stats.serial_sect_count, state->serial_sect_count);
         TEST_ERROR;
     } /* end if */
     if (frspace_stats.ghost_sect_count != state->ghost_sect_count) {
-        HDfprintf(stdout,
-                  "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.ghost_sect_count, state->ghost_sect_count);
+        fprintf(stdout,
+                "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.ghost_sect_count, state->ghost_sect_count);
         TEST_ERROR;
     } /* end if */
 
@@ -213,24 +212,24 @@ error:
 static unsigned
 test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file     = -1;            /* File ID */
-    hid_t          fapl_new = -1;            /* copy of fapl */
-    char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t         *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t file_size, new_file_size; /* file size */
+    hid_t          file     = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char           filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t         *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t file_size, new_file_size;   /* file size */
     H5FD_mem_t     type;
     haddr_t        addr1, addr2;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MM_alloc() of file allocation");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation. Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                             HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                          HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -336,7 +335,7 @@ error:
         H5Pclose(fapl_new);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_eoa() */
 
@@ -362,24 +361,24 @@ error:
 static unsigned
 test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file     = -1;                /* File ID */
-    hid_t          fapl_new = -1;                /* copy of fapl */
+    hid_t          file     = H5I_INVALID_HID;   /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID;   /* copy of fapl */
     char           filename[FILENAME_LEN];       /* Filename to use */
     H5F_t         *f         = NULL;             /* Internal file object pointer */
     h5_stat_size_t file_size = 0, new_file_size; /* file size */
-    H5FD_mem_t     type;
-    haddr_t        addr    = 0;
+    H5FD_mem_t     type      = H5FD_MEM_DEFAULT;
+    haddr_t        addr      = 0;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_try_shrink() of file allocation: test 1");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation. Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                             HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                          HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -627,7 +626,7 @@ error:
         H5Pclose(fapl_new);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_eoa_shrink() */
 
@@ -649,25 +648,25 @@ error:
 static unsigned
 test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file     = -1;            /* File ID */
-    hid_t          fapl_new = -1;            /* copy of fapl */
-    char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t         *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t file_size, new_file_size; /* File size */
+    hid_t          file     = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char           filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t         *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t file_size, new_file_size;   /* File size */
     H5FD_mem_t     type;
     haddr_t        addr;
     htri_t         was_extended;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_try_extend() of file allocation: test 1");
 
     /* Skip test when using VFDs that has different address spaces for each
      *  type of metadata allocation. Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                             HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                          HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -834,7 +833,7 @@ error:
         H5Pclose(fapl_new);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_eoa_extend() */
 
@@ -862,11 +861,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+test_mf_tmp(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t file  = -1; /* File ID */
-    hid_t fapl2 = -1; /* File access property list */
-    hid_t fcpl  = -1; /* File creation property list */
+    hid_t file  = H5I_INVALID_HID; /* File ID */
+    hid_t fapl2 = H5I_INVALID_HID; /* File access property list */
+    hid_t fcpl  = H5I_INVALID_HID; /* File creation property list */
 
     if (new_format)
         TESTING("'temporary' file space allocation with new library format");
@@ -900,7 +899,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
                 FAIL_STACK_ERROR;
 
-            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1);
+            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1);
         } /* end if */
 
         /* Create the file to work on */
@@ -942,14 +941,14 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         {
             status = H5F_block_read(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), &buf);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
         H5E_BEGIN_TRY
         {
             status = H5F_block_write(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), &buf);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
 
@@ -958,7 +957,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         {
             status = H5MF_xfree(f, H5FD_MEM_SUPER, tmp_addr, (hsize_t)TBLOCK_SIZE30);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (status >= 0)
             TEST_ERROR;
 
@@ -999,8 +998,8 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         {
             check_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3));
         }
-        H5E_END_TRY;
-        if (H5F_addr_defined(check_addr))
+        H5E_END_TRY
+        if (H5_addr_defined(check_addr))
             TEST_ERROR;
 
         /* Test that pushing normal space allocation into temporary space fails */
@@ -1008,8 +1007,8 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         {
             check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)(maxaddr / 3));
         }
-        H5E_END_TRY;
-        if (H5F_addr_defined(check_addr))
+        H5E_END_TRY
+        if (H5_addr_defined(check_addr))
             TEST_ERROR;
 
         /* Free the normal block (so the file doesn't blow up to a huge size) */
@@ -1042,7 +1041,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_tmp() */
 
@@ -1057,11 +1056,11 @@ error:
 static unsigned
 test_mf_fs_start(hid_t fapl)
 {
-    hid_t          file     = -1;            /* File ID */
-    hid_t          fapl_new = -1;            /* copy of fapl */
-    char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t         *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t file_size, new_file_size; /* file size */
+    hid_t          file     = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char           filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t         *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t file_size, new_file_size;   /* file size */
     H5FS_stat_t    state;
 
     TESTING("H5MF_create_fstype()/H5MF__open_fstype() of free-space manager");
@@ -1105,7 +1104,7 @@ test_mf_fs_start(hid_t fapl)
     if (f->shared->fs_man[H5FD_MEM_SUPER]->client != H5FS_CLIENT_FILE_ID)
         TEST_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
 
     if (check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
         TEST_ERROR;
@@ -1134,7 +1133,7 @@ error:
         H5Pclose(fapl_new);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_start() */
 
@@ -1168,11 +1167,11 @@ error:
 static unsigned
 test_mf_fs_alloc_free(hid_t fapl)
 {
-    hid_t                file     = -1;            /* File ID */
-    hid_t                fapl_new = -1;            /* copy of fapl */
-    char                 filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t               *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t       file_size, new_file_size; /* file size */
+    hid_t                file     = H5I_INVALID_HID; /* File ID */
+    hid_t                fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char                 filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t               *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t       file_size, new_file_size;   /* file size */
     H5MF_free_section_t *sect_node = NULL;
     haddr_t              addr;
     haddr_t              tmp;
@@ -1226,7 +1225,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1259,7 +1258,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Remove section A from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
-        TRUE)
+        true)
         TEST_ERROR;
 
     if (tmp != TBLOCK_ADDR70)
@@ -1304,7 +1303,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1335,7 +1334,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Remove section A from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
-        TRUE)
+        true)
         TEST_ERROR;
 
     if (tmp != TBLOCK_ADDR70)
@@ -1380,7 +1379,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1405,14 +1404,14 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Remove section A from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
-        TRUE)
+        true)
         TEST_ERROR;
 
     /* Verify that the block is section A in free-space */
     if (tmp != TBLOCK_ADDR70)
         TEST_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     if (check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
         TEST_ERROR;
 
@@ -1451,7 +1450,7 @@ error:
         H5Pclose(fapl_new);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_alloc_free() */
 
@@ -1497,11 +1496,11 @@ error:
 static unsigned
 test_mf_fs_extend(hid_t fapl)
 {
-    hid_t                file     = -1;            /* File ID */
-    hid_t                fapl_new = -1;            /* copy of fapl */
-    char                 filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t               *f = NULL;                 /* Internal file object pointer */
-    h5_stat_size_t       file_size, new_file_size; /* file size */
+    hid_t                file     = H5I_INVALID_HID; /* File ID */
+    hid_t                fapl_new = H5I_INVALID_HID; /* copy of fapl */
+    char                 filename[FILENAME_LEN];     /* Filename to use */
+    H5F_t               *f = NULL;                   /* Internal file object pointer */
+    h5_stat_size_t       file_size, new_file_size;   /* file size */
     H5MF_free_section_t *sect_node1 = NULL, *sect_node2 = NULL;
     haddr_t              addr;
     haddr_t              tmp;
@@ -1556,7 +1555,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1621,7 +1620,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Remove the extended block */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50),
-                        f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != TRUE)
+                        f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
         TEST_ERROR;
 
     if (tmp != TBLOCK_ADDR70)
@@ -1666,7 +1665,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1726,7 +1725,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Remove the merged sections A & B from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50),
-                        f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != TRUE)
+                        f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
         TEST_ERROR;
 
     if (tmp != addr)
@@ -1771,7 +1770,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1831,7 +1830,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Remove the merged sections A & B from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50),
-                        f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != TRUE)
+                        f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
         TEST_ERROR;
 
     if (tmp != addr)
@@ -1877,7 +1876,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += (TBLOCK_SIZE30 - 10);
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1937,7 +1936,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Remove section A from free-space manager */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 - 10), f->shared->fs_man[H5FD_MEM_SUPER],
-                        &tmp) != TRUE)
+                        &tmp) != true)
         TEST_ERROR;
 
     if (tmp != addr)
@@ -1945,7 +1944,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Remove section B from free-space manager */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE50, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
-        TRUE)
+        true)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
@@ -1972,7 +1971,7 @@ error:
         H5Pclose(fapl_new);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_extend() */
 
@@ -2005,7 +2004,7 @@ error:
 static unsigned
 test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t                file = -1;              /* File ID */
+    hid_t                file = H5I_INVALID_HID; /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
     H5F_t               *f = NULL;               /* Internal file object pointer */
     haddr_t              addr, saddr;
@@ -2013,12 +2012,12 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
     haddr_t              ma_addr   = HADDR_UNDEF;
     hsize_t              ma_size   = 0;
     H5MF_free_section_t *sect_node = NULL;
-    hbool_t              contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool                 contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("A free-space section absorbs an aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2063,7 +2062,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 
         /* Verify that the section did absorb the aggregator */
         if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(ma_addr + ma_size),
-                            f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != TRUE)
+                            f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
             TEST_ERROR;
 
         if (tmp != ma_addr)
@@ -2123,7 +2122,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 
         /* Verify that the section did absorb the aggregator */
         if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(ma_size + TBLOCK_SIZE30),
-                            f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != TRUE)
+                            f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
             TEST_ERROR;
 
         if ((tmp + TBLOCK_SIZE30) != ma_addr)
@@ -2155,7 +2154,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_absorb() */
 
@@ -2180,7 +2179,7 @@ error:
 static unsigned
 test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     hid_t          fcpl;                     /* File creation property list */
@@ -2189,13 +2188,13 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
     haddr_t        addr1, addr2;
     haddr_t        ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator. Also skip test for Direct VFD. */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                             HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                          HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2205,7 +2204,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR;
 
         /* Set to H5F_FSPACE_STRATEGY_AGGR strategy */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_AGGR, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_AGGR, false, (hsize_t)1) < 0)
             TEST_ERROR;
 
         /* Create the file to work on */
@@ -2301,7 +2300,7 @@ error:
         H5Fclose(file);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc1() */
 
@@ -2333,7 +2332,7 @@ error:
 static unsigned
 test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
@@ -2341,13 +2340,13 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
     haddr_t        addr1, addr2, addr3;
     haddr_t        ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 2");
 
     /* Skip test when using VFDs that don't use the metadata aggregator. Also skip test for Direct VFD. */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                             HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                          HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2445,7 +2444,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc2() */
 
@@ -2490,7 +2489,7 @@ error:
 static unsigned
 test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
@@ -2500,12 +2499,12 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
     hsize_t        ma_size = 0, new_ma_size = 0;
     haddr_t        sdata_addr = HADDR_UNDEF;
     hsize_t        sdata_size = 0;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_alloc() of meta/sdata aggregator: test 3");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2611,7 +2610,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc3() */
 
@@ -2660,7 +2659,7 @@ error:
 static unsigned
 test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
@@ -2668,12 +2667,12 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
     haddr_t        addr1, addr2, saddr1, saddr2, saddr3;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0, sdata_size = 0;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 4");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2779,7 +2778,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc4() */
 
@@ -2809,7 +2808,7 @@ error:
 static unsigned
 test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
@@ -2817,12 +2816,12 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
     haddr_t        addr1, addr2, addr3;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 5");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2905,7 +2904,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc5() */
 
@@ -2946,7 +2945,7 @@ error:
 static unsigned
 test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;                /* File ID */
+    hid_t          file = H5I_INVALID_HID;   /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
     H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
@@ -2955,12 +2954,12 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0, sdata_size = 0;
     H5FS_stat_t    state;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 6");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3029,7 +3028,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR;
 
         /* Verify that meta_aggr's unused space of 1968 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         state.tot_space += (TBLOCK_SIZE2048 - (TBLOCK_SIZE30 + TBLOCK_SIZE50));
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
@@ -3068,7 +3067,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc6() */
 
@@ -3120,7 +3119,7 @@ error:
 static unsigned
 test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t empty_size, file_size;
@@ -3129,12 +3128,12 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
     haddr_t        ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, sdata_size = 0;
     H5FS_stat_t    state;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_alloc() of meta/sdata aggregator:test 7");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3219,7 +3218,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR;
 
         /* Verify that meta_aggr's unused space of 1968 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         state.tot_space += (TBLOCK_SIZE2048 - (TBLOCK_SIZE30 + TBLOCK_SIZE50));
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
@@ -3260,7 +3259,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_alloc7() */
 
@@ -3291,7 +3290,7 @@ error:
 static unsigned
 test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f          = NULL;      /* Internal file object pointer */
     h5_stat_size_t empty_size = 0, file_size;
@@ -3300,12 +3299,12 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0, sdata_size = 0;
     htri_t         was_extended;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_try_extend() of meta/sdata aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3559,7 +3558,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_extend() */
 
@@ -3588,7 +3587,7 @@ error:
 static unsigned
 test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f          = NULL;      /* Internal file object pointer */
     h5_stat_size_t empty_size = 0, file_size;
@@ -3598,12 +3597,12 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
     haddr_t        new_sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0;
     hsize_t        sdata_size = 0, new_sdata_size = 0;
-    hbool_t        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd; /* Whether VFD used has a contiguous address space */
 
     TESTING("H5MF_try_shrink() of meta/sdata aggregator: test 1");
 
     /* Skip test when using VFDs that don't use the metadata aggregator */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
     if (contig_addr_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3799,7 +3798,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_aggr_absorb() */
 
@@ -3838,8 +3837,8 @@ error:
 static unsigned
 test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file  = -1; /* File ID */
-    hid_t          fapl1 = -1;
+    hid_t          file  = H5I_INVALID_HID; /* File ID */
+    hid_t          fapl1 = H5I_INVALID_HID;
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size;
@@ -3850,7 +3849,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     htri_t         was_extended;
     H5FS_stat_t    state;
     hsize_t        alignment = 0, mis_align = 0, tmp = 0, accum = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MM_alloc() of file allocation with alignment: test 1");
 
@@ -3858,8 +3857,8 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3914,7 +3913,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (ma_addr || ma_size)
             TEST_ERROR;
 
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         if (mis_align) {
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
@@ -4096,7 +4095,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_eoa() */
 
@@ -4135,7 +4134,7 @@ error:
 static unsigned
 test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t                file = -1;              /* File ID */
+    hid_t                file = H5I_INVALID_HID; /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
     h5_stat_size_t       file_size;
     H5F_t               *f         = NULL; /* Internal file object pointer */
@@ -4144,7 +4143,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     H5FS_stat_t          state;
     htri_t               was_extended;
     hsize_t              alignment = 0, tmp = 0, mis_align = 0;
-    hbool_t              suitable_vfd;
+    bool                 suitable_vfd;
 
     TESTING("H5MF_alloc() of free-space manager with alignment: test 1");
 
@@ -4187,7 +4186,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE50;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -4251,7 +4250,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE8000;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -4308,8 +4307,8 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         if ((file_size = h5_get_file_size(filename, new_fapl)) < 0)
             TEST_ERROR;
@@ -4338,7 +4337,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
             FAIL_STACK_ERROR;
 
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         state.tot_space += TBLOCK_SIZE700;
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
@@ -4391,7 +4390,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_fs() */
 
@@ -4496,7 +4495,7 @@ error:
 static unsigned
 test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;              /* File size */
@@ -4507,7 +4506,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t     ma_addr = HADDR_UNDEF;
     hsize_t     ma_size = 0, mis_align = 0;
     hsize_t     alignment = 0, tmp = 0;
-    hbool_t     suitable_vfd;
+    bool        suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 1");
 
@@ -4515,8 +4514,8 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -4558,7 +4557,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         if (mis_align) {
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
@@ -4667,7 +4666,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_alloc1() */
 
@@ -4760,7 +4759,7 @@ error:
 static unsigned
 test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;              /* File size */
@@ -4770,7 +4769,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t        ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, sdata_size = 0, mis_align = 0;
     hsize_t        alignment = 0, tmp = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 2");
 
@@ -4778,8 +4777,8 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -4821,7 +4820,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -4961,7 +4960,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_alloc2() */
 
@@ -5105,7 +5104,7 @@ error:
 static unsigned
 test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5116,7 +5115,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t        ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, sdata_size = 0, mis_align = 0;
     hsize_t        alignment = 0, tmp = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 3");
 
@@ -5124,8 +5123,8 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5167,7 +5166,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -5347,7 +5346,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_alloc3() */
 
@@ -5420,7 +5419,7 @@ error:
 static unsigned
 test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5430,7 +5429,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t        ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, saved_ma_size = 0;
     hsize_t        alignment = 0, mis_align = 0, tmp = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 4");
 
@@ -5438,8 +5437,8 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5481,7 +5480,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         if (mis_align) {
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
@@ -5563,7 +5562,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_alloc4() */
 
@@ -5638,7 +5637,7 @@ error:
 static unsigned
 test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5649,7 +5648,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t        sdata_addr = HADDR_UNDEF, new_sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0, sdata_size = 0, new_sdata_size = 0;
     hsize_t        alignment = 0, mis_align = 0, tmp = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 5");
 
@@ -5657,8 +5656,8 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5705,7 +5704,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -5793,7 +5792,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_align_alloc5() */
 
@@ -5909,7 +5908,7 @@ error:
 static unsigned
 test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
-    hid_t          file = -1;              /* File ID */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
     H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;
@@ -5920,7 +5919,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF, sdata_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0, sdata_size = 0;
     hsize_t        alignment = 0, mis_align = 0, tmp = 0;
-    hbool_t        suitable_vfd;
+    bool           suitable_vfd;
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 6");
 
@@ -5928,8 +5927,8 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
      *  don't push mis-aligned space fragments on the file free space list.
      *  Also skip test for Direct VFD.
      */
-    suitable_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
-                             HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
+    suitable_vfd = (bool)(HDstrcmp(env_h5_drvr, "stdio") != 0 && HDstrcmp(env_h5_drvr, "split") != 0 &&
+                          HDstrcmp(env_h5_drvr, "multi") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0);
     if (suitable_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -5971,7 +5970,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 in meta_aggr is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -6108,7 +6107,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_mf_align_alloc6() */
 
@@ -6119,15 +6118,15 @@ error:
 static unsigned
 test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t      file        = -1;       /* File ID */
-    hid_t      copied_fapl = -1;       /* FAPL to use for this test */
-    char       filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t     *f = NULL;               /* Internal file object pointer */
+    hid_t      file        = H5I_INVALID_HID; /* File ID */
+    hid_t      copied_fapl = H5I_INVALID_HID; /* FAPL to use for this test */
+    char       filename[FILENAME_LEN];        /* Filename to use */
+    H5F_t     *f = NULL;                      /* Internal file object pointer */
     H5FD_mem_t type;
     haddr_t    addr1, addr2;
     hsize_t    block_size;
     hsize_t    align;
-    hbool_t    split = FALSE, multi = FALSE;
+    bool       split = false, multi = false;
 
     TESTING("H5MF_alloc() bug 1");
 
@@ -6149,9 +6148,9 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 
     /* Check for split or multi driver */
     if (!HDstrcmp(env_h5_drvr, "split"))
-        split = TRUE;
+        split = true;
     else if (!HDstrcmp(env_h5_drvr, "multi"))
-        multi = TRUE;
+        multi = true;
 
     /* Add alignment to member files for split/multi driver */
     if (split || multi) {
@@ -6179,11 +6178,11 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
             hid_t      memb_fapl_arr[H5FD_MEM_NTYPES];
             char      *memb_name[H5FD_MEM_NTYPES];
             haddr_t    memb_addr[H5FD_MEM_NTYPES];
-            hbool_t    relax;
+            bool       relax;
             H5FD_mem_t mt;
 
             /* Get current multi settings */
-            HDmemset(memb_name, 0, sizeof memb_name);
+            memset(memb_name, 0, sizeof memb_name);
             if (H5Pget_fapl_multi(copied_fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
                 TEST_ERROR;
 
@@ -6204,7 +6203,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 
             /* Free memb_name */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-                HDfree(memb_name[mt]);
+                free(memb_name[mt]);
         } /* end else */
     }     /* end if */
 
@@ -6285,7 +6284,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_bug1() */
 
@@ -6297,9 +6296,9 @@ error:
 static unsigned
 test_mf_fs_persist_split(void)
 {
-    hid_t       file = -1;                      /* File ID */
-    hid_t       fcpl = -1;                      /* File creation property list ID */
-    hid_t       fapl = -1;                      /* File access property list ID */
+    hid_t       file = H5I_INVALID_HID;         /* File ID */
+    hid_t       fcpl = H5I_INVALID_HID;         /* File creation property list ID */
+    hid_t       fapl = H5I_INVALID_HID;         /* File access property list ID */
     char        filename[FILENAME_LEN];         /* Filename to use */
     H5F_t      *f = NULL;                       /* Internal file object pointer */
     H5FD_mem_t  type, stype, btype;             /* File allocation type */
@@ -6315,7 +6314,7 @@ test_mf_fs_persist_split(void)
      * with the split file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* File creation property list template */
@@ -6325,7 +6324,7 @@ test_mf_fs_persist_split(void)
          * with the split file driver.
          */
         SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* File creation property list template */
@@ -6342,7 +6341,7 @@ test_mf_fs_persist_split(void)
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -6402,7 +6401,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6426,7 +6425,7 @@ test_mf_fs_persist_split(void)
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (!H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_DRAW free-space manager */
@@ -6486,11 +6485,11 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is not there */
-    if (H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_SUPER is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6530,7 +6529,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6564,18 +6563,18 @@ error:
         H5Pclose(fcpl);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_persist_split() */
 
 #define MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)                                           \
     {                                                                                                        \
         H5FD_mem_t mt;                                                                                       \
-        HDmemset(memb_map, 0, sizeof memb_map);                                                              \
-        HDmemset(memb_fapl, 0, sizeof memb_fapl);                                                            \
-        HDmemset(memb_name, 0, sizeof memb_name);                                                            \
-        HDmemset(memb_addr, 0, sizeof memb_addr);                                                            \
-        HDmemset(sv, 0, sizeof sv);                                                                          \
+        memset(memb_map, 0, sizeof memb_map);                                                                \
+        memset(memb_fapl, 0, sizeof memb_fapl);                                                              \
+        memset(memb_name, 0, sizeof memb_name);                                                              \
+        memset(memb_addr, 0, sizeof memb_addr);                                                              \
+        memset(sv, 0, sizeof sv);                                                                            \
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {                                            \
             memb_map[mt]  = H5FD_MEM_SUPER;                                                                  \
             memb_fapl[mt] = H5P_DEFAULT;                                                                     \
@@ -6612,9 +6611,9 @@ error:
 static unsigned
 test_mf_fs_persist_multi(void)
 {
-    hid_t                file = -1;                      /* File ID */
-    hid_t                fcpl = -1;                      /* File creation property list ID */
-    hid_t                fapl = -1;                      /* File access property list ID */
+    hid_t                file = H5I_INVALID_HID;         /* File ID */
+    hid_t                fcpl = H5I_INVALID_HID;         /* File creation property list ID */
+    hid_t                fapl = H5I_INVALID_HID;         /* File access property list ID */
     char                 filename[FILENAME_LEN];         /* Filename to use */
     H5F_t               *f = NULL;                       /* Internal file object pointer */
     H5FD_mem_t           type, stype, btype, gtype;      /* File allocation type */
@@ -6625,7 +6624,7 @@ test_mf_fs_persist_multi(void)
     haddr_t              gaddr1, gaddr2;                 /* File address for H5FD_MEM_GHEAP */
     haddr_t              tmp_addr;                       /* Temporary variable for address */
     H5FS_section_info_t *node;                           /* Free space section node */
-    htri_t               node_found = FALSE;             /* Indicate section is in free-space */
+    htri_t               node_found = false;             /* Indicate section is in free-space */
     H5FD_mem_t           memb_map[H5FD_MEM_NTYPES];      /* Memory usage map */
     hid_t                memb_fapl[H5FD_MEM_NTYPES];     /* Member access properties */
     char                 sv[H5FD_MEM_NTYPES][64];        /* Name generators */
@@ -6638,21 +6637,21 @@ test_mf_fs_persist_multi(void)
      * with the multi file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* for now, we don't support persistent free space managers
      * with the multi file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* File creation property list template */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
         FAIL_STACK_ERROR;
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -6660,7 +6659,7 @@ test_mf_fs_persist_multi(void)
 
     MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)
 
-    if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
+    if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, true) < 0)
         TEST_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -6720,7 +6719,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6744,7 +6743,7 @@ test_mf_fs_persist_multi(void)
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (!H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_DRAW free-space manager */
@@ -6802,7 +6801,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_SUPER is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6824,11 +6823,11 @@ test_mf_fs_persist_multi(void)
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is not there */
-    if (H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_BTREE is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[btype]))
+    if (!H5_addr_defined(f->shared->fs_addr[btype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_BTREE free-space manager */
@@ -6868,7 +6867,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     /* If H5FD_MEM_SUPER is there, should not find block #1 & #3 */
-    if (H5F_addr_defined(f->shared->fs_addr[type])) {
+    if (H5_addr_defined(f->shared->fs_addr[type])) {
         /* Start up H5FD_MEM_SUPER free-space manager */
         if (H5MF__open_fstype(f, (H5F_mem_page_t)type) < 0)
             FAIL_STACK_ERROR;
@@ -6887,7 +6886,7 @@ test_mf_fs_persist_multi(void)
     }
 
     /* Verify that the H5FD_MEM_GHEAP free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[gtype]))
+    if (!H5_addr_defined(f->shared->fs_addr[gtype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_GHEAP free-space manager */
@@ -6921,7 +6920,7 @@ error:
         H5Pclose(fcpl);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_persist_multi() */
 #endif /* PB_OUT */
@@ -6932,11 +6931,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t       file  = -1;                               /* File ID */
-    hid_t       fcpl  = -1;                               /* File creation property list ID */
-    hid_t       fapl2 = -1;                               /* File access property list ID */
+    hid_t       file  = H5I_INVALID_HID;                  /* File ID */
+    hid_t       fcpl  = H5I_INVALID_HID;                  /* File creation property list ID */
+    hid_t       fapl2 = H5I_INVALID_HID;                  /* File access property list ID */
     char        filename[FILENAME_LEN];                   /* Filename to use */
     H5F_t      *f = NULL;                                 /* Internal file object pointer */
     H5FD_mem_t  type;                                     /* File allocation type */
@@ -6965,12 +6964,12 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
                 FAIL_STACK_ERROR;
             /* Set to paged aggregation and persisting free-space */
-            if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+            if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                 TEST_ERROR;
         }
         else {
             /* Setting: aggregation with persisting free-space */
-            if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+            if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
                 TEST_ERROR;
         }
 
@@ -7022,7 +7021,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
-        if (!H5F_addr_defined(f->shared->fs_addr[tt]))
+        if (!H5_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR;
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -7065,7 +7064,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
-        if (!H5F_addr_defined(f->shared->fs_addr[tt]))
+        if (!H5_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR;
 
         /* Retrieve block #5 from H5FD_MEM_SUPER free-space manager */
@@ -7097,7 +7096,7 @@ error:
         H5Pclose(fcpl);
         H5Pclose(fapl2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_persist() */
 
@@ -7107,11 +7106,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t       file  = -1;                 /* File ID */
-    hid_t       fcpl  = -1;                 /* File creation property list */
-    hid_t       fapl2 = -1;                 /* File access property list */
+    hid_t       file  = H5I_INVALID_HID;    /* File ID */
+    hid_t       fcpl  = H5I_INVALID_HID;    /* File creation property list */
+    hid_t       fapl2 = H5I_INVALID_HID;    /* File access property list */
     char        filename[FILENAME_LEN];     /* Filename to use */
     H5F_t      *f = NULL;                   /* Internal file object pointer */
     H5FD_mem_t  type;                       /* File allocation type */
@@ -7119,7 +7118,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     haddr_t     addr1, addr2, addr3, addr4; /* File address for H5FD_MEM_SUPER */
     haddr_t     addrx;
     H5FD_mem_t  fs_type;
-    hbool_t     contig_addr_vfd;
+    bool        contig_addr_vfd;
 
     if (new_format)
         TESTING("File's free-space is going away with new library format");
@@ -7127,7 +7126,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         TESTING("File's free-space is going away with old library format");
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -7149,7 +7148,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         }
 
         /* Set to aggregation and persisting free-space */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
 
         /* Set the filename to use for this test (dependent on fapl) */
@@ -7200,7 +7199,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
 
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
-        if (H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if (H5_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR;
 
         /* Put block #3 to H5FD_MEM_SUPER free-space manager */
@@ -7219,7 +7218,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
-        if (!H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if (!H5_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR;
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -7231,7 +7230,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if (H5FS_stat_info(f, f->shared->fs_man[fs_type], &fs_stat) < 0)
             FAIL_STACK_ERROR;
 
-        if (!H5F_addr_defined(fs_stat.addr))
+        if (!H5_addr_defined(fs_stat.addr))
             TEST_ERROR;
 
         if (fs_stat.tot_space < TBLOCK_SIZE3)
@@ -7259,7 +7258,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR;
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
-        if (H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if (H5_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR;
 
         /* Closing */
@@ -7286,7 +7285,7 @@ error:
         H5Pclose(fcpl);
         H5Pclose(fapl2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_fs_gone() */
 
@@ -7297,11 +7296,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t                 file  = -1;                               /* File ID */
-    hid_t                 fcpl  = -1;                               /* File creation property list template */
-    hid_t                 fapl2 = -1;                               /* File access property list template */
+    hid_t                 file  = H5I_INVALID_HID;                  /* File ID */
+    hid_t                 fcpl  = H5I_INVALID_HID;                  /* File creation property list template */
+    hid_t                 fapl2 = H5I_INVALID_HID;                  /* File access property list template */
     char                  filename[FILENAME_LEN];                   /* Filename to use */
     H5F_t                *f = NULL;                                 /* Internal file object pointer */
     H5FD_mem_t            type;                                     /* File allocation type */
@@ -7310,7 +7309,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
     H5F_fspace_strategy_t fs_type;                                  /* File space handling strategy */
     hsize_t               fs_threshold;                             /* Free-space section threshold */
     unsigned              fs_persist;                               /* To persist free-space or not */
-    hbool_t               contig_addr_vfd;
+    bool                  contig_addr_vfd;
 
     if (new_format)
         TESTING("File space strategy/persisting/threshold with new library format");
@@ -7318,7 +7317,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
         TESTING("File space strategy/persisting/threshold with old library format");
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -7331,8 +7330,8 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
         if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             FAIL_STACK_ERROR;
 
-    /* Test with TRUE or FALSE for persisting free-space */
-    for (fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
+    /* Test with true or false for persisting free-space */
+    for (fs_persist = false; fs_persist <= true; fs_persist++) {
 
         for (fs_threshold = 0; fs_threshold <= TEST_THRESHOLD10; fs_threshold++) {
 
@@ -7347,7 +7346,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                     FAIL_STACK_ERROR;
 
                 /* Set default file space information */
-                if (H5Pset_file_space_strategy(fcpl, fs_type, (hbool_t)fs_persist, fs_threshold) < 0)
+                if (H5Pset_file_space_strategy(fcpl, fs_type, (bool)fs_persist, fs_threshold) < 0)
                     FAIL_STACK_ERROR;
 
                 /* Create the file to work on */
@@ -7415,7 +7414,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
 
                     if (nsects) {
                         /* Allocate storage for the free space section information */
-                        sect_info = (H5F_sect_info_t *)HDcalloc((size_t)nsects, sizeof(H5F_sect_info_t));
+                        sect_info = (H5F_sect_info_t *)calloc((size_t)nsects, sizeof(H5F_sect_info_t));
 
                         H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
 
@@ -7424,11 +7423,11 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                             if (sect_info[i].size < fs_threshold)
                                 TEST_ERROR;
                         if (sect_info)
-                            HDfree(sect_info);
+                            free(sect_info);
                     }
                 }
                 else {
-                    if (H5F_addr_defined(f->shared->fs_addr[tt]))
+                    if (H5_addr_defined(f->shared->fs_addr[tt]))
                         TEST_ERROR;
                 }
 
@@ -7455,7 +7454,7 @@ error:
         H5Pclose(fapl2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_strat_thres_persist() */
 
@@ -7466,11 +7465,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    hid_t                 file  = -1;                               /* File ID */
-    hid_t                 fcpl  = -1;                               /* File creation property list template */
-    hid_t                 fapl2 = -1;                               /* File access property list template */
+    hid_t                 file  = H5I_INVALID_HID;                  /* File ID */
+    hid_t                 fcpl  = H5I_INVALID_HID;                  /* File creation property list template */
+    hid_t                 fapl2 = H5I_INVALID_HID;                  /* File access property list template */
     char                  filename[FILENAME_LEN];                   /* Filename to use */
     H5F_t                *f = NULL;                                 /* Internal file object pointer */
     H5FD_mem_t            type;                                     /* File allocation type */
@@ -7480,7 +7479,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
     unsigned              fs_persist;                               /* To persist free-space or not */
     H5FS_stat_t           fs_state;                                 /* Information for free-space manager */
     H5FS_stat_t           fs_state_zero;                            /* Information for free-space manager */
-    hbool_t               contig_addr_vfd;
+    bool                  contig_addr_vfd;
 
     if (new_format)
         TESTING("File space merge/shrink for section size < threshold with new library format");
@@ -7488,12 +7487,12 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
         TESTING("File space merge/shrink for section size < threshold with old library format");
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    HDmemset(&fs_state_zero, 0, sizeof(H5FS_stat_t));
+    memset(&fs_state_zero, 0, sizeof(H5FS_stat_t));
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -7503,8 +7502,8 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
         if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             FAIL_STACK_ERROR;
 
-    /* Test with TRUE or FALSE for persisting free-space */
-    for (fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
+    /* Test with true or false for persisting free-space */
+    for (fs_persist = false; fs_persist <= true; fs_persist++) {
         /* Testing for H5F_FSPACE_STRATEGY_FSM_AGGR and H5F_FSPACE_STRATEGY_PAGE strategies only */
         for (fs_type = H5F_FSPACE_STRATEGY_FSM_AGGR; fs_type < H5F_FSPACE_STRATEGY_AGGR; fs_type++) {
 
@@ -7513,7 +7512,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
                 continue;
 
             /* Clear out free-space statistics */
-            HDmemset(&fs_state, 0, sizeof(H5FS_stat_t));
+            memset(&fs_state, 0, sizeof(H5FS_stat_t));
 
             /* Create file-creation template */
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -7618,7 +7617,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
 
             /* Free-space manager should be empty */
             if (!(fs_type == H5F_FSPACE_STRATEGY_PAGE && fs_persist))
-                if (H5F_addr_defined(f->shared->fs_addr[tt]))
+                if (H5_addr_defined(f->shared->fs_addr[tt]))
                     TEST_ERROR;
 
             /* Closing */
@@ -7644,7 +7643,7 @@ error:
         H5Pclose(fapl2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_mf_strat_thres_gone() */
 
@@ -7673,7 +7672,7 @@ error:
 static unsigned
 test_dichotomy(hid_t fapl)
 {
-    hid_t      file = -1;              /* File ID */
+    hid_t      file = H5I_INVALID_HID; /* File ID */
     char       filename[FILENAME_LEN]; /* Filename to use */
     H5F_t     *f = NULL;               /* Internal file object pointer */
     H5FD_mem_t type, stype;
@@ -7735,7 +7734,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_dichotomy() */
 
@@ -7747,18 +7746,18 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
+set_multi_split(hid_t fapl, hsize_t pagesize, bool is_multi_or_split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t      memb_fapl_arr[H5FD_MEM_NTYPES];
     char      *memb_name[H5FD_MEM_NTYPES];
     haddr_t    memb_addr[H5FD_MEM_NTYPES];
-    hbool_t    relax;
+    bool       relax;
     H5FD_mem_t mt;
 
-    HDassert(is_multi_or_split);
+    assert(is_multi_or_split);
 
-    HDmemset(memb_name, 0, sizeof memb_name);
+    memset(memb_name, 0, sizeof memb_name);
 
     /* Get current split settings */
     if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
@@ -7782,7 +7781,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        HDfree(memb_name[mt]);
+        free(memb_name[mt]);
 
     return 0;
 
@@ -7799,22 +7798,20 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t    fid      = -1;   /* File ID */
-    hid_t    fcpl     = -1;   /* File creation property list */
-    hid_t    fapl_new = -1;   /* File access property list ID */
-    H5F_t   *f        = NULL; /* Internal file object pointer */
-    haddr_t  addr2, addr3;    /* Addresses for small metadata blocks */
-    haddr_t  saddr1;          /* Addresses for small raw data blocks */
-    haddr_t  gaddr1;          /* Addresses for large data blocks */
-    hbool_t  split = FALSE, multi = FALSE;
+    hid_t    fid      = H5I_INVALID_HID; /* File ID */
+    hid_t    fcpl     = H5I_INVALID_HID; /* File creation property list */
+    hid_t    fapl_new = H5I_INVALID_HID; /* File access property list ID */
+    H5F_t   *f        = NULL;            /* Internal file object pointer */
+    haddr_t  addr2, addr3;               /* Addresses for small metadata blocks */
+    haddr_t  saddr1;                     /* Addresses for small raw data blocks */
+    haddr_t  gaddr1;                     /* Addresses for large data blocks */
+    bool     split = false, multi = false;
     char     filename[FILENAME_LEN]; /* Filename to use */
     haddr_t  found_addr;             /* Address of the found section */
     unsigned fs_persist;             /* To persist free-space or not */
@@ -7823,9 +7820,9 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
     /* Check for split or multi driver */
     if (!HDstrcmp(env_h5_drvr, "split"))
-        split = TRUE;
+        split = true;
     else if (!HDstrcmp(env_h5_drvr, "multi"))
-        multi = TRUE;
+        multi = true;
 
     if (!multi && !split) {
 
@@ -7839,8 +7836,8 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
             if (set_multi_split(fapl_new, 4096, split) < 0)
                 TEST_ERROR;
 
-        /* Test with TRUE or FALSE for persisting free-space */
-        for (fs_persist = FALSE; fs_persist <= TRUE; fs_persist++) {
+        /* Test with true or false for persisting free-space */
+        for (fs_persist = false; fs_persist <= true; fs_persist++) {
             H5F_mem_page_t fs_type;
 
             /* File creation property list */
@@ -7936,13 +7933,13 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
                 /* Verify that the large generic manager is there */
                 H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
-                if (!H5F_addr_defined(f->shared->fs_addr[fs_type]))
+                if (!H5_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR;
 
                 /* Verify that the small metadata manager is there */
                 H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_OHDR, f->shared->fs_page_size - 1,
                                        (H5F_mem_page_t *)&fs_type);
-                if (!H5F_addr_defined(f->shared->fs_addr[fs_type]))
+                if (!H5_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR;
 
                 /* Set up to use the small metadata manager */
@@ -7960,7 +7957,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     TEST_ERROR;
 
                 /* Verify that the small raw data manager is there */
-                if (!H5F_addr_defined(f->shared->fs_addr[H5F_MEM_PAGE_DRAW]))
+                if (!H5_addr_defined(f->shared->fs_addr[H5F_MEM_PAGE_DRAW]))
                     TEST_ERROR;
 
                 /* Set up to use the small raw data manager */
@@ -8017,7 +8014,7 @@ error:
         H5Pclose(fcpl);
         H5Pclose(fapl_new);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_alloc_xfree() */
@@ -8031,21 +8028,19 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t          fid  = -1;              /* File ID */
-    hid_t          fcpl = -1;              /* File creation property list */
+    hid_t          fid  = H5I_INVALID_HID; /* File ID */
+    hid_t          fcpl = H5I_INVALID_HID; /* File creation property list */
     H5F_t         *f    = NULL;            /* Internal file object pointer */
     haddr_t        addr1;                  /* Address for small metadata block */
     haddr_t        saddr1;                 /* Address for small raw data block */
     haddr_t        gaddr1;                 /* Address for large data block */
-    hbool_t        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     htri_t         status;                 /* status from shrinking */
     h5_stat_size_t file_size;              /* File size */
     char           filename[FILENAME_LEN]; /* Filename to use */
@@ -8053,7 +8048,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: H5MF_try_shrink()");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8065,7 +8060,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Set the strategy to paged aggregation */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
 
         /* Create the file to work on */
@@ -8085,7 +8080,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
 
         /* Couldn't shrink due to the section (remaining space in the page) is in the small metadata
          * free-space manager */
-        if (status == TRUE)
+        if (status == true)
             TEST_ERROR;
 
         /* Allocate a small raw data block with saddr1 */
@@ -8097,7 +8092,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
 
         /* Couldn't shrink due to the section (remaining space in the page) is in the small raw data
          * free-space manager */
-        if (status == TRUE)
+        if (status == true)
             TEST_ERROR;
 
         /* Allocate a large data block with gaddr1 */
@@ -8109,7 +8104,7 @@ test_page_try_shrink(const char *env_h5_drvr, hid_t fapl)
 
         /* Couldn't shrink due to the section (remaining space in the page) is in the large-sized free-space
          * manager */
-        if (status == TRUE)
+        if (status == true)
             TEST_ERROR;
 
         /* Free the block with saddr1--merge to become 1 page, then return to the large manager */
@@ -8148,7 +8143,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_try_shrink() */
@@ -8162,28 +8157,26 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t   fid  = -1;              /* File ID */
-    hid_t   fcpl = -1;              /* File creation property list */
+    hid_t   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl = H5I_INVALID_HID; /* File creation property list */
     H5F_t  *f    = NULL;            /* Internal file object pointer */
     haddr_t addr1, addr2, addr3;    /* Addresses for small metadata blocks */
     haddr_t saddr1;                 /* Address for small raw data block */
-    hbool_t contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
+    bool    contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
     htri_t  was_extended;           /* Whether the block can be extended or not */
     char    filename[FILENAME_LEN]; /* Filename to use */
 
     TESTING("Paged aggregation for file space: H5MF_try_extend() a small block");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                                HDstrcmp(env_h5_drvr, "family") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                             HDstrcmp(env_h5_drvr, "family") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8195,7 +8188,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Set the strategy to paged aggregation */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
 
         /* Create the file to work on */
@@ -8213,7 +8206,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended =
             H5MF_try_extend(f, H5FD_MEM_OHDR, (haddr_t)addr1, (hsize_t)TBLOCK_SIZE98, (hsize_t)3100);
         /* Should succeed */
-        if (was_extended != TRUE)
+        if (was_extended != true)
             TEST_ERROR;
 
         /* Allocate 2 small metadata blocks with addr2 and addr3--will be on another metadata page */
@@ -8235,7 +8228,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_OHDR, (haddr_t)addr1, (hsize_t)TBLOCK_SIZE3198,
                                        (hsize_t)TBLOCK_SIZE100);
         /* Shouldn't succeed--should not cross page boundary */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Try extending the block with addr1 into the free-space section that is big enough to fulfill the
@@ -8243,7 +8236,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_OHDR, (haddr_t)addr1, (hsize_t)TBLOCK_SIZE3198,
                                        (hsize_t)TBLOCK_SIZE50);
         /* Should succeed */
-        if (was_extended != TRUE)
+        if (was_extended != true)
             TEST_ERROR;
 
         /* Free the block with addr1 */
@@ -8258,14 +8251,14 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_OHDR, (haddr_t)addr1, (hsize_t)TBLOCK_SIZE3286,
                                        (hsize_t)TBLOCK_SIZE11);
         /* Shouldn't succeed */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Try extending the block into the threshold with size < H5F_FILE_SPACE_PGEND_META_THRES */
         was_extended = H5MF_try_extend(f, H5FD_MEM_OHDR, (haddr_t)addr1, (hsize_t)TBLOCK_SIZE3286,
                                        (hsize_t)TBLOCK_SIZE2);
         /* Should succeed */
-        if (was_extended != TRUE)
+        if (was_extended != true)
             TEST_ERROR;
 
         /* Free the block with addr3--will merge with the remaining sections to become a page and then free
@@ -8279,14 +8272,14 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)saddr1, (hsize_t)TBLOCK_SIZE4086,
                                        (hsize_t)TBLOCK_SIZE11);
         /* Shouldn't succeed */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Try extending the block not crossing page boundary */
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)saddr1, (hsize_t)TBLOCK_SIZE4086,
                                        (hsize_t)TBLOCK_SIZE10);
         /* Should succeed */
-        if (was_extended != TRUE)
+        if (was_extended != true)
             TEST_ERROR;
 
         /* The extended block is now "large" in size */
@@ -8294,7 +8287,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)saddr1, (hsize_t)TBLOCK_SIZE4096,
                                        (hsize_t)TBLOCK_SIZE10);
         /* Should succeed */
-        if (was_extended != TRUE)
+        if (was_extended != true)
             TEST_ERROR;
 
         /* Try extending the large-sized block */
@@ -8302,7 +8295,7 @@ test_page_small_try_extend(const char *env_h5_drvr, hid_t fapl)
                                        (hsize_t)TBLOCK_SIZE5000);
         /* Should not succeed because the mis-aligned fragment in the page is in the large-sized free-space
          * manager */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Close the file */
@@ -8328,7 +8321,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_small_try_extend() */
@@ -8342,26 +8335,24 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t   fid  = -1;                      /* File ID */
-    hid_t   fcpl = -1;                      /* File creation property list */
+    hid_t   fid  = H5I_INVALID_HID;         /* File ID */
+    hid_t   fcpl = H5I_INVALID_HID;         /* File creation property list */
     H5F_t  *f    = NULL;                    /* Internal file object pointer */
     haddr_t gaddr1, gaddr2, gaddr3, gaddr4; /* Addresses for large data blocks */
-    hbool_t contig_addr_vfd;                /* Whether VFD used has a contiguous address space */
+    bool    contig_addr_vfd;                /* Whether VFD used has a contiguous address space */
     htri_t  was_extended;                   /* Whether the block can be extended or not */
     char    filename[FILENAME_LEN];         /* Filename to use */
 
     TESTING("Paged aggregation for file space: H5MF_try_extend() a large block");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8373,7 +8364,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Set the strategy to paged aggregation */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
 
         /* Create the file to work on */
@@ -8395,7 +8386,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr1, (hsize_t)TBLOCK_SIZE6000,
                                        (hsize_t)TBLOCK_SIZE2192);
         /* Should succeed */
-        if (was_extended != TRUE)
+        if (was_extended != true)
             TEST_ERROR;
 
         /* Allocate a large data block with gaddr2 */
@@ -8408,7 +8399,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr1, (hsize_t)TBLOCK_SIZE8192,
                                        (hsize_t)TBLOCK_SIZE50);
         /* Should not succeed */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Allocate a large data block with gaddr3 */
@@ -8422,7 +8413,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr2, (hsize_t)TBLOCK_SIZE8000,
                                        (hsize_t)TBLOCK_SIZE100);
         /* Should succeed */
-        if (was_extended == FALSE)
+        if (was_extended == false)
             TEST_ERROR;
 
         /* Try extending the block with gaddr2--there is no free-space section big enough to fulfill the
@@ -8430,7 +8421,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr2, (hsize_t)TBLOCK_SIZE8100,
                                        (hsize_t)TBLOCK_SIZE100);
         /* Should not succeed */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Try extending the block with gaddr2--there is a free-space section big enough to fulfill the
@@ -8438,7 +8429,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr2, (hsize_t)TBLOCK_SIZE8100,
                                        (hsize_t)TBLOCK_SIZE90);
         /* Should succeed */
-        if (was_extended == FALSE)
+        if (was_extended == false)
             TEST_ERROR;
 
         /* Try extending the block with gaddr2 */
@@ -8447,7 +8438,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr2, (hsize_t)TBLOCK_SIZE8190,
                                        (hsize_t)TBLOCK_SIZE5);
         /* Should not succeed */
-        if (was_extended == TRUE)
+        if (was_extended == true)
             TEST_ERROR;
 
         /* Allocate a large data block with gaddr4 */
@@ -8465,7 +8456,7 @@ test_page_large_try_extend(const char *env_h5_drvr, hid_t fapl)
         was_extended = H5MF_try_extend(f, H5FD_MEM_DRAW, (haddr_t)gaddr2, (hsize_t)TBLOCK_SIZE8190,
                                        (hsize_t)TBLOCK_SIZE5);
         /* Should succeed */
-        if (was_extended == FALSE)
+        if (was_extended == false)
             TEST_ERROR;
 
         /* Close file */
@@ -8491,7 +8482,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_large_try_extend() */
@@ -8505,19 +8496,17 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_large(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t          fid  = -1;                      /* File ID */
-    hid_t          fcpl = -1;                      /* File creation property list ID */
+    hid_t          fid  = H5I_INVALID_HID;         /* File ID */
+    hid_t          fcpl = H5I_INVALID_HID;         /* File creation property list ID */
     H5F_t         *f    = NULL;                    /* Internal file object pointer */
     haddr_t        gaddr1, gaddr2, gaddr3, gaddr4; /* Addresses for blocks */
-    hbool_t        contig_addr_vfd;                /* Whether VFD used has a contiguous address space */
+    bool           contig_addr_vfd;                /* Whether VFD used has a contiguous address space */
     H5FS_stat_t    fs_stat;                        /* Information for free-space manager */
     h5_stat_size_t file_size;                      /* File size */
     char           filename[FILENAME_LEN];         /* Filename to use */
@@ -8525,7 +8514,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
     TESTING("Paged aggregation for file space: large allocations and de-allocations");
 
     /* Current VFD that does not support continuous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     if (contig_addr_vfd) {
 
@@ -8537,7 +8526,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Set the strategy to paged aggregation */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
 
         /* Create the file to work on */
@@ -8566,7 +8555,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
         /* Allocate a large data block with gaddr3--should be on another page */
         /* Allocate 2 pages + 3808 bytes; 288 bytes in free-space manager */
         gaddr3 = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE12000);
-        if (!H5F_addr_defined(gaddr3))
+        if (!H5_addr_defined(gaddr3))
             TEST_ERROR;
 
         /* Free the block with gaddr2 */
@@ -8646,7 +8635,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_large() */
@@ -8660,31 +8649,29 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_small(const char *env_h5_drvr, hid_t fapl)
 {
-    hid_t       fid  = -1;                  /* File ID */
-    hid_t       fcpl = -1;                  /* File creation property list */
+    hid_t       fid  = H5I_INVALID_HID;     /* File ID */
+    hid_t       fcpl = H5I_INVALID_HID;     /* File creation property list */
     H5F_t      *f    = NULL;                /* Internal file object pointer */
     haddr_t     addr2, addr3, addr4, addr5; /* Addresses for blocks */
     haddr_t     addr9, addr10, addr11;      /* Address for small metadata blocks */
     haddr_t     saddr1, saddr2;             /* Addresses for small raw data blocks */
     H5FS_stat_t fs_stat;                    /* Information for free-space manager */
     char        filename[FILENAME_LEN];     /* Filename to use */
-    hbool_t     multi = FALSE, split = FALSE, family = FALSE;
+    bool        multi = false, split = false, family = false;
 
     TESTING("Paged aggregation for file space: small allocations and de-allocations");
 
     if (!HDstrcmp(env_h5_drvr, "split"))
-        split = TRUE;
+        split = true;
     else if (!HDstrcmp(env_h5_drvr, "multi"))
-        multi = TRUE;
+        multi = true;
     else if (!HDstrcmp(env_h5_drvr, "family"))
-        family = TRUE;
+        family = true;
 
     if (!multi && !split) {
 
@@ -8696,7 +8683,7 @@ test_page_small(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Set the strategy to paged aggregation */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
 
         /* Create the file to work on */
@@ -8818,7 +8805,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_small() */
@@ -8832,32 +8819,30 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Vailin Choi; Jan 2013
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 {
 
-    hid_t   fid      = -1;          /* File ID */
-    hid_t   fcpl     = -1;          /* File creation property list ID */
-    hid_t   fcpl2    = -1;          /* File creation property list ID */
-    hid_t   fapl_new = -1;          /* File access property list ID */
-    H5F_t  *f        = NULL;        /* Internal file object pointer */
-    haddr_t addr1, addr2;           /* Addresses for small metadata blocks */
-    haddr_t saddr1, saddr2;         /* Addresses for small raw data blocks */
-    haddr_t gaddr1, gaddr2;         /* Addresses for blocks */
-    char    filename[FILENAME_LEN]; /* Filename to use */
-    hbool_t split = FALSE, multi = FALSE;
+    hid_t   fid      = H5I_INVALID_HID; /* File ID */
+    hid_t   fcpl     = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t   fcpl2    = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t   fapl_new = H5I_INVALID_HID; /* File access property list ID */
+    H5F_t  *f        = NULL;            /* Internal file object pointer */
+    haddr_t addr1, addr2;               /* Addresses for small metadata blocks */
+    haddr_t saddr1, saddr2;             /* Addresses for small raw data blocks */
+    haddr_t gaddr1, gaddr2;             /* Addresses for blocks */
+    char    filename[FILENAME_LEN];     /* Filename to use */
+    bool    split = false, multi = false;
 
     TESTING("Paged aggregation and H5Pset_alignment: verify proper alignment is used");
 
     /* Check for split or multi driver */
     if (!HDstrcmp(env_h5_drvr, "split"))
-        split = TRUE;
+        split = true;
     else if (!HDstrcmp(env_h5_drvr, "multi"))
-        multi = TRUE;
+        multi = true;
 
     if (!multi && !split) {
 
@@ -8886,7 +8871,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             hid_t      memb_fapl_arr[H5FD_MEM_NTYPES];
             char      *memb_name[H5FD_MEM_NTYPES];
             haddr_t    memb_addr[H5FD_MEM_NTYPES];
-            hbool_t    relax;
+            bool       relax;
             H5FD_mem_t mt;
 
             /* Create fapl */
@@ -8897,7 +8882,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             if (H5Pset_alignment(memb_fapl, 0, (hsize_t)TEST_ALIGN16) < 0)
                 TEST_ERROR;
 
-            HDmemset(memb_name, 0, sizeof memb_name);
+            memset(memb_name, 0, sizeof memb_name);
 
             if (split) {
                 /* Set split driver with new FAPLs */
@@ -8941,7 +8926,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
             /* Free memb_name */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-                HDfree(memb_name[mt]);
+                free(memb_name[mt]);
 
             /* Close memb_fapl */
             if (H5Pclose(memb_fapl) < 0)
@@ -8954,7 +8939,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
         /* Set the strategy to paged aggregation and persisting free space */
         /* The alignment to use will be the library's default file space page size */
-        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
             TEST_ERROR;
 
         /* Create the file to work on */
@@ -9067,7 +9052,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR;
 
         /* Set strategy to H5F_FSPACE_STRATEGY_AGGR but meta/raw data block is 0 as set in fapl_new */
-        if (H5Pset_file_space_strategy(fcpl2, H5F_FSPACE_STRATEGY_AGGR, FALSE, (hsize_t)1) < 0)
+        if (H5Pset_file_space_strategy(fcpl2, H5F_FSPACE_STRATEGY_AGGR, false, (hsize_t)1) < 0)
             TEST_ERROR;
 
         /* fapl_new has latest format, H5Pset_alignment set, and disable meta/raw block */
@@ -9133,7 +9118,7 @@ error:
         H5Pclose(fcpl);
         H5Pclose(fapl_new);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 
 } /* test_page_alignment() */
@@ -9141,12 +9126,12 @@ error:
 int
 main(void)
 {
-    hid_t       fapl     = -1;          /* File access property list for data files */
-    hid_t       new_fapl = -1;          /* File access property list for alignment & aggr setting */
-    unsigned    nerrors  = 0;           /* Cumulative error count */
-    test_type_t curr_test;              /* Current test being worked on */
-    const char *env_h5_drvr;            /* File Driver value from environment */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    hid_t       fapl     = H5I_INVALID_HID; /* File access property list for data files */
+    hid_t       new_fapl = H5I_INVALID_HID; /* File access property list for alignment & aggr setting */
+    unsigned    nerrors  = 0;               /* Cumulative error count */
+    test_type_t curr_test;                  /* Current test being worked on */
+    const char *env_h5_drvr;                /* File Driver value from environment */
+    bool        api_ctx_pushed = false;     /* Whether API context pushed */
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
@@ -9160,7 +9145,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Make a copy of the FAPL before adjusting the alignment */
     if ((new_fapl = H5Pcopy(fapl)) < 0)
@@ -9221,32 +9206,32 @@ main(void)
     } /* end for */
 
     /* For old and new format--interaction with temporary file space allocation */
-    nerrors += test_mf_tmp(env_h5_drvr, fapl, FALSE);
-    nerrors += test_mf_tmp(env_h5_drvr, fapl, TRUE);
+    nerrors += test_mf_tmp(env_h5_drvr, fapl, false);
+    nerrors += test_mf_tmp(env_h5_drvr, fapl, true);
 
     /* For old and new format--free-space merge/shrunk away */
 
     /* Temporary: modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_fs_gone(env_h5_drvr, fapl, FALSE);
-    nerrors += test_mf_fs_gone(env_h5_drvr, fapl, TRUE);
+    nerrors += test_mf_fs_gone(env_h5_drvr, fapl, false);
+    nerrors += test_mf_fs_gone(env_h5_drvr, fapl, true);
 
     /* Temporary: modify to skip testing multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_strat_thres_gone(env_h5_drvr, fapl, FALSE);
-    nerrors += test_mf_strat_thres_gone(env_h5_drvr, fapl, TRUE);
+    nerrors += test_mf_strat_thres_gone(env_h5_drvr, fapl, false);
+    nerrors += test_mf_strat_thres_gone(env_h5_drvr, fapl, true);
 
     /* For old and new format--persisting free-space */
 
     /* Temporary: Modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_fs_persist(env_h5_drvr, fapl, FALSE);
-    nerrors += test_mf_fs_persist(env_h5_drvr, fapl, TRUE);
+    nerrors += test_mf_fs_persist(env_h5_drvr, fapl, false);
+    nerrors += test_mf_fs_persist(env_h5_drvr, fapl, true);
 
     /* Temporary: modify to skip testing for multi/split driver:
          fail file create when persisting free-space or using paged aggregation strategy */
-    nerrors += test_mf_strat_thres_persist(env_h5_drvr, fapl, FALSE);
-    nerrors += test_mf_strat_thres_persist(env_h5_drvr, fapl, TRUE);
+    nerrors += test_mf_strat_thres_persist(env_h5_drvr, fapl, false);
+    nerrors += test_mf_strat_thres_persist(env_h5_drvr, fapl, true);
 
     /* Temporary skipped for multi/split drivers:
          fail file create when persisting free-space or using paged aggregation strategy */
@@ -9277,9 +9262,9 @@ main(void)
     h5_cleanup(FILENAME, fapl);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     if (nerrors)
         goto error;
@@ -9294,10 +9279,10 @@ error:
         H5Pclose(fapl);
         H5Pclose(new_fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return (1);
 } /* main() */

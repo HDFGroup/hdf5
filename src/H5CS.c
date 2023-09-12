@@ -71,9 +71,6 @@ H5CS_t H5CS_stack_g[1];
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              February 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 static H5CS_t *
@@ -90,10 +87,10 @@ H5CS__get_stack(void)
         fstack = (H5CS_t *)LocalAlloc(
             LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
 #else
-        fstack = (H5CS_t *)HDmalloc(
-            sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
+        fstack =
+            (H5CS_t *)malloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
 #endif /* H5_HAVE_WIN_THREADS */
-        HDassert(fstack);
+        assert(fstack);
 
         /* Set the thread-specific info */
         fstack->nused  = 0;
@@ -118,9 +115,6 @@ H5CS__get_stack(void)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, February 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -133,21 +127,21 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(fstack);
+    assert(fstack);
 
     /* Default to outputting information to stderr */
     if (!stream)
         stream = stderr;
 
-    HDfprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
+    fprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
-    HDfprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
+    fprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
-        HDfprintf(stream, "  Back trace follows.");
+        fprintf(stream, "  Back trace follows.");
     HDfputc('\n', stream);
 
     for (i = fstack->nused - 1; i >= 0; --i)
-        HDfprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);
+        fprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_print_stack() */
@@ -160,9 +154,6 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, February 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -174,19 +165,19 @@ H5CS_push(const char *func_name)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(fstack);
-    HDassert(fstack->nused <= fstack->nalloc);
-    HDassert(func_name);
+    assert(fstack);
+    assert(fstack->nused <= fstack->nalloc);
+    assert(func_name);
 
     /* Check if we need to expand the stack of records */
     if (fstack->nused == fstack->nalloc) {
         size_t na = MAX((fstack->nalloc * 2), H5CS_MIN_NSLOTS);
 
         /* Don't use H5MM_realloc here */
-        const char **x = (const char **)HDrealloc(fstack->rec, na * sizeof(const char *));
+        const char **x = (const char **)realloc(fstack->rec, na * sizeof(const char *));
 
         /* (Avoid returning an error from this routine, currently -QAK) */
-        HDassert(x);
+        assert(x);
         fstack->rec    = x;
         fstack->nalloc = na;
     } /* end if */
@@ -205,9 +196,6 @@ H5CS_push(const char *func_name)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, February 6, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -219,13 +207,13 @@ H5CS_pop(void)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(fstack);
-    HDassert(fstack->nused > 0);
+    assert(fstack);
+    assert(fstack->nused > 0);
 
     /* Pop the function. */
     fstack->nused--;
 
-    FUNC_LEAVE_NOAPI_NOFS(SUCCEED);
+    FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_pop() */
 
 /*-------------------------------------------------------------------------
@@ -234,9 +222,6 @@ H5CS_pop(void)
  * Purpose:	Makes a copy of the current stack
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, August 9, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -252,18 +237,18 @@ H5CS_copy_stack(void)
     FUNC_ENTER_NOAPI_NOFS
 
     /* Sanity check */
-    HDassert(old_stack);
+    assert(old_stack);
 
     /* Allocate a new stack */
     /* (Don't use library allocate code, since this code stack supports it) */
-    if (NULL == (new_stack = HDcalloc(1, sizeof(H5CS_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack")
-    if (NULL == (new_stack->rec = HDcalloc(old_stack->nused, sizeof(const char *))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack records")
+    if (NULL == (new_stack = calloc(1, sizeof(H5CS_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack");
+    if (NULL == (new_stack->rec = calloc(old_stack->nused, sizeof(const char *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack records");
 
     /* Copy pointers on old stack to new one */
     /* (Strings don't need to be duplicated, they are statically allocated) */
-    HDmemcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
+    H5MM_memcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
     new_stack->nused = new_stack->nalloc = old_stack->nused;
 
     /* Set the return value */
@@ -280,9 +265,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, August 9, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -294,18 +276,18 @@ H5CS_close_stack(H5CS_t *stack)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(stack);
+    assert(stack);
 
     /* Free stack */
     /* The function name string are statically allocated (by the compiler)
      * and are not allocated, so there's no need to free them.
      */
     if (stack->rec) {
-        HDfree(stack->rec);
+        free(stack->rec);
         stack->rec = NULL;
     } /* end if */
     if (stack)
-        HDfree(stack);
+        free(stack);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_close_stack() */

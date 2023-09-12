@@ -23,8 +23,6 @@
 # True errors in the first program will be detected as errors in the
 # second program, so watch out for that.
 #
-# Programmer:   Dana Robinson
-#               Fall 2018
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then

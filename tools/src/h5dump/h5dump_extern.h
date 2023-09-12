@@ -52,7 +52,7 @@ extern table_t            *group_table, *dset_table, *type_table;
 
 extern unsigned    dump_indent; /* how far in to indent the line */
 extern int         unamedtype;  /* shared datatype with no name */
-extern hbool_t     hit_elink;   /* whether we have traversed an external link */
+extern bool        hit_elink;   /* whether we have traversed an external link */
 extern size_t      prefix_len;
 extern char       *prefix;
 extern const char *fp_format;

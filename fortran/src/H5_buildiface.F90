@@ -38,9 +38,6 @@
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! AUTHOR
-!  M. Scot Breitenfeld
-!
 !*****
 
 #include <H5config_f.inc>
@@ -424,23 +421,6 @@ PROGRAM H5_buildiface
 ! Outputs:
 !  hdferr      - \fortran_error
 !
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!  dims parameter was added to make code portable;
-!  Aprile 4, 2001
-!
-!  Changed buf intent to INOUT to be consistent
-!  with how the C functions handles it. The pg
-!  compiler will return 0 if a buf value is not set.
-!  February, 2008
-!
 ! NOTES
 !  This function is overloaded to write INTEGER,
 !  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
@@ -551,23 +531,6 @@ PROGRAM H5_buildiface
 !  buf 	       - Data buffer; may be a scalar or an array
 !  hdferr      - \fortran_error
 !
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces are added for
-!  called C functions (it is needed for Windows
-!  port).  February 27, 2001
-!
-!  dims parameter was added to make code portable;
-!  Aprile 4, 2001
-!
-!  Changed buf intent to INOUT to be consistent
-!  with how the C functions handles it. The pg
-!  compiler will return 0 if a buf value is not set.
-!  February, 2008
-!
 ! NOTES
 !  This function is overloaded to write INTEGER,
 !  REAL, REAL(KIND=C_DOUBLE) and CHARACTER buffers
@@ -677,20 +640,6 @@ PROGRAM H5_buildiface
 !		mem_space_id	- memory dataspace identifier
 !		file_space_id 	- file dataspace identifier
 !		xfer_prp	- transfer property list identifier
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  February 28, 2001
-!
-!  dims parameter was added to make code portable;
-!  n parameter was replaced with dims parameter in
-!  the h5dwrite_reference_obj and h5dwrite_reference_dsetreg
-!  functions.  April 2, 2001
 !
 ! NOTES
 !  This function is overloaded to read INTEGER,
@@ -941,7 +890,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr '
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr '
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
-     WRITE(11,'(A)') '    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '    hdferr = INT(h5pset_fill_value(prp_id, type_id, f_ptr))'
      WRITE(11,'(A)') '  END SUBROUTINE h5pset_fill_value_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 
@@ -963,7 +912,7 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
      WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
      WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
-     WRITE(11,'(A)') '    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '    hdferr = INT(h5pget_fill_value(prp_id, type_id, f_ptr))'
      WRITE(11,'(A)') '  END SUBROUTINE h5pget_fill_value_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 

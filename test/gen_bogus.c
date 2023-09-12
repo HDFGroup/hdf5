@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Apr 17, 2007
- *
  * Purpose:     This program is run to generate an HDF5 data file with several
  *              datasets that have "bogus" messages in their object header.
  */
@@ -26,12 +23,12 @@
 #define FILENAME "tbogus.h5"
 #endif /* H5O_ENABLE_BOGUS */
 
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
+#ifndef true
+#define true 1
+#endif /* true */
+#ifndef false
+#define false 0
+#endif /* false */
 
 #ifdef H5O_ENABLE_BOGUS
 
@@ -43,10 +40,10 @@
 static int
 generate_datasets(hid_t loc_id, unsigned bogus_id)
 {
-    hid_t   sid         = -1; /* Dataspace ID */
-    hid_t   dcpl        = -1; /* Dataset creation property list ID */
-    hid_t   did         = -1; /* Dataset ID */
-    uint8_t bogus_flags = 0;  /* Flags for bogus message */
+    hid_t   sid         = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dcpl        = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   did         = H5I_INVALID_HID; /* Dataset ID */
+    uint8_t bogus_flags = 0;               /* Flags for bogus message */
 
     /* Create dataspace for datasets */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
@@ -133,7 +130,7 @@ error:
         H5Sclose(sid);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* generate_datasets() */
@@ -143,8 +140,8 @@ int
 main(void)
 {
 #ifdef H5O_ENABLE_BOGUS
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group ID */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group ID */
 
     /* Create file for test datasets */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -177,7 +174,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 #else  /* H5O_ENABLE_BOGUS */
     HDputs("H5O_ENABLE_BOGUS compiler macro not defined!");
 #endif /* H5O_ENABLE_BOGUS */

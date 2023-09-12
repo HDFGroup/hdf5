@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Tuesday, June 17, 2008
- */
 #include "h5test.h"
 
 /*
@@ -139,13 +136,13 @@ struct earray_test_param_t {
 
 /* Flush depend test context */
 typedef struct earray_flush_depend_ctx_t {
-    hbool_t base_obj;      /* Flag to indicate that base object has been flushed */
-    hbool_t idx0_obj;      /* Flag to indicate that index 0's object has been flushed */
-    hbool_t idx0_elem;     /* Flag to indicate that index 0's element has been flushed */
-    hbool_t idx1_obj;      /* Flag to indicate that index 1's object has been flushed */
-    hbool_t idx1_elem;     /* Flag to indicate that index 1's element has been flushed */
-    hbool_t idx10000_obj;  /* Flag to indicate that index 10000's object has been flushed */
-    hbool_t idx10000_elem; /* Flag to indicate that index 10000's element has been flushed */
+    bool base_obj;      /* Flag to indicate that base object has been flushed */
+    bool idx0_obj;      /* Flag to indicate that index 0's object has been flushed */
+    bool idx0_elem;     /* Flag to indicate that index 0's element has been flushed */
+    bool idx1_obj;      /* Flag to indicate that index 1's object has been flushed */
+    bool idx1_elem;     /* Flag to indicate that index 1's element has been flushed */
+    bool idx10000_obj;  /* Flag to indicate that index 10000's object has been flushed */
+    bool idx10000_elem; /* Flag to indicate that index 10000's element has been flushed */
 } earray_flush_depend_ctx_t;
 
 /* Extensible array test cache object */
@@ -161,7 +158,7 @@ typedef struct earray_test_t {
 /* Local prototypes */
 
 /* Local variables */
-const char *FILENAME[] = {"earray", "earray_tmp", NULL};
+static const char *FILENAME[] = {"earray", "earray_tmp", NULL};
 
 /* Filename to use for all tests */
 char filename_g[EARRAY_FILENAME_LEN];
@@ -177,16 +174,13 @@ h5_stat_size_t empty_size_g;
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 21, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
 init_cparam(H5EA_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     /* General parameters */
     cparam->cls                       = H5EA_CLS_TEST;
@@ -210,9 +204,6 @@ init_cparam(H5EA_create_t *cparam)
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, September 25, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -223,14 +214,14 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
     size_t  u;          /* Local index variable */
 
     /* Wipe out background */
-    HDmemset(tparam, 0, sizeof(*tparam));
+    memset(tparam, 0, sizeof(*tparam));
 
     /* Compute general information */
     tparam->nsblks = 1 + (cparam->max_nelmts_bits - H5VM_log2_of2(cparam->data_blk_min_elmts));
 
     /* Allocate information for each super block */
-    tparam->sblk_info = (H5EA_sblk_info_t *)HDmalloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
-    HDassert(tparam->sblk_info);
+    tparam->sblk_info = (H5EA_sblk_info_t *)malloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
+    assert(tparam->sblk_info);
 
     /* Compute information about each super block */
     start_idx  = 0;
@@ -257,16 +248,13 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, September 25, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
 finish_tparam(earray_test_param_t *tparam)
 {
     /* Release super block information */
-    HDfree(tparam->sblk_info);
+    free(tparam->sblk_info);
     tparam->sblk_info = NULL;
 
     return (0);
@@ -279,9 +267,6 @@ finish_tparam(earray_test_param_t *tparam)
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -315,9 +300,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 21, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -331,64 +313,62 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
 
     /* Compare information */
     if (earray_stats.stored.max_idx_set != state->max_idx_set) {
-        HDfprintf(stdout,
-                  "earray_stats.stored.max_idx_set = %" PRIuHSIZE ", state->max_idx_set = %" PRIuHSIZE "\n",
-                  earray_stats.stored.max_idx_set, state->max_idx_set);
+        fprintf(stdout,
+                "earray_stats.stored.max_idx_set = %" PRIuHSIZE ", state->max_idx_set = %" PRIuHSIZE "\n",
+                earray_stats.stored.max_idx_set, state->max_idx_set);
         TEST_ERROR;
     } /* end if */
     if (earray_stats.stored.nelmts != state->nelmts) {
-        HDfprintf(stdout, "earray_stats.stored.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
-                  earray_stats.stored.nelmts, state->nelmts);
+        fprintf(stdout, "earray_stats.stored.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+                earray_stats.stored.nelmts, state->nelmts);
         TEST_ERROR;
     } /* end if */
     if (earray_stats.computed.hdr_size != state->hdr_size) {
-        HDfprintf(stdout,
-                  "earray_stats.computed.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
-                  earray_stats.computed.hdr_size, state->hdr_size);
+        fprintf(stdout, "earray_stats.computed.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+                earray_stats.computed.hdr_size, state->hdr_size);
         TEST_ERROR;
     } /* end if */
     if (earray_stats.computed.nindex_blks != state->nindex_blks) {
-        HDfprintf(stdout,
-                  "earray_stats.computed.nindex_blks = %" PRIuHSIZE ", state->nindex_blks = %" PRIuHSIZE "\n",
-                  earray_stats.computed.nindex_blks, state->nindex_blks);
+        fprintf(stdout,
+                "earray_stats.computed.nindex_blks = %" PRIuHSIZE ", state->nindex_blks = %" PRIuHSIZE "\n",
+                earray_stats.computed.nindex_blks, state->nindex_blks);
         TEST_ERROR;
     } /* end if */
     if (earray_stats.computed.index_blk_size != state->index_blk_size) {
-        HDfprintf(stdout,
-                  "earray_stats.computed.index_blk_size = %" PRIuHSIZE ", state->index_blk_size = %" PRIuHSIZE
-                  "\n",
-                  earray_stats.computed.index_blk_size, state->index_blk_size);
+        fprintf(stdout,
+                "earray_stats.computed.index_blk_size = %" PRIuHSIZE ", state->index_blk_size = %" PRIuHSIZE
+                "\n",
+                earray_stats.computed.index_blk_size, state->index_blk_size);
         TEST_ERROR;
     } /* end if */
     if (earray_stats.stored.ndata_blks != state->ndata_blks) {
-        HDfprintf(stdout,
-                  "earray_stats.stored.ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n",
-                  earray_stats.stored.ndata_blks, state->ndata_blks);
+        fprintf(stdout,
+                "earray_stats.stored.ndata_blks = %" PRIuHSIZE ", state->ndata_blks = %" PRIuHSIZE "\n",
+                earray_stats.stored.ndata_blks, state->ndata_blks);
         TEST_ERROR;
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if (earray_stats.stored.data_blk_size != state->data_blk_size) {
-        HDfprintf(stdout,
-                  "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE
-                  "\n",
-                  earray_stats.stored.data_blk_size, state->data_blk_size);
+        fprintf(stdout,
+                "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE "\n",
+                earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR;
     }  /* end if */
 #endif /* NOT_YET */
     if (earray_stats.stored.nsuper_blks != state->nsuper_blks) {
-        HDfprintf(stdout,
-                  "earray_stats.stored.nsuper_blks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n",
-                  earray_stats.stored.nsuper_blks, state->nsuper_blks);
+        fprintf(stdout,
+                "earray_stats.stored.nsuper_blks = %" PRIuHSIZE ", state->nsuper_blks = %" PRIuHSIZE "\n",
+                earray_stats.stored.nsuper_blks, state->nsuper_blks);
         TEST_ERROR;
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
     if (earray_stats.stored.super_blk_size != state->super_blk_size) {
-        HDfprintf(stdout,
-                  "earray_stats.stored.super_blk_size = %" PRIuHSIZE ", state->super_blk_size = %" PRIuHSIZE
-                  "\n",
-                  earray_stats.stored.super_blk_size, state->super_blk_size);
+        fprintf(stdout,
+                "earray_stats.stored.super_blk_size = %" PRIuHSIZE ", state->super_blk_size = %" PRIuHSIZE
+                "\n",
+                earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR;
     }  /* end if */
 #endif /* NOT_YET */
@@ -407,9 +387,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -468,9 +445,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -491,9 +465,9 @@ create_array(H5F_t *f, const H5EA_create_t *cparam, H5EA_t **ea, haddr_t *ea_add
         TEST_ERROR;
     if (H5EA_get_addr(*ea, ea_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(*ea_addr))
+    if (!H5_addr_defined(*ea_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;
     if (check_stats(*ea, &state))
         TEST_ERROR;
@@ -513,9 +487,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -524,7 +495,7 @@ verify_cparam(const H5EA_t *ea, const H5EA_create_t *cparam)
     H5EA_create_t test_cparam; /* Creation parameters for array */
 
     /* Retrieve creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5EA_create_t));
+    memset(&test_cparam, 0, sizeof(H5EA_create_t));
     if (H5EA__get_cparam_test(ea, &test_cparam) < 0)
         FAIL_STACK_ERROR;
 
@@ -547,9 +518,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -593,18 +561,15 @@ error:
  * Return:    Success: 0
  *        Failure: 1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August  7, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5EA_t *ea      = NULL;        /* Extensible array wrapper */
-    haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -620,13 +585,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         H5EA_create_t test_cparam; /* Creation parameters for array */
 
         /* Set invalid element size */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -637,13 +602,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements bits */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_nelmts_bits = 0;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -653,13 +618,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             TEST_ERROR;
         } /* end if */
 
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_nelmts_bits = 65;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -670,13 +635,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid min. # of data block pointers in super blocks */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 0;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -685,13 +650,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             /* Indicate error */
             TEST_ERROR;
         } /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 1;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -700,13 +665,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             /* Indicate error */
             TEST_ERROR;
         } /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.sup_blk_min_data_ptrs = 6;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -717,13 +682,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid min. # of elements per data block */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.data_blk_min_elmts = 0;
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -735,14 +700,14 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
 
         /* Set invalid max. # of elements per data block page bits */
         if (test_cparam.idx_blk_elmts > 0) {
-            HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+            memcpy(&test_cparam, cparam, sizeof(test_cparam));
             test_cparam.max_dblk_page_nelmts_bits =
                 (uint8_t)(H5VM_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1);
             H5E_BEGIN_TRY
             {
                 ea = H5EA_create(f, &test_cparam, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ea) {
                 /* Close opened extensible array */
                 H5EA_close(ea);
@@ -752,14 +717,14 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
                 TEST_ERROR;
             } /* end if */
         }     /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 4; /* corresponds to 16 elements in data block page, which is
                                                       less than the 64 elements for the default settings */
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -768,13 +733,13 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             /* Indicate error */
             TEST_ERROR;
         } /* end if */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(test_cparam.max_nelmts_bits + 1);
         H5E_BEGIN_TRY
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -825,7 +790,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_create() */
@@ -838,18 +803,15 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5EA_t *ea      = NULL;        /* Extensible array wrapper */
-    haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -896,7 +858,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_reopen() */
@@ -909,21 +871,18 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    hid_t   file2   = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5F_t  *f2      = NULL;        /* Internal file object pointer */
-    H5EA_t *ea      = NULL;        /* Extensible array wrapper */
-    H5EA_t *ea2     = NULL;        /* Extensible array wrapper */
-    haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    hid_t   file2   = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5F_t  *f2      = NULL;            /* Internal file object pointer */
+    H5EA_t *ea      = NULL;            /* Extensible array wrapper */
+    H5EA_t *ea2     = NULL;            /* Extensible array wrapper */
+    haddr_t ea_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -1004,7 +963,7 @@ error:
         H5Fclose(file);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice() */
@@ -1019,19 +978,16 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, December 18, 2015
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
     char    filename_tmp[EARRAY_FILENAME_LEN]; /* Temporary file name */
-    hid_t   file    = -1;                      /* File ID */
-    hid_t   file2   = -1;                      /* File ID */
-    hid_t   file0   = -1;                      /* File ID */
-    hid_t   file00  = -1;                      /* File ID */
+    hid_t   file    = H5I_INVALID_HID;         /* File ID */
+    hid_t   file2   = H5I_INVALID_HID;         /* File ID */
+    hid_t   file0   = H5I_INVALID_HID;         /* File ID */
+    hid_t   file00  = H5I_INVALID_HID;         /* File ID */
     H5F_t  *f       = NULL;                    /* Internal file object pointer */
     H5F_t  *f2      = NULL;                    /* Internal file object pointer */
     H5EA_t *ea      = NULL;                    /* Extensible array wrapper */
@@ -1146,7 +1102,7 @@ error:
         H5Fclose(file0);
         H5Fclose(file00);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice_diff() */
@@ -1159,20 +1115,17 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
-    hid_t          file    = -1;          /* File ID */
-    H5F_t         *f       = NULL;        /* Internal file object pointer */
-    H5EA_t        *ea      = NULL;        /* Extensible array wrapper */
-    H5EA_t        *ea2     = NULL;        /* Extensible array wrapper */
-    haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
-    h5_stat_size_t file_size;             /* File size, after deleting array */
+    hid_t          file    = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f       = NULL;            /* Internal file object pointer */
+    H5EA_t        *ea      = NULL;            /* Extensible array wrapper */
+    H5EA_t        *ea2     = NULL;            /* Extensible array wrapper */
+    haddr_t        ea_addr = HADDR_UNDEF;     /* Array address in file */
+    h5_stat_size_t file_size;                 /* File size, after deleting array */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -1211,7 +1164,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     {
         ea2 = H5EA_open(f, ea_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ea2) {
         /* Close opened array */
         H5EA_close(ea2);
@@ -1234,7 +1187,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     {
         ea = H5EA_open(f, ea_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ea) {
         /* Close opened array */
         H5EA_close(ea);
@@ -1269,7 +1222,7 @@ error:
             H5EA_close(ea2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_delete_open() */
@@ -1288,9 +1241,6 @@ typedef struct eiter_fw_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Thursday, October  2, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1300,8 +1250,8 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
     eiter_fw_t *eiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_fw_t *)HDmalloc(sizeof(eiter_fw_t));
-    HDassert(eiter);
+    eiter = (eiter_fw_t *)malloc(sizeof(eiter_fw_t));
+    assert(eiter);
 
     /* Initialize the element iteration object */
     eiter->idx           = 0;
@@ -1319,9 +1269,6 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1331,7 +1278,7 @@ eiter_fw_next(void *in_eiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx++;
@@ -1347,9 +1294,6 @@ eiter_fw_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -1358,7 +1302,7 @@ eiter_fw_max(const void *in_eiter)
     const eiter_fw_t *eiter = (const eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)(eiter->idx - 1));
@@ -1372,9 +1316,6 @@ eiter_fw_max(const void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1384,10 +1325,10 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
     eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(cparam);
-    HDassert(tparam);
-    HDassert(state);
+    assert(eiter);
+    assert(cparam);
+    assert(tparam);
+    assert(state);
 
     /* Compute the state of the extensible array */
     state->hdr_size       = EA_HDR_SIZE;
@@ -1432,19 +1373,16 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, October  2, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
 eiter_fw_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_fw_term() */
@@ -1476,9 +1414,6 @@ typedef struct eiter_rv_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1487,8 +1422,8 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
     eiter_rv_t *eiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rv_t *)HDmalloc(sizeof(eiter_rv_t));
-    HDassert(eiter);
+    eiter = (eiter_rv_t *)malloc(sizeof(eiter_rv_t));
+    assert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->idx = cnt - 1;
@@ -1519,9 +1454,6 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1531,7 +1463,7 @@ eiter_rv_next(void *in_eiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx--;
@@ -1547,9 +1479,6 @@ eiter_rv_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -1558,7 +1487,7 @@ eiter_rv_max(const void *in_eiter)
     const eiter_rv_t *eiter = (const eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1572,9 +1501,6 @@ eiter_rv_max(const void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1584,10 +1510,10 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
     eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(cparam);
-    HDassert(tparam);
-    HDassert(state);
+    assert(eiter);
+    assert(cparam);
+    assert(tparam);
+    assert(state);
 
     /* Compute the state of the extensible array */
     state->hdr_size       = EA_HDR_SIZE;
@@ -1657,19 +1583,16 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
 eiter_rv_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_rv_term() */
@@ -1698,9 +1621,6 @@ typedef struct eiter_rnd_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Thursday, November  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1711,12 +1631,12 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(eiter);
+    eiter = (eiter_rnd_t *)malloc(sizeof(eiter_rnd_t));
+    assert(eiter);
 
     /* Allocate space for the array of shuffled indices */
-    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(eiter->idx);
+    eiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
+    assert(eiter->idx);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1749,9 +1669,6 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Thursday, November  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1761,7 +1678,7 @@ eiter_rnd_next(void *in_eiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx[eiter->pos];
@@ -1782,9 +1699,6 @@ eiter_rnd_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -1793,7 +1707,7 @@ eiter_rnd_max(const void *in_eiter)
     const eiter_rnd_t *eiter = (const eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1807,9 +1721,6 @@ eiter_rnd_max(const void *in_eiter)
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November  6, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1818,14 +1729,14 @@ eiter_rnd_term(void *in_eiter)
     eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(eiter->idx);
+    assert(eiter);
+    assert(eiter->idx);
 
     /* Free shuffled index array */
-    HDfree(eiter->idx);
+    free(eiter->idx);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_rnd_term() */
@@ -1847,9 +1758,6 @@ static const earray_iter_t ea_iter_rnd = {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Thursday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1860,12 +1768,12 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(eiter);
+    eiter = (eiter_rnd_t *)malloc(sizeof(eiter_rnd_t));
+    assert(eiter);
 
     /* Allocate space for the array of shuffled indices */
-    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(eiter->idx);
+    eiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
+    assert(eiter->idx);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1877,8 +1785,8 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         hsize_t  sparse_cnt = (hsize_t)(cnt * EA_RND2_SCALE); /* Sparse range to choose from */
 
         /* Allocate temporary index array */
-        tmp_idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)sparse_cnt);
-        HDassert(tmp_idx);
+        tmp_idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)sparse_cnt);
+        assert(tmp_idx);
 
         /* Initialize temporary index array, for shuffling */
         for (u = 0; u < (size_t)sparse_cnt; u++)
@@ -1894,7 +1802,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         } /* end for */
 
         /* Release temporary array */
-        HDfree(tmp_idx);
+        free(tmp_idx);
     } /* end if */
     else {
         for (u = 0; u < (size_t)cnt; u++)
@@ -1930,9 +1838,6 @@ typedef struct eiter_cyc_t {
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1942,8 +1847,8 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     eiter_cyc_t *eiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
-    HDassert(eiter);
+    eiter = (eiter_cyc_t *)malloc(sizeof(eiter_cyc_t));
+    assert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1963,9 +1868,6 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static hssize_t
@@ -1975,7 +1877,7 @@ eiter_cyc_next(void *in_eiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->pos;
@@ -1998,9 +1900,6 @@ eiter_cyc_next(void *in_eiter)
  * Return:    Success:    Non-negative
  *        Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hssize_t
@@ -2009,7 +1908,7 @@ eiter_cyc_max(const void *in_eiter)
     const eiter_cyc_t *eiter = (const eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -2023,9 +1922,6 @@ eiter_cyc_max(const void *in_eiter)
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2034,10 +1930,10 @@ eiter_cyc_term(void *in_eiter)
     eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_cyc_term() */
@@ -2059,29 +1955,26 @@ static const earray_iter_t ea_iter_cyc = {
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, September 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, hsize_t nelmts,
                const char *test_str)
 {
-    hid_t          file = -1;             /* File ID */
-    H5F_t         *f    = NULL;           /* Internal file object pointer */
-    H5EA_t        *ea   = NULL;           /* Extensible array wrapper */
-    void          *eiter_info;            /* Extensible array iterator info */
-    earray_state_t state;                 /* State of extensible array */
-    uint64_t       welmt;                 /* Element to write */
-    uint64_t       relmt;                 /* Element to read */
-    hsize_t        nelmts_written;        /* Highest element written in array */
-    hsize_t        cnt;                   /* Count of array indices */
-    hssize_t       smax;                  /* Index value of max. element set */
-    hsize_t        max;                   /* Index value of max. element set */
-    hssize_t       sidx;                  /* Index value of first element of first data block */
-    hsize_t        idx;                   /* Index value of first element of first data block */
-    haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f    = NULL;            /* Internal file object pointer */
+    H5EA_t        *ea   = NULL;            /* Extensible array wrapper */
+    void          *eiter_info;             /* Extensible array iterator info */
+    earray_state_t state;                  /* State of extensible array */
+    uint64_t       welmt;                  /* Element to write */
+    uint64_t       relmt;                  /* Element to read */
+    hsize_t        nelmts_written;         /* Highest element written in array */
+    hsize_t        cnt;                    /* Count of array indices */
+    hssize_t       smax;                   /* Index value of max. element set */
+    hsize_t        max;                    /* Index value of max. element set */
+    hssize_t       sidx;                   /* Index value of first element of first data block */
+    hsize_t        idx;                    /* Index value of first element of first data block */
+    haddr_t        ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /*
      * Display testing message
@@ -2112,7 +2005,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;
     if (check_stats(ea, &state))
         TEST_ERROR;
@@ -2224,7 +2117,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_set_elmts() */
@@ -2237,25 +2130,22 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 11, 2008
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, hsize_t skip_elmts,
                 const char *test_str)
 {
-    hid_t          file = -1;             /* File ID */
-    H5F_t         *f    = NULL;           /* Internal file object pointer */
-    H5EA_t        *ea   = NULL;           /* Extensible array wrapper */
-    earray_state_t state;                 /* State of extensible array */
-    uint64_t       welmt;                 /* Element to write */
-    uint64_t       relmt;                 /* Element to read */
-    hsize_t        nelmts_written;        /* Highest element written in array */
-    hsize_t        idx;                   /* Index value of element to get */
-    hsize_t        cnt;                   /* Count of array indices */
-    haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f    = NULL;            /* Internal file object pointer */
+    H5EA_t        *ea   = NULL;            /* Extensible array wrapper */
+    earray_state_t state;                  /* State of extensible array */
+    uint64_t       welmt;                  /* Element to write */
+    uint64_t       relmt;                  /* Element to read */
+    hsize_t        nelmts_written;         /* Highest element written in array */
+    hsize_t        idx;                    /* Index value of element to get */
+    hsize_t        cnt;                    /* Count of array indices */
+    haddr_t        ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /*
      * Display testing message
@@ -2286,7 +2176,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
         TEST_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;
     if (check_stats(ea, &state))
         TEST_ERROR;
@@ -2316,7 +2206,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
         TEST_ERROR;
 
     /* Set array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size       = EA_HDR_SIZE;
     state.nindex_blks    = 1;
     state.index_blk_size = EA_IBLOCK_SIZE;
@@ -2383,7 +2273,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_skip_elmts() */
@@ -2396,30 +2286,27 @@ error:
  * Return:    Success: 0
  *        Failure: 1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 17, 2008
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    H5EA_create_t       cparam;                 /* Creation parameters for extensible array */
-    earray_test_param_t tparam;                 /* Testing parameters */
-    earray_test_type_t  curr_test;              /* Current test being worked on */
-    earray_iter_type_t  curr_iter;              /* Current iteration type being worked on */
-    hid_t               fapl    = -1;           /* File access property list for data files */
-    unsigned            nerrors = 0;            /* Cumulative error count */
-    time_t              curr_time;              /* Current time, for seeding random number generator */
-    int                 ExpressMode;            /* Test express value */
-    hbool_t             api_ctx_pushed = FALSE; /* Whether API context pushed */
+    H5EA_create_t       cparam;                    /* Creation parameters for extensible array */
+    earray_test_param_t tparam;                    /* Testing parameters */
+    earray_test_type_t  curr_test;                 /* Current test being worked on */
+    earray_iter_type_t  curr_iter;                 /* Current iteration type being worked on */
+    hid_t               fapl    = H5I_INVALID_HID; /* File access property list for data files */
+    unsigned            nerrors = 0;               /* Cumulative error count */
+    time_t              curr_time;                 /* Current time, for seeding random number generator */
+    int                 ExpressMode;               /* Test express value */
+    bool                api_ctx_pushed = false;    /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
@@ -2427,7 +2314,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
@@ -2588,9 +2475,9 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     if (nerrors)
         goto error;
@@ -2608,10 +2495,10 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return 1;
 } /* end main() */

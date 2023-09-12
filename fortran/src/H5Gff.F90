@@ -36,10 +36,10 @@
 !
 
 MODULE H5G
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_INT
+
   USE H5GLOBAL
   USE H5P, ONLY : H5Pcreate_f, H5Pset_local_heap_size_hint_f, H5Pclose_f
-
+  IMPLICIT NONE
 
 !
 ! @brief Fortran2003 Derived Type for @ref H5G_info_t
@@ -261,7 +261,7 @@ CONTAINS
 !! \param loc_id    Location identifier.
 !! \param name      Group name at the specified location.
 !! \param grp_id    Group identifier.
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param size_hint A parameter indicating the number of bytes to reserve for the names that will appear in the group.
 !!                  Set to OBJECT_NAMELEN_DEFAULT_F if using any of the optional parameters lcpl_id, gcpl_id,
@@ -420,7 +420,7 @@ CONTAINS
 !! \param loc_id  Location identifier.
 !! \param name    Name of the group to open.
 !! \param grp_id  Group identifier.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param gapl_id Group access property list identifier.
 !! \param file    \fortran_file
@@ -509,7 +509,7 @@ CONTAINS
 !! \brief Asynchronously closes the specified group.
 !!
 !! \param grp_id Group identifier.
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !! \param file   \fortran_file
 !! \param func   \fortran_func
@@ -1076,7 +1076,7 @@ CONTAINS
 !!
 !! \param loc_id Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
 !! \param ginfo  Derived type in which group information is returned.
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !! \param file   \fortran_file
 !! \param func   \fortran_func
@@ -1171,7 +1171,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Retrieves information about a group, according to the group’s position within an index.
+!! \brief Retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \attention  \fortran_approved
 !!
@@ -1226,7 +1226,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Asynchronously retrieves information about a group, according to the group’s position within an index.
+!! \brief Asynchronously retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
 !! \param group_name Name of group containing group for which information is to be retrieved.
@@ -1234,7 +1234,7 @@ CONTAINS
 !! \param order      Order of the count in the index.
 !! \param n          Position in the index of the group for which information is retrieved.
 !! \param ginfo      Derived type in which group information is returned.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param lapl_id    Link access property list.
 !! \param file       \fortran_file
@@ -1285,7 +1285,7 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
-!! \brief Retrieves information about a group, according to the group’s position within an index.
+!! \brief Retrieves information about a group, according to the group&apos;s position within an index.
 !!
 !! \attention  \fortran_obsolete. Both nlinks and max_corder can overflow.
 !!
@@ -1414,9 +1414,12 @@ CONTAINS
 !! \param loc_id  File or group identifier.
 !! \param name    Name of group containing group for which information is to be retrieved.
 !! \param ginfo   Derived type in which group information is returned.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list.
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
 !!
 !! See C API: @ref H5Gget_info_by_name_async()
 !!

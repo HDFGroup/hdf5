@@ -173,7 +173,7 @@ done:
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_int32le_1d(hbool_t external)
+generate_int32le_1d(bool external)
 {
     int32_t              wdata[12];
     hsize_t              dims[]    = {12};
@@ -188,7 +188,7 @@ generate_int32le_1d(hbool_t external)
         wdata[n] = n - 6;
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_INT32LE_1, def_ptr, H5T_STD_I32LE, 1, dims, wdata) < 0)
         ret_value = -1;
 
@@ -199,7 +199,7 @@ generate_int32le_1d(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_int32le_2d(hbool_t external)
+generate_int32le_2d(bool external)
 {
     int32_t              wdata[64];
     hsize_t              dims[]    = {8, 8};
@@ -214,7 +214,7 @@ generate_int32le_2d(hbool_t external)
         wdata[n] = n - 32;
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_INT32LE_2, def_ptr, H5T_STD_I32LE, 2, dims, wdata) < 0)
         ret_value = -1;
 
@@ -225,7 +225,7 @@ generate_int32le_2d(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_int32le_3d(hbool_t external)
+generate_int32le_3d(bool external)
 {
     hsize_t              dims[] = {8, 8, 8};
     int32_t              wdata[512]; /* 8^3, from dims */
@@ -247,7 +247,7 @@ generate_int32le_3d(hbool_t external)
         }
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_INT32LE_3, def_ptr, H5T_STD_I32LE, 3, dims, wdata) < 0)
         ret_value = -1;
 
@@ -258,7 +258,7 @@ generate_int32le_3d(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_uint8be(hbool_t external)
+generate_uint8be(bool external)
 {
     hsize_t              dims[] = {4, 8, 8};
     uint8_t              wdata[256]; /* 4*8*8, from dims */
@@ -280,7 +280,7 @@ generate_uint8be(hbool_t external)
         }
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_UINT8BE, def_ptr, H5T_STD_U8BE, 3, dims, wdata) < 0)
         ret_value = -1;
 
@@ -291,7 +291,7 @@ generate_uint8be(hbool_t external)
  * Returns 0 on success, -1 on failure.
  */
 static int
-generate_f32le(hbool_t external)
+generate_f32le(bool external)
 {
     hsize_t              dims[] = {12, 6};
     float                wdata[72]; /* 12*6, from dims */
@@ -310,7 +310,7 @@ generate_f32le(hbool_t external)
         }
     }
 
-    def_ptr = (TRUE == external) ? (&def) : NULL;
+    def_ptr = (true == external) ? (&def) : NULL;
     if (make_file(FILE_F32LE, def_ptr, H5T_IEEE_F32LE, 2, dims, wdata) < 0)
         ret_value = -1;
 
@@ -327,21 +327,21 @@ main(void)
     int i = 0;
 
     for (i = 0; i < 2; i++) {
-        hbool_t external = (i & 1) ? TRUE : FALSE;
+        bool external = (i & 1) ? true : false;
         if (generate_int32le_1d(external) < 0)
-            HDprintf("A generate_int32le_1d failed!\n");
+            printf("A generate_int32le_1d failed!\n");
 
         if (generate_int32le_2d(external) < 0)
-            HDprintf("A generate_int32le_2d failed!\n");
+            printf("A generate_int32le_2d failed!\n");
 
         if (generate_int32le_3d(external) < 0)
-            HDprintf("A generate_int32le_3d failed!\n");
+            printf("A generate_int32le_3d failed!\n");
 
         if (generate_uint8be(external) < 0)
-            HDprintf("A generate_uint8be failed!\n");
+            printf("A generate_uint8be failed!\n");
 
         if (generate_f32le(external) < 0)
-            HDprintf("A generate_f32le failed!\n");
+            printf("A generate_f32le failed!\n");
 
     } /* end for external data storage or not */
 

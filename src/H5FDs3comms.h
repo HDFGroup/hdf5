@@ -478,6 +478,7 @@ typedef struct {
     char          *region;
     char          *secret_id;
     unsigned char *signing_key;
+    char          *token;
 } s3r_t;
 
 #define S3COMMS_S3R_MAGIC 0x44d8d79
@@ -509,7 +510,7 @@ H5_DLL herr_t H5FD_s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD_s3comms_s3r_get_filesize(s3r_t *handle);
 
 H5_DLL s3r_t *H5FD_s3comms_s3r_open(const char url[], const char region[], const char id[],
-                                    const unsigned char signing_key[]);
+                                    const unsigned char signing_key[], const char token[]);
 
 H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
 
@@ -522,8 +523,7 @@ H5_DLL struct tm *gmnow(void);
 H5_DLL herr_t H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int cr_size,
                                                  char *signed_headers_dest, int sh_size, hrb_t *http_request);
 
-H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len,
-                                        hbool_t lowercase);
+H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase);
 
 H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
 
@@ -547,7 +547,7 @@ H5_DLL herr_t H5FD_s3comms_tostringtosign(char *dest, const char *req_str, const
 
 H5_DLL herr_t H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written);
 
-H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hbool_t encode_slash,
+H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, bool encode_slash,
                                      size_t *n_written);
 
 #ifdef __cplusplus

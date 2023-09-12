@@ -33,7 +33,6 @@
 
 MODULE H5ES
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_INT64_T, C_BOOL
   USE H5GLOBAL
   IMPLICIT NONE
 
@@ -44,7 +43,7 @@ CONTAINS
 !!
 !! \brief Creates an event set.
 !!
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5EScreate()
@@ -72,7 +71,7 @@ CONTAINS
 !!
 !! \brief Retrieves number of events in an event set.
 !!
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param count  The number of events in the event set
 !! \param hdferr \fortran_error
 !!
@@ -102,7 +101,7 @@ CONTAINS
 !!
 !! \brief Retrieves the next operation counter to be assigned in an event set.
 !!
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param counter The number of events in the event set
 !! \param hdferr  \fortran_error
 !!
@@ -133,7 +132,7 @@ CONTAINS
 !!
 !! \brief Waits for operations in event set to complete.
 !!
-!! \param es_id           \es_id
+!! \param es_id           \fortran_es_id
 !! \param timeout         The number of events in the event set
 !! \param num_in_progress The number of operations still in progress
 !! \param err_occurred    Flag if an operation in the event set failed
@@ -175,7 +174,7 @@ CONTAINS
 !!
 !! \brief Attempt to cancel operations in an event set.
 !!
-!! \param es_id            \es_id
+!! \param es_id            \fortran_es_id
 !! \param num_not_canceled The number of events not canceled
 !! \param err_occurred     Status indicating if error is present in the event set
 !! \param hdferr           \fortran_error
@@ -214,7 +213,7 @@ CONTAINS
 !!
 !! \brief Checks for failed operations.
 !!
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param err_occurred Status indicating if error is present in the event set
 !! \param hdferr       \fortran_error
 !!
@@ -250,7 +249,7 @@ CONTAINS
 !!
 !! \brief Retrieves the number of failed operations.
 !!
-!! \param es_id    \es_id
+!! \param es_id    \fortran_es_id
 !! \param num_errs Number of errors
 !! \param hdferr   \fortran_error
 !!
@@ -282,7 +281,7 @@ CONTAINS
 !!
 !! \brief Terminates access to an event set.
 !!
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !!
 !! See C API: @ref H5ESclose()

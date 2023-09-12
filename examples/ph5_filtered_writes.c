@@ -102,7 +102,7 @@ fill_databuf(hsize_t start[], hsize_t count[], hsize_t stride[], C_DATATYPE *dat
 static void
 cleanup(char *filename)
 {
-    hbool_t do_cleanup = getenv(HDF5_NOCLEANUP) ? 0 : 1;
+    bool do_cleanup = getenv(HDF5_NOCLEANUP) ? false : true;
 
     if (do_cleanup)
         MPI_File_delete(filename, MPI_INFO_NULL);
@@ -125,7 +125,6 @@ write_dataset_no_overlap(hid_t file_id, hid_t dxpl_id)
     hsize_t    start[EXAMPLE_DSET_DIMS];
     hsize_t    stride[EXAMPLE_DSET_DIMS];
     hsize_t    count[EXAMPLE_DSET_DIMS];
-    size_t     i, j;
     hid_t      dset_id        = H5I_INVALID_HID;
     hid_t      dcpl_id        = H5I_INVALID_HID;
     hid_t      file_dataspace = H5I_INVALID_HID;
@@ -244,7 +243,6 @@ write_dataset_overlap(hid_t file_id, hid_t dxpl_id)
     hsize_t     start[EXAMPLE_DSET_DIMS];
     hsize_t     stride[EXAMPLE_DSET_DIMS];
     hsize_t     count[EXAMPLE_DSET_DIMS];
-    size_t      i, j;
     hid_t       dset_id        = H5I_INVALID_HID;
     hid_t       dcpl_id        = H5I_INVALID_HID;
     hid_t       file_dataspace = H5I_INVALID_HID;

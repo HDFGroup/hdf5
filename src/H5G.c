@@ -155,25 +155,25 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
 
     /* Check arguments */
     if (!name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL");
     if (!*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, TRUE, &gapl_id, vol_obj_ptr, &loc_params) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, true, &gapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Check link creation property list */
     if (H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a link creation property list")
+    else if (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a link creation property list");
 
     /* Check group creation property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group creation property list")
+    else if (true != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group creation property list");
 
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
@@ -181,16 +181,16 @@ H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl
     /* Create the group */
     if (NULL == (grp = H5VL_group_create(*vol_obj_ptr, &loc_params, name, lcpl_id, gcpl_id, gapl_id,
                                          H5P_DATASET_XFER_DEFAULT, token_ptr)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group");
 
     /* Get an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle")
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, true)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle");
 
 done:
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__create_api_common() */
@@ -228,7 +228,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
 
     /* Create the group synchronously */
     if ((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create group");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -264,7 +264,7 @@ H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* Create the group asynchronously */
     if ((ret_value = H5G__create_api_common(loc_id, name, lcpl_id, gcpl_id, gapl_id, token_ptr, &vol_obj)) <
         0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create group");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -273,8 +273,8 @@ H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                         H5ARG_TRACE9(__func__, "*s*sIui*siiii", app_file, app_func, app_line, loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set");
         } /* end if */
 
 done:
@@ -302,7 +302,7 @@ done:
  *
  * Example:     To create missing groups "A" and "B01" along the given path "/A/B01/grp"
  *              hid_t create_id = H5Pcreate(H5P_GROUP_CREATE);
- *              int   status = H5Pset_create_intermediate_group(create_id, TRUE);
+ *              int   status = H5Pset_create_intermediate_group(create_id, true);
  *              hid_t gid = H5Gcreate_anon(file_id, "/A/B01/grp", create_id, H5P_DEFAULT);
  *
  * Return:      Success:    The object ID of a new, empty group open for
@@ -327,17 +327,17 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     /* Check group property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list")
+    else if (true != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list");
 
     if (H5P_DEFAULT == gapl_id)
         gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else if (TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group access property list")
+    else if (true != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group access property list");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
+    if (H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, true) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* Set location struct fields */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -345,22 +345,22 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 
     /* Get the location object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Create the group */
     if (NULL == (grp = H5VL_group_create(vol_obj, &loc_params, NULL, H5P_LINK_CREATE_DEFAULT, gcpl_id,
                                          gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group");
 
     /* Get an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle")
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, true)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle");
 
 done:
     /* Cleanup on failure */
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_anon() */
@@ -390,26 +390,26 @@ H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id, void **token
 
     /* Check args */
     if (!name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL");
     if (!*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, FALSE, &gapl_id, vol_obj_ptr, &loc_params) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_GACC, false, &gapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     if (NULL == (grp = H5VL_group_open(*vol_obj_ptr, &loc_params, name, gapl_id, H5P_DATASET_XFER_DEFAULT,
                                        token_ptr)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open group");
 
     /* Register an ID for the group */
-    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group")
+    if ((ret_value = H5VL_register(H5I_GROUP, grp, (*vol_obj_ptr)->connector, true)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register group");
 
 done:
     if (H5I_INVALID_HID == ret_value)
         if (grp && H5VL_group_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group")
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release group");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G__open_api_common() */
@@ -439,7 +439,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
     /* Open the group synchronously */
     if ((ret_value = H5G__open_api_common(loc_id, name, gapl_id, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously open group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously open group");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -473,7 +473,7 @@ H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
 
     /* Open the group asynchronously */
     if ((ret_value = H5G__open_api_common(loc_id, name, gapl_id, token_ptr, &vol_obj)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously open group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously open group");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -482,8 +482,8 @@ H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, gapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set");
         } /* end if */
 
 done:
@@ -515,7 +515,7 @@ H5Gget_create_plist(hid_t group_id)
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type               = H5VL_GROUP_GET_GCPL;
@@ -523,7 +523,7 @@ H5Gget_create_plist(hid_t group_id)
 
     /* Get the group creation property list for the group */
     if (H5VL_group_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group's creation property list")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group's creation property list");
 
     /* Set the return value */
     ret_value = vol_cb_args.args.get_gcpl.gcpl_id;
@@ -558,19 +558,19 @@ H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info /*out*/, void **to
     /* Check args */
     id_type = H5I_get_type(loc_id);
     if (!(H5I_GROUP == id_type || H5I_FILE == id_type))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group (or file) ID");
     if (!group_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL");
 
     /* Set up VOL callback & object access arguments */
     vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
     if (H5VL_setup_self_args(loc_id, vol_obj_ptr, &vol_cb_args.args.get_info.loc_params) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments");
     vol_cb_args.args.get_info.ginfo = group_info;
 
     /* Retrieve group information */
     if (H5VL_group_get(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -595,7 +595,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *group_info /*out*/)
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_api_common(loc_id, group_info, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to synchronously get group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to synchronously get group info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -628,7 +628,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
 
     /* Retrieve group information asynchronously */
     if (H5G__get_info_api_common(loc_id, group_info, token_ptr, &vol_obj) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to asynchronously get group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to asynchronously get group info");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -636,7 +636,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
         if (H5ES_insert(es_id, vol_obj->connector, token,
                 H5ARG_TRACE6(__func__, "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
             /* clang-format on */
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -666,18 +666,18 @@ H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *gro
 
     /* Check args */
     if (!group_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL");
 
     /* Set up VOL callback & object access arguments */
     vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
-    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr,
+    if (H5VL_setup_name_args(loc_id, name, false, lapl_id, vol_obj_ptr,
                              &vol_cb_args.args.get_info.loc_params) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments");
     vol_cb_args.args.get_info.ginfo = group_info;
 
     /* Retrieve group information */
     if (H5VL_group_get(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -703,7 +703,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *group_info /*out
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_by_name_api_common(loc_id, name, group_info, lapl_id, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't synchronously retrieve group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't synchronously retrieve group info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -736,7 +736,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
 
     /* Retrieve group information asynchronously */
     if (H5G__get_info_by_name_api_common(loc_id, name, group_info, lapl_id, token_ptr, &vol_obj) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't asynchronously retrieve group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't asynchronously retrieve group info");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -744,7 +744,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE8(__func__, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -775,18 +775,18 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
 
     /* Check args */
     if (!group_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL");
 
     /* Set up VOL callback & object access arguments */
     vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
-    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr,
+    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, false, lapl_id, vol_obj_ptr,
                             &vol_cb_args.args.get_info.loc_params) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments");
     vol_cb_args.args.get_info.ginfo = group_info;
 
     /* Retrieve group information */
     if (H5VL_group_get(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -814,7 +814,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     /* Retrieve group information synchronously */
     if (H5G__get_info_by_idx_api_common(loc_id, group_name, idx_type, order, n, group_info, lapl_id, NULL,
                                         NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't synchronously retrieve group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't synchronously retrieve group info");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -850,7 +850,7 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     /* Retrieve group information asynchronously */
     if (H5G__get_info_by_idx_api_common(loc_id, group_name, idx_type, order, n, group_info, lapl_id,
                                         token_ptr, &vol_obj) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't asynchronously retrieve group info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't asynchronously retrieve group info");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -858,7 +858,7 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE11(__func__, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -884,13 +884,13 @@ H5Gclose(hid_t group_id)
 
     /* Check arguments */
     if (H5I_GROUP != H5I_get_type(group_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
 
     /* Decrement the counter on the group ID. It will be freed if the count
      * reaches zero.
      */
     if (H5I_dec_app_ref(group_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "decrementing group ID failed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "decrementing group ID failed");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -919,13 +919,13 @@ H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
 
     /* Check arguments */
     if (H5I_GROUP != H5I_get_type(group_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
 
     /* Prepare for possible asynchronous operation */
     if (H5ES_NONE != es_id) {
         /* Get group object's connector */
         if (NULL == (vol_obj = H5VL_vol_object(group_id)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get VOL object for group")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get VOL object for group");
 
         /* Increase connector's refcount, so it doesn't get closed if closing
          * the group closes the file */
@@ -940,7 +940,7 @@ H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
      * reaches zero.
      */
     if (H5I_dec_app_ref_async(group_id, token_ptr) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "decrementing group ID failed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "decrementing group ID failed");
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -948,11 +948,11 @@ H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
         if (H5ES_insert(es_id, vol_obj->connector, token,
                         H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, group_id, es_id)) < 0)
             /* clang-format on */
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
 done:
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on connector");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gclose_async() */
@@ -963,9 +963,6 @@ done:
  * Purpose:     Flushes all buffers associated with a group to disk.
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -981,11 +978,11 @@ H5Gflush(hid_t group_id)
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
 
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(group_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type           = H5VL_GROUP_FLUSH;
@@ -993,7 +990,7 @@ H5Gflush(hid_t group_id)
 
     /* Flush group's metadata to file */
     if (H5VL_group_specific(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1005,9 +1002,6 @@ done:
  * Purpose:     Refreshes all buffers associated with a group.
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Mike McGreevy
- *              July 21, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1023,11 +1017,11 @@ H5Grefresh(hid_t group_id)
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
 
     /* Set up collective metadata if appropriate */
     if (H5CX_set_loc(group_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type             = H5VL_GROUP_REFRESH;
@@ -1035,7 +1029,7 @@ H5Grefresh(hid_t group_id)
 
     /* Refresh group's metadata */
     if (H5VL_group_specific(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group");
 
 done:
     FUNC_LEAVE_API(ret_value)

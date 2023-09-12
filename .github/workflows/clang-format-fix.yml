@@ -11,11 +11,15 @@ name: clang-format Commit Changes
 on: 
   workflow_dispatch:
   push:
+permissions:
+  contents: read
 jobs:
   formatting-check:
     name: Commit Format Changes
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
+    permissions:
+        contents: write # In order to allow EndBug/add-and-commit to commit changes
     steps:
     - uses: actions/checkout@v3
     - name: Fix C and Java formatting issues detected by clang-format

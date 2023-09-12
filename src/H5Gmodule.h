@@ -46,7 +46,7 @@
  * In the first figure below, the group structure is strictly hierarchical, identical to the file system
  * analogs.
  *
- * In the next two figures below, the structure takes advantage of the directed graph’s allowance of
+ * In the next two figures below, the structure takes advantage of the directed graph's allowance of
  * circular references. In the second figure, GroupA is not only a member of the root group, /, but a
  * member of GroupC. Since Group C is a member of Group B and Group B is a member of Group
  * A, Dataset1 can be accessed by means of the circular reference /Group A/Group B/Group
@@ -189,7 +189,7 @@
  * like a regular or hard link. The differences are that the hard link cannot be created if the target
  * object does not exist and it always points to the same object. A soft link can be created with any
  * path name, whether or not the object exists; it may or may not, therefore, be possible to follow a
- * soft link. Furthermore, a soft link’s target object may be changed.
+ * soft link. Furthermore, a soft link's target object may be changed.
  *
  * \subsubsection subsubsec_group_descr_path HDF5 Path Names
  * The structure of the HDF5 file constitutes the name space for the objects in the file. A path name
@@ -257,14 +257,14 @@
  * for very small groups, improved link indexing for large groups, and other advanced features.
  * <ul>
  * <li>The original indexed format remains the default. Links are stored in a B-tree in the
- * group’s local heap.</li>
+ * group's local heap.</li>
  * <li>Groups created in the new compact-or-indexed format, the implementation introduced
  * with Release 1.8.0, can be tuned for performance, switching between the compact and
  * indexed formats at thresholds set in the user application.
  * <ul>
  * <li>The compact format will conserve file space and processing overhead when
  * working with small groups and is particularly valuable when a group contains
- * no links. Links are stored as a list of messages in the group’s header.</li>
+ * no links. Links are stored as a list of messages in the group's header.</li>
  * <li>The indexed format will yield improved performance when working with large
  * groups. A large group may contain thousands to millions of members. Links
  * are stored in a fractal heap and indexed with an improved B-tree.</li>
@@ -385,7 +385,7 @@
  * </tr>
  * <tr>
  * <td>#H5Gget_info_by_idx</td>
- * <td>Retrieves information about a group according to the group’s position within an index.</td>
+ * <td>Retrieves information about a group according to the group's position within an index.</td>
  * </tr>
  * <tr>
  * <td>#H5Gget_info_by_name</td>
@@ -523,7 +523,7 @@
  * A path that begins with a slash (/) is
  * an absolute path indicating that it locates the new group from the root group of the HDF5 file. A
  * path that begins with any other character is a relative path. When the location is a file, a relative
- * path is a path from that file’s root group; when the location is a group, a relative path is a path
+ * path is a path from that file's root group; when the location is a group, a relative path is a path
  * from that group.
  *
  * The sample code in the example below creates three groups. The group Data is created in the
@@ -692,7 +692,7 @@
  * entry in the \ref RM for the #H5Pset_elink_file_cache_size function call.
  *
  * <h4>Note Regarding Hard Links and Soft Links</h4>
- * Note that an object’s existence in a file is governed by the presence of at least one hard link to
+ * Note that an object's existence in a file is governed by the presence of at least one hard link to
  * that object. If the last hard link to an object is removed, the object is removed from the file and
  * any remaining soft link becomes a dangling link, a link whose target object does not exist.
  *
@@ -710,7 +710,7 @@
  *
  * <h5>Scenario 2: Moving a Link that Isolates an Object</h5>
  * Consider the following example: assume that the group group2 can only be accessed via the
- * following path, where top_group is a member of the file’s root group:
+ * following path, where top_group is a member of the file's root group:
  * <em>/top_group/group1/group2/</em>
  *
  * Using #H5Lmove, top_group is renamed to be a member ofgroup2. At this point, since
@@ -780,7 +780,7 @@
  * </table>
  *
  * Figure 10 illustrates loops in an HDF5 file structure. The file in part a contains three groups
- * and a dataset; group2 is a member of the root group and of the root group’s other member group,
+ * and a dataset; group2 is a member of the root group and of the root group's other member group,
  * group1. group2 thus can be accessed by either of two paths: /group2 or /group1/GXX. Similarly,
  * the dataset can be accessed either as /group2/dset1 or as /group1/GXX/dset1.
  *
@@ -906,7 +906,7 @@
  *          indexing for large groups, and other advanced features.
  *
  *          \li The \Emph{original indexed} format remains the default. Links
- *              are stored in a B-tree in the group’s local heap.
+ *              are stored in a B-tree in the group's local heap.
  *          \li Groups created in the new \Emph{compact-or-indexed} format, the
  *              implementation introduced with Release 1.8.0, can be tuned for
  *              performance, switching between the compact and indexed formats
@@ -914,7 +914,7 @@
  *              - The \Emph{compact} format will conserve file space and processing
  *                overhead when working with small groups and is particularly
  *                valuable when a group contains no links. Links are stored
- *                as a list of messages in the group’s header.
+ *                as a list of messages in the group's header.
  *              - The \Emph{indexed} format will yield improved
  *                performance when working with large groups, e.g., groups
  *                containing thousands to millions of members. Links are stored in

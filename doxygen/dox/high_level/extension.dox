@@ -392,7 +392,7 @@ H5_HLRDLL herr_t H5LRread_region(hid_t obj_id,
  *
  * \details H5LRget_region_info() queries information about the data
  *          pointed by a region reference \p ref. It returns one of the
- *          absolute paths to a dataset, length of the path, dataset’s rank
+ *          absolute paths to a dataset, length of the path, dataset's rank
  *          and datatype, description of the referenced region and type of
  *          the referenced region. Any output argument can be NULL if that
  *          argument does not need to be returned.

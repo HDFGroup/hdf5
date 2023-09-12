@@ -95,11 +95,11 @@ check_options(diff_opt_t *opts)
      * These options are mutually exclusive.
      */
     if ((opts->delta_bool + opts->percent_bool + opts->use_system_epsilon) > 1) {
-        HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
-        HDprintf("use no more than one.\n");
-        HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
-                 "Reference Manual'.\n",
-                 PROGRAMNAME);
+        printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+        printf("use no more than one.\n");
+        printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
+               "Reference Manual'.\n",
+               PROGRAMNAME);
         h5diff_exit(EXIT_FAILURE);
     }
 }
@@ -122,7 +122,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
     H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
-    HDmemset(opts, 0, sizeof(diff_opt_t));
+    memset(opts, 0, sizeof(diff_opt_t));
 
     /* assume equal contents initially */
     opts->contents = 1;
@@ -181,7 +181,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     }
                     else {
                         if (H5_optarg != NULL)
-                            opts->mode_verbose_level = HDatoi(H5_optarg);
+                            opts->mode_verbose_level = atoi(H5_optarg);
                         else
                             opts->mode_verbose_level = 0;
                     }
@@ -198,7 +198,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 break;
 
             case 'l':
-                opts->follow_links = TRUE;
+                opts->follow_links = true;
                 break;
 
             case 'x':
@@ -207,7 +207,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case 'S':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -216,9 +216,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->exclude_path = 1;
 
                 /* create linked list of excluding objects */
-                if ((exclude_node = (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) ==
+                if ((exclude_node = (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) ==
                     NULL) {
-                    HDprintf("Error: lack of memory!\n");
+                    printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }
 
@@ -241,7 +241,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 break;
 
             case 'C':
-                opts->disable_compact_subset = TRUE;
+                opts->disable_compact_subset = true;
                 break;
 
             case 'A':
@@ -249,8 +249,8 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
                 /* create linked list of excluding objects */
                 if ((exclude_attr_node =
-                         (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) == NULL) {
-                    HDprintf("Error: lack of memory!\n");
+                         (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) == NULL) {
+                    printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }
 
@@ -276,22 +276,22 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->delta_bool = 1;
 
                 if (check_d_input(H5_optarg) == -1) {
-                    HDprintf("<-d %s> is not a valid option\n", H5_optarg);
+                    printf("<-d %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->delta = HDatof(H5_optarg);
+                opts->delta = atof(H5_optarg);
                 /* do not check against default, the DBL_EPSILON is being replaced by user */
                 break;
 
             case 'p':
                 opts->percent_bool = 1;
                 if (check_p_input(H5_optarg) == -1) {
-                    HDprintf("<-p %s> is not a valid option\n", H5_optarg);
+                    printf("<-p %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->percent = HDatof(H5_optarg);
+                opts->percent = atof(H5_optarg);
 
                 /* -p 0 is the same as default */
                 if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
@@ -301,11 +301,11 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case 'n':
                 opts->count_bool = 1;
                 if (check_n_input(H5_optarg) == -1) {
-                    HDprintf("<-n %s> is not a valid option\n", H5_optarg);
+                    printf("<-n %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->count = HDstrtoull(H5_optarg, NULL, 0);
+                opts->count = strtoull(H5_optarg, NULL, 0);
                 break;
 
             case 'N':
@@ -322,14 +322,14 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '1':
                 opts->vol_info[0].type    = VOL_BY_VALUE;
-                opts->vol_info[0].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
-                opts->custom_vol[0]       = TRUE;
+                opts->vol_info[0].u.value = (H5VL_class_value_t)atoi(H5_optarg);
+                opts->custom_vol[0]       = true;
                 break;
 
             case '2':
                 opts->vol_info[0].type   = VOL_BY_NAME;
                 opts->vol_info[0].u.name = H5_optarg;
-                opts->custom_vol[0]      = TRUE;
+                opts->custom_vol[0]      = true;
                 break;
 
             case '3':
@@ -338,14 +338,14 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '4':
                 opts->vol_info[1].type    = VOL_BY_VALUE;
-                opts->vol_info[1].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
-                opts->custom_vol[1]       = TRUE;
+                opts->vol_info[1].u.value = (H5VL_class_value_t)atoi(H5_optarg);
+                opts->custom_vol[1]       = true;
                 break;
 
             case '5':
                 opts->vol_info[1].type   = VOL_BY_NAME;
                 opts->vol_info[1].u.name = H5_optarg;
-                opts->custom_vol[1]      = TRUE;
+                opts->custom_vol[1]      = true;
                 break;
 
             case '6':
@@ -354,14 +354,14 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '7':
                 opts->vfd_info[0].type    = VFD_BY_VALUE;
-                opts->vfd_info[0].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
-                opts->custom_vfd[0]       = TRUE;
+                opts->vfd_info[0].u.value = (H5FD_class_value_t)atoi(H5_optarg);
+                opts->custom_vfd[0]       = true;
                 break;
 
             case '8':
                 opts->vfd_info[0].type   = VFD_BY_NAME;
                 opts->vfd_info[0].u.name = H5_optarg;
-                opts->custom_vfd[0]      = TRUE;
+                opts->custom_vfd[0]      = true;
                 break;
 
             case '9':
@@ -370,14 +370,14 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '0':
                 opts->vfd_info[1].type    = VFD_BY_VALUE;
-                opts->vfd_info[1].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
-                opts->custom_vfd[1]       = TRUE;
+                opts->vfd_info[1].u.value = (H5FD_class_value_t)atoi(H5_optarg);
+                opts->custom_vfd[1]       = true;
                 break;
 
             case 'Y':
                 opts->vfd_info[1].type   = VFD_BY_NAME;
                 opts->vfd_info[1].u.name = H5_optarg;
-                opts->custom_vfd[1]      = TRUE;
+                opts->custom_vfd[1]      = true;
                 break;
 
             case 'Z':
@@ -390,9 +390,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[0].u.name && !HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
         if (opts->vfd_info[0].info) {
             errno                     = 0;
-            onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
+            onion_fa_g_1.revision_num = strtoull(opts->vfd_info[0].info, NULL, 10);
             if (errno == ERANGE) {
-                HDprintf("Invalid onion revision specified for file 1\n");
+                printf("Invalid onion revision specified for file 1\n");
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -407,9 +407,9 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[1].u.name && !HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
         if (opts->vfd_info[1].info) {
             errno                     = 0;
-            onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
+            onion_fa_g_2.revision_num = strtoull(opts->vfd_info[1].info, NULL, 10);
             if (errno == ERANGE) {
-                HDprintf("Invalid onion revision specified for file 2\n");
+                printf("Invalid onion revision specified for file 2\n");
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -480,20 +480,20 @@ print_info(diff_opt_t *opts)
         return;
 
     if (opts->cmn_objs == 0) {
-        HDprintf("No common objects found. Files are not comparable.\n");
+        printf("No common objects found. Files are not comparable.\n");
         if (!opts->mode_verbose)
-            HDprintf("Use -v for a list of objects.\n");
+            printf("Use -v for a list of objects.\n");
     }
 
     if (opts->not_cmp == 1) {
         if (opts->mode_list_not_cmp == 0) {
-            HDprintf("--------------------------------\n");
-            HDprintf("Some objects are not comparable\n");
-            HDprintf("--------------------------------\n");
+            printf("--------------------------------\n");
+            printf("Some objects are not comparable\n");
+            printf("--------------------------------\n");
             if (opts->mode_verbose)
-                HDprintf("Use -c for a list of objects without details of differences.\n");
+                printf("Use -c for a list of objects without details of differences.\n");
             else
-                HDprintf("Use -c for a list of objects.\n");
+                printf("Use -c for a list of objects.\n");
         }
     }
 }
@@ -544,7 +544,7 @@ check_p_input(const char *str)
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
@@ -571,7 +571,7 @@ check_d_input(const char *str)
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
@@ -640,6 +640,13 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "                           If none of the above options are used to "
+                                 "specify a VOL for a file, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                           the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");

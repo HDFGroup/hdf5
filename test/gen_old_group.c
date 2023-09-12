@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Oct 24, 2005
- *
  * Purpose:     This program is run to generate an HDF5 data file with an
  *              empty "symbol table" group.
  *
@@ -33,8 +30,8 @@
 int
 main(void)
 {
-    hid_t fid = -1; /* File ID */
-    hid_t gid = -1; /* Group creation property list ID */
+    hid_t fid = H5I_INVALID_HID; /* File ID */
+    hid_t gid = H5I_INVALID_HID; /* Group creation property list ID */
 
     /* Create file for test groups */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -58,6 +55,6 @@ error:
         H5Dclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }

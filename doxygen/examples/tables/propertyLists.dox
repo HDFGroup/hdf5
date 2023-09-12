@@ -351,7 +351,8 @@ larger than 2 gigabytes, or retrieves information regarding driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_log</td>
-<td>Sets logging driver.</td>
+<td>The logging driver is a clone of the standard SEC2 (#H5FD_SEC2) driver with additional
+facilities for logging metrics and activity to a file.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_mirror/#H5Pget_fapl_mirror</td>
@@ -376,13 +377,21 @@ or retrieves information regarding driver.</td>
 <td>Modifies/queries the file driver properties of the onion driver.</td>
 </tr>
 <tr>
+<td>#H5Pset_fapl_ros3/#H5Pget_fapl_ros3</td>
+<td>Modifies/queries the file driver properties of the ros3 driver.</td>
+</tr>
+<tr>
 <td>#H5Pset_fapl_sec2</td>
 <td>Sets driver for unbuffered permanent files or retrieves information regarding driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_split</td>
-<td>Sets driver for split files, a limited case of multiple files with one metadata file
+<td>Sets driver for split files, a limited case of multi driver with one metadata file
 and one raw data file.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_splitter/#H5Pget_fapl_splitter</td>
+<td>Modifies/queries the file driver properties of the splitter driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_stdio</td>
@@ -758,7 +767,7 @@ C function is a macro: \see \ref api-compat-macros.</td>
 <td>Sets up use of the Fletcher32 checksum filter.</td>
 </tr>
 <tr>
-<td>#H5Pset_local_heap_size_hint#H5Pget_local_heap_size_hint/</td>
+<td>#H5Pset_local_heap_size_hint/#H5Pget_local_heap_size_hint</td>
 <td>Sets/gets the anticipated maximum size of a local heap.</td>
 </tr>
 <tr>

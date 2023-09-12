@@ -68,9 +68,9 @@ test_VLof_atomic(void)
 
     /* Allocate and initialize VL data to write (copied from C test) */
     for (uu = 0; uu < NRECORDS; uu++) {
-        writeBuf[uu].p = HDmalloc((uu + 1) * sizeof(unsigned int));
+        writeBuf[uu].p = malloc((uu + 1) * sizeof(unsigned int));
         if (writeBuf[uu].p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         }
         writeBuf[uu].len = uu + 1;
@@ -109,7 +109,7 @@ test_VLof_atomic(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -120,8 +120,8 @@ test_VLof_atomic(void)
     for (uu = 0; uu < NRECORDS; uu++)
         for (vv = 0; vv < (uu + 1); vv++) {
             if (((unsigned int *)readBuf[uu].p)[vv] != ((unsigned int *)writeBuf[uu].p)[vv]) {
-                HDprintf("Packet %u's value should be %d\n", uu, ((unsigned int *)writeBuf[uu].p)[vv]);
-                HDprintf("Packet %u's value in readBuf is %d\n", uu, ((unsigned int *)readBuf[uu].p)[vv]);
+                printf("Packet %u's value should be %d\n", uu, ((unsigned int *)writeBuf[uu].p)[vv]);
+                printf("Packet %u's value in readBuf is %d\n", uu, ((unsigned int *)readBuf[uu].p)[vv]);
             }
         }
 
@@ -188,9 +188,9 @@ test_VLof_comptype(void)
 
     /* Allocate and initialize VL data to write (copied from C test) */
     for (uu = 0; uu < NRECORDS; uu++) {
-        writeBuf[uu].p = HDmalloc((uu + 1) * sizeof(VLcomp_t));
+        writeBuf[uu].p = malloc((uu + 1) * sizeof(VLcomp_t));
         if (writeBuf[uu].p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         }
         writeBuf[uu].len = uu + 1;
@@ -246,7 +246,7 @@ test_VLof_comptype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -257,16 +257,16 @@ test_VLof_comptype(void)
     /* Compare data read in */
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].len != readBuf[uu].len) {
-            HDfprintf(stderr, "%d: VL data length don't match!, writeBuf[%u].len=%d, readBuf[%u].len=%d\n",
-                      __LINE__, uu, (int)writeBuf[uu].len, uu, (int)readBuf[uu].len);
+            fprintf(stderr, "%d: VL data length don't match!, writeBuf[%u].len=%d, readBuf[%u].len=%d\n",
+                    __LINE__, uu, (int)writeBuf[uu].len, uu, (int)readBuf[uu].len);
             continue;
         } /* write len != read len */
 
         for (vv = 0; vv < (uu + 1); vv++) {
             if (((unsigned int *)writeBuf[uu].p)[vv] != ((unsigned int *)readBuf[uu].p)[vv]) {
-                HDfprintf(
-                    stderr, "VL data values don't match!, writeBuf[uu].p[%d]=%d, readBuf[uu].p[%d]=%d\n", vv,
-                    (int)((unsigned int *)writeBuf[uu].p)[vv], vv, (int)((unsigned int *)readBuf[uu].p)[vv]);
+                fprintf(stderr, "VL data values don't match!, writeBuf[uu].p[%d]=%d, readBuf[uu].p[%d]=%d\n",
+                        vv, (int)((unsigned int *)writeBuf[uu].p)[vv], vv,
+                        (int)((unsigned int *)readBuf[uu].p)[vv]);
                 continue;
             } /* write value != read value */
         }
@@ -344,16 +344,16 @@ test_compound_VL_VLtype(void)
     for (uu = 0; uu < NRECORDS; uu++) {
         writeBuf[uu].u   = uu * 10;
         writeBuf[uu].f   = (float)(uu * 20) / 3.0F;
-        writeBuf[uu].v.p = HDmalloc((uu + L1_INCM) * sizeof(hvl_t));
+        writeBuf[uu].v.p = malloc((uu + L1_INCM) * sizeof(hvl_t));
         if (writeBuf[uu].v.p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         }
         writeBuf[uu].v.len = uu + L1_INCM;
         for (t1 = (hvl_t *)((writeBuf[uu].v).p), vv = 0; vv < (uu + L1_INCM); vv++, t1++) {
-            t1->p = HDmalloc((vv + L2_INCM) * sizeof(unsigned int));
+            t1->p = malloc((vv + L2_INCM) * sizeof(unsigned int));
             if (t1->p == NULL) {
-                HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+                fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
                 goto error;
             }
             t1->len = vv + L2_INCM;
@@ -418,7 +418,7 @@ test_compound_VL_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -429,34 +429,34 @@ test_compound_VL_VLtype(void)
     /* Compare data read in */
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].u != readBuf[uu].u) {
-            HDfprintf(stderr, "Integer components don't match!, writeBuf[%u].u=%u, readBuf[%u].u=%u\n", uu,
-                      writeBuf[uu].u, uu, readBuf[uu].u);
+            fprintf(stderr, "Integer components don't match!, writeBuf[%u].u=%u, readBuf[%u].u=%u\n", uu,
+                    writeBuf[uu].u, uu, readBuf[uu].u);
             continue;
         } /* end if */
         if (!H5_FLT_ABS_EQUAL(writeBuf[uu].f, readBuf[uu].f)) {
-            HDfprintf(stderr, "Float components don't match!, writeBuf[%u].f=%f, readBuf[%u].f=%f\n", uu,
-                      (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
+            fprintf(stderr, "Float components don't match!, writeBuf[%u].f=%f, readBuf[%u].f=%f\n", uu,
+                    (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
             continue;
         } /* end if */
 
         if (writeBuf[uu].v.len != readBuf[uu].v.len) {
-            HDfprintf(stderr,
-                      "%d: VL data length don't match!, writeBuf[%d].v.len=%zu, readBuf[%d].v.len=%zu\n",
-                      __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
+            fprintf(stderr,
+                    "%d: VL data length don't match!, writeBuf[%d].v.len=%zu, readBuf[%d].v.len=%zu\n",
+                    __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
             continue;
         } /* end if */
 
         for (t1 = (hvl_t *)(writeBuf[uu].v.p), t2 = (hvl_t *)(readBuf[uu].v.p), vv = 0;
              (size_t)vv < readBuf[uu].v.len; vv++, t1++, t2++) {
             if (t1->len != t2->len) {
-                HDfprintf(stderr, "%d: VL data length don't match!, uu=%u, vv=%u, t1->len=%zu, t2->len=%zu\n",
-                          __LINE__, uu, vv, t1->len, t2->len);
+                fprintf(stderr, "%d: VL data length don't match!, uu=%u, vv=%u, t1->len=%zu, t2->len=%zu\n",
+                        __LINE__, uu, vv, t1->len, t2->len);
                 continue;
             } /* end if */
             for (ww = 0; (size_t)ww < t2->len; ww++) {
                 if (((unsigned int *)t1->p)[ww] != ((unsigned int *)t2->p)[ww]) {
-                    HDfprintf(stderr, "VL data values don't match!, t1->p[%u]=%u, t2->p[%u]=%u\n", ww,
-                              ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
+                    fprintf(stderr, "VL data values don't match!, t1->p[%u]=%u, t2->p[%u]=%u\n", ww,
+                            ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
                     continue;
                 } /* end if */
             }     /* end for */
@@ -527,16 +527,16 @@ test_VLof_VLtype(void)
 
     /* Allocate and initialize VL data to write (copied from C test) */
     for (uu = 0; uu < NRECORDS; uu++) {
-        writeBuf[uu].p = HDmalloc((uu + 1) * sizeof(hvl_t));
+        writeBuf[uu].p = malloc((uu + 1) * sizeof(hvl_t));
         if (writeBuf[uu].p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         } /* end if */
         writeBuf[uu].len = uu + 1;
         for (t1 = (hvl_t *)(writeBuf[uu].p), vv = 0; vv < (uu + 1); vv++, t1++) {
-            t1->p = HDmalloc((vv + 1) * sizeof(unsigned int));
+            t1->p = malloc((vv + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
-                HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+                fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
                 goto error;
             }
             t1->len = vv + 1;
@@ -582,7 +582,7 @@ test_VLof_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -652,10 +652,10 @@ verify_ptlengthtype(hid_t fid, const char *table_name, herr_t expected_value)
         ret = SUCCEED;
     else {
         char lenthtype[20];
-        HDstrcpy(lenthtype, "fixed-length");
+        strcpy(lenthtype, "fixed-length");
         if (expected_value == 1)
-            HDstrcpy(lenthtype, "variable-length");
-        HDfprintf(stderr, "\nPacket table '%s' should be %s but is not\n", table_name, lenthtype);
+            strcpy(lenthtype, "variable-length");
+        fprintf(stderr, "\nPacket table '%s' should be %s but is not\n", table_name, lenthtype);
         ret = FAIL;
     }
 
@@ -763,7 +763,7 @@ error: /* An error has occurred.  Clean up and exit. */
  */
 #define ATTR_RANK 1
 #define ATTR_DIM  3
-int attr_data[ATTR_DIM] = {256, 11945, -22107}; /* values to be written to attr */
+static int attr_data[ATTR_DIM] = {256, 11945, -22107}; /* values to be written to attr */
 
 static int
 adding_attribute(hid_t fid, const char *table_name, const char *attr_name)
@@ -969,7 +969,7 @@ error: /* An error has occurred.  Clean up and exit. */
  *-------------------------------------------------------------------------
  */
 static herr_t
-verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
+verify_accessors(hid_t fid, const char *table_name, bool uses_vlen_type)
 {
     hid_t   ptable   = H5I_INVALID_HID; /* Packet table identifier */
     hid_t   dset_id  = H5I_INVALID_HID; /* Dataset associated with the pt */
@@ -990,7 +990,7 @@ verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
     *buf = '\0';
     if ((name_size = H5Iget_name(dset_id, (char *)buf, NAME_BUF_SIZE)) < 0)
         goto error;
-    VERIFY(HDstrcmp(buf, table_name), "Names of dataset and packet table don't match");
+    VERIFY(strcmp(buf, table_name), "Names of dataset and packet table don't match");
 
     /* Get the packet table's datatype ID */
     if ((dtype_id = H5PTget_type(ptable)) < 0)
@@ -1006,11 +1006,11 @@ verify_accessors(hid_t fid, const char *table_name, hbool_t uses_vlen_type)
          * expected_value passed in, then print the error message.
          */
         char lenthtype[20];
-        if (uses_vlen_type == TRUE)
-            HDstrcpy(lenthtype, "variable-length");
+        if (uses_vlen_type == true)
+            strcpy(lenthtype, "variable-length");
         else
-            HDstrcpy(lenthtype, "fixed-length");
-        HDfprintf(stderr, "\nThe dataset '%s' should be %s but is not\n", table_name, lenthtype);
+            strcpy(lenthtype, "fixed-length");
+        fprintf(stderr, "\nThe dataset '%s' should be %s but is not\n", table_name, lenthtype);
         goto error;
     }
 
@@ -1050,11 +1050,11 @@ test_accessors(void)
     if (fid < 0)
         goto error;
 
-    ret = verify_accessors(fid, PT_VLEN_ATOMIC, TRUE);
+    ret = verify_accessors(fid, PT_VLEN_ATOMIC, true);
     if (ret < 0)
         goto error;
 
-    ret = verify_accessors(fid, PT_FIXED_LEN, FALSE);
+    ret = verify_accessors(fid, PT_FIXED_LEN, false);
     if (ret < 0)
         goto error;
 
@@ -1103,9 +1103,9 @@ testfl_VLof_atomic(void)
 
     /* Allocate and initialize VL data to write (copied from C test) */
     for (uu = 0; uu < NRECORDS; uu++) {
-        writeBuf[uu].p = HDmalloc((uu + 1) * sizeof(unsigned int));
+        writeBuf[uu].p = malloc((uu + 1) * sizeof(unsigned int));
         if (writeBuf[uu].p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         }
         writeBuf[uu].len = uu + 1;
@@ -1144,7 +1144,7 @@ testfl_VLof_atomic(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1155,8 +1155,8 @@ testfl_VLof_atomic(void)
     for (uu = 0; uu < NRECORDS; uu++)
         for (vv = 0; vv < (uu + 1); vv++) {
             if (((unsigned int *)readBuf[uu].p)[vv] != ((unsigned int *)writeBuf[uu].p)[vv]) {
-                HDprintf("Packet %d's value should be %d\n", uu, ((unsigned int *)writeBuf[uu].p)[vv]);
-                HDprintf("Packet %d's value in readBuf is %d\n", uu, ((unsigned int *)readBuf[uu].p)[vv]);
+                printf("Packet %d's value should be %d\n", uu, ((unsigned int *)writeBuf[uu].p)[vv]);
+                printf("Packet %d's value in readBuf is %d\n", uu, ((unsigned int *)readBuf[uu].p)[vv]);
             }
         }
 
@@ -1223,9 +1223,9 @@ testfl_VLof_comptype(void)
 
     /* Allocate and initialize VL data to write (copied from C test) */
     for (uu = 0; uu < NRECORDS; uu++) {
-        writeBuf[uu].p = HDmalloc((uu + 1) * sizeof(VLcomp_t));
+        writeBuf[uu].p = malloc((uu + 1) * sizeof(VLcomp_t));
         if (writeBuf[uu].p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         }
         writeBuf[uu].len = uu + 1;
@@ -1281,7 +1281,7 @@ testfl_VLof_comptype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1292,16 +1292,15 @@ testfl_VLof_comptype(void)
     /* Compare data read in */
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].len != readBuf[uu].len) {
-            HDfprintf(stderr, "%d: VL data length don't match!, writeBuf[%u].len=%zu, readBuf[%u].len=%zu\n",
-                      __LINE__, uu, writeBuf[uu].len, uu, readBuf[uu].len);
+            fprintf(stderr, "%d: VL data length don't match!, writeBuf[%u].len=%zu, readBuf[%u].len=%zu\n",
+                    __LINE__, uu, writeBuf[uu].len, uu, readBuf[uu].len);
             continue;
         } /* write len != read len */
 
         for (vv = 0; vv < (uu + 1); vv++) {
             if (((unsigned int *)writeBuf[uu].p)[vv] != ((unsigned int *)readBuf[uu].p)[vv]) {
-                HDfprintf(stderr,
-                          "VL data values don't match!, writeBuf[uu].p[%u]=%u, readBuf[uu].p[%u]=%u\n", vv,
-                          ((unsigned int *)writeBuf[uu].p)[vv], vv, ((unsigned int *)readBuf[uu].p)[vv]);
+                fprintf(stderr, "VL data values don't match!, writeBuf[uu].p[%u]=%u, readBuf[uu].p[%u]=%u\n",
+                        vv, ((unsigned int *)writeBuf[uu].p)[vv], vv, ((unsigned int *)readBuf[uu].p)[vv]);
                 continue;
             } /* write value != read value */
         }
@@ -1379,16 +1378,16 @@ testfl_compound_VL_VLtype(void)
     for (uu = 0; uu < NRECORDS; uu++) {
         writeBuf[uu].u   = uu * 10;
         writeBuf[uu].f   = (float)(uu * 20) / 3.0F;
-        writeBuf[uu].v.p = HDmalloc((uu + L1_INCM) * sizeof(hvl_t));
+        writeBuf[uu].v.p = malloc((uu + L1_INCM) * sizeof(hvl_t));
         if (writeBuf[uu].v.p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         }
         writeBuf[uu].v.len = uu + L1_INCM;
         for (t1 = (hvl_t *)((writeBuf[uu].v).p), vv = 0; vv < (uu + L1_INCM); vv++, t1++) {
-            t1->p = HDmalloc((vv + L2_INCM) * sizeof(unsigned int));
+            t1->p = malloc((vv + L2_INCM) * sizeof(unsigned int));
             if (t1->p == NULL) {
-                HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+                fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
                 goto error;
             }
             t1->len = vv + L2_INCM;
@@ -1453,7 +1452,7 @@ testfl_compound_VL_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1464,34 +1463,34 @@ testfl_compound_VL_VLtype(void)
     /* Compare data read in */
     for (uu = 0; uu < NRECORDS; uu++) {
         if (writeBuf[uu].u != readBuf[uu].u) {
-            HDfprintf(stderr, "Integer components don't match!, writeBuf[%u].u=%u, readBuf[%u].u=%u\n", uu,
-                      writeBuf[uu].u, uu, readBuf[uu].u);
+            fprintf(stderr, "Integer components don't match!, writeBuf[%u].u=%u, readBuf[%u].u=%u\n", uu,
+                    writeBuf[uu].u, uu, readBuf[uu].u);
             continue;
         } /* end if */
         if (!H5_FLT_ABS_EQUAL(writeBuf[uu].f, readBuf[uu].f)) {
-            HDfprintf(stderr, "Float components don't match!, writeBuf[%u].f=%f, readBuf[%u].f=%f\n", uu,
-                      (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
+            fprintf(stderr, "Float components don't match!, writeBuf[%u].f=%f, readBuf[%u].f=%f\n", uu,
+                    (double)writeBuf[uu].f, uu, (double)readBuf[uu].f);
             continue;
         } /* end if */
 
         if (writeBuf[uu].v.len != readBuf[uu].v.len) {
-            HDfprintf(stderr,
-                      "%d: VL data length don't match!, writeBuf[%u].v.len=%zu, readBuf[%u].v.len=%zu\n",
-                      __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
+            fprintf(stderr,
+                    "%d: VL data length don't match!, writeBuf[%u].v.len=%zu, readBuf[%u].v.len=%zu\n",
+                    __LINE__, uu, writeBuf[uu].v.len, uu, readBuf[uu].v.len);
             continue;
         } /* end if */
 
         for (t1 = (hvl_t *)(writeBuf[uu].v.p), t2 = (hvl_t *)(readBuf[uu].v.p), vv = 0;
              (size_t)vv < readBuf[uu].v.len; vv++, t1++, t2++) {
             if (t1->len != t2->len) {
-                HDfprintf(stderr, "%d: VL data length don't match!, uu=%u, vv=%u, t1->len=%zu, t2->len=%zu\n",
-                          __LINE__, uu, vv, t1->len, t2->len);
+                fprintf(stderr, "%d: VL data length don't match!, uu=%u, vv=%u, t1->len=%zu, t2->len=%zu\n",
+                        __LINE__, uu, vv, t1->len, t2->len);
                 continue;
             } /* end if */
             for (ww = 0; (size_t)ww < t2->len; ww++) {
                 if (((unsigned int *)t1->p)[ww] != ((unsigned int *)t2->p)[ww]) {
-                    HDfprintf(stderr, "VL data values don't match!, t1->p[%u]=%u, t2->p[%u]=%u\n", ww,
-                              ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
+                    fprintf(stderr, "VL data values don't match!, t1->p[%u]=%u, t2->p[%u]=%u\n", ww,
+                            ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
                     continue;
                 } /* end if */
             }     /* end for */
@@ -1562,16 +1561,16 @@ testfl_VLof_VLtype(void)
 
     /* Allocate and initialize VL data to write (copied from C test) */
     for (uu = 0; uu < NRECORDS; uu++) {
-        writeBuf[uu].p = HDmalloc((uu + 1) * sizeof(hvl_t));
+        writeBuf[uu].p = malloc((uu + 1) * sizeof(hvl_t));
         if (writeBuf[uu].p == NULL) {
-            HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+            fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
             goto error;
         } /* end if */
         writeBuf[uu].len = uu + 1;
         for (t1 = (hvl_t *)(writeBuf[uu].p), vv = 0; vv < (uu + 1); vv++, t1++) {
-            t1->p = HDmalloc((vv + 1) * sizeof(unsigned int));
+            t1->p = malloc((vv + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
-                HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
+                fprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
                 goto error;
             }
             t1->len = vv + 1;
@@ -1617,7 +1616,7 @@ testfl_VLof_VLtype(void)
     if (ret < 0)
         goto error;
 
-    HDsnprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
+    snprintf(msg, sizeof(msg), "The number of packets in the packet table must be %u\n", NRECORDS);
     VERIFY(count == NRECORDS, msg);
 
     /* Read all five packets back */
@@ -1683,7 +1682,7 @@ test_packet_table_with_varlen(void)
     if (H5Fclose(fid) < 0)
         return FAIL;
 
-    HDputs("Testing packet table with various variable-length datatypes");
+    puts("Testing packet table with various variable-length datatypes");
 
     /* If any test fails, move on to subsequent test, but status will indicate
        there is a failure. */
@@ -1731,7 +1730,7 @@ test_packet_table_with_varlen(void)
     if (H5Fclose(fid) < 0)
         return FAIL;
 
-    HDputs("Testing packet table with various variable-length datatypes - H5PTcreate_fl");
+    puts("Testing packet table with various variable-length datatypes - H5PTcreate_fl");
 
     /* If any test fails, move on to subsequent test, but status will indicate
        there is a failure. */

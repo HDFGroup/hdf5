@@ -198,7 +198,7 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  *          \p dst_name.
  *
  *          If \p dst_loc_id is a file identifier, \p dst_name will be
- *          interpreted relative to that file’s root group.
+ *          interpreted relative to that file's root group.
  *
  *          The new link is created with the creation and access property lists
  *          specified by \p lcpl_id and \p lapl_id. The interpretation of
@@ -342,7 +342,7 @@ H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t
  *       the new link, use H5Lcreate_external() to create an external link.
  *
  * \note Soft links and external links are also known as symbolic links as they
- *       use a name to point to an object; hard links employ an object’s
+ *       use a name to point to an object; hard links employ an object's
  *       address in the file.
  *
  * \note Unlike hard links, a soft link in an HDF5 file is allowed to dangle,
@@ -617,7 +617,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *
  *          If the link to be verified is specified with an absolute path, the
  *          same approach should be used, but starting with the first link in
- *          the file’s root group. For instance, if \c datasetD were in
+ *          the file's root group. For instance, if \c datasetD were in
  *          \c /group1/group2/softlink_to_group3, the first call to H5Lexists()
  *          would have name set to \c /group1.
  *
@@ -710,11 +710,11 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  *          There will be additional valid values if user-defined links have
  *          been registered.
  *
- *          \p corder specifies the link’s creation order position, while
+ *          \p corder specifies the link's creation order position, while
  *          \p corder_valid indicates whether the value in corder is valid.
  *
- *          If \p corder_valid is \c TRUE, the value in \p corder is known to
- *          be valid; if \p corder_valid is \c FALSE, the value in \p corder is
+ *          If \p corder_valid is \c true, the value in \p corder is known to
+ *          be valid; if \p corder_valid is \c false, the value in \p corder is
  *          presumed to be invalid; \p corder starts at zero (0) and is
  *          incremented by one (1) as new links are created. But
  *          higher-numbered entries are not adjusted when a lower-numbered link
@@ -982,7 +982,7 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  *
  * \warning H5Literate_by_name2() assumes that the membership of the group being
  *          iterated over remains unchanged through the iteration; if any of the
- *          links in the group change during the iteration, the function’s
+ *          links in the group change during the iteration, the function's
  *          behavior is undefined. Note, however, that objects pointed to by the
  *          links can be modified.
  *
@@ -1112,7 +1112,7 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          The group serving as the root of the iteration is specified by the
  *          \p loc_id / \p group_name parameter pair. \p loc_id specifies a
  *          file or group; group_name specifies either a group in the file
- *          (with an absolute name based in the file’s root group) or a group
+ *          (with an absolute name based in the file's root group) or a group
  *          relative to \p loc_id. If \p loc_id fully specifies the group that
  *          is to serve as the root of the iteration, group_name should be '.'
  *          (a dot). (Note that when \p loc_id fully specifies the group
@@ -1301,7 +1301,7 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  *          \p file_name identifies the target file containing the target
  *          object; \p obj_name specifies the path of the target object within
  *          that file. \p obj_name must be an absolute pathname in
- *          \p file_name, i.e., it must start at the target file’s root group,
+ *          \p file_name, i.e., it must start at the target file's root group,
  *          but it is not interpreted until an application attempts to traverse
  *          it.
  *
@@ -1507,16 +1507,16 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *          There will be additional valid values if user-defined links have
  *          been registered.
  *
- *          \c corder specifies the link’s creation order position while
+ *          \c corder specifies the link's creation order position while
  *          \c corder_valid indicates whether the value in \c corder is valid.
  *
- *          If \c corder_valid is \c TRUE, the value in \c corder is known to
- *          be valid; if \c corder_valid is \c FALSE, the value in \c corder is
+ *          If \c corder_valid is \c true, the value in \c corder is known to
+ *          be valid; if \c corder_valid is \c false, the value in \c corder is
  *          presumed to be invalid;
  *
  *          \c corder starts at zero (0) and is incremented by one (1) as new
  *          links are created. But higher-numbered entries are not adjusted
- *          when a lower-numbered link is deleted; the deleted link’s creation
+ *          when a lower-numbered link is deleted; the deleted link's creation
  *          order position is simply left vacant. In such situations, the value
  *          of \c corder for the last link created will be larger than the
  *          number of links remaining in the group.
@@ -1728,7 +1728,7 @@ H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *
  * \warning H5Literate_by_name1() assumes that the membership of the group being
  *          iterated over remains unchanged through the iteration; if any of the
- *          links in the group change during the iteration, the function’s
+ *          links in the group change during the iteration, the function's
  *          behavior is undefined. Note, however, that objects pointed to by the
  *          links can be modified.
  *
@@ -1872,7 +1872,7 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          The group serving as the root of the iteration is specified by the
  *          \p loc_id / \p group_name parameter pair. \p loc_id specifies a
  *          file or group; group_name specifies either a group in the file
- *          (with an absolute name based in the file’s root group) or a group
+ *          (with an absolute name based in the file's root group) or a group
  *          relative to \p loc_id. If \p loc_id fully specifies the group that
  *          is to serve as the root of the iteration, group_name should be '.'
  *          (a dot). (Note that when \p loc_id fully specifies the group

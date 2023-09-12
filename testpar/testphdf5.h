@@ -27,12 +27,12 @@ enum H5TEST_COLL_CHUNK_API {
     API_MULTI_IND
 };
 
-#ifndef FALSE
-#define FALSE 0
+#ifndef false
+#define false 0
 #endif
 
-#ifndef TRUE
-#define TRUE 1
+#ifndef true
+#define true 1
 #endif
 
 /* Constants definitions */
@@ -82,8 +82,8 @@ enum H5TEST_COLL_CHUNK_API {
 #define LINK_TRUE_NUM_CHUNK   2
 #define LINK_FALSE_NUM_CHUNK  6
 #define MULTI_TRUE_PERCENT    50
-#define LINK_TRUE_CHUNK_NAME  "h5_link_chunk_true"
-#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_false"
+#define LINK_TRUE_CHUNK_NAME  "h5_link_chunk_TRUE"
+#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_FALSE"
 #define LINK_HARD_CHUNK_NAME  "h5_link_chunk_hard"
 #define MULTI_HARD_CHUNK_NAME "h5_multi_chunk_hard"
 #define MULTI_COLL_CHUNK_NAME "h5_multi_chunk_coll"
@@ -232,6 +232,7 @@ void external_links(void);
 void zero_dim_dset(void);
 void test_file_properties(void);
 void test_delete(void);
+void test_invalid_libver_bounds_file_close_assert(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
@@ -255,6 +256,7 @@ void none_selection_chunk(void);
 void actual_io_mode_tests(void);
 void no_collective_cause_tests(void);
 void test_chunk_alloc(void);
+void test_chunk_alloc_incr_ser_to_par(void);
 void test_filter_read(void);
 void compact_dataset(void);
 void null_dataset(void);

@@ -67,17 +67,17 @@ file_image_daisy_chain_test(void)
     int        space_ndims;
     MPI_Status rcvstat;
     int       *vector_ptr = NULL;
-    hid_t      fapl_id    = -1;
+    hid_t      fapl_id    = H5I_INVALID_HID;
     hid_t      file_id; /* file IDs */
-    hid_t      dset_id      = -1;
-    hid_t      dset_type_id = -1;
-    hid_t      space_id     = -1;
+    hid_t      dset_id      = H5I_INVALID_HID;
+    hid_t      dset_type_id = H5I_INVALID_HID;
+    hid_t      space_id     = H5I_INVALID_HID;
     herr_t     err;
     hsize_t    dims[1];
     void      *image_ptr = NULL;
     ssize_t    bytes_read;
     ssize_t    image_len;
-    hbool_t    vector_ok = TRUE;
+    bool       vector_ok = true;
     htri_t     tri_result;
 
     /* set up MPI parameters */
@@ -95,7 +95,7 @@ file_image_daisy_chain_test(void)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), FALSE);
+        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl_id);
@@ -112,7 +112,7 @@ file_image_daisy_chain_test(void)
          *    to -1 everywhere else.
          */
 
-        vector_ptr = (int *)HDmalloc((size_t)(mpi_size) * sizeof(int));
+        vector_ptr = (int *)malloc((size_t)(mpi_size) * sizeof(int));
         VRFY((vector_ptr != NULL), "allocated in memory representation of vector");
 
         vector_ptr[0] = 0;
@@ -122,7 +122,7 @@ file_image_daisy_chain_test(void)
         err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "wrote initial data to vector.");
 
-        HDfree(vector_ptr);
+        free(vector_ptr);
         vector_ptr = NULL;
 
         /* 3) Flush the core file, and get an image of it.  Close
@@ -134,7 +134,7 @@ file_image_daisy_chain_test(void)
         image_len = H5Fget_file_image(file_id, NULL, (size_t)0);
         VRFY((image_len > 0), "got image file size");
 
-        image_ptr = (void *)HDmalloc((size_t)image_len);
+        image_ptr = (void *)malloc((size_t)image_len);
         VRFY(image_ptr != NULL, "allocated file image buffer.");
 
         bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)image_len);
@@ -160,7 +160,7 @@ file_image_daisy_chain_test(void)
         mpi_result = MPI_Ssend((void *)image_ptr, (int)image_len, MPI_BYTE, 1, 0, MPI_COMM_WORLD);
         VRFY((mpi_result == MPI_SUCCESS), "sent image to process 1");
 
-        HDfree(image_ptr);
+        free(image_ptr);
         image_ptr = NULL;
         image_len = 0;
 
@@ -170,7 +170,7 @@ file_image_daisy_chain_test(void)
                               MPI_COMM_WORLD, &rcvstat);
         VRFY((mpi_result == MPI_SUCCESS), "received image len from process n-1");
 
-        image_ptr = (void *)HDmalloc((size_t)image_len);
+        image_ptr = (void *)malloc((size_t)image_len);
         VRFY(image_ptr != NULL, "allocated file image receive buffer.");
 
         mpi_result =
@@ -184,7 +184,7 @@ file_image_daisy_chain_test(void)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), FALSE);
+        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         err = H5Pset_file_image(fapl_id, image_ptr, (size_t)image_len);
@@ -200,7 +200,7 @@ file_image_daisy_chain_test(void)
         VRFY((dset_type_id >= 0), "obtained data set type");
 
         tri_result = H5Tequal(dset_type_id, H5T_NATIVE_INT);
-        VRFY((tri_result == TRUE), "verified data set type");
+        VRFY((tri_result == true), "verified data set type");
 
         space_id = H5Dget_space(dset_id);
         VRFY((space_id >= 0), "opened data space");
@@ -212,19 +212,19 @@ file_image_daisy_chain_test(void)
         VRFY((space_ndims == 1), "verified data space num dims(2)");
         VRFY((dims[0] == (hsize_t)mpi_size), "verified data space dims");
 
-        vector_ptr = (int *)HDmalloc((size_t)(mpi_size) * sizeof(int));
+        vector_ptr = (int *)malloc((size_t)(mpi_size) * sizeof(int));
         VRFY((vector_ptr != NULL), "allocated in memory rep of vector");
 
         err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "read received vector.");
 
-        vector_ok = TRUE;
+        vector_ok = true;
         for (i = 0; i < mpi_size; i++)
             if (vector_ptr[i] != i)
-                vector_ok = FALSE;
+                vector_ok = false;
         VRFY((vector_ok), "verified received vector.");
 
-        HDfree(vector_ptr);
+        free(vector_ptr);
         vector_ptr = NULL;
 
         /* 7) closes the core file and exit. */
@@ -241,7 +241,7 @@ file_image_daisy_chain_test(void)
         err = H5Pclose(fapl_id);
         VRFY((err >= 0), "closed fapl(1).");
 
-        HDfree(image_ptr);
+        free(image_ptr);
         image_ptr = NULL;
         image_len = 0;
     }
@@ -252,7 +252,7 @@ file_image_daisy_chain_test(void)
                               MPI_COMM_WORLD, &rcvstat);
         VRFY((mpi_result == MPI_SUCCESS), "received image size from process mpi_rank-1");
 
-        image_ptr = (void *)HDmalloc((size_t)image_len);
+        image_ptr = (void *)malloc((size_t)image_len);
         VRFY(image_ptr != NULL, "allocated file image receive buffer.");
 
         mpi_result =
@@ -266,7 +266,7 @@ file_image_daisy_chain_test(void)
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((fapl_id >= 0), "creating fapl");
 
-        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), FALSE);
+        err = H5Pset_fapl_core(fapl_id, (size_t)(64 * 1024), false);
         VRFY((err >= 0), "setting core file driver in fapl.");
 
         err = H5Pset_file_image(fapl_id, image_ptr, (size_t)image_len);
@@ -283,7 +283,7 @@ file_image_daisy_chain_test(void)
         VRFY((dset_type_id >= 0), "obtained data set type");
 
         tri_result = H5Tequal(dset_type_id, H5T_NATIVE_INT);
-        VRFY((tri_result == TRUE), "verified data set type");
+        VRFY((tri_result == true), "verified data set type");
 
         space_id = H5Dget_space(dset_id);
         VRFY((space_id >= 0), "opened data space");
@@ -295,21 +295,21 @@ file_image_daisy_chain_test(void)
         VRFY((space_ndims == 1), "verified data space num dims(2)");
         VRFY((dims[0] == (hsize_t)mpi_size), "verified data space dims");
 
-        vector_ptr = (int *)HDmalloc((size_t)(mpi_size) * sizeof(int));
+        vector_ptr = (int *)malloc((size_t)(mpi_size) * sizeof(int));
         VRFY((vector_ptr != NULL), "allocated in memory rep of vector");
 
         err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "read received vector.");
 
-        vector_ok = TRUE;
+        vector_ok = true;
         for (i = 0; i < mpi_size; i++) {
             if (i < mpi_rank) {
                 if (vector_ptr[i] != i)
-                    vector_ok = FALSE;
+                    vector_ok = false;
             }
             else {
                 if (vector_ptr[i] != -1)
-                    vector_ok = FALSE;
+                    vector_ok = false;
             }
         }
         VRFY((vector_ok), "verified received vector.");
@@ -321,7 +321,7 @@ file_image_daisy_chain_test(void)
         err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)vector_ptr);
         VRFY((err >= 0), "wrote modified data to vector.");
 
-        HDfree(vector_ptr);
+        free(vector_ptr);
         vector_ptr = NULL;
 
         /* 4) Flush the core file and send it to process (mpi_rank + 1) % n. */
@@ -332,7 +332,7 @@ file_image_daisy_chain_test(void)
         image_len = H5Fget_file_image(file_id, NULL, (size_t)0);
         VRFY((image_len > 0), "got (possibly modified) image file len");
 
-        image_ptr = (void *)HDrealloc((void *)image_ptr, (size_t)image_len);
+        image_ptr = (void *)realloc((void *)image_ptr, (size_t)image_len);
         VRFY(image_ptr != NULL, "re-allocated file image buffer.");
 
         bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)image_len);
@@ -346,7 +346,7 @@ file_image_daisy_chain_test(void)
                                MPI_COMM_WORLD);
         VRFY((mpi_result == MPI_SUCCESS), "sent image to process (mpi_rank + 1) % mpi_size");
 
-        HDfree(image_ptr);
+        free(image_ptr);
         image_ptr = NULL;
         image_len = 0;
 

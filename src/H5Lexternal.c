@@ -91,9 +91,6 @@ static const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
  *
  * Return:    ID of the opened object on success/H5I_INVALID_HID on failure
  *
- * Programmer:    James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -124,13 +121,13 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(p);
+    assert(p);
 
     /* Check external link version & flags */
     if (((*p >> 4) & 0x0F) > H5L_EXT_VERSION)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "bad version number for external link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "bad version number for external link");
     if ((*p & 0x0F) & ~H5L_EXT_FLAGS_ALL)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "bad flags for external link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, H5I_INVALID_HID, "bad flags for external link");
     p++;
 
     /* Gather some information from the external link's user data */
@@ -140,35 +137,35 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID");
 
     /* Get the fapl_id set for lapl_id if any */
     if (H5P_get(plist, H5L_ACS_ELINK_FAPL_NAME, &fapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get fapl for links")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get fapl for links");
 
     /* Get the location for the group holding the external link */
     if (H5G_loc(cur_group, &loc) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "can't get object location")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "can't get object location");
 
     /* get the access flags set for lapl_id if any */
     if (H5P_get(plist, H5L_ACS_ELINK_FLAGS_NAME, &intent) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get elink file access flags")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get elink file access flags");
 
     /* get the file access mode flags for the parent file, if they were not set
      * on lapl_id */
     if (intent == H5F_ACC_DEFAULT)
         intent = H5F_INTENT(loc.oloc->file);
 
-    if ((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0))
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "can't get parent's file access property list")
+    if ((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, false)) < 0))
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "can't get parent's file access property list");
 
     /* Get callback_info */
     if (H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get elink callback info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get elink callback info");
 
     /* Get file access property list */
     if (NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID");
 
     /* Make callback if it exists */
     if (cb_info.func) {
@@ -180,7 +177,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
         /* Query length of parent group name */
         if (H5G_get_name(&loc, NULL, (size_t)0, &group_name_len, NULL) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve length of group name")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve length of group name");
 
         /* Account for null terminator */
         group_name_len++;
@@ -189,50 +186,50 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
         if (group_name_len > sizeof(local_group_name)) {
             if (NULL == (parent_group_name = (char *)H5MM_malloc(group_name_len)))
                 HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, H5I_INVALID_HID,
-                            "can't allocate buffer to hold group name, group_name_len = %zu", group_name_len)
+                            "can't allocate buffer to hold group name, group_name_len = %zu", group_name_len);
         } /* end if */
         else
             parent_group_name = local_group_name;
 
         /* Get parent group name */
         if (H5G_get_name(&loc, parent_group_name, group_name_len, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve group name")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve group name");
 
         /* Make callback */
         if ((cb_info.func)(parent_file_name, parent_group_name, file_name, obj_name, &intent, fapl_id,
                            cb_info.user_data) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, H5I_INVALID_HID, "traversal operator failed")
+            HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, H5I_INVALID_HID, "traversal operator failed");
 
         /* Check access flags */
         if ((intent & H5F_ACC_TRUNC) || (intent & H5F_ACC_EXCL))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file open flags")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid file open flags");
     } /* end if */
 
     /* Set file close degree for new file to "weak" */
     if (H5P_set(fa_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5I_INVALID_HID, "can't set file close degree")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5I_INVALID_HID, "can't set file close degree");
 
     /* Get the current elink prefix */
     if (H5P_peek(plist, H5L_ACS_ELINK_PREFIX_NAME, &elink_prefix) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get external link prefix")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get external link prefix");
 
     /* Search for the target file */
     if (NULL == (ext_file = H5F_prefix_open_file(loc.oloc->file, H5F_PREFIX_ELINK, elink_prefix, file_name,
                                                  intent, fapl_id)))
         HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, H5I_INVALID_HID,
-                    "unable to open external file, external link file name = '%s'", file_name)
+                    "unable to open external file, external link file name = '%s'", file_name);
 
     /* Retrieve the "group location" for the file's root group */
     if (H5G_root_loc(ext_file, &root_loc) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, H5I_INVALID_HID, "unable to create location for file")
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, H5I_INVALID_HID, "unable to create location for file");
 
     /* Open the object referenced in the external file */
     if (NULL == (ext_obj = H5O_open_name(&root_loc, obj_name, &opened_type)))
-        HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object");
 
     /* Get an ID for the external link's object */
-    if ((ext_obj_id = H5VL_wrap_register(opened_type, ext_obj, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register external link object")
+    if ((ext_obj_id = H5VL_wrap_register(opened_type, ext_obj, true)) < 0)
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register external link object");
 
     /* Set return value */
     ret_value = ext_obj_id;
@@ -242,15 +239,15 @@ done:
     /* Release resources */
     if (fapl_id > 0 && H5I_dec_ref(fapl_id) < 0)
         HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID,
-                    "unable to close ID for file access property list")
+                    "unable to close ID for file access property list");
     if (ext_file && H5F_efc_close(loc.oloc->file, ext_file) < 0)
-        HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problem closing external file")
+        HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problem closing external file");
     if (parent_group_name && parent_group_name != local_group_name)
         parent_group_name = (char *)H5MM_xfree(parent_group_name);
     if (ret_value < 0) {
         /* Close object if it's open and something failed */
         if (ext_obj_id >= 0 && H5I_dec_ref(ext_obj_id) < 0)
-            HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to close ID for external object")
+            HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to close ID for external object");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -268,9 +265,6 @@ done:
  *
  * Return:    Size of buffer on success/Negative on failure
  *
- * Programmer:    James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -284,9 +278,9 @@ H5L__extern_query(const char H5_ATTR_UNUSED *link_name, const void *_udata, size
 
     /* Check external link version & flags */
     if (((*udata >> 4) & 0x0F) != H5L_EXT_VERSION)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link");
     if ((*udata & 0x0F) & ~H5L_EXT_FLAGS_ALL)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link");
 
     /* If the buffer is NULL, skip writing anything in it and just return
      * the size needed */
@@ -314,9 +308,6 @@ done:
  *
  * Return: Non-negative on success/ negative on failure
  *
- * Programmer:  James Laird
- *              Monday, July 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -327,7 +318,7 @@ H5L_register_external(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     if (H5L_register(H5L_EXTERN_LINK_CLASS) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -38,7 +38,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->type = (int_f)Oinfo.type;
     object_info->rc   = (int_f)Oinfo.rc;
 
-    ts = HDgmtime(&Oinfo.atime);
+    ts = gmtime(&Oinfo.atime);
 
     object_info->atime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->atime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -49,7 +49,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->atime[6] = (int_f)ts->tm_sec;
     object_info->atime[7] = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-    ts = HDgmtime(&Oinfo.btime);
+    ts = gmtime(&Oinfo.btime);
 
     object_info->btime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->btime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -60,7 +60,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->btime[6] = (int_f)ts->tm_sec;
     object_info->btime[7] = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-    ts = HDgmtime(&Oinfo.ctime);
+    ts = gmtime(&Oinfo.ctime);
 
     object_info->ctime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->ctime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -71,7 +71,7 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
     object_info->ctime[6] = (int_f)ts->tm_sec;
     object_info->ctime[7] = -32767; /* millisecond is not available, assign it -HUGE(0) */
 
-    ts = HDgmtime(&Oinfo.mtime);
+    ts = gmtime(&Oinfo.mtime);
 
     object_info->mtime[0] = (int_f)ts->tm_year + 1900; /* year starts at 1900 */
     object_info->mtime[1] = (int_f)ts->tm_mon + 1;     /* month starts at 0 in C */
@@ -101,9 +101,6 @@ fill_h5o_info_t_f(H5O_info2_t Oinfo, H5O_info_t_f *object_info)
  *  lapl_id          - Link access property list identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 21, 2008
  * SOURCE
  */
 int_f
@@ -128,51 +125,7 @@ h5olink_c(hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namelen,
 
 done:
     if (c_name)
-        HDfree(c_name);
-    return ret_value;
-}
-
-/****if* H5Of/h5ovisit_c
- * NAME
- *  h5ovisit_c
- * PURPOSE
- *  Calls H5Ovisit
- * INPUTS
- *  object_id - Identifier specifying subject group
- *  index_type - Type of index which determines the order
- *  order - Order within index
- *  idx - Iteration position at which to start
- *  op - Callback function passing data regarding the link to the calling application
- *  op_data - User-defined pointer to data required by the application for its processing of the link
- *  fields - Flags specifying the fields to include in object_info.
- *
- * OUTPUTS
- *  idx - Position at which an interrupted iteration may be restarted
- *
- * RETURNS
- *     >0 on success, 0< on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  November 19, 2008
- * SOURCE
- */
-int_f
-h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate2_t op, void *op_data,
-           int_f *fields)
-/******/
-{
-    int_f  ret_value = -1; /* Return value */
-    herr_t func_ret_value; /* H5Linterate return value */
-
-    /*
-     * Call H5Ovisit
-     */
-
-    func_ret_value = H5Ovisit3((hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op,
-                               op_data, (unsigned)*fields);
-
-    ret_value = (int_f)func_ret_value;
-
+        free(c_name);
     return ret_value;
 }
 
@@ -183,16 +136,13 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate2_t op
  *  Calls H5open_by_token
  * INPUTS
  *  loc_id - File or group identifier
- *  token  - Object’s token in the file
+ *  token  - Object's token in the file
  *
  * OUTPUTS
  *  obj_id  - Object identifier
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  September 14, 2009
  * SOURCE
  */
 int_f
@@ -232,9 +182,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 1, 2008
  * SOURCE
  */
 int_f
@@ -281,9 +228,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 1, 2008
  * SOURCE
  */
 int_f
@@ -317,7 +261,7 @@ h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *namelen, int_f 
 
 done:
     if (c_group_name)
-        HDfree(c_group_name);
+        free(c_group_name);
     return ret_value;
 }
 
@@ -334,9 +278,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
  * SOURCE
  */
 int_f
@@ -358,59 +299,6 @@ done:
     return ret_value;
 }
 
-/****if* H5Of/h5ovisit_by_name_c
- * NAME
- *  h5ovisit_by_name_c
- * PURPOSE
- *  Calls H5Ovisit_by_name
- * INPUTS
- *  object_id - Identifier specifying subject group.
- *  index_type - Type of index which determines the order.
- *  order - Order within index.
- *  idx - Iteration position at which to start.
- *  op - Callback function passing data regarding the link to the calling application.
- *  op_data - User-defined pointer to data required by the application for its processing of the link.
- *  fields - Flags specifying the fields to include in object_info.
- *
- * OUTPUTS
- *  idx - Position at which an interrupted iteration may be restarted.
- *
- * RETURNS
- *  >0 on success, 0< on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
- * SOURCE
- */
-int_f
-h5ovisit_by_name_c(hid_t_f *loc_id, _fcd object_name, size_t_f *namelen, int_f *index_type, int_f *order,
-                   H5O_iterate2_t op, void *op_data, hid_t_f *lapl_id, int_f *fields)
-/******/
-{
-    int_f  ret_value = -1;       /* Return value */
-    herr_t func_ret_value;       /* H5Linterate return value */
-    char  *c_object_name = NULL; /* Buffer to hold C string */
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_object_name = HD5f2cstring(object_name, (size_t)*namelen)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Ovisit_by_name
-     */
-    func_ret_value =
-        H5Ovisit_by_name3((hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order, op,
-                          op_data, (unsigned)*fields, (hid_t)*lapl_id);
-    ret_value = (int_f)func_ret_value;
-
-done:
-    if (c_object_name)
-        HDfree(c_object_name);
-    return ret_value;
-}
-
 /****if* H5Of/h5odecr_refcount_c
  * NAME
  *  h5odecr_refcount_c
@@ -420,9 +308,6 @@ done:
  *  object_id - Object identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
  * SOURCE
  */
 int_f
@@ -454,9 +339,6 @@ done:
  *
  * RETURNS
  *  link status: 0 = false, 1 = true, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
  * SOURCE
  */
 int_f
@@ -480,7 +362,7 @@ h5oexists_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 }
 
@@ -493,9 +375,6 @@ done:
  *  object_id - Object identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
  * SOURCE
  */
 int_f
@@ -525,9 +404,6 @@ done:
  *  commentlen - Length of the comment.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
  * SOURCE
  */
 int_f
@@ -551,7 +427,7 @@ h5oset_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
 
 done:
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -570,9 +446,6 @@ done:
  *  lapl_id    - Link access property list identifier.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
  * SOURCE
  */
 int_f
@@ -603,9 +476,9 @@ h5oset_comment_by_name_c(hid_t_f *object_id, _fcd name, size_t_f *namelen, _fcd 
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     return ret_value;
 }
 
@@ -622,9 +495,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 24, 2012
  * SOURCE
  */
 int_f
@@ -641,7 +511,7 @@ h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize
      * Allocate buffer to hold comment name
      */
 
-    if (NULL == (c_comment = (char *)HDmalloc(c_commentsize)))
+    if (NULL == (c_comment = (char *)malloc(c_commentsize)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -660,7 +530,7 @@ h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize
 
 done:
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
 
     return ret_value;
 }
@@ -678,9 +548,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  July 6, 2012
  * SOURCE
  */
 int_f
@@ -706,7 +573,7 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
      * Allocate buffer to hold comment name
      */
 
-    if (NULL == (c_comment = (char *)HDmalloc(c_commentsize)))
+    if (NULL == (c_comment = (char *)malloc(c_commentsize)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -718,7 +585,7 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
         HGOTO_DONE(FAIL);
 
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     *bufsize = (size_t_f)c_bufsize;
 
@@ -727,16 +594,16 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
      */
     if (c_comment) {
         HD5packFstring(c_comment, _fcdtocp(comment), c_commentsize - 1);
-        HDfree(c_comment);
+        free(c_comment);
     }
 
     return ret_value;
 
 done:
     if (c_comment)
-        HDfree(c_comment);
+        free(c_comment);
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -753,9 +620,6 @@ done:
  *  cmp_value - Whether the tokens are equal.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  January 10, 2019
  * SOURCE
  */
 int_f

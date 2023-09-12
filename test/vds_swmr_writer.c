@@ -18,11 +18,11 @@ main(int argc, char *argv[])
 {
     int file_number = -1; /* Source file number               */
 
-    hid_t fid    = -1; /* HDF5 file ID                     */
-    hid_t faplid = -1; /* file access property list ID                */
-    hid_t did    = -1; /* dataset ID                       */
-    hid_t msid   = -1; /* memory dataspace ID              */
-    hid_t fsid   = -1; /* file dataspace ID                */
+    hid_t fid    = H5I_INVALID_HID; /* HDF5 file ID                     */
+    hid_t faplid = H5I_INVALID_HID; /* file access property list ID                */
+    hid_t did    = H5I_INVALID_HID; /* dataset ID                       */
+    hid_t msid   = H5I_INVALID_HID; /* memory dataspace ID              */
+    hid_t fsid   = H5I_INVALID_HID; /* file dataspace ID                */
 
     hsize_t extent[RANK]; /* dataset extents                  */
     hsize_t start[RANK];  /* hyperslab start point            */
@@ -43,11 +43,11 @@ main(int argc, char *argv[])
      * This is an integer index into the FILE_NAMES array.
      */
     if (argc != 2) {
-        HDfprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
+        fprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
         return EXIT_FAILURE;
     }
 
-    file_number = HDatoi(argv[1]);
+    file_number = atoi(argv[1]);
     if (file_number < 0 || file_number >= N_SOURCES)
         TEST_ERROR;
 
@@ -64,7 +64,7 @@ main(int argc, char *argv[])
 
     /* Create a data buffer that represents a plane */
     n_elements = PLANES[file_number][1] * PLANES[file_number][2];
-    if (NULL == (buffer = (int *)HDmalloc(n_elements * sizeof(int))))
+    if (NULL == (buffer = (int *)malloc(n_elements * sizeof(int))))
         TEST_ERROR;
 
     /* Create the memory dataspace */
@@ -132,9 +132,9 @@ main(int argc, char *argv[])
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
-    HDfree(buffer);
+    free(buffer);
 
-    HDfprintf(stderr, "SWMR writer exited successfully\n");
+    fprintf(stderr, "SWMR writer exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -152,11 +152,11 @@ error:
         if (fsid >= 0)
             (void)H5Sclose(fsid);
         if (buffer != NULL)
-            HDfree(buffer);
+            free(buffer);
     }
     H5E_END_TRY
 
-    HDfprintf(stderr, "ERROR: SWMR writer exited with errors\n");
+    fprintf(stderr, "ERROR: SWMR writer exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

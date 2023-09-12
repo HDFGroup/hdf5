@@ -37,11 +37,8 @@
 
 MODULE H5L
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_INT
   USE H5GLOBAL
-
   IMPLICIT NONE
-
 
   TYPE, bind(c) :: union_t
      TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens
@@ -57,7 +54,7 @@ MODULE H5L
                             !< \li H5L_TYPE_SOFT_F     Soft link
                             !< \li H5L_TYPE_EXTERNAL_F External link
                             !< \li H5L_TYPE_ERROR_F    Invalid link type id
- !   LOGICAL(c_bool) :: corder_valid ! hbool_t corder_valid
+ !   LOGICAL(c_bool) :: corder_valid ! bool corder_valid
      INTEGER(c_int64_t) :: corder !< Creation order
      INTEGER(c_int)     :: cset   !< Character set of link name is encoded. Valid values include the following:
                                   !< \li H5T_CSET_ASCII  US ASCII
@@ -180,7 +177,7 @@ CONTAINS
 !!
 !! \param loc_id  Identifier of the file or group containing the object.
 !! \param name    Name of the link to delete.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !! \param file    \fortran_file
@@ -198,7 +195,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
     TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
-    INTEGER    , INTENT(IN), OPTIONAL :: line
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
 
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
@@ -298,7 +295,7 @@ CONTAINS
 !! \param target_path Path to the target object, which is not required to exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
@@ -430,7 +427,7 @@ CONTAINS
 !! \param obj_name    Name of the target object, which must already exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
@@ -644,7 +641,7 @@ CONTAINS
 !!                    \li H5_ITER_NATIVE_F  - No particular order, whatever is fastest
 !!                    \li H5_ITER_N_F       - Number of iteration orders
 !! \param n           Link for which to retrieve information.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !! \param file        \fortran_file
@@ -751,10 +748,10 @@ CONTAINS
     link_exists_c = H5Lexists(loc_id, c_name, lapl_id_default)
 
     link_exists = .FALSE.
-    IF(link_exists_c.GT.0) link_exists = .TRUE.
+    IF(link_exists_c.GT.0_C_INT) link_exists = .TRUE.
 
     hdferr = 0
-    IF(link_exists_c.LT.0) hdferr = -1
+    IF(link_exists_c.LT.0_C_INT) hdferr = -1
 
   END SUBROUTINE h5lexists_f
 
@@ -765,8 +762,10 @@ CONTAINS
 !!
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
-!! \param link_exists Pointer to Link exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
-!! \param es_id       \es_id
+!! \param link_exists Pointer to link exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.
 !! \param file        \fortran_file
@@ -831,8 +830,8 @@ CONTAINS
 !! \param link_loc_id File or group identifier.
 !! \param link_name   Name of the link for which information is being sought.
 !!                     NOTE: In C these are contained in the structure H5L_info_t
-!! \param cset         Indicates the character set used for link’s name.
-!! \param corder       Specifies the link’s creation order position.
+!! \param cset         Indicates the character set used for link&apos;s name.
+!! \param corder       Specifies the link&apos;s creation order position.
 !! \param f_corder_valid Indicates whether the value in corder is valid.
 !! \param link_type    Specifies the link class:
 !!                     \li H5L_TYPE_HARD_F     - Hard link
@@ -927,7 +926,7 @@ CONTAINS
 !!                       \li H5L_TYPE_ERROR _F    - Error
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
 !! \param corder         Is a positive integer containing the creation order of the attribute.
-!! \param cset           Indicates the character set used for the attribute’s name.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
 !! \param token          If the link is a hard link, token specifies the object token that the link points to.
 !! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                       the length of the name of the pointed-to object with a null terminator.
@@ -1371,8 +1370,11 @@ CONTAINS
 !!                     in \p return_value for H5Literate_async_f(), so \p return_value should
 !!                     not be used for determining the return state of the callback routine.
 !!
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
+!! \param file         \fortran_file
+!! \param func         \fortran_func
+!! \param line         \fortran_line
 !!
 !! See C API: @ref H5Literate_async()
 !!
@@ -1460,7 +1462,7 @@ CONTAINS
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
+
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)           :: loc_id
     CHARACTER(LEN=*), INTENT(IN)           :: group_name
@@ -1506,5 +1508,128 @@ CONTAINS
     END IF
 
   END SUBROUTINE h5literate_by_name_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Recursively visits all links starting from a specified group.
+!!
+!! \param grp_id       Group identifier
+!! \param idx_type     Index type
+!! \param order	       Iteration order
+!! \param op	       Callback function
+!! \param op_data      User-defined callback function context
+!! \param return_value The return value of the first operator that returns non-zero, or zero if
+!!                     all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Lvisit2()
+!!
+  SUBROUTINE h5lvisit_f(grp_id, idx_type, order, op, op_data, return_value, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(hid_t), INTENT(IN)    :: grp_id
+    INTEGER       , INTENT(IN)    :: idx_type
+    INTEGER       , INTENT(IN)    :: order
+    TYPE(C_FUNPTR), INTENT(IN)    :: op
+    TYPE(C_PTR)   , INTENT(INOUT) :: op_data  ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER       , INTENT(OUT)   :: return_value
+    INTEGER       , INTENT(OUT)   :: hdferr
+
+    INTEGER(C_INT) :: return_value_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lvisit(grp_id, idx_type, order, op, op_data) BIND(C, NAME='H5Lvisit2')
+         IMPORT :: c_char, c_int, c_ptr, c_funptr
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: grp_id
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+       END FUNCTION H5Lvisit
+    END INTERFACE
+
+    return_value_c = INT(H5Lvisit(grp_id, INT(idx_type, C_INT), INT(order, C_INT), op, op_data))
+    return_value = INT(return_value_c)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE H5Lvisit_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Recursively visits all links starting from a specified group.
+!!
+!! \param loc_id       Location identifier
+!! \param group_name   Group name
+!! \param idx_type     Index type
+!! \param order	       Iteration order
+!! \param op	       Callback function
+!! \param op_data      User-defined callback function context
+!! \param return_value The return value of the first operator that returns non-zero, or zero if
+!!                     all members were processed with no operator returning non-zero.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list
+!!
+!!
+!! See C API: @ref H5Lvisit_by_name2()
+!!
+  SUBROUTINE H5Lvisit_by_name_f(loc_id, group_name, idx_type, order, op, op_data, return_value, hdferr, lapl_id)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T)  , INTENT(IN)    :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)    :: group_name
+    INTEGER         , INTENT(IN)    :: idx_type
+    INTEGER         , INTENT(IN)    :: order
+    TYPE(C_FUNPTR)  , INTENT(IN)    :: op
+    TYPE(C_PTR)     , INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER         , INTENT(OUT)   :: return_value
+    INTEGER       , INTENT(OUT)     :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(C_INT)  :: return_value_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lvisit_by_name(loc_id, group_name, idx_type, order, op, op_data, lapl_id) &
+            BIND(C, NAME='H5Lvisit_by_name2')
+         IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER(C_INT), VALUE :: idx_type
+         INTEGER(C_INT), VALUE :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(HID_T), VALUE :: lapl_id
+       END FUNCTION H5Lvisit_by_name
+    END INTERFACE
+
+    c_name = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    return_value_c = INT(H5Lvisit_by_name(loc_id, c_name, INT(idx_type, C_INT), INT(order, C_INT), op, op_data, lapl_id_default))
+    return_value = INT(return_value_c)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE H5Lvisit_by_name_f
 
 END MODULE H5L

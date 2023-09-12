@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              March 10, 2014
- *
  * Purpose:     Test H5Dwrite_multi() and H5Dread_multi using randomized
  *              parameters.  Also tests H5Dwrite() and H5Dread() using a similar
  *              method.
@@ -47,14 +44,14 @@
     (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_TCONV |    \
      MDSET_FLAG_FILTER)
 
-const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
+static const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
 
 /* Names for datasets */
 char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
 
 /* Whether these filters are available */
-htri_t deflate_avail    = FALSE;
-htri_t fletcher32_avail = FALSE;
+htri_t deflate_avail    = false;
+htri_t fletcher32_avail = false;
 
 static int
 test_mdset_location(hid_t fapl_id)
@@ -83,7 +80,7 @@ test_mdset_location(hid_t fapl_id)
     if ((file_id2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    if (NULL == (buf = (int *)HDcalloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
+    if (NULL == (buf = (int *)calloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
         TEST_ERROR;
 
     /* Generate memory dataspace */
@@ -172,9 +169,6 @@ error:
  *
  * Return:      Number of errors
  *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -189,7 +183,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     size_t      max_dsets;
     size_t      buf_size;
     size_t      ndsets;
-    hid_t       file_id = -1;
+    hid_t       file_id = H5I_INVALID_HID;
     hid_t       dcpl_id[MAX_DSETS];
     hsize_t     dset_dims[MAX_DSETS][3];
     hsize_t     chunk_dims[2];
@@ -202,7 +196,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     unsigned   *wbufi[MAX_DSETS][MAX_DSET_X];
     unsigned   *efbuf = NULL;
     unsigned   *efbufi[MAX_DSETS][MAX_DSET_X];
-    hbool_t     do_read;
+    bool        do_read;
     hsize_t     start[3];
     hsize_t     count[3];
     hsize_t     points[3 * MAX_POINTS];
@@ -224,13 +218,13 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         dcpl_id[i] = -1;
 
     /* Allocate buffers */
-    if (NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (rbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (erbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (wbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (efbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
 
     /* Initialize buffer indices */
@@ -327,7 +321,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         for (j = 0; j < ndsets; j++) {
             hid_t source_dset;
 
-            hbool_t use_chunk =
+            bool use_chunk =
                 (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
@@ -378,8 +372,8 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         } /* end for */
 
         /* Initialize read buffer and expected read buffer */
-        (void)HDmemset(rbuf, 0, buf_size);
-        (void)HDmemset(erbuf, 0, buf_size);
+        (void)memset(rbuf, 0, buf_size);
+        (void)memset(erbuf, 0, buf_size);
 
         /* Initialize write buffer */
         for (j = 0; j < max_dsets; j++)
@@ -388,13 +382,13 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     wbufi[j][k][l] = (unsigned)((j * MAX_DSET_X * MAX_DSET_Y) + (k * MAX_DSET_Y) + l);
 
         /* Initialize expected file buffer */
-        (void)HDmemset(efbuf, 0, buf_size);
+        (void)memset(efbuf, 0, buf_size);
 
         /* Perform read/write operations */
         for (j = 0; j < OPS_PER_FILE; j++) {
             /* Decide whether to read or write.  Can't read on the first iteration with external
              * layout because the write is needed to create the external file. */
-            do_read = (j == 0 && flags & MDSET_FLAG_MLAYOUT) ? FALSE : (hbool_t)(HDrandom() % 2);
+            do_read = (j == 0 && flags & MDSET_FLAG_MLAYOUT) ? false : (bool)(HDrandom() % 2);
 
             /* Loop over datasets */
             for (k = 0; k < ndsets; k++) {
@@ -637,9 +631,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
  *
  *-------------------------------------------------------------------------
  */

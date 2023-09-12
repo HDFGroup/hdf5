@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              July, 2019
- *
  * Purpose:     Private declaration for external.c and external_env.c
  */
 #ifndef EXTERNAL_FNAME_H

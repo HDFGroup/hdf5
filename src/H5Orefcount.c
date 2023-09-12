@@ -29,11 +29,11 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__refcount_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                    size_t p_size, const uint8_t *p);
-static herr_t H5O__refcount_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__refcount_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__refcount_copy(const void *_mesg, void *_dest);
-static size_t H5O__refcount_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__refcount_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__refcount_free(void *_mesg);
-static herr_t H5O__refcount_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+static herr_t H5O__refcount_pre_copy_file(H5F_t *file_src, const void *mesg_src, bool *deleted,
                                           const H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__refcount_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -88,23 +88,23 @@ H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_REFCOUNT_VERSION)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message");
 
     /* Allocate space for message */
     if (NULL == (refcount = H5FL_MALLOC(H5O_refcount_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Get reference count for object */
     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-    UINT32DECODE(p, *refcount)
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    UINT32DECODE(p, *refcount);
 
     /* Set return value */
     ret_value = refcount;
@@ -123,13 +123,10 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p,
                      const void *_mesg)
 {
     const H5O_refcount_t *refcount = (const H5O_refcount_t *)_mesg;
@@ -137,9 +134,9 @@ H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(refcount);
+    assert(f);
+    assert(p);
+    assert(refcount);
 
     /* Message version */
     *p++ = H5O_REFCOUNT_VERSION;
@@ -159,9 +156,6 @@ H5O__refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sha
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -174,9 +168,9 @@ H5O__refcount_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(refcount);
+    assert(refcount);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_refcount_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy */
     *dest = *refcount;
@@ -198,13 +192,10 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *              Failure:        zero
  *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
+H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared,
                    const void H5_ATTR_UNUSED *_mesg)
 {
     size_t ret_value = 0; /* Return value */
@@ -225,9 +216,6 @@ H5O__refcount_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, March 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -235,7 +223,7 @@ H5O__refcount_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_refcount_t, mesg);
 
@@ -251,26 +239,23 @@ H5O__refcount_free(void *mesg)
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, March 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
-                            hbool_t *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info,
+                            bool *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info,
                             void H5_ATTR_UNUSED *udata)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(deleted);
-    HDassert(cpy_info);
+    assert(deleted);
+    assert(cpy_info);
 
     /* Always delete this message when copying objects between files.  Let
      *  the copy routine set the correct ref. count.
      */
-    *deleted = TRUE;
+    *deleted = true;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__refcount_pre_copy_file() */
@@ -282,9 +267,6 @@ H5O__refcount_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_U
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -295,13 +277,13 @@ H5O__refcount_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, in
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(refcount);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(refcount);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of links:", (unsigned)*refcount);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of links:", (unsigned)*refcount);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__refcount_debug() */

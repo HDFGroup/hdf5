@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -149,26 +149,6 @@ int H5_api_dataset_test(void);
 #define DATASET_IO_POINT_DSET_NAME_NOCHUNK "dataset_io_point_selection_dset_nochunk"
 #define DATASET_IO_POINT_DSET_NAME_CHUNK   "dataset_io_point_selection_dset_chunk"
 
-#ifndef NO_LARGE_TESTS
-#define DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK 3
-#define DATASET_LARGE_READ_TEST_ALL_DSET_DTYPESIZE  sizeof(int)
-#define DATASET_LARGE_READ_TEST_ALL_DSET_DTYPE      H5T_NATIVE_INT
-#define DATASET_LARGE_READ_TEST_ALL_GROUP_NAME      "dataset_large_read_all_test"
-#define DATASET_LARGE_READ_TEST_ALL_DSET_NAME       "dataset_large_read_all_dset"
-
-#define DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK 3
-#define DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPESIZE  sizeof(int)
-#define DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPE      H5T_NATIVE_INT
-#define DATASET_LARGE_READ_TEST_HYPERSLAB_GROUP_NAME      "dataset_large_read_hyperslab_test"
-#define DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME       "dataset_large_read_hyperslab_dset"
-
-#define DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK 1
-#define DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE  sizeof(int)
-#define DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE      H5T_NATIVE_INT
-#define DATASET_LARGE_READ_TEST_POINT_SELECTION_GROUP_NAME      "dataset_large_read_point_selection_test"
-#define DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME       "dataset_large_read_point_selection_dset"
-#endif
-
 #define DATASET_READ_INVALID_PARAMS_TEST_DSET_SPACE_RANK 3
 #define DATASET_READ_INVALID_PARAMS_TEST_DSET_DTYPESIZE  sizeof(int)
 #define DATASET_READ_INVALID_PARAMS_TEST_DSET_DTYPE      H5T_NATIVE_INT
@@ -193,26 +173,6 @@ int H5_api_dataset_test(void);
 #define DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS      10
 #define DATASET_SMALL_WRITE_TEST_POINT_SELECTION_GROUP_NAME      "dataset_small_write_point_selection_test"
 #define DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_NAME       "dataset_small_write_point_selection_dset"
-
-#ifndef NO_LARGE_TESTS
-#define DATASET_LARGE_WRITE_TEST_ALL_DSET_SPACE_RANK 3
-#define DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPESIZE  sizeof(int)
-#define DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE      H5T_NATIVE_INT
-#define DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME      "dataset_large_write_all_test"
-#define DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME       "dataset_large_write_all_dset"
-
-#define DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK 3
-#define DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE  sizeof(int)
-#define DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPE      H5T_NATIVE_INT
-#define DATASET_LARGE_WRITE_TEST_HYPERSLAB_GROUP_NAME      "dataset_large_write_hyperslab_test"
-#define DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME       "dataset_large_write_hyperslab_dset"
-
-#define DATASET_LARGE_WRITE_TEST_POINT_SELECTION_DSET_SPACE_RANK 3
-#define DATASET_LARGE_WRITE_TEST_POINT_SELECTION_DSET_DTYPESIZE  sizeof(int)
-#define DATASET_LARGE_WRITE_TEST_POINT_SELECTION_DSET_DTYPE      H5T_NATIVE_INT
-#define DATASET_LARGE_WRITE_TEST_POINT_SELECTION_GROUP_NAME      "dataset_large_write_point_selection_test"
-#define DATASET_LARGE_WRITE_TEST_POINT_SELECTION_DSET_NAME       "dataset_large_write_point_selection_dset"
-#endif
 
 #define DATASET_DATA_VERIFY_WRITE_TEST_DSET_SPACE_RANK 3
 #define DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE  sizeof(int)

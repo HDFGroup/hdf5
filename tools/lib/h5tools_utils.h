@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling
- *              Tuesday, 6. March 2001
- *
  * Purpose:     Support functions for the various tools.
  */
 #ifndef H5TOOLS_UTILS_H
@@ -44,8 +41,8 @@ H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
 typedef struct obj_t {
     H5O_token_t obj_token;
     char       *objname;
-    hbool_t     displayed; /* Flag to indicate that the object has been displayed */
-    hbool_t     recorded;  /* Flag for named datatypes to indicate they were found in the group hierarchy */
+    bool        displayed; /* Flag to indicate that the object has been displayed */
+    bool        recorded;  /* Flag for named datatypes to indicate they were found in the group hierarchy */
 } obj_t;
 
 /*struct for the tables that the find_objs function uses*/
@@ -63,6 +60,14 @@ typedef struct find_objs_t {
     table_t *type_table;
     table_t *dset_table;
 } find_objs_t;
+
+#ifdef H5_HAVE_ROS3_VFD
+/*extended configuration struct for holding the configuration data to the #H5FD_ROS3 driver */
+typedef struct H5FD_ros3_fapl_ext_t {
+    H5FD_ros3_fapl_t fa;                                      /* ROS3 configuration struct*/
+    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1]; /* Session/security token*/
+} H5FD_ros3_fapl_ext_t;
+#endif /* H5_HAVE_ROS3_VFD */
 
 H5TOOLS_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  */
 
@@ -121,7 +126,7 @@ typedef struct {
 
 /* Definitions of routines */
 H5TOOLS_DLL int H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info,
-                                         hbool_t get_obj_type);
+                                         bool get_obj_type);
 H5TOOLS_DLL const char *h5tools_getprogname(void);
 H5TOOLS_DLL void        h5tools_setprogname(const char *progname);
 H5TOOLS_DLL int         h5tools_getstatus(void);
@@ -129,8 +134,8 @@ H5TOOLS_DLL void        h5tools_setstatus(int d_status);
 H5TOOLS_DLL int         h5tools_getenv_update_hyperslab_bufsize(void);
 #ifdef H5_HAVE_ROS3_VFD
 H5TOOLS_DLL herr_t h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
-                                                 H5FD_ros3_fapl_t *fapl_config_out);
-H5TOOLS_DLL int    h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values);
+                                                 H5FD_ros3_fapl_ext_t *fapl_config_out);
+H5TOOLS_DLL int    h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values);
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
 H5TOOLS_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,

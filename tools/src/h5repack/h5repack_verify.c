@@ -49,7 +49,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     hid_t                 fcpl_in  = H5I_INVALID_HID;  /* file creation property for input file */
     hid_t                 fcpl_out = H5I_INVALID_HID;  /* file creation property for output file */
     H5F_fspace_strategy_t in_strategy, out_strategy;   /* file space handling strategy for in/output file */
-    hbool_t               in_persist, out_persist;     /* free-space persist status for in/output file */
+    bool                  in_persist, out_persist;     /* free-space persist status for in/output file */
     hsize_t               in_threshold, out_threshold; /* free-space section threshold for in/output file */
     hsize_t               in_pagesize, out_pagesize;   /* file space page size for input/output file */
     int                   ret_value = 0;
@@ -234,7 +234,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * the same as the input file's free-space persist status
      */
     if (options->fs_persist) {
-        if (out_persist != (hbool_t)(options->fs_persist == (-1) ? FALSE : options->fs_persist))
+        if (out_persist != (bool)(options->fs_persist == (-1) ? false : options->fs_persist))
             H5TOOLS_GOTO_ERROR((-1), "free-space persist status not set as unexpected");
     }
     else {
@@ -286,7 +286,7 @@ done:
         if (travt)
             trav_table_free(travt);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 } /* h5repack_verify() */
@@ -475,7 +475,7 @@ done:
         if (trav)
             trav_table_free(trav);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }

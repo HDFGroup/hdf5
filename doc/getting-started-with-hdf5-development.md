@@ -270,7 +270,7 @@ H5X_do_stuff(/*parameters*/)
 	HDassert(/*parameter check*/);
 
 	if (H5X_other_call() < 0)
-		HGOTO_ERROR(H5E_MAJ, H5E_MIN, FAIL, "badness")
+		HGOTO_ERROR(H5E_MAJ, H5E_MIN, FAIL, "badness");
 
 done:
 	if (ret_value < 0)
@@ -329,12 +329,12 @@ H5Xdo_api_stuff(/*parameters*/)
 	H5TRACE3(/*stuff*/)
 
 	if (/*parameter check*/)
-		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "badness")
+		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "badness");
 
 	/* VOL setup */
 
 	if (H5VL_call() < 0)
-		HGOTO_ERROR(H5E_FOO, H5E_BAR, FAIL, "badness")
+		HGOTO_ERROR(H5E_FOO, H5E_BAR, FAIL, "badness");
 
 done:
 	if (ret_value < 0)
@@ -483,7 +483,7 @@ fail. The general format is this:
 
 ```c
 if (function_that_could_fail(foo, bar) < 0)
-    HGOTO_ERROR(H5E_<major>, H5E_<minor>, <bad value>, "tell me about badness")
+    HGOTO_ERROR(H5E_<major>, H5E_<minor>, <bad value>, "tell me about badness");
 ```
 
 `HGOTO_ERROR` is one of a set of macros defined in `H5Eprivate.h`. This macro
@@ -713,7 +713,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }

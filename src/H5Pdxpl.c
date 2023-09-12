@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pdxpl.c
- *			March 16 1998
- *			Robb Matzke
  *
  * Purpose:		Data transfer property list class routines
  *
@@ -30,14 +28,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Cache                                */
-#include "H5Dprivate.h"  /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Ppkg.h"      /* Property lists		  	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Cache                                    */
+#include "H5Dprivate.h"  /* Datasets                                 */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FDprivate.h" /* File drivers                             */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /****************/
 /* Local Macros */
@@ -180,8 +179,8 @@
 #define H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE sizeof(uint32_t)
 #define H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF  0
 /* Definitions for modify write buffer property */
-#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
-#define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE
+#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(bool)
+#define H5D_XFER_MODIFY_WRITE_BUF_DEF  false
 #define H5D_XFER_MODIFY_WRITE_BUF_ENC  H5P__dxfr_modify_write_buf_enc
 #define H5D_XFER_MODIFY_WRITE_BUF_DEC  H5P__dxfr_modify_write_buf_dec
 
@@ -300,7 +299,7 @@ static const H5S_t *H5D_def_dset_io_sel_g =
 static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
 static const uint32_t H5D_def_actual_selection_io_mode_g             = H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF;
-static const hbool_t  H5D_def_modify_write_buf_g                     = H5D_XFER_MODIFY_WRITE_BUF_DEF;
+static const bool                    H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -309,8 +308,6 @@ static const hbool_t  H5D_def_modify_write_buf_g                     = H5D_XFER_
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -324,158 +321,158 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE,
                            &H5D_def_max_temp_buf_g, NULL, NULL, NULL, H5D_XFER_MAX_TEMP_BUF_ENC,
                            H5D_XFER_MAX_TEMP_BUF_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the type conversion buffer property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_TCONV_BUF_NAME, H5D_XFER_TCONV_BUF_SIZE, &H5D_def_tconv_buf_g,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the background buffer property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_BKGR_BUF_NAME, H5D_XFER_BKGR_BUF_SIZE, &H5D_def_bkgr_buf_g, NULL,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the background buffer type property */
     if (H5P__register_real(pclass, H5D_XFER_BKGR_BUF_TYPE_NAME, H5D_XFER_BKGR_BUF_TYPE_SIZE,
                            &H5D_def_bkgr_buf_type_g, NULL, NULL, NULL, H5D_XFER_BKGR_BUF_TYPE_ENC,
                            H5D_XFER_BKGR_BUF_TYPE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the B-Tree node splitting ratios property */
     if (H5P__register_real(pclass, H5D_XFER_BTREE_SPLIT_RATIO_NAME, H5D_XFER_BTREE_SPLIT_RATIO_SIZE,
                            H5D_def_btree_split_ratio_g, NULL, NULL, NULL, H5D_XFER_BTREE_SPLIT_RATIO_ENC,
                            H5D_XFER_BTREE_SPLIT_RATIO_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the vlen allocation function property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_VLEN_ALLOC_NAME, H5D_XFER_VLEN_ALLOC_SIZE, &H5D_def_vlen_alloc_g,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the vlen allocation information property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_VLEN_ALLOC_INFO_NAME, H5D_XFER_VLEN_ALLOC_INFO_SIZE,
                            &H5D_def_vlen_alloc_info_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the vlen free function property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_VLEN_FREE_NAME, H5D_XFER_VLEN_FREE_SIZE, &H5D_def_vlen_free_g,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the vlen free information property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_VLEN_FREE_INFO_NAME, H5D_XFER_VLEN_FREE_INFO_SIZE,
                            &H5D_def_vlen_free_info_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the vector size property */
     if (H5P__register_real(pclass, H5D_XFER_HYPER_VECTOR_SIZE_NAME, H5D_XFER_HYPER_VECTOR_SIZE_SIZE,
                            &H5D_def_hyp_vec_size_g, NULL, NULL, NULL, H5D_XFER_HYPER_VECTOR_SIZE_ENC,
                            H5D_XFER_HYPER_VECTOR_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the I/O transfer mode properties */
     if (H5P__register_real(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE,
                            &H5D_def_io_xfer_mode_g, NULL, NULL, NULL, H5D_XFER_IO_XFER_MODE_ENC,
                            H5D_XFER_IO_XFER_MODE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE,
                            &H5D_def_mpio_collective_opt_mode_g, NULL, NULL, NULL,
                            H5D_XFER_MPIO_COLLECTIVE_OPT_ENC, H5D_XFER_MPIO_COLLECTIVE_OPT_DEC, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE,
                            &H5D_def_mpio_chunk_opt_mode_g, NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_HARD_ENC,
                            H5D_XFER_MPIO_CHUNK_OPT_HARD_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, H5D_XFER_MPIO_CHUNK_OPT_NUM_SIZE,
                            &H5D_def_mpio_chunk_opt_num_g, NULL, NULL, NULL, H5D_XFER_MPIO_CHUNK_OPT_NUM_ENC,
                            H5D_XFER_MPIO_CHUNK_OPT_NUM_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, H5D_XFER_MPIO_CHUNK_OPT_RATIO_SIZE,
                            &H5D_def_mpio_chunk_opt_ratio_g, NULL, NULL, NULL,
                            H5D_XFER_MPIO_CHUNK_OPT_RATIO_ENC, H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEC, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the chunk optimization mode property. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_SIZE,
                            &H5D_def_mpio_actual_chunk_opt_mode_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the actual I/O mode property. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE,
                            &H5D_def_mpio_actual_io_mode_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the local cause of broken collective I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE,
                            &H5D_def_mpio_no_collective_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the global cause of broken collective I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME,
                            H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &H5D_def_mpio_no_collective_cause_g, NULL, NULL,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the EDC property */
     if (H5P__register_real(pclass, H5D_XFER_EDC_NAME, H5D_XFER_EDC_SIZE, &H5D_def_enable_edc_g, NULL, NULL,
                            NULL, H5D_XFER_EDC_ENC, H5D_XFER_EDC_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the filter callback property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_FILTER_CB_NAME, H5D_XFER_FILTER_CB_SIZE, &H5D_def_filter_cb_g,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the type conversion callback property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_CONV_CB_NAME, H5D_XFER_CONV_CB_SIZE, &H5D_def_conv_cb_g, NULL,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the data transform property */
     if (H5P__register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &H5D_def_xfer_xform_g, NULL,
                            H5D_XFER_XFORM_SET, H5D_XFER_XFORM_GET, H5D_XFER_XFORM_ENC, H5D_XFER_XFORM_DEC,
                            H5D_XFER_XFORM_DEL, H5D_XFER_XFORM_COPY, H5D_XFER_XFORM_CMP,
                            H5D_XFER_XFORM_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the dataset I/O selection property */
     if (H5P__register_real(pclass, H5D_XFER_DSET_IO_SEL_NAME, H5D_XFER_DSET_IO_SEL_SIZE,
                            &H5D_def_dset_io_sel_g, NULL, NULL, NULL, NULL, NULL, NULL,
                            H5D_XFER_DSET_IO_SEL_COPY, H5D_XFER_DSET_IO_SEL_CMP,
                            H5D_XFER_DSET_IO_SEL_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     if (H5P__register_real(pclass, H5D_XFER_SELECTION_IO_MODE_NAME, H5D_XFER_SELECTION_IO_MODE_SIZE,
                            &H5D_def_selection_io_mode_g, NULL, NULL, NULL, H5D_XFER_SELECTION_IO_MODE_ENC,
                            H5D_XFER_SELECTION_IO_MODE_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the cause of no selection I/O property */
     /* (Note: this property should not have an encode/decode callback) */
     if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE,
                            &H5D_def_no_selection_io_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the actual selection I/O mode property */
     /* (Note: this property should not have an encode/decode callback) */
@@ -488,7 +485,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_XFER_MODIFY_WRITE_BUF_NAME, H5D_XFER_MODIFY_WRITE_BUF_SIZE,
                            &H5D_def_modify_write_buf_g, NULL, NULL, NULL, H5D_XFER_MODIFY_WRITE_BUF_ENC,
                            H5D_XFER_MODIFY_WRITE_BUF_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -504,9 +501,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -518,8 +512,8 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(bkgr_buf_type);
-    HDassert(size);
+    assert(bkgr_buf_type);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode background buffer type */
@@ -541,9 +535,6 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -555,9 +546,9 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(bkgr_buf_type);
+    assert(pp);
+    assert(*pp);
+    assert(bkgr_buf_type);
 
     /* Decode background buffer type */
     *bkgr_buf_type = (H5T_bkg_t) * (*pp)++;
@@ -575,9 +566,6 @@ H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -589,23 +577,23 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(btree_split_ratio);
-    HDassert(size);
+    assert(btree_split_ratio);
+    assert(size);
 
     if (NULL != *pp) {
         /* Encode the size of a double*/
         *(*pp)++ = (uint8_t)sizeof(double);
 
         /* Encode the left split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
         btree_split_ratio++;
 
         /* Encode the middle split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
         btree_split_ratio++;
 
         /* Encode the right split value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)btree_split_ratio);
     } /* end if */
 
     /* Size of B-tree split ratio values */
@@ -624,9 +612,6 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -640,19 +625,19 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(btree_split_ratio);
+    assert(pp);
+    assert(*pp);
+    assert(btree_split_ratio);
 
     /* Decode the size */
     enc_size = *(*pp)++;
     if (enc_size != sizeof(double))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded");
 
     /* Decode the left, middle & left B-tree split ratios */
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[0])
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[1])
-    H5_DECODE_DOUBLE(*pp, btree_split_ratio[2])
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[0]);
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[1]);
+    H5_DECODE_DOUBLE(*pp, btree_split_ratio[2]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -666,9 +651,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -680,11 +662,11 @@ H5P__dxfr_xform_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -698,9 +680,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Sept 1, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -712,11 +691,11 @@ H5P__dxfr_xform_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -731,9 +710,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Monday, August 6, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -751,13 +727,13 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
 
     /* Sanity check */
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-    HDassert(size);
+    assert(size);
 
     /* Check for data transform set */
     if (NULL != data_xform_prop) {
         /* Get the transform expression */
         if (NULL == (pexp = H5Z_xform_extract_xform_str(data_xform_prop)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression");
 
         /* Get the transform string expression size */
         len = HDstrlen(pexp) + 1;
@@ -770,13 +746,13 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
         /* encode the length of the prefix */
         enc_value = (uint64_t)len;
         enc_size  = H5VM_limit_enc_size(enc_value);
-        HDassert(enc_size < 256);
+        assert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         if (NULL != data_xform_prop) {
             /* Sanity check */
-            HDassert(pexp);
+            assert(pexp);
 
             /* Copy the expression into the buffer */
             H5MM_memcpy(*pp, (const uint8_t *)pexp, len);
@@ -804,9 +780,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Monday, August 6, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -822,20 +795,20 @@ H5P__dxfr_xform_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(data_xform_prop);
+    assert(pp);
+    assert(*pp);
+    assert(data_xform_prop);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* Decode the length of xform expression */
     enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
+    assert(enc_size < 256);
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     len = (size_t)enc_value;
 
     if (0 != len) {
         if (NULL == (*data_xform_prop = H5Z_xform_create((const char *)*pp)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create data transform info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create data transform info");
         *pp += len;
     } /* end if */
     else
@@ -852,10 +825,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -866,10 +835,10 @@ H5P__dxfr_xform_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *nam
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(value);
+    assert(value);
 
     if (H5Z_xform_destroy(*(H5Z_data_xform_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -883,10 +852,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -897,11 +862,11 @@ H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(value);
+    assert(value);
 
     /* Make copy of data transform */
     if (H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -914,9 +879,6 @@ done:
  *
  * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
- *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -933,9 +895,9 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(xform1);
-    HDassert(xform2);
-    HDassert(size == sizeof(H5Z_data_xform_t *));
+    assert(xform1);
+    assert(xform2);
+    assert(size == sizeof(H5Z_data_xform_t *));
 
     /* Check for a property being set */
     if (*xform1 == NULL && *xform2 != NULL)
@@ -944,7 +906,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
         HGOTO_DONE(1);
 
     if (*xform1) {
-        HDassert(*xform2);
+        assert(*xform2);
 
         /* Get the transform expressions */
         pexp1 = H5Z_xform_extract_xform_str(*xform1);
@@ -957,7 +919,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
             HGOTO_DONE(1);
 
         if (pexp1) {
-            HDassert(pexp2);
+            assert(pexp2);
             ret_value = HDstrcmp(pexp1, pexp2);
         } /* end if */
     }     /* end if */
@@ -973,10 +935,6 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber
- *
- * Date: April 9, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -986,10 +944,10 @@ H5P__dxfr_xform_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED siz
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(value);
+    assert(value);
 
     if (H5Z_xform_destroy(*(H5Z_data_xform_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing the parse tree");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1001,9 +959,6 @@ done:
  * Purpose:	Sets data transform expression.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Leon Arber
- *              Monday, March 07, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1019,32 +974,32 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
 
     /* Check arguments */
     if (expression == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "expression cannot be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "expression cannot be NULL");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* See if a data transform is already set, and free it if it is */
     if (H5P_peek(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression");
 
     /* Destroy previous data transform property */
     if (H5Z_xform_destroy(data_xform_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
+        HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression");
 
     /* Create data transform info from expression */
     if (NULL == (data_xform_prop = H5Z_xform_create(expression)))
-        HGOTO_ERROR(H5E_PLIST, H5E_NOSPACE, FAIL, "unable to create data transform info")
+        HGOTO_ERROR(H5E_PLIST, H5E_NOSPACE, FAIL, "unable to create data transform info");
 
     /* Update property list (takes ownership of transform) */
     if (H5P_poke(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression");
 
 done:
     if (ret_value < 0)
         if (data_xform_prop && H5Z_xform_destroy(data_xform_prop) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_data_transform() */
@@ -1066,9 +1021,6 @@ done:
  *  If a zero is returned for the name's length, then there is no name
  *  associated with the ID.
  *
- * Programmer:	Leon Arber
- *              August 27, 2004
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1085,17 +1037,17 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     if (H5P_peek(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression");
 
     if (NULL == data_xform_prop)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "data transform has not been set")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "data transform has not been set");
 
     /* Get the data transform string */
     if (NULL == (pexp = H5Z_xform_extract_xform_str(data_xform_prop)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression");
 
     /* Copy into application buffer */
     len = HDstrlen(pexp);
@@ -1127,9 +1079,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, March 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1143,19 +1092,19 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 
     /* Check arguments */
     if (size == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     if (H5P_set(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer buffer size")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer buffer size");
     if (H5P_set(plist, H5D_XFER_TCONV_BUF_NAME, &tconv) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer type conversion buffer")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer type conversion buffer");
     if (H5P_set(plist, H5D_XFER_BKGR_BUF_NAME, &bkg) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1169,9 +1118,6 @@ done:
  * Return:	Success:	Buffer size.
  *
  *		Failure:	0
- *
- * Programmer:	Robb Matzke
- *              Monday, March 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1187,19 +1133,19 @@ H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, 0, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, 0, "can't find object for ID");
 
     /* Return values */
     if (tconv)
         if (H5P_get(plist, H5D_XFER_TCONV_BUF_NAME, tconv) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "Can't get transfer type conversion buffer")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "Can't get transfer type conversion buffer");
     if (bkg)
         if (H5P_get(plist, H5D_XFER_BKGR_BUF_NAME, bkg) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "Can't get background type conversion buffer")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "Can't get background type conversion buffer");
 
     /* Get the size */
     if (H5P_get(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, 0, "Can't set transfer buffer size")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, 0, "Can't set transfer buffer size");
 
     /* Set the return value */
     ret_value = size;
@@ -1214,13 +1160,10 @@ done:
  * Purpose:	When reading or writing compound data types and the
  *		destination is partially initialized and the read/write is
  *		intended to initialize the other members, one must set this
- *		property to TRUE.  Otherwise the I/O pipeline treats the
+ *		property to true.  Otherwise the I/O pipeline treats the
  *		destination datapoints as completely uninitialized.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 17, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1236,12 +1179,12 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     need_bkg = status ? H5T_BKG_YES : H5T_BKG_NO;
     if (H5P_set(plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1252,12 +1195,9 @@ done:
  *
  * Purpose:	The inverse of H5Pset_preserve()
  *
- * Return:	Success:	TRUE or FALSE
+ * Return:	Success:	true or false
  *
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, March 17, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1273,14 +1213,14 @@ H5Pget_preserve(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
     if (H5P_get(plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     /* Set return value */
-    ret_value = need_bkg ? TRUE : FALSE;
+    ret_value = need_bkg ? true : false;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1296,9 +1236,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1312,15 +1249,15 @@ H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
 
     /* Check argument */
     if (check != H5Z_ENABLE_EDC && check != H5Z_DISABLE_EDC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid value")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid value");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     if (H5P_set(plist, H5D_XFER_EDC_NAME, &check) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1336,9 +1273,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
- *
  *-------------------------------------------------------------------------
  */
 H5Z_EDC_t
@@ -1352,11 +1286,11 @@ H5Pget_edc_check(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_ERROR_EDC, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_ERROR_EDC, "can't find object for ID");
 
     /* Update property list */
     if (H5P_get(plist, H5D_XFER_EDC_NAME, &ret_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5Z_ERROR_EDC, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5Z_ERROR_EDC, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1370,9 +1304,6 @@ done:
  *              if certain filter fails.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Jan 14, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1388,14 +1319,14 @@ H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void *op_data)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     cb_struct.func    = func;
     cb_struct.op_data = op_data;
 
     if (H5P_set(plist, H5D_XFER_FILTER_CB_NAME, &cb_struct) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1409,9 +1340,6 @@ done:
  *              if there's exception during datatype conversion.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              April 15, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1427,14 +1355,14 @@ H5Pset_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t op, void *operate_dat
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     cb_struct.func      = op;
     cb_struct.user_data = operate_data;
 
     if (H5P_set(plist, H5D_XFER_CONV_CB_NAME, &cb_struct) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1448,9 +1376,6 @@ done:
  *              if there's exception during datatype conversion.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              April 15, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1466,11 +1391,11 @@ H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op /*out*/, void **o
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get property */
     if (H5P_get(plist, H5D_XFER_CONV_CB_NAME, &cb_struct) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
     /* Assign return value */
     *op           = cb_struct.func;
@@ -1490,9 +1415,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Monday, September 28, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1507,11 +1429,11 @@ H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *middle /*out*/
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the split ratios */
     if (H5P_get(plist, H5D_XFER_BTREE_SPLIT_RATIO_NAME, &btree_split_ratio) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     /* Get values */
     if (left)
@@ -1540,9 +1462,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, September 28, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1557,11 +1476,11 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
 
     /* Check arguments */
     if (left < 0.0 || left > 1.0 || middle < 0.0 || middle > 1.0 || right < 0.0 || right > 1.0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0 <= X <= 1.0")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0 <= X <= 1.0");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
     split_ratio[0] = left;
@@ -1570,7 +1489,7 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
 
     /* Set the split ratios */
     if (H5P_set(plist, H5D_XFER_BTREE_SPLIT_RATIO_NAME, &split_ratio) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1590,9 +1509,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1603,17 +1519,17 @@ H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func, void
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(plist);
+    assert(plist);
 
     /* Update property list */
     if (H5P_set(plist, H5D_XFER_VLEN_ALLOC_NAME, &alloc_func) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
     if (H5P_set(plist, H5D_XFER_VLEN_ALLOC_INFO_NAME, &alloc_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
     if (H5P_set(plist, H5D_XFER_VLEN_FREE_NAME, &free_func) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
     if (H5P_set(plist, H5D_XFER_VLEN_FREE_INFO_NAME, &free_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1633,9 +1549,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1650,11 +1563,11 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func, void *alloc_
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Update property list */
     if (H5P_set_vlen_mem_manager(plist, alloc_func, alloc_info, free_func, free_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set values")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set values");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1666,9 +1579,6 @@ done:
  * Purpose:	The inverse of H5Pset_vlen_mem_manager()
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 1, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1684,20 +1594,20 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func /*out*/, voi
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     if (alloc_func)
         if (H5P_get(plist, H5D_XFER_VLEN_ALLOC_NAME, alloc_func) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
     if (alloc_info)
         if (H5P_get(plist, H5D_XFER_VLEN_ALLOC_INFO_NAME, alloc_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
     if (free_func)
         if (H5P_get(plist, H5D_XFER_VLEN_FREE_NAME, free_func) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
     if (free_info)
         if (H5P_get(plist, H5D_XFER_VLEN_FREE_INFO_NAME, free_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1719,9 +1629,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, July 9, 2001
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1735,15 +1642,15 @@ H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
 
     /* Check arguments */
     if (vector_size < 1)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "vector size too small")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "vector size too small");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
     if (H5P_set(plist, H5D_XFER_HYPER_VECTOR_SIZE_NAME, &vector_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1755,9 +1662,6 @@ done:
  * Purpose:	Reads values previously set with H5Pset_hyper_vector_size().
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, July 9, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1772,12 +1676,12 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Return values */
     if (vector_size)
         if (H5P_get(plist, H5D_XFER_HYPER_VECTOR_SIZE_NAME, vector_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1793,9 +1697,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1807,8 +1708,8 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(xfer_mode);
-    HDassert(size);
+    assert(xfer_mode);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode I/O transfer mode */
@@ -1830,9 +1731,6 @@ H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1844,9 +1742,9 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(xfer_mode);
+    assert(pp);
+    assert(*pp);
+    assert(xfer_mode);
 
     /* Decode I/O transfer mode */
     *xfer_mode = (H5FD_mpio_xfer_t) * (*pp)++;
@@ -1864,9 +1762,6 @@ H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1879,8 +1774,8 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(coll_opt);
-    HDassert(size);
+    assert(coll_opt);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode MPI-I/O collective optimization property */
@@ -1902,9 +1797,6 @@ H5P__dxfr_mpio_collective_opt_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1917,9 +1809,9 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(coll_opt);
+    assert(pp);
+    assert(*pp);
+    assert(coll_opt);
 
     /* Decode MPI-I/O collective optimization mode */
     *coll_opt = (H5FD_mpio_collective_opt_t) * (*pp)++;
@@ -1937,9 +1829,6 @@ H5P__dxfr_mpio_collective_opt_dec(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1952,8 +1841,8 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(chunk_opt);
-    HDassert(size);
+    assert(chunk_opt);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode MPI-I/O chunk optimization property */
@@ -1975,9 +1864,6 @@ H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1989,9 +1875,9 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(chunk_opt);
+    assert(pp);
+    assert(*pp);
+    assert(chunk_opt);
 
     /* Decode MPI-I/O chunk optimization mode */
     *chunk_opt = (H5FD_mpio_chunk_opt_t) * (*pp)++;
@@ -2008,9 +1894,6 @@ H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jacob Gruber
- *              Wednesday, May 4, 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2025,12 +1908,12 @@ H5Pget_mpio_actual_chunk_opt_mode(hid_t                             plist_id,
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Return values */
     if (actual_chunk_opt_mode)
         if (H5P_get(plist, H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, actual_chunk_opt_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2043,9 +1926,6 @@ done:
  *		is requested.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jacob Gruber
- *              Wednesday, May 4, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2060,12 +1940,12 @@ H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Return values */
     if (actual_io_mode)
         if (H5P_get(plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, actual_io_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2078,8 +1958,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim
- *              Aug 3, 2012
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2094,15 +1972,15 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Return values */
     if (local_no_collective_cause)
         if (H5P_get(plist, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, local_no_collective_cause) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get local value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get local value");
     if (global_no_collective_cause)
         if (H5P_get(plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, global_no_collective_cause) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2119,9 +1997,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2133,8 +2008,8 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(check);
-    HDassert(size);
+    assert(check);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode EDC property */
@@ -2156,9 +2031,6 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, August 3, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2170,9 +2042,9 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(check);
+    assert(pp);
+    assert(*pp);
+    assert(check);
 
     /* Decode EDC property */
     *check = (H5Z_EDC_t) * (*pp)++;
@@ -2186,9 +2058,6 @@ H5P__dxfr_edc_dec(const void **_pp, void *_value)
  * Purpose:     Creates a copy of the dataset I/O selection.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -2204,8 +2073,8 @@ H5P__dxfr_dset_io_hyp_sel_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
     /* If there's a dataspace I/O selection set, copy it */
     if (orig_space) {
         /* Make copy of dataspace */
-        if (NULL == (new_space = H5S_copy(orig_space, FALSE, TRUE)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the dataset I/O selection")
+        if (NULL == (new_space = H5S_copy(orig_space, false, true)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the dataset I/O selection");
 
         /* Set new value for property */
         *(void **)value = new_space;
@@ -2215,7 +2084,7 @@ done:
     /* Cleanup on error */
     if (ret_value < 0)
         if (new_space && H5S_close(new_space) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing dataset I/O selection dataspace")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing dataset I/O selection dataspace");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dxfr_dset_io_hyp_sel_copy() */
@@ -2227,9 +2096,6 @@ done:
  *
  * Return:      positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
  *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
- *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -2243,9 +2109,9 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(space1);
-    HDassert(space1);
-    HDassert(size == sizeof(H5S_t *));
+    assert(space1);
+    assert(space1);
+    assert(size == sizeof(H5S_t *));
 
     /* Check for a property being set */
     if (*space1 == NULL && *space2 != NULL)
@@ -2254,11 +2120,11 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
         HGOTO_DONE(1);
 
     if (*space1) {
-        HDassert(*space2);
+        assert(*space2);
 
         /* Compare the extents of the dataspaces */
         /* (Error & not-equal count the same) */
-        if (TRUE != H5S_extent_equal(*space1, *space2))
+        if (true != H5S_extent_equal(*space1, *space2))
             HGOTO_DONE(-1);
 
         /* Compare the selection "shape" of the dataspaces
@@ -2270,7 +2136,7 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
          * we quiet the const warning.
          */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        if (TRUE != H5S_select_shape_same((H5S_t *)*space1, (H5S_t *)*space2))
+        if (true != H5S_select_shape_same((H5S_t *)*space1, (H5S_t *)*space2))
             HGOTO_DONE(-1);
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     } /* end if */
@@ -2286,9 +2152,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Sunday, January 31, 2021
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2301,7 +2164,7 @@ H5P__dxfr_dset_io_hyp_sel_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
 
     /* Release any dataspace */
     if (space && H5S_close(space) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing dataset I/O selection dataspace")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error closing dataset I/O selection dataspace");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2317,9 +2180,6 @@ done:
  * Return:      Success:	Non-negative
  *		        Failure:	Negative
  *
- * Programmer:  Vailin Choi
- *              Feb 2023
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2332,8 +2192,8 @@ H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(select_io_mode);
-    HDassert(size);
+    assert(select_io_mode);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode selection I/O mode property */
@@ -2355,9 +2215,6 @@ H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
  * Return:      Success:	Non-negative
  *		        Failure:	Negative
  *
- * Programmer:  Vailin Choi
- *              Feb 2023
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2369,9 +2226,9 @@ H5P__dxfr_selection_io_mode_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(select_io_mode);
+    assert(pp);
+    assert(*pp);
+    assert(select_io_mode);
 
     /* Decode selection I/O mode property */
     *select_io_mode = (H5D_selection_io_mode_t) * (*pp)++;
@@ -2400,19 +2257,16 @@ H5P__dxfr_selection_io_mode_dec(const void **_pp, void *_value)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Saturday, January 30, 2021
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t *plist = NULL;                  /* Property list pointer */
-    H5S_t          *space;                         /* Dataspace to hold selection */
-    hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
-    hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
+    H5P_genplist_t *plist               = NULL;    /* Property list pointer */
+    H5S_t          *space               = NULL;    /* Dataspace to hold selection */
+    bool            space_created       = false;   /* Whether a new dataspace has been created */
+    bool            reset_prop_on_error = false;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2420,30 +2274,30 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 
     /* Check arguments */
     if (rank < 1 || rank > H5S_MAX_RANK)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank value: %u", rank)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank value: %u", rank);
     if (!(op > H5S_SELECT_NOOP && op < H5S_SELECT_INVALID))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
     if (start == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "'count' pointer is NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "'count' pointer is NULL");
     if (stride != NULL) {
         unsigned u; /* Local index variable */
 
         /* Check for 0-sized strides */
         for (u = 0; u < rank; u++)
             if (stride[u] == 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value - stride[%u]==0", u)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value - stride[%u]==0", u);
     } /* end if */
     if (count == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "'start' pointer is NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "'start' pointer is NULL");
     /* block is allowed to be NULL, and will be assumed to be all '1's when NULL */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* See if a dataset I/O selection is already set, and free it if it is */
     if (H5P_peek(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting dataset I/O selection")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting dataset I/O selection");
 
     /* Check for operation on existing dataspace selection */
     if (NULL != space) {
@@ -2451,7 +2305,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 
         /* Get dimensions from current dataspace for selection */
         if ((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection's dataspace rank")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection's dataspace rank");
 
         /* Check for different # of dimensions */
         if ((unsigned)sndims != rank) {
@@ -2459,16 +2313,16 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
             if (op == H5S_SELECT_SET) {
                 /* Close previous dataspace */
                 if (H5S_close(space) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+                    HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
 
                 /* Reset 'space' pointer, so it's re-created */
                 space = NULL;
 
                 /* Set flag to reset property list on error */
-                reset_prop_on_error = TRUE;
+                reset_prop_on_error = true;
             } /* end if */
             else
-                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "different rank for previous and new selections")
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "different rank for previous and new selections");
         } /* end if */
     }     /* end if */
 
@@ -2483,26 +2337,26 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 
         /* Create dataspace of the correct dimensionality, with maximum dimensions */
         if (NULL == (space = H5S_create_simple(rank, dims, NULL)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create dataspace for selection")
-        space_created = TRUE;
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create dataspace for selection");
+        space_created = true;
     } /* end if */
 
     /* Set selection for dataspace */
     if (H5S_select_hyperslab(space, op, start, stride, count, block) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSELECT, FAIL, "can't create selection")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSELECT, FAIL, "can't create selection");
 
     /* Update property list (takes ownership of dataspace, if new) */
     if (H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection")
-    space_created = FALSE; /* Reset now that property owns the dataspace */
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection");
+    space_created = false; /* Reset now that property owns the dataspace */
 
 done:
     /* Cleanup on failure */
     if (ret_value < 0) {
         if (reset_prop_on_error && plist && H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection")
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection");
         if (space_created && H5S_close(space) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -2520,9 +2374,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              March 5, 2023
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2536,14 +2387,14 @@ H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode)
 
     /* Check arguments */
     if (plist_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
 
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Set the selection I/O mode */
     if (H5P_set(plist, H5D_XFER_SELECTION_IO_MODE_NAME, &selection_io_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2561,9 +2412,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Vailin Choi
- *              March 5, 2023
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2577,12 +2425,12 @@ H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode /
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Get the selection I/O mode */
     if (selection_io_mode)
         if (H5P_get(plist, H5D_XFER_SELECTION_IO_MODE_NAME, selection_io_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2595,8 +2443,6 @@ done:
  *
  * Return:	    Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi
- *              April 17, 2023
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2610,12 +2456,12 @@ H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause /*o
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Return values */
     if (no_selection_io_cause)
         if (H5P_get(plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, no_selection_io_cause) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get no_selection_io_cause value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get no_selection_io_cause value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2669,14 +2515,14 @@ done:
 static herr_t
 H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *size /*out*/)
 {
-    const hbool_t *modify_write_buf = (const hbool_t *)value; /* Create local alias for values */
-    uint8_t      **pp               = (uint8_t **)_pp;
+    const bool *modify_write_buf = (const bool *)value; /* Create local alias for values */
+    uint8_t   **pp               = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(modify_write_buf);
-    HDassert(size);
+    assert(modify_write_buf);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode modify write buf property.  Use "!!" so we always get 0 or 1 */
@@ -2703,18 +2549,18 @@ H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *si
 static herr_t
 H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
 {
-    hbool_t        *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
+    bool           *modify_write_buf = (bool *)_value; /* Modify write buffer */
     const uint8_t **pp               = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(modify_write_buf);
+    assert(pp);
+    assert(*pp);
+    assert(modify_write_buf);
 
     /* Decode selection I/O mode property */
-    *modify_write_buf = (hbool_t) * (*pp)++;
+    *modify_write_buf = (bool)*(*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__dxfr_modify_write_buf_dec() */
@@ -2741,14 +2587,14 @@ H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf)
 
     /* Check arguments */
     if (plist_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
 
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Set the selection I/O mode */
     if (H5P_set(plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &modify_write_buf) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2775,12 +2621,12 @@ H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf /*out*/)
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Get the selection I/O mode */
     if (modify_write_buf)
         if (H5P_get(plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, modify_write_buf) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value)

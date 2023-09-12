@@ -95,7 +95,7 @@ struct farray_test_param_t {
 };
 
 /* Local variables */
-const char *FILENAME[] = {"farray", "farray_tmp", NULL};
+static const char *FILENAME[] = {"farray", "farray_tmp", NULL};
 
 /* Filename to use for all tests */
 char filename_g[FARRAY_FILENAME_LEN];
@@ -116,7 +116,7 @@ static herr_t
 init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     cparam->cls                       = H5FA_CLS_TEST;
     cparam->raw_elmt_size             = ELMT_SIZE;
@@ -177,20 +177,20 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
-                  farray_stats.hdr_size, state->hdr_size);
+        fprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+                farray_stats.hdr_size, state->hdr_size);
         TEST_ERROR;
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
-                  farray_stats.dblk_size, state->dblk_size);
+        fprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
+                farray_stats.dblk_size, state->dblk_size);
         TEST_ERROR;
     }
 
     if (farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
-                  farray_stats.nelmts, state->nelmts);
+        fprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+                farray_stats.nelmts, state->nelmts);
         TEST_ERROR;
     }
 
@@ -216,8 +216,8 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
     size_t dblk_page_nelmts; /* # of elements per page */
 
     /* Sanity check */
-    HDassert(cparam);
-    HDassert(state);
+    assert(cparam);
+    assert(state);
 
     /* Compute the state of the fixed array */
     state->hdr_size = FA_HDR_SIZE;
@@ -316,11 +316,11 @@ create_array(H5F_t *f, const H5FA_create_t *cparam, H5FA_t **fa, haddr_t *fa_add
     /* Check status of array */
     if (H5FA_get_addr(*fa, fa_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(*fa_addr))
+    if (!H5_addr_defined(*fa_addr))
         TEST_ERROR;
 
     /* Check array stats */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size = FA_HDR_SIZE;
     state.nelmts   = cparam->nelmts;
     if (check_stats(*fa, &state))
@@ -348,7 +348,7 @@ verify_cparam(const H5FA_t *fa, const H5FA_create_t *cparam)
     H5FA_create_t test_cparam; /* Creation parameters for array */
 
     /* Retrieve creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5FA_create_t));
+    memset(&test_cparam, 0, sizeof(H5FA_create_t));
     if (H5FA__get_cparam_test(fa, &test_cparam) < 0)
         FAIL_STACK_ERROR;
 
@@ -418,10 +418,10 @@ error:
 static unsigned
 test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSED *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5FA_t *fa      = NULL;        /* Fixed array wrapper */
-    haddr_t fa_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5FA_t *fa      = NULL;            /* Fixed array wrapper */
+    haddr_t fa_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
@@ -437,13 +437,13 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         H5FA_create_t test_cparam; /* Creation parameters for array */
 
         /* Set invalid element size */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.raw_elmt_size = 0;
         H5E_BEGIN_TRY
         {
             fa = H5FA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fa) {
             /* Close opened fixed array */
             H5FA_close(fa);
@@ -454,13 +454,13 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements bits */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 0;
         H5E_BEGIN_TRY
         {
             fa = H5FA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fa) {
             /* Close opened fixed array */
             H5FA_close(fa);
@@ -471,13 +471,13 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         } /* end if */
 
         /* Set invalid max. # of elements */
-        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.nelmts = 0;
         H5E_BEGIN_TRY
         {
             fa = H5FA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fa) {
             /* Close opened fixed array */
             H5FA_close(fa);
@@ -528,7 +528,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_create() */
@@ -546,10 +546,10 @@ error:
 static unsigned
 test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
-    hid_t   file    = -1;          /* File ID */
-    H5F_t  *f       = NULL;        /* Internal file object pointer */
-    H5FA_t *fa      = NULL;        /* Fixed array wrapper */
-    haddr_t fa_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t   file    = H5I_INVALID_HID; /* File ID */
+    H5F_t  *f       = NULL;            /* Internal file object pointer */
+    H5FA_t *fa      = NULL;            /* Fixed array wrapper */
+    haddr_t fa_addr = HADDR_UNDEF;     /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
@@ -596,7 +596,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_reopen() */
@@ -699,7 +699,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice() */
@@ -713,9 +713,6 @@ error:
  *
  * Return:	Success:	0
  *		Failure:	1
- *
- * Programmer:	Quincey Koziol
- *              Friday, December 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -835,7 +832,7 @@ error:
         H5Fclose(fid0);
         H5Fclose(fid00);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice_diff() */
@@ -853,12 +850,12 @@ error:
 static unsigned
 test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 {
-    hid_t          file    = -1;          /* File ID */
-    H5F_t         *f       = NULL;        /* Internal file object pointer */
-    H5FA_t        *fa      = NULL;        /* Fixed array wrapper */
-    H5FA_t        *fa2     = NULL;        /* Fixed array wrapper */
-    haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
-    h5_stat_size_t file_size;             /* File size, after deleting array */
+    hid_t          file    = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f       = NULL;            /* Internal file object pointer */
+    H5FA_t        *fa      = NULL;            /* Fixed array wrapper */
+    H5FA_t        *fa2     = NULL;            /* Fixed array wrapper */
+    haddr_t        fa_addr = HADDR_UNDEF;     /* Array address in file */
+    h5_stat_size_t file_size;                 /* File size, after deleting array */
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(fapl, &file, &f) < 0)
@@ -897,7 +894,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     {
         fa2 = H5FA_open(f, fa_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fa2) {
         /* Close opened array */
         H5FA_close(fa2);
@@ -920,7 +917,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     {
         fa = H5FA_open(f, fa_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fa) {
         /* Close opened array */
         H5FA_close(fa);
@@ -955,7 +952,7 @@ error:
             H5FA_close(fa2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_delete_open() */
@@ -982,8 +979,8 @@ fiter_fw_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_para
     fiter_fw_t *fiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_fw_t *)HDmalloc(sizeof(fiter_fw_t));
-    HDassert(fiter);
+    fiter = (fiter_fw_t *)malloc(sizeof(fiter_fw_t));
+    assert(fiter);
 
     /* Initialize the element iteration object */
     fiter->idx = 0;
@@ -1009,7 +1006,7 @@ fiter_fw_next(void *_fiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx++;
@@ -1031,10 +1028,10 @@ static int
 fiter_term(void *fiter)
 {
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_term() */
@@ -1068,8 +1065,8 @@ fiter_rv_init(const H5FA_create_t *cparam, const farray_test_param_t H5_ATTR_UNU
     fiter_rv_t *fiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rv_t *)HDmalloc(sizeof(fiter_rv_t));
-    HDassert(fiter);
+    fiter = (fiter_rv_t *)malloc(sizeof(fiter_rv_t));
+    assert(fiter);
 
     /* Initialize reverse iteration info */
     fiter->idx = cparam->nelmts - 1;
@@ -1095,7 +1092,7 @@ fiter_rv_next(void *_fiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx--;
@@ -1134,12 +1131,12 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rnd_t *)HDmalloc(sizeof(fiter_rnd_t));
-    HDassert(fiter);
+    fiter = (fiter_rnd_t *)malloc(sizeof(fiter_rnd_t));
+    assert(fiter);
 
     /* Allocate space for the array of shuffled indices */
-    fiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(fiter->idx);
+    fiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
+    assert(fiter->idx);
 
     /* Initialize reverse iteration info */
     fiter->pos = 0;
@@ -1180,7 +1177,7 @@ fiter_rnd_next(void *_fiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->idx[fiter->pos];
@@ -1205,14 +1202,14 @@ fiter_rnd_term(void *_fiter)
     fiter_rnd_t *fiter = (fiter_rnd_t *)_fiter;
 
     /* Sanity check */
-    HDassert(fiter);
-    HDassert(fiter->idx);
+    assert(fiter);
+    assert(fiter->idx);
 
     /* Free shuffled index array */
-    HDfree(fiter->idx);
+    free(fiter->idx);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_rnd_term() */
@@ -1248,8 +1245,8 @@ fiter_cyc_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     fiter_cyc_t *fiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_cyc_t *)HDmalloc(sizeof(fiter_cyc_t));
-    HDassert(fiter);
+    fiter = (fiter_cyc_t *)malloc(sizeof(fiter_cyc_t));
+    assert(fiter);
 
     /* Initialize reverse iteration info */
     fiter->pos = 0;
@@ -1277,7 +1274,7 @@ fiter_cyc_next(void *_fiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(fiter);
+    assert(fiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)fiter->pos;
@@ -1302,8 +1299,6 @@ static const farray_iter_t fa_iter_cyc = {
  *
  * Return:	Success:	0
  *		Failure:	1
- *
- * Programmer:  Vailin Choi; 6th August, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1343,20 +1338,20 @@ static unsigned
 test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, hsize_t nelmts,
                const char *test_str)
 {
-    hid_t          file = -1;             /* File ID */
-    H5F_t         *f    = NULL;           /* Internal file object pointer */
-    H5FA_t        *fa   = NULL;           /* Fixed array wrapper */
-    void          *fiter_info;            /* Fixed array iterator info */
-    farray_state_t state;                 /* State of fixed array */
-    uint64_t       welmt;                 /* Element to write */
-    uint64_t       relmt;                 /* Element to read */
-    hsize_t        cnt;                   /* Count of array indices */
-    hssize_t       sidx;                  /* Index value of next element in the fixed array */
-    hsize_t        idx;                   /* Index value of next element in the fixed array */
-    hsize_t        fa_nelmts;             /* # of elements in fixed array */
-    haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f    = NULL;            /* Internal file object pointer */
+    H5FA_t        *fa   = NULL;            /* Fixed array wrapper */
+    void          *fiter_info;             /* Fixed array iterator info */
+    farray_state_t state;                  /* State of fixed array */
+    uint64_t       welmt;                  /* Element to write */
+    uint64_t       relmt;                  /* Element to read */
+    hsize_t        cnt;                    /* Count of array indices */
+    hssize_t       sidx;                   /* Index value of next element in the fixed array */
+    hsize_t        idx;                    /* Index value of next element in the fixed array */
+    hsize_t        fa_nelmts;              /* # of elements in fixed array */
+    haddr_t        fa_addr = HADDR_UNDEF;  /* Array address in file */
 
-    HDassert(nelmts);
+    assert(nelmts);
     /*
      * Display testing message
      */
@@ -1385,7 +1380,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
         TEST_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size  = FA_HDR_SIZE;
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
@@ -1456,7 +1451,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
     } /* end for */
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
         TEST_ERROR;
@@ -1481,7 +1476,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_set_elmts() */
@@ -1499,18 +1494,18 @@ error:
  */
 static unsigned
 test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, hsize_t skip_elmts,
-                hbool_t check_rest, const char *test_str)
+                bool check_rest, const char *test_str)
 {
-    hid_t          file = -1;             /* File ID */
-    H5F_t         *f    = NULL;           /* Internal file object pointer */
-    H5FA_t        *fa   = NULL;           /* Extensible array wrapper */
-    farray_state_t state;                 /* State of extensible array */
-    uint64_t       welmt;                 /* Element to write */
-    uint64_t       relmt;                 /* Element to read */
-    hsize_t        idx;                   /* Index value of element to get */
-    hsize_t        cnt;                   /* Count of array indices */
-    hsize_t        fa_nelmts;             /* # of elements in fixed array */
-    haddr_t        fa_addr = HADDR_UNDEF; /* Array address in file */
+    hid_t          file = H5I_INVALID_HID; /* File ID */
+    H5F_t         *f    = NULL;            /* Internal file object pointer */
+    H5FA_t        *fa   = NULL;            /* Extensible array wrapper */
+    farray_state_t state;                  /* State of extensible array */
+    uint64_t       welmt;                  /* Element to write */
+    uint64_t       relmt;                  /* Element to read */
+    hsize_t        idx;                    /* Index value of element to get */
+    hsize_t        cnt;                    /* Count of array indices */
+    hsize_t        fa_nelmts;              /* # of elements in fixed array */
+    haddr_t        fa_addr = HADDR_UNDEF;  /* Array address in file */
 
     /*
      * Display testing message
@@ -1540,7 +1535,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         TEST_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     state.hdr_size  = FA_HDR_SIZE;
     state.nelmts    = cparam->nelmts;
     state.dblk_size = 0;
@@ -1565,7 +1560,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         FAIL_STACK_ERROR;
 
     /* Verify array state */
-    HDmemset(&state, 0, sizeof(state));
+    memset(&state, 0, sizeof(state));
     set_fa_state(cparam, &state);
     if (check_stats(fa, &state))
         TEST_ERROR;
@@ -1609,7 +1604,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_skip_elmts() */
@@ -1627,22 +1622,22 @@ error:
 int
 main(void)
 {
-    H5FA_create_t       cparam;                 /* Creation parameters for fixed array */
-    farray_test_param_t tparam;                 /* Testing parameters */
-    farray_test_type_t  curr_test;              /* Current test being worked on */
-    farray_iter_type_t  curr_iter;              /* Current iteration type being worked on */
-    hid_t               fapl    = -1;           /* File access property list for data files */
-    unsigned            nerrors = 0;            /* Cumulative error count */
-    time_t              curr_time;              /* Current time, for seeding random number generator */
-    int                 ExpressMode;            /* Test express value */
-    hbool_t             api_ctx_pushed = FALSE; /* Whether API context pushed */
+    H5FA_create_t       cparam;                    /* Creation parameters for fixed array */
+    farray_test_param_t tparam;                    /* Testing parameters */
+    farray_test_type_t  curr_test;                 /* Current test being worked on */
+    farray_iter_type_t  curr_iter;                 /* Current iteration type being worked on */
+    hid_t               fapl    = H5I_INVALID_HID; /* File access property list for data files */
+    unsigned            nerrors = 0;               /* Cumulative error count */
+    time_t              curr_time;                 /* Current time, for seeding random number generator */
+    int                 ExpressMode;               /* Test express value */
+    bool                api_ctx_pushed = false;    /* Whether API context pushed */
 
     /* Reset library */
     h5_reset();
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
@@ -1650,7 +1645,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
@@ -1676,7 +1671,7 @@ main(void)
     for (curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
 
         /* Initialize the testing parameters */
-        HDmemset(&tparam, 0, sizeof(tparam));
+        memset(&tparam, 0, sizeof(tparam));
         tparam.nelmts = TEST_NELMTS;
 
         /* Set appropriate testing parameters for each test */
@@ -1752,10 +1747,10 @@ main(void)
         } /* end for */
 
         /* Check skipping elements */
-        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)1, TRUE, "skipping to first element");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)1, true, "skipping to first element");
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, ((hsize_t)1 << cparam.max_dblk_page_nelmts_bits),
-                                   TRUE, "skipping to first element in data block page");
-        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), TRUE,
+                                   true, "skipping to first element in data block page");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), true,
                                    "skipping to last element");
 
         /* Create Fixed Array */
@@ -1773,7 +1768,7 @@ main(void)
         init_cparam(&cparam, &tparam);
 
         /* Set the last element in the Fixed Array */
-        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), FALSE,
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), false,
                                    "skipping to last element");
     } /* end for */
 
@@ -1781,9 +1776,9 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     if (nerrors)
         goto error;
@@ -1792,7 +1787,7 @@ main(void)
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
@@ -1801,10 +1796,10 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

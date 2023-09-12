@@ -278,7 +278,7 @@ public class TestH5Arw {
     @Test
     public void testH5Aread_32bit_ints()
     {
-        int[][] attr_data = new int[DIM_X][DIM16_Y];
+        int[][] attr_data = new int[DIM_X][DIM32_Y];
 
         try {
             openH5file(H5_INTS_FILE, DATASETU32);

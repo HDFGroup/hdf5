@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente
- *              April 12, 2002
- *
  * Purpose:     Tests the "ID to name" functionality
  */
 
@@ -35,7 +32,7 @@ typedef struct s1_t {
     float        c;
 } s1_t;
 
-const char *FILENAME[] = {"getname", "getname1", "getname2", "getname3", NULL};
+static const char *FILENAME[] = {"getname", "getname1", "getname2", "getname3", NULL};
 
 #define NAME_BUF_SIZE       64
 #define SMALL_NAME_BUF_SIZE 2
@@ -1470,7 +1467,7 @@ test_main(hid_t file_id, hid_t fapl)
         char *name3;
 
         /* Include the extra null character */
-        name3 = (char *)HDmalloc(name_len + 1);
+        name3 = (char *)malloc(name_len + 1);
         if (!name3)
             TEST_ERROR;
 
@@ -1493,7 +1490,7 @@ test_main(hid_t file_id, hid_t fapl)
         if (HDstrcmp(name3, "/g") != 0)
             TEST_ERROR;
 
-        HDfree(name3);
+        free(name3);
     }
 
     /* Close */
@@ -1531,7 +1528,7 @@ test_main(hid_t file_id, hid_t fapl)
             if (H5Iget_name(type_id, name, NAME_BUF_SIZE) > 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Get name for dataspace, it should fail */
         H5E_BEGIN_TRY
@@ -1539,7 +1536,7 @@ test_main(hid_t file_id, hid_t fapl)
             if (H5Iget_name(space_id, name, NAME_BUF_SIZE) > 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* Close */
@@ -3080,7 +3077,7 @@ test_main(hid_t file_id, hid_t fapl)
         if ((size = H5Iget_name(dtype, NULL, 0)) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Tcommit_anon(file2_id, dtype, H5P_DEFAULT, H5P_DEFAULT))
         TEST_ERROR;
@@ -3327,7 +3324,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in /Group1");
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[1])) < 0)
         FAIL_STACK_ERROR;
@@ -3343,7 +3340,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to /Group1");
     if ((group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[2])) < 0)
         FAIL_STACK_ERROR;
@@ -3359,7 +3356,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to datatype in /Group1");
     if ((tid1 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[3])) < 0)
         FAIL_STACK_ERROR;
@@ -3375,7 +3372,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in nested group");
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[4])) < 0)
         FAIL_STACK_ERROR;
@@ -3391,7 +3388,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to nested group");
     if ((group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[5])) < 0)
         FAIL_STACK_ERROR;
@@ -3407,7 +3404,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset created via hard link");
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[6])) < 0)
         FAIL_STACK_ERROR;
@@ -3423,7 +3420,7 @@ test_obj_ref(hid_t fapl)
         TEST_ERROR;
     PASSED();
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     TESTING("getting path to root group");
     if ((group = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[7])) < 0)
         FAIL_STACK_ERROR;
@@ -3669,9 +3666,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3682,7 +3676,7 @@ test_elinks(hid_t fapl)
     hid_t   group, group2;                    /* Group IDs                    */
     char    name[NAME_BUF_SIZE];              /* Buffer for storing object's name */
     ssize_t namelen;                          /* Length of object's name */
-    hbool_t name_cached;                      /* Indicate if name is cached */
+    bool    name_cached;                      /* Indicate if name is cached */
 
     /* Initialize the file names */
     h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
@@ -3717,7 +3711,7 @@ test_elinks(hid_t fapl)
 
     /* Query the external link object's name */
     *name       = '\0';
-    name_cached = FALSE;
+    name_cached = false;
     namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
     if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR;
@@ -3732,7 +3726,7 @@ test_elinks(hid_t fapl)
 
     /* Query the external link to external link object's name */
     *name       = '\0';
-    name_cached = FALSE;
+    name_cached = false;
     namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
     if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
         TEST_ERROR;
@@ -3756,11 +3750,11 @@ error:
 int
 main(void)
 {
-    hid_t   file_id = (-1);
-    int     nerrors = 0;
-    hid_t   fapl;
-    char    filename0[1024];
-    hbool_t driver_is_parallel;
+    hid_t file_id = (H5I_INVALID_HID);
+    int   nerrors = 0;
+    hid_t fapl;
+    char  filename0[1024];
+    bool  driver_is_parallel;
 
     /* Reset the library and get the file access property list */
     h5_reset();
@@ -3805,7 +3799,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDputs("***** GET NAME TESTS FAILED *****");
 

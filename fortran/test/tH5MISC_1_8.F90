@@ -337,10 +337,6 @@ END SUBROUTINE test_h5s_encode
 !
 ! Return:      Success:        0
 !              Failure:        >0
-!
-! Programmer:  M. Scot Breitenfeld
-!              Decemeber 11, 2010
-!
 !-------------------------------------------------------------------------
 !
 
@@ -479,5 +475,69 @@ SUBROUTINE test_scaleoffset(cleanup, total_error )
   CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_scaleoffset
+
+SUBROUTINE test_freelist(total_error)
+
+  IMPLICIT NONE
+  INTEGER, INTENT(INOUT) :: total_error
+
+  INTEGER(hid_t) ::   sid
+  INTEGER(hsize_t), DIMENSION(1:1) :: dims = (/8/)
+  INTEGER(hsize_t), DIMENSION(1:1,1:4) :: coord
+  INTEGER(size_t) :: reg_size_start ! Initial amount of regular memory allocated
+  INTEGER(size_t) :: arr_size_start ! Initial amount of array memory allocated
+  INTEGER(size_t) :: blk_size_start ! Initial amount of block memory allocated
+  INTEGER(size_t) :: fac_size_start ! Initial amount of factory memory allocated
+  INTEGER(size_t) :: reg_size_final ! Final amount of regular memory allocated
+  INTEGER(size_t) :: arr_size_final ! Final amount of array memory allocated
+  INTEGER(size_t) :: blk_size_final ! Final amount of BLOCK memory allocated
+  INTEGER(size_t) :: fac_size_final ! Final amount of factory memory allocated
+  INTEGER :: error
+
+  coord(1,1:4) = (/3,4,5,6/)
+
+  ! Create dataspace
+  ! (Allocates array free-list nodes)
+  CALL h5screate_simple_f(1, dims, sid, error)
+  CALL CHECK("h5screate_simple_f", error, total_error)
+
+  ! Select sequence of 4 points
+  CALL h5sselect_elements_f(sid, H5S_SELECT_SET_F, 1, 4_size_t, coord, error)
+  CALL CHECK("h5sselect_elements_f", error, total_error)
+
+  ! Close dataspace
+  CALL h5sclose_f(sid, error)
+  CALL CHECK("h5sclose_f", error, total_error)
+
+  ! Retrieve initial free list values
+  CALL h5get_free_list_sizes_f(reg_size_start, arr_size_start, blk_size_start, fac_size_start, error)
+  CALL check("h5get_free_list_sizes_f", error, total_error)
+
+  IF(reg_size_start.LT.0 .OR. &
+     arr_size_start.LT.0 .OR. &
+     blk_size_start.LT.0 .OR. &
+     fac_size_start.LT.0 &
+     )THEN
+     CALL check("h5get_free_list_sizes_f", -1, total_error)
+  ENDIF
+
+  CALL h5garbage_collect_f(error)
+  CALL check("h5garbage_collect_f", error, total_error)
+
+  ! Retrieve initial free list values
+  CALL h5get_free_list_sizes_f(reg_size_final, arr_size_final, blk_size_final, fac_size_final, error)
+  CALL check("h5get_free_list_sizes_f", error, total_error)
+
+  ! All the free list values should be <= previous values
+  IF( reg_size_final .GT. reg_size_start) &
+       CALL check("h5get_free_list_sizes_f: reg_size_final > reg_size_start", -1, total_error)
+  IF( arr_size_final .GT. arr_size_start) &
+       CALL check("h5get_free_list_sizes_f: arr_size_final > arr_size_start", -1, total_error)
+  IF( blk_size_final .GT. blk_size_start) &
+       CALL check("h5get_free_list_sizes_f: blk_size_final > blk_size_start", -1, total_error)
+  IF( fac_size_final .GT. fac_size_start) &
+       CALL check("h5get_free_list_sizes_f: fac_size_final > fac_size_start", -1, total_error)
+
+END SUBROUTINE test_freelist
 
 END MODULE TH5MISC_1_8

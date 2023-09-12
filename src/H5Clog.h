@@ -78,8 +78,8 @@ typedef struct H5C_log_class_t {
 
 /* Logging information */
 struct H5C_log_info_t {
-    hbool_t                enabled; /* Was the logging set up? */
-    hbool_t                logging; /* Are we currently logging? */
+    bool                   enabled; /* Was the logging set up? */
+    bool                   logging; /* Are we currently logging? */
     const H5C_log_class_t *cls;     /* Callbacks for writing log messages */
     void                  *udata;   /* Log-specific data */
 };
@@ -92,7 +92,7 @@ struct H5C_log_info_t {
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style,
-                             hbool_t start_immediately);
+                             bool start_immediately);
 H5_DLL herr_t H5C_log_tear_down(H5C_t *cache);
 
 H5_DLL herr_t H5C_log_write_create_cache_msg(H5C_t *cache, herr_t fxn_ret_value);

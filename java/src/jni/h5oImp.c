@@ -45,7 +45,7 @@ static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *in
  * Create a java object of hdf.hdf5lib.structs.H5O_token_t.
  */
 jobject
-create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, hbool_t is_critical_pinning)
+create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, bool is_critical_pinning)
 {
     jbyteArray tokenByteBuf;
     jboolean   token_buf_is_copy;
@@ -63,7 +63,7 @@ create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, hbool_t is_critical
         PIN_BYTE_ARRAY(envptr, tokenByteBuf, token_buf, &token_buf_is_copy,
                        "create_H5O_token_t: object token buffer not pinned");
 
-    HDmemcpy(token_buf, token, sizeof(H5O_token_t));
+    memcpy(token_buf, token, sizeof(H5O_token_t));
 
     if (is_critical_pinning)
         UNPIN_ARRAY_CRITICAL(envptr, tokenByteBuf, token_buf, 0);
@@ -193,7 +193,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info(JNIEnv *env, jclass clss, jlong loc_id, jint fi
     if ((status = H5Oget_info3((hid_t)loc_id, &infobuf, (unsigned)fields)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, false)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)infobuf.fileno;
@@ -241,7 +241,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name(JNIEnv *env, jclass clss, jlong loc_i
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Create an H5O_token_t object */
-    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, false)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)infobuf.fileno;
@@ -293,7 +293,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Create an H5O_token_t object */
-    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, false)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)infobuf.fileno;
@@ -580,7 +580,7 @@ H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *info, void *cb_d
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     /* Create an H5O_token_t object */
-    if (NULL == (token = create_H5O_token_t(CBENVONLY, &info->token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(CBENVONLY, &info->token, false)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)info->fileno;
@@ -756,7 +756,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment(JNIEnv *env, jclass clss, jlong loc_id)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size) {
-        if (NULL == (oComment = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        if (NULL == (oComment = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Oget_comment: failed to allocate object comment buffer");
 
         if ((status = H5Oget_comment((hid_t)loc_id, oComment, (size_t)buf_size + 1)) < 0)
@@ -769,7 +769,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment(JNIEnv *env, jclass clss, jlong loc_id)
 
 done:
     if (oComment)
-        HDfree(oComment);
+        free(oComment);
 
     return (jstring)str;
 } /* end Java_hdf_hdf5lib_H5_H5Oget_1comment */
@@ -801,7 +801,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name(JNIEnv *env, jclass clss, jlong lo
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (buf_size) {
-        if (NULL == (objComment = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        if (NULL == (objComment = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY,
                                    "H5Oget_comment_by_name: failed to allocate buffer for object comment");
 
@@ -816,7 +816,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name(JNIEnv *env, jclass clss, jlong lo
 
 done:
     if (objComment)
-        HDfree(objComment);
+        free(objComment);
     if (objName)
         UNPIN_JAVA_STRING(ENVONLY, name, objName);
 
@@ -916,7 +916,7 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token(JNIEnv *env, jclass clss, jlong loc_id,
 
     PIN_BYTE_ARRAY(ENVONLY, (jbyteArray)token_data, token_buf, &token_buf_is_copy,
                    "H5Oopen_by_token: token buffer not pinned");
-    HDmemcpy(&obj_token, token_buf, sizeof(H5O_token_t));
+    memcpy(&obj_token, token_buf, sizeof(H5O_token_t));
     UNPIN_BYTE_ARRAY(ENVONLY, (jbyteArray)token_data, token_buf, JNI_ABORT);
     token_buf = NULL;
 
@@ -1037,14 +1037,14 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled(JNIEnv *env, jclass clss, jlong loc_id)
 {
     jboolean bval        = JNI_FALSE;
-    hbool_t  is_disabled = FALSE;
+    bool     is_disabled = false;
 
     UNUSED(clss);
 
     if (H5Oare_mdc_flushes_disabled((hid_t)loc_id, &is_disabled) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (is_disabled == TRUE)
+    if (is_disabled == true)
         bval = JNI_TRUE;
 
 done:

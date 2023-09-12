@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -105,7 +105,7 @@ H5_api_test_run(void)
 }
 
 hid_t
-create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read)
+create_mpi_fapl(MPI_Comm comm, MPI_Info info, bool coll_md_read)
 {
     hid_t ret_pl = H5I_INVALID_HID;
 
@@ -118,7 +118,7 @@ create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read)
         goto error;
     if (H5Pset_all_coll_metadata_ops(ret_pl, coll_md_read) < 0)
         goto error;
-    if (H5Pset_coll_metadata_write(ret_pl, TRUE) < 0)
+    if (H5Pset_coll_metadata_write(ret_pl, true) < 0)
         goto error;
 
     return ret_pl;
@@ -141,7 +141,7 @@ generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out)
     if (space_rank <= 0)
         goto error;
 
-    if (NULL == (dims = HDmalloc((size_t)space_rank * sizeof(hsize_t))))
+    if (NULL == (dims = malloc((size_t)space_rank * sizeof(hsize_t))))
         goto error;
     if (MAINPROCESS) {
         for (i = 0; i < (size_t)space_rank; i++) {
@@ -164,7 +164,7 @@ generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out)
 
 error:
     if (dims)
-        HDfree(dims);
+        free(dims);
 
     return -1;
 }
@@ -172,13 +172,33 @@ error:
 int
 main(int argc, char **argv)
 {
+    const char *vol_connector_string;
     const char *vol_connector_name;
     unsigned    seed;
-    hid_t       fapl_id = H5I_INVALID_HID;
+    hid_t       fapl_id                   = H5I_INVALID_HID;
+    hid_t       default_con_id            = H5I_INVALID_HID;
+    hid_t       registered_con_id         = H5I_INVALID_HID;
+    char       *vol_connector_string_copy = NULL;
+    char       *vol_connector_info        = NULL;
+    int         required                  = MPI_THREAD_MULTIPLE;
+    int         provided;
 
-    MPI_Init(&argc, &argv);
+    /*
+     * Attempt to initialize with MPI_THREAD_MULTIPLE for VOL connectors
+     * that require that level of threading support in MPI
+     */
+    if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
+        fprintf(stderr, "MPI_Init_thread failed\n");
+        exit(EXIT_FAILURE);
+    }
+
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    if (provided < required) {
+        if (MAINPROCESS)
+            printf("** INFO: couldn't initialize with MPI_THREAD_MULTIPLE threading support **\n");
+    }
 
     /* Simple argument checking, TODO can improve that later */
     if (argc > 1) {
@@ -209,7 +229,7 @@ main(int argc, char **argv)
     if (mpi_size > 1) {
         if (MPI_SUCCESS != MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("Couldn't broadcast test seed\n");
+                fprintf(stderr, "Couldn't broadcast test seed\n");
             goto error;
         }
     }
@@ -222,36 +242,124 @@ main(int argc, char **argv)
     HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
                PARALLEL_TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)
-            HDprintf("No VOL connector selected; using native VOL connector\n");
+            printf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";
+        vol_connector_info = NULL;
+    }
+    else {
+        char *token = NULL;
+
+        BEGIN_INDEPENDENT_OP(copy_connector_string)
+        {
+            if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
+                if (MAINPROCESS)
+                    fprintf(stderr, "Unable to copy VOL connector string\n");
+                INDEPENDENT_OP_ERROR(copy_connector_string);
+            }
+        }
+        END_INDEPENDENT_OP(copy_connector_string);
+
+        BEGIN_INDEPENDENT_OP(get_connector_name)
+        {
+            if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
+                if (MAINPROCESS)
+                    fprintf(stderr, "Error while parsing VOL connector string\n");
+                INDEPENDENT_OP_ERROR(get_connector_name);
+            }
+        }
+        END_INDEPENDENT_OP(get_connector_name);
+
+        vol_connector_name = token;
+
+        if (NULL != (token = HDstrtok(NULL, " "))) {
+            vol_connector_info = token;
+        }
     }
 
     if (MAINPROCESS) {
-        HDprintf("Running parallel API tests with VOL connector '%s'\n\n", vol_connector_name);
-        HDprintf("Test parameters:\n");
-        HDprintf("  - Test file name: '%s'\n", H5_api_test_parallel_filename);
-        HDprintf("  - Number of MPI ranks: %d\n", mpi_size);
-        HDprintf("  - Test seed: %u\n", seed);
-        HDprintf("\n\n");
+        printf("Running parallel API tests with VOL connector '%s' and info string '%s'\n\n",
+               vol_connector_name, vol_connector_info ? vol_connector_info : "");
+        printf("Test parameters:\n");
+        printf("  - Test file name: '%s'\n", H5_api_test_parallel_filename);
+        printf("  - Number of MPI ranks: %d\n", mpi_size);
+        printf("  - Test seed: %u\n", seed);
+        printf("\n\n");
     }
+
+    BEGIN_INDEPENDENT_OP(create_fapl)
+    {
+        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, false)) < 0) {
+            if (MAINPROCESS)
+                fprintf(stderr, "Unable to create FAPL\n");
+            INDEPENDENT_OP_ERROR(create_fapl);
+        }
+    }
+    END_INDEPENDENT_OP(create_fapl);
+
+    BEGIN_INDEPENDENT_OP(check_vol_register)
+    {
+        /*
+         * If using a VOL connector other than the native
+         * connector, check whether the VOL connector was
+         * successfully registered before running the tests.
+         * Otherwise, HDF5 will default to running the tests
+         * with the native connector, which could be misleading.
+         */
+        if (0 != HDstrcmp(vol_connector_name, "native")) {
+            htri_t is_registered;
+
+            if ((is_registered = H5VLis_connector_registered_by_name(vol_connector_name)) < 0) {
+                if (MAINPROCESS)
+                    fprintf(stderr, "Unable to determine if VOL connector is registered\n");
+                INDEPENDENT_OP_ERROR(check_vol_register);
+            }
+
+            if (!is_registered) {
+                if (MAINPROCESS)
+                    fprintf(stderr, "Specified VOL connector '%s' wasn't correctly registered!\n",
+                            vol_connector_name);
+                INDEPENDENT_OP_ERROR(check_vol_register);
+            }
+            else {
+                /*
+                 * If the connector was successfully registered, check that
+                 * the connector ID set on the default FAPL matches the ID
+                 * for the registered connector before running the tests.
+                 */
+                if (H5Pget_vol_id(fapl_id, &default_con_id) < 0) {
+                    if (MAINPROCESS)
+                        fprintf(stderr, "Couldn't retrieve ID of VOL connector set on default FAPL\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+
+                if ((registered_con_id = H5VLget_connector_id_by_name(vol_connector_name)) < 0) {
+                    if (MAINPROCESS)
+                        fprintf(stderr, "Couldn't retrieve ID of registered VOL connector\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+
+                if (default_con_id != registered_con_id) {
+                    if (MAINPROCESS)
+                        fprintf(stderr,
+                                "VOL connector set on default FAPL didn't match specified VOL connector\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+            }
+        }
+    }
+    END_INDEPENDENT_OP(check_vol_register);
 
     /* Retrieve the VOL cap flags - work around an HDF5
      * library issue by creating a FAPL
      */
     BEGIN_INDEPENDENT_OP(get_capability_flags)
     {
-        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
-            if (MAINPROCESS)
-                HDfprintf(stderr, "Unable to create FAPL\n");
-            INDEPENDENT_OP_ERROR(get_capability_flags);
-        }
-
         vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
         if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
             if (MAINPROCESS)
-                HDfprintf(stderr, "Unable to retrieve VOL connector capability flags\n");
+                fprintf(stderr, "Unable to retrieve VOL connector capability flags\n");
             INDEPENDENT_OP_ERROR(get_capability_flags);
         }
     }
@@ -265,7 +373,8 @@ main(int argc, char **argv)
     {
         if (MAINPROCESS) {
             if (create_test_container(H5_api_test_parallel_filename, vol_cap_flags_g) < 0) {
-                HDprintf("    failed to create testing container file '%s'\n", H5_api_test_parallel_filename);
+                fprintf(stderr, "    failed to create testing container file '%s'\n",
+                        H5_api_test_parallel_filename);
                 INDEPENDENT_OP_ERROR(create_test_container);
             }
         }
@@ -276,63 +385,77 @@ main(int argc, char **argv)
     H5_api_test_run();
 
     if (MAINPROCESS)
-        HDprintf("Cleaning up testing files\n");
+        printf("Cleaning up testing files\n");
     H5Fdelete(H5_api_test_parallel_filename, fapl_id);
 
     if (n_tests_run_g > 0) {
         if (MAINPROCESS)
-            HDprintf("The below statistics are minimum values due to the possibility of some ranks failing a "
-                     "test while others pass:\n");
+            printf("The below statistics are minimum values due to the possibility of some ranks failing a "
+                   "test while others pass:\n");
 
         if (MPI_SUCCESS != MPI_Allreduce(MPI_IN_PLACE, &n_tests_passed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN,
                                          MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    failed to collect consensus about the minimum number of tests that passed -- "
-                         "reporting rank 0's (possibly inaccurate) value\n");
+                printf("    failed to collect consensus about the minimum number of tests that passed -- "
+                       "reporting rank 0's (possibly inaccurate) value\n");
         }
 
         if (MAINPROCESS)
-            HDprintf("%s%zu/%zu (%.2f%%) API tests passed across all ranks with VOL connector '%s'\n",
-                     n_tests_passed_g > 0 ? "At least " : "", n_tests_passed_g, n_tests_run_g,
-                     ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+            printf("%s%zu/%zu (%.2f%%) API tests passed across all ranks with VOL connector '%s'\n",
+                   n_tests_passed_g > 0 ? "At least " : "", n_tests_passed_g, n_tests_run_g,
+                   ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
         if (MPI_SUCCESS != MPI_Allreduce(MPI_IN_PLACE, &n_tests_failed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN,
                                          MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    failed to collect consensus about the minimum number of tests that failed -- "
-                         "reporting rank 0's (possibly inaccurate) value\n");
+                printf("    failed to collect consensus about the minimum number of tests that failed -- "
+                       "reporting rank 0's (possibly inaccurate) value\n");
         }
 
         if (MAINPROCESS) {
-            HDprintf("%s%zu/%zu (%.2f%%) API tests did not pass across all ranks with VOL connector '%s'\n",
-                     n_tests_failed_g > 0 ? "At least " : "", n_tests_failed_g, n_tests_run_g,
-                     ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+            printf("%s%zu/%zu (%.2f%%) API tests did not pass across all ranks with VOL connector '%s'\n",
+                   n_tests_failed_g > 0 ? "At least " : "", n_tests_failed_g, n_tests_run_g,
+                   ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
-            HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
-                     n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0),
-                     vol_connector_name);
+            printf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
+                   n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0),
+                   vol_connector_name);
         }
+    }
+
+    if (default_con_id >= 0 && H5VLclose(default_con_id) < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "    failed to close VOL connector ID\n");
+    }
+
+    if (registered_con_id >= 0 && H5VLclose(registered_con_id) < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "    failed to close VOL connector ID\n");
     }
 
     if (fapl_id >= 0 && H5Pclose(fapl_id) < 0) {
         if (MAINPROCESS)
-            HDprintf("    failed to close MPI FAPL\n");
+            fprintf(stderr, "    failed to close MPI FAPL\n");
     }
 
     H5close();
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
+    free(vol_connector_string_copy);
+
     H5E_BEGIN_TRY
     {
+        H5VLclose(default_con_id);
+        H5VLclose(registered_con_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     MPI_Finalize();
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

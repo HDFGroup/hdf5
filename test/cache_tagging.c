@@ -10,11 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Mike McGreevy
- *              January 25, 2010
- *
+/*
  *              This file contains tests for metadata tagging.
  */
+
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"
@@ -108,9 +107,6 @@ static unsigned check_invalid_tag_application(void);
  *
  * Return:      void
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -143,9 +139,6 @@ error:
  *              in the cache.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -192,9 +185,6 @@ error:
  *
  * Return:      0 on Success, -1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -215,7 +205,7 @@ mark_all_entries_investigated(hid_t fid)
         entry_ptr = cache_ptr->index[i];
         while (entry_ptr != NULL) {
             if (!entry_ptr->dirtied)
-                entry_ptr->dirtied = TRUE;
+                entry_ptr->dirtied = true;
 
             entry_ptr = entry_ptr->ht_next;
         } /* end if */
@@ -237,9 +227,6 @@ error:
  *
  * Return:      0 on Success, -1 on Failure
  *
- * Programmer:  Quincey Koziol
- *              July 13, 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -260,7 +247,7 @@ reset_all_entries_investigated(hid_t fid)
         entry_ptr = cache_ptr->index[i];
         while (entry_ptr != NULL) {
             if (entry_ptr->dirtied)
-                entry_ptr->dirtied = FALSE;
+                entry_ptr->dirtied = false;
 
             entry_ptr = entry_ptr->ht_next;
         } /* end if */
@@ -283,9 +270,6 @@ error:
  *              checked.
  *
  * Return:      0 on Success, -1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -311,7 +295,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
                     TEST_ERROR;
 
                 /* Mark the entry/tag pair as found */
-                entry_ptr->dirtied = TRUE;
+                entry_ptr->dirtied = true;
 
                 /* leave now that we've found the entry */
                 goto done;
@@ -344,7 +328,7 @@ evict_entries(hid_t fid)
     mark_all_entries_investigated(fid);
 
     /* setup the skip list prior to calling H5C_flush_cache() */
-    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
         TEST_ERROR;
 
     /* Evict all we can from the cache to examine full tag creation tree */
@@ -354,7 +338,7 @@ evict_entries(hid_t fid)
     H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
 
     /* shutdown the slist -- allow it to be non-empty */
-    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, false, true) < 0)
         TEST_ERROR;
 
     return 0;
@@ -369,9 +353,6 @@ error:
  * Purpose:     This function retrieves the tag associated with an object.
  *
  * Return:      0 on Success; 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -402,9 +383,6 @@ error:
  *
  * Return:      0 on Success; 1 on Failure
  *
- * Programmer:  Quincey Koziol
- *              July 10, 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -432,20 +410,17 @@ error:
  *
  * Return:      0 on Success; 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_file_creation_tags(hid_t fcpl_id, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose test output */
-#endif                     /* NDEBUG */
-    hid_t   fapl     = -1; /* File access prop list */
+    int verbose = false;                /* verbose test output */
+#endif                                  /* NDEBUG */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag = 0;
     haddr_t sbe_tag  = 0;
 
@@ -536,22 +511,19 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 25, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_file_open_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE; /* verbose file output */
-#endif                   /* NDEBUG */
-    hid_t   fapl = -1;   /* File access prop list */
-    haddr_t root_tag;    /* Root Group Tag */
-    haddr_t sbe_tag;     /* Sblock Extension Tag */
+    int verbose = false;            /* verbose file output */
+#endif                              /* NDEBUG */
+    hid_t   fapl = H5I_INVALID_HID; /* File access prop list */
+    haddr_t root_tag;               /* Root Group Tag */
+    haddr_t sbe_tag = HADDR_UNDEF;  /* Sblock Extension Tag */
 
     /* Testing Macro */
     TESTING("tag application during file open");
@@ -665,23 +637,20 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_group_creation_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;            /* verbose file output */
-#endif                              /* NDEBUG */
-    hid_t   fapl     = -1;          /* File access prop list */
-    haddr_t root_tag = HADDR_UNDEF; /* Root Group Tag */
-    haddr_t g_tag;                  /* Group Tag */
+    int verbose = false;                /* verbose file output */
+#endif                                  /* NDEBUG */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access prop list */
+    haddr_t root_tag = HADDR_UNDEF;     /* Root Group Tag */
+    haddr_t g_tag;                      /* Group Tag */
 
     /* Testing Macro */
     TESTING("tag application during group creation");
@@ -788,25 +757,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_multi_group_creation_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file output */
-#endif                     /* NDEBUG */
-    char    gname[16];     /* group name buffer */
-    int     i        = 0;  /* iterator */
-    hid_t   fapl     = -1; /* File access prop list */
-    haddr_t g_tag    = 0;  /* Group tag value */
-    haddr_t root_tag = 0;  /* Root group tag value */
+    int verbose = false;                /* verbose file output */
+#endif                                  /* NDEBUG */
+    char    gname[16];                  /* group name buffer */
+    int     i        = 0;               /* iterator */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access prop list */
+    haddr_t g_tag    = 0;               /* Group tag value */
+    haddr_t root_tag = 0;               /* Root group tag value */
 
     /* Testing Macro */
     TESTING("tag application during multiple group creation");
@@ -939,27 +905,24 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_link_iteration_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t sid = -1; /* Group Identifier */
-    hid_t did = -1; /* Group Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Group Identifier */
+    hid_t did = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;        /* verbose file output */
-#endif                          /* NDEBUG */
-    int        i        = 0;    /* iterator */
-    haddr_t    root_tag = 0;    /* Root Group Tag Value */
-    char       dsetname[500];   /* Name of dataset */
-    H5G_info_t ginfo;           /* Group Info Struct */
-    hid_t      fapl       = -1; /* File access prop list */
-    hid_t      root_group = -1; /* Root Group Identifier */
+    int verbose = false;                     /* verbose file output */
+#endif                                       /* NDEBUG */
+    int        i        = 0;                 /* iterator */
+    haddr_t    root_tag = 0;                 /* Root Group Tag Value */
+    char       dsetname[500];                /* Name of dataset */
+    H5G_info_t ginfo;                        /* Group Info Struct */
+    hid_t      fapl       = H5I_INVALID_HID; /* File access prop list */
+    hid_t      root_group = H5I_INVALID_HID; /* Root Group Identifier */
 
     /* Testing Macro */
     TESTING("tag application during iteration over links in a group");
@@ -1079,28 +1042,25 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dense_attribute_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid  = -1; /* File Identifier */
-    hid_t aid  = -1; /* File Identifier */
-    hid_t sid  = -1; /* Group Identifier */
-    hid_t did  = -1; /* Group Identifier */
-    hid_t dcpl = -1; /* Group Identifier */
+    hid_t fid  = H5I_INVALID_HID; /* File Identifier */
+    hid_t aid  = H5I_INVALID_HID; /* File Identifier */
+    hid_t sid  = H5I_INVALID_HID; /* Group Identifier */
+    hid_t did  = H5I_INVALID_HID; /* Group Identifier */
+    hid_t dcpl = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file output */
-#endif                     /* NDEBUG */
-    int     i        = 0;  /* iterator */
-    hid_t   fapl     = -1; /* File access property list */
-    haddr_t d_tag    = 0;  /* Dataset tag value */
-    haddr_t root_tag = 0;  /* Root group tag value */
-    char    attrname[500]; /* Name of attribute */
+    int verbose = false;                /* verbose file output */
+#endif                                  /* NDEBUG */
+    int     i        = 0;               /* iterator */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access property list */
+    haddr_t d_tag    = 0;               /* Dataset tag value */
+    haddr_t root_tag = 0;               /* Root group tag value */
+    char    attrname[500];              /* Name of attribute */
 
     /* Testing Macro */
     TESTING("tag application during dense attribute manipulation");
@@ -1312,21 +1272,18 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              January 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_group_open_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file output */
-#endif                     /* NDEBUG */
-    hid_t   fapl     = -1; /* File access prop list */
+    int verbose = false;                /* verbose file output */
+#endif                                  /* NDEBUG */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
 
@@ -1441,24 +1398,21 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_attribute_creation_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t aid = -1; /* Attribute Identifier */
-    hid_t gid = -1; /* Group Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t aid = H5I_INVALID_HID; /* Attribute Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;     /* verbose file output */
-#endif                       /* NDEBUG */
-    hid_t   fapl       = -1; /* File access prop list */
-    haddr_t root_tag   = 0;  /* Root group tag */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
+    haddr_t root_tag   = 0;               /* Root group tag */
     haddr_t g_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
@@ -1606,23 +1560,20 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_attribute_open_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t aid = -1; /* Attribute Identifier */
-    hid_t gid = -1; /* Group Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t aid = H5I_INVALID_HID; /* Attribute Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;     /* verbose file output */
-#endif                       /* NDEBUG */
-    hid_t   fapl       = -1; /* File access prop list */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t g_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -1773,30 +1724,27 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_attribute_rename_tags(hid_t fcpl, int type)
 {
     /* Variable declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
-    hid_t aid = -1; /* Attribute Identifier */
-    hid_t sid = -1; /* Dataset Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
+    hid_t aid = H5I_INVALID_HID; /* Attribute Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataset Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;          /* verbose file output */
-#endif                            /* NDEBUG */
-    int    *data = NULL;          /* data buffer */
-    int     i, j, k = 0;          /* iterators */
-    hid_t   fapl            = -1; /* File access prop list */
+    int verbose = false;                       /* verbose file output */
+#endif                                         /* NDEBUG */
+    int    *data = NULL;                       /* data buffer */
+    int     i, j, k = 0;                       /* iterators */
+    hid_t   fapl            = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag        = 0;
     haddr_t g_tag           = 0;
     hsize_t dims1[2]        = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2]      = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    hbool_t persistent_fsms = FALSE;
+    bool    persistent_fsms = false;
 
     /* Testing Macro */
     TESTING("tag application during attribute renaming");
@@ -1810,7 +1758,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         TEST_ERROR;
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -1967,14 +1915,14 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_rename_tags */
 
@@ -1986,30 +1934,27 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_attribute_delete_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
-    hid_t aid = -1; /* Attribute Identifier */
-    hid_t sid = -1; /* Dataset Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
+    hid_t aid = H5I_INVALID_HID; /* Attribute Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataset Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;          /* verbose file output */
-#endif                            /* NDEBUG */
-    int    *data = NULL;          /* data buffer */
-    int     i, j, k = 0;          /* iterators */
-    hid_t   fapl            = -1; /* File access prop list */
+    int verbose = false;                       /* verbose file output */
+#endif                                         /* NDEBUG */
+    int    *data = NULL;                       /* data buffer */
+    int     i, j, k = 0;                       /* iterators */
+    hid_t   fapl            = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag        = 0;
     haddr_t g_tag           = 0;
     hsize_t dims1[2]        = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2]      = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    hbool_t persistent_fsms = FALSE;
+    bool    persistent_fsms = false;
 
     /* Testing Macro */
     TESTING("tag application during attribute delete");
@@ -2023,7 +1968,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
         TEST_ERROR;
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2159,14 +2104,14 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_delete_tags */
 
@@ -2178,25 +2123,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dataset_creation_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -2338,25 +2280,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -2504,25 +2443,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dataset_open_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -2656,25 +2592,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dataset_write_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -2690,7 +2623,7 @@ check_dataset_write_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2803,14 +2736,14 @@ check_dataset_write_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_write_tags */
 
@@ -2822,25 +2755,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_attribute_write_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
-    hid_t aid = -1; /* Attribute Identifier */
-    hid_t sid = -1; /* Dataset Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
+    hid_t aid = H5I_INVALID_HID; /* Attribute Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataset Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;     /* verbose file output */
-#endif                       /* NDEBUG */
-    int    *data = NULL;     /* data buffer */
-    int     i, j, k = 0;     /* iterators */
-    hid_t   fapl       = -1; /* File access prop list */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    int    *data = NULL;                  /* data buffer */
+    int     i, j, k = 0;                  /* iterators */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t g_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -2854,7 +2784,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -2990,14 +2920,14 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_attribute_write_tags */
 
@@ -3009,25 +2939,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 10, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dataset_read_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -3043,7 +2970,7 @@ check_dataset_read_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3152,14 +3079,14 @@ check_dataset_read_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_read_tags */
 
@@ -3171,25 +3098,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_dataset_size_retrieval(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -3206,7 +3130,7 @@ check_dataset_size_retrieval(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3315,14 +3239,14 @@ check_dataset_size_retrieval(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_size_retrieval */
 
@@ -3334,9 +3258,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3344,16 +3265,16 @@ check_dataset_extend_tags(void)
 {
 
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
@@ -3370,7 +3291,7 @@ check_dataset_extend_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3479,14 +3400,14 @@ check_dataset_extend_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_dataset_extend_tags */
 
@@ -3498,21 +3419,18 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_object_info_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;             /* verbose file output */
-#endif                               /* NDEBUG */
-    hid_t             fapl     = -1; /* File access prop list */
+    int verbose = false;                          /* verbose file output */
+#endif                                            /* NDEBUG */
+    hid_t             fapl     = H5I_INVALID_HID; /* File access prop list */
     haddr_t           root_tag = HADDR_UNDEF;
     haddr_t           g_tag;
     H5O_native_info_t ninfo; /* Native object info struct */
@@ -3633,21 +3551,18 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 3, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_object_copy_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t gid = -1; /* Group Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Group Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file output */
-#endif                     /* NDEBUG */
-    hid_t   fapl     = -1; /* File access prop list */
+    int verbose = false;                /* verbose file output */
+#endif                                  /* NDEBUG */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag = HADDR_UNDEF;
     haddr_t g_tag;
     haddr_t copy_tag;
@@ -3781,26 +3696,23 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_link_removal_tags(hid_t fcpl, int type)
 {
     /* Variable Declarations */
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
-    hid_t gid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     haddr_t g_tag      = 0;
@@ -3817,7 +3729,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -3950,14 +3862,14 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_link_removal_tags */
 
@@ -3969,9 +3881,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              March 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3979,17 +3888,17 @@ check_link_getname_tags(void)
 {
     /* Variable Declarations */
     char  name[500];
-    hid_t fid = -1; /* File Identifier */
-    hid_t did = -1; /* Dataset Identifier */
-    hid_t sid = -1; /* Dataspace Identifier */
-    hid_t gid = -1; /* Dataspace Identifier */
+    hid_t fid = H5I_INVALID_HID; /* File Identifier */
+    hid_t did = H5I_INVALID_HID; /* Dataset Identifier */
+    hid_t sid = H5I_INVALID_HID; /* Dataspace Identifier */
+    hid_t gid = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;         /* verbose file output */
-#endif                           /* NDEBUG */
-    hid_t   dcpl       = -1;     /* dataset creation pl */
-    hsize_t cdims[2]   = {1, 1}; /* chunk dimensions */
+    int verbose = false;                  /* verbose file output */
+#endif                                    /* NDEBUG */
+    hid_t   dcpl       = H5I_INVALID_HID; /* dataset creation pl */
+    hsize_t cdims[2]   = {1, 1};          /* chunk dimensions */
     int     fillval    = 0;
-    hid_t   fapl       = -1; /* File access prop list */
+    hid_t   fapl       = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag   = 0;
     haddr_t d_tag      = 0;
     haddr_t g_tag      = 0;
@@ -4006,7 +3915,7 @@ check_link_getname_tags(void)
     /* ===== */
 
     /* Allocate array */
-    if ((NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))))
+    if ((NULL == (data = (int *)calloc(DIMS * DIMS, sizeof(int)))))
         TEST_ERROR;
 
     /* Create Fapl */
@@ -4129,14 +4038,14 @@ check_link_getname_tags(void)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     return 1;
 } /* check_link_getname_tags */
 
@@ -4148,22 +4057,19 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_external_link_creation_tags(void)
 {
     /* Variable Declarations */
-    hid_t fid  = -1; /* File Identifier */
-    hid_t fid2 = -1; /* File Identifier */
-    hid_t gid  = -1; /* Dataspace Identifier */
+    hid_t fid  = H5I_INVALID_HID; /* File Identifier */
+    hid_t fid2 = H5I_INVALID_HID; /* File Identifier */
+    hid_t gid  = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;   /* verbose file output */
-#endif                     /* NDEBUG */
-    hid_t   fapl     = -1; /* File access prop list */
+    int verbose = false;                /* verbose file output */
+#endif                                  /* NDEBUG */
+    hid_t   fapl     = H5I_INVALID_HID; /* File access prop list */
     haddr_t root_tag = 0;
 
     /* Testing Macro */
@@ -4273,25 +4179,22 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              February 24, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 check_external_link_open_tags(void)
 {
     /* Variable Declarations */
-    haddr_t link_tag = 0;  /* link tag */
-    hid_t   fid      = -1; /* File Identifier */
-    hid_t   fid2     = -1; /* File Identifier */
-    hid_t   gid      = -1; /* Dataspace Identifier */
-    hid_t   xid      = -1; /* Dataspace Identifier */
+    haddr_t link_tag = 0;               /* link tag */
+    hid_t   fid      = H5I_INVALID_HID; /* File Identifier */
+    hid_t   fid2     = H5I_INVALID_HID; /* File Identifier */
+    hid_t   gid      = H5I_INVALID_HID; /* Dataspace Identifier */
+    hid_t   xid      = H5I_INVALID_HID; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;              /* verbose file output */
-#endif                                /* NDEBUG */
-    H5O_native_info_t ninfo;          /* Native object info struct */
-    hid_t             fapl      = -1; /* File access prop list */
+    int verbose = false;                           /* verbose file output */
+#endif                                             /* NDEBUG */
+    H5O_native_info_t ninfo;                       /* Native object info struct */
+    hid_t             fapl      = H5I_INVALID_HID; /* File access prop list */
     haddr_t           root_tag  = 0;
     haddr_t           root2_tag = 0;
 
@@ -4446,9 +4349,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              May 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4457,12 +4357,12 @@ check_invalid_tag_application(void)
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
     H5F_t  *f   = NULL;
-    hid_t   fid = -1;
+    hid_t   fid = H5I_INVALID_HID;
     haddr_t addr;
     H5HL_t *lheap          = NULL;
-    hid_t   fapl           = -1;    /* File access prop list */
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
-#endif                              /* H5C_DO_TAGGING_SANITY_CHECKS */
+    hid_t   fapl           = H5I_INVALID_HID; /* File access prop list */
+    bool    api_ctx_pushed = false;           /* Whether API context pushed */
+#endif                                        /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     /* Testing Macro */
     TESTING("failure on invalid tag application");
@@ -4482,7 +4382,7 @@ check_invalid_tag_application(void)
     /* Push API context */
     if (H5CX_push() < 0)
         TEST_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Get internal file pointer*/
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -4520,9 +4420,9 @@ check_invalid_tag_application(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         TEST_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     /* Close open objects and file */
     if (H5Fclose(fid) < 0)
@@ -4532,7 +4432,7 @@ check_invalid_tag_application(void)
     PASSED();
 #else
     SKIPPED();
-    HDprintf("    test skipped because sanity checking on tag value is disabled.\n");
+    printf("    test skipped because sanity checking on tag value is disabled.\n");
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 0;
@@ -4540,7 +4440,7 @@ check_invalid_tag_application(void)
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
 error:
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return 1;
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
@@ -4554,20 +4454,17 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Mike McGreevy
- *              January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
     /* Variable Declarations */
-    hid_t    fcpl_default    = -1; /* file creation prop list */
-    hid_t    fcpl_shmesg_all = -1; /* file creation prop list */
-    hid_t    fcpl            = -1; /* file creation prop list */
-    unsigned nerrs           = 0;  /* Error Encountered */
-    int      test_type       = 0;  /* test type iterator */
+    hid_t    fcpl_default    = H5I_INVALID_HID; /* file creation prop list */
+    hid_t    fcpl_shmesg_all = H5I_INVALID_HID; /* file creation prop list */
+    hid_t    fcpl            = H5I_INVALID_HID; /* file creation prop list */
+    unsigned nerrs           = 0;               /* Error Encountered */
+    int      test_type       = 0;               /* test type iterator */
 
     /* Open the HDF5 Library */
     H5open();
@@ -4575,7 +4472,7 @@ main(void)
     /* Only run with sec2/default driver */
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* ========== */
@@ -4589,7 +4486,7 @@ main(void)
     fcpl_shmesg_all = H5Pcreate(H5P_FILE_CREATE);
     H5Pset_shared_mesg_nindexes(fcpl_shmesg_all, 1);
     H5Pset_shared_mesg_index(fcpl_shmesg_all, 0, H5O_SHMESG_ALL_FLAG, 20);
-    H5Pset_file_space_strategy(fcpl_shmesg_all, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)0);
+    H5Pset_file_space_strategy(fcpl_shmesg_all, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)0);
 
     /* ========= */
     /* Run Tests */
@@ -4601,13 +4498,13 @@ main(void)
         if (test_type == TEST_DEFAULT) {
 
             if (!nerrs)
-                HDprintf("Testing standard tag application cases w/ default fcpl:\n");
+                printf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
         }
         else if (test_type == TEST_SHMESG) {
 
             if (!nerrs)
-                HDprintf("Testing standard tag application cases w/ shared messages:\n");
+                printf("Testing standard tag application cases w/ shared messages:\n");
             fcpl = fcpl_shmesg_all;
         }
         else {
@@ -4638,7 +4535,7 @@ main(void)
     } /* end for */
 
     if (!nerrs)
-        HDprintf("Testing other specific tag application cases:\n");
+        printf("Testing other specific tag application cases:\n");
     if (!nerrs)
         nerrs += check_group_creation_tags();
     if (!nerrs)

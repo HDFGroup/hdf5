@@ -56,9 +56,11 @@ int HDF_NO_UBSAN main(void)
             ll = (long)ld;
             memcpy(s2, &ll, 8);
 
-            /* The library's algorithm converts it to 0x 00 47 33 ce 17 af 22 82
-             * and gets wrong value 20041683600089730 on the IBM Power6 Linux.
-             * But the IBM Power6 Linux converts it to 0x00 47 33 ce 17 af 22 7f
+            /* The library's algorithm converts it to 0x00 47 33 ce 17 af 22 82
+             * and gets wrong value 20041683600089730 on Linux on IBM Power
+             * architecture.
+             *
+             * But Linux on IBM Power converts it to 0x00 47 33 ce 17 af 22 7f
              * and gets the correct value 20041683600089727.  It uses some special
              * algorithm.  We're going to define the macro and skip the test until
              * we can figure out how they do it.
@@ -118,10 +120,11 @@ int HDF_NO_UBSAN main(void)
 
         /* The library converts the value to 0x434fffffffffffff8000000000000000.
          * In decimal it is 18014398509481982.000000, one value short of the original.
-         * The IBM Power6 Linux converts it to 0x4350000000000000bff0000000000000.
-         * The value is correct in decimal. It uses some special
-         * algorithm.  We're going to define the macro and skip the test until
-         * we can figure out how they do it.
+         *
+         * Linux on IBM Power architecture converts it to
+         * 0x4350000000000000bff0000000000000. The value is correct in decimal.
+         * It uses some special algorithm.  We're going to define the macro and
+         * skip the test until we can figure out how they do it.
          */
         if (s[0]==0x43 && s[1]==0x50 && s[2]==0x00 && s[3]==0x00 &&
             s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
@@ -136,14 +139,14 @@ int HDF_NO_UBSAN main(void)
         ld = (long double)ull;
         memcpy(s, &ld, 16);
 
-        /* Use a different value from signed long to test. The problem is the same
-         * for both long and unsigned long. The value is 18446744073709551615.
+        /* Use a different value from signed long to test. The problem is the
+         * same for both long and unsigned long. The value is 18446744073709551615.
          * The library converts the value to 0x43effffffffffffffe000000000000000.
-         * In decimal it's 18446744073709548544.000000, very different from the original.
-         * The IBM Power6 Linux converts it to 0x43f0000000000000bff0000000000000.
-         * The value is correct in decimal. It uses some special
-         * algorithm.  We're going to define the macro and skip the test until
-         * we can figure out how they do it.
+         * In decimal it's 18446744073709548544.000000, very different from the
+         * original. Linux on IBM Power architecture converts it to
+         * 0x43f0000000000000bff0000000000000. The value is correct in decimal.
+         * It uses some special algorithm.  We're going to define the macro and
+         * skip the test until we can figure out how they do it.
          */
         if (s[0]==0x43 && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
             s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&

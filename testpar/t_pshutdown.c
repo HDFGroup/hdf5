@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              February 2015
- *
  * Purpose: This test creates a file and a bunch of objects in the
  * file and then calls MPI_Finalize without closing anything. The
  * library should exercise the attribute callback destroy attached to
@@ -26,7 +23,7 @@
 
 int nerrors = 0; /* errors count */
 
-const char *FILENAME[] = {"shutdown", NULL};
+static const char *FILENAME[] = {"shutdown", NULL};
 
 int
 main(int argc, char **argv)
@@ -73,8 +70,8 @@ main(int argc, char **argv)
     VRFY((dset_id >= 0), "H5Dcreate succeeded");
 
     /* allocate memory for data buffer */
-    data_array = (DATATYPE *)HDmalloc(dims[0] * dims[1] * sizeof(DATATYPE));
-    VRFY((data_array != NULL), "data_array HDmalloc succeeded");
+    data_array = (DATATYPE *)malloc(dims[0] * dims[1] * sizeof(DATATYPE));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /* Each process takes a slabs of rows. */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -103,7 +100,7 @@ main(int argc, char **argv)
 
     /* release data buffers */
     if (data_array)
-        HDfree(data_array);
+        free(data_array);
 
     MPI_Finalize();
 

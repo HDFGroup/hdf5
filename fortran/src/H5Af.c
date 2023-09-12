@@ -32,11 +32,6 @@
  *  namelen - name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -60,7 +55,7 @@ h5adelete_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen)
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
 
     return ret_value;
 }
@@ -76,11 +71,6 @@ done:
  *  attr_num - number of attributes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -115,11 +105,6 @@ done:
  *  buf - buffer to hold the name
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, August 12, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -135,7 +120,7 @@ h5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if (NULL == (c_buf = (char *)HDmalloc(c_bufsize)))
+    if (NULL == (c_buf = (char *)malloc(c_bufsize)))
         HGOTO_DONE(FAIL);
 
     /*
@@ -151,7 +136,7 @@ h5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
 
 done:
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -172,11 +157,6 @@ done:
  *     N/A
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -204,9 +184,9 @@ h5adelete_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd 
 
 done:
     if (c_attr_name)
-        HDfree(c_attr_name);
+        free(c_attr_name);
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     return ret_value;
 }
 /****if* H5Af/h5adelete_by_idx_c
@@ -226,11 +206,6 @@ done:
  *     N/A
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -245,18 +220,18 @@ h5adelete_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_f 
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Adelete_by_name function.
      */
     if (H5Adelete_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order,
                          (hsize_t)*n, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
 
     return ret_value;
 }
@@ -284,7 +259,7 @@ done:
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *  n  - Attribute’s position in index
+ *  n  - Attribute's position in index
  *  attr_id  - Attribute identifier
  *  size  - Buffer size ! *TEST* check for 0 value *CHECK* should this return the correct value
  *
@@ -297,11 +272,6 @@ done:
  *
  * RETURNS
  *  Size of buffer on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -319,14 +289,14 @@ h5aget_name_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Allocate buffer to hold name of an attribute
      */
     c_buf_size = (size_t)*size + 1;
-    if (NULL == (c_buf = (char *)HDmalloc(c_buf_size)))
-        HGOTO_DONE(FAIL)
+    if (NULL == (c_buf = (char *)malloc(c_buf_size)))
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Aget_name_by_idx function.
@@ -334,7 +304,7 @@ h5aget_name_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
     c_size = H5Aget_name_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order,
                                 (hsize_t)*n, c_buf, c_buf_size, (hid_t)*lapl_id);
     if (c_size < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Convert C name to FORTRAN and place it in the given buffer
@@ -344,9 +314,9 @@ h5aget_name_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
     return ret_value;
 }
 
@@ -361,16 +331,11 @@ done:
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -423,22 +388,17 @@ done:
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *  n - Attribute’s position in index
+ *  n - Attribute's position in index
  *  lapl_id - Link access property list
  * OUTPUTS
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -455,14 +415,14 @@ h5aget_info_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Ainfo_by_idx function.
      */
     if (H5Aget_info_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order,
                            (hsize_t)*n, &ainfo, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Unpack the structure */
     *corder_valid = 0;
@@ -474,7 +434,7 @@ h5aget_info_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int_
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
 
     return ret_value;
 }
@@ -495,16 +455,11 @@ done:
  *
  *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
- *  cset - Indicates the character set used for the attribute’s name
+ *  cset - Indicates the character set used for the attribute's name
  *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- * N/A
  * SOURCE
  */
 int_f
@@ -522,15 +477,15 @@ h5aget_info_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fc
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
     if (NULL == (c_attr_name = HD5f2cstring(attr_name, (size_t)*attr_namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Ainfo_by_name function.
      */
     if (H5Aget_info_by_name((hid_t)*loc_id, c_obj_name, c_attr_name, &ainfo, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Unpack the structure */
     *corder_valid = 0;
@@ -542,9 +497,9 @@ h5aget_info_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fc
 
 done:
     if (c_obj_name)
-        HDfree(c_obj_name);
+        free(c_obj_name);
     if (c_attr_name)
-        HDfree(c_attr_name);
+        free(c_attr_name);
 
     return ret_value;
 }
@@ -560,12 +515,6 @@ done:
  *  buf         - data pointer buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 11, 2008
- * HISTORY
- *
- *
  * SOURCE
  */
 int_f
@@ -594,12 +543,6 @@ h5awrite_f_c(hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf)
  *  buf         - data pointer buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 11, 2008
- * HISTORY
- *
- *
  * SOURCE
  */
 int_f

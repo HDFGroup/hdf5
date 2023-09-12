@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  James Laird
- *              Monday, January 29, 2007
- *
+/*
  * Purpose:	A message holding "implicitly shared object header message"
  *              information in the superblock extension.
  */
@@ -26,9 +24,9 @@
 
 static void  *H5O__shmesg_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                  size_t p_size, const uint8_t *p);
-static herr_t H5O__shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__shmesg_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__shmesg_copy(const void *_mesg, void *_dest);
-static size_t H5O__shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__shmesg_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__shmesg_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
@@ -75,12 +73,12 @@ H5O__shmesg_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (NULL == (mesg = (H5O_shmesg_table_t *)H5MM_calloc(sizeof(H5O_shmesg_table_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* Retrieve version, table address, and number of indexes */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -112,22 +110,19 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__shmesg_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* Store version, table address, and number of indexes */
     *p++ = (uint8_t)mesg->version;
@@ -146,9 +141,6 @@ H5O__shmesg_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
  * Return:	Success:	Ptr to _DEST
  *		Failure:	NULL
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -161,11 +153,11 @@ H5O__shmesg_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(mesg);
+    assert(mesg);
 
     if (!dest && NULL == (dest = (H5O_shmesg_table_t *)H5MM_malloc(sizeof(H5O_shmesg_table_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed for shared message table message")
+                    "memory allocation failed for shared message table message");
 
     /* All this message requires is a shallow copy */
     *dest = *mesg;
@@ -186,20 +178,17 @@ done:
  * Return:	Success:	Message data size in bytes w/o alignment.
  *		Failure:	0
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
+H5O__shmesg_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
     size_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     ret_value = (size_t)(1 +                  /* Version number        */
                          H5F_SIZEOF_ADDR(f) + /* Table address */
@@ -215,9 +204,6 @@ H5O__shmesg_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -228,16 +214,16 @@ H5O__shmesg_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
-              "Shared message table address:", mesg->addr);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of indexes:", mesg->nindexes);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
+            "Shared message table address:", mesg->addr);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of indexes:", mesg->nindexes);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__shmesg_debug() */

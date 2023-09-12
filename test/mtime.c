@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, July 30, 1998
- *
  * Purpose:    Determines if the modification time message is working
  *        properly.  Specifically, the code in H5O_mtime_decode() is
  *        very OS-dependent and this test tries to figure out if it's
@@ -22,7 +19,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
-const char *FILENAME[] = {"mtime", NULL};
+static const char *FILENAME[] = {"mtime", NULL};
 
 #define TESTFILE1 "tmtimeo.h5"
 #define MTIME1    1055531866
@@ -35,9 +32,6 @@ const char *FILENAME[] = {"mtime", NULL};
  * Purpose:    H5O_mtime_decode() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *              Thursday, July 30, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -52,7 +46,7 @@ main(void)
     signed char buf1[32], buf2[32];
     char        filename[1024];
     int         token_cmp;
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -122,7 +116,7 @@ main(void)
         HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
         tm = HDlocaltime(&now);
         HDstrftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
-        HDprintf("    got: %s\n    ans: %s\n", buf1, buf2);
+        printf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;
     }
     PASSED();
@@ -152,7 +146,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created old modification test file (%s)\n", testfile);
+                printf("***cannot open the pre-created old modification test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }
@@ -182,7 +176,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created old modification test file (%s)\n", testfile);
+                printf("***cannot open the pre-created old modification test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }

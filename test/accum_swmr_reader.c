@@ -23,7 +23,7 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
-const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
+static const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -35,23 +35,23 @@ const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
  *
  * Return:      Success: EXIT_SUCCESS
  *              Failure: EXIT_FAILURE
- *
- * Programmer:  Vailin Choi; June 2013
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t    fid  = -1;   /* File ID */
-    hid_t    fapl = -1;   /* file access property list ID */
-    H5F_t   *f    = NULL; /* File pointer */
+    hid_t    fid  = H5I_INVALID_HID; /* File ID */
+    hid_t    fapl = H5I_INVALID_HID; /* file access property list ID */
+    H5F_t   *f    = NULL;            /* File pointer */
     char     filename[1024];
     unsigned u;                      /* Local index variable */
     uint8_t  rbuf[1024];             /* Buffer for reading */
     uint8_t  buf[1024];              /* Buffer for holding the expected data */
     char    *driver         = NULL;  /* VFD string (from env variable) */
-    hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool     api_ctx_pushed = false; /* Whether API context pushed */
+
+    /* Testing setup */
+    h5_reset();
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -77,7 +77,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Get H5F_t * to internal file structure */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -88,7 +88,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
-    if (HDmemcmp(buf, rbuf, (size_t)1024) != 0)
+    if (memcmp(buf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
 
     /* CLose the file */
@@ -98,9 +98,9 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     return EXIT_SUCCESS;
 
@@ -110,10 +110,10 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return EXIT_FAILURE;
 } /* end main() */

@@ -9,7 +9,6 @@ Section II:    Obtain HDF5 source
 Section III:   Using ctest command to build and test
 Section IV:    Cross compiling
 Section V:     Manual alternatives
-Section VI:    Other cross compiling options
 
 ************************************************************************
 
@@ -39,9 +38,6 @@ If no branch is specified, then the 'develop' version will be checked out.
 If no source directory is specified, then the source will be located in the
 'hdf5' directory. The CMake scripts expect the source to be in a directory
 named hdf5-<version string>, where 'version string' uses the format '1.xx.xx'.
-For example, for the current 'develop' version, the "hdf5" directory should
-be renamed "hdf5-1.13.0", or for the first hdf5_1_12_0 pre-release version,
-it should be renamed "hdf5-1.12.0-5".
 
 If the version number is not known a priori, the version string
 can be obtained by running bin/h5vers in the top level directory of the source clone, and
@@ -65,15 +61,15 @@ scripts on compute nodes and to cross-compile for compute node hardware using
 a cross-compiling emulator.  The setup steps will make default settings for
 parallel or serial only builds available to the CMake command.
 
-    1. For the current 'develop' version the "hdf5" directory should be renamed
-       "hdf5-1.13.0".
+    1. The "hdf5" directory should be renamed hdf5-<version string>.  For 
+       further explanation see section II.
 
     2. Three cmake script files need to be copied to the working directory, or
        have symbolic links to them, created in the working directory:
 
-       hdf5-1.13.0/config/cmake/scripts/HDF5config.cmake
-       hdf5-1.13.0/config/cmake/scripts/CTestScript.cmake
-       hdf5-1.13.0/config/cmake/scripts/HDF5options.cmake
+       hdf5-<version string>/config/cmake/scripts/HDF5config.cmake
+       hdf5-<version string>/config/cmake/scripts/CTestScript.cmake
+       hdf5-<version string>/config/cmake/scripts/HDF5options.cmake
 
        should be copied to the working directory.
 
@@ -82,7 +78,7 @@ parallel or serial only builds available to the CMake command.
        CTestScript.cmake
        HDF5config.cmake
        HDF5options.cmake
-       hdf5-1.13.0
+       hdf5-<version string>
 
        Additionally, when the ctest command runs [1], it will add a build directory
        in the working directory.
@@ -145,7 +141,8 @@ cori, another CrayXC40, that line is replaced by "#SBATCH -C knl,quad,cache".
 For cori (and other machines), the values in LOCAL_BATCH_SCRIPT_NAME and
 LOCAL_BATCH_SCRIPT_PARALLEL_NAME in the config/cmake/scripts/HPC/sbatch-HDF5options.cmake
 file can be replaced by cori_knl_ctestS.sl and cori_knl_ctestS.sl, or the lines
-can be edited in the batch files in hdf5-1.13.0/bin/batch.
+can be edited in the batch files in hdf5-<version string>/bin/batch (see section II
+for version string explanation).
 
 ========================================================================
 V. Manual alternatives
@@ -153,11 +150,11 @@ V. Manual alternatives
 If using ctest is undesirable, one can create a build directory and run the cmake
 configure command, for example
 
-"/projects/Mutrino/hpcsoft/cle6.0/common/cmake/3.18/bin/cmake"
--C "<working directory>/hdf5-1.15.x/config/cmake/cacheinit.cmake"
+"/projects/Mutrino/hpcsoft/cle6.0/common/cmake/<CMake version>/bin/cmake"
+-C "<working directory>/hdf5-<version string>/config/cmake/cacheinit.cmake"
 -DCMAKE_BUILD_TYPE:STRING=Release -DHDF5_BUILD_FORTRAN:BOOL=ON
 -DHDF5_BUILD_JAVA:BOOL=OFF
--DCMAKE_INSTALL_PREFIX:PATH=<working directory>/HDF_Group/HDF5/1.15.x
+-DCMAKE_INSTALL_PREFIX:PATH=<working directory>/HDF_Group/HDF5/<version string>
 -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
 -DHDF5_ENABLE_PARALLEL:BOOL=ON -DHDF5_BUILD_CPP_LIB:BOOL=OFF
 -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_ENABLE_THREADSAFE:BOOL=OFF
@@ -168,7 +165,7 @@ configure command, for example
 -DLOCAL_BATCH_SCRIPT_NAME:STRING=knl_ctestS.sl
 -DLOCAL_BATCH_SCRIPT_PARALLEL_NAME:STRING=knl_ctestP.sl -DSITE:STRING=mutrino
 -DBUILDNAME:STRING=par-knl_GCC493-SHARED-Linux-4.4.156-94.61.1.16335.0.PTF.1107299-default-x86_64
-"-GUnix Makefiles" "" "<working directory>/hdf5-1.15.x"
+"-GUnix Makefiles" "" "<working directory>/hdf5-<version string>"
 
 followed by make and batch jobs to run tests.
 
@@ -186,21 +183,3 @@ or
 for parallel builds.
 
 Tests on machines using LSF will typically use "bsub ctestS.lsf", etc.
-
-========================================================================
-VI.    Other cross compiling options
-========================================================================
-Settings for two other cross-compiling options are also in the config/toolchain
-files which do not seem to be necessary with the Cray PrgEnv-* modules
-
-1.  HDF5_USE_PREGEN.  This option, along with the HDF5_USE_PREGEN_DIR CMake
-    variable would allow the use of an appropriate H5Tinit.c file with type
-    information generated on a compute node to be used when cross compiling
-    for those compute nodes.  The use of the variables in lines 110 and 111
-    of HDF5options.cmake file seem to preclude needing this option with the
-    available Cray modules and CMake option.
-
-2.  HDF5_BATCH_H5DETECT and associated CMake variables.  This option when
-    properly configured will run H5detect in a batch job on a compute node
-    at the beginning of the CMake build process.  It was also found to be
-    unnecessary with the available Cray modules and CMake options.

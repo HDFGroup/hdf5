@@ -99,6 +99,7 @@ set (test_par_CLEANFILES
     MPItest.h5
     ShapeSameTest.h5
     test_subfiling_basic_create.h5
+    test_subfiling_only_ioc_fail.h5
     test_subfiling_config_file.h5
     test_subfiling_stripe_sizes.h5
     test_subfiling_selection_strategies.h5

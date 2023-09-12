@@ -70,9 +70,8 @@
 
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_NULL_CHAR, C_LOC, C_INT
-
   USE H5GLOBAL
+  IMPLICIT NONE
 
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
@@ -96,12 +95,12 @@ MODULE H5A
 !  Interface for the function used to pass the C pointer of the buffer
 !  to the C H5Awrite routine
   INTERFACE
-     INTEGER FUNCTION h5awrite_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5awrite_f_c')
+     INTEGER FUNCTION h5awrite_f_c(attr_id, memtype_id, buf) BIND(C, NAME='h5awrite_f_c')
        IMPORT :: c_ptr
        IMPORT :: HID_T
        IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: attr_id
-       INTEGER(HID_T), INTENT(IN) :: mem_type_id
+       INTEGER(HID_T), INTENT(IN) :: memtype_id
        TYPE(C_PTR), VALUE :: buf
      END FUNCTION h5awrite_f_c
   END INTERFACE
@@ -109,12 +108,12 @@ MODULE H5A
 !  Interface for the function used to pass the C pointer of the buffer
 !  to the C H5Aread routine
   INTERFACE
-     INTEGER FUNCTION h5aread_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5aread_f_c')
+     INTEGER FUNCTION h5aread_f_c(attr_id, memtype_id, buf) BIND(C, NAME='h5aread_f_c')
        IMPORT :: c_ptr
        IMPORT :: HID_T
        IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: attr_id
-       INTEGER(HID_T), INTENT(IN) :: mem_type_id
+       INTEGER(HID_T), INTENT(IN) :: memtype_id
        TYPE(C_PTR), VALUE :: buf
      END FUNCTION h5aread_f_c
   END INTERFACE
@@ -207,7 +206,7 @@ CONTAINS
 !! \param type_id  Attribute datatype identifier
 !! \param space_id Attribute dataspace identifier
 !! \param attr_id  Attribute identifier
-!! \param es_id    \es_id
+!! \param es_id    \fortran_es_id
 !! \param hdferr   \fortran_error
 !! \param acpl_id  Attribute creation property list identifier
 !! \param aapl_id  Attribute access property list identifier
@@ -238,7 +237,6 @@ CONTAINS
     TYPE(C_PTR) :: file_default = C_NULL_PTR
     TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
-    
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
@@ -458,7 +456,7 @@ CONTAINS
 !!                 \li H5_ITER_DEC_F       - Decreasing order
 !!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
 !!                 \li H5_ITER_N_F         - Number of iteration orders
-!! \param n        Attribute’s position in index
+!! \param n        Attribute&apos;s position in index
 !! \param name     Attribute name
 !! \param hdferr   \fortran_error
 !!
@@ -583,7 +581,7 @@ CONTAINS
 !! \brief Closes the specified attribute.
 !!
 !! \param attr_id Attribute identifier
-!! \param  hdferr \fortran_error
+!! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5Aclose()
 !!
@@ -609,7 +607,7 @@ CONTAINS
 !! \brief Asynchronously closes the specified attribute.
 !!
 !! \param attr_id Attribute identifier
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !! \param file   \fortran_file
 !! \param func   \fortran_func
@@ -689,7 +687,7 @@ CONTAINS
 !! \brief Gets an attribute creation property list identifier
 !!
 !! \param attr_id          Identifier of the attribute
-!! \param creation_prop_id Identifier for the attribute’s creation property
+!! \param creation_prop_id Identifier for the attribute&apos;s creation property
 !! \param hdferr           \fortran_error
 !!
 !! See C API: @ref H5Aget_create_plist()
@@ -779,6 +777,7 @@ CONTAINS
 !! \param obj_name      Name of object, relative to location, whose attribute is to be renamed
 !! \param old_attr_name Prior attribute name
 !! \param new_attr_name New attribute name
+!! \param es_id         \fortran_es_id
 !! \param hdferr        \fortran_error
 !! \param lapl_id       Link access property list identifier
 !! \param file          \fortran_file
@@ -891,7 +890,7 @@ CONTAINS
 !! \param obj_id    Identifier for object to which attribute is attached
 !! \param attr_name Name of attribute to open
 !! \param attr_id   Attribute identifier
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param aapl_id   Attribute access property list
 !! \param file      \fortran_file
@@ -1081,7 +1080,7 @@ CONTAINS
 !!                 \li H5_ITER_DEC_F       - Decreasing order
 !!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
 !!                 \li H5_ITER_N_F         - Number of iteration orders
-!! \param n        Attribute’s position in index.
+!! \param n        Attribute&apos;s position in index.
 !! \param attr_id  Attribute identifier.
 !! \param hdferr   \fortran_error
 !! \param aapl_id  Attribute access property list.
@@ -1153,9 +1152,9 @@ CONTAINS
 !!                 \li H5_ITER_DEC_F       - Decreasing order
 !!                 \li H5_ITER_NATIVE_F    - No particular order, whatever is fastest
 !!                 \li H5_ITER_N_F         - Number of iteration orders
-!! \param n        Attribute’s position in index.
+!! \param n        Attribute&apos;s position in index.
 !! \param attr_id  Attribute identifier.
-!! \param es_id    \es_id
+!! \param es_id    \fortran_es_id
 !! \param hdferr   \fortran_error
 !! \param aapl_id  Attribute access property list.
 !! \param lapl_id  Link access property list.
@@ -1238,7 +1237,7 @@ CONTAINS
 !!                       NOTE: In C it is defined as a structure: H5A_info_t.
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
 !! \param corder         Is a positive integer containing the creation order of the attribute.
-!! \param cset           Indicates the character set used for the attribute’s name.
+!! \param cset           Indicates the character set used for the attribute&apos;s name.
 !! \param data_size      Indicates the size, in the number of characters, of the attribute.
 !! \param hdferr         \fortran_error
 !!
@@ -1284,10 +1283,10 @@ CONTAINS
 !! \param obj_name       Name of object to which attribute is attached, relative to location
 !! \param idx_type       Type of index
 !! \param order          Index traversal order
-!! \param n              Attribute’s position in index
+!! \param n              Attribute&apos;s position in index
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute
 !! \param corder         Is a positive integer containing the creation order of the attribute
-!! \param cset           Indicates the character set used for the attribute’s name
+!! \param cset           Indicates the character set used for the attribute&apos;s name
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
 !! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
@@ -1360,7 +1359,7 @@ CONTAINS
 !! \param attr_name      Attribute name
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute
 !! \param corder         Is a positive integer containing the creation order of the attribute
-!! \param cset           Indicates the character set used for the attribute’s name
+!! \param cset           Indicates the character set used for the attribute&apos;s name
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
 !! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
@@ -1507,7 +1506,7 @@ CONTAINS
 !! \param type_id   Attribute datatype identifier
 !! \param space_id  Attribute dataspace identifier
 !! \param attr      An attribute identifier
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param acpl_id   Attribute creation property list identifier (Currently not used.)
 !! \param aapl_id   Attribute access property list identifier (Currently not used.)
@@ -1644,8 +1643,10 @@ CONTAINS
 !!
 !! \param obj_id      Object identifier
 !! \param attr_name   Attribute name
-!! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
-!! \param es_id       \es_id
+!! \param attr_exists Pointer to attribute exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param file        \fortran_file
 !! \param func        \fortran_func
@@ -1700,7 +1701,7 @@ CONTAINS
 !! \brief Determines whether an attribute with a given name exists on an object
 !!
 !! \param loc_id      Location identifier
-!! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
+!! \param obj_name    Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
 !! \param attr_exists Attribute exists status
 !! \param hdferr      \fortran_error
@@ -1757,10 +1758,10 @@ CONTAINS
 !! \brief Asynchronously determines whether an attribute with a given name exists on an object
 !!
 !! \param loc_id      Location identifier
-!! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
+!! \param obj_name    Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
 !! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier
 !! \param file        \fortran_file
@@ -1828,7 +1829,7 @@ CONTAINS
 !! \brief Opens an attribute for an object by object name and attribute name.
 !!
 !! \param loc_id    Location from which to find object to which attribute is attached
-!! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or &apos;.&apos; (a dot)
+!! \param obj_name  Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;.&apos; (a dot)
 !! \param attr_name Attribute name
 !! \param attr_id   Attribute identifier
 !! \param hdferr    \fortran_error
@@ -1887,10 +1888,10 @@ CONTAINS
 !! \brief Asynchronously opens an attribute for an object by object name and attribute name.
 !!
 !! \param loc_id    Location from which to find object to which attribute is attached
-!! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or &apos;.&apos; (a dot)
+!! \param obj_name  Object name either relative to loc_id, absolute from the file&apos;s root group, or &apos;.&apos; (a dot)
 !! \param attr_name Attribute name
 !! \param attr_id   Attribute identifier
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param aapl_id   Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
 !! \param lapl_id   Link access property list identifier
@@ -2010,7 +2011,7 @@ CONTAINS
 !! \param loc_id        Location or object identifier; may be dataset or group
 !! \param old_attr_name Prior attribute name
 !! \param new_attr_name New attribute name
-!! \param es_id         \es_id
+!! \param es_id         \fortran_es_id
 !! \param hdferr        \fortran_error
 !! \param file          \fortran_file
 !! \param func          \fortran_func
@@ -2073,7 +2074,7 @@ CONTAINS
 !! \param attr_id    Identifier of an attribute to read.
 !! \param memtype_id Identifier of the attribute datatype (in memory).
 !! \param buf	     Buffer for data to be read.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param file       \fortran_file
 !! \param func       \fortran_func
@@ -2082,10 +2083,10 @@ CONTAINS
 !! See C API: @ref H5Aread_async()
 !!
 
-  SUBROUTINE h5aread_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
+  SUBROUTINE h5aread_async_f(attr_id, memtype_id, buf, es_id, hdferr, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: attr_id
-    INTEGER(HID_T), INTENT(IN)  :: mem_type_id
+    INTEGER(HID_T), INTENT(IN)  :: memtype_id
     TYPE(C_PTR)   , INTENT(IN)  :: buf
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER       , INTENT(OUT) :: hdferr
@@ -2098,7 +2099,7 @@ CONTAINS
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION H5Aread_async(file, func, line, attr_id, mem_type_id, buf, es_id) &
+       INTEGER FUNCTION H5Aread_async(file, func, line, attr_id, memtype_id, buf, es_id) &
             BIND(C,NAME='H5Aread_async')
          IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
@@ -2107,7 +2108,7 @@ CONTAINS
          TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: attr_id
-         INTEGER(HID_T), VALUE :: mem_type_id
+         INTEGER(HID_T), VALUE :: memtype_id
          TYPE(C_PTR)   , VALUE :: buf
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Aread_async
@@ -2117,7 +2118,7 @@ CONTAINS
     IF (PRESENT(func)) func_default = func
     IF (PRESENT(line)) line_default = INT(line, C_INT)
 
-    hdferr = H5Aread_async(file_default, func_default, line_default, attr_id, mem_type_id, buf, es_id)
+    hdferr = H5Aread_async(file_default, func_default, line_default, attr_id, memtype_id, buf, es_id)
 
   END SUBROUTINE h5aread_async_f
 
@@ -2129,7 +2130,7 @@ CONTAINS
 !! \param attr_id    Identifier of an attribute to read.
 !! \param memtype_id Identifier of the attribute datatype (in memory).
 !! \param buf	     Data to be written.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param file       \fortran_file
 !! \param func       \fortran_func
@@ -2138,10 +2139,10 @@ CONTAINS
 !! See C API: @ref H5Awrite_async()
 !!
 
-  SUBROUTINE h5awrite_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
+  SUBROUTINE h5awrite_async_f(attr_id, memtype_id, buf, es_id, hdferr, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: attr_id
-    INTEGER(HID_T), INTENT(IN)  :: mem_type_id
+    INTEGER(HID_T), INTENT(IN)  :: memtype_id
     TYPE(C_PTR)   , INTENT(IN)  :: buf
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER       , INTENT(OUT) :: hdferr
@@ -2154,7 +2155,7 @@ CONTAINS
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION H5Awrite_async(file, func, line, attr_id, mem_type_id, buf, es_id) &
+       INTEGER FUNCTION H5Awrite_async(file, func, line, attr_id, memtype_id, buf, es_id) &
             BIND(C,NAME='H5Awrite_async')
          IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
@@ -2163,7 +2164,7 @@ CONTAINS
          TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: attr_id
-         INTEGER(HID_T), VALUE :: mem_type_id
+         INTEGER(HID_T), VALUE :: memtype_id
          TYPE(C_PTR)   , VALUE :: buf
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Awrite_async
@@ -2173,7 +2174,7 @@ CONTAINS
     IF (PRESENT(func)) func_default = func
     IF (PRESENT(line)) line_default = INT(line, C_INT)
 
-    hdferr = H5Awrite_async(file_default, func_default, line_default, attr_id, mem_type_id, buf, es_id)
+    hdferr = H5Awrite_async(file_default, func_default, line_default, attr_id, memtype_id, buf, es_id)
 
   END SUBROUTINE h5awrite_async_f
 
@@ -2299,14 +2300,14 @@ CONTAINS
 
   END SUBROUTINE h5awrite_char_scalar_fix
 
-  SUBROUTINE h5awrite_ptr(attr_id, mem_type_id, buf, hdferr)
+  SUBROUTINE h5awrite_ptr(attr_id, memtype_id, buf, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
-    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
     TYPE(C_PTR), INTENT(IN), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
-    hdferr = H5Awrite_f_c(attr_id, mem_type_id, buf)
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, buf)
 
   END SUBROUTINE h5awrite_ptr
 
@@ -2337,14 +2338,14 @@ CONTAINS
 
   END SUBROUTINE h5aread_char_scalar_fix
 
-  SUBROUTINE h5aread_ptr(attr_id, mem_type_id, buf, hdferr)
+  SUBROUTINE h5aread_ptr(attr_id, memtype_id, buf, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
-    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    INTEGER(HID_T), INTENT(IN) :: memtype_id
     TYPE(C_PTR), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
-    hdferr = H5Aread_f_c(attr_id, mem_type_id, buf)
+    hdferr = H5Aread_f_c(attr_id, memtype_id, buf)
 
   END SUBROUTINE h5aread_ptr
 

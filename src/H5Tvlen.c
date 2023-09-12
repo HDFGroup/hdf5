@@ -53,7 +53,7 @@
 /* Memory-based VL sequence callbacks */
 static herr_t H5T__vlen_mem_seq_getlen(H5VL_object_t *file, const void *_vl, size_t *len);
 static void  *H5T__vlen_mem_seq_getptr(void *_vl);
-static herr_t H5T__vlen_mem_seq_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull);
+static herr_t H5T__vlen_mem_seq_isnull(const H5VL_object_t *file, void *_vl, bool *isnull);
 static herr_t H5T__vlen_mem_seq_setnull(H5VL_object_t *file, void *_vl, void *_bg);
 static herr_t H5T__vlen_mem_seq_read(H5VL_object_t *file, void *_vl, void *_buf, size_t len);
 static herr_t H5T__vlen_mem_seq_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info,
@@ -62,7 +62,7 @@ static herr_t H5T__vlen_mem_seq_write(H5VL_object_t *file, const H5T_vlen_alloc_
 /* Memory-based VL string callbacks */
 static herr_t H5T__vlen_mem_str_getlen(H5VL_object_t *file, const void *_vl, size_t *len);
 static void  *H5T__vlen_mem_str_getptr(void *_vl);
-static herr_t H5T__vlen_mem_str_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull);
+static herr_t H5T__vlen_mem_str_isnull(const H5VL_object_t *file, void *_vl, bool *isnull);
 static herr_t H5T__vlen_mem_str_setnull(H5VL_object_t *file, void *_vl, void *_bg);
 static herr_t H5T__vlen_mem_str_read(H5VL_object_t *file, void *_vl, void *_buf, size_t len);
 static herr_t H5T__vlen_mem_str_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info,
@@ -70,7 +70,7 @@ static herr_t H5T__vlen_mem_str_write(H5VL_object_t *file, const H5T_vlen_alloc_
 
 /* Disk-based VL sequence (and string) callbacks */
 static herr_t H5T__vlen_disk_getlen(H5VL_object_t *file, const void *_vl, size_t *len);
-static herr_t H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull);
+static herr_t H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, bool *isnull);
 static herr_t H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *_bg);
 static herr_t H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *_buf, size_t len);
 static herr_t H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl,
@@ -136,9 +136,6 @@ static const H5T_vlen_class_t H5T_vlen_disk_g = {
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 20, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -153,15 +150,15 @@ H5Tvlen_create(hid_t base_id)
 
     /* Check args */
     if (NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
 
     /* Create up VL datatype */
     if ((dt = H5T__vlen_create(base)) == NULL)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
 
     /* Register the type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -177,9 +174,6 @@ done:
  *
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 20, 2001
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -191,20 +185,20 @@ H5T__vlen_create(const H5T_t *base)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(base);
+    assert(base);
 
     /* Build new type */
     if (NULL == (dt = H5T__alloc()))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "memory allocation failed");
     dt->shared->type = H5T_VLEN;
 
     /*
      * Force conversions (i.e. memory to memory conversions should duplicate
      * data, not point to the same VL sequences)
      */
-    dt->shared->force_conv = TRUE;
+    dt->shared->force_conv = true;
     if (NULL == (dt->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype");
 
     /* Inherit encoding version from base type */
     dt->shared->version = base->shared->version;
@@ -214,7 +208,7 @@ H5T__vlen_create(const H5T_t *base)
 
     /* Set up VL information */
     if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location");
 
     /* Set return value */
     ret_value = dt;
@@ -222,7 +216,7 @@ H5T__vlen_create(const H5T_t *base)
 done:
     if (!ret_value)
         if (dt && H5T_close_real(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release datatype info")
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release datatype info");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_create() */
@@ -234,31 +228,28 @@ done:
  *
  * Return:
  *  One of two values on success:
- *      TRUE - If the location of any vlen types changed
- *      FALSE - If the location of any vlen types is the same
+ *      true - If the location of any vlen types changed
+ *      false - If the location of any vlen types is the same
  *  <0 is returned on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, June 4, 1999
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
-    htri_t ret_value = FALSE; /* Indicate success, but no location change */
+    htri_t ret_value = false; /* Indicate success, but no location change */
 
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    HDassert(dt);
-    HDassert(loc >= H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
+    assert(dt);
+    assert(loc >= H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
 
     /* Only change the location if it's different */
     if (loc != dt->shared->u.vlen.loc || file != dt->shared->u.vlen.file) {
         switch (loc) {
             case H5T_LOC_MEMORY: /* Memory based VL datatype */
-                HDassert(NULL == file);
+                assert(NULL == file);
 
                 /* Mark this type as being stored in memory */
                 dt->shared->u.vlen.loc = H5T_LOC_MEMORY;
@@ -278,12 +269,12 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     dt->shared->u.vlen.cls = &H5T_vlen_mem_str_g;
                 } /* end else-if */
                 else
-                    HDassert(0 && "Invalid VL type");
+                    assert(0 && "Invalid VL type");
 
                 /* Release owned file */
                 if (dt->shared->owned_vol_obj) {
                     if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object");
                     dt->shared->owned_vol_obj = NULL;
                 } /* end if */
 
@@ -296,7 +287,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
                 H5VL_file_get_args_t  vol_cb_args; /* Arguments to VOL callback */
 
-                HDassert(file);
+                assert(file);
 
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc = H5T_LOC_DISK;
@@ -307,7 +298,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Get container info */
                 if (H5VL_file_get(file, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get container info")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get container info");
 
                 /* The datatype size is equal to 4 bytes for the sequence length
                  * plus the size of a blob id */
@@ -322,7 +313,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* dt now owns a reference to file */
                 if (H5T_own_vol_obj(dt, file) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object");
                 break;
             }
 
@@ -342,11 +333,11 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
             case H5T_LOC_MAXLOC:
                 /* MAXLOC is invalid */
             default:
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location");
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Indicate that the location changed */
-        ret_value = TRUE;
+        ret_value = true;
     } /* end if */
 
 done:
@@ -360,9 +351,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -372,14 +360,11 @@ H5T__vlen_mem_seq_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check parameter */
-    HDassert(_vl);
-    HDassert(len);
+    assert(_vl);
+    assert(len);
 
-    /* Copy to ensure correct alignment.  memcpy is best here because
-     * it optimizes to fast code.
-     */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
     *len = vl.len;
 
@@ -393,9 +378,6 @@ H5T__vlen_mem_seq_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
  *
  * Return:	Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, June 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -405,10 +387,10 @@ H5T__vlen_mem_seq_getptr(void *_vl)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* check parameters, return result */
-    HDassert(_vl);
-    /* Copy to ensure correct alignment. */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    assert(_vl);
+
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI(vl.p)
 } /* end H5T__vlen_mem_seq_getptr() */
@@ -420,25 +402,21 @@ H5T__vlen_mem_seq_getptr(void *_vl)
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hbool_t *isnull)
+H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, bool *isnull)
 {
     hvl_t vl; /* User's hvl_t information */
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check parameters */
-    HDassert(_vl);
+    assert(_vl);
 
-    /* Copy to ensure correct alignment. */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
 
-    *isnull = ((vl.len == 0 || vl.p == NULL) ? TRUE : FALSE);
+    *isnull = ((vl.len == 0 || vl.p == NULL) ? true : false);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_seq_isnull() */
@@ -450,9 +428,6 @@ H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -463,7 +438,7 @@ H5T__vlen_mem_seq_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check parameters */
-    HDassert(_vl);
+    assert(_vl);
 
     /* Set the "nil" hvl_t */
     vl.len = 0;
@@ -482,9 +457,6 @@ H5T__vlen_mem_seq_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -494,12 +466,12 @@ H5T__vlen_mem_seq_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* check parameters, copy data */
-    HDassert(buf);
-    HDassert(_vl);
-    /* Copy to ensure correct alignment. */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
-    HDassert(vl.p);
+    assert(buf);
+    assert(_vl);
+
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&vl, _vl, sizeof(hvl_t));
+    assert(vl.p);
 
     H5MM_memcpy(buf, vl.p, len);
 
@@ -513,9 +485,6 @@ H5T__vlen_mem_seq_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -528,8 +497,8 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    HDassert(_vl);
-    HDassert(buf);
+    assert(_vl);
+    assert(buf);
 
     if (seq_len) {
         size_t len = seq_len * base_size; /* Sequence size */
@@ -538,11 +507,11 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
         if (vl_alloc_info->alloc_func != NULL) {
             if (NULL == (vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                            "application memory allocation routine failed for VL data")
+                            "application memory allocation routine failed for VL data");
         }    /* end if */
         else /* Default to system malloc */
-            if (NULL == (vl.p = HDmalloc(len)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
+            if (NULL == (vl.p = malloc(len)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data");
 
         /* Copy the data into the newly allocated buffer */
         H5MM_memcpy(vl.p, buf, len);
@@ -567,9 +536,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -579,11 +545,10 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* check parameters */
-    HDassert(_vl);
+    assert(_vl);
 
-    /* Copy to ensure correct alignment. */
-    HDmemcpy(&s, _vl, sizeof(char *));
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&s, _vl, sizeof(char *));
 
     *len = HDstrlen(s);
 
@@ -597,9 +562,6 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
  *
  * Return:	Non-NULL on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, June 12, 2004
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -609,10 +571,10 @@ H5T__vlen_mem_str_getptr(void *_vl)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* check parameters */
-    HDassert(_vl);
-    /* Copy to ensure correct alignment. */
-    HDmemcpy(&s, _vl, sizeof(char *));
+    assert(_vl);
+
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&s, _vl, sizeof(char *));
 
     FUNC_LEAVE_NOAPI(s)
 } /* end H5T__vlen_mem_str_getptr() */
@@ -624,22 +586,19 @@ H5T__vlen_mem_str_getptr(void *_vl)
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hbool_t *isnull)
+H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, bool *isnull)
 {
     char *s = NULL; /* Pointer to the user's string information */
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Copy to ensure correct alignment. */
-    HDmemcpy(&s, _vl, sizeof(char *));
+    /* Copy to ensure correct alignment */
+    H5MM_memcpy(&s, _vl, sizeof(char *));
 
-    *isnull = (s == NULL ? TRUE : FALSE);
+    *isnull = (s == NULL ? true : false);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_isnull() */
@@ -650,9 +609,6 @@ H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
  * Purpose:	Sets a VL info object in memory to the "null" value
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -676,9 +632,6 @@ H5T__vlen_mem_str_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -689,14 +642,13 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
     FUNC_ENTER_PACKAGE_NOERR
 
     if (len > 0) {
-        /* check parameters */
-        HDassert(buf);
-        HDassert(_vl);
-        /* Copy to ensure correct alignment. */
-        HDmemcpy(&s, _vl, sizeof(char *));
+        assert(buf);
+        assert(_vl);
 
+        /* Copy to ensure correct alignment */
+        H5MM_memcpy(&s, _vl, sizeof(char *));
         H5MM_memcpy(buf, s, len);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_read() */
@@ -707,9 +659,6 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
  * Purpose:	"Writes" the memory based VL string from a buffer
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -724,18 +673,18 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    HDassert(buf);
+    assert(buf);
 
     /* Use the user's memory allocation routine if one is defined */
     if (vl_alloc_info->alloc_func != NULL) {
         if (NULL ==
             (t = (char *)(vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                        "application memory allocation routine failed for VL data")
+                        "application memory allocation routine failed for VL data");
     }    /* end if */
     else /* Default to system malloc */
-        if (NULL == (t = (char *)HDmalloc((seq_len + 1) * base_size)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
+        if (NULL == (t = (char *)malloc((seq_len + 1) * base_size)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data");
 
     /* 'write' the string into the buffer, with memcpy() */
     len = (seq_len * base_size);
@@ -756,9 +705,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -769,8 +715,8 @@ H5T__vlen_disk_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, size_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check parameters */
-    HDassert(vl);
-    HDassert(seq_len);
+    assert(vl);
+    assert(seq_len);
 
     /* Get length of sequence (different from blob size) */
     UINT32DECODE(vl, *seq_len);
@@ -785,13 +731,10 @@ H5T__vlen_disk_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, size_
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
+H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, bool *isnull)
 {
     H5VL_blob_specific_args_t vol_cb_args;                /* Arguments to VOL callback */
     uint8_t                  *vl        = (uint8_t *)_vl; /* Pointer to the user's hvl_t information */
@@ -800,9 +743,9 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    HDassert(file);
-    HDassert(vl);
-    HDassert(isnull);
+    assert(file);
+    assert(vl);
+    assert(isnull);
 
     /* Skip the sequence's length */
     vl += 4;
@@ -813,7 +756,7 @@ H5T__vlen_disk_isnull(const H5VL_object_t *file, void *_vl, hbool_t *isnull)
 
     /* Check if blob ID is "nil" */
     if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to check if a blob ID is 'nil'");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -825,9 +768,6 @@ done:
  * Purpose:	Sets a VL info object on disk to the "nil" value
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Saturday, November 8, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -841,14 +781,14 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    HDassert(file);
-    HDassert(vl);
+    assert(file);
+    assert(vl);
 
     /* Free heap object for old data */
     if (bg != NULL)
         /* Delete sequence in destination location */
         if (H5T__vlen_disk_delete(file, bg) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object");
 
     /* Set the length of the sequence */
     UINT32ENCODE(vl, 0);
@@ -858,7 +798,7 @@ H5T__vlen_disk_setnull(H5VL_object_t *file, void *_vl, void *bg)
 
     /* Set blob ID to "nil" */
     if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set a blob ID to 'nil'")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set a blob ID to 'nil'");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -871,9 +811,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -885,16 +822,16 @@ H5T__vlen_disk_read(H5VL_object_t *file, void *_vl, void *buf, size_t len)
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    HDassert(file);
-    HDassert(vl);
-    HDassert(buf);
+    assert(file);
+    assert(vl);
+    assert(buf);
 
     /* Skip the length of the sequence */
     vl += 4;
 
     /* Retrieve blob */
     if (H5VL_blob_get(file, vl, buf, len, NULL) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get blob");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -906,9 +843,6 @@ done:
  * Purpose:	Writes the disk based VL element from a buffer
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -923,21 +857,21 @@ H5T__vlen_disk_write(H5VL_object_t *file, const H5T_vlen_alloc_info_t H5_ATTR_UN
     FUNC_ENTER_PACKAGE
 
     /* check parameters */
-    HDassert(vl);
-    HDassert(seq_len == 0 || buf);
-    HDassert(file);
+    assert(vl);
+    assert(seq_len == 0 || buf);
+    assert(file);
 
     /* Free heap object for old data, if non-NULL */
     if (bg != NULL)
         if (H5T__vlen_disk_delete(file, bg) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to remove background heap object");
 
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
 
     /* Store blob */
     if (H5VL_blob_put(file, buf, (seq_len * base_size), vl, NULL) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to put blob");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -950,9 +884,6 @@ done:
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Friday, August 15, 2019
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -964,7 +895,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl)
     FUNC_ENTER_PACKAGE
 
     /* Check parameters */
-    HDassert(file);
+    assert(file);
 
     /* Free heap object for old data */
     if (vl != NULL) {
@@ -981,7 +912,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl)
             vol_cb_args.op_type = H5VL_BLOB_DELETE;
 
             if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob");
         } /* end if */
     }     /* end if */
 
@@ -996,9 +927,6 @@ done:
  *
  * Return:  Non-negative on success / Negative on failure
  *
- * Programmer:  Quincey Koziol
- *      Friday, August 15, 2019
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1012,9 +940,9 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(elem);
-    HDassert(dt);
-    HDassert(alloc_info);
+    assert(elem);
+    assert(dt);
+    assert(alloc_info);
 
     free_func = alloc_info->free_func;
     free_info = alloc_info->free_info;
@@ -1030,7 +958,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                 for (u = 0; u < dt->shared->u.array.nelem; u++) {
                     off = ((uint8_t *)elem) + u * (dt->shared->parent->shared->size);
                     if (H5T_reclaim_cb(off, dt->shared->parent, 0, NULL, alloc_info) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free array element")
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free array element");
                 } /* end for */
             }     /* end if */
             break;
@@ -1045,7 +973,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     /* Calculate the offset member and recurse on it */
                     off = ((uint8_t *)elem) + dt->shared->u.compnd.memb[u].offset;
                     if (H5T_reclaim_cb(off, dt->shared->u.compnd.memb[u].type, 0, NULL, alloc_info) < 0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free compound field")
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free compound field");
                 } /* end if */
             }     /* end for */
             break;
@@ -1065,7 +993,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                         while (vl->len > 0) {
                             off = ((uint8_t *)vl->p) + (vl->len - 1) * dt->shared->parent->shared->size;
                             if (H5T_reclaim_cb(off, dt->shared->parent, 0, NULL, alloc_info) < 0)
-                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free VL element")
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free VL element");
                             vl->len--;
                         } /* end while */
                     }     /* end if */
@@ -1074,7 +1002,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     if (free_func != NULL)
                         (*free_func)(vl->p, free_info);
                     else
-                        HDfree(vl->p);
+                        free(vl->p);
                 } /* end if */
             }
             else if (dt->shared->u.vlen.type == H5T_VLEN_STRING) {
@@ -1082,10 +1010,10 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                 if (free_func != NULL)
                     (*free_func)(*(char **)elem, free_info);
                 else
-                    HDfree(*(char **)elem);
+                    free(*(char **)elem);
             }
             else {
-                HDassert(0 && "Invalid VL type");
+                assert(0 && "Invalid VL type");
             } /* end else */
             break;
 
@@ -1104,7 +1032,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
         case H5T_NO_CLASS:
         case H5T_NCLASSES:
         default:
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class");
             break;
 
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
@@ -1124,9 +1052,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Mike McGreevy
- *              May 11, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1135,18 +1060,18 @@ H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
     H5T_vlen_alloc_info_t vl_alloc_info;       /* VL allocation info */
     herr_t                ret_value = SUCCEED; /* return value */
 
-    HDassert(dt);
-    HDassert(elem);
+    assert(dt);
+    assert(elem);
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get VL allocation info */
     if (H5CX_get_vlen_alloc_info(&vl_alloc_info) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
 
     /* Recurse on buffer to free dynamic fields */
     if (H5T__vlen_reclaim(elem, dt, &vl_alloc_info) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim vlen elements");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

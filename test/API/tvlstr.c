@@ -64,7 +64,7 @@ test_vlstr_alloc_custom(size_t size, void *info)
      */
     extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *mem_used += size;
     } /* end if */
@@ -96,7 +96,7 @@ test_vlstr_free_custom(void *_mem, void *info)
     if (_mem != NULL) {
         mem = ((unsigned char *)_mem) - extra;
         *mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 }
 
@@ -162,15 +162,15 @@ test_vlstrings_basic(void)
     dataset2 = H5Dcreate2(fid1, "Dataset2", tid1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate2");
 
-    wdata2 = (char *)HDcalloc((size_t)65534, sizeof(char));
-    HDmemset(wdata2, 'A', (size_t)65533);
+    wdata2 = (char *)calloc((size_t)65534, sizeof(char));
+    memset(wdata2, 'A', (size_t)65533);
 
     ret = H5Dwrite(dataset2, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
 
     H5Sclose(dataspace);
     H5Dclose(dataset2);
-    HDfree(wdata2);
+    free(wdata2);
 
     /* Change to the custom memory allocation routines for reading VL string */
     xfer_pid = H5Pcreate(H5P_DATASET_XFER);
@@ -424,12 +424,12 @@ test_vlstring_type(void)
     ret = H5Tget_class(tid_vlstr);
     VERIFY(ret, H5T_STRING, "H5Tget_class");
     ret = H5Tis_variable_str(tid_vlstr);
-    VERIFY(ret, TRUE, "H5Tis_variable_str");
+    VERIFY(ret, true, "H5Tis_variable_str");
 
     /* Verify that the class detects as a string */
     vl_str = H5Tdetect_class(tid_vlstr, H5T_STRING);
     CHECK(vl_str, FAIL, "H5Tdetect_class");
-    VERIFY(vl_str, TRUE, "H5Tdetect_class");
+    VERIFY(vl_str, true, "H5Tdetect_class");
 
     /* Check default character set and padding */
     cset = H5Tget_cset(tid_vlstr);
@@ -625,8 +625,8 @@ test_write_vl_string_attribute(void)
     att = H5Acreate2(root, "test_scalar_large", type, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
 
-    string_att_write = (char *)HDcalloc((size_t)8192, sizeof(char));
-    HDmemset(string_att_write, 'A', (size_t)8191);
+    string_att_write = (char *)calloc((size_t)8192, sizeof(char));
+    memset(string_att_write, 'A', (size_t)8191);
 
     ret = H5Awrite(att, type, &string_att_write);
     CHECK(ret, FAIL, "H5Awrite");
@@ -642,7 +642,7 @@ test_write_vl_string_attribute(void)
     string_att_check = NULL;
 
     /* The attribute string written is freed below, in the test_read_vl_string_attribute() test */
-    /* HDfree(string_att_write); */
+    /* free(string_att_write); */
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "HAclose");
@@ -723,7 +723,7 @@ test_read_vl_string_attribute(void)
 
     /* Free string allocated in test_write_vl_string_attribute */
     if (string_att_write)
-        HDfree(string_att_write);
+        free(string_att_write);
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "HAclose");
@@ -871,7 +871,6 @@ test_vl_rewrite(void)
 static void
 test_write_same_element(void)
 {
-#ifndef NO_WRITE_SAME_ELEMENT_TWICE
     hid_t       file1, dataset1;
     hid_t       mspace, fspace, dtype;
     hsize_t     fdim[]             = {SPACE1_DIM1};
@@ -880,86 +879,84 @@ test_write_same_element(void)
     hsize_t     marray[]           = {NUMP};
     hsize_t     coord[SPACE1_RANK][NUMP];
     herr_t      ret;
-#endif
 
-    MESSAGE(
-        5,
-        ("Testing writing to same element of VL string dataset twice - SKIPPED for now due to no support\n"));
-#ifndef NO_WRITE_SAME_ELEMENT_TWICE
-    file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(file1, FAIL, "H5Fcreate");
+    MESSAGE(5, ("Testing writing to same element of VL string dataset twice\n"));
 
-    dtype = H5Tcopy(H5T_C_S1);
-    CHECK(dtype, FAIL, "H5Tcopy");
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+        file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(file1, FAIL, "H5Fcreate");
 
-    ret = H5Tset_size(dtype, H5T_VARIABLE);
-    CHECK(ret, FAIL, "H5Tset_size");
+        dtype = H5Tcopy(H5T_C_S1);
+        CHECK(dtype, FAIL, "H5Tcopy");
 
-    fspace = H5Screate_simple(SPACE1_RANK, fdim, NULL);
-    CHECK(fspace, FAIL, "H5Screate_simple");
+        ret = H5Tset_size(dtype, H5T_VARIABLE);
+        CHECK(ret, FAIL, "H5Tset_size");
 
-    dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dataset1, FAIL, "H5Dcreate");
+        fspace = H5Screate_simple(SPACE1_RANK, fdim, NULL);
+        CHECK(fspace, FAIL, "H5Screate_simple");
 
-    ret = H5Dwrite(dataset1, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-    CHECK(ret, FAIL, "H5Dwrite");
+        dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(dataset1, FAIL, "H5Dcreate");
 
-    ret = H5Dclose(dataset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Dwrite(dataset1, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    ret = H5Tclose(dtype);
-    CHECK(ret, FAIL, "H5Tclose");
+        ret = H5Dclose(dataset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    ret = H5Sclose(fspace);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Tclose(dtype);
+        CHECK(ret, FAIL, "H5Tclose");
 
-    ret = H5Fclose(file1);
-    CHECK(ret, FAIL, "H5Fclose");
+        ret = H5Sclose(fspace);
+        CHECK(ret, FAIL, "H5Sclose");
 
-    /*
-     * Open the file.  Select the same points, write values to those point locations.
-     */
-    file1 = H5Fopen(DATAFILE3, H5F_ACC_RDWR, H5P_DEFAULT);
-    CHECK(file1, FAIL, "H5Fopen");
+        ret = H5Fclose(file1);
+        CHECK(ret, FAIL, "H5Fclose");
 
-    dataset1 = H5Dopen2(file1, DATASET, H5P_DEFAULT);
-    CHECK(dataset1, FAIL, "H5Dopen");
+        /*
+         * Open the file.  Select the same points, write values to those point locations.
+         */
+        file1 = H5Fopen(DATAFILE3, H5F_ACC_RDWR, H5P_DEFAULT);
+        CHECK(file1, FAIL, "H5Fopen");
 
-    fspace = H5Dget_space(dataset1);
-    CHECK(fspace, FAIL, "H5Dget_space");
+        dataset1 = H5Dopen2(file1, DATASET, H5P_DEFAULT);
+        CHECK(dataset1, FAIL, "H5Dopen");
 
-    dtype = H5Dget_type(dataset1);
-    CHECK(dtype, FAIL, "H5Dget_type");
+        fspace = H5Dget_space(dataset1);
+        CHECK(fspace, FAIL, "H5Dget_space");
 
-    mspace = H5Screate_simple(1, marray, NULL);
-    CHECK(mspace, FAIL, "H5Screate_simple");
+        dtype = H5Dget_type(dataset1);
+        CHECK(dtype, FAIL, "H5Dget_type");
 
-    coord[0][0] = 0;
-    coord[0][1] = 2;
-    coord[0][2] = 2;
-    coord[0][3] = 0;
+        mspace = H5Screate_simple(1, marray, NULL);
+        CHECK(mspace, FAIL, "H5Screate_simple");
 
-    ret = H5Sselect_elements(fspace, H5S_SELECT_SET, NUMP, (const hsize_t *)&coord);
-    CHECK(ret, FAIL, "H5Sselect_elements");
+        coord[0][0] = 0;
+        coord[0][1] = 2;
+        coord[0][2] = 2;
+        coord[0][3] = 0;
 
-    ret = H5Dwrite(dataset1, dtype, mspace, fspace, H5P_DEFAULT, val);
-    CHECK(ret, FAIL, "H5Dwrite");
+        ret = H5Sselect_elements(fspace, H5S_SELECT_SET, NUMP, (const hsize_t *)&coord);
+        CHECK(ret, FAIL, "H5Sselect_elements");
 
-    ret = H5Tclose(dtype);
-    CHECK(ret, FAIL, "H5Tclose");
+        ret = H5Dwrite(dataset1, dtype, mspace, fspace, H5P_DEFAULT, val);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    ret = H5Dclose(dataset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Tclose(dtype);
+        CHECK(ret, FAIL, "H5Tclose");
 
-    ret = H5Sclose(fspace);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Dclose(dataset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    ret = H5Sclose(mspace);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Sclose(fspace);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    ret = H5Fclose(file1);
-    CHECK(ret, FAIL, "H5Fclose");
-#endif
+        ret = H5Sclose(mspace);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        ret = H5Fclose(file1);
+        CHECK(ret, FAIL, "H5Fclose");
+    }
 } /* test_write_same_element */
 
 /****************************************************************
@@ -996,12 +993,6 @@ test_vlstrings(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              September 10, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

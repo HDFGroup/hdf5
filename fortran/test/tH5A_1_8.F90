@@ -236,7 +236,7 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   data_dims = 0
@@ -413,7 +413,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   LOGICAL :: equal
@@ -621,7 +621,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
            my_dataset = dset3
            dsetname = DSET3_NAME
            !     CASE DEFAULT
-           !        CALL HDassert(0.AND."Toomanydatasets!")
+           !        CALL assert(0.AND."Toomanydatasets!")
         END SELECT
 
 
@@ -755,7 +755,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
   INTEGER(HSIZE_T) :: n
   LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./)
@@ -936,7 +936,7 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
   LOGICAL :: use_index
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   INTEGER(SIZE_T) :: NAME_BUF_SIZE = 7
@@ -1399,7 +1399,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
   LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./)
 
@@ -1487,7 +1487,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
 
@@ -1536,7 +1536,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
               !  Delete attributes from compact storage
@@ -1552,7 +1552,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
 
                  !  Verify the attribute information for first attribute in appropriate order
-                 ! HDmemset(&ainfo, 0, sizeof(ainfo));
+                 ! memset(&ainfo, 0, sizeof(ainfo));
 
 !EP                 CALL h5aget_info_by_idx_f(my_dataset, ".", idx_type, order, 0_HSIZE_T, &
                  CALL h5aget_info_by_idx_f(my_dataset, ".", idx_type, order, hzero, &
@@ -1602,7 +1602,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
               !  Create more attributes, to push into dense form
@@ -1667,7 +1667,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
                  ENDIF
 
                  !  Verify the name for first attribute in appropriate order
-                 ! HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                 ! memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 
                  size = 7 ! *CHECK* if not the correct size
                  CALL h5aget_name_by_idx_f(my_dataset, ".", idx_type, order,INT(0,hsize_t), &
@@ -2671,10 +2671,6 @@ END SUBROUTINE test_attr_many
 ! *
 ! * Return:      Success:        0
 ! *              Failure:        -1
-! *
-! * Programmer:  Fortran version (M.S. Breitenfeld)
-! *              March 21, 2008
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -2692,7 +2688,7 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
   INTEGER :: error
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
-  INTEGER :: cset ! Indicates the character set used for the attribute’s name
+  INTEGER :: cset ! Indicates the character set used for the attribute's name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
   INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements

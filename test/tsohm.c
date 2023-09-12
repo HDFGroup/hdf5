@@ -26,20 +26,21 @@
 
 /* Default SOHM values */
 #define DEF_NUM_INDEXES 0
-const unsigned def_type_flags[H5O_SHMESG_MAX_NINDEXES] = {0, 0, 0, 0, 0, 0};
-const unsigned def_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {250, 250, 250, 250, 250, 250};
+static const unsigned def_type_flags[H5O_SHMESG_MAX_NINDEXES] = {0, 0, 0, 0, 0, 0};
+static const unsigned def_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {250, 250, 250, 250, 250, 250};
 #define DEF_L2B 50
 #define DEF_B2L 40
 
 /* Non-default SOHM values for testing */
 #define TEST_NUM_INDEXES 4
-const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] = {H5O_SHMESG_FILL_FLAG,
-                                                           H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_ATTR_FLAG,
-                                                           H5O_SHMESG_SDSPACE_FLAG,
-                                                           H5O_SHMESG_PLINE_FLAG,
-                                                           0,
-                                                           0};
-const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {0, 2, 40, 100, 3, 1000};
+static const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] = {H5O_SHMESG_FILL_FLAG,
+                                                                  H5O_SHMESG_DTYPE_FLAG |
+                                                                      H5O_SHMESG_ATTR_FLAG,
+                                                                  H5O_SHMESG_SDSPACE_FLAG,
+                                                                  H5O_SHMESG_PLINE_FLAG,
+                                                                  0,
+                                                                  0};
+static const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {0, 2, 40, 100, 3, 1000};
 #define TEST_L2B 65
 #define TEST_B2L 64
 
@@ -69,31 +70,31 @@ typedef struct dtype1_struct {
 } dtype1_struct;
 
 #define DTYPE2_SIZE 1024
-const char *DSETNAME[]       = {"dataset0",  "dataset1",  "dataset2", "dataset3", "dataset4",
-                          "dataset5",  "dataset6",  "dataset7", "dataset8", "dataset9",
-                          "dataset10", "dataset11", NULL};
-const char *EXTRA_DSETNAME[] = {"ex_dataset0",  "ex_dataset1",  "ex_dataset2",
-                                "ex_dataset3",  "ex_dataset4",  "ex_dataset5",
-                                "ex_dataset6",  "ex_dataset7",  "ex_dataset8",
-                                "ex_dataset9",  "ex_dataset10", "ex_dataset11",
-                                "ex_dataset12", "ex_dataset13", "ex_dataset14",
-                                "ex_dataset15", "ex_dataset16", "ex_dataset17",
-                                "ex_dataset18", "ex_dataset19", NULL};
+static const char *DSETNAME[]       = {"dataset0",  "dataset1",  "dataset2", "dataset3", "dataset4",
+                                 "dataset5",  "dataset6",  "dataset7", "dataset8", "dataset9",
+                                 "dataset10", "dataset11", NULL};
+static const char *EXTRA_DSETNAME[] = {"ex_dataset0",  "ex_dataset1",  "ex_dataset2",
+                                       "ex_dataset3",  "ex_dataset4",  "ex_dataset5",
+                                       "ex_dataset6",  "ex_dataset7",  "ex_dataset8",
+                                       "ex_dataset9",  "ex_dataset10", "ex_dataset11",
+                                       "ex_dataset12", "ex_dataset13", "ex_dataset14",
+                                       "ex_dataset15", "ex_dataset16", "ex_dataset17",
+                                       "ex_dataset18", "ex_dataset19", NULL};
 #define SOHM_HELPER_NUM_EX_DSETS 20
 typedef struct complex_t {
     double re;
     double im;
 } complex_t;
 #define ENUM_NUM_MEMBS 20
-const char *ENUM_NAME[] = {"enum_member0",  "enum_member1",  "enum_member2",
-                           "enum_member3",  "enum_member4",  "enum_member5",
-                           "enum_member6",  "enum_member7",  "enum_member8",
-                           "enum_member9",  "enum_member10", "enum_member11",
-                           "enum_member12", "enum_member13", "enum_member14",
-                           "enum_member15", "enum_member16", "enum_member17",
-                           "enum_member18", "enum_member19", NULL};
-const int   ENUM_VAL[]  = {0, 13,  -500,  63,  64,  -64,  65,  2048,  1,  2,     -1,
-                        7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
+static const char *ENUM_NAME[] = {"enum_member0",  "enum_member1",  "enum_member2",
+                                  "enum_member3",  "enum_member4",  "enum_member5",
+                                  "enum_member6",  "enum_member7",  "enum_member8",
+                                  "enum_member9",  "enum_member10", "enum_member11",
+                                  "enum_member12", "enum_member13", "enum_member14",
+                                  "enum_member15", "enum_member16", "enum_member17",
+                                  "enum_member18", "enum_member19", NULL};
+static const int   ENUM_VAL[]  = {0, 13,  -500,  63,  64,  -64,  65,  2048,  1,  2,     -1,
+                               7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
 #define SIZE2_RANK1 6
 #define SIZE2_RANK2 10
 #define SIZE2_DIMS                                                                                           \
@@ -192,9 +193,9 @@ verify_fcpl_values(hid_t fcpl_id, const unsigned nindexes_expected, const unsign
 static void
 test_sohm_fcpl(void)
 {
-    hid_t    fid      = -1;
-    hid_t    fcpl_id  = -1;
-    hid_t    fcpl2_id = -1;
+    hid_t    fid      = H5I_INVALID_HID;
+    hid_t    fcpl_id  = H5I_INVALID_HID;
+    hid_t    fcpl2_id = H5I_INVALID_HID;
     unsigned x;
     herr_t   ret;
 
@@ -327,8 +328,8 @@ test_sohm_fcpl(void)
 static void
 test_sohm_fcpl_errors(void)
 {
-    hid_t    fcpl_id = -1;
-    hid_t    fid     = -1;
+    hid_t    fcpl_id = H5I_INVALID_HID;
+    hid_t    fid     = H5I_INVALID_HID;
     unsigned x;
     herr_t   ret;
 
@@ -411,16 +412,13 @@ test_sohm_fcpl_errors(void)
  * Return:      Success:        datatype ID (should be closed by calling function)
  *              Failure:        negative
  *
- * Programmer:  James Laird
- *              Saturday, August 26, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
 make_dtype_1(void)
 {
-    hid_t dtype1_id = -1;
-    hid_t str_id    = -1;
+    hid_t dtype1_id = H5I_INVALID_HID;
+    hid_t str_id    = H5I_INVALID_HID;
 
     /* Create compound datatype. */
     if ((dtype1_id = H5Tcreate(H5T_COMPOUND, sizeof(struct dtype1_struct))) < 0)
@@ -477,17 +475,14 @@ error:
  * Return:      Success:        datatype ID (should be closed by calling function)
  *              Failure:        negative
  *
- * Programmer:  James Laird
- *              Saturday, August 26, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
 make_dtype_2(void)
 {
-    hid_t   dtype2_id = -1;
-    hid_t   enum_id   = -1;
-    hid_t   int_id    = -1;
+    hid_t   dtype2_id = H5I_INVALID_HID;
+    hid_t   enum_id   = H5I_INVALID_HID;
+    hid_t   int_id    = H5I_INVALID_HID;
     int     x;
     hsize_t dims[] = {2, 1, 2, 4};
     size_t  size;
@@ -550,9 +545,6 @@ error:
  * Return:      Success:        new hid_t for the file
  *              Failure:        Negative
  *
- * Programmer:  James Laird
- *              Wednesday, October 4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -574,20 +566,17 @@ error:
  *
  * Purpose:     Creates object headers that use a large datatype message.
  *
- *              Set test_file_closing to TRUE to add file closing and reopening
+ *              Set test_file_closing to true to add file closing and reopening
  *              whenever possible (to test that SOHMs are written correctly
  *              on disk and not just in memory).
  *
  * Return:      Success:    file ID (may not be the same one passed in)
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  James Laird
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
-size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_closing)
+size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_closing)
 {
     dtype1_struct wdata;
     dtype1_struct rdata;
@@ -604,23 +593,21 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
  *             Reads the dataset and verifies that [a subset of] the data
  *             are as expected.
  *
- * Programmer: Jacob Smith
- *             2018 November 1
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_S1H_VERIFY_DATA(dset_id, dtype_id)                                                             \
     {                                                                                                        \
-        HDmemset(&rdata, 0, sizeof(rdata));                                                                  \
+        memset(&rdata, 0, sizeof(rdata));                                                                    \
         if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) {                     \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
-            HDprintf("Can't read data\n");                                                                   \
+            printf("Can't read data\n");                                                                     \
             goto error;                                                                                      \
         }                                                                                                    \
         if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str) != 0) {       \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
-            HDprintf("incorrect read data\n");                                                               \
+            printf("incorrect read data\n");                                                                 \
             goto error;                                                                                      \
         }                                                                                                    \
     } /* TSOHM_S1H_VERIFY_DATA() definition */
@@ -629,10 +616,10 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
      * local disks.  Don't close and reopen if express testing is enabled.
      */
     if (GetTestExpress() > 1)
-        test_file_closing = FALSE;
+        test_file_closing = false;
 
     /* Initialize wdata */
-    HDmemset(&wdata, 0, sizeof(wdata));
+    memset(&wdata, 0, sizeof(wdata));
     wdata.i1 = 11;
     HDstrcpy(wdata.str, "string");
     wdata.i2 = 22;
@@ -645,7 +632,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
     wdata.f1 = 0.0F;
 
     /* Initialize rdata */
-    HDmemset(&rdata, 0, sizeof(rdata));
+    memset(&rdata, 0, sizeof(rdata));
 
     dtype1_id = make_dtype_1();
     if (dtype1_id < 0)
@@ -760,12 +747,10 @@ error:
  *          Object header information from the "first" dataset in the file
  *          is stored in pointer `oinfo`.
  *
- * Programmer: Jacob Smith
- *             2018 November 1
  *----------------------------------------------------------------------------
  */
 static h5_stat_size_t
-getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t test_file_closing,
+getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, bool test_file_closing,
                   H5O_native_info_t *ninfo)
 {
     hid_t  fid = H5I_INVALID_HID;
@@ -774,7 +759,7 @@ getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t te
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
     CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
 
-    /* If test_file_closing is TRUE, you will get back a different ID,
+    /* If test_file_closing is true, you will get back a different ID,
      * which will need to be closed. The helper will close your passed-in
      * ID.
      */
@@ -795,17 +780,14 @@ getsize_testsize1(const char *filename, hid_t fcpl_id, hid_t fapl_id, hbool_t te
  *
  * Purpose:     Tests shared object header messages with a large datatype
  *
- * Programmer:  James Laird
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 test_sohm_size1(void)
 {
-    hid_t file    = -1;
-    hid_t fcpl_id = -1;
-    hid_t fapl_id = -1;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t fcpl_id = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     unsigned       use_shared = 0;
     unsigned       use_btree  = 0;
@@ -851,7 +833,7 @@ test_sohm_size1(void)
 
     for (use_shared = 0; use_shared < 2; use_shared++) {
         for (use_btree = 0; use_btree < 2; use_btree++) {
-            hbool_t test_open_close;
+            bool test_open_close;
 
             /* cannot use btree indexing without shared messages; skip case */
             if (use_btree && !use_shared)
@@ -889,9 +871,9 @@ test_sohm_size1(void)
             file_sizes[size_index++] = h5_get_file_size(FILENAME, fapl_id);
 
             /* size of populated file, with different populating behaviors */
-            test_open_close          = TRUE;
+            test_open_close          = true;
             file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, test_open_close, &ninfo);
-            test_open_close          = FALSE;
+            test_open_close          = false;
             file_sizes[size_index++] = getsize_testsize1(FILENAME, fcpl_id, fapl_id, test_open_close, &ninfo);
             oh_sizes[oh_size_index++] = ninfo.hdr.space.total;
 
@@ -982,18 +964,15 @@ test_sohm_size1(void)
  *              Uses "size1_helper" for file setup directed to a specific
  *              file handle.
  *
- * Programmer:  Jacob Smith
- *              2018 November 1
- *
  *---------------------------------------------------------------------------
  */
 #if 0  /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
 static void
 test_sohm_size_consistency_open_create(void)
 {
-    hid_t       file = -1;
-    hid_t       fcpl_id = -1;
-    hid_t       fapl_id = -1;
+    hid_t       file = H5I_INVALID_HID;
+    hid_t       fcpl_id = H5I_INVALID_HID;
+    hid_t       fapl_id = H5I_INVALID_HID;
     unsigned    use_btree;
     hsize_t     oh_size_open;
     hsize_t     oh_size_create;
@@ -1043,7 +1022,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to previously-created file */
         file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
         CHECK_I(file, "H5Fopen");
-        file = size1_helper(file, FILENAME, fapl_id, FALSE);
+        file = size1_helper(file, FILENAME, fapl_id, false);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
@@ -1058,7 +1037,7 @@ test_sohm_size_consistency_open_create(void)
          * Add messages to a newly-created file */
         file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
         CHECK_I(file, "H5Fcreate");
-        file = size1_helper(file, FILENAME, fapl_id, FALSE);
+        file = size1_helper(file, FILENAME, fapl_id, false);
         CHECK_I(file, "size1_helper");
 
         /* Get the size of a dataset object header */
@@ -1089,9 +1068,6 @@ test_sohm_size_consistency_open_create(void)
  *              Tests attribute on a Group.
  *              Tests committed and non-committed datatypes.
  *              Tests attribute access through `H5Aopen()`.
- *
- * Programmer:  James Laird
- *              Thursday, November 30, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1125,10 +1101,10 @@ sohm_attr_helper(hid_t fcpl_id)
      * 2 - committed datatype, read through second ID
      */
     for (op_index = 0; op_index < TSOHM_SAH_OP_COUNT; op_index++) {
-        hid_t type_id  = -1;
-        hid_t group_id = -1;
-        hid_t attr_id  = -1;
-        hid_t attr_id2 = -1;
+        hid_t type_id  = H5I_INVALID_HID;
+        hid_t group_id = H5I_INVALID_HID;
+        hid_t attr_id  = H5I_INVALID_HID;
+        hid_t attr_id2 = H5I_INVALID_HID;
         hid_t attr_read_id;
 
         /* create group in file with name unique to op_index */
@@ -1169,7 +1145,7 @@ sohm_attr_helper(hid_t fcpl_id)
 
         /* Verify */
         attr_read_id = (op_index == 2) ? attr_id2 : attr_id;
-        HDmemset(rdata, 0, sizeof(rdata));
+        memset(rdata, 0, sizeof(rdata));
         ret = H5Aread(attr_read_id, H5T_NATIVE_INT, rdata);
         CHECK_I(ret, "H5Aread");
         for (x = 0; x < (size_t)dims; ++x)
@@ -1198,9 +1174,6 @@ sohm_attr_helper(hid_t fcpl_id)
  *              shouldn't be shared.
  *
  *              Test permutations of this.
- *
- * Programmer:  James Laird
- *              Thursday, November 30, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1344,7 +1317,7 @@ test_sohm_attrs(void)
         ret = H5Pclose(fcpl_id);
         CHECK_I(ret, "H5Pclose");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* three shared message indices
      */
@@ -1378,9 +1351,6 @@ test_sohm_attrs(void)
  * Purpose:     Verify that the property list passed in is in fact the
  *              same property list used as dcpl1_id in the size2 helper
  *              function.  This ensures that the filters can be read.
- *
- * Programmer:  James Laird
- *              Wednesday, November 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1422,12 +1392,12 @@ size2_verify_plist1(hid_t plist)
     /* Check fill value */
     dtype1_id = make_dtype_1();
     CHECK_I(dtype1_id, "make_dtype_1");
-    HDmemset(&fill1_correct, '1', sizeof(fill1_correct));
+    memset(&fill1_correct, '1', sizeof(fill1_correct));
 
     ret = H5Pget_fill_value(plist, dtype1_id, &fill1);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = HDmemcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
+    ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype1_id);
@@ -1440,9 +1410,6 @@ size2_verify_plist1(hid_t plist)
  * Purpose:     Verify that the property list passed in is in fact the
  *              same property list used as dcpl2_id in the size2 helper
  *              function.  This ensures that the filters can be read.
- *
- * Programmer:  James Laird
- *              Wednesday, November 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1493,12 +1460,12 @@ size2_verify_plist2(hid_t plist)
     /* Check fill value */
     dtype2_id = make_dtype_2();
     CHECK_I(dtype2_id, "make_dtype_2");
-    HDmemset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
+    memset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
 
     ret = H5Pget_fill_value(plist, dtype2_id, &fill2);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
+    ret = memcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype2_id);
@@ -1514,30 +1481,27 @@ size2_verify_plist2(hid_t plist)
  *              size2_helper_struct (which holds the various sizes for a
  *              given file during the size2_helper function).
  *
- * Programmer:  James Laird
- *              Friday, January 26, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
     HDputs(name);
-    HDprintf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
-    HDprintf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
-             (unsigned long long)(sizes->first_dset - sizes->empty_size));
-    HDprintf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset,
-             (unsigned long long)(sizes->second_dset - sizes->first_dset));
-    HDprintf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1,
-             (unsigned long long)(sizes->dsets1 - sizes->second_dset));
-    HDprintf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2,
-             (unsigned long long)(sizes->dsets2 - sizes->dsets1));
-    HDprintf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved,
-             (unsigned long long)(sizes->interleaved - sizes->dsets2));
-    HDprintf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1,
-             (unsigned long long)(sizes->attrs1 - sizes->interleaved));
-    HDprintf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2,
-             (unsigned long long)(sizes->attrs2 - sizes->attrs1));
+    printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
+    printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
+           (unsigned long long)(sizes->first_dset - sizes->empty_size));
+    printf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset,
+           (unsigned long long)(sizes->second_dset - sizes->first_dset));
+    printf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1,
+           (unsigned long long)(sizes->dsets1 - sizes->second_dset));
+    printf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2,
+           (unsigned long long)(sizes->dsets2 - sizes->dsets1));
+    printf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved,
+           (unsigned long long)(sizes->interleaved - sizes->dsets2));
+    printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1,
+           (unsigned long long)(sizes->attrs1 - sizes->interleaved));
+    printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2,
+           (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 } /* size2_dump_struct */
 #endif /* NOT_NOW */
 
@@ -1556,26 +1520,23 @@ size2_dump_struct(const char *name, size2_helper_struct *sizes)
  *              Doesn't close the property list.  Prints an error message
  *              if there's a failure, but doesn't alter its return value.
  *
- * Programmer:  James Laird
- *              Friday, November 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_sizes)
 {
-    hid_t  file_id       = -1;
-    hid_t  dtype1_id     = -1;
-    hid_t  dtype2_id     = -1;
-    hid_t  dspace1_id    = -1;
-    hid_t  dspace2_id    = -1;
-    hid_t  dcpl1_id      = -1;
-    hid_t  dcpl2_id      = -1;
-    hid_t  dset_id       = -1;
-    hid_t  attr_type_id  = -1;
-    hid_t  attr_space_id = -1;
-    hid_t  attr_id       = -1;
-    hid_t  group_id      = -1;
+    hid_t  file_id       = H5I_INVALID_HID;
+    hid_t  dtype1_id     = H5I_INVALID_HID;
+    hid_t  dtype2_id     = H5I_INVALID_HID;
+    hid_t  dspace1_id    = H5I_INVALID_HID;
+    hid_t  dspace2_id    = H5I_INVALID_HID;
+    hid_t  dcpl1_id      = H5I_INVALID_HID;
+    hid_t  dcpl2_id      = H5I_INVALID_HID;
+    hid_t  dset_id       = H5I_INVALID_HID;
+    hid_t  attr_type_id  = H5I_INVALID_HID;
+    hid_t  attr_space_id = H5I_INVALID_HID;
+    hid_t  attr_id       = H5I_INVALID_HID;
+    hid_t  group_id      = H5I_INVALID_HID;
     char   attr_string1[NAME_BUF_SIZE];
     char   attr_string2[NAME_BUF_SIZE];
     char   attr_name[NAME_BUF_SIZE];
@@ -1624,8 +1585,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* fill1 and fill2 are fill values for the two datatypes.
      * We'll set them in the DCPL.
      */
-    HDmemset(&fill1, '1', sizeof(dtype1_struct));
-    HDmemset(&fill2, '2', (size_t)DTYPE2_SIZE);
+    memset(&fill1, '1', sizeof(dtype1_struct));
+    memset(&fill2, '2', (size_t)DTYPE2_SIZE);
 
     dcpl1_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK_I(dcpl1_id, "H5Pcreate");
@@ -1668,8 +1629,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     size2_verify_plist2(dcpl2_id);
 
     /* Set up attribute data */
-    HDmemset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
-    HDmemset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_string1, LONG_STRING);
     HDstrcpy(attr_string2, LONG_STRING);
     attr_string2[1] = '1'; /* The second string starts "01 index..." */
@@ -1928,18 +1889,15 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
  *              file FILENAME actually has the structure that size2_helper
  *              should have created.
  *
- * Programmer:  James Laird
- *              Friday, November 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 size2_verify(void)
 {
-    hid_t   file_id  = -1;
-    hid_t   dset_id  = -1;
-    hid_t   plist_id = -1;
-    hid_t   space_id = -1;
+    hid_t   file_id  = H5I_INVALID_HID;
+    hid_t   dset_id  = H5I_INVALID_HID;
+    hid_t   plist_id = H5I_INVALID_HID;
+    hid_t   space_id = H5I_INVALID_HID;
     hid_t   group1_id, group2_id;
     hid_t   attr1_id, attr2_id;
     hid_t   attr_type_id;
@@ -2078,8 +2036,8 @@ size2_verify(void)
     group2_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
     CHECK_I(group2_id, "H5Gopen2");
 
-    HDmemset(attr_string, 0, (size_t)NAME_BUF_SIZE);
-    HDmemset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_correct_string, LONG_STRING);
     HDstrcpy(attr_name, "00 index");
 
@@ -2133,16 +2091,12 @@ size2_verify(void)
  *              file at various points.  Once all of the files have been
  *              generated, the test compares the measured sizes of the files.
  *
- *
- * Programmer:  James Laird
- *              Friday, November 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 test_sohm_size2(int close_reopen)
 {
-    hid_t fcpl_id = -1;
+    hid_t fcpl_id = H5I_INVALID_HID;
     /* Sizes for file with no shared messages at all */
     size2_helper_struct norm_sizes;
     /* Sizes for files with all messages in one index */
@@ -2157,9 +2111,9 @@ test_sohm_size2(int close_reopen)
     herr_t              ret;
 
     if (close_reopen == 0)
-        MESSAGE(5, ("Testing that shared object header messages save space\n"))
+        MESSAGE(5, ("Testing that shared object header messages save space\n"));
     else
-        MESSAGE(5, ("Testing that shared messages save space when file is closed and reopened\n"))
+        MESSAGE(5, ("Testing that shared messages save space when file is closed and reopened\n"));
 
     /* Create an fcpl with SOHMs disabled */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
@@ -2713,16 +2667,13 @@ test_sohm_size2(int close_reopen)
  * Purpose:     Creates a dataset and attribute in file FILE_ID using value X
  *              in the DSPACE_ID and DCPL_ID arrays.
  *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
 {
-    hid_t  dset_id = -1;
-    hid_t  attr_id = -1;
+    hid_t  dset_id = H5I_INVALID_HID;
+    hid_t  attr_id = H5I_INVALID_HID;
     char   wdata;
     herr_t ret;
 
@@ -2750,16 +2701,13 @@ delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
  * Purpose:     Checks the value of the dataset and attribute created by
  *              delete_helper_write.
  *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
 {
-    hid_t  dset_id = -1;
-    hid_t  attr_id = -1;
+    hid_t  dset_id = H5I_INVALID_HID;
+    hid_t  attr_id = H5I_INVALID_HID;
     char   rdata;
     herr_t ret;
 
@@ -2797,15 +2745,12 @@ delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
  *              and property lists with filter pipelines used to create the
  *              messages.
  *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
 {
-    hid_t          file_id = -1;
+    hid_t          file_id = H5I_INVALID_HID;
     int            x;
     h5_stat_size_t norm_filesize;
     h5_stat_size_t deleted_filesize;
@@ -2878,9 +2823,6 @@ delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
  *              can be deleted without corrupting the remaining messages.
  *              Also checks that indexes convert from B-trees back into
  *              lists.
- *
- * Programmer:  James Laird
- *              Tuesday, December 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3017,9 +2959,6 @@ test_sohm_delete(void)
  *              then creates datasets and deletes them.
  *              Done in two passes: once with one dataset, once with two.
  *
- * Programmer:  James Laird
- *              Wednesday, January 3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3116,9 +3055,6 @@ verify_dset_create_and_delete_does_not_grow_file(hid_t fcpl_id)
  * Purpose:     Verifies that creation and deletion of datasets with shared
  *              message headers will not increase file size.
  *
- * Programmer:  James Laird
- *              Wednesday, January 3, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3194,18 +3130,15 @@ test_sohm_delete_revert(void)
  *              be opened (that shared messages were created or not and
  *              were shared in the right file).
  *
- * Programmer:  James Laird
- *              Friday, December 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t dst_fcpl_id)
 {
-    hid_t   src_file_id = -1;
-    hid_t   dst_file_id = -1;
-    hid_t   space_id    = -1;
-    hid_t   dset_id     = -1;
+    hid_t   src_file_id = H5I_INVALID_HID;
+    hid_t   dst_file_id = H5I_INVALID_HID;
+    hid_t   space_id    = H5I_INVALID_HID;
+    hid_t   dset_id     = H5I_INVALID_HID;
     hsize_t dims[]      = {1, 1};
     herr_t  ret;
 
@@ -3260,17 +3193,14 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
  * Purpose:     Test creating SOHMs through external links (to make sure that
  *              they're created in the correct file).
  *
- * Programmer:  James Laird
- *              Friday, December 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static void
 test_sohm_extlink(void)
 {
-    hid_t   fcpl_id = -1;
-    hbool_t driver_is_default_compatible;
-    herr_t  ret;
+    hid_t  fcpl_id = H5I_INVALID_HID;
+    bool   driver_is_default_compatible;
+    herr_t ret;
 
     MESSAGE(5, ("Testing SOHM creation through external links\n"));
 
@@ -3278,7 +3208,7 @@ test_sohm_extlink(void)
     CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -3303,16 +3233,13 @@ test_sohm_extlink(void)
  * Purpose:     Tests extending a dataset's dataspace when sharing is
  *              enabled.
  *
- *              If close_reopen is TRUE, closes and reopens the file to
+ *              If close_reopen is true, closes and reopens the file to
  *              ensure that data is correctly written to disk.
- *
- * Programmer:  James Laird
- *              Wednesday, January 10, 2007
  *
  *-------------------------------------------------------------------------
  */
 static int
-verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
+verify_dataset_extension(hid_t fcpl_id, bool close_reopen)
 {
     hid_t   file_id       = H5I_INVALID_HID;
     hid_t   orig_space_id = H5I_INVALID_HID;
@@ -3336,12 +3263,10 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * Purpose:    Encapsulate a common pattern
  *             Open, read-verify, and close the dataspaces for datasets 1-3
  *
- * Programmer: Jacob Smith
- *             2018 November 5
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_VERIFY_SPACES(dims)                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         /* Open dataspaces                                                                                   \
          */                                                                                                  \
         space1_id = H5Dget_space(dset1_id);                                                                  \
@@ -3375,7 +3300,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
         CHECK_I(H5Sclose(space1_id), "H5Sclose");                                                            \
         CHECK_I(H5Sclose(space2_id), "H5Sclose");                                                            \
         CHECK_I(H5Sclose(space3_id), "H5Sclose");                                                            \
-    } /* define TSOHM_VDE_VERIFY_SPACES */
+    } while (0) /* define TSOHM_VDE_VERIFY_SPACES */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Macro:      TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS()
@@ -3387,12 +3312,10 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  *                + if n > 2 then include "dataset3" (dset_id3)
  *                + file (file_id)
  *
- * Programmer: Jacob Smith
- *             2018 November 5
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS(n)                                                             \
-    {                                                                                                        \
+    do {                                                                                                     \
         CHECK_I(H5Dclose(dset1_id), "H5Dclose");                                                             \
         if ((n) > 1)                                                                                         \
             CHECK_I(H5Dclose(dset2_id), "H5Dclose");                                                         \
@@ -3412,7 +3335,7 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
             dset3_id = H5Dopen2(file_id, "dataset3", H5P_DEFAULT);                                           \
             CHECK_I(dset3_id, "H5Dopen2");                                                                   \
         }                                                                                                    \
-    } /* define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS */
+    } while (0) /* define TSOHM_VDE_CLOSE_REOPEN_FILE_AND_DSETS */
 
     /* Remember the current # of reported errors */
     old_nerrs = GetTestNumErrs();
@@ -3571,15 +3494,12 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  *              dataspace will change, possibly confusing the shared message
  *              code.
  *
- * Programmer:  James Laird
- *              Wednesday, January 10, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void
 test_sohm_extend_dset(void)
 {
-    hid_t  fcpl_id = -1;
+    hid_t  fcpl_id = H5I_INVALID_HID;
     herr_t ret;
 
     MESSAGE(5, ("Testing extending shared dataspaces\n"));
@@ -3590,54 +3510,54 @@ test_sohm_extend_dset(void)
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
     /* No shared messages */
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* Only dataspaces */
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_SDSPACE_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages */
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, 16);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages in lists */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 100, 50);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages in lists converted to B-trees */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 1, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     /* All messages in B-trees */
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 0, 0);
     CHECK_I(ret, "H5Pset_shared_mesg_phase_change");
 
-    ret = verify_dataset_extension(fcpl_id, FALSE);
+    ret = verify_dataset_extension(fcpl_id, false);
     CHECK_I(ret, "verify_dataset_extension");
-    ret = verify_dataset_extension(fcpl_id, TRUE);
+    ret = verify_dataset_extension(fcpl_id, true);
     CHECK_I(ret, "verify_dataset_extension");
 
     ret = H5Pclose(fcpl_id);
@@ -3650,9 +3570,6 @@ test_sohm_extend_dset(void)
  * Purpose:     When a datatype is a SOHM type in one file, test that the
  *              second file using the same datatype actually save it in
  *              the file, too.
- *
- * Programmer:  Raymond Lu
- *              13 October, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -3717,9 +3634,9 @@ test_sohm_external_dtype(void)
     CHECK_I(dset1_tid, "H5Dget_type");
 
     /* Allocate space and initialize data */
-    orig = (s1_t *)HDmalloc(NX * NY * sizeof(s1_t));
+    orig = (s1_t *)malloc(NX * NY * sizeof(s1_t));
     if (orig == NULL)
-        CHECK_I(-1, "HDmalloc");
+        CHECK_I(-1, "malloc");
     for (i = 0; i < NX * NY; i++) {
         s_ptr    = (s1_t *)orig + i;
         s_ptr->a = (int)(i * 3 + 1);
@@ -3782,7 +3699,7 @@ test_sohm_external_dtype(void)
     CHECK_I(ret, "H5Pclose");
     ret = H5Fclose(file2);
     CHECK_I(ret, "H5Fclose");
-    HDfree(orig);
+    free(orig);
 } /* test_sohm_external_dtype */
 
 /****************************************************************
@@ -3794,7 +3711,7 @@ void
 test_sohm(void)
 {
     const char *env_h5_drvr;
-    hbool_t     default_driver;
+    bool        default_driver;
 
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
@@ -3841,9 +3758,6 @@ test_sohm(void)
  * Purpose:     Cleanup temporary test files
  *
  * Return:      none
- *
- * Programmer:  James Laird
- *              October 9, 2006
  *
  *-------------------------------------------------------------------------
  */

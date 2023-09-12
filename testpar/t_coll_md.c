@@ -99,7 +99,7 @@ test_partial_no_selection_coll_md_read(void)
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
-    dataset_dims = HDmalloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
+    dataset_dims = malloc(PARTIAL_NO_SELECTION_DATASET_NDIMS * sizeof(*dataset_dims));
     VRFY((dataset_dims != NULL), "malloc succeeded");
 
     dataset_dims[0]     = (hsize_t)PARTIAL_NO_SELECTION_Y_DIM_SCALE * (hsize_t)mpi_size;
@@ -145,8 +145,8 @@ test_partial_no_selection_coll_md_read(void)
     mspace_id = H5Screate_simple(1, sel_dims, NULL);
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    data = HDcalloc(1, count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                           sizeof(int));
+    data = calloc(1, count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+                         sizeof(int));
     VRFY((data != NULL), "calloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
@@ -169,8 +169,8 @@ test_partial_no_selection_coll_md_read(void)
     VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
          "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    read_buf = HDmalloc(count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                        sizeof(int));
+    read_buf = malloc(count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+                      sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     /*
@@ -191,24 +191,24 @@ test_partial_no_selection_coll_md_read(void)
      * Check data integrity just to be sure.
      */
     if (!PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
-        VRFY((!HDmemcmp(data, read_buf,
-                        count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
-                            sizeof(int))),
+        VRFY((!memcmp(data, read_buf,
+                      count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
+                          sizeof(int))),
              "memcmp succeeded");
     }
 
     if (dataset_dims) {
-        HDfree(dataset_dims);
+        free(dataset_dims);
         dataset_dims = NULL;
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -319,13 +319,13 @@ test_multi_chunk_io_addrmap_issue(void)
 
     VRFY((H5Fflush(file_id, H5F_SCOPE_GLOBAL) >= 0), "H5Fflush succeeded");
 
-    read_buf = HDmalloc(50 * sizeof(int));
+    read_buf = malloc(50 * sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     VRFY((H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "H5Dread succeeded");
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -341,36 +341,6 @@ test_multi_chunk_io_addrmap_issue(void)
  * A test for HDFFV-10562 which attempts to verify that using linked-chunk
  * I/O with collective metadata reads enabled doesn't cause issues due to
  * collective metadata reads being made only by process 0 in H5D__sort_chunk().
- *
- * NOTE: Due to the way that the threshold value which pertains to this test
- * is currently calculated within HDF5, the following two conditions must be
- * true to trigger the issue:
- *
- * Condition 1: A certain threshold ratio must be met in order to have HDF5
- * obtain all chunk addresses collectively inside H5D__sort_chunk(). This is
- * given by the following:
- *
- *     (sum_chunk * 100) / (dataset_nchunks * mpi_size) >= 30%
- *
- * where:
- *     * `sum_chunk` is the combined sum of the number of chunks selected in
- *       the dataset by all ranks (chunks selected by more than one rank count
- *       individually toward the sum for each rank selecting that chunk)
- *     * `dataset_nchunks` is the number of chunks in the dataset (selected
- *       or not)
- *     * `mpi_size` is the size of the MPI Communicator
- *
- * Condition 2: `sum_chunk` divided by `mpi_size` must exceed or equal a certain
- * threshold (as of this writing, 10000).
- *
- * To satisfy both these conditions, we #define a macro,
- * LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM, which corresponds to the
- * value of the H5D_ALL_CHUNK_ADDR_THRES_COL_NUM macro in H5Dmpio.c (the
- * 10000 threshold from condition 2). We then create a dataset of that many
- * chunks and have each MPI rank write to and read from a piece of every single
- * chunk in the dataset. This ensures chunk utilization is the max possible
- * and exceeds our 30% target ratio, while always exactly matching the numeric
- * chunk threshold value of condition 2.
  *
  * Failure in this test may either cause a hang, or, due to how the MPI calls
  * pertaining to this issue might mistakenly match up, may cause an MPI error
@@ -469,7 +439,7 @@ test_link_chunk_io_sort_chunk_issue(void)
     mspace_id = H5Screate_simple(1, sel_dims, NULL);
     VRFY((mspace_id >= 0), "H5Screate_simple succeeded");
 
-    data = HDcalloc(1, count[0] * sizeof(int));
+    data = calloc(1, count[0] * sizeof(int));
     VRFY((data != NULL), "calloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
@@ -492,7 +462,7 @@ test_link_chunk_io_sort_chunk_issue(void)
     VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, H5FD_MPIO_CHUNK_ONE_IO) >= 0),
          "H5Pset_dxpl_mpio_chunk_opt succeeded");
 
-    read_buf = HDmalloc(count[0] * sizeof(int));
+    read_buf = malloc(count[0] * sizeof(int));
     VRFY((read_buf != NULL), "malloc succeeded");
 
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -512,12 +482,12 @@ test_link_chunk_io_sort_chunk_issue(void)
          "H5Dread succeeded");
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 

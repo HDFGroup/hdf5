@@ -154,13 +154,20 @@ if (HDF5_PACK_EXAMPLES)
   option (EXAMPLES_USE_RELEASE_NAME "Use the released examples artifact name" OFF)
   option (EXAMPLES_DOWNLOAD "Download to use released examples files" OFF)
   if (EXAMPLES_DOWNLOAD)
-    if (NOT EXAMPLES_USE_LOCALCONTENT)
-      set (EXAMPLES_URL ${EXAMPLES_TGZ_ORIGPATH}/${EXAMPLES_TGZ_ORIGNAME})
+    if (EXAMPLES_USE_RELEASE_NAME)
+      set (EXAMPLES_NAME ${EXAMPLES_TGZ_ORIGNAME})
     else ()
-      set (EXAMPLES_URL ${TGZPATH}/${EXAMPLES_TGZ_ORIGNAME})
+      set (EXAMPLES_NAME ${HDF5_EXAMPLES_COMPRESSED})
     endif ()
-    message (VERBOSE "Examples file is ${EXAMPLES_URL}")
-    file (DOWNLOAD ${EXAMPLES_URL} ${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED})
+    if (NOT EXAMPLES_USE_LOCALCONTENT)
+      set (EXAMPLES_URL ${EXAMPLES_TGZ_ORIGPATH}/${EXAMPLES_NAME})
+      file (DOWNLOAD ${EXAMPLES_URL} ${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED} STATUS EX_DL)
+      message (STATUS "Examples file is ${EXAMPLES_URL} STATUS=${EX_DL}")
+    else ()
+      set (EXAMPLES_URL ${TGZPATH}/${EXAMPLES_NAME})
+      file (COPY_FILE ${EXAMPLES_URL} ${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED} RESULT EX_DL)
+      message (STATUS "Examples file is ${EXAMPLES_URL} RESULT=${EX_DL}")
+    endif ()
     if (EXISTS "${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
       execute_process(
           COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED}
@@ -168,7 +175,6 @@ if (HDF5_PACK_EXAMPLES)
           COMMAND_ECHO STDOUT
       )
     endif ()
-    set (EXAMPLES_USE_RELEASE_NAME ON CACHE BOOL "" FORCE)
   else ()
     if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
       execute_process(
@@ -178,20 +184,18 @@ if (HDF5_PACK_EXAMPLES)
       )
     endif ()
   endif ()
-  if (EXAMPLES_USE_RELEASE_NAME)
-    get_filename_component (EX_LAST_EXT ${HDF5_EXAMPLES_COMPRESSED} LAST_EXT)
-    if (${EX_LAST_EXT} STREQUAL ".zip")
-      get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
-    else ()
-      get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
-      get_filename_component (EX_DIR_NAME ${EX_DIR_NAME} NAME_WLE)
-    endif ()
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E rename ${EX_DIR_NAME} HDF5Examples
-        WORKING_DIRECTORY ${HDF5_BINARY_DIR}
-        COMMAND_ECHO STDOUT
-    )
+  get_filename_component (EX_LAST_EXT ${HDF5_EXAMPLES_COMPRESSED} LAST_EXT)
+  if (${EX_LAST_EXT} STREQUAL ".zip")
+    get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
+  else ()
+    get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
+    get_filename_component (EX_DIR_NAME ${EX_DIR_NAME} NAME_WLE)
   endif ()
+  execute_process(
+      COMMAND ${CMAKE_COMMAND} -E rename ${EX_DIR_NAME} HDF5Examples
+      WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+      COMMAND_ECHO STDOUT
+  )
   install (
     DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
     DESTINATION ${HDF5_INSTALL_DATA_DIR}
@@ -390,7 +394,9 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "${HDF5_PACKAGE_URL}")
     set(CPACK_WIX_PROPERTY_ARPHELPLINK "${HDF5_PACKAGE_BUGREPORT}")
     if (BUILD_SHARED_LIBS)
-      set(CPACK_WIX_PATCH_FILE "${HDF_RESOURCES_DIR}/patch.xml")
+      set (WIX_CMP_NAME "${HDF5_LIB_NAME}${CMAKE_DEBUG_POSTFIX}")
+      configure_file (${HDF_RESOURCES_DIR}/patch.xml.in ${HDF5_BINARY_DIR}/patch.xml @ONLY)
+      set(CPACK_WIX_PATCH_FILE "${HDF5_BINARY_DIR}/patch.xml")
     endif ()
   elseif (APPLE)
     list (APPEND CPACK_GENERATOR "STGZ")

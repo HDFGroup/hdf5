@@ -239,14 +239,14 @@ test_array_funcs(void)
     {
         cset = H5Tget_cset(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(cset, FAIL, "H5Tget_cset");
 
     H5E_BEGIN_TRY
     {
         strpad = H5Tget_strpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(strpad, FAIL, "H5Tget_strpad");
 
     /* Close datatype */
@@ -1055,7 +1055,7 @@ test_array_alloc_custom(size_t size, void *info)
      */
     extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *mem_used += size;
     } /* end if */
@@ -1093,7 +1093,7 @@ test_array_free_custom(void *_mem, void *info)
     if (_mem != NULL) {
         mem = ((unsigned char *)_mem) - extra;
         *mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 
 } /* end test_array_free_custom() */
@@ -1136,7 +1136,7 @@ test_array_vlen_atomic(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int));
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int));
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 ((unsigned int *)wdata[i][j].p)[k] = (unsigned int)(i * 100 + j * 10 + k);
@@ -1357,7 +1357,7 @@ test_array_vlen_array(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 for (l = 0; l < ARRAY1_DIM1; l++)
@@ -1632,9 +1632,9 @@ test_array_bkg(void)
 
     /* Initialize the data */
     /* ------------------- */
-    dtsinfo = (CmpDTSinfo *)HDmalloc(sizeof(CmpDTSinfo));
-    CHECK_PTR(dtsinfo, "HDmalloc");
-    HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
+    dtsinfo = (CmpDTSinfo *)malloc(sizeof(CmpDTSinfo));
+    CHECK_PTR(dtsinfo, "malloc");
+    memset(dtsinfo, 0, sizeof(CmpDTSinfo));
     for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
             cf[i].a[j] = 100 * (i + 1) + j;
@@ -1662,7 +1662,7 @@ test_array_bkg(void)
     /* Initialize the names of data members */
     /* ------------------------------------ */
     for (i = 0; i < dtsinfo->nsubfields; i++)
-        dtsinfo->name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
+        dtsinfo->name[i] = (char *)calloc((size_t)20, sizeof(char));
 
     HDstrcpy(dtsinfo->name[0], "One");
     HDstrcpy(dtsinfo->name[1], "Two");
@@ -1734,7 +1734,7 @@ test_array_bkg(void)
     /* Release memory resources */
     /* ------------------------ */
     for (i = 0; i < dtsinfo->nsubfields; i++)
-        HDfree(dtsinfo->name[i]);
+        free(dtsinfo->name[i]);
 
     /* Release IDs */
     /* ----------- */
@@ -1849,7 +1849,7 @@ test_array_bkg(void)
 
     /* Reset the data to read in */
     /* ------------------------- */
-    HDmemset(cfr, 0, sizeof(CmpField) * LENGTH);
+    memset(cfr, 0, sizeof(CmpField) * LENGTH);
 
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");
@@ -1885,7 +1885,7 @@ test_array_bkg(void)
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 
-    HDfree(dtsinfo);
+    free(dtsinfo);
 } /* end test_array_bkg() */
 
 /*-------------------------------------------------------------------------
@@ -1918,7 +1918,7 @@ test_compat(void)
     size_t      off;                  /* Offset of compound field         */
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value             */
 
     /* Output message about test being performed */
@@ -1937,7 +1937,7 @@ test_compat(void)
     if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
         TestErrPrintf("can't check if VFD is default VFD compatible\n");
     if (!driver_is_default_compatible) {
-        HDprintf(" -- SKIPPED --\n");
+        printf(" -- SKIPPED --\n");
         return;
     }
 
@@ -2193,7 +2193,7 @@ test_compat(void)
         CHECK_I(ret, "H5Fclose");
     } /* end if */
     else
-        HDprintf("***cannot open the pre-created compound datatype test file (%s)\n", testfile);
+        printf("***cannot open the pre-created compound datatype test file (%s)\n", testfile);
 
 } /* end test_compat() */
 
@@ -2236,9 +2236,6 @@ test_array(void)
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              June 8, 1999
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2248,5 +2245,5 @@ cleanup_array(void)
     {
         H5Fdelete(FILENAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 } /* end cleanup_array() */

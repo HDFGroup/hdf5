@@ -448,12 +448,6 @@ END SUBROUTINE multi_file_test
 !
 ! Return:      Success: 0
 !              Failure: -1
-!
-! C Programmer:  Neil Fortner
-!                Wednesday, October 29, 2008
-!
-! FORTRAN Programmer: M. Scot Breitenfeld
-!                     April 16, 2009
 !-------------------------------------------------------------------------
 !
 SUBROUTINE test_chunk_cache(cleanup, total_error)

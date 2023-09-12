@@ -36,11 +36,6 @@
  *  ref  - reference to the dataset region
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, December 1, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -55,20 +50,20 @@ h5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Rcreate function.
      */
     if (H5Rcreate(&ref_c, (hid_t)*loc_id, c_name, H5R_DATASET_REGION, (hid_t)*space_id) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the reference created */
-    HDmemcpy(ref, &ref_c, H5R_DSET_REG_REF_BUF_SIZE);
+    memcpy(ref, &ref_c, H5R_DSET_REG_REF_BUF_SIZE);
 
 done:
     if (c_name)
-        HDfree(c_name);
+        free(c_name);
     return ret_value;
 } /* end h5rcreate_region_c() */
 
@@ -86,10 +81,6 @@ done:
  *  ref       - reference to the dataset region
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 20, 2008
- *
  * SOURCE
  */
 int_f
@@ -112,7 +103,7 @@ h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *re
     if (H5Rcreate(ref, (hid_t)*loc_id, c_name, (H5R_type_t)*ref_type, (hid_t)*space_id) >= 0)
         ret_value = 0;
 
-    HDfree(c_name);
+    free(c_name);
     return ret_value;
 }
 
@@ -130,11 +121,6 @@ h5rcreate_ptr_c(void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *re
  *  ref_obj_id - Identifier of referenced object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 20, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -167,11 +153,6 @@ h5rdereference_ptr_c(hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_o
  *  space_id - dereferenced  dataset dataspace identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, December 1, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -183,13 +164,13 @@ h5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
     int_f           ret_value = 0;
 
     /* Copy the reference to dereference */
-    HDmemcpy(&ref_c, ref, H5R_DSET_REG_REF_BUF_SIZE);
+    memcpy(&ref_c, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
     /*
      * Call H5Rget_region function.
      */
     if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, &ref_c)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the dataspace ID */
     *space_id = (hid_t_f)c_space_id;
@@ -210,11 +191,6 @@ done:
  *  space_id - dereferenced  dataset dataspace identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  August 4, 2012
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -228,7 +204,7 @@ h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
      * Call H5Rget_region function.
      */
     if ((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, ref)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the dataspace ID */
     *space_id = (hid_t_f)c_space_id;
@@ -250,11 +226,6 @@ done:
  *  obj_type - type of dereferenced object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, December 1, 1999
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -269,7 +240,7 @@ h5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
      * Call H5Rget_object_type function.
      */
     if (H5Rget_obj_type2((hid_t)*dset_id, H5R_OBJECT, &ref_c, &c_obj_type) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* Copy the object type */
     *obj_type = (int_f)c_obj_type;
@@ -295,11 +266,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  June 20, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -316,7 +282,7 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
     /*
      * Allocate buffer to hold name of an attribute
      */
-    if ((c_buf = (char *)HDmalloc(c_bufsize)) == NULL)
+    if ((c_buf = (char *)malloc(c_bufsize)) == NULL)
         return ret_value;
 
     /*
@@ -324,7 +290,7 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
      */
     if ((c_size = H5Rget_name((hid_t)*loc_id, (H5R_type_t)*ref_type, ref, c_buf, c_bufsize)) < 0) {
         if (c_buf)
-            HDfree(c_buf);
+            free(c_buf);
         return ret_value;
     }
     /*
@@ -335,7 +301,7 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
     *size_default = (size_t_f)c_size;
     ret_value     = 0;
     if (c_buf)
-        HDfree(c_buf);
+        free(c_buf);
 
     return ret_value;
 }
@@ -357,10 +323,6 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  December 17, 2008
- *
  * SOURCE
  */
 int_f

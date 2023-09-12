@@ -21,7 +21,6 @@
 /* #include "h5test.h" */
 #include "hdf5.h"
 #include "H5private.h"
-#include "H5_api_tests_disabled.h"
 
 #define VERBO_NONE 0 /* None    */
 #define VERBO_DEF  3 /* Default */
@@ -30,8 +29,8 @@
 #define VERBO_HI   9 /* High    */
 
 /* Turn off verbose reporting by default */
-#define VERBOSE_MED (FALSE)
-#define VERBOSE_HI  (FALSE)
+#define VERBOSE_MED (false)
+#define VERBOSE_HI  (false)
 
 /* Use %ld to print the value because long should cover most cases. */
 /* Used to make certain a return value _is_not_ a value */
@@ -51,7 +50,7 @@
     } while (0)
 
 #define CHECK_I(ret, where)                                                                                  \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", (where), (int)__LINE__,  \
                        __FILE__, (long)(ret));                                                               \
@@ -61,7 +60,7 @@
                           (int)__LINE__, __FILE__);                                                          \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    }
+    } while (0)
 
 /* Check that a pointer is valid (i.e.: not NULL) */
 #define CHECK_PTR(ret, where)                                                                                \
@@ -208,36 +207,36 @@
 #define TEST_STR      "Test"
 #define CLEAN_STR     "Cleanup"
 
-#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define TESTING(WHAT)                                                                                        \
     {                                                                                                        \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
+        printf("Testing %-62s", WHAT);                                                                       \
+        fflush(stdout);                                                                                      \
     }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
-        HDprintf("  Testing %-60s", WHAT);                                                                   \
-        HDfflush(stdout);                                                                                    \
+        printf("  Testing %-60s", WHAT);                                                                     \
+        fflush(stdout);                                                                                      \
     }
 #define PASSED()                                                                                             \
     {                                                                                                        \
         HDputs(" PASSED");                                                                                   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
         HDputs("*FAILED*");                                                                                  \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define H5_WARNING()                                                                                         \
     {                                                                                                        \
         HDputs("*WARNING*");                                                                                 \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define SKIPPED()                                                                                            \
     {                                                                                                        \
         HDputs(" -SKIP-");                                                                                   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define PUTS_ERROR(s)                                                                                        \
     {                                                                                                        \
@@ -281,12 +280,12 @@ int   print_func(const char *format, ...);
 int   TestErrPrintf(const char *format, ...);
 hid_t h5_fileaccess(void);
 /* Functions that will replace components of a FAPL */
-herr_t  h5_get_vfd_fapl(hid_t fapl_id);
-herr_t  h5_get_libver_fapl(hid_t fapl_id);
-char   *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-char   *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
-hbool_t h5_using_default_driver(const char *drv_name);
-herr_t  h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
+herr_t h5_get_vfd_fapl(hid_t fapl_id);
+herr_t h5_get_libver_fapl(hid_t fapl_id);
+char  *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+char  *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
+bool   h5_using_default_driver(const char *drv_name);
+herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
 
 #ifdef H5_HAVE_PARALLEL
 char *getenv_all(MPI_Comm comm, int root, const char *name);
@@ -342,6 +341,9 @@ void cleanup_h5_system(void);
 void cleanup_sohm(void);
 void cleanup_misc(void);
 void cleanup_unicode(void);
+
+/* Extern global variables */
+extern uint64_t vol_cap_flags_g;
 
 #ifdef __cplusplus
 }

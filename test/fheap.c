@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Friday, February 24, 2006
- */
 #include "h5test.h"
 
 /*
@@ -43,7 +40,7 @@
 
 /* "Small" heap creation parameters */
 #define SMALL_DBLOCK_OVERHEAD      21          /* Overhead for direct blocks */
-#define SMALL_CHECKSUM_DBLOCKS     TRUE        /* Whether to checksum direct blocks */
+#define SMALL_CHECKSUM_DBLOCKS     true        /* Whether to checksum direct blocks */
 #define SMALL_MAN_WIDTH            4           /* Managed obj. table width */
 #define SMALL_MAN_START_BLOCK_SIZE 512         /* Managed obj. starting block size */
 #define SMALL_MAN_MAX_DIRECT_SIZE  (64 * 1024) /* Managed obj. max. direct block size */
@@ -55,7 +52,7 @@
 /* "Large" heap creation parameters */
 #define LARGE_DBLOCK_OVERHEAD 21         /* Overhead for direct blocks */
                                          /* (coincidentally the same size as for small direct blocks) */
-#define LARGE_CHECKSUM_DBLOCKS     FALSE /* Whether to checksum direct blocks */
+#define LARGE_CHECKSUM_DBLOCKS     false /* Whether to checksum direct blocks */
 #define LARGE_MAN_WIDTH            32    /* Managed obj. table width */
 #define LARGE_MAN_START_BLOCK_SIZE 4096  /* Managed obj. starting block size */
 #define LARGE_MAN_MAX_DIRECT_SIZE  (1024 * 1024) /* Managed obj. max. direct block size */
@@ -89,7 +86,7 @@
 #define NUM_PB_FS             6
 #define PAGE_BUFFER_PAGE_SIZE 4096
 
-const char *FILENAME[] = {"fheap", NULL};
+static const char *FILENAME[] = {"fheap", NULL};
 
 /* Types of tests to perform */
 typedef enum {
@@ -186,16 +183,13 @@ static int del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_hea
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 init_small_cparam(H5HF_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+    memset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
     cparam->id_len           = SMALL_ID_LEN;
@@ -222,16 +216,13 @@ init_small_cparam(H5HF_create_t *cparam)
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 init_large_cparam(H5HF_create_t *cparam)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(H5HF_create_t));
+    memset(cparam, 0, sizeof(H5HF_create_t));
 
     /* General parameters */
     cparam->id_len           = LARGE_ID_LEN;
@@ -257,9 +248,6 @@ init_large_cparam(H5HF_create_t *cparam)
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -271,45 +259,45 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     if (H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR;
     if (heap_stats.man_nobjs != state->man_nobjs) {
-        HDfprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
-                  heap_stats.man_nobjs, state->man_nobjs);
+        fprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
+                heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.man_size != state->man_size) {
-        HDfprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
-                  heap_stats.man_size, state->man_size);
+        fprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
+                heap_stats.man_size, state->man_size);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.man_alloc_size != state->man_alloc_size) {
-        HDfprintf(stdout,
-                  "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
-                  heap_stats.man_alloc_size, state->man_alloc_size);
+        fprintf(stdout,
+                "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
+                heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.man_free_space != state->man_free_space) {
-        HDfprintf(stdout,
-                  "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
-                  heap_stats.man_free_space, state->man_free_space);
+        fprintf(stdout,
+                "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
+                heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.huge_nobjs != state->huge_nobjs) {
-        HDfprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
-                  heap_stats.huge_nobjs, state->huge_nobjs);
+        fprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
+                heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.huge_size != state->huge_size) {
-        HDfprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
-                  heap_stats.huge_size, state->huge_size);
+        fprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
+                heap_stats.huge_size, state->huge_size);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.tiny_nobjs != state->tiny_nobjs) {
-        HDfprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
-                  heap_stats.tiny_nobjs, state->tiny_nobjs);
+        fprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
+                heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.tiny_size != state->tiny_size) {
-        HDfprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
-                  heap_stats.tiny_size, state->tiny_size);
+        fprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
+                heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR;
     } /* end if */
 
@@ -329,16 +317,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 op_memcpy(const void *obj, size_t obj_len, void *op_data)
 {
     /* Make copy of the object */
-    HDmemcpy(op_data, obj, obj_len);
+    memcpy(op_data, obj, obj_len);
 
     return (SUCCEED);
 } /* op_memcpy() */
@@ -362,9 +347,6 @@ op_memcpy(const void *obj, size_t obj_len, void *op_data)
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -376,7 +358,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
     size_t         robj_size;                /* Object size read in */
 
     /* Sanity check */
-    HDassert(fh);
+    assert(fh);
 
     /* Initialize object buffer */
     obj = &shared_wobj_g[obj_off];
@@ -388,14 +370,14 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR;
 
     /* Insert object */
-    HDmemset(heap_id, 0, id_len);
+    memset(heap_id, 0, id_len);
     if (H5HF_insert(fh, obj_size, obj, heap_id) < 0)
         FAIL_STACK_ERROR;
 
     /* Check for tracking the heap's state */
     if (state) {
-        size_t  tiny_max_len;      /* Max. length of tiny objects */
-        hbool_t tiny_len_extended; /* Do tiny objects use two bytes for the length? */
+        size_t tiny_max_len;      /* Max. length of tiny objects */
+        bool   tiny_len_extended; /* Do tiny objects use two bytes for the length? */
 
         /* Check information about tiny objects */
         if (H5HF_get_tiny_info_test(fh, &tiny_max_len, &tiny_len_extended) < 0)
@@ -423,7 +405,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         TEST_ERROR;
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(obj, shared_robj_g, obj_size) != 0)
+    if (memcmp(obj, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* If the heap IDs are to be retained, append them to the list */
@@ -450,7 +432,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
         } /* end if */
 
         /* Append the object info onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * id_len], heap_id, id_len);
+        memcpy(&keep_ids->ids[keep_ids->num_ids * id_len], heap_id, id_len);
         keep_ids->lens[keep_ids->num_ids] = obj_size;
         keep_ids->offs[keep_ids->num_ids] = obj_off;
 
@@ -493,9 +475,6 @@ get_del_string(const fheap_test_param_t *tparam)
  * Return:      Size of object to pass down to "fill_heap" routine on
  *              success/can't fail
  *
- * Programmer:    Quincey Koziol
- *              Thursday, July 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static size_t
@@ -510,7 +489,7 @@ get_fill_size(const fheap_test_param_t *tparam)
 
         case FHEAP_TEST_FILL_N:
         default:
-            HDassert(0 && "Unknown bulk fill type?!?");
+            assert(0 && "Unknown bulk fill type?!?");
     } /* end switch */
 
     return (0);
@@ -524,9 +503,6 @@ get_fill_size(const fheap_test_param_t *tparam)
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -547,7 +523,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
     H5MM_xfree(test_desc);
 
     /* Initialize the heap ID structure */
-    HDmemset(keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Retrieve "bulk" filling object size */
     if (fill_size)
@@ -564,9 +540,6 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -621,9 +594,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -659,9 +629,9 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             TEST_ERROR;
         if (H5HF_get_heap_addr(*fh, fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(*fh_addr))
+        if (!H5_addr_defined(*fh_addr))
             TEST_ERROR;
-        HDmemset(state, 0, sizeof(fheap_heap_state_t));
+        memset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
             TEST_ERROR;
 
@@ -704,9 +674,9 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             TEST_ERROR;
         if (H5HF_get_heap_addr(*fh, fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(*fh_addr))
+        if (!H5_addr_defined(*fh_addr))
             TEST_ERROR;
-        HDmemset(state, 0, sizeof(fheap_heap_state_t));
+        memset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
             TEST_ERROR;
     } /* end if */
@@ -731,9 +701,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -766,9 +733,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -833,9 +797,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -849,15 +810,15 @@ del_objs_half_refill(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_he
     size_t         u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(keep_ids);
 
     /* Check for closing & re-opening the heap */
     if (tparam->reopen_heap) {
         if (H5HF_get_heap_addr(*fh, &fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(fh_addr))
+        if (!H5_addr_defined(fh_addr))
             TEST_ERROR;
     } /* end if */
 
@@ -925,9 +886,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -940,10 +898,10 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     size_t  u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(state);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(state);
+    assert(keep_ids);
 
     /* Check for first deleting half of objects & then re-inserting them */
     if (tparam->drain_half == FHEAP_DEL_DRAIN_HALF)
@@ -954,7 +912,7 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     if (tparam->reopen_heap) {
         if (H5HF_get_heap_addr(*fh, &fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(fh_addr))
+        if (!H5_addr_defined(fh_addr))
             TEST_ERROR;
     } /* end if */
 
@@ -984,7 +942,7 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     } /* end for */
 
     /* Heap should be completely empty now, reset our state */
-    HDmemset(state, 0, sizeof(fheap_heap_state_t));
+    memset(state, 0, sizeof(fheap_heap_state_t));
 
     /* Check up on heap... */
     if (check_stats(*fh, state))
@@ -1016,9 +974,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1037,9 +992,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
     unsigned       u;            /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
-    HDassert(obj_size + 256 < shared_obj_size_g);
+    assert(fh);
+    assert(state);
+    assert(obj_size + 256 < shared_obj_size_g);
 
     /* Initialize starting information */
     data_size    = (size_t)DBLOCK_FREE(fh, block_row);
@@ -1166,7 +1121,7 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
 
         /* Check that object is correct */
         wobj = &shared_wobj_g[*curr_off_ptr];
-        if (HDmemcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
+        if (memcmp(wobj, shared_robj_g, *curr_len_ptr) != 0)
             TEST_ERROR;
 
         /* Adjust object & ID pointers */
@@ -1192,9 +1147,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
         } /* end if */
 
         /* Append the IDs onto the array */
-        HDmemcpy(&keep_ids->ids[keep_ids->num_ids * id_len], shared_ids_g, (num_ids * id_len));
-        HDmemcpy(&keep_ids->lens[keep_ids->num_ids], shared_lens_g, (num_ids * sizeof(size_t)));
-        HDmemcpy(&keep_ids->offs[keep_ids->num_ids], shared_offs_g, (num_ids * sizeof(size_t)));
+        memcpy(&keep_ids->ids[keep_ids->num_ids * id_len], shared_ids_g, (num_ids * id_len));
+        memcpy(&keep_ids->lens[keep_ids->num_ids], shared_lens_g, (num_ids * sizeof(size_t)));
+        memcpy(&keep_ids->offs[keep_ids->num_ids], shared_offs_g, (num_ids * sizeof(size_t)));
 
         /* Increment the number of IDs kept */
         keep_ids->num_ids += num_ids;
@@ -1216,9 +1171,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1236,8 +1188,8 @@ fill_root_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *sta
     unsigned u;                /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1312,9 +1264,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1325,8 +1274,8 @@ fill_partial_row(H5HF_t *fh, unsigned row, unsigned width, size_t obj_size, fhea
     unsigned u;          /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1357,17 +1306,14 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
 fill_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Fill the entire row (with the partial row fill routine) */
     if (fill_partial_row(fh, row, DTABLE_WIDTH(fh), obj_size, state, keep_ids))
@@ -1392,9 +1338,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1405,7 +1348,7 @@ fill_root_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_h
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1430,9 +1373,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1444,7 +1384,7 @@ fill_2nd_indirect(H5HF_t *fh, unsigned pos, size_t obj_size, fheap_heap_state_t 
 
     /* Get some information for the heap */
     max_dblock_rows = IBLOCK_MAX_DROWS(fh, pos);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1468,9 +1408,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1481,7 +1418,7 @@ fill_all_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_he
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1505,9 +1442,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1544,9 +1478,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1580,9 +1511,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1618,9 +1546,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1658,9 +1583,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1695,9 +1617,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1744,9 +1663,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1798,15 +1714,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
@@ -1857,16 +1770,16 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
     PASSED();
 
     /* Query the type of address mapping */
     TESTING("query heap creation parameters");
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -1905,7 +1818,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_create() */
 
@@ -1917,15 +1830,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
@@ -1935,7 +1845,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
-    hbool_t            page = FALSE;                 /* Paged aggregation strategy or not */
+    bool               page = false;                 /* Paged aggregation strategy or not */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1961,7 +1871,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         STACK_ERROR;
 
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
-        page = TRUE;
+        page = true;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(f) < 0)
@@ -1982,9 +1892,9 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -2018,7 +1928,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Query the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2058,7 +1968,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_reopen() */
 
@@ -2070,16 +1980,13 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file  = -1;                   /* File ID */
-    hid_t              file2 = -1;                   /* File ID */
+    hid_t              file  = H5I_INVALID_HID;      /* File ID */
+    hid_t              file2 = H5I_INVALID_HID;      /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5F_t             *f2 = NULL;                    /* Internal file object pointer */
@@ -2091,7 +1998,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
-    hbool_t            page = FALSE;                 /* Paged aggregation strategy or not */
+    bool               page = false;                 /* Paged aggregation strategy or not */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2117,7 +2024,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         STACK_ERROR;
 
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
-        page = TRUE;
+        page = true;
 
     /* Ignore metadata tags in the file's cache */
     if (H5AC_ignore_tags(f) < 0)
@@ -2137,9 +2044,9 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -2148,7 +2055,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2180,7 +2087,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2235,7 +2142,7 @@ error:
         H5Fclose(file);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice() */
@@ -2248,15 +2155,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, January  5, 2007
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
@@ -2307,9 +2211,9 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -2322,7 +2226,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR;
 
     /* Verify the creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(cparam, &test_cparam))
@@ -2338,7 +2242,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         fh2 = H5HF_open(f, fh_addr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fh2) {
         /* Close opened heap */
         H5HF_close(fh2);
@@ -2378,7 +2282,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         fh = H5HF_open(f, fh_addr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fh) {
         /* Close opened heap */
         H5HF_close(fh);
@@ -2414,7 +2318,7 @@ error:
             H5HF_close(fh2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_delete_open() */
 
@@ -2426,15 +2330,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t         file = -1;                    /* File ID */
+    hid_t         file = H5I_INVALID_HID;       /* File ID */
     char          filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t        *f  = NULL;                    /* Internal file object pointer */
     H5HF_t       *fh = NULL;                    /* Fractal heap wrapper */
@@ -2442,8 +2343,8 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     unsigned      deflate_level;                /* Deflation level */
     size_t        id_len;                       /* Size of fractal heap IDs */
     size_t        tiny_max_len;                 /* Max. length of tiny objects */
-    hbool_t       tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
-    hbool_t       huge_ids_direct;              /* Are 'huge' objects directly accessed? */
+    bool          tiny_len_extended;            /* Do tiny objects use two bytes for the length? */
+    bool          huge_ids_direct;              /* Are 'huge' objects directly accessed? */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -2464,7 +2365,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     TESTING("limits of heap ID lengths");
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set the 'default' heap ID length */
     tmp_cparam.id_len = 0;
@@ -2482,11 +2383,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != (HEAP_ID_LEN - 1))
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != FALSE)
+    if (huge_ids_direct != false)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2511,11 +2412,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2545,11 +2446,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 27)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2568,7 +2469,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     {
         fh = H5HF_create(f, &tmp_cparam);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (NULL != fh)
         FAIL_STACK_ERROR;
 
@@ -2590,11 +2491,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 7)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != FALSE)
+    if (huge_ids_direct != false)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2620,11 +2521,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2650,11 +2551,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 16)
         TEST_ERROR;
-    if (tiny_len_extended != FALSE)
+    if (tiny_len_extended != false)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2680,11 +2581,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 17)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2710,11 +2611,11 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
     if (tiny_max_len != 43)
         TEST_ERROR;
-    if (tiny_len_extended != TRUE)
+    if (tiny_len_extended != true)
         TEST_ERROR;
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
-    if (huge_ids_direct != TRUE)
+    if (huge_ids_direct != true)
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2732,7 +2633,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     {
         fh = H5HF_create(f, &tmp_cparam);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (NULL != fh)
         FAIL_STACK_ERROR;
 
@@ -2752,7 +2653,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_id_limits() */
 
@@ -2764,15 +2665,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t         file = -1;                    /* File ID */
+    hid_t         file = H5I_INVALID_HID;       /* File ID */
     char          filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t        *f  = NULL;                    /* Internal file object pointer */
     H5HF_t       *fh = NULL;                    /* Fractal heap wrapper */
@@ -2800,7 +2698,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     TESTING("creating heaps with I/O filters");
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -2814,7 +2712,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Get heap's address */
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2843,7 +2741,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
         FAIL_STACK_ERROR;
 
     /* Query the heap creation parameters */
-    HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
+    memset(&test_cparam, 0, sizeof(H5HF_create_t));
     if (H5HF_get_cparam_test(fh, &test_cparam) < 0)
         FAIL_STACK_ERROR;
     if (H5HF_cmp_cparam_test(&tmp_cparam, &test_cparam))
@@ -2874,7 +2772,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_filtered_create() */
 
@@ -2886,15 +2784,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, August 14, 2007
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_size(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t   file = -1;                    /* File ID */
+    hid_t   file = H5I_INVALID_HID;       /* File ID */
     char    filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t  *f  = NULL;                    /* Internal file object pointer */
     H5HF_t *fh = NULL;                    /* Fractal heap wrapper */
@@ -2928,7 +2823,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Get heap's address */
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
 
     /* Get an empty heap's size */
@@ -3013,7 +2908,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_size() */
 
@@ -3028,15 +2923,12 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Neil Fortner
- *              Tuesday, September 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
 {
-    hid_t   file1 = -1;                   /* File ID */
+    hid_t   file1 = H5I_INVALID_HID;      /* File ID */
     hid_t   file2 = -2;                   /* File ID */
     char    filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t  *f  = NULL;                    /* Internal file object pointer */
@@ -3069,7 +2961,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Get heap's address */
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
 
     /* Insert an object */
@@ -3148,7 +3040,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_reopen_hdr() */
 
@@ -3160,15 +3052,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3202,9 +3091,9 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -3222,7 +3111,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     {
         ret = H5HF_insert(fh, (size_t)0, shared_wobj_g, heap_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5Eclear2(H5E_DEFAULT);
@@ -3260,7 +3149,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_weird() */
 
@@ -3275,15 +3164,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3315,9 +3201,9 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR;
 
@@ -3363,7 +3249,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_first() */
 
@@ -3376,15 +3262,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3416,9 +3299,9 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting first (small) object into absolute heap
@@ -3458,7 +3341,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_second() */
 
@@ -3472,15 +3355,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3513,9 +3393,9 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) object into absolute heap
@@ -3556,7 +3436,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_root_mult() */
 
@@ -3571,15 +3451,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3612,9 +3489,9 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test forcing creation of indirect root block & second direct block
@@ -3662,7 +3539,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_force_indirect() */
 
@@ -3677,15 +3554,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3718,9 +3592,9 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill second direct block
@@ -3768,7 +3642,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_fill_second() */
 
@@ -3784,15 +3658,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3825,9 +3696,9 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to create third direct block
@@ -3880,7 +3751,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_insert_third_direct() */
 
@@ -3895,15 +3766,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -3936,9 +3804,9 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill first row in root indirect block
@@ -3976,7 +3844,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_row() */
 
@@ -3991,15 +3859,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4032,9 +3897,9 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start second row in root indirect block
@@ -4079,7 +3944,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_second_row() */
 
@@ -4094,15 +3959,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4135,9 +3997,9 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start second row in root indirect block
@@ -4179,7 +4041,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_second_row() */
 
@@ -4195,15 +4057,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4236,9 +4095,9 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to start third row in root indirect block
@@ -4290,7 +4149,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_third_row() */
 
@@ -4305,15 +4164,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4347,9 +4203,9 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill four rows in root indirect block
@@ -4388,7 +4244,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_fourth_row() */
 
@@ -4403,15 +4259,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4444,9 +4297,9 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct  rows in root indirect block
@@ -4484,7 +4337,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_all_root_direct() */
 
@@ -4499,15 +4352,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4540,9 +4390,9 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to force creation of first recursive indirect block
@@ -4585,7 +4435,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_first_recursive_indirect() */
 
@@ -4601,15 +4451,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4642,9 +4489,9 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to force creation of second direct
@@ -4695,7 +4542,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_second_direct_recursive_indirect() */
 
@@ -4711,15 +4558,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4752,9 +4596,9 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -4797,7 +4641,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_recursive_indirect() */
 
@@ -4814,15 +4658,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4855,9 +4696,9 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -4907,7 +4748,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_second_recursive_indirect() */
 
@@ -4925,15 +4766,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -4966,9 +4804,9 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5015,7 +4853,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_second_recursive_indirect() */
 
@@ -5033,15 +4871,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5070,9 +4905,9 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5115,7 +4950,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_recursive_indirect_row() */
 
@@ -5131,15 +4966,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5172,9 +5004,9 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5224,7 +5056,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_2nd_recursive_indirect() */
 
@@ -5240,15 +5072,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5281,9 +5110,9 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5326,7 +5155,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_recursive_indirect_two_deep() */
 
@@ -5343,15 +5172,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5384,9 +5210,9 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5436,7 +5262,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_3rd_recursive_indirect() */
 
@@ -5453,15 +5279,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5494,9 +5317,9 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5547,7 +5370,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_3rd_recursive_indirect() */
 
@@ -5564,15 +5387,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5605,9 +5425,9 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5655,7 +5475,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_recursive_indirect_row() */
 
@@ -5672,15 +5492,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5713,9 +5530,9 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5763,7 +5580,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_all_3rd_recursive_indirect() */
 
@@ -5781,15 +5598,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5822,9 +5636,9 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5878,7 +5692,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_4th_recursive_indirect() */
 
@@ -5896,15 +5710,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -5937,9 +5748,9 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -5999,7 +5810,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_first_4th_recursive_indirect() */
 
@@ -6017,15 +5828,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6058,9 +5866,9 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6111,7 +5919,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_4th_recursive_indirect_row() */
 
@@ -6129,15 +5937,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6170,9 +5975,9 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6223,7 +6028,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_all_4th_recursive_indirect() */
 #endif /* ALL_INSERT_TESTS */
@@ -6243,15 +6048,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6284,9 +6086,9 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
 
     /*
      * Test inserting mult. (small) objects to fill all direct
@@ -6357,7 +6159,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_start_5th_recursive_indirect() */
 
@@ -6370,15 +6172,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6416,9 +6215,9 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -6438,7 +6237,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1155438845; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -6452,7 +6251,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     {
         ret = H5HF_remove(fh, heap_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_STACK_ERROR;
 
@@ -6481,7 +6280,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     {
         ret = H5HF_remove(fh, heap_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5Eclear2(H5E_DEFAULT);
@@ -6491,7 +6290,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     {
         ret = H5HF_read(fh, heap_id, shared_robj_g);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5Eclear2(H5E_DEFAULT);
@@ -6510,14 +6309,14 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         if (fh)
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_bogus() */
 
@@ -6530,15 +6329,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6575,9 +6371,9 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -6681,7 +6477,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_one() */
 
@@ -6694,15 +6490,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6740,9 +6533,9 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -6874,7 +6667,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_two() */
 
@@ -6888,15 +6681,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -6934,9 +6724,9 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7043,7 +6833,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_one_larger() */
 
@@ -7057,15 +6847,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, June 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7104,9 +6891,9 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7283,7 +7070,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_two_larger() */
 
@@ -7297,15 +7084,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7345,9 +7129,9 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7583,7 +7367,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_three_larger() */
 
@@ -7595,15 +7379,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Sunday, April 1, 2012
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t           file = -1;                    /* File ID */
+    hid_t           file = H5I_INVALID_HID;       /* File ID */
     char            filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t          *f  = NULL;                    /* Internal file object pointer */
     H5HF_t         *fh = NULL;                    /* Fractal heap wrapper */
@@ -7622,9 +7403,9 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Set up data array */
-    if (NULL == (heap_id_data = (unsigned char *)HDcalloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
+    if (NULL == (heap_id_data = (unsigned char *)calloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
         TEST_ERROR;
-    if (NULL == (heap_id = (unsigned char **)HDcalloc(100, sizeof(heap_id_data))))
+    if (NULL == (heap_id = (unsigned char **)calloc(100, sizeof(heap_id_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         heap_id[i] = heap_id_data + (i * MAX_HEAP_ID_LEN);
@@ -7650,9 +7431,9 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
-    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    memset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         FAIL_STACK_ERROR;
 
@@ -7661,8 +7442,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
      */
     TESTING("incremental object insertion and removal");
 
-    HDmemset(&obj1, 0, sizeof(obj1));
-    HDmemset(&obj2, 0, sizeof(obj2));
+    memset(&obj1, 0, sizeof(obj1));
+    memset(&obj2, 0, sizeof(obj2));
     for (i = 0; i < 100; i++) {
         for (j = 0; j < i; j++) {
             if (H5HF_remove(fh, heap_id[j]) < 0)
@@ -7678,7 +7459,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
             TEST_ERROR;
 
         /* Insert object */
-        HDmemset(heap_id[i], 0, id_len);
+        memset(heap_id[i], 0, id_len);
         HDsnprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if (H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR;
@@ -7695,8 +7476,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     /* All tests passed */
     PASSED();
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 0;
 
@@ -7707,10 +7488,10 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 1;
 } /* test_man_incr_insert_remove() */
@@ -7725,15 +7506,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7784,7 +7562,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_root_direct() */
 
@@ -7798,15 +7576,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7872,7 +7647,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_two_direct() */
 
@@ -7886,15 +7661,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -7942,7 +7714,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_first_row() */
 
@@ -7956,15 +7728,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June 12, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8014,7 +7783,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_first_two_rows() */
 
@@ -8028,15 +7797,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8090,7 +7856,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_first_four_rows() */
 
@@ -8104,15 +7870,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8160,7 +7923,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_all_root_direct() */
 
@@ -8174,15 +7937,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8234,7 +7994,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_2nd_indirect() */
 
@@ -8248,15 +8008,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, July 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8312,7 +8069,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_remove_3rd_indirect() */
 
@@ -8329,15 +8086,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8392,7 +8146,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_start_block() */
 
@@ -8407,15 +8161,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8490,7 +8241,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_start_block_add_back() */
 
@@ -8506,15 +8257,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8600,7 +8348,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_start_block_add_skipped() */
 
@@ -8616,15 +8364,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April  1, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8694,7 +8439,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_2nd_block() */
 
@@ -8713,15 +8458,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April  1, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -8837,7 +8579,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_2nd_block_add_skipped() */
 
@@ -8858,16 +8600,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                      fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -9005,7 +8744,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_one_partial_skip_2nd_block_add_skipped() */
 
@@ -9025,15 +8764,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -9135,7 +8871,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_row_skip_add_skipped() */
 
@@ -9152,16 +8888,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                         fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -9264,7 +8997,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_skip_direct_skip_indirect_two_rows_add_skipped() */
 
@@ -9280,16 +9013,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                            fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -9388,7 +9118,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_indirect_start_block_add_skipped() */
 
@@ -9405,16 +9135,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9519,7 +9246,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped() */
 
@@ -9537,16 +9264,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9662,7 +9386,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
 
@@ -9683,16 +9407,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                   fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9830,7 +9551,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped() */
 
@@ -9846,16 +9567,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                         fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -9984,7 +9702,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_indirect_two_rows_add_skipped() */
 
@@ -10002,16 +9720,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                           fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10169,7 +9884,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped() */
 
@@ -10186,16 +9901,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                       fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -10298,7 +10010,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_skip_start_block_add_skipped() */
 
@@ -10317,16 +10029,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                    fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -10440,7 +10149,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped() */
 
@@ -10458,9 +10167,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -10468,7 +10174,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
                                                                                H5HF_create_t      *cparam,
                                                                                fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10592,7 +10298,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
 
@@ -10611,9 +10317,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -10621,7 +10324,7 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
                                                                                 H5HF_create_t      *cparam,
                                                                                 fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10749,7 +10452,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped() */
 
@@ -10769,16 +10472,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tues, April 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                            fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -10912,7 +10612,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped() */
 
@@ -10933,16 +10633,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tues, April 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11082,7 +10779,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped() */
 
@@ -11101,16 +10798,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam,
                                                                   fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11243,7 +10937,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped() */
 
@@ -11264,16 +10958,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11423,7 +11114,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped() */
 
@@ -11447,16 +11138,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11640,7 +11328,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped()
    */
@@ -11667,16 +11355,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -11841,7 +11526,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped() */
 
@@ -11867,16 +11552,13 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(
     hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -12078,7 +11760,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped()
    */
@@ -12097,15 +11779,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, July 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12211,7 +11890,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_simple() */
 
@@ -12228,15 +11907,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12380,7 +12056,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_direct() */
 
@@ -12399,15 +12075,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -12491,7 +12164,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_2nd_direct() */
 
@@ -12511,15 +12184,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12611,7 +12281,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_man_frag_3rd_direct() */
 
@@ -12625,15 +12295,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12692,10 +12359,10 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -12761,7 +12428,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_one() */
 
@@ -12775,15 +12442,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -12845,10 +12509,10 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -12875,10 +12539,10 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -12991,7 +12655,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_two() */
 
@@ -13005,15 +12669,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13078,10 +12739,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -13108,10 +12769,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert third object too large for managed heap blocks */
@@ -13138,10 +12799,10 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13296,7 +12957,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_three() */
 
@@ -13310,15 +12971,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13389,10 +13047,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -13419,10 +13077,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert third object too large for managed heap blocks */
@@ -13449,10 +13107,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -13486,10 +13144,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -13524,10 +13182,10 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13662,7 +13320,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         } /* end else */
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR;
     } /* end if */
@@ -13721,7 +13379,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_huge_insert_mix() */
 
@@ -13733,15 +13391,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -13758,19 +13413,19 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     fheap_heap_state_t state;                        /* State of fractal heap */
     unsigned           deflate_level;                /* Deflation level */
     size_t             old_actual_id_len = 0;        /* Old actual ID length */
-    hbool_t            huge_ids_direct;              /* Are 'huge' objects directly accessed? */
-    hbool_t            pline_init = FALSE;           /* Whether the I/O pipeline has been initialized */
+    bool               huge_ids_direct;              /* Are 'huge' objects directly accessed? */
+    bool               pline_init = false;           /* Whether the I/O pipeline has been initialized */
     /* Test description */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
     if (H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
         FAIL_STACK_ERROR;
-    pline_init = TRUE;
+    pline_init = true;
 
     /* Adjust actual ID length, if asking for IDs that can directly access 'huge' objects */
     if (cparam->id_len == 1) {
@@ -13799,15 +13454,15 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     if (H5HF_get_huge_info_test(fh, NULL, &huge_ids_direct) < 0)
         FAIL_STACK_ERROR;
     if (cparam->id_len == 1) {
-        if (huge_ids_direct != TRUE)
+        if (huge_ids_direct != true)
             TEST_ERROR;
     } /* end if */
     else if (tparam->actual_id_len >= 29) {
-        if (huge_ids_direct != TRUE)
+        if (huge_ids_direct != true)
             TEST_ERROR;
     } /* end if */
     else {
-        if (huge_ids_direct != FALSE)
+        if (huge_ids_direct != false)
             TEST_ERROR;
     } /* end else */
 
@@ -13862,10 +13517,10 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -13932,7 +13587,7 @@ error:
             H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_filtered_huge() */
 
@@ -13946,15 +13601,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -14013,10 +13665,10 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14082,7 +13734,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_tiny_insert_one() */
 
@@ -14096,15 +13748,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -14166,10 +13815,10 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object small enough to encode in heap ID */
@@ -14196,10 +13845,10 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14312,7 +13961,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_tiny_insert_two() */
 
@@ -14327,15 +13976,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -14412,17 +14058,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on first huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert second object too large for managed heap blocks */
@@ -14449,17 +14095,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on second huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id2, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert third object too large for managed heap blocks */
@@ -14486,17 +14132,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id3, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on third huge object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id3, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fourth object small enough to fit into 'normal' heap blocks */
@@ -14530,17 +14176,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id4, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on fourth ('normal') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id4, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert fifth object small enough to fit into 'normal' heap blocks */
@@ -14575,17 +14221,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id5, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on fifth ('normal') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id5, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert sixth object small enough to encode in heap ID */
@@ -14612,17 +14258,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id6, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on sixth ('tiny') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id6, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Insert seventh object small enough to encode in heap ID */
@@ -14649,17 +14295,17 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id7, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Check 'op' functionality on seventh ('tiny') object */
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_op(fh, heap_id7, op_memcpy, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -14856,7 +14502,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         } /* end else */
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR;
     } /* end if */
@@ -14919,7 +14565,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_tiny_insert_mix() */
 
@@ -14931,15 +14577,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -14960,7 +14603,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     const char *base_desc = "insert one 'managed' object into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -15026,10 +14669,10 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15045,7 +14688,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
             TEST_ERROR;
 
         /* Check up on heap... */
-        HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+        memset(&state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(fh, &state))
             TEST_ERROR;
     } /* end if */
@@ -15092,7 +14735,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_filtered_man_root_direct() */
 
@@ -15104,15 +14747,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, October 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t            file = -1;                    /* File ID */
+    hid_t            file = H5I_INVALID_HID;       /* File ID */
     char             filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t           *f  = NULL;                    /* Internal file object pointer */
     H5HF_t          *fh = NULL;                    /* Fractal heap wrapper */
@@ -15134,7 +14774,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     const char *base_desc = "insert two 'managed' objects into heap with I/O filters, then remove";
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Set an I/O filter for heap data */
     deflate_level = 6;
@@ -15209,10 +14849,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id1, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Read in ('normal') object #2 */
@@ -15220,10 +14860,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR;
     if (obj_size != robj_size)
         TEST_ERROR;
-    HDmemset(shared_robj_g, 0, obj_size);
+    memset(shared_robj_g, 0, obj_size);
     if (H5HF_read(fh, heap_id2, shared_robj_g) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
+    if (memcmp(shared_wobj_g, shared_robj_g, obj_size) != 0)
         TEST_ERROR;
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
@@ -15267,7 +14907,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
 
@@ -15297,7 +14937,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end if */
@@ -15340,7 +14980,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
 
@@ -15370,7 +15010,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR;
 
             /* Check up on heap... */
-            HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+            memset(&state, 0, sizeof(fheap_heap_state_t));
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end else */
@@ -15418,7 +15058,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_filtered_man_root_indirect() */
 
@@ -15434,15 +15074,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, May  9, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15460,10 +15097,10 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     size_t             u;                            /* Local index variable */
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15508,7 +15145,7 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1156158635; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -15545,9 +15182,9 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
+            memcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
+            memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
+            memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
     }     /* end for */
 
@@ -15608,7 +15245,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         H5MM_xfree(keep_ids.ids);
@@ -15621,7 +15258,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_random() */
 
@@ -15638,15 +15275,12 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15664,10 +15298,10 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     size_t             u;                            /* Local index variable */
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15714,7 +15348,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1155181717; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -15763,9 +15397,9 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 
             /* Swap current position with future position */
             /* (just swap the heap ID, the len & offset isn't used */
-            HDmemcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
-            HDmemcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
+            memcpy(temp_id, &keep_ids.ids[u * id_len], id_len);
+            memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
+            memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
     }     /* end for */
 
@@ -15826,7 +15460,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         H5MM_xfree(keep_ids.ids);
@@ -15838,7 +15472,7 @@ error:
             H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_random_pow2() */
 
@@ -15850,20 +15484,17 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, December 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 /* Custom filter used to verify that the filters are actually called and do not
  * just silently fail */
-static hbool_t test_write_filter_called;
+static bool test_write_filter_called;
 static size_t
 test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
-    test_write_filter_called = TRUE;
+    test_write_filter_called = true;
 
     return nbytes;
 } /* end link_filter_filter */
@@ -15871,7 +15502,7 @@ test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_ne
 static unsigned
 test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -15880,7 +15511,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     size_t             id_len;                       /* Size of fractal heap IDs */
     unsigned char      tiny_heap_id[HEAP_ID_LEN];    /* Heap ID for 'tiny' object */
     unsigned char      huge_heap_id[HEAP_ID_LEN];    /* Heap ID for 'huge' object */
-    hbool_t            id_changed  = FALSE;          /* Whether the heap ID changed */
+    bool               id_changed  = false;          /* Whether the heap ID changed */
     unsigned char     *rewrite_obj = NULL;           /* Pointer to re-write buffer for objects */
     fheap_heap_ids_t   keep_ids;                     /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                   /* Size of a file with an empty heap */
@@ -15899,10 +15530,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TESTING("writing objects in heap");
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Copy heap creation properties */
-    HDmemcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
+    memcpy(&tmp_cparam, cparam, sizeof(H5HF_create_t));
 
     /* Check if we are compressing the blocks */
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15918,8 +15549,8 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Register and append custom filter */
         filter_class.version         = H5Z_CLASS_T_VERS;
         filter_class.id              = H5Z_FILTER_RESERVED + 43;
-        filter_class.encoder_present = TRUE;
-        filter_class.decoder_present = TRUE;
+        filter_class.encoder_present = true;
+        filter_class.decoder_present = true;
         filter_class.name            = "custom_fheap_filter";
         filter_class.can_apply       = NULL;
         filter_class.set_local       = NULL;
@@ -15928,7 +15559,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             TEST_ERROR;
         if (H5Z_append(&tmp_cparam.pline, H5Z_FILTER_RESERVED + 43, 0, (size_t)0, NULL) < 0)
             FAIL_STACK_ERROR;
-        test_write_filter_called = FALSE;
+        test_write_filter_called = false;
     } /* end if */
 
     /* Perform common file & heap open operations */
@@ -15955,8 +15586,8 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         ret = H5HF_write(fh, huge_heap_id, &id_changed, shared_wobj_g);
     }
-    H5E_END_TRY;
-    HDassert(!id_changed);
+    H5E_END_TRY
+    assert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (ret >= 0)
             TEST_ERROR;
@@ -15971,8 +15602,8 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     {
         ret = H5HF_write(fh, tiny_heap_id, &id_changed, shared_wobj_g);
     }
-    H5E_END_TRY;
-    HDassert(!id_changed);
+    H5E_END_TRY
+    assert(!id_changed);
     if (ret >= 0)
         TEST_ERROR;
 
@@ -15990,7 +15621,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (!test_write_filter_called)
             TEST_ERROR;
-        test_write_filter_called = FALSE;
+        test_write_filter_called = false;
     } /* end if */
 
     /* Re-open the file */
@@ -16028,14 +15659,14 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Overwrite data just written */
         if (H5HF_write(fh, &keep_ids.ids[id_len * u], &id_changed, rewrite_obj) < 0)
             FAIL_STACK_ERROR;
-        HDassert(!id_changed);
+        assert(!id_changed);
 
         /* Read data back in */
         if (H5HF_read(fh, &keep_ids.ids[id_len * u], shared_robj_g) < 0)
             FAIL_STACK_ERROR;
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
+        if (memcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR;
 
         /* Change size of data to write */
@@ -16084,7 +15715,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
             FAIL_STACK_ERROR;
 
         /* Compare data read in */
-        if (HDmemcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
+        if (memcmp(rewrite_obj, shared_robj_g, obj_size) != 0)
             TEST_ERROR;
 
         /* Change size of data to write */
@@ -16129,7 +15760,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_write() */
 
@@ -16143,15 +15774,12 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
 test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
-    hid_t              file = -1;                    /* File ID */
+    hid_t              file = H5I_INVALID_HID;       /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
     H5F_t             *f  = NULL;                    /* Internal file object pointer */
     H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
@@ -16169,7 +15797,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     TESTING("bug1: inserting several objects & removing one, then re-inserting");
 
     /* Initialize the heap ID structure */
-    HDmemset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
+    memset(&keep_ids, 0, sizeof(fheap_heap_ids_t));
 
     /* Perform common file & heap open operations */
     if (open_heap(filename, fapl, cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
@@ -16301,7 +15929,7 @@ error:
             H5HF_close(fh);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* test_bug1() */
 
@@ -16314,28 +15942,25 @@ error:
  *
  *            Failure:
  *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    fheap_test_param_t tparam;                   /* Testing parameters */
-    H5HF_create_t      small_cparam;             /* Creation parameters for "small" heap */
-    H5HF_create_t      large_cparam;             /* Creation parameters for "large" heap */
-    hid_t              fapl = -1, def_fapl = -1; /* File access property list for data files */
-    hid_t              pb_fapl = -1;             /* File access property list for data files */
-    hid_t              fcpl = -1, def_fcpl = -1; /* File creation property list for data files */
-    fheap_test_type_t  curr_test;                /* Current test being worked on */
-    unsigned           u, v;                     /* Local index variable */
-    unsigned           nerrors = 0;              /* Cumulative error count */
+    fheap_test_param_t tparam;                                /* Testing parameters */
+    H5HF_create_t      small_cparam;                          /* Creation parameters for "small" heap */
+    H5HF_create_t      large_cparam;                          /* Creation parameters for "large" heap */
+    hid_t fapl = H5I_INVALID_HID, def_fapl = H5I_INVALID_HID; /* File access property list for data files */
+    hid_t pb_fapl = H5I_INVALID_HID;                          /* File access property list for data files */
+    hid_t fcpl = H5I_INVALID_HID, def_fcpl = H5I_INVALID_HID; /* File creation property list for data files */
+    fheap_test_type_t curr_test;                              /* Current test being worked on */
+    unsigned          u, v;                                   /* Local index variable */
+    unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     int         ExpressMode;   /* Express testing level */
     const char *envval;        /* Environment variable */
-    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Don't run this test using certain file drivers */
     envval = HDgetenv(HDF5_DRIVER);
@@ -16343,7 +15968,7 @@ main(void)
         envval = "nomatch";
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -16362,7 +15987,7 @@ main(void)
      *      in the future for parallel build.
      */
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
     else if (ExpressMode == 0) {
 #ifdef H5_HAVE_PARALLEL
         num_pb_fs = NUM_PB_FS - 2;
@@ -16378,7 +16003,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Allocate space for the shared objects */
     shared_obj_size_g = large_cparam.max_man_size + 256;
@@ -16412,12 +16037,12 @@ main(void)
 
         switch (v) {
             case 0:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 1:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 /* This is a fix for the daily test failure from the checkin for libver bounds. */
@@ -16449,22 +16074,22 @@ main(void)
                     TEST_ERROR;
                 break;
             case 2:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 3:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = def_fapl;
                 break;
             case 4:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = pb_fapl;
                 break;
             case 5:
-                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+                if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                     TEST_ERROR;
                 fapl = pb_fapl;
                 break;
@@ -16477,7 +16102,7 @@ main(void)
         /* Iterate over the testing parameters */
         for (curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; curr_test++) {
             /* Clear the testing parameters */
-            HDmemset(&tparam, 0, sizeof(fheap_test_param_t));
+            memset(&tparam, 0, sizeof(fheap_test_param_t));
             tparam.actual_id_len = HEAP_ID_LEN;
 
             /* Set to run with different file space setting */
@@ -16580,7 +16205,7 @@ main(void)
                      * level of complexity gradually. -QAK
                      */
                     if (ExpressMode > 1)
-                        HDprintf(
+                        printf(
                             "***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
                     else
                         nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
@@ -16628,7 +16253,7 @@ main(void)
                                 nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
                                 if (ExpressMode > 1)
-                                    HDprintf("***Express test mode on.  Some tests skipped\n");
+                                    printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
                                     nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
@@ -16678,7 +16303,7 @@ main(void)
                                     test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
                                         fapl, &small_cparam, &tparam);
                                 if (ExpressMode > 1)
-                                    HDprintf("***Express test mode on.  Some tests skipped\n");
+                                    printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors +=
                                         test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(
@@ -16808,7 +16433,7 @@ main(void)
 
             /* Random object insertion & deletion */
             if (ExpressMode > 1)
-                HDprintf("***Express test mode on.  Some tests skipped\n");
+                printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */
                 HDputs("Using 'small' heap creation parameters");
@@ -16903,9 +16528,9 @@ main(void)
         TEST_ERROR;
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     /* Clean up file used */
     h5_cleanup(FILENAME, def_fapl);
@@ -16926,10 +16551,10 @@ error:
         H5Pclose(def_fcpl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return 1;
 } /* end main() */

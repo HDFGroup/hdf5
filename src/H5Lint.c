@@ -105,7 +105,7 @@ typedef struct {
     H5T_cset_t       cset;             /* Char set for new name */
     const H5G_loc_t *dst_loc;          /* Destination location for moving object */
     unsigned         dst_target_flags; /* Target flags for destination object */
-    hbool_t          copy;             /* TRUE if this is a copy operation */
+    bool             copy;             /* true if this is a copy operation */
     size_t           orig_nlinks; /* The original value for the # of soft / UD links that can be traversed */
 } H5L_trav_mv_t;
 
@@ -113,7 +113,7 @@ typedef struct {
 typedef struct {
     H5F_t      *file; /* Pointer to the file */
     H5O_link_t *lnk;  /* Pointer to link information to insert */
-    hbool_t     copy; /* TRUE if this is a copy operation */
+    bool        copy; /* true if this is a copy operation */
 } H5L_trav_mv2_t;
 
 /* User data for path traversal routine for checking if a link exists */
@@ -122,7 +122,7 @@ typedef struct {
     char *sep; /* Pointer to next separator in the string */
 
     /* Up */
-    hbool_t *exists; /* Whether the link exists or not */
+    bool *exists; /* Whether the link exists or not */
 } H5L_trav_le_t;
 
 /* User data for path traversal routine for getting link value */
@@ -196,9 +196,6 @@ static H5L_class_t *H5L_table_g       = NULL;
  *
  *              Failure:	negative
  *
- * Programmer:	James Laird
- *              Thursday, July 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -210,7 +207,7 @@ H5L_init(void)
 
     /* Initialize user-defined link classes */
     if (H5L_register_external() < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to register external link class");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -222,9 +219,6 @@ done:
  * Purpose:     Terminate any resources allocated in H5L_init.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, January 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -255,9 +249,6 @@ H5L_term_package(void)
  *                              link class table.
  *		Failure:	Negative
  *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -270,7 +261,7 @@ H5L__find_class_idx(H5L_type_t id)
 
     for (i = 0; i < H5L_table_used_g; i++)
         if (H5L_table_g[i].id == id)
-            HGOTO_DONE((int)i)
+            HGOTO_DONE((int)i);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -285,9 +276,6 @@ done:
  * Return:	Success:	Ptr to entry in global link class table.
  *		Failure:	NULL
  *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 const H5L_class_t *
@@ -300,7 +288,7 @@ H5L_find_class(H5L_type_t id)
 
     /* Get the index in the global table */
     if ((idx = H5L__find_class_idx(id)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, NULL, "unable to find link class")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, NULL, "unable to find link class");
 
     /* Set return value */
     ret_value = H5L_table_g + idx;
@@ -319,9 +307,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -332,8 +317,8 @@ H5L_register(const H5L_class_t *cls)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(cls);
-    HDassert(cls->id >= 0 && cls->id <= H5L_TYPE_MAX);
+    assert(cls);
+    assert(cls->id >= 0 && cls->id <= H5L_TYPE_MAX);
 
     /* Is the link type already registered? */
     for (i = 0; i < H5L_table_used_g; i++)
@@ -346,7 +331,7 @@ H5L_register(const H5L_class_t *cls)
             size_t       n     = MAX(H5L_MIN_TABLE_SIZE, (2 * H5L_table_alloc_g));
             H5L_class_t *table = (H5L_class_t *)H5MM_realloc(H5L_table_g, (n * sizeof(H5L_class_t)));
             if (!table)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table");
             H5L_table_g       = table;
             H5L_table_alloc_g = n;
         } /* end if */
@@ -371,9 +356,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -384,7 +366,7 @@ H5L_unregister(H5L_type_t id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(id >= 0 && id <= H5L_TYPE_MAX);
+    assert(id >= 0 && id <= H5L_TYPE_MAX);
 
     /* Is the filter already registered? */
     for (i = 0; i < H5L_table_used_g; i++)
@@ -393,11 +375,11 @@ H5L_unregister(H5L_type_t id)
 
     /* Fail if filter not found */
     if (i >= H5L_table_used_g)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class is not registered")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class is not registered");
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
+    memmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
     H5L_table_used_g--;
 
 done:
@@ -415,20 +397,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_is_registered(H5L_type_t id, hbool_t *is_registered)
+H5L_is_registered(H5L_type_t id, bool *is_registered)
 {
     size_t i; /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    HDassert(is_registered);
+    assert(is_registered);
 
     /* Is the link class already registered? */
-    *is_registered = FALSE;
+    *is_registered = false;
     for (i = 0; i < H5L_table_used_g; i++)
         if (H5L_table_g[i].id == id) {
-            *is_registered = TRUE;
+            *is_registered = true;
             break;
         }
 
@@ -443,9 +425,6 @@ H5L_is_registered(H5L_type_t id, hbool_t *is_registered)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Tuesday, December 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -457,9 +436,9 @@ H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc, hid
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(new_loc);
-    HDassert(obj_loc);
-    HDassert(new_name && *new_name);
+    assert(new_loc);
+    assert(obj_loc);
+    assert(new_name && *new_name);
 
     /* The link callback will check that the object isn't being hard linked
      * into a different file, so we don't need to do it here (there could be
@@ -472,7 +451,7 @@ H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc, hid
 
     /* Create the link */
     if (H5L__create_real(new_loc, new_name, obj_loc->path, obj_loc->oloc->file, &lnk, NULL, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -485,9 +464,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, April 9, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -499,9 +475,9 @@ H5L_link_object(const H5G_loc_t *new_loc, const char *new_name, H5O_obj_create_t
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(new_loc);
-    HDassert(new_name && *new_name);
-    HDassert(ocrt_info);
+    assert(new_loc);
+    assert(new_name && *new_name);
+    assert(ocrt_info);
 
     /* The link callback will check that the object isn't being hard linked
      * into a different file, so we don't need to do it here (there could be
@@ -513,7 +489,7 @@ H5L_link_object(const H5G_loc_t *new_loc, const char *new_name, H5O_obj_create_t
 
     /* Create the link */
     if (H5L__create_real(new_loc, new_name, NULL, NULL, &lnk, ocrt_info, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -526,9 +502,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, September 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -536,19 +509,19 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
              H5G_loc_t *obj_loc, void *_udata /*in,out*/, H5G_own_loc_t *own_loc /*out*/)
 {
     H5L_trav_cr_t *udata  = (H5L_trav_cr_t *)_udata; /* User data passed in */
-    H5G_t         *grp    = NULL;    /* H5G_t for this group, opened to pass to user callback */
-    hid_t          grp_id = FAIL;    /* Id for this group (passed to user callback */
-    H5G_loc_t      temp_loc;         /* For UD callback */
-    hbool_t temp_loc_init = FALSE;   /* Temporary location for UD callback (temp_loc) has been initialized */
-    hbool_t obj_created   = FALSE;   /* Whether an object was created (through a hard link) */
-    herr_t  ret_value     = SUCCEED; /* Return value */
+    H5G_t         *grp    = NULL;   /* H5G_t for this group, opened to pass to user callback */
+    hid_t          grp_id = FAIL;   /* Id for this group (passed to user callback */
+    H5G_loc_t      temp_loc;        /* For UD callback */
+    bool   temp_loc_init = false;   /* Temporary location for UD callback (temp_loc) has been initialized */
+    bool   obj_created   = false;   /* Whether an object was created (through a hard link) */
+    herr_t ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid location */
     /* (which is not what we want) */
     if (obj_loc != NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "name already exists")
+        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "name already exists");
 
     /* Check for crossing file boundaries with a new hard link */
     if (udata->lnk->type == H5L_TYPE_HARD) {
@@ -561,7 +534,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
             if (NULL ==
                 (udata->ocrt_info->new_obj = H5O_obj_create(grp_loc->oloc->file, udata->ocrt_info->obj_type,
                                                             udata->ocrt_info->crt_info, &new_loc)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create object")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create object");
 
             /* Set address for hard link */
             udata->lnk->u.hard.addr = new_loc.oloc->addr;
@@ -570,25 +543,25 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
             udata->path = new_loc.path;
 
             /* Indicate that an object was created */
-            obj_created = TRUE;
+            obj_created = true;
         } /* end if */
         else {
             /* Check that both objects are in same file */
             if (!H5F_SAME_SHARED(grp_loc->oloc->file, udata->file))
-                HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "interfile hard links are not allowed")
+                HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "interfile hard links are not allowed");
         } /* end else */
     }     /* end if */
 
     /* Set 'standard' aspects of link */
     udata->lnk->corder =
         0; /* Will be re-written during group insertion, if the group is tracking creation order */
-    udata->lnk->corder_valid = FALSE; /* Creation order not valid (yet) */
+    udata->lnk->corder_valid = false; /* Creation order not valid (yet) */
 
     /* Check for non-default link creation properties */
     if (udata->lc_plist) {
         /* Get character encoding property */
         if (H5CX_get_encoding(&udata->lnk->cset) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'character set' property")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'character set' property");
     } /* end if */
     else
         udata->lnk->cset = H5F_DEFAULT_CSET; /* Default character encoding for link */
@@ -599,15 +572,15 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert link into group */
-    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, TRUE,
+    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, true,
                        udata->ocrt_info ? udata->ocrt_info->obj_type : H5O_TYPE_UNKNOWN,
                        udata->ocrt_info ? udata->ocrt_info->crt_info : NULL) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link for object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link for object");
 
     /* Set object's path if it has been passed in and is not set */
     if (udata->path != NULL && udata->path->user_path_r == NULL)
         if (H5G_name_set(grp_loc->path, udata->path, name) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "cannot set name")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "cannot set name");
 
     /* If link is a user-defined link, trigger its creation callback if it has one */
     if (udata->lnk->type >= H5L_TYPE_UD_MIN) {
@@ -615,7 +588,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
 
         /* Get the link class for this type of link. */
         if (NULL == (link_class = H5L_find_class(udata->lnk->type)))
-            HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to get class of UD link")
+            HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to get class of UD link");
 
         if (link_class->create_func != NULL) {
             H5O_loc_t  temp_oloc;
@@ -626,22 +599,22 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
              */
             H5G_name_reset(&temp_path);
             if (H5O_loc_copy_deep(&temp_oloc, grp_loc->oloc) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location");
 
             temp_loc.oloc = &temp_oloc;
             temp_loc.path = &temp_path;
-            temp_loc_init = TRUE;
+            temp_loc_init = true;
 
             /* Set up location for user-defined callback */
             if (NULL == (grp = H5G_open(&temp_loc)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTREGISTER, FAIL, "unable to register ID for group")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, FAIL, "unable to open group");
+            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, true)) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTREGISTER, FAIL, "unable to register ID for group");
 
             /* Make callback */
             if ((link_class->create_func)(name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size,
                                           H5P_DEFAULT) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "link creation callback failed")
+                HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "link creation callback failed");
         } /* end if */
     }     /* end if */
 
@@ -651,23 +624,23 @@ done:
         H5O_loc_t oloc; /* Object location for created object */
 
         /* Set up object location */
-        HDmemset(&oloc, 0, sizeof(oloc));
+        memset(&oloc, 0, sizeof(oloc));
         oloc.file = grp_loc->oloc->file;
         oloc.addr = udata->lnk->u.hard.addr;
 
         /* Decrement refcount on new object's object header in memory */
         if (H5O_dec_rc_by_loc(&oloc) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+            HDONE_ERROR(H5E_LINK, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object");
     } /* end if */
 
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback");
     } /* end if */
     else if (temp_loc_init)
         H5G_loc_free(&temp_loc);
@@ -693,9 +666,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Monday, December  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -711,14 +681,14 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(link_loc);
-    HDassert(link_name && *link_name);
-    HDassert(lnk);
-    HDassert(lnk->type >= H5L_TYPE_HARD && lnk->type <= H5L_TYPE_MAX);
+    assert(link_loc);
+    assert(link_name && *link_name);
+    assert(lnk);
+    assert(lnk->type >= H5L_TYPE_HARD && lnk->type <= H5L_TYPE_MAX);
 
     /* Get normalized link name */
     if ((norm_link_name = H5G_normalize(link_name)) == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name")
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name");
 
     /* Check for flags present in creation property list */
     if (lcpl_id != H5P_DEFAULT) {
@@ -726,11 +696,11 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
 
         /* Get link creation property list */
         if (NULL == (lc_plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
         /* Get intermediate group creation property */
         if (H5CX_get_intermediate_group(&crt_intmd_group) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'create intermediate group' property")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get 'create intermediate group' property");
 
         if (crt_intmd_group > 0)
             target_flags |= H5G_CRT_INTMD_GROUP;
@@ -756,7 +726,7 @@ H5L__create_real(const H5G_loc_t *link_loc, const char *link_name, H5G_name_t *o
 
     /* Traverse the destination path & create new link */
     if (H5G_traverse(link_loc, link_name, target_flags, H5L__link_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert link")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert link");
 
 done:
     /* Free the normalized path name */
@@ -773,9 +743,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -788,20 +755,20 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name, const H5G_loc_t *link
     H5G_loc_t  obj_loc;              /* Location of object to link to */
     H5G_name_t path;                 /* obj_loc's path*/
     H5O_loc_t  oloc;                 /* obj_loc's oloc */
-    hbool_t    loc_valid = FALSE;
+    bool       loc_valid = false;
     herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(cur_loc);
-    HDassert(cur_name && *cur_name);
-    HDassert(link_loc);
-    HDassert(link_name && *link_name);
+    assert(cur_loc);
+    assert(cur_name && *cur_name);
+    assert(link_loc);
+    assert(link_name && *link_name);
 
     /* Get normalized copy of the current name */
     if ((norm_cur_name = H5G_normalize(cur_name)) == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name")
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name");
 
     /* Set up link data specific to hard links */
     lnk.type = H5L_TYPE_HARD;
@@ -811,8 +778,8 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name, const H5G_loc_t *link
     obj_loc.oloc = &oloc;
     H5G_loc_reset(&obj_loc);
     if (H5G_loc_find(cur_loc, norm_cur_name, &obj_loc) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "source object not found")
-    loc_valid = TRUE;
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "source object not found");
+    loc_valid = true;
 
     /* Construct link information for eventual insertion */
     lnk.u.hard.addr = obj_loc.oloc->addr;
@@ -823,13 +790,13 @@ H5L__create_hard(H5G_loc_t *cur_loc, const char *cur_name, const H5G_loc_t *link
     /* Create actual link to the object.  Pass in NULL for the path, since this
      * function shouldn't change an object's user path. */
     if (H5L__create_real(link_loc, link_name, NULL, link_file, &lnk, NULL, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
 done:
     /* Free the object header location */
     if (loc_valid)
         if (H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to free location")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to free location");
 
     /* Free the normalized path name */
     if (norm_cur_name)
@@ -845,9 +812,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -860,13 +824,13 @@ H5L__create_soft(const char *target_path, const H5G_loc_t *link_loc, const char 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(link_loc);
-    HDassert(target_path && *target_path);
-    HDassert(link_name && *link_name);
+    assert(link_loc);
+    assert(target_path && *target_path);
+    assert(link_name && *link_name);
 
     /* Get normalized copy of the link target */
     if ((norm_target = H5G_normalize(target_path)) == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name")
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name");
 
     /* Set up link data specific to soft links */
     lnk.type        = H5L_TYPE_SOFT;
@@ -874,7 +838,7 @@ H5L__create_soft(const char *target_path, const H5G_loc_t *link_loc, const char 
 
     /* Create actual link to the object */
     if (H5L__create_real(link_loc, link_name, NULL, NULL, &lnk, NULL, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
 done:
     /* Free the normalized target name */
@@ -892,9 +856,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Friday, May 19, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -907,17 +868,17 @@ H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, const void *ud_
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(type >= H5L_TYPE_UD_MIN && type <= H5L_TYPE_MAX);
-    HDassert(link_loc);
-    HDassert(link_name && *link_name);
-    HDassert(ud_data_size == 0 || ud_data);
+    assert(type >= H5L_TYPE_UD_MIN && type <= H5L_TYPE_MAX);
+    assert(link_loc);
+    assert(link_name && *link_name);
+    assert(ud_data_size == 0 || ud_data);
 
     /* Initialize the link struct's pointer to its udata buffer */
     lnk.u.ud.udata = NULL;
 
     /* Make sure that this link class is registered */
     if (H5L__find_class_idx(type) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "link class has not been registered with library")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "link class has not been registered with library");
 
     /* Fill in UD link-specific information in the link struct*/
     if (ud_data_size > 0) {
@@ -932,7 +893,7 @@ H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, const void *ud_
 
     /* Create actual link to the object */
     if (H5L__create_real(link_loc, link_name, NULL, NULL, &lnk, NULL, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to register new name for object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to register new name for object");
 
 done:
     /* Free the link's udata buffer if it's been allocated */
@@ -948,9 +909,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 13 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -961,7 +919,7 @@ H5L__get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(lnk);
+    assert(lnk);
 
     /* Check for soft link */
     if (H5L_TYPE_SOFT == lnk->type) {
@@ -984,13 +942,13 @@ H5L__get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
 
         if (link_class != NULL && link_class->query_func != NULL) {
             if ((link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, buf, size) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query callback returned failure")
+                HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query callback returned failure");
         } /* end if */
         else if (buf && size > 0)
             ((char *)buf)[0] = '\0';
     } /* end if */
     else
-        HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "object is not a symbolic or user-defined link")
+        HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "object is not a symbolic or user-defined link");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1002,9 +960,6 @@ done:
  * Purpose:	Callback for retrieving link value or udata.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 20, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1019,11 +974,11 @@ H5L__get_val_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, cons
 
     /* Check if the name in this group resolved to a valid link */
     if (lnk == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "'%s' doesn't exist", name)
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "'%s' doesn't exist", name);
 
     /* Retrieve the value for the link */
     if (H5L__get_val_real(lnk, udata->buf, udata->size) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't retrieve link value")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't retrieve link value");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -1047,9 +1002,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Monday, April 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1061,8 +1013,8 @@ H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf /*out*/, size_t s
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for retrieving information */
     udata.size = size;
@@ -1070,7 +1022,7 @@ H5L__get_val(const H5G_loc_t *loc, const char *name, void *buf /*out*/, size_t s
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_val_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1084,9 +1036,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 13 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1096,23 +1045,23 @@ H5L__get_val_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_A
 {
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata; /* User data passed in */
     H5O_link_t       fnd_lnk;                           /* Link within group */
-    hbool_t          lnk_copied = FALSE;                /* Whether the link was copied */
+    bool             lnk_copied = false;                /* Whether the link was copied */
     herr_t           ret_value  = SUCCEED;              /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist");
 
     /* Query link */
     if (H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, &fnd_lnk) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found")
-    lnk_copied = TRUE;
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found");
+    lnk_copied = true;
 
     /* Retrieve the value for the link */
     if (H5L__get_val_real(&fnd_lnk, udata->buf, udata->size) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't retrieve link value")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't retrieve link value");
 
 done:
     /* Reset the link information, if we have a copy */
@@ -1134,9 +1083,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 27, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1149,8 +1095,8 @@ H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for retrieving information */
     udata.idx_type = idx_type;
@@ -1161,7 +1107,8 @@ H5L__get_val_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_val_by_idx_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info for index: %llu", (unsigned long long)n)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info for index: %llu",
+                    (unsigned long long)n);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1174,9 +1121,6 @@ done:
  *              actually deletes the link
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1191,22 +1135,22 @@ H5L__delete_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *ln
 
     /* Check if the group resolved to a valid link */
     if (grp_loc == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist");
 
     /* Check if the name in this group resolved to a valid link */
     if (name == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Check for non-existent (NULL) link.
      * Note that this can also occur when attempting to remove '.'
      */
     if (lnk == NULL)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL,
-                    "callback link pointer is NULL (specified link may be '.' or not exist)")
+                    "callback link pointer is NULL (specified link may be '.' or not exist)");
 
     /* Remove the link from the group */
     if (H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, name) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to remove link from group")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to remove link from group");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -1223,9 +1167,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Thursday, September 17, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1237,17 +1178,17 @@ H5L__delete(const H5G_loc_t *loc, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Get normalized copy of the name */
     if ((norm_name = H5G_normalize(name)) == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name")
+        HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize name");
 
     /* Set up user data for unlink operation */
     if (H5G_traverse(loc, norm_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK | H5G_TARGET_MOUNT, H5L__delete_cb,
                      NULL) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTREMOVE, FAIL, "can't unlink object")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTREMOVE, FAIL, "can't unlink object");
 
 done:
     /* Free the normalized path name */
@@ -1264,9 +1205,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 13 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1281,12 +1219,12 @@ H5L__delete_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_AT
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist");
 
     /* Delete link */
     if (H5G_obj_remove_by_idx(obj_loc->oloc, obj_loc->path->full_path_r, udata->idx_type, udata->order,
                               udata->n) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -1304,9 +1242,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 27, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1319,8 +1254,8 @@ H5L__delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for unlink operation */
     udata.idx_type = idx_type;
@@ -1330,7 +1265,7 @@ H5L__delete_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type, 
     /* Traverse the group hierarchy to remove the link */
     if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK | H5G_TARGET_MOUNT,
                      H5L__delete_by_idx_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "link doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "link doesn't exist");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1345,9 +1280,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, April 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1358,30 +1290,30 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
     H5G_t          *grp    = NULL; /* H5G_t for this group, opened to pass to user callback */
     hid_t           grp_id = FAIL; /* ID for this group (passed to user callback */
     H5G_loc_t       temp_loc;      /* For UD callback */
-    hbool_t         temp_loc_init = FALSE;
+    bool            temp_loc_init = false;
     herr_t          ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Make sure an object with this name doesn't already exist */
     if (obj_loc != NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "an object with that name already exists")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "an object with that name already exists");
 
     /* Check for crossing file boundaries with a new hard link */
     if (udata->lnk->type == H5L_TYPE_HARD)
         /* Check that both objects are in same file */
         if (!H5F_SAME_SHARED(grp_loc->oloc->file, udata->file))
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "moving a link across files is not allowed")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "moving a link across files is not allowed");
 
     /* Give the object its new name */
-    HDassert(udata->lnk->name == NULL);
+    assert(udata->lnk->name == NULL);
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
     udata->lnk->name = (char *)name;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert the link into the group */
-    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, TRUE, H5O_TYPE_UNKNOWN, NULL) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
+    if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, true, H5O_TYPE_UNKNOWN, NULL) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object");
 
     /* If the link was a user-defined link, call its move callback if it has one */
     if (udata->lnk->type >= H5L_TYPE_UD_MIN) {
@@ -1389,7 +1321,7 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
 
         /* Get the link class for this type of link. */
         if (NULL == (link_class = H5L_find_class(udata->lnk->type)))
-            HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class is not registered")
+            HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class is not registered");
 
         if ((!udata->copy && link_class->move_func) || (udata->copy && link_class->copy_func)) {
             H5O_loc_t  temp_oloc;
@@ -1400,27 +1332,27 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
              */
             H5G_name_reset(&temp_path);
             if (H5O_loc_copy_deep(&temp_oloc, grp_loc->oloc) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object location");
 
             temp_loc.oloc = &temp_oloc;
             temp_loc.path = &temp_path;
-            temp_loc_init = TRUE;
+            temp_loc_init = true;
 
             /* Set up location for user-defined callback */
             if (NULL == (grp = H5G_open(&temp_loc)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTREGISTER, FAIL, "unable to register group ID")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTOPENOBJ, FAIL, "unable to open group");
+            if ((grp_id = H5VL_wrap_register(H5I_GROUP, grp, true)) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTREGISTER, FAIL, "unable to register group ID");
 
             if (udata->copy) {
                 if ((link_class->copy_func)(udata->lnk->name, grp_id, udata->lnk->u.ud.udata,
                                             udata->lnk->u.ud.size) < 0)
-                    HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD copy callback returned error")
+                    HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD copy callback returned error");
             } /* end if */
             else {
                 if ((link_class->move_func)(udata->lnk->name, grp_id, udata->lnk->u.ud.udata,
                                             udata->lnk->u.ud.size) < 0)
-                    HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD move callback returned error")
+                    HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD move callback returned error");
             } /* end else */
         }     /* end if */
     }         /* end if */
@@ -1429,11 +1361,11 @@ done:
     /* Close the location given to the user callback if it was created */
     if (grp_id >= 0) {
         if (H5I_dec_app_ref(grp_id) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback");
     } /* end if */
     else if (grp != NULL) {
         if (H5G_close(grp) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback")
+            HDONE_ERROR(H5E_LINK, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback");
     } /* end if */
     else if (temp_loc_init)
         H5G_loc_free(&temp_loc);
@@ -1458,9 +1390,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Friday, April 3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1470,28 +1399,28 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
     H5L_trav_mv_t *udata = (H5L_trav_mv_t *)_udata; /* User data passed in */
     H5L_trav_mv2_t udata_out;                       /* User data for H5L__move_dest_cb traversal */
     char          *orig_name   = NULL;              /* The name of the link in this group */
-    hbool_t        link_copied = FALSE;             /* Has udata_out.lnk been allocated? */
+    bool           link_copied = false;             /* Has udata_out.lnk been allocated? */
     herr_t         ret_value   = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Check for operations on '.' */
     if (lnk == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "the name of a link must be supplied to move or copy")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "the name of a link must be supplied to move or copy");
 
     /* Set up user data for move_dest_cb */
     if (NULL == (udata_out.lnk = (H5O_link_t *)H5O_msg_copy(H5O_LINK_ID, lnk, NULL)))
-        HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link to be moved")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link to be moved");
 
     /* In this special case, the link's name is going to be replaced at its
      * destination, so we should free it here.
      */
     udata_out.lnk->name = (char *)H5MM_xfree(udata_out.lnk->name);
-    link_copied         = TRUE;
+    link_copied         = true;
 
     udata_out.lnk->cset = udata->cset;
     udata_out.file      = grp_loc->oloc->file;
@@ -1504,12 +1433,12 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
      * (destination) traversal has the correct value
      */
     if (H5CX_set_nlinks(udata->orig_nlinks) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't reset # of soft / UD links to traverse")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't reset # of soft / UD links to traverse");
 
     /* Insert the link into its new location */
     if (H5G_traverse(udata->dst_loc, udata->dst_name, udata->dst_target_flags, H5L__move_dest_cb,
                      &udata_out) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to follow symbolic link");
 
     /* If this is a move and not a copy operation, change the object's name and remove the old link */
     if (!udata->copy) {
@@ -1517,28 +1446,28 @@ H5L__move_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t *lnk,
 
         /* Make certain that the destination name is a full (not relative) path */
         if (*(udata->dst_name) != '/') {
-            HDassert(udata->dst_loc->path->full_path_r);
+            assert(udata->dst_loc->path->full_path_r);
 
             /* Create reference counted string for full dst path */
             if ((dst_name_r = H5G_build_fullpath_refstr_str(udata->dst_loc->path->full_path_r,
                                                             udata->dst_name)) == NULL)
-                HGOTO_ERROR(H5E_LINK, H5E_PATH, FAIL, "can't build destination path name")
+                HGOTO_ERROR(H5E_LINK, H5E_PATH, FAIL, "can't build destination path name");
         } /* end if */
         else
             dst_name_r = H5RS_wrap(udata->dst_name);
-        HDassert(dst_name_r);
+        assert(dst_name_r);
 
         /* Fix names up */
         if (H5G_name_replace(lnk, H5G_NAME_MOVE, obj_loc->oloc->file, obj_loc->path->full_path_r,
                              udata->dst_loc->oloc->file, dst_name_r) < 0) {
             H5RS_decr(dst_name_r);
-            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to replace name")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to replace name");
         } /* end if */
 
         /* Remove the old link */
         if (H5G_obj_remove(grp_loc->oloc, grp_loc->path->full_path_r, orig_name) < 0) {
             H5RS_decr(dst_name_r);
-            HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to remove old name")
+            HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to remove old name");
         } /* end if */
 
         H5RS_decr(dst_name_r);
@@ -1573,19 +1502,16 @@ done:
  *              location, while DST_LOC and DST_NAME together define its
  *              final location.
  *
- *              If copy_flag is FALSE, the original link is removed
+ *              If copy_flag is false, the original link is removed
  *              (effectively moving the link).
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, May 1, 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5L__move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_loc, const char *dst_name,
-          hbool_t copy_flag, hid_t lcpl_id)
+          bool copy_flag, hid_t lcpl_id)
 {
     unsigned        dst_target_flags = H5G_TARGET_NORMAL;
     H5T_cset_t      char_encoding    = H5F_DEFAULT_CSET; /* Character encoding for link */
@@ -1596,21 +1522,21 @@ H5L__move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_l
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(src_loc);
-    HDassert(dst_loc);
-    HDassert(src_name && *src_name);
-    HDassert(dst_name && *dst_name);
+    assert(src_loc);
+    assert(dst_loc);
+    assert(src_name && *src_name);
+    assert(dst_name && *dst_name);
 
     /* Check for flags present in creation property list */
     if (lcpl_id != H5P_DEFAULT) {
         unsigned crt_intmd_group;
 
         if (NULL == (lc_plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
         /* Get intermediate group creation property */
         if (H5CX_get_intermediate_group(&crt_intmd_group) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups");
 
         /* Set target flags for source and destination */
         if (crt_intmd_group > 0)
@@ -1618,7 +1544,7 @@ H5L__move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_l
 
         /* Get character encoding property */
         if (H5CX_get_encoding(&char_encoding) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding");
     } /* end if */
 
     /* Set up user data */
@@ -1632,12 +1558,12 @@ H5L__move(const H5G_loc_t *src_loc, const char *src_name, const H5G_loc_t *dst_l
      *  that the countdown can be reset after the first path is traversed.
      */
     if (H5CX_get_nlinks(&udata.orig_nlinks) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve # of soft / UD links to traverse");
 
     /* Do the move */
     if (H5G_traverse(src_loc, src_name, H5G_TARGET_MOUNT | H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__move_cb,
                      &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to find link")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to find link");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1651,9 +1577,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 16 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1666,7 +1589,7 @@ H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check if the name in this group resolved to a valid link */
-    *udata->exists = (hbool_t)(lnk != NULL);
+    *udata->exists = (bool)(lnk != NULL);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -1682,9 +1605,6 @@ H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
  *              component of a path
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, December 31 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1718,13 +1638,13 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
                 cb_func = H5L__exists_inter_cb;
             } /* end else */
             if (H5G_traverse(obj_loc, next, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, cb_func, udata) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists");
         } /* end if */
         else
-            *udata->exists = TRUE;
+            *udata->exists = true;
     } /* end if */
     else
-        *udata->exists = FALSE;
+        *udata->exists = false;
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -1740,17 +1660,14 @@ done:
  * Purpose:	Returns whether a link exists in a group
  *
  * Note:	Same as H5L__exists, except that missing links are reported
- *		as 'FALSE' instead of causing failures
+ *		as 'false' instead of causing failures
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, December 31 2015
+ * Return:	Non-negative (true/false) on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
+H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, bool *exists)
 {
     H5L_trav_le_t  udata;               /* User data for traversal */
     H5G_traverse_t cb_func;             /* Callback function for traversal */
@@ -1761,9 +1678,9 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(name);
-    HDassert(exists);
+    assert(loc);
+    assert(name);
+    assert(exists);
 
     /* Copy the name and skip leading '/'s */
     name_trav = name_copy = H5MM_strdup(name);
@@ -1772,7 +1689,7 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 
     /* A path of "/" will always exist in a file */
     if ('\0' == *name_trav)
-        *exists = TRUE;
+        *exists = true;
     else {
         /* Set up user data & correct callback */
         udata.exists = exists;
@@ -1789,7 +1706,7 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 
         /* Traverse the group hierarchy to locate the link to check */
         if (H5G_traverse(loc, name_trav, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, cb_func, &udata) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't determine if link exists");
     }
 
 done:
@@ -1809,13 +1726,10 @@ done:
  *
  * Return:	Non-negative on success, with *exists set/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 16 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L__exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
+H5L__exists(const H5G_loc_t *loc, const char *name, bool *exists)
 {
     H5L_trav_le_t udata;               /* User data for traversal */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -1823,18 +1737,18 @@ H5L__exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(name);
-    HDassert(exists);
+    assert(loc);
+    assert(name);
+    assert(exists);
 
     /* A path of "/" will always exist in a file */
     if (0 == HDstrcmp(name, "/"))
-        *exists = TRUE;
+        *exists = true;
     else {
         /* Traverse the group hierarchy to locate the object to get info about */
         udata.exists = exists;
         if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__exists_final_cb, &udata) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "link doesn't exist")
+            HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "link doesn't exist");
     }
 
 done:
@@ -1847,9 +1761,6 @@ done:
  * Purpose:	Callback for retrieving a link's metadata
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, April 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1864,11 +1775,11 @@ H5L__get_info_cb(H5G_loc_t *grp_loc /*in*/, const char H5_ATTR_UNUSED *name, con
 
     /* Check if the name in this group resolved to a valid link */
     if (lnk == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "name doesn't exist");
 
     /* Get information from the link */
     if (H5G_link_to_info(grp_loc->oloc, lnk, udata->linfo) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -1885,9 +1796,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *              Monday, April 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1902,7 +1810,7 @@ H5L_get_info(const H5G_loc_t *loc, const char *name, H5L_info2_t *linfo /*out*/)
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_info_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "name doesn't exist");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1916,9 +1824,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November  6 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1928,23 +1833,23 @@ H5L__get_info_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 {
     H5L_trav_gibi_t *udata = (H5L_trav_gibi_t *)_udata; /* User data passed in */
     H5O_link_t       fnd_lnk;                           /* Link within group */
-    hbool_t          lnk_copied = FALSE;                /* Whether the link was copied */
+    bool             lnk_copied = false;                /* Whether the link was copied */
     herr_t           ret_value  = SUCCEED;              /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist");
 
     /* Query link */
     if (H5G_obj_lookup_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, &fnd_lnk) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found")
-    lnk_copied = TRUE;
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found");
+    lnk_copied = true;
 
     /* Get information from the link */
     if (H5G_link_to_info(obj_loc->oloc, &fnd_lnk, udata->linfo) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get link info");
 
 done:
     /* Reset the link information, if we have a copy */
@@ -1978,9 +1883,9 @@ H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(linfo);
+    assert(loc);
+    assert(name && *name);
+    assert(linfo);
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -1990,7 +1895,7 @@ H5L__get_info_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type
 
     /* Traverse the group hierarchy to locate the object to get info about */
     if (H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_info_by_idx_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to get link info");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2003,9 +1908,6 @@ done:
  *              index's order.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Saturday, November 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2021,12 +1923,12 @@ H5L__get_name_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 
     /* Check if the name of the group resolved to a valid object */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist");
 
     /* Query link */
     if (H5G_obj_get_name_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, udata->name,
                                 udata->size, &udata->name_len) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found")
+        HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found");
 
 done:
     /* Indicate that this callback didn't take ownership of the group *
@@ -2056,9 +1958,9 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(group_name && *group_name);
-    HDassert(link_name_len);
+    assert(loc);
+    assert(group_name && *group_name);
+    assert(link_name_len);
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -2071,7 +1973,7 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     /* Traverse the group hierarchy to locate the link to get name of */
     if (H5G_traverse(loc, group_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_name_by_idx_cb, &udata) <
         0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get name")
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get name");
 
     /* Set the return value */
     *link_name_len = udata.name_len;
@@ -2088,9 +1990,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 29 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2099,8 +1998,8 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
 {
     H5O_link_t        tmp_src_lnk;                   /* Temporary copy of src link, when needed */
     const H5O_link_t *src_lnk            = _src_lnk; /* Source link */
-    hbool_t           dst_lnk_init       = FALSE;    /* Whether the destination link is initialized */
-    hbool_t           expanded_link_open = FALSE;    /* Whether the target location has been opened */
+    bool              dst_lnk_init       = false;    /* Whether the destination link is initialized */
+    bool              expanded_link_open = false;    /* Whether the target location has been opened */
     H5G_loc_t         tmp_src_loc;                   /* Group location holding target object */
     H5G_name_t        tmp_src_path;                  /* Path for target object */
     H5O_loc_t         tmp_src_oloc;                  /* Object location for target object */
@@ -2109,17 +2008,17 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(dst_file);
-    HDassert(src_lnk);
-    HDassert(dst_lnk);
-    HDassert(cpy_info);
+    assert(dst_file);
+    assert(src_lnk);
+    assert(dst_lnk);
+    assert(cpy_info);
 
     /* Expand soft or external link, if requested */
     if ((H5L_TYPE_SOFT == src_lnk->type && cpy_info->expand_soft_link) ||
         (H5L_TYPE_EXTERNAL == src_lnk->type && cpy_info->expand_ext_link)) {
         H5G_loc_t  lnk_grp_loc;        /* Group location holding link */
         H5G_name_t lnk_grp_path;       /* Path for link */
-        hbool_t    tar_exists = FALSE; /* Whether the target object exists */
+        bool       tar_exists = false; /* Whether the target object exists */
 
         /* Set up group location for link */
         H5G_name_reset(&lnk_grp_path);
@@ -2130,25 +2029,25 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
 
         /* Check if the target object exists */
         if (H5G_loc_exists(&lnk_grp_loc, src_lnk->name, &tar_exists) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to check if target object exists")
+            HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to check if target object exists");
 
         if (tar_exists) {
             /* Make a temporary copy of the link, so that it will not change the
              * info in the cache when we change it to a hard link */
             if (NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, &tmp_src_lnk))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy message")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy message");
 
             /* Set up group location for target object.  Let H5G_traverse expand
              * the link. */
             tmp_src_loc.path = &tmp_src_path;
             tmp_src_loc.oloc = &tmp_src_oloc;
             if (H5G_loc_reset(&tmp_src_loc) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to reset location")
+                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to reset location");
 
             /* Find the target object */
             if (H5G_loc_find(&lnk_grp_loc, src_lnk->name, &tmp_src_loc) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to find target object")
-            expanded_link_open = TRUE;
+                HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to find target object");
+            expanded_link_open = true;
 
             /* Convert symbolic link to hard link */
             if (tmp_src_lnk.type == H5L_TYPE_SOFT)
@@ -2163,8 +2062,8 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
 
     /* Copy src link information to dst link information */
     if (NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, dst_lnk))
-        HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy message")
-    dst_lnk_init = TRUE;
+        HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy message");
+    dst_lnk_init = true;
 
     /* Check if object in source group is a hard link & copy it */
     if (H5L_TYPE_HARD == src_lnk->type) {
@@ -2180,13 +2079,13 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
             tmp_src_oloc.file = src_oloc->file;
             tmp_src_oloc.addr = src_lnk->u.hard.addr;
         } /* end if */
-        HDassert(H5F_addr_defined(tmp_src_oloc.addr));
+        assert(H5_addr_defined(tmp_src_oloc.addr));
 
         /* Copy the shared object from source to destination */
         /* Don't care about obj_type or udata because those are only important
          * for old style groups */
-        if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, TRUE, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object")
+        if (H5O_copy_header_map(&tmp_src_oloc, &new_dst_oloc, cpy_info, true, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy object");
 
         /* Copy new destination object's information for eventual insertion */
         dst_lnk->u.hard.addr = new_dst_oloc.addr;
@@ -2195,7 +2094,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
 done:
     /* Check if we used a temporary src link */
     if (src_lnk != _src_lnk) {
-        HDassert(src_lnk == &tmp_src_lnk);
+        assert(src_lnk == &tmp_src_lnk);
         H5O_msg_reset(H5O_LINK_ID, &tmp_src_lnk);
     } /* end if */
     if (ret_value < 0)
@@ -2204,7 +2103,7 @@ done:
     /* Check if we need to free the temp source oloc */
     if (expanded_link_open)
         if (H5G_loc_free(&tmp_src_loc) < 0)
-            HDONE_ERROR(H5E_LINK, H5E_CANTFREE, FAIL, "unable to free object")
+            HDONE_ERROR(H5E_LINK, H5E_CANTFREE, FAIL, "unable to free object");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L__link_copy_file() */
@@ -2230,9 +2129,9 @@ H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(group_name);
-    HDassert(op);
+    assert(loc);
+    assert(group_name);
+    assert(op);
 
     /* Set up iteration beginning/end info */
     idx      = (idx_p == NULL ? 0 : *idx_p);
@@ -2244,7 +2143,7 @@ H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
 
     /* Iterate over the links */
     if ((ret_value = H5G_iterate(loc, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed");
 
     /* Set the index we stopped at */
     if (idx_p)

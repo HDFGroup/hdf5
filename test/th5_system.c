@@ -33,8 +33,8 @@ test_h5_dirname(void)
 
     MESSAGE(5, ("Testing H5_dirname\n"));
 
-    path = HDmalloc(H5_SYSTEM_TEST_PATH_MAX);
-    CHECK_PTR(path, "HDmalloc");
+    path = malloc(H5_SYSTEM_TEST_PATH_MAX);
+    CHECK_PTR(path, "malloc");
     if (!path)
         return;
 
@@ -44,7 +44,7 @@ test_h5_dirname(void)
     {
         ret = H5_dirname(NULL, &dirname);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_dirname with NULL path");
     H5Eclear2(H5E_DEFAULT);
 
@@ -55,7 +55,7 @@ test_h5_dirname(void)
     {
         ret = H5_dirname(path, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_dirname with NULL dirname pointer");
     H5Eclear2(H5E_DEFAULT);
 
@@ -225,7 +225,7 @@ test_h5_dirname(void)
                "comparing H5_dirname with contrived path to proper dirname");
     H5MM_free(dirname);
 
-    HDfree(path);
+    free(path);
 }
 
 static void
@@ -237,8 +237,8 @@ test_h5_basename(void)
 
     MESSAGE(5, ("Testing H5_basename\n"));
 
-    path = HDmalloc(H5_SYSTEM_TEST_PATH_MAX);
-    CHECK_PTR(path, "HDmalloc");
+    path = malloc(H5_SYSTEM_TEST_PATH_MAX);
+    CHECK_PTR(path, "malloc");
     if (!path)
         return;
 
@@ -248,7 +248,7 @@ test_h5_basename(void)
     {
         ret = H5_basename(NULL, &basename);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_basename with NULL path");
     H5Eclear2(H5E_DEFAULT);
 
@@ -259,7 +259,7 @@ test_h5_basename(void)
     {
         ret = H5_basename(path, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_basename with NULL basename pointer");
     H5Eclear2(H5E_DEFAULT);
 
@@ -434,7 +434,7 @@ test_h5_basename(void)
     VERIFY_STR(basename, "finaldir", "comparing H5_basename with contrived path to proper basename");
     H5MM_free(basename);
 
-    HDfree(path);
+    free(path);
 }
 
 static void
@@ -447,19 +447,56 @@ test_h5_strcasestr(void)
 
     /* check that H5_strcasestr returns target in empty search */
     str = H5_strcasestr(haystack, "");
-    CHECK_PTR_EQ(str, haystack, "H5_strcasestr search for empty");
+    CHECK_PTR(str, "H5_strcasestr for empty substring");
+    if (str)
+        VERIFY_STR(str, haystack, "comparing H5_strcasestr to original string for empty substring");
 
     /* Check that H5_strcasestr find a string of same case */
     str = H5_strcasestr(haystack, "string");
-    CHECK_PTR_EQ(str, &(haystack[8]), "H5_strcasestr search same case");
+    CHECK_PTR(str, "H5_strcasestr for substring of same case");
+    if (str)
+        VERIFY_STR(str, "string", "comparing H5_strcasestr for substring of same case");
 
     /* Check that H5_strcasestr find a string of different case */
     str = H5_strcasestr(haystack, "sTrInG");
-    CHECK_PTR_EQ(str, &(haystack[8]), "H5_strcasestr search different case");
+    CHECK_PTR(str, "H5_strcasestr for substring of different case");
+    if (str)
+        VERIFY_STR(str, "string", "comparing H5_strcasestr for substring of different case");
 
     /* Check that H5_strcasestr returns NULL if no match is found */
     str = H5_strcasestr(haystack, "nomatch");
     CHECK_PTR_NULL(str, "H5_strcasestr search with no match");
+}
+
+static void
+test_HDstrcasestr(void)
+{
+    const char *const haystack = "My test string";
+    char             *str      = NULL;
+
+    MESSAGE(5, ("Testing HDstrcasestr\n"));
+
+    /* check that HDstrcasestr returns target in empty search */
+    str = HDstrcasestr(haystack, "");
+    CHECK_PTR(str, "HDstrcasestr for empty substring");
+    if (str)
+        VERIFY_STR(str, haystack, "comparing HDstrcasestr to original string for empty substring");
+
+    /* Check that HDstrcasestr find a string of same case */
+    str = HDstrcasestr(haystack, "string");
+    CHECK_PTR(str, "HDstrcasestr for substring of same case");
+    if (str)
+        VERIFY_STR(str, "string", "comparing HDstrcasestr for substring of same case");
+
+    /* Check that HDstrcasestr find a string of different case */
+    str = HDstrcasestr(haystack, "sTrInG");
+    CHECK_PTR(str, "HDstrcasestr for substring of different case");
+    if (str)
+        VERIFY_STR(str, "string", "comparing HDstrcasestr for substring of different case");
+
+    /* Check that HDstrcasestr returns NULL if no match is found */
+    str = HDstrcasestr(haystack, "nomatch");
+    CHECK_PTR_NULL(str, "HDstrcasestr search with no match");
 }
 
 static void
@@ -476,7 +513,7 @@ test_h5_strndup(void)
     {
         str = H5_strndup(NULL, 20);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     CHECK_PTR_NULL(str, "H5_strndup with NULL string pointer");
     H5Eclear2(H5E_DEFAULT);
 
@@ -521,6 +558,7 @@ test_h5_system(void)
     test_h5_dirname();
     test_h5_basename();
     test_h5_strcasestr();
+    test_HDstrcasestr();
     test_h5_strndup();
 }
 

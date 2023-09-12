@@ -10,13 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Feb 20, 2014
- *
- * This file contains tests for:
- *  H5Odisable_mdc_flushes()
- *  H5Oenable_mdc_flushes()
- *  H5Oare_mdc_flushes_disabled()
+/*
+ *      This file contains tests for:
+ *          * H5Odisable_mdc_flushes()
+ *          * H5Oenable_mdc_flushes()
+ *          * H5Oare_mdc_flushes_disabled()
  */
 #include "h5test.h"
 
@@ -67,14 +65,14 @@
 /* ===================== */
 
 /* Tests */
-static unsigned test_objs_cork(hbool_t swmr, hbool_t new_format);
-static unsigned test_dset_cork(hbool_t swmr, hbool_t new_format);
+static unsigned test_objs_cork(bool swmr, bool new_format);
+static unsigned test_dset_cork(bool swmr, bool new_format);
 static unsigned verify_old_dset_cork(void);
-static unsigned verify_obj_dset_cork(hbool_t swmr);
-static unsigned verify_dset_cork(hbool_t swmr, hbool_t new_format);
-static unsigned verify_group_cork(hbool_t swmr);
-static unsigned verify_named_cork(hbool_t swmr);
-static unsigned verify_multiple_cork(hbool_t swmr);
+static unsigned verify_obj_dset_cork(bool swmr);
+static unsigned verify_dset_cork(bool swmr, bool new_format);
+static unsigned verify_group_cork(bool swmr);
+static unsigned verify_named_cork(bool swmr);
+static unsigned verify_multiple_cork(bool swmr);
 
 /*-------------------------------------------------------------------------
  * Function:    verify_old_dset_cork
@@ -84,8 +82,6 @@ static unsigned verify_multiple_cork(hbool_t swmr);
  *      object tag are checked for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -137,13 +133,13 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Verify cork status */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -158,7 +154,7 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_BT1 */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Create compact dataset: DSET_COMPACT */
@@ -182,7 +178,7 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Verify cork status */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -230,11 +226,11 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_CONTIG */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_BT1 */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
 
     /* Un-cork the dataset: DSET_CONTIG */
@@ -242,7 +238,7 @@ verify_old_dset_cork(void)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_CONTIG */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -255,8 +251,8 @@ verify_old_dset_cork(void)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -275,10 +271,10 @@ error:
         H5Pclose(dcpl3);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_old_dset_cork */
@@ -292,12 +288,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_obj_dset_cork(hbool_t swmr)
+verify_obj_dset_cork(bool swmr)
 {
     /* Variable Declarations */
     hid_t       fid  = H5I_INVALID_HID;                        /* File ID */
@@ -348,7 +342,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
 
     /* Cork the dataset: DSET */
@@ -360,7 +354,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Close the attribute */
@@ -368,7 +362,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Create dcpl */
@@ -406,7 +400,7 @@ verify_obj_dset_cork(hbool_t swmr)
     } /* end for */
 
     /* Verify cork status of the dataset: DSET_NONE */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -435,7 +429,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
         TEST_ERROR;
 
     /* Open the attribute attached to the dataset object: DSET_NONE */
@@ -448,7 +442,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET_NONE */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Close the attribute */
@@ -456,7 +450,7 @@ verify_obj_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -483,7 +477,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_obj_dset_cork */
 
@@ -497,12 +491,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_dset_cork(hbool_t swmr, hbool_t new_format)
+verify_dset_cork(bool swmr, bool new_format)
 {
     /* Variable Declarations */
     hid_t       fid  = H5I_INVALID_HID; /* File ID */
@@ -576,7 +568,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify cork status */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Create chunked dataset with fixed array indexing: DSET_FA */
@@ -598,11 +590,11 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_FA */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_EA */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
 
     /* Create chunked dataset with v2-Btree indexing */
@@ -621,7 +613,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -653,9 +645,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(100 * 20, sizeof(int))))
+    if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf = (int **)HDcalloc(100, sizeof(buf_data))))
+    if (NULL == (buf = (int **)calloc(100, sizeof(buf_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         buf[i] = buf_data + (i * 20);
@@ -672,7 +664,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_EA */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
 
     /* Open and write to the dataset: DSET_FA */
@@ -686,7 +678,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_FA */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Open and write to the dataset: DSET_BT2 */
@@ -696,7 +688,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
         TEST_ERROR;
 
     /* Cork the dataset: DSET_BT2 */
@@ -704,7 +696,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -719,8 +711,8 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     PASSED();
     return 0;
@@ -738,10 +730,10 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     return 1;
 } /* verify_dset_cork */
@@ -755,12 +747,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_group_cork(hbool_t swmr)
+verify_group_cork(bool swmr)
 {
     /* Variable Declarations */
     hid_t       fid  = H5I_INVALID_HID; /* File ID */
@@ -816,11 +806,11 @@ verify_group_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the groups */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
         TEST_ERROR;
 
     /* Close the second group: GRP2 */
@@ -832,7 +822,7 @@ verify_group_cork(hbool_t swmr)
         FAIL_STACK_ERROR;
 
     /* Verify cork status of the second group: GRP2 */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -873,7 +863,7 @@ verify_group_cork(hbool_t swmr)
         if (i == 3) {
             if (H5Odisable_mdc_flushes(gid3) < 0)
                 TEST_ERROR;
-            if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+            if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
                 TEST_ERROR;
         }
         if (H5Aclose(aid) < 0)
@@ -881,7 +871,7 @@ verify_group_cork(hbool_t swmr)
     } /* end for */
 
     /* Verify cork status of the third group: GRP3 */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -911,7 +901,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_group_cork */
 
@@ -924,12 +914,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_named_cork(hbool_t swmr)
+verify_named_cork(bool swmr)
 {
     /* Variable Declarations */
     hid_t       fid  = H5I_INVALID_HID; /* File ID */
@@ -1007,11 +995,11 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the named datatypes */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Close the datatypes */
@@ -1031,11 +1019,11 @@ verify_named_cork(hbool_t swmr)
         FAIL_STACK_ERROR;
 
     /* Verify cork status of the named datatypes */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -1090,7 +1078,7 @@ verify_named_cork(hbool_t swmr)
         if (i == 3) {
             if (H5Odisable_mdc_flushes(tid3) < 0)
                 TEST_ERROR;
-            if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+            if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
                 TEST_ERROR;
         }
         if (H5Aclose(aid) < 0)
@@ -1110,20 +1098,20 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the datatype: DT */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
         TEST_ERROR;
     /* Verify cork status of the datatype: DT2 */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
     /* Verify cork status of the datatype: DT3 */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Un-cork the datatype: DT3 */
     if (H5Oenable_mdc_flushes(tid3) < 0)
         TEST_ERROR;
     /* Verify cork status of the datatype: DT3 */
-    if (H5C__verify_cork_tag_test(fid, oinfo3.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
         TEST_ERROR;
 
     /* Cork the datatype: DT */
@@ -1131,14 +1119,14 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the datatype: DT */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
     /* Verify cork status of the datatype: DT2 */
-    if (H5C__verify_cork_tag_test(fid, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo4.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo4.token, true) < 0)
         TEST_ERROR;
 
     /* Close the dataset */
@@ -1146,11 +1134,11 @@ verify_named_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the datatype: DT */
-    if (H5C__verify_cork_tag_test(fid, oinfo.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: DSET */
-    if (H5C__verify_cork_tag_test(fid, oinfo4.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid, oinfo4.token, false) < 0)
         TEST_ERROR;
 
     /* Closing */
@@ -1186,7 +1174,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_named_cork */
 
@@ -1201,12 +1189,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_multiple_cork(hbool_t swmr)
+verify_multiple_cork(bool swmr)
 {
     /* Variable Declarations */
     hid_t       fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;   /* File ID */
@@ -1221,7 +1207,7 @@ verify_multiple_cork(hbool_t swmr)
     H5O_info2_t oinfo1, oinfo2, oinfo3;                           /* Object metadata information */
     hsize_t     dim[1] = {5};                                     /* Dimension sizes */
     unsigned    flags;                                            /* File access flags */
-    hbool_t     corked;                                           /* Cork status */
+    bool        corked;                                           /* Cork status */
     herr_t      ret;                                              /* Return value */
 
     /* Testing Macro */
@@ -1320,7 +1306,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the group: gid2 */
     if (H5Oget_info3(gid2, &oinfo1, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid2, oinfo1.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid2, oinfo1.token, true) < 0)
         TEST_ERROR;
 
     /* Check cork status of the group: gid1 */
@@ -1348,7 +1334,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the dataset: did1 */
     if (H5Oget_info3(did1, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid1, oinfo2.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid1, oinfo2.token, true) < 0)
         TEST_ERROR;
 
     /* Check cork status of the dataset: did2 */
@@ -1376,7 +1362,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the datatype: tid2 */
     if (H5Oget_info3(tid2, &oinfo3, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid2, oinfo3.token, TRUE) < 0)
+    if (H5C__verify_cork_tag_test(fid2, oinfo3.token, true) < 0)
         TEST_ERROR;
 
     /* Check cork status of the datatype: tid1 */
@@ -1392,7 +1378,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the group: gid1 */
     if (H5Oget_info3(gid1, &oinfo1, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid1, oinfo1.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid1, oinfo1.token, false) < 0)
         TEST_ERROR;
 
     /* Check cork status of the group: gid2 */
@@ -1412,7 +1398,7 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the group: gid1 */
-    if (H5C__verify_cork_tag_test(fid1, oinfo1.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid1, oinfo1.token, false) < 0)
         TEST_ERROR;
 
     /* Close the group: gid1 */
@@ -1426,7 +1412,7 @@ verify_multiple_cork(hbool_t swmr)
     /* Verify cork status of the dataset: did2 */
     if (H5Oget_info3(did2, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    if (H5C__verify_cork_tag_test(fid2, oinfo2.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid2, oinfo2.token, false) < 0)
         TEST_ERROR;
 
     /* Check cork status of the dataset: did1 */
@@ -1446,7 +1432,7 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Verify cork status of the dataset: did1 */
-    if (H5C__verify_cork_tag_test(fid1, oinfo2.token, FALSE) < 0)
+    if (H5C__verify_cork_tag_test(fid1, oinfo2.token, false) < 0)
         TEST_ERROR;
 
     /* Close the dataset: did1 */
@@ -1478,7 +1464,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Odisable_mdc_flushes(aidg2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1487,7 +1473,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Odisable_mdc_flushes(aidd1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1496,7 +1482,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Oare_mdc_flushes_disabled(aidt2, &corked);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1520,7 +1506,7 @@ verify_multiple_cork(hbool_t swmr)
         ret = H5Oare_mdc_flushes_disabled(fid1, &corked);
         ret = H5Odisable_mdc_flushes(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1529,7 +1515,7 @@ verify_multiple_cork(hbool_t swmr)
     {
         ret = H5Oenable_mdc_flushes(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1563,7 +1549,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* verify_multiple_cork */
 
@@ -1576,12 +1562,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_objs_cork(hbool_t swmr, hbool_t new_format)
+test_objs_cork(bool swmr, bool new_format)
 {
     hid_t    fid  = H5I_INVALID_HID; /* HDF5 File ID */
     hid_t    fapl = H5I_INVALID_HID; /* File access property list */
@@ -1591,7 +1575,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     hid_t    sid  = H5I_INVALID_HID; /* Dataspace ID */
     hid_t    aid  = H5I_INVALID_HID; /* Attribute ID */
     hsize_t  dims[RANK];             /* Dataset dimension sizes */
-    hbool_t  corked;                 /* Cork status of an object */
+    bool     corked;                 /* Cork status of an object */
     unsigned flags;                  /* File access flags */
     herr_t   ret;                    /* Return value */
 
@@ -1667,7 +1651,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Odisable_mdc_flushes(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1706,7 +1690,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oenable_mdc_flushes(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1723,7 +1707,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oare_mdc_flushes_disabled(aid, &corked);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1766,7 +1750,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Odisable_mdc_flushes(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1791,7 +1775,7 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
     {
         ret = H5Oenable_mdc_flushes(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -1865,7 +1849,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_objs_cork() */
 
@@ -1878,12 +1862,10 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_dset_cork(hbool_t swmr, hbool_t new_format)
+test_dset_cork(bool swmr, bool new_format)
 {
     hid_t    fid = H5I_INVALID_HID;                          /* File ID */
     hid_t    fapl;                                           /* File access property list */
@@ -1900,7 +1882,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     int    **wbuf      = NULL; /* Data buffer for writes (pointers to fake 2D array) */
     int     *wbuf_data = NULL; /* Data buffer for writes (real data) */
     int     *rbuf_data = NULL; /* Data buffer for reads (real data) */
-    hbool_t  corked;           /* Cork status of an object */
+    bool     corked;           /* Cork status of an object */
     unsigned flags;            /* File access flags */
 
     /* Testing Macro */
@@ -2001,9 +1983,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (wbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (wbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (wbuf = (int **)HDcalloc(DIMS0, sizeof(wbuf_data))))
+    if (NULL == (wbuf = (int **)calloc(DIMS0, sizeof(wbuf_data))))
         TEST_ERROR;
     for (i = 0; i < DIMS0; i++)
         wbuf[i] = wbuf_data + (i * DIMS1);
@@ -2048,7 +2030,7 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (rbuf_data = (int *)HDcalloc(DIMS0 * DIMS1, sizeof(int))))
+    if (NULL == (rbuf_data = (int *)calloc(DIMS0 * DIMS1, sizeof(int))))
         TEST_ERROR;
 
     /* Read from the dataset */
@@ -2195,9 +2177,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     PASSED();
     return 0;
@@ -2215,11 +2197,11 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
-    HDfree(wbuf);
-    HDfree(wbuf_data);
-    HDfree(rbuf_data);
+    free(wbuf);
+    free(wbuf_data);
+    free(rbuf_data);
 
     return 1;
 
@@ -2233,8 +2215,6 @@ error:
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -2263,16 +2243,16 @@ main(void)
 
         /* Tests with new/old library format */
         /* This is the test moved from th5o.c: test_h5o_cork() */
-        nerrs += test_objs_cork(swmr, TRUE);
-        nerrs += test_objs_cork(swmr, FALSE);
+        nerrs += test_objs_cork(swmr, true);
+        nerrs += test_objs_cork(swmr, false);
         /* This is the test moved from th5o.c: test_h5o_cork_dataset() */
-        nerrs += test_dset_cork(swmr, TRUE);
-        nerrs += test_dset_cork(swmr, FALSE);
+        nerrs += test_dset_cork(swmr, true);
+        nerrs += test_dset_cork(swmr, false);
 
         /* Tests with/without SWMR access */
         nerrs += verify_obj_dset_cork(swmr);
-        nerrs += verify_dset_cork(swmr, TRUE);
-        nerrs += verify_dset_cork(swmr, FALSE);
+        nerrs += verify_dset_cork(swmr, true);
+        nerrs += verify_dset_cork(swmr, false);
         nerrs += verify_group_cork(swmr);
         nerrs += verify_named_cork(swmr);
         nerrs += verify_multiple_cork(swmr);

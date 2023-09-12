@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Mike McGreevy
- *             June 30, 2010
- *
  * Purpose: This test file contains routines used to test flushing and
  *          refreshing individual objects' metadata from the cache.
  *
@@ -66,26 +63,26 @@
    For errors occurring in the spawned process (from the test script), use
    the PROCESS_ERROR macro, which will send a signal to the main process so the
    main process can propagate errors correctly. */
-FILE *errorfile;
+static FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
-    {                                                                                                        \
-        errorfile = HDfopen(ERRFILE, "w+");                                                                  \
-        HDfprintf(errorfile, "Error occurred in flushrefresh.\n");                                           \
-        HDfflush(errorfile);                                                                                 \
-        HDfclose(errorfile);                                                                                 \
+    do {                                                                                                     \
+        errorfile = fopen(ERRFILE, "w+");                                                                    \
+        fprintf(errorfile, "Error occurred in flushrefresh.\n");                                             \
+        fflush(errorfile);                                                                                   \
+        fclose(errorfile);                                                                                   \
         TEST_ERROR;                                                                                          \
-    }
+    } while (0)
 
 #define CLEANUP_FILES                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDremove(ERRFILE);                                                                                   \
         HDremove(FILENAME);                                                                                  \
         HDremove(SIGNAL_TO_SCRIPT);                                                                          \
         HDremove(SIGNAL_BETWEEN_PROCESSES_1);                                                                \
         HDremove(SIGNAL_BETWEEN_PROCESSES_2);                                                                \
         HDremove(SIGNAL_FROM_SCRIPT);                                                                        \
-    }
+    } while (0)
 
 /* ===================== */
 /* Function Declarations */
@@ -130,9 +127,6 @@ herr_t end_verification(void);
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Mike McGreevy
- *              July 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -161,8 +155,7 @@ main(int argc, char *argv[])
                 TEST_ERROR;
         } /* end if */
         else {
-            HDfprintf(stdout,
-                      "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
+            fprintf(stdout, "Skipping all flush/refresh tests (only run with SWMR-enabled file drivers).\n");
 
             /* Test script is expecting some signals, so send them out to end it. */
             if (end_verification() < 0)
@@ -183,8 +176,8 @@ main(int argc, char *argv[])
     }
     else {
         /* Illegal number of arguments supplied. Error. */
-        HDfprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
-        PROCESS_ERROR
+        fprintf(stderr, "Error. %d is an Invalid number of arguments to main().\n", argc);
+        PROCESS_ERROR;
     } /* end if */
 
     return EXIT_SUCCESS;
@@ -201,9 +194,6 @@ error:
  *              from the metadata cache.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 1, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -267,7 +257,7 @@ test_flush(void)
     hsize_t dims[2] = {3, 5};
 
     /* Testing Message */
-    HDfprintf(stdout, "Testing individual object flush behavior:\n");
+    fprintf(stdout, "Testing individual object flush behavior:\n");
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
@@ -670,9 +660,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              August 17, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -739,7 +726,7 @@ test_refresh(void)
     int     fillval  = 2;
 
     /* Testing Message */
-    HDfprintf(stdout, "Testing individual object refresh behavior:\n");
+    fprintf(stdout, "Testing individual object refresh behavior:\n");
 
     /* Cleanup any old error or signal files */
     CLEANUP_FILES;
@@ -1024,9 +1011,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1064,16 +1048,13 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 flush_verification(const char *obj_pathname, const char *expected)
 {
     /* Variables */
-    hid_t       oid = -1, fid = -1;
+    hid_t       oid = H5I_INVALID_HID, fid = H5I_INVALID_HID;
     herr_t      status = 0;
     H5O_info2_t oinfo;
 
@@ -1084,25 +1065,24 @@ flush_verification(const char *obj_pathname, const char *expected)
         oid    = H5Oopen(fid, obj_pathname, H5P_DEFAULT);
         status = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Compare to expected result */
     if (HDstrcmp(expected, FLUSHED) == 0) {
         if ((oid < 0) || (status < 0)) {
-            HDfprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
+            fprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
     else if (HDstrcmp(expected, NOT_FLUSHED) == 0) {
         if ((oid > 0) || (status > 0)) {
-            HDfprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
-                      obj_pathname);
+            fprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
+                    obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
     else {
-        HDfprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n",
-                  expected);
+        fprintf(stderr, "Error! Bad verification parameters. %s is an invalid expected outcome.\n", expected);
         PROCESS_ERROR;
     } /* end if */
 
@@ -1112,7 +1092,7 @@ flush_verification(const char *obj_pathname, const char *expected)
         H5Oclose(oid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return SUCCEED;
 
@@ -1128,9 +1108,6 @@ error:
  *              H5*refresh routine.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1168,9 +1145,6 @@ error:
  *              on an object and conclude the refresh verification.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1212,9 +1186,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1228,7 +1199,7 @@ refresh_verification(const char *obj_pathname)
     H5O_native_info_t refreshed_ninfo;
     int               tries = 800, sleep_tries = 400;
     int               token_cmp;
-    hbool_t           ok = FALSE;
+    bool              ok = false;
 
     HDremove(SIGNAL_BETWEEN_PROCESSES_2);
 
@@ -1312,7 +1283,7 @@ refresh_verification(const char *obj_pathname)
                 PROCESS_ERROR;
         } /* end if */
         else {
-            HDfprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
+            fprintf(stdout, "Error. %s is an unrecognized object.\n", obj_pathname);
             PROCESS_ERROR;
         } /* end else */
 
@@ -1333,7 +1304,7 @@ refresh_verification(const char *obj_pathname)
             (flushed_ninfo.hdr.nmesgs != refreshed_ninfo.hdr.nmesgs) &&
             (flushed_ninfo.hdr.nchunks != refreshed_ninfo.hdr.nchunks) &&
             (flushed_ninfo.hdr.space.total != refreshed_ninfo.hdr.space.total)) {
-            ok = TRUE;
+            ok = true;
             break;
         }
 
@@ -1343,12 +1314,12 @@ refresh_verification(const char *obj_pathname)
     } while (--tries);
 
     if (!ok) {
-        HDprintf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
-                 (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
-                 (int)flushed_ninfo.hdr.space.total);
-        HDprintf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
-                 (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
-                 (int)refreshed_ninfo.hdr.space.total);
+        printf("FLUSHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)flushed_oinfo.num_attrs,
+               (int)flushed_ninfo.hdr.nmesgs, (int)flushed_ninfo.hdr.nchunks,
+               (int)flushed_ninfo.hdr.space.total);
+        printf("REFRESHED: num_attrs=%d, nmesgs=%d, nchunks=%d, total=%d\n", (int)refreshed_oinfo.num_attrs,
+               (int)refreshed_ninfo.hdr.nmesgs, (int)refreshed_ninfo.hdr.nchunks,
+               (int)refreshed_ninfo.hdr.space.total);
         PROCESS_ERROR;
     }
 
@@ -1377,9 +1348,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Mike McGreevy
- *              July 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1387,8 +1355,8 @@ check_for_errors(void)
 {
     FILE *file;
 
-    if ((file = HDfopen(ERRFILE, "r"))) {
-        HDfclose(file);
+    if ((file = fopen(ERRFILE, "r"))) {
+        fclose(file);
         HDremove(ERRFILE);
         return FAIL;
     } /* end if */
@@ -1403,9 +1371,6 @@ check_for_errors(void)
  *              that the test can wrap up.
  *
  * Return:      void
- *
- * Programmer:  Mike McGreevy
- *              July 16, 2010
  *
  *-------------------------------------------------------------------------
  */

@@ -432,11 +432,13 @@
       add_test (
           NAME MPI_TEST_H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff${tgt_file_ext}>;${MPIEXEC_POSTFLAGS}"
-              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
+              -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff${tgt_file_ext}>;${MPIEXEC_POSTFLAGS};${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=0"
+              #-D "TEST_EXPECT=${resultcode}"
+              -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
+                                 # output from some MPI implementations from a non-zero exit code
               -D "TEST_REFERENCE=${resultfile}.txt"
               -D "TEST_APPEND=EXIT CODE:"
               -D "TEST_REF_APPEND=EXIT CODE: [0-9]"

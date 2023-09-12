@@ -37,10 +37,8 @@
 
 MODULE H5O
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_LONG, C_INT, C_LOC
   USE H5GLOBAL
   IMPLICIT NONE
-
 
 !> @brief h5o_info_t derived type. The time values are an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
   TYPE, BIND(C) :: h5o_info_t
@@ -266,7 +264,7 @@ CONTAINS
 !! \param loc_id  File or group identifier.
 !! \param name    Path to the object, relative to loc_id.
 !! \param obj_id  Object identifier for the opened object.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Access property list identifier for the link pointing to the object.
 !! \param file    \fortran_file
@@ -357,11 +355,14 @@ CONTAINS
 !!
 !! \brief Asynchronously closes an object in an HDF5 file.
 !!
-!! \param object_id Object identifier.
-!! \param es_id     \es_id
+!! \param object_id Object identifier
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
 !!
-!! See C API: @ref H5Oclose_async_f()
+!! See C API: @ref H5Oclose_async()
 !!
   SUBROUTINE h5oclose_async_f(object_id, es_id, hdferr, file, func, line)
     IMPLICIT NONE
@@ -370,7 +371,7 @@ CONTAINS
     INTEGER       , INTENT(OUT) :: hdferr
     TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
     TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
-    INTEGER    , INTENT(IN), OPTIONAL :: line
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
     TYPE(C_PTR) :: func_default = C_NULL_PTR
@@ -403,7 +404,7 @@ CONTAINS
 !! \brief Opens an object using its token within an HDF5 file.
 !!
 !! \param loc_id File or group identifier.
-!! \param token  Object’s token in the file.
+!! \param token  Object&apos;s token in the file.
 !! \param obj_id Object identifier for the opened object.
 !! \param hdferr \fortran_error
 !!
@@ -497,7 +498,7 @@ CONTAINS
 !! \param dst_name   Name to be assigned to the new copy.
 !! \param ocpypl_id  Object copy property list.
 !! \param lcpl_id    Link creation property list for the new hard link.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param file       \fortran_file
 !! \param func       \fortran_func
@@ -845,7 +846,7 @@ CONTAINS
 !! \param order      Order of iteration within index, NOTE: zero-based.
 !! \param n          Object to open.
 !! \param obj_id     An object identifier for the opened object.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !!
 !! \param lapl_id    Link access property list.
@@ -1025,33 +1026,35 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type
     INTEGER, INTENT(IN) :: order
-
     TYPE(C_FUNPTR), INTENT(IN) :: op
-    TYPE(C_PTR), INTENT(IN)   :: op_data
+    TYPE(C_PTR), INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER, INTENT(IN), OPTIONAL  :: fields
-    INTEGER :: fields_c
+    INTEGER, INTENT(IN), OPTIONAL :: fields
+
+    INTEGER(C_INT) :: fields_c
+    INTEGER(C_INT) :: return_value_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data, fields) &
-            BIND(C, NAME='h5ovisit_c')
-         IMPORT :: C_FUNPTR, C_PTR
+       INTEGER(C_INT) FUNCTION H5Ovisit3(object_id, index_type, order, op, op_data, fields) &
+            BIND(C, NAME='H5Ovisit3')
+         IMPORT :: C_FUNPTR, C_PTR, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(C_INT), VALUE :: index_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
-         TYPE(C_PTR), VALUE :: op_data
-         INTEGER, INTENT(IN) :: fields
-       END FUNCTION h5ovisit_c
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+       END FUNCTION H5Ovisit3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F,C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields,C_INT)
 
-    return_value = h5ovisit_c(object_id, index_type, order, op, op_data, fields_c)
+    return_value_c = H5Ovisit3(object_id, INT(index_type,C_INT), INT(order, C_INT), op, op_data, fields_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -1118,7 +1121,7 @@ CONTAINS
 !! \param loc_id      File or group identifier specifying location of group in which object is located.
 !! \param name        Name of group, relative to loc_id.
 !! \param object_info Pointer to buffer returning object information, points to variable of datatype TYPE(C_H5O_INFO_T).
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !! \param fields      Flags specifying the fields to include in object_info.
@@ -1327,44 +1330,44 @@ CONTAINS
     INTEGER         , INTENT(IN)             :: order
 
     TYPE(C_FUNPTR)  , INTENT(IN)             :: op
-    TYPE(C_PTR)     , INTENT(IN)             :: op_data
+    TYPE(C_PTR)     , INTENT(INOUT)          :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL  :: fields
 
-    INTEGER(SIZE_T) :: namelen
-    INTEGER(HID_T)  :: lapl_id_default
-    INTEGER :: fields_c
+    INTEGER(HID_T)  :: lapl_id_c
+    INTEGER(C_INT)  :: fields_c
+    INTEGER(C_INT)  :: return_value_c
+    CHARACTER(LEN=LEN_TRIM(object_name)+1,KIND=C_CHAR) :: object_name_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-            op, op_data, lapl_id, fields) BIND(C, NAME='h5ovisit_by_name_c')
-         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Ovisit_by_name3(loc_id, object_name, index_type, order, &
+            op, op_data, fields, lapl_id) BIND(C, NAME='H5Ovisit_by_name3')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR, C_INT
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: object_name
-         INTEGER(SIZE_T)              :: namelen
-         INTEGER         , INTENT(IN) :: index_type
-         INTEGER         , INTENT(IN) :: order
-         TYPE(C_FUNPTR)  , VALUE      :: op
-         TYPE(C_PTR)     , VALUE      :: op_data
-         INTEGER(HID_T)  , INTENT(IN) :: lapl_id
-         INTEGER         , INTENT(IN) :: fields
-       END FUNCTION h5ovisit_by_name_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: object_name
+         INTEGER(C_INT), VALUE  :: index_type
+         INTEGER(C_INT), VALUE  :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id
+       END FUNCTION H5Ovisit_by_name3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
+    object_name_c = TRIM(object_name)//C_NULL_CHAR
 
-    namelen = LEN(object_name)
+    lapl_id_c = INT(H5P_DEFAULT_F, C_INT)
+    IF(PRESENT(lapl_id)) lapl_id_c = INT(lapl_id, C_INT)
 
-    lapl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-
-    return_value = h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-         op, op_data, lapl_id_default, fields_c)
+    return_value_c = H5Ovisit_by_name3(loc_id, object_name_c, INT(index_type, C_INT), INT(order, C_INT), &
+         op, op_data, fields_c, lapl_id_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0

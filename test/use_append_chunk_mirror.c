@@ -86,8 +86,6 @@
  *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Jacob Smith, 2019 */
-
 #include "use.h"
 
 /* This test uses many POSIX things that are not available on
@@ -118,9 +116,9 @@ int
 setup_parameters(int argc, char *const argv[], options_t *opts)
 {
     /* use case defaults */
-    HDmemset(opts, 0, sizeof(options_t));
+    memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
-    opts->use_swmr    = TRUE;
+    opts->use_swmr    = true;
     opts->iterations  = 1;
     opts->chunkplanes = 1;
     opts->progname    = THIS_PROGNAME;
@@ -158,7 +156,7 @@ main(int argc, char *argv[])
     int                         child_wait_option = 0;
     int                         ret_value         = 0;
     int                         child_ret_value;
-    hbool_t                     send_wait = FALSE;
+    bool                        send_wait = false;
     hid_t                       fid       = H5I_INVALID_HID;
     H5FD_mirror_fapl_t          mirr_fa;
     H5FD_splitter_vfd_config_t *split_fa     = NULL;
@@ -173,8 +171,8 @@ main(int argc, char *argv[])
     mirr_fa.handshake_port = SERVER_PORT;
     HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
 
-    if (NULL == (split_fa = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
-        HDfprintf(stderr, "can't allocate memory for splitter config\n");
+    if (NULL == (split_fa = calloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
+        fprintf(stderr, "can't allocate memory for splitter config\n");
         Hgoto_error(1);
     }
 
@@ -183,13 +181,13 @@ main(int argc, char *argv[])
     split_fa->magic            = H5FD_SPLITTER_MAGIC;
     split_fa->version          = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
     split_fa->log_file_path[0] = '\0'; /* none */
-    split_fa->ignore_wo_errs   = FALSE;
+    split_fa->ignore_wo_errs   = false;
     HDstrncpy(split_fa->wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
 
     /* Determine the need to send/wait message file*/
     if (UC_opts.launch == UC_READWRITE) {
         HDunlink(WRITER_MESSAGE);
-        send_wait = TRUE;
+        send_wait = true;
     }
 
     /* ==============================================================*/
@@ -201,16 +199,16 @@ main(int argc, char *argv[])
     /* Create file */
     /* =========== */
     if (UC_opts.launch != UC_READER) {
-        HDprintf("Creating skeleton data file for test...\n");
+        printf("Creating skeleton data file for test...\n");
 
         /* Prepare mirror child driver */
         mirr_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         if (mirr_fapl_id == H5I_INVALID_HID) {
-            HDfprintf(stderr, "can't create creation mirror FAPL\n");
+            fprintf(stderr, "can't create creation mirror FAPL\n");
             Hgoto_error(1);
         }
         if (H5Pset_fapl_mirror(mirr_fapl_id, &mirr_fa) < 0) {
-            HDfprintf(stderr, "can't set creation mirror FAPL\n");
+            fprintf(stderr, "can't set creation mirror FAPL\n");
             H5Eprint2(H5E_DEFAULT, stdout);
             Hgoto_error(1);
         }
@@ -220,37 +218,37 @@ main(int argc, char *argv[])
         split_fa->rw_fapl_id = H5P_DEFAULT;
         UC_opts.fapl_id      = H5Pcreate(H5P_FILE_ACCESS);
         if (UC_opts.fapl_id == H5I_INVALID_HID) {
-            HDfprintf(stderr, "can't create creation FAPL\n");
+            fprintf(stderr, "can't create creation FAPL\n");
             Hgoto_error(1);
         }
         if (H5Pset_fapl_splitter(UC_opts.fapl_id, split_fa) < 0) {
-            HDfprintf(stderr, "can't set creation FAPL\n");
+            fprintf(stderr, "can't set creation FAPL\n");
             H5Eprint2(H5E_DEFAULT, stdout);
             Hgoto_error(1);
         }
 
         if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-            HDfprintf(stderr, "can't set creation FAPL libver bounds\n");
+            fprintf(stderr, "can't set creation FAPL libver bounds\n");
             Hgoto_error(1);
         }
 
         /* Create file */
         if (create_uc_file(&UC_opts) < 0) {
-            HDfprintf(stderr, "***encounter error\n");
+            fprintf(stderr, "***encounter error\n");
             Hgoto_error(1);
         }
         else {
-            HDprintf("File created.\n");
+            printf("File created.\n");
         }
 
         /* Close FAPLs to prevent issues with forking later */
         if (H5Pclose(UC_opts.fapl_id) < 0) {
-            HDfprintf(stderr, "can't close creation FAPL\n");
+            fprintf(stderr, "can't close creation FAPL\n");
             Hgoto_error(1);
         }
         UC_opts.fapl_id = H5I_INVALID_HID;
         if (H5Pclose(mirr_fapl_id) < 0) {
-            HDfprintf(stderr, "can't close creation mirror FAPL\n");
+            fprintf(stderr, "can't close creation mirror FAPL\n");
             Hgoto_error(1);
         }
         mirr_fapl_id = H5I_INVALID_HID;
@@ -260,7 +258,7 @@ main(int argc, char *argv[])
     /* Fork process */
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((childpid = HDfork()) < 0) {
+        if ((childpid = fork()) < 0) {
             HDperror("fork");
             Hgoto_error(1);
         }
@@ -274,15 +272,15 @@ main(int argc, char *argv[])
         /* child process -- launch the reader */
         /* reader only opens the one file -- separate reader needed for mirrored file 'shinano.h5' */
         if (0 == childpid) {
-            HDprintf("%d: launch reader process\n", mypid);
+            printf("%d: launch reader process\n", mypid);
 
             UC_opts.fapl_id = H5P_DEFAULT;
             if (read_uc_file(send_wait, &UC_opts) < 0) {
-                HDfprintf(stderr, "read_uc_file encountered error (%d)\n", mypid);
-                HDexit(1);
+                fprintf(stderr, "read_uc_file encountered error (%d)\n", mypid);
+                exit(1);
             }
 
-            HDexit(0);
+            exit(0);
         }
     }
 
@@ -290,16 +288,16 @@ main(int argc, char *argv[])
     /* launch writer */
     /* ============= */
     /* this process continues to launch the writer */
-    HDprintf("%d: continue as the writer process\n", mypid);
+    printf("%d: continue as the writer process\n", mypid);
 
     /* Prepare mirror child driver */
     mirr_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (mirr_fapl_id == H5I_INVALID_HID) {
-        HDfprintf(stderr, "can't create creation mirror FAPL\n");
+        fprintf(stderr, "can't create creation mirror FAPL\n");
         Hgoto_error(1);
     }
     if (H5Pset_fapl_mirror(mirr_fapl_id, &mirr_fa) < 0) {
-        HDfprintf(stderr, "can't set creation mirror FAPL\n");
+        fprintf(stderr, "can't set creation mirror FAPL\n");
         H5Eprint2(H5E_DEFAULT, stdout);
         Hgoto_error(1);
     }
@@ -309,45 +307,45 @@ main(int argc, char *argv[])
     split_fa->rw_fapl_id = H5P_DEFAULT;
     UC_opts.fapl_id      = H5Pcreate(H5P_FILE_ACCESS);
     if (UC_opts.fapl_id == H5I_INVALID_HID) {
-        HDfprintf(stderr, "can't create creation FAPL\n");
+        fprintf(stderr, "can't create creation FAPL\n");
         Hgoto_error(1);
     }
     if (H5Pset_fapl_splitter(UC_opts.fapl_id, split_fa) < 0) {
-        HDfprintf(stderr, "can't set creation FAPL\n");
+        fprintf(stderr, "can't set creation FAPL\n");
         H5Eprint2(H5E_DEFAULT, stdout);
         Hgoto_error(1);
     }
 
     if (UC_opts.use_swmr) {
         if (H5Pset_libver_bounds(UC_opts.fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-            HDfprintf(stderr, "can't set write FAPL libver bounds\n");
+            fprintf(stderr, "can't set write FAPL libver bounds\n");
             Hgoto_error(1);
         }
     }
 
     if ((fid = H5Fopen(UC_opts.filename, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0),
                        UC_opts.fapl_id)) < 0) {
-        HDfprintf(stderr, "H5Fopen failed\n");
+        fprintf(stderr, "H5Fopen failed\n");
         Hgoto_error(1);
     }
 
     if (write_uc_file(send_wait, fid, &UC_opts) < 0) {
-        HDfprintf(stderr, "write_uc_file encountered error\n");
+        fprintf(stderr, "write_uc_file encountered error\n");
         Hgoto_error(1);
     }
 
     if (H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "Failed to close write\n");
+        fprintf(stderr, "Failed to close write\n");
         Hgoto_error(1);
     }
 
     if (H5Pclose(UC_opts.fapl_id) < 0) {
-        HDfprintf(stderr, "can't close write FAPL\n");
+        fprintf(stderr, "can't close write FAPL\n");
         Hgoto_error(1);
     }
 
     if (H5Pclose(mirr_fapl_id) < 0) {
-        HDfprintf(stderr, "can't close write mirror FAPL\n");
+        fprintf(stderr, "can't close write mirror FAPL\n");
         Hgoto_error(1);
     }
 
@@ -355,31 +353,31 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
-        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
+        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
             HDperror("waitpid");
             Hgoto_error(1);
         }
 
         if (WIFEXITED(child_status)) {
             if ((child_ret_value = WEXITSTATUS(child_status)) != 0) {
-                HDprintf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
+                printf("%d: child process exited with non-zero code (%d)\n", mypid, child_ret_value);
                 Hgoto_error(2);
             }
         }
         else {
-            HDprintf("%d: child process terminated abnormally\n", mypid);
+            printf("%d: child process terminated abnormally\n", mypid);
             Hgoto_error(2);
         }
     }
 
 done:
-    HDfree(split_fa);
+    free(split_fa);
 
     if (ret_value != 0) {
-        HDprintf("Error(s) encountered\n");
+        printf("Error(s) encountered\n");
     }
     else {
-        HDprintf("All passed\n");
+        printf("All passed\n");
     }
 
     return ret_value;
@@ -390,7 +388,7 @@ done:
 int
 main(void)
 {
-    HDfprintf(stderr, "Mirror VFD is not built. Skipping.\n");
+    fprintf(stderr, "Mirror VFD is not built. Skipping.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 
@@ -401,7 +399,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    fprintf(stderr, "Non-POSIX platform. Skipping.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 

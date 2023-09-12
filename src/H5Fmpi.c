@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Fmpi.c
- *                      Jan 10 2008
- *                      Quincey Koziol
  *
  * Purpose:             MPI-related routines.
  *
@@ -77,9 +75,6 @@
  *
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, January 30, 2004
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -89,11 +84,11 @@ H5F_mpi_get_rank(const H5F_t *f)
 
     FUNC_ENTER_NOAPI((-1))
 
-    HDassert(f && f->shared);
+    assert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_rank request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -108,9 +103,6 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, January 30, 2004
- *
  *-------------------------------------------------------------------------
  */
 MPI_Comm
@@ -120,11 +112,11 @@ H5F_mpi_get_comm(const H5F_t *f)
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    HDassert(f && f->shared);
+    assert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_comm(f->shared->lf)) == MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -139,9 +131,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  John Mainzer
- *              Friday, May 6, 2005
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -151,11 +140,11 @@ H5F_shared_mpi_get_size(const H5F_shared_t *f_sh)
 
     FUNC_ENTER_NOAPI((-1))
 
-    HDassert(f_sh);
+    assert(f_sh);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f_sh->lf)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -170,9 +159,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  John Mainzer
- *              Friday, May 6, 2005
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -182,11 +168,11 @@ H5F_mpi_get_size(const H5F_t *f)
 
     FUNC_ENTER_NOAPI((-1))
 
-    HDassert(f && f->shared);
+    assert(f && f->shared);
 
     /* Dispatch to driver */
     if ((ret_value = H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_size request failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -202,14 +188,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
+H5F__set_mpi_atomicity(H5F_t *file, bool flag)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(file);
+    assert(file);
 
     /* Check VFD */
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
@@ -221,7 +207,7 @@ H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set atomicity flag");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -231,9 +217,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -245,7 +228,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Get the file object */
@@ -262,7 +245,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set MPI atomicity");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fset_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -282,8 +265,8 @@ H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(file);
-    HDassert(flag);
+    assert(file);
+    assert(flag);
 
     /* Check VFD */
     if (!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
@@ -295,7 +278,7 @@ H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get atomicity flag");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -306,20 +289,17 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              Feb 14, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
+H5Fget_mpi_atomicity(hid_t file_id, bool *flag /*out*/)
 {
     H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", file_id, flag);
 
     /* Get the file object */
@@ -336,7 +316,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MPI atomicity");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -350,9 +330,6 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              Feb 14, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -363,7 +340,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(mpi_comm);
+    assert(mpi_comm);
 
     /* Set value to return to invalid MPI comm */
     *mpi_comm = MPI_COMM_NULL;
@@ -376,15 +353,15 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
 
         /* Retrieve the file structure */
         if (H5G_loc(loc_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
         f = loc.oloc->file;
-        HDassert(f);
+        assert(f);
 
         /* Check if MPIO driver is used */
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
             /* retrieve the file communicator */
             if (MPI_COMM_NULL == (*mpi_comm = H5F_mpi_get_comm(f)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator");
         }
     }
     /* otherwise, this is from H5Fopen or H5Fcreate and has to be collective */
@@ -395,20 +372,20 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         H5FD_class_t      *driver_class = NULL;
 
         if (NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list")
+            HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list");
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info");
 
         if (NULL == (driver_class = H5FD_get_class(driver_prop.driver_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver class structure")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver class structure");
 
         if (H5FD_driver_query(driver_class, &driver_feat_flags) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver feature flags")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver feature flags");
 
         if (driver_feat_flags & H5FD_FEAT_HAS_MPI)
             if (H5P_peek(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, mpi_comm) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator");
     }
 
 done:
@@ -424,29 +401,29 @@ done:
  *              coordinates between the file-global flag and the flag set
  *              for the current operation in the current API context.
  *
- * Return:      TRUE/FALSE (can't fail)
+ * Return:      true/false (can't fail)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
     H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
-    hbool_t                 ret_value = FALSE;
+    bool                    ret_value = false;
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(file && file->shared);
+    assert(file && file->shared);
 
     /* Retrieve the file-global flag */
     file_flag = H5F_COLL_MD_READ(file);
 
     /* If file flag is set to H5P_FORCE_FALSE, exit early
-     * with FALSE, since collective metadata reads have
+     * with false, since collective metadata reads have
      * been explicitly disabled somewhere in the library.
      */
     if (H5P_FORCE_FALSE == file_flag)
-        ret_value = FALSE;
+        ret_value = false;
     else {
         /* If file flag is set to H5P_USER_TRUE, ignore
          * any settings in the API context. A file-global
@@ -455,7 +432,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
          * Property List for an individual operation.
          */
         if (H5P_USER_TRUE == file_flag)
-            ret_value = TRUE;
+            ret_value = true;
         else {
             /* Get the collective metadata reads flag from
              * the current API context.
@@ -507,16 +484,16 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
  *-------------------------------------------------------------------------
  */
 void
-H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag)
+H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, bool *context_flag)
 {
     H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
-    hbool_t                 prev_context_flag = FALSE;
+    bool                    prev_context_flag = false;
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(file && file->shared);
-    HDassert(file_flag);
-    HDassert(context_flag);
+    assert(file && file->shared);
+    assert(file_flag);
+    assert(context_flag);
 
     /* Save old state */
     prev_file_flag    = H5F_COLL_MD_READ(file);
@@ -539,12 +516,12 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
  * Function:    H5F_mpi_get_file_block_type
  *
  * Purpose:     Creates an MPI derived datatype for communicating an
- *              H5F_block_t structure. If `commit` is specified as TRUE,
+ *              H5F_block_t structure. If `commit` is specified as true,
  *              the resulting datatype will be committed and ready for
  *              use in communication. Otherwise, the type is only suitable
  *              for building other derived types.
  *
- *              If TRUE is returned through `new_type_derived`, this lets
+ *              If true is returned through `new_type_derived`, this lets
  *              the caller know that the datatype has been derived and
  *              should be freed with MPI_Type_free once it is no longer
  *              needed.
@@ -554,7 +531,7 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived)
+H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_derived)
 {
     MPI_Datatype types[2];
     MPI_Aint     displacements[2];
@@ -565,13 +542,13 @@ H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(new_type);
-    HDassert(new_type_derived);
+    assert(new_type);
+    assert(new_type_derived);
 
-    *new_type_derived = FALSE;
+    *new_type_derived = false;
 
     field_count = 2;
-    HDassert(field_count == sizeof(types) / sizeof(MPI_Datatype));
+    assert(field_count == sizeof(types) / sizeof(MPI_Datatype));
 
     block_lengths[0] = 1;
     block_lengths[1] = 1;
@@ -582,7 +559,7 @@ H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
-    *new_type_derived = TRUE;
+    *new_type_derived = true;
 
     if (commit && MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
@@ -592,7 +569,7 @@ done:
         if (*new_type_derived) {
             if (MPI_SUCCESS != (mpi_code = MPI_Type_free(new_type)))
                 HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-            *new_type_derived = FALSE;
+            *new_type_derived = false;
         }
     }
 

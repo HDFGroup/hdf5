@@ -13,9 +13,6 @@
  *
  * Purpose:     Tests chunk query API functions
  *
- * Modification:
- *              Many tests were added for HDFFV-10677. -BMR, August 2019
- *
  * Test structure:
  *          main()
  *              test_basic_query()
@@ -47,13 +44,13 @@
 #endif
 
 /* Test file names, using H5F_libver_t as indices */
-const char *FILENAME[] = {"tchunk_info_earliest",
-                          "tchunk_info_v18",
-                          "tchunk_info_v110",
-                          "tchunk_info_v112",
-                          "tchunk_info_v114",
-                          "tchunk_info_v116",
-                          NULL};
+static const char *FILENAME[] = {"tchunk_info_earliest",
+                                 "tchunk_info_v18",
+                                 "tchunk_info_v110",
+                                 "tchunk_info_v112",
+                                 "tchunk_info_v114",
+                                 "tchunk_info_v116",
+                                 NULL};
 
 /* File to be used in test_failed_attempts */
 #define FILTERMASK_FILE "tflt_msk"
@@ -118,10 +115,6 @@ const char *FILENAME[] = {"tchunk_info_earliest",
 
 /* For compressed data */
 #define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12.0)
-
-/* For use in error reporting */
-#define MSG_CHK_ADDR "Chunk address should not be HADDR_UNDEF because of H5D_ALLOC_TIME_EARLY."
-#define MSG_CHK_SIZE "Chunk size should not be 0 because of H5D_ALLOC_TIME_EARLY."
 
 /* Utility function to initialize arguments */
 void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
@@ -332,7 +325,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
     hsize_t  ii, jj;                                       /* Array indices */
     int      n;
 
-    HDmemset(&read_buf, 0, sizeof(read_buf));
+    memset(&read_buf, 0, sizeof(read_buf));
 
     /* Initialize the array of chunk data for all NUM_CHUNKS chunks, this is
        the same as the written data and will be used to verify the read data */
@@ -354,10 +347,10 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
                 TEST_ERROR;
 
             /* Verify that read chunk is the same as the corresponding written one */
-            if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
-                HDfprintf(stderr,
-                          "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
-                          offset[0], offset[1]);
+            if (memcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
+                fprintf(stderr,
+                        "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
+                        offset[0], offset[1]);
                 return FAIL;
             }
         }
@@ -564,7 +557,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = HDcalloc(1, z_dst_nbytes);
+    inbuf = calloc(1, z_dst_nbytes);
 
     /* zlib-friendly alias for the input buffer */
     z_dst = (Bytef *)inbuf;
@@ -577,22 +570,22 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "overflow");
+        fprintf(stderr, "overflow");
         TEST_ERROR;
     }
     else if (Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "deflate memory error");
+        fprintf(stderr, "deflate memory error");
         TEST_ERROR;
     }
     else if (Z_OK != ret) {
-        HDfprintf(stderr, "other deflate error");
+        fprintf(stderr, "other deflate error");
         TEST_ERROR;
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    if (NULL == (inbuf = HDcalloc(1, CHK_SIZE)))
+    if (NULL == (inbuf = calloc(1, CHK_SIZE)))
         TEST_ERROR;
-    HDmemcpy(inbuf, direct_buf, CHK_SIZE);
+    memcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
@@ -609,7 +602,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Free the input buffer */
     if (inbuf)
-        HDfree(inbuf);
+        free(inbuf);
 
     if (H5Fflush(dset, H5F_SCOPE_LOCAL) < 0)
         TEST_ERROR;
@@ -641,7 +634,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, H5S_ALL, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt to get info of a non-existing chunk.");
 
@@ -698,7 +691,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt to get info of a non-existing chunk.");
 
@@ -798,7 +791,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -922,7 +915,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
 
@@ -945,7 +938,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1064,7 +1057,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1170,7 +1163,7 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempted to get info of a chunk using an out-of-range index.");
 
@@ -1207,7 +1200,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1319,7 +1312,7 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempted to get info of a chunk using an out-of-range index.");
 
@@ -1356,7 +1349,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1468,7 +1461,7 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempted to get info of a chunk using an out-of-range index.");
 
@@ -1505,7 +1498,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1665,7 +1658,7 @@ test_basic_query(hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
 
@@ -1744,7 +1737,7 @@ test_basic_query(hid_t fapl)
     {
         ret = H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_fail, &cptr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     if (cptr != &(chunk_infos[1]))
@@ -1774,7 +1767,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(basicfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1852,7 +1845,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     {
         ret = H5Dget_num_chunks(dset, dspace, &nchunks);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.");
 
@@ -1863,7 +1856,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.");
 
@@ -1875,7 +1868,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.");
 
@@ -1897,7 +1890,7 @@ error:
         H5Sclose(dspace);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1932,7 +1925,7 @@ test_get_chunk_info_v110(hid_t fapl)
     H5F_libver_t low, high;                   /* File format bounds */
 
     TESTING("getting chunk information in file with versions 1.10 and later");
-    HDprintf("\n"); /* to list sub-tests */
+    printf("\n"); /* to list sub-tests */
 
     /* Set high bound to the current latest version */
     high = H5F_LIBVER_LATEST;
@@ -2108,9 +2101,9 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     for (ii = 0; ii < CHUNK_NX; ii++)
         for (jj = 0; jj < CHUNK_NY; jj++)
             if (direct_buf[ii][jj] != check_chunk[ii][jj]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", ii, jj);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[ii][jj], check_chunk[ii][jj]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", ii, jj);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[ii][jj], check_chunk[ii][jj]);
                 TEST_ERROR;
             }
 
@@ -2121,7 +2114,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
         TEST_ERROR;
 
     /* Read the raw chunk back with H5Dread_chunk */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, read_direct_buf) < 0)
         TEST_ERROR;
     if (read_flt_msk != flt_msk)
@@ -2131,10 +2124,10 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     for (ii = 0; ii < CHUNK_NX; ii++)
         for (jj = 0; jj < CHUNK_NY; jj++)
             if (direct_buf[ii][jj] != read_direct_buf[ii][jj]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", ii, jj);
-                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[ii][jj],
-                         read_direct_buf[ii][jj]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", ii, jj);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[ii][jj],
+                       read_direct_buf[ii][jj]);
                 TEST_ERROR;
             }
 
@@ -2185,7 +2178,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(filter_file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -2197,9 +2190,6 @@ error:
  * Purpose:     Tests functions related to chunk information
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Binh-Minh Ribler
- *              November 5, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2230,7 +2220,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All chunk query tests passed.\n");
+    printf("All chunk query tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -2238,7 +2228,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 }
 

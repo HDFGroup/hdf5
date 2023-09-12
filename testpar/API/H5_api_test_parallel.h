@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -151,7 +151,7 @@ extern char H5_api_test_parallel_filename[];
  */
 #define BEGIN_INDEPENDENT_OP(op_name)                                                                        \
     {                                                                                                        \
-        hbool_t ind_op_failed = FALSE;                                                                       \
+        bool ind_op_failed = false;                                                                          \
                                                                                                              \
         {
 
@@ -162,24 +162,24 @@ extern char H5_api_test_parallel_filename[];
                                                           MPI_LOR, MPI_COMM_WORLD))                          \
     {                                                                                                        \
         if (MAINPROCESS)                                                                                     \
-            HDprintf(                                                                                        \
+            printf(                                                                                          \
                 "    failed to collect consensus about whether non-collective operation was successful\n");  \
         goto error;                                                                                          \
     }                                                                                                        \
                                                                                                              \
     if (ind_op_failed) {                                                                                     \
         if (MAINPROCESS)                                                                                     \
-            HDprintf("    failure detected during non-collective operation - all other ranks will now fail " \
-                     "too\n");                                                                               \
+            printf("    failure detected during non-collective operation - all other ranks will now fail "   \
+                   "too\n");                                                                                 \
         goto error;                                                                                          \
     }                                                                                                        \
     }
 
 #define INDEPENDENT_OP_ERROR(op_name)                                                                        \
-    ind_op_failed = TRUE;                                                                                    \
+    ind_op_failed = true;                                                                                    \
     goto op_##op_name##_end;
 
-hid_t create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read);
+hid_t create_mpi_fapl(MPI_Comm comm, MPI_Info info, bool coll_md_read);
 int   generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out);
 
 extern int mpi_size;

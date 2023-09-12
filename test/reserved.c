@@ -13,7 +13,7 @@
 #include "h5test.h"
 
 #ifdef BROKEN
-const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
+static const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    rsrv_heap
@@ -26,17 +26,13 @@ const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 rsrv_heap(void)
 {
-    hid_t   file_id = (-1), dataset_id = (-1), dataspace_id = (-1);
-    hid_t   fapl = (-1), fcpl = (-1);
+    hid_t   file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID);
+    hid_t   fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID);
     hsize_t dims[1] = {1};
     char    filename[1024], dset_name[10];
     int     i;
@@ -159,17 +155,13 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *              Nat Furrer
- *              Friday, May 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 rsrv_ohdr(void)
 {
-    hid_t   file_id = (-1), dataset_id = (-1), dataspace_id = (-1);
-    hid_t   fapl = (-1), fcpl = (-1), aid, attr_id;
+    hid_t   file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID);
+    hid_t   fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID), aid, attr_id;
     hsize_t dims[2];
     herr_t  status;
     int     attrval[4][6];
@@ -301,17 +293,14 @@ error:
  * Return:    Success:    0
  *        Failure:    1
  *
- * Programmer:    James Laird
- *        Nat Furrer
- *              Thursday, July 1, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 rsrv_vlen(void)
 {
-    hid_t    file_id = (-1), dataset_id = (-1), dataspace_id = (-1), type_id = (-1);
-    hid_t    fapl = (-1), fcpl = (-1), mem_space_id = (-1);
+    hid_t file_id = (H5I_INVALID_HID), dataset_id = (H5I_INVALID_HID), dataspace_id = (H5I_INVALID_HID),
+          type_id = (H5I_INVALID_HID);
+    hid_t    fapl = (H5I_INVALID_HID), fcpl = (H5I_INVALID_HID), mem_space_id = (H5I_INVALID_HID);
     hssize_t offset[1];
     hsize_t  start[1];
     hsize_t  dims[1], count[1];
@@ -462,9 +451,6 @@ error:
  *
  *        Failure:
  *
- * Programmer:    Nat Furrer and James Laird
- *              Thursday, July 1, 2004
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -491,7 +477,7 @@ main(void)
         num_errs += rsrv_vlen();
 
         if (num_errs > 0)
-            HDprintf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
+            printf("**** %d FAILURE%s! ****\n", num_errs, num_errs == 1 ? "" : "S");
         else
             HDputs("All address space reservation tests passed.");
 

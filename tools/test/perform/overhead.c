@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, September 28, 1998
- *
  * Purpose:  Creates a chunked dataset and measures the storage overhead.
  */
 
@@ -43,12 +40,12 @@
 #endif
 
 #define FILE_NAME_1 "overhead.h5"
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
+#ifndef false
+#define false 0
+#endif /* false */
+#ifndef true
+#define true 1
+#endif /* true */
 
 typedef enum fill_t { FILL_ALL, FILL_FORWARD, FILL_REVERSE, FILL_INWARD, FILL_OUTWARD, FILL_RANDOM } fill_t;
 
@@ -59,16 +56,13 @@ typedef enum fill_t { FILL_ALL, FILL_FORWARD, FILL_REVERSE, FILL_INWARD, FILL_OU
  *
  * Return:  never returns
  *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
 usage(const char *prog)
 {
-    HDfprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n", prog);
-    HDfprintf(stderr, "\
+    fprintf(stderr, "usage: %s [STYLE|cache] [LEFT [MIDDLE [RIGHT]]]\n", prog);
+    fprintf(stderr, "\
     STYLE is the order that the dataset is filled and should be one of:\n\
         forward   --  Fill the dataset from lowest address to highest\n\
                       address. This style tests the right split ratio.\n\
@@ -106,9 +100,6 @@ usage(const char *prog)
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Thursday, June  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -127,9 +118,6 @@ cleanup(void)
  * Return:  Success:  0
  *
  *    Failure:  -1
- *
- * Programmer:  Robb Matzke
- *    Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -151,13 +139,10 @@ display_error_cb(hid_t estack, void H5_ATTR_UNUSED *client_data)
  *
  *    Failure:  number of errors
  *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
-test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc)
+test(fill_t fill_style, const double splits[], bool verbose, bool use_rdcc)
 {
     hid_t       file = (-1), fapl = (-1), dcpl = (-1), xfer = (-1), mspace = (-1), fspace = (-1), dset = (-1);
     hsize_t     ch_size[1]  = {1};             /*chunk size    */
@@ -230,7 +215,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
                 abort();
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown fill style\n");
+                fprintf(stderr, "Unknown fill style\n");
                 goto error;
                 break;
         }
@@ -286,7 +271,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
                 abort();
             default:
                 /* unknown request */
-                HDfprintf(stderr, "Unknown fill style\n");
+                fprintf(stderr, "Unknown fill style\n");
                 goto error;
                 break;
         }
@@ -322,19 +307,16 @@ error:
  *
  *    Failure:  non-zero
  *
- * Programmer:  Robb Matzke
- *              Monday, September 28, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, char *argv[])
 {
-    hid_t   xfer;
-    fill_t  fill_style = FILL_ALL;
-    hbool_t use_cache  = FALSE;
-    double  splits[3];
-    int     i, j, nerrors = 0;
+    hid_t  xfer;
+    fill_t fill_style = FILL_ALL;
+    bool   use_cache  = false;
+    double splits[3];
+    int    i, j, nerrors = 0;
 
     /* Default split ratios */
     H5Eset_auto2(H5E_DEFAULT, display_error_cb, NULL);
@@ -364,7 +346,7 @@ main(int argc, char *argv[])
             fill_style = FILL_RANDOM;
         }
         else if (!strcmp(argv[i], "cache")) {
-            use_cache = TRUE;
+            use_cache = true;
         }
         else if (j < 3 && (isdigit(argv[i][0]) || '.' == argv[i][0])) {
             splits[j++] = strtod(argv[i], NULL);
@@ -377,16 +359,16 @@ main(int argc, char *argv[])
     if (FILL_ALL == fill_style) {
         printf("%-7s %8s\n", "Style", "Bytes/Chunk");
         printf("%-7s %8s\n", "-----", "-----------");
-        nerrors += test(FILL_FORWARD, splits, FALSE, use_cache);
-        nerrors += test(FILL_REVERSE, splits, FALSE, use_cache);
-        nerrors += test(FILL_INWARD, splits, FALSE, use_cache);
-        nerrors += test(FILL_OUTWARD, splits, FALSE, use_cache);
-        nerrors += test(FILL_RANDOM, splits, FALSE, use_cache);
+        nerrors += test(FILL_FORWARD, splits, false, use_cache);
+        nerrors += test(FILL_REVERSE, splits, false, use_cache);
+        nerrors += test(FILL_INWARD, splits, false, use_cache);
+        nerrors += test(FILL_OUTWARD, splits, false, use_cache);
+        nerrors += test(FILL_RANDOM, splits, false, use_cache);
     }
     else {
         if (use_cache)
             usage(argv[0]);
-        nerrors += test(fill_style, splits, TRUE, FALSE);
+        nerrors += test(fill_style, splits, true, false);
     }
     if (nerrors > 0)
         goto error;
@@ -394,6 +376,6 @@ main(int argc, char *argv[])
     return 0;
 
 error:
-    HDfprintf(stderr, "*** ERRORS DETECTED ***\n");
+    fprintf(stderr, "*** ERRORS DETECTED ***\n");
     return 1;
 }
