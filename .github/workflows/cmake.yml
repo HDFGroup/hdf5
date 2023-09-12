@@ -11,31 +11,32 @@ permissions:
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
 jobs:
-      call-debug-thread-cmake:
+    name: "CMake"
+    call-debug-thread-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Debug"
 
-      call-release-thread-cmake:
+    call-release-thread-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Release"
 
-      call-debug-cmake:
+    call-debug-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Debug"
 
-      call-release-cmake:
+    call-release-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Release"
 
-      call-release-cmake-intel:
+    call-release-cmake-intel:
         uses: ./.github/workflows/intel-cmake.yml
         with:
             build_mode: "Release"

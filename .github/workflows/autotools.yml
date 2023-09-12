@@ -11,39 +11,38 @@ permissions:
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
 jobs:
-  workflow-autotools:
-    name: "Autotools Workflows"
-      call-workflow-special-autotools:
+    name: "Autotools"
+    call-workflow-special-autotools:
         uses: ./.github/workflows/main-auto-spc.yml
 
-      call-parallel-special-autotools:
+    call-parallel-special-autotools:
         uses: ./.github/workflows/main-auto-par.yml
 
-      call-debug-thread-autotools:
+    call-debug-thread-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "debug"
 
-      call-release-thread-autotools:
+    call-release-thread-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "production"
 
-      call-debug-autotools:
+    call-debug-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: false
             build_mode: "debug"
 
-      call-release-autotools:
+    call-release-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: false
             build_mode: "production"
 
-      call-release-auto-intel:
+    call-release-auto-intel:
         uses: ./.github/workflows/intel-auto.yml
         with:
             build_mode: "production"
