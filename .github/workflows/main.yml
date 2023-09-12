@@ -35,7 +35,7 @@ jobs:
 
       - uses: ./.github/workflows/main-auto-par.yml
 
-        uses: ./.github/workflows/main-auto.yml
+      - uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "debug"
