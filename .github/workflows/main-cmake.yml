@@ -112,7 +112,7 @@ jobs:
 
 
     # Sets the job's name from the properties
-    name: "${{ matrix.name }}${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
+    name: "${{ matrix.name }}-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
 
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
