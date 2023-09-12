@@ -2522,15 +2522,12 @@ done:
 } /* end H5CX_get_no_selection_io_cause() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5CX_get_no_selection_io_cause
+ * Function:    H5CX_get_actual_selection_io_mode
  *
  * Purpose:     Retrieves the cause for not performing selection I/O
  *              for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Vailin Choi
- *              April 15, 2023
  *
  *-------------------------------------------------------------------------
  */
@@ -3526,9 +3523,6 @@ H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause)
  *
  * Return:      <none>
  *
- * Programmer:  Vailin Choi
- *              April 15, 2023
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -3548,7 +3542,7 @@ H5CX_set_actual_selection_io_mode(uint32_t actual_selection_io_mode)
         /* Cache the value for later, marking it to set in DXPL when context popped */
         (*head)->ctx.actual_selection_io_mode     = actual_selection_io_mode;
         (*head)->ctx.actual_selection_io_mode_set = TRUE;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_set_actual_selection_io_mode() */
