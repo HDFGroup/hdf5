@@ -8332,7 +8332,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *          H5Pget_no_selection_io_cause() can be used to determine the reason
  *          why selection or vector I/O was not performed.
  *
- *          Valid values returned in \p actual_selection_io_mode are listed
+ *          Valid bitflags returned in \p actual_selection_io_mode are listed
  *          as follows.
  *
  *          - #H5D_SCALAR_IO
@@ -8342,12 +8342,17 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *          - #H5D_SELECTION_IO
  *          Selection I/O was performed
  *
+ *          0 or more of these can be present in \p actual_selection_io_mode in
+ *          a bitwise fashion, since a single operation can trigger multiple
+ *          instances of I/O, possibly with different types.  A value of \p 0
+ *          indicates no raw data I/O was performed during the operation.
+ *
  *          Be aware that this function will only include raw data I/O performed
- *          as part of the last I/O operation.  Any metadata flushes, including
- *          attribute and compact dataset I/O, is disregarded.  It is also
- *          possible that data was cached in the dataset chunk cache or sieve
- *          buffer, which may prevent I/O from hitting the disk, and thereby
- *          prevent it from being counted by this function.
+ *          to/from disk as part of the last I/O operation.  Any metadata
+ *          I/O, including attribute and compact dataset I/O, is disregarded.
+ *          It is also possible that data was cached in the dataset chunk cache
+ *          or sieve buffer, which may prevent I/O from hitting the disk, and
+ *          thereby prevent it from being counted by this function.
  *
  * \since 1.14.2
  *
