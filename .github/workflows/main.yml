@@ -29,6 +29,7 @@ permissions:
 jobs:
   workflow-autotools:
     name: "Autotools Workflows"
+    runs-on: ubuntu-latest
     steps:
       - uses: ./.github/workflows/main-auto-spc.yml
 
@@ -60,6 +61,7 @@ jobs:
 
   workflow-cmake:
     name: "CMake Workflows"
+    runs-on: ubuntu-latest
     steps:
       - uses: ./.github/workflows/main-cmake.yml
         with:
