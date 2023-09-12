@@ -479,7 +479,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
                            H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE, &H5D_def_actual_selection_io_mode_g, NULL,
                            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the modify write buffer property */
     if (H5P__register_real(pclass, H5D_XFER_MODIFY_WRITE_BUF_NAME, H5D_XFER_MODIFY_WRITE_BUF_SIZE,
@@ -2489,12 +2489,12 @@ H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mo
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Return values */
     if (actual_selection_io_mode)
         if (H5P_get(plist, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME, actual_selection_io_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get actual_selection_io_mode value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get actual_selection_io_mode value");
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -588,7 +588,7 @@ H5CX_init(void)
     /* Get the actual selection I/O mode */
     if (H5P_get(dx_plist, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
                 &H5CX_def_dxpl_cache.actual_selection_io_mode) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve actual selection I/O mode")
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve actual selection I/O mode");
 
     /* Get the modify write buffer property */
     if (H5P_get(dx_plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &H5CX_def_dxpl_cache.modify_write_buf) < 0)
@@ -2543,10 +2543,10 @@ H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(actual_selection_io_mode);
+    assert(actual_selection_io_mode);
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
-    HDassert(head && *head);
-    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+    assert(head && *head);
+    assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
     H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
                                  actual_selection_io_mode)
@@ -3540,8 +3540,8 @@ H5CX_set_actual_selection_io_mode(uint32_t actual_selection_io_mode)
 
     /* Sanity checks */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
-    HDassert(head && *head);
-    HDassert((*head)->ctx.dxpl_id != H5P_DEFAULT);
+    assert(head && *head);
+    assert((*head)->ctx.dxpl_id != H5P_DEFAULT);
 
     /* If we're using the default DXPL, don't modify it */
     if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {

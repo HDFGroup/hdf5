@@ -1062,7 +1062,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     if (use_vector) {
         uint32_t actual_selection_io_mode;
 
-        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
@@ -1754,7 +1754,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     if (use_vector) {
         uint32_t actual_selection_io_mode;
 
-        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
