@@ -33,5 +33,4 @@ jobs:
 
   workflow-cmake:
     name: "CMake Workflows"
-    runs-on: ubuntu-latest
     uses: ./.github/workflows/cmake.yml
