@@ -28,67 +28,59 @@ permissions:
 # run in parallel.
 jobs:
   workflow-autotools:
-      call-workflow-special-autotools:
+    name: "Autotools Workflows"
+    steps:
         uses: ./.github/workflows/main-auto-spc.yml
 
-      call-parallel-special-autotools:
         uses: ./.github/workflows/main-auto-par.yml
 
-      call-debug-thread-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "debug"
 
-      call-release-thread-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: true
             build_mode: "production"
 
-      call-debug-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: false
             build_mode: "debug"
 
-      call-release-autotools:
         uses: ./.github/workflows/main-auto.yml
         with:
             thread_safety: false
             build_mode: "production"
 
-      call-release-auto-intel:
         uses: ./.github/workflows/intel-auto.yml
         with:
             build_mode: "production"
 
   workflow-cmake:
-      call-debug-thread-cmake:
+    name: "CMake Workflows"
+    steps:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Debug"
 
-      call-release-thread-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Release"
 
-      call-debug-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Debug"
 
-      call-release-cmake:
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Release"
 
-      call-release-cmake-intel:
         uses: ./.github/workflows/intel-cmake.yml
         with:
             build_mode: "Release"
