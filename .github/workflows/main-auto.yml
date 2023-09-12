@@ -119,7 +119,8 @@ jobs:
 
       - name: Autotools Verify Install
         run: make check-install
- 
+        working-directory: ${{ runner.workspace }}/build
+
   #
   # The GitHub runners are inadequate for running parallel HDF5 tests,
   # so we catch most issues in daily testing. What we have here is just
