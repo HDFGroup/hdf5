@@ -144,9 +144,8 @@ compare_stype4_data(void *expect_buf, void *rbuf)
 
         if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
             s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[6] != s2_ptr->c[6] ||
-            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e ||
-            s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p ||
-            s1_ptr->q != s2_ptr->q) {
+            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e || s1_ptr->o != s2_ptr->o ||
+            s1_ptr->p != s2_ptr->p || s1_ptr->q != s2_ptr->q) {
 
             H5_FAILED();
             printf("    i=%d\n", i);
