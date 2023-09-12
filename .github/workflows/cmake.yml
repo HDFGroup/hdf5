@@ -12,30 +12,35 @@ permissions:
 # run in parallel.
 jobs:
     call-debug-thread-cmake:
+        name: "CMake Debug Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Debug"
 
     call-release-thread-cmake:
+        name: "CMake Release Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: true
             build_mode: "Release"
 
     call-debug-cmake:
+        name: "CMake Debug Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Debug"
 
     call-release-cmake:
+        name: "CMake Release Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
             thread_safety: false
             build_mode: "Release"
 
     call-release-cmake-intel:
+        name: "CMake Intel Workflows"
         uses: ./.github/workflows/intel-cmake.yml
         with:
             build_mode: "Release"
