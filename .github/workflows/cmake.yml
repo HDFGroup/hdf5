@@ -1,0 +1,41 @@
+name: hdf5 dev cmake CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel. We just have one job, but the matrix items defined below will
+# run in parallel.
+jobs:
+      call-debug-thread-cmake:
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: true
+            build_mode: "Debug"
+
+      call-release-thread-cmake:
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: true
+            build_mode: "Release"
+
+      call-debug-cmake:
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: false
+            build_mode: "Debug"
+
+      call-release-cmake:
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            thread_safety: false
+            build_mode: "Release"
+
+      call-release-cmake-intel:
+        uses: ./.github/workflows/intel-cmake.yml
+        with:
+            build_mode: "Release"

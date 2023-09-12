@@ -1,0 +1,49 @@
+name: hdf5 dev autools CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel. We just have one job, but the matrix items defined below will
+# run in parallel.
+jobs:
+  workflow-autotools:
+    name: "Autotools Workflows"
+      call-workflow-special-autotools:
+        uses: ./.github/workflows/main-auto-spc.yml
+
+      call-parallel-special-autotools:
+        uses: ./.github/workflows/main-auto-par.yml
+
+      call-debug-thread-autotools:
+        uses: ./.github/workflows/main-auto.yml
+        with:
+            thread_safety: true
+            build_mode: "debug"
+
+      call-release-thread-autotools:
+        uses: ./.github/workflows/main-auto.yml
+        with:
+            thread_safety: true
+            build_mode: "production"
+
+      call-debug-autotools:
+        uses: ./.github/workflows/main-auto.yml
+        with:
+            thread_safety: false
+            build_mode: "debug"
+
+      call-release-autotools:
+        uses: ./.github/workflows/main-auto.yml
+        with:
+            thread_safety: false
+            build_mode: "production"
+
+      call-release-auto-intel:
+        uses: ./.github/workflows/intel-auto.yml
+        with:
+            build_mode: "production"
