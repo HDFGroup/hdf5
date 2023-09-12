@@ -46,7 +46,7 @@ jobs:
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
-    
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4
@@ -72,7 +72,6 @@ jobs:
             --enable-ros3-vfd \
             --with-szlib=yes
         shell: bash
-        working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety == 'disable' }}
 
       - name: Autotools Configure (Thread-Safe)
@@ -91,7 +90,6 @@ jobs:
             --enable-ros3-vfd \
             --with-szlib=yes
         shell: bash
-        working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety == 'enable' }}
 
       # BUILD
@@ -176,7 +174,6 @@ jobs:
             --disable-ros3-vfd \
             --with-szlib=yes
         shell: bash
-        working-directory: ${{ runner.workspace }}/build
 
       # BUILD
       - name: Autotools Build
