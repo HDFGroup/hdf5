@@ -40,7 +40,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # AUTOTOOLS CONFIGURE
       - name: Autotools Configure
@@ -97,7 +97,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # AUTOTOOLS CONFIGURE
       - name: Autotools Configure
