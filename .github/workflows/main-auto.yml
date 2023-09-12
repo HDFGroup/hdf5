@@ -46,7 +46,7 @@ jobs:
           #
           # Keep this identical to the CMake configs. Note the difference in
           # the values.
-          - name: "Ubuntu gcc Autotools"
+          - name: "gcc"
             os: ubuntu-latest
             cpp: enable
             fortran: enable
@@ -67,7 +67,7 @@ jobs:
           # The GitHub runners are inadequate for running parallel HDF5 tests,
           # so we catch most issues in daily testing. What we have here is just
           # a compile check to make sure nothing obvious is broken.
-          - name: "Ubuntu gcc parallel (build only)"
+          - name: "gcc parallel (build only)"
             os: ubuntu-latest
             cpp: disable
             fortran: enable
