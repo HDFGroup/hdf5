@@ -28,10 +28,10 @@ permissions:
 # run in parallel.
 jobs:
 
-  call-workflow-special:
+  call-workflow-special-autotools:
     uses: ./.github/workflows/main-auto-spc.yml
 
-  call-parallel-special:
+  call-parallel-special-autotools:
     uses: ./.github/workflows/main-auto-par.yml
 
   call--debug-thread-autotools:
@@ -61,7 +61,6 @@ jobs:
   call-release-auto-intel:
     uses: ./.github/workflows/intel-auto.yml
     with:
-        thread_safety: true
         build_mode: "production"
 
   call-debug-thread-cmake:
@@ -88,8 +87,7 @@ jobs:
         thread_safety: false
         build_mode: "Release"
 
-  call-release-cmake-thread-intel:
+  call-release-cmake-intel:
     uses: ./.github/workflows/intel-cmake.yml
     with:
-        thread_safety: true
         build_mode: "Release"

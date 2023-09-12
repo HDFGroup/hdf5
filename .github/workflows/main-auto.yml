@@ -33,8 +33,8 @@ jobs:
       # names match.
       matrix:
         name:
-          - "Ubuntu gcc Autotools"
-          - "Ubuntu gcc Autotools parallel (build only)"
+          - "gcc"
+          - "gcc parallel (build only)"
 
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
@@ -67,7 +67,7 @@ jobs:
           # The GitHub runners are inadequate for running parallel HDF5 tests,
           # so we catch most issues in daily testing. What we have here is just
           # a compile check to make sure nothing obvious is broken.
-          - name: "Ubuntu gcc Autotools parallel (build only)"
+          - name: "Ubuntu gcc parallel (build only)"
             os: ubuntu-latest
             cpp: disable
             fortran: enable
@@ -84,7 +84,7 @@ jobs:
             run_tests: false
 
     # Sets the job's name from the properties
-    name: "${{ matrix.name }}${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
+    name: "${{ matrix.name }}-TS=${{ inputs.thread_safety }}"
 
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"

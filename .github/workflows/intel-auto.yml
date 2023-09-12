@@ -3,10 +3,6 @@ name: hdf5 dev autotools icx CI
 on:
   workflow_call:
     inputs:
-      thread_safety:
-        description: "thread-safety on/off"
-        required: true
-        type: boolean
       build_mode:
         description: "release vs. debug build"
         required: true
@@ -16,7 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  Autotools_build_and_test:
+  Intel_build_and_test:
+    name: "Intel ${{ inputs.build_mode }} -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

@@ -1,4 +1,4 @@
-name: hdf5 dev autotools CI
+name: hdf5 dev autotools special CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:
@@ -20,7 +20,7 @@ jobs:
   #
 
   build_v1_6:
-    name: "Ubuntu gcc DBG Autotools v1.6 default API (build only)"
+    name: "gcc DBG v1.6 default API (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -81,7 +81,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_8:
-    name: "Ubuntu gcc DBG Autotools v1.8 default API (build only)"
+    name: "gcc DBG v1.8 default API (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -142,7 +142,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_10:
-    name: "Ubuntu gcc DBG Autotools v1.10 default API (build only)"
+    name: "gcc DBG v1.10 default API (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -203,7 +203,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_12:
-    name: "Ubuntu gcc DBG Autotools v1.12 default API (build only)"
+    name: "gcc DBG v1.12 default API (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -264,7 +264,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_14:
-    name: "Ubuntu gcc DBG Autotools v1.14 default API (build only)"
+    name: "gcc DBG v1.14 default API (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -325,7 +325,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_no_deprecated:
-    name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
+    name: "gcc no deprecated symbols (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -386,7 +386,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_debug_werror:
-    name: "Ubuntu gcc DBG Autotools -Werror (build only)"
+    name: "gcc DBG -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -447,7 +447,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   build_release_werror:
-    name: "Ubuntu gcc REL Autotools -Werror (build only)"
+    name: "gcc REL -Werror (build only)"
     runs-on: ubuntu-latest
     steps:
       # SETUP

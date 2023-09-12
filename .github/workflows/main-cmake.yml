@@ -33,9 +33,9 @@ jobs:
       # names match.
       matrix:
         name:
-          - "Windows MSVC CMake"
-          - "Ubuntu gcc CMake"
-          - "MacOS Clang CMake"
+          - "Windows MSVC"
+          - "Ubuntu gcc"
+          - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
@@ -46,7 +46,7 @@ jobs:
           # Windows w/ MSVC + CMake
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC CMake"
+          - name: "Windows MSVC"
             os: windows-2022
             toolchain: ""
             cpp: ON
@@ -68,7 +68,7 @@ jobs:
           #
           # We might think about adding Clang, but MacOS already tests that
           # so it's not critical
-          - name: "Ubuntu gcc CMake"
+          - name: "Ubuntu gcc"
             os: ubuntu-latest
             cpp: ON
             fortran: ON
@@ -91,7 +91,7 @@ jobs:
           #
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
-          - name: "MacOS Clang CMake"
+          - name: "MacOS Clang"
             os: macos-13
             cpp: ON
             fortran: OFF
