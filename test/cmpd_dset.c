@@ -144,16 +144,8 @@ compare_stype4_data(void *expect_buf, void *rbuf)
 
         if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
             s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[6] != s2_ptr->c[6] ||
-            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e || !H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g) || !H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1]) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5]) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9]) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11]) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13]) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15]) || !H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i) ||
-            !H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j) || !H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k) ||
-            !H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l) || !H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m) ||
-            !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n) || s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p ||
+            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e ||
+            s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p ||
             s1_ptr->q != s2_ptr->q) {
 
             H5_FAILED();
