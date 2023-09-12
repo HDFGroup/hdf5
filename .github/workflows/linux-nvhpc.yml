@@ -1,9 +1,26 @@
 name: linux CMake nvhpc
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - develop
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
+
+# Using concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -20,7 +37,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y nvhpc-23-7          
       - name: Get Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Test HDF5
         env:
           FC: nvfortran
