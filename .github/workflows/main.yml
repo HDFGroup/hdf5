@@ -28,6 +28,7 @@ permissions:
 # run in parallel.
 jobs:
   call-workflow-autotools:
+    name: "Autotools"
     steps:
       - name: call-workflow-special-autotools:
         uses: ./.github/workflows/main-auto-spc.yml
@@ -65,6 +66,7 @@ jobs:
             build_mode: "production"
 
   call-workflow-cmake:
+    name: "CMake"
     steps:
       - name: call-debug-thread-cmake:
         uses: ./.github/workflows/main-cmake.yml
