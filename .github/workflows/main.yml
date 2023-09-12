@@ -34,7 +34,13 @@ jobs:
   call-parallel-special:
     uses: ./.github/workflows/main-auto-par.yml
 
-  call-release-autotools:
+  call--debug-thread-autotools:
+    uses: ./.github/workflows/main-auto.yml
+    with:
+        thread_safety: true
+        build_mode: "debug"
+
+  call-release-thread-autotools:
     uses: ./.github/workflows/main-auto.yml
     with:
         thread_safety: true
@@ -46,13 +52,25 @@ jobs:
         thread_safety: false
         build_mode: "debug"
 
+  call-release-autotools:
+    uses: ./.github/workflows/main-auto.yml
+    with:
+        thread_safety: false
+        build_mode: "production"
+
   call-release-auto-intel:
     uses: ./.github/workflows/intel-auto.yml
     with:
         thread_safety: true
         build_mode: "production"
 
-  call-release-cmake:
+  call-debug-thread-cmake:
+    uses: ./.github/workflows/main-cmake.yml
+    with:
+        thread_safety: true
+        build_mode: "Debug"
+
+  call-release-thread-cmake:
     uses: ./.github/workflows/main-cmake.yml
     with:
         thread_safety: true
@@ -64,7 +82,13 @@ jobs:
         thread_safety: false
         build_mode: "Debug"
 
-  call-release-cmake-intel:
+  call-release-cmake:
+    uses: ./.github/workflows/main-cmake.yml
+    with:
+        thread_safety: false
+        build_mode: "Release"
+
+  call-release-cmake-thread-intel:
     uses: ./.github/workflows/intel-cmake.yml
     with:
         thread_safety: true
