@@ -134,7 +134,7 @@ static int   compare_stype4_data(void *expect_buf, void *rbuf);
 static int
 compare_stype4_data(void *expect_buf, void *rbuf)
 {
-    int i;
+    int      i;
     unsigned err = FALSE;
 
     for (i = 0; i < (int)(NX * NY); i++) {
@@ -174,61 +174,80 @@ compare_stype4_data(void *expect_buf, void *rbuf)
         else if (s1_ptr->e != s2_ptr->e) {
             printf("e is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f)) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f)) {
             printf("f is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g)) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g)) {
             printf("g is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1])) {
             printf("h[1] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3])) {
             printf("h[3] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5])) {
             printf("h[5] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7])) {
             printf("h[7] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9])) {
             printf("h[9] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11])) {
             printf("h[11] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13])) {
             printf("h[13] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15])) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15])) {
             printf("h[15] is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i)) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i)) {
             printf("i is different\n");
             err = TRUE;
-        } else if (!H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j)) {
+        }
+        else if (!H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j)) {
             printf("j is different\n");
             err = TRUE;
-        } else if (!H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k)) {
+        }
+        else if (!H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k)) {
             printf("k is different\n");
             err = TRUE;
-        } else if (!H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l)) {
+        }
+        else if (!H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l)) {
             printf("l is different\n");
             err = TRUE;
-        } else if (!H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m)) {
+        }
+        else if (!H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m)) {
             printf("m is different\n");
             err = TRUE;
-        } else if (!H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n)) {
+        }
+        else if (!H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n)) {
             printf("n is different\n");
             err = TRUE;
-        } else if (s1_ptr->o != s2_ptr->o) {
+        }
+        else if (s1_ptr->o != s2_ptr->o) {
             printf("o is different\n");
             err = TRUE;
-        } else if (s1_ptr->p != s2_ptr->p) {
+        }
+        else if (s1_ptr->p != s2_ptr->p) {
             printf("p is different\n");
             err = TRUE;
-        } else if (s1_ptr->q != s2_ptr->q) {
+        }
+        else if (s1_ptr->q != s2_ptr->q) {
             printf("q is different\n");
             err = TRUE;
         }
