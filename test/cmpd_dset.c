@@ -410,12 +410,12 @@ error:
 static unsigned
 test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillvalue, unsigned set_buf)
 {
-    hid_t          fid;
-    hid_t          rew_tid, src_tid, dst_tid;
-    hid_t          did;
-    hid_t          sid;
-    hid_t          dcpl;
-    hid_t          dxpl;
+    hid_t          fid = H5I_INVALID_HID ;
+    hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID, dst_tid = H5I_INVALID_HID;
+    hid_t          did = H5I_INVALID_HID;
+    hid_t          sid = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID;
+    hid_t          dxpl = H5I_INVALID_HID;
     hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
