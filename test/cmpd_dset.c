@@ -399,7 +399,7 @@ static unsigned
 test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillvalue, unsigned set_buf)
 {
     hid_t          fid     = H5I_INVALID_HID;
-    hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID, dst_tid = H5I_INVALID_HID;
+    hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID;
     hid_t          did           = H5I_INVALID_HID;
     hid_t          sid           = H5I_INVALID_HID;
     hid_t          dcpl          = H5I_INVALID_HID;
@@ -419,9 +419,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
 
     if ((rew_tid = create_stype4()) < 0)
-        goto error;
-
-    if ((dst_tid = create_stype1()) < 0)
         goto error;
 
     /* Create the data space */
@@ -469,18 +466,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
 
-    initialize_stype4(rew_buf, (size_t)NX * NY);
-    memset(rbuf, 0, NX * NY * sizeof(stype4));
-    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        goto error;
-#ifdef OUT
-    if (H5Dread(did, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        goto error;
-#endif
-
-    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
-        goto error;
-
     if (H5Dclose(did) < 0)
         goto error;
 
@@ -498,13 +483,26 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
 
-    memset(rbuf, 0, NX * NY * sizeof(stype4));
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    if ((did = H5Dopen2(fid, DSET_NAME[2], H5P_DEFAULT)) < 0)
+        goto error;
+
     if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
-#ifdef OUT
-    if (H5Dread(did, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+
+    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
         goto error;
-#endif
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    if ((did = H5Dopen2(fid, DSET_NAME[3], H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
 
     if (compare_stype4_data(save_rew_buf, rbuf) < 0)
         goto error;
@@ -525,8 +523,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
     if (H5Tclose(rew_tid) < 0)
         goto error;
-    if (H5Tclose(dst_tid) < 0)
-        goto error;
     if (H5Fclose(fid) < 0)
         goto error;
 
@@ -545,7 +541,6 @@ error:
         H5Fclose(fid);
         H5Tclose(src_tid);
         H5Tclose(rew_tid);
-        H5Tclose(dst_tid);
     }
     H5E_END_TRY
 
