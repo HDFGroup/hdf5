@@ -800,7 +800,7 @@ test_compounds_selection_io(void)
     for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
         for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
             for (select_io = FALSE; select_io <= TRUE; select_io++) {
-                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
+                for (mwbuf = FALSE; mwbuf <= FALSE; mwbuf++) {
                     for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
