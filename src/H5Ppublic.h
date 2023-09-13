@@ -420,10 +420,15 @@ typedef enum H5D_selection_io_mode_t {
 } H5D_selection_io_mode_t;
 //! <!--[H5D_selection_io_mode_t_snip] -->
 
-/* Actual selection I/O modes for H5Pget_actual_selection_io_mode() property */
-#define H5D_SCALAR_IO    0x1 /* Scalar (or legacy MPIO) I/O was performed */
-#define H5D_VECTOR_IO    0x2 /* Vector I/O was performed */
-#define H5D_SELECTION_IO 0x4 /* Selection I/O was performed */
+/**
+ * Causes for H5Pget_actual_selection_io_mode() property
+ */
+#define H5D_SCALAR_IO                                                                                        \
+    (0x0001u) /**< Scalar (or legacy MPIO) I/O was performed */
+#define H5D_VECTOR_IO                                                                                        \
+    (0x0002u) /**< Vector I/O was performed */
+#define H5D_SELECTION_IO                                                                                     \
+    (0x0004u) /**< Selection I/O was performed */
 
 /********************/
 /* Public Variables */
