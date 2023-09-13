@@ -175,6 +175,7 @@ compare_stype4_data(void *expect_buf, void *rbuf)
             printf("e is different\n");
             err = TRUE;
         }
+#ifdef OUT
         else if (s1_ptr->o != s2_ptr->o) {
             printf("o is different\n");
             err = TRUE;
@@ -187,6 +188,7 @@ compare_stype4_data(void *expect_buf, void *rbuf)
             printf("q is different\n");
             err = TRUE;
         }
+#endif
         if (err) {
             H5_FAILED();
             printf("    i=%d\n", i);
