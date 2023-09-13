@@ -153,7 +153,7 @@ compare_stype4_data(void *expect_buf, void *rbuf)
             !H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15]) || !H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i) ||
             !H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j) || !H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k) ||
             !H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l) || !H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m) ||
-            !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n) ) {
+            !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n)) {
 
             H5_FAILED();
             printf("    i=%d\n", i);
