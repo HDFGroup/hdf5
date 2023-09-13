@@ -446,6 +446,12 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
 
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
+
+    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
+        goto error;
+
     if (H5Dclose(did) < 0)
         goto error;
 
@@ -461,24 +467,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     /* Write data to the dataset with rew_tid */
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-        goto error;
-
-    if (H5Dclose(did) < 0)
-        goto error;
-
-    if ((did = H5Dopen2(fid, DSET_NAME[2], H5P_DEFAULT)) < 0)
-        goto error;
-
-    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        goto error;
-
-    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
-        goto error;
-
-    if (H5Dclose(did) < 0)
-        goto error;
-
-    if ((did = H5Dopen2(fid, DSET_NAME[3], H5P_DEFAULT)) < 0)
         goto error;
 
     if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
