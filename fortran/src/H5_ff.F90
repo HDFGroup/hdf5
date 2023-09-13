@@ -76,7 +76,7 @@ MODULE H5LIB
   !
   ! H5D flags declaration
   !
-  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 57
+  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 60
   INTEGER, DIMENSION(1:H5D_FLAGS_LEN) :: H5D_flags
   INTEGER, PARAMETER :: H5D_SIZE_FLAGS_LEN = 2
   INTEGER(SIZE_T), DIMENSION(1:H5D_SIZE_FLAGS_LEN) :: H5D_size_flags
@@ -469,6 +469,9 @@ CONTAINS
     H5D_MPIO_NO_CHUNK_OPTIMIZATION_F                    = H5D_flags(55)
     H5D_MPIO_LINK_CHUNK_F                               = H5D_flags(56)
     H5D_MPIO_MULTI_CHUNK_F                              = H5D_flags(57)
+    H5D_SCALAR_IO_F                                     = H5D_flags(58)
+    H5D_VECTOR_IO_F                                     = H5D_flags(59)
+    H5D_SELECTION_IO_F                                  = H5D_flags(60)
 
     H5D_CHUNK_CACHE_NSLOTS_DFLT_F = H5D_size_flags(1)
     H5D_CHUNK_CACHE_NBYTES_DFLT_F = H5D_size_flags(2)
