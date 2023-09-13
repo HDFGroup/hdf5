@@ -135,6 +135,7 @@ static int
 compare_stype4_data(void *expect_buf, void *rbuf)
 {
     int i;
+    unsigned err = FALSE;
 
     for (i = 0; i < (int)(NX * NY); i++) {
         stype4 *s1_ptr;
@@ -142,36 +143,66 @@ compare_stype4_data(void *expect_buf, void *rbuf)
         s1_ptr = ((stype4 *)expect_buf) + i;
         s2_ptr = ((stype4 *)rbuf) + i;
 
-        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
-            s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[6] != s2_ptr->c[6] ||
-            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e ||
-            s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p ||
-            s1_ptr->q != s2_ptr->q) {
+        if (s1_ptr->a != s2_ptr->a) {
+            printf("a is different\n");
+            err = TRUE;
+        } else if(s1_ptr->b != s2_ptr->b) {
+            printf("b is different\n");
+            err = TRUE;
+        } else if (s1_ptr->c[0] != s2_ptr->c[0]) {
+            printf("c[0] is different\n");
+            err = TRUE;
+        } else if (s1_ptr->c[2] != s2_ptr->c[2]) {
+            printf("c[2] is different\n");
+            err = TRUE;
+        } else if (s1_ptr->c[4] != s2_ptr->c[4]) {
+            printf("c[4] is different\n");
+            err = TRUE;
+        } else if (s1_ptr->c[6] != s2_ptr->c[6]) {
+            printf("c[6] is different\n");
+            err = TRUE;
+        } else if (s1_ptr->d != s2_ptr->d) {
+            printf("d is different\n");
+            err = TRUE;
+        } else if (s1_ptr->e != s2_ptr->e) {
+            printf("e is different\n");
+            err = TRUE;
+        } else if (s1_ptr->o != s2_ptr->o) {
+            printf("o is different\n");
+            err = TRUE;
+        } else if (s1_ptr->p != s2_ptr->p) {
+            printf("p is different\n");
+            err = TRUE;
+        } else if (s1_ptr->q != s2_ptr->q) {
+            printf("q is different\n");
+            err = TRUE;
+        }
+        if(err) {
 
             H5_FAILED();
             printf("    i=%d\n", i);
-            printf("    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
-                   "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
-                   "o=%ld, p=%ld, q=%ld}\n",
-                   s1_ptr->a, s1_ptr->b, s1_ptr->c[0], s1_ptr->c[1], s1_ptr->c[2], s1_ptr->c[3], s1_ptr->c[4],
-                   s1_ptr->c[5], s1_ptr->c[6], s1_ptr->c[7], s1_ptr->d, s1_ptr->e, (double)s1_ptr->f,
-                   (double)s1_ptr->g, (double)s1_ptr->h[0], (double)s1_ptr->h[1], (double)s1_ptr->h[2],
-                   (double)s1_ptr->h[3], (double)s1_ptr->h[4], (double)s1_ptr->h[5], (double)s1_ptr->h[6],
-                   (double)s1_ptr->h[7], (double)s1_ptr->h[8], (double)s1_ptr->h[9], (double)s1_ptr->h[10],
-                   (double)s1_ptr->h[11], (double)s1_ptr->h[12], (double)s1_ptr->h[13], (double)s1_ptr->h[14],
-                   (double)s1_ptr->h[15], (double)s1_ptr->i, (double)s1_ptr->j, s1_ptr->k, s1_ptr->l,
-                   s1_ptr->m, s1_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
-            printf("    rbuf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
-                   "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
-                   "o=%ld, p=%ld, q=%ld}\n",
-                   s2_ptr->a, s2_ptr->b, s2_ptr->c[0], s2_ptr->c[1], s2_ptr->c[2], s2_ptr->c[3], s2_ptr->c[4],
-                   s2_ptr->c[5], s2_ptr->c[6], s2_ptr->c[7], s2_ptr->d, s2_ptr->e, (double)s2_ptr->f,
-                   (double)s2_ptr->g, (double)s2_ptr->h[0], (double)s2_ptr->h[1], (double)s2_ptr->h[2],
-                   (double)s2_ptr->h[3], (double)s2_ptr->h[4], (double)s2_ptr->h[5], (double)s2_ptr->h[6],
-                   (double)s2_ptr->h[7], (double)s2_ptr->h[8], (double)s2_ptr->h[9], (double)s2_ptr->h[10],
-                   (double)s2_ptr->h[11], (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14],
-                   (double)s2_ptr->h[15], (double)s2_ptr->i, (double)s2_ptr->j, s2_ptr->k, s2_ptr->l,
-                   s2_ptr->m, s2_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
+            printf(
+                "    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
+                "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%ld, p=%ld, q=%ld}\n",
+                s1_ptr->a, s1_ptr->b, s1_ptr->c[0], s1_ptr->c[1], s1_ptr->c[2], s1_ptr->c[3], s1_ptr->c[4],
+                s1_ptr->c[5], s1_ptr->c[6], s1_ptr->c[7], s1_ptr->d, s1_ptr->e, (double)s1_ptr->f, (double)s1_ptr->g,
+                (double)s1_ptr->h[0], (double)s1_ptr->h[1], (double)s1_ptr->h[2], (double)s1_ptr->h[3],
+                (double)s1_ptr->h[4], (double)s1_ptr->h[5], (double)s1_ptr->h[6], (double)s1_ptr->h[7],
+                (double)s1_ptr->h[8], (double)s1_ptr->h[9], (double)s1_ptr->h[10], (double)s1_ptr->h[11],
+                (double)s1_ptr->h[12], (double)s1_ptr->h[13], (double)s1_ptr->h[14], (double)s1_ptr->h[15],
+                (double)s1_ptr->i, (double)s1_ptr->j, s1_ptr->k, s1_ptr->l, s1_ptr->m, s1_ptr->n,
+                s1_ptr->o, s1_ptr->p, s1_ptr->q);
+            printf(
+                "    rbuf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
+                "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%ld, p=%ld, q=%ld}\n",
+                s2_ptr->a, s2_ptr->b, s2_ptr->c[0], s2_ptr->c[1], s2_ptr->c[2], s2_ptr->c[3], s2_ptr->c[4],
+                s2_ptr->c[5], s2_ptr->c[6], s2_ptr->c[7], s2_ptr->d, s2_ptr->e, (double)s2_ptr->f, (double)s2_ptr->g,
+                (double)s2_ptr->h[0], (double)s2_ptr->h[1], (double)s2_ptr->h[2], (double)s2_ptr->h[3],
+                (double)s2_ptr->h[4], (double)s2_ptr->h[5], (double)s2_ptr->h[6], (double)s2_ptr->h[7],
+                (double)s2_ptr->h[8], (double)s2_ptr->h[9], (double)s2_ptr->h[10], (double)s2_ptr->h[11],
+                (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14], (double)s2_ptr->h[15],
+                (double)s2_ptr->i, (double)s2_ptr->j, s2_ptr->k, s2_ptr->l, s2_ptr->m, s2_ptr->n,
+                s1_ptr->o, s1_ptr->p, s1_ptr->q);
             goto error;
         }
     } /* end for */
@@ -182,6 +213,7 @@ error:
     return FAIL;
 
 } /* compare_stype4_data() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_select_src_subset
@@ -497,6 +529,8 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
     if (H5Tclose(rew_tid) < 0)
         goto error;
+    if (H5Tclose(dst_tid) < 0)
+        goto error;
     if (H5Fclose(fid) < 0)
         goto error;
 
@@ -507,6 +541,18 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     return 0;
 
 error:
+     H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Tclose(src_tid);
+        H5Tclose(rew_tid);
+        H5Tclose(dst_tid);
+    }
+    H5E_END_TRY
+
     if (rbuf)
         free(rbuf);
     if (rew_buf)
@@ -803,7 +849,7 @@ test_compounds_selection_io(void)
                         else
                             printf("without H5Pset_buffer:\n");
 
-                        nerrs += test_select_compound(fname, fapl, dxpl, set_fillvalue, set_buf);
+                        nerrs += test_select_compound(fname, fapl, dxpl, set_fillvalue, set_buf); 
                         nerrs += test_select_src_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
                         nerrs += test_select_dst_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
 
