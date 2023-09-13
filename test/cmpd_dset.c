@@ -178,7 +178,6 @@ compare_stype4_data(void *expect_buf, void *rbuf)
             err = TRUE;
         }
         if(err) {
-
             H5_FAILED();
             printf("    i=%d\n", i);
             printf(
