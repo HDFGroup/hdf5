@@ -169,7 +169,7 @@ static int
 verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
                       const hsize_t *exp_offset, unsigned exp_flt_msk)
 {
-    unsigned read_flt_msk  = 0;      /* Read filter mask */
+    uint32_t read_flt_msk  = 0;      /* Read filter mask */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
     hsize_t  size          = 0;      /* Size of an allocated/written chunk */
     haddr_t  addr          = 0;      /* Address of an allocated/written chunk */
@@ -210,7 +210,7 @@ error:
 static int
 verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size, unsigned exp_flt_msk)
 {
-    unsigned read_flt_msk = 0; /* Read filter mask */
+    uint32_t read_flt_msk = 0; /* Read filter mask */
     hsize_t  size         = 0; /* Size of an allocated/written chunk */
     haddr_t  addr         = 0; /* Address of an allocated/written chunk */
 
@@ -247,7 +247,7 @@ error:
 static int
 verify_empty_chunk_info(hid_t dset, hsize_t *offset)
 {
-    unsigned read_flt_msk = 0; /* Read filter mask */
+    uint32_t read_flt_msk = 0; /* Read filter mask */
     hsize_t  size         = 0; /* Size of an allocated/written chunk */
     haddr_t  addr         = 0; /* Address of an allocated/written chunk */
 
@@ -319,7 +319,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
 {
     int      read_buf[CHUNK_NX][CHUNK_NY];
     int      expected_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY]; /* Expected data */
-    unsigned read_flt_msk = 0;                             /* Filter mask read back */
+    uint32_t read_flt_msk = 0;                             /* Filter mask read back */
     hsize_t  offset[2]    = {0, 0};                        /* Offset coordinates of a chunk */
     hsize_t  chk_index;                                    /* Chunk index */
     hsize_t  ii, jj;                                       /* Array indices */
@@ -494,8 +494,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     haddr_t  addr         = 0;                            /* Address of an allocated/written chunk */
     hsize_t  chk_index    = 0;                            /* Index of a chunk */
     hsize_t  dims[2]      = {NX, NY};                     /* Dataset dimensions */
-    unsigned flt_msk      = 0;                            /* Filter mask */
-    unsigned read_flt_msk = 0;                            /* Filter mask after direct read */
+    uint32_t flt_msk      = 0;                            /* Filter mask */
+    uint32_t read_flt_msk = 0;                            /* Filter mask after direct read */
     int      fillvalue    = -1;                           /* Fill value */
     hsize_t  offset[2]    = {0, 0};                       /* Offset coordinates of a chunk */
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -825,8 +825,8 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     hsize_t           chunk_dims[2] = {NX, NY};        /* Chunk dimensions */
     int               data_buf[NX][NY];                /* Input buffer */
     H5D_chunk_index_t idx_type;                        /* Dataset chunk index type */
-    unsigned          flt_msk      = 0;                /* Filter mask */
-    unsigned          read_flt_msk = 0;                /* Filter mask after direct read */
+    uint32_t          flt_msk      = 0;                /* Filter mask */
+    uint32_t          read_flt_msk = 0;                /* Filter mask after direct read */
     hsize_t           offset[2];                       /* Offset coordinates of a chunk */
     hsize_t           out_offset[2] = {0, 0};          /* Buffer to get offset coordinates */
     hsize_t           size          = 0;               /* Size of an allocated/written chunk */
@@ -970,7 +970,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
     hid_t    cparms        = H5I_INVALID_HID;       /* Creation plist */
     hsize_t  dims[2]       = {NX, NY};              /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};  /* Chunk dimensions */
-    unsigned flt_msk       = 0;                     /* Filter mask */
+    uint32_t flt_msk       = 0;                     /* Filter mask */
     hsize_t  chk_index     = 0;                     /* Index of a chunk */
     hsize_t  ii, jj;                                /* Array indices */
     hsize_t  start[2] = {START_CHK_X, START_CHK_Y}; /* Start position */
@@ -1089,8 +1089,8 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     hid_t    cparms        = H5I_INVALID_HID;            /* Creation plist */
     hsize_t  dims[2]       = {NX, NY};                   /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};       /* Chunk dimensions */
-    unsigned flt_msk       = 0;                          /* Filter mask */
-    unsigned read_flt_msk  = 0;                          /* Filter mask after direct read */
+    uint32_t flt_msk       = 0;                          /* Filter mask */
+    uint32_t read_flt_msk  = 0;                          /* Filter mask after direct read */
     hsize_t  offset[2];                                  /* Offset coordinates of a chunk */
     hsize_t  start[2]      = {START_CHK_X, START_CHK_Y}; /* Start position */
     hsize_t  end[2]        = {END_CHK_X, END_CHK_Y};     /* End position */
@@ -1233,8 +1233,8 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     hsize_t  dims[2]       = {NX, NY};                   /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};       /* Chunk dimensions */
     hsize_t  maxdims[2]    = {H5S_UNLIMITED, NY};        /* One unlimited dimension */
-    unsigned flt_msk       = 0;                          /* Filter mask */
-    unsigned read_flt_msk  = 0;                          /* Filter mask after direct read */
+    uint32_t flt_msk       = 0;                          /* Filter mask */
+    uint32_t read_flt_msk  = 0;                          /* Filter mask after direct read */
     hsize_t  offset[2];                                  /* Offset coordinates of a chunk */
     hsize_t  start[2]      = {START_CHK_X, START_CHK_Y}; /* Start position */
     hsize_t  end[2]        = {END_CHK_X, END_CHK_Y};     /* End position */
@@ -1382,8 +1382,8 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     hsize_t  dims[2]       = {NX, NY};                       /* Dataset dimensions */
     hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};           /* Chunk dimensions */
     hsize_t  maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Two unlimited dims */
-    unsigned flt_msk       = 0;                              /* Filter mask */
-    unsigned read_flt_msk  = 0;                              /* Filter mask after direct read */
+    uint32_t flt_msk       = 0;                              /* Filter mask */
+    uint32_t read_flt_msk  = 0;                              /* Filter mask after direct read */
     hsize_t  offset[2];                                      /* Offset coordinates of a chunk */
     hsize_t  start[2]      = {START_CHK_X, START_CHK_Y};     /* Start position */
     hsize_t  end[2]        = {END_CHK_X, END_CHK_Y};         /* End position */
@@ -1579,8 +1579,8 @@ test_basic_query(hid_t fapl)
     hsize_t            dims[2]       = {NX, NY};             /* Dataset dimensions */
     hsize_t            chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
     int                direct_buf[CHUNK_NX][CHUNK_NY];       /* Data in chunks */
-    unsigned           flt_msk      = 0;                     /* Filter mask */
-    unsigned           read_flt_msk = 0;                     /* Filter mask after direct read */
+    uint32_t           flt_msk      = 0;                     /* Filter mask */
+    uint32_t           read_flt_msk = 0;                     /* Filter mask after direct read */
     hsize_t            offset[2];                            /* Offset coordinates of a chunk */
     hsize_t            out_offset[2] = {0, 0};               /* Buffer to get offset coordinates */
     hsize_t            size          = 0;                    /* Size of an allocated/written chunk */
@@ -1797,7 +1797,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     hid_t    dset      = H5I_INVALID_HID; /* Dataset ID */
     hsize_t  dims[2]   = {NX, NY};        /* Dataset dimensions */
     int      data_buf[NX][NY];            /* Input buffer */
-    unsigned read_flt_msk = 0;            /* Filter mask after direct read */
+    uint32_t read_flt_msk = 0;            /* Filter mask after direct read */
     hsize_t  offset[2];                   /* Offset coordinates of a chunk */
     hsize_t  out_offset[2] = {0, 0};      /* Buffer to get offset coordinates */
     hsize_t  size          = 0;           /* Size of an allocated/written chunk */
@@ -2009,8 +2009,8 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     int      check_chunk[CHUNK_NX][CHUNK_NY];                /* Buffer to read data in */
     int      read_direct_buf[CHUNK_NX][CHUNK_NY];            /* Buffer to read a chunk */
     hsize_t  read_buf_size = 0;                              /* buf size */
-    unsigned flt_msk       = 0;                              /* Filter mask */
-    unsigned read_flt_msk  = 0;                              /* Filter mask after direct read */
+    uint32_t flt_msk       = 0;                              /* Filter mask */
+    uint32_t read_flt_msk  = 0;                              /* Filter mask after direct read */
     hsize_t  offset[2]     = {0, 0};                         /* Offset coordinates of a chunk */
     hsize_t  nchunks       = 0;                              /* Number of chunks */
     hsize_t  chk_index     = 0;                              /* Index of a chunk */

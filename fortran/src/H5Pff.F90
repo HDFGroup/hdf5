@@ -5346,9 +5346,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
    SUBROUTINE h5pget_mpio_no_collective_cause_f(plist_id, local_no_collective_cause, global_no_collective_cause, hdferr)
      IMPLICIT NONE
      INTEGER(HID_T)    , INTENT(IN)  :: plist_id
-     INTEGER(C_INT32_T), INTENT(OUT) :: local_no_collective_cause
-     INTEGER(C_INT32_T), INTENT(OUT) :: global_no_collective_cause
+     INTEGER, INTENT(OUT) :: local_no_collective_cause
+     INTEGER, INTENT(OUT) :: global_no_collective_cause
      INTEGER           , INTENT(OUT) :: hdferr
+
+     INTEGER(C_INT32_T) :: c_local_no_collective_cause
+     INTEGER(C_INT32_T) :: c_global_no_collective_cause
 
      INTERFACE
         INTEGER(C_INT) FUNCTION H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause) &
@@ -5361,7 +5364,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
         END FUNCTION H5Pget_mpio_no_collective_cause
      END INTERFACE
 
-     hdferr = INT(H5Pget_mpio_no_collective_cause(plist_id, local_no_collective_cause, global_no_collective_cause))
+     hdferr = INT(H5Pget_mpio_no_collective_cause(plist_id, c_local_no_collective_cause, c_global_no_collective_cause))
+
+     local_no_collective_cause = INT(c_local_no_collective_cause)
+     global_no_collective_cause = INT(c_global_no_collective_cause)
 
    END SUBROUTINE h5pget_mpio_no_collective_cause_f
 
@@ -6328,9 +6334,11 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !!
    SUBROUTINE h5pget_no_selection_io_cause_f(plist_id, no_selection_io_cause, hdferr)
      IMPLICIT NONE
-     INTEGER(HID_T)    , INTENT(IN)  :: plist_id
-     INTEGER(C_INT32_T), INTENT(OUT) :: no_selection_io_cause
-     INTEGER           , INTENT(OUT) :: hdferr
+     INTEGER(HID_T), INTENT(IN)  :: plist_id
+     INTEGER       , INTENT(OUT) :: no_selection_io_cause
+     INTEGER       , INTENT(OUT) :: hdferr
+
+     INTEGER(C_INT32_T) :: c_no_selection_io_cause
 
      INTERFACE
         INTEGER(C_INT) FUNCTION H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause) &
@@ -6342,7 +6350,9 @@ END SUBROUTINE h5pget_virtual_dsetname_f
         END FUNCTION H5Pget_no_selection_io_cause
      END INTERFACE
 
-     hdferr = INT( H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause))
+     hdferr = INT( H5Pget_no_selection_io_cause(plist_id, c_no_selection_io_cause))
+
+     no_selection_io_cause = INT(c_no_selection_io_cause)
 
    END SUBROUTINE h5pget_no_selection_io_cause_f
 
@@ -6373,7 +6383,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
      INTERFACE
         INTEGER(C_INT) FUNCTION H5Pset_file_space_strategy(plist_id, strategy, persist, threshold) &
              BIND(C, NAME='H5Pset_file_space_strategy')
-          IMPORT :: HID_T, HSIZE_T, C_INT, C_INT32_T, C_BOOL
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_BOOL
           IMPLICIT NONE
           INTEGER(HID_T)  , VALUE :: plist_id
           INTEGER(C_INT)  , VALUE :: strategy
@@ -6416,7 +6426,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
      INTERFACE
         INTEGER(C_INT) FUNCTION H5Pget_file_space_strategy(plist_id, strategy, persist, threshold) &
              BIND(C, NAME='H5Pget_file_space_strategy')
-          IMPORT :: HID_T, HSIZE_T, C_INT, C_INT32_T, C_BOOL
+          IMPORT :: HID_T, HSIZE_T, C_INT, C_BOOL
           IMPLICIT NONE
           INTEGER(HID_T), VALUE :: plist_id
           INTEGER(C_INT)   :: strategy
