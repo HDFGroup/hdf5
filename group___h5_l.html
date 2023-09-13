@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.a0edeee</span>
+   &#160;<span id="projectnumber">1.15.0.db9053e</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -108,170 +108,9 @@ $(document).ready(function(){initNavTree('group___h5_l.html',''); initResizable(
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Use the functions in this module to manage HDF5 links and link types.</p>
-<table class="doxtable">
-<tr>
-<th>Create</th><th>Read </th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    {</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        __label__ fail_link, fail_prop, fail_lcpl, fail_create;</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, lcpl;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordflow">if</span> ((file = <a class="code" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(<span class="stringliteral">&quot;l1.h5&quot;</span>, <a class="code" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            <span class="keywordflow">goto</span> fail_create;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        }</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="comment">// make link creation easier by auto-creating intermediate</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="comment">// groups and UTF-8 encoding of link names</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keywordflow">if</span> ((lcpl = <a class="code" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>(<a class="code" href="_h5_ppublic_8h.html#ad2c1d10104f0262c826350ccbf7c49f2">H5P_LINK_CREATE</a>)) == <a class="code" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keywordflow">goto</span> fail_lcpl;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        }</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___l_c_p_l.html#ga66c4c5d3f34e5cf65d00e47a5387383c">H5Pset_create_intermediate_group</a>(lcpl, 1) &lt; 0 || <a class="code" href="group___a_c_p_l.html#gad4fa8e2d17236786f770cf17eef908cc">H5Pset_char_encoding</a>(lcpl, <a class="code" href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71aa41685667f69bf81eb7de5dd5f452e658">H5T_CSET_UTF8</a>) &lt; 0) {</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            <span class="keywordflow">goto</span> fail_prop;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        }</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="comment">// create a loop by hard linking the root group</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___h5_l.html#ga69d50f7acdfd2f1dc7c4372397e63bd2">H5Lcreate_hard</a>(file, <span class="stringliteral">&quot;.&quot;</span>, file, <span class="stringliteral">&quot;√&quot;</span>, lcpl, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;            <span class="keywordflow">goto</span> fail_link;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        }</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="comment">// create a soft link to nowhere</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___h5_l.html#ga894444623b58ce1ac3bd35538245ac78">H5Lcreate_soft</a>(<span class="stringliteral">&quot;e1 62 80 87 04 09 43 ba 02 d3&quot;</span>, file, <span class="stringliteral">&quot;/path/to/nowhere&quot;</span>, lcpl, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;            0) {</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;            <span class="keywordflow">goto</span> fail_link;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        }</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="comment">// create an external link to nowhere in a non-existent file</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683">H5Lcreate_external</a>(<span class="stringliteral">&quot;non-existent-file.h5&quot;</span>, <span class="stringliteral">&quot;???&quot;</span>, file, <span class="stringliteral">&quot;external&quot;</span>, lcpl, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;            <span class="keywordflow">goto</span> fail_link;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        }</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;fail_link:</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;fail_prop:</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <a class="code" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(lcpl);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;fail_lcpl:</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        <a class="code" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;fail_create:;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    }</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a5a2d6726f9ad8d2bca8df2b817e5ad6a"><div class="ttname"><a href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a></div><div class="ttdeci">#define H5F_ACC_TRUNC</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:50</div></div>
-<div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition:</b> H5Ipublic.h:60</div></div>
-<div class="ttc" id="a_h5_ipublic_8h_html_a01eab13dccc91afd6909d74dccb780ba"><div class="ttname"><a href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a></div><div class="ttdeci">#define H5I_INVALID_HID</div><div class="ttdef"><b>Definition:</b> H5Ipublic.h:75</div></div>
-<div class="ttc" id="a_h5_ppublic_8h_html_ad2c1d10104f0262c826350ccbf7c49f2"><div class="ttname"><a href="_h5_ppublic_8h.html#ad2c1d10104f0262c826350ccbf7c49f2">H5P_LINK_CREATE</a></div><div class="ttdeci">#define H5P_LINK_CREATE</div><div class="ttdef"><b>Definition:</b> H5Ppublic.h:67</div></div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition:</b> H5Ppublic.h:102</div></div>
-<div class="ttc" id="a_h5_tpublic_8h_html_a03755b8370672668ddc7063add28e71aa41685667f69bf81eb7de5dd5f452e658"><div class="ttname"><a href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71aa41685667f69bf81eb7de5dd5f452e658">H5T_CSET_UTF8</a></div><div class="ttdeci">@ H5T_CSET_UTF8</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:96</div></div>
-<div class="ttc" id="agroup___a_c_p_l_html_gad4fa8e2d17236786f770cf17eef908cc"><div class="ttname"><a href="group___a_c_p_l.html#gad4fa8e2d17236786f770cf17eef908cc">H5Pset_char_encoding</a></div><div class="ttdeci">herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)</div><div class="ttdoc">Sets the character encoding used to encode link and attribute names.</div></div>
-<div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
-<div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
-<div class="ttc" id="agroup___h5_l_html_ga15dfaeb9b1c0b3136533cb97ee45e683"><div class="ttname"><a href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683">H5Lcreate_external</a></div><div class="ttdeci">herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)</div><div class="ttdoc">Creates an external link, a soft link to an object in a different file.</div></div>
-<div class="ttc" id="agroup___h5_l_html_ga69d50f7acdfd2f1dc7c4372397e63bd2"><div class="ttname"><a href="group___h5_l.html#ga69d50f7acdfd2f1dc7c4372397e63bd2">H5Lcreate_hard</a></div><div class="ttdeci">herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id)</div><div class="ttdoc">Creates a hard link to an object.</div></div>
-<div class="ttc" id="agroup___h5_l_html_ga894444623b58ce1ac3bd35538245ac78"><div class="ttname"><a href="group___h5_l.html#ga894444623b58ce1ac3bd35538245ac78">H5Lcreate_soft</a></div><div class="ttdeci">herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)</div><div class="ttdoc">Creates a soft link.</div></div>
-<div class="ttc" id="agroup___l_c_p_l_html_ga66c4c5d3f34e5cf65d00e47a5387383c"><div class="ttname"><a href="group___l_c_p_l.html#ga66c4c5d3f34e5cf65d00e47a5387383c">H5Pset_create_intermediate_group</a></div><div class="ttdeci">herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd)</div><div class="ttdoc">Specifies in property list whether to create missing intermediate groups.</div></div>
-<div class="ttc" id="agroup___p_l_c_r_html_ga5dce61149211d3ef319452aa598887fb"><div class="ttname"><a href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a></div><div class="ttdeci">herr_t H5Pclose(hid_t plist_id)</div><div class="ttdoc">Terminates access to a property list.</div></div>
-<div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
-</div><!-- fragment -->  </td><td><div class="fragment"><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;iter_cb(<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> group, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keyword">const</span> <a class="code" href="_h5version_8h.html#af542682cfe46de7b0759e52a1608d1e4">H5L_info_t</a> *info, <span class="keywordtype">void</span> *op_data)</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;{</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    printf(<span class="stringliteral">&quot;Link \&quot;%s\&quot; is a&quot;</span>, name);</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    <span class="keywordflow">switch</span> (info-&gt;type) {</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        <span class="keywordflow">case</span> <a class="code" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a>:</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;            printf(<span class="stringliteral">&quot; hard link.\n&quot;</span>);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;            <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;        <span class="keywordflow">case</span> <a class="code" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a38eb885df3f43f179b973f576fe996ed">H5L_TYPE_SOFT</a>:</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;            printf(<span class="stringliteral">&quot; soft link.\n&quot;</span>);</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;            <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        <span class="keywordflow">case</span> <a class="code" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a>:</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;            printf(<span class="stringliteral">&quot;n external link.\n&quot;</span>);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;            <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        <span class="keywordflow">default</span>:</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            printf(<span class="stringliteral">&quot; UFO link.\n&quot;</span>);</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;            <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;}</div>
-<div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a></div><div class="ttdeci">@ H5L_TYPE_EXTERNAL</div><div class="ttdef"><b>Definition:</b> H5Lpublic.h:67</div></div>
-<div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48a38eb885df3f43f179b973f576fe996ed"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a38eb885df3f43f179b973f576fe996ed">H5L_TYPE_SOFT</a></div><div class="ttdeci">@ H5L_TYPE_SOFT</div><div class="ttdef"><b>Definition:</b> H5Lpublic.h:66</div></div>
-<div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a></div><div class="ttdeci">@ H5L_TYPE_HARD</div><div class="ttdef"><b>Definition:</b> H5Lpublic.h:65</div></div>
-<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:235</div></div>
-<div class="ttc" id="a_h5version_8h_html_af542682cfe46de7b0759e52a1608d1e4"><div class="ttname"><a href="_h5version_8h.html#af542682cfe46de7b0759e52a1608d1e4">H5L_info_t</a></div><div class="ttdeci">#define H5L_info_t</div><div class="ttdef"><b>Definition:</b> H5version.h:1033</div></div>
-</div><!-- fragment --> <div class="fragment"><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        __label__ fail_iterate, fail_read;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>   file;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> idx = 0;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        <span class="keywordflow">if</span> ((file = <a class="code" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;l1.h5&quot;</span>, <a class="code" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;            <span class="keywordflow">goto</span> fail_read;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        }</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___t_r_a_v.html#ga55406698106930db68242987c11ba051">H5Literate</a>(file, <a class="code" href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3a644e6701706be4d37660864336c7bd3e">H5_INDEX_NAME</a>, <a class="code" href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a15eebaf7d85d5e37e918858634e29d01">H5_ITER_NATIVE</a>, &amp;idx, iter_cb, NULL) &lt; 0) {</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            <span class="keywordflow">goto</span> fail_iterate;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        }</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;fail_iterate:</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <a class="code" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;fail_read:;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    }</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a1c406ffa89f4acf5a332144a2683d394"><div class="ttname"><a href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a></div><div class="ttdeci">#define H5F_ACC_RDONLY</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:48</div></div>
-<div class="ttc" id="a_h5public_8h_html_a6a6ddd1504d1ed61939d46d91d9441b9a15eebaf7d85d5e37e918858634e29d01"><div class="ttname"><a href="_h5public_8h.html#a6a6ddd1504d1ed61939d46d91d9441b9a15eebaf7d85d5e37e918858634e29d01">H5_ITER_NATIVE</a></div><div class="ttdeci">@ H5_ITER_NATIVE</div><div class="ttdef"><b>Definition:</b> H5public.h:348</div></div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition:</b> H5public.h:297</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8203c78e10ab2d89d8bce688a31afad3a644e6701706be4d37660864336c7bd3e"><div class="ttname"><a href="_h5public_8h.html#a8203c78e10ab2d89d8bce688a31afad3a644e6701706be4d37660864336c7bd3e">H5_INDEX_NAME</a></div><div class="ttdeci">@ H5_INDEX_NAME</div><div class="ttdef"><b>Definition:</b> H5public.h:369</div></div>
-<div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
-<div class="ttc" id="agroup___t_r_a_v_html_ga55406698106930db68242987c11ba051"><div class="ttname"><a href="group___t_r_a_v.html#ga55406698106930db68242987c11ba051">H5Literate</a></div><div class="ttdeci">#define H5Literate</div><div class="ttdef"><b>Definition:</b> H5version.h:1045</div></div>
-</div><!-- fragment -->  </td></tr>
-<tr>
-<th>Update</th><th>Delete </th></tr>
-<tr valign="top">
-<td><div class="fragment"><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    {</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        __label__ fail_move, fail_update;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        <span class="keywordflow">if</span> ((file = <a class="code" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;l1.h5&quot;</span>, <a class="code" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;            <span class="keywordflow">goto</span> fail_update;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        }</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160; </div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="comment">// move the &quot;√&quot; link to the group at &quot;/path/to&quot;</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="comment">// the cycle remains!</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb">H5Lmove</a>(file, <span class="stringliteral">&quot;√&quot;</span>, file, <span class="stringliteral">&quot;path/to/√&quot;</span>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;            <span class="keywordflow">goto</span> fail_move;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        }</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;fail_move:</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        <a class="code" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;fail_update:;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    }</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a402673dec5c537b27a49a9a8bd6140b4"><div class="ttname"><a href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a></div><div class="ttdeci">#define H5F_ACC_RDWR</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:49</div></div>
-<div class="ttc" id="agroup___h5_l_html_ga0bbc7f9bf25c8aca9dd8433a325c8acb"><div class="ttname"><a href="group___h5_l.html#ga0bbc7f9bf25c8aca9dd8433a325c8acb">H5Lmove</a></div><div class="ttdeci">herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id)</div><div class="ttdoc">Moves a link within an HDF5 file.</div></div>
-</div><!-- fragment -->  </td><td><div class="fragment"><div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    {</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        __label__ fail_delete, fail_file;</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        <span class="keywordflow">if</span> ((file = <a class="code" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a>(<span class="stringliteral">&quot;l1.h5&quot;</span>, <a class="code" href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)) == <a class="code" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>) {</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;            <span class="keywordflow">goto</span> fail_file;</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        }</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160; </div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;        <span class="comment">// delete the &quot;external&quot; link</span></div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf">H5Ldelete</a>(file, <span class="stringliteral">&quot;external&quot;</span>, <a class="code" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>) &lt; 0) {</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;            ret_val = EXIT_FAILURE;</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;            <span class="keywordflow">goto</span> fail_delete;</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        }</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;fail_delete:</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        <a class="code" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;fail_file:;</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    }</div>
-<div class="ttc" id="agroup___h5_l_html_ga5b4e7f59f5d4bdae94fd8ce6875295cf"><div class="ttname"><a href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf">H5Ldelete</a></div><div class="ttdeci">herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)</div><div class="ttdoc">Removes a link from a group.</div></div>
-</div><!-- fragment -->   </td></tr>
-</table>
+<p>Use the functions in this module to manage HDF5 links and link types. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="group___t_r_a_v.html">Link Traversal</a> for <a class="el" href="group___t_r_a_v.html#ga55406698106930db68242987c11ba051">H5Literate</a>, <a class="el" href="group___t_r_a_v.html#ga655b002428e0176c2fa23a0315fbbcc2">H5Literate_by_name</a> and <a class="el" href="group___t_r_a_v.html#gac0558936502924d9e898d8b6e041ed69">H5Lvisit</a>, <a class="el" href="group___t_r_a_v.html#ga138405315e233673741893e4e250f055">H5Lvisit_by_name</a> </dd>
+<dd>
+<a class="el" href="group___h5_l_a.html">Advanced Link Functions</a> for <a class="el" href="group___h5_l_a.html#ga5073a814de9878bad53e1d3c900ea77f" title="Registers a user-defined link class or changes behavior of an existing class.">H5Lregister</a>, <a class="el" href="group___h5_l_a.html#ga01ddc889d27306a96a7cd27b6084a5ec" title="Unregisters a class of user-defined links.">H5Lunregister</a> and <a class="el" href="group___h5_l_a.html#ga02c1cf38efea97d18e5e2f65df3f08a2" title="Determines whether a class of user-defined links is registered.">H5Lis_registered</a> </dd></dl>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Collaboration diagram for Links (H5L):</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -1774,7 +1613,7 @@ Call <a class="el" href="group___h5_l.html#gade0c3b274c185d148f000172fbdc3220" t
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Sep 12 2023 00:28:16 for HDF5 by
+    <li class="footer">Generated on Wed Sep 13 2023 00:29:40 for HDF5 by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
