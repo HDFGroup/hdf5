@@ -253,7 +253,8 @@ compare_stype4_data(void *expect_buf, void *rbuf)
         }
 
         if (err) {
-            if (err) H5_FAILED();
+            if (err)
+                H5_FAILED();
             printf("    i=%d\n", i);
             printf("    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                    "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
