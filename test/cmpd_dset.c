@@ -104,8 +104,8 @@ typedef struct {
     long long r, s, t;
 } stype4;
 
-#define NX          100U
-#define NY          2000U
+#define NX          50U
+#define NY          100U
 #define PACK_NMEMBS 100
 
 static void  initialize_stype1(unsigned char *buf, size_t num);
@@ -871,7 +871,7 @@ test_compounds_selection_io(void)
         for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
             for (select_io = FALSE; select_io <= TRUE; select_io++) {
                 for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
-                    for (set_buf = TRUE; set_buf <= TRUE; set_buf++) {
+                    for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
                             goto error;
