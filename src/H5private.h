@@ -454,13 +454,13 @@
  *       It's the developer's responsibility not to pass in the value 0, which
  *       may cause the equation to fail.
  */
-#define H5_FLT_ABS_EQUAL(X, Y)  (HDfabsf((X) - (Y)) < FLT_EPSILON)
-#define H5_DBL_ABS_EQUAL(X, Y)  (HDfabs((X) - (Y)) < DBL_EPSILON)
-#define H5_LDBL_ABS_EQUAL(X, Y) (HDfabsl((X) - (Y)) < LDBL_EPSILON)
+#define H5_FLT_ABS_EQUAL(X, Y)  (fabsf((X) - (Y)) < FLT_EPSILON)
+#define H5_DBL_ABS_EQUAL(X, Y)  (fabs((X) - (Y)) < DBL_EPSILON)
+#define H5_LDBL_ABS_EQUAL(X, Y) (fabsl((X) - (Y)) < LDBL_EPSILON)
 
-#define H5_FLT_REL_EQUAL(X, Y, M)  (HDfabsf(((Y) - (X)) / (X)) < (M))
-#define H5_DBL_REL_EQUAL(X, Y, M)  (HDfabs(((Y) - (X)) / (X)) < (M))
-#define H5_LDBL_REL_EQUAL(X, Y, M) (HDfabsl(((Y) - (X)) / (X)) < (M))
+#define H5_FLT_REL_EQUAL(X, Y, M)  (fabsf(((Y) - (X)) / (X)) < (M))
+#define H5_DBL_REL_EQUAL(X, Y, M)  (fabs(((Y) - (X)) / (X)) < (M))
+#define H5_LDBL_REL_EQUAL(X, Y, M) (fabsl(((Y) - (X)) / (X)) < (M))
 
 /* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
 #define H5_KB (1024.0F)
@@ -617,9 +617,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
 #endif
-#ifndef HDceil
-#define HDceil(X) ceil(X)
-#endif
 #ifndef HDchdir
 #define HDchdir(S) chdir(S)
 #endif
@@ -640,15 +637,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
-#endif
-#ifndef HDfabs
-#define HDfabs(X) fabs(X)
-#endif
-#ifndef HDfabsf
-#define HDfabsf(X) fabsf(X)
-#endif
-#ifndef HDfabsl
-#define HDfabsl(X) fabsl(X)
 #endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
@@ -688,23 +676,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 
 #endif /* HDflock */
 
-#ifndef HDfloor
-#define HDfloor(X) floor(X)
-#endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif
 #ifndef HDfputs
 #define HDfputs(S, F) fputs(S, F)
-#endif
-#ifndef HDfrexp
-#define HDfrexp(X, N) frexp(X, N)
-#endif
-#ifndef HDfrexpf
-#define HDfrexpf(X, N) frexpf(X, N)
-#endif
-#ifndef HDfrexpl
-#define HDfrexpl(X, N) frexpl(X, N)
 #endif
 #ifndef HDfscanf
 #define HDfscanf fscanf
@@ -757,44 +733,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
 #endif
-#ifndef HDisnan
-#define HDisnan(X) isnan(X)
-#endif
-#ifndef HDlabs
-#define HDlabs(X) labs(X)
-#endif
-#ifndef HDldexp
-#define HDldexp(X, N) ldexp(X, N)
-#endif
-#ifndef HDllround
-#define HDllround(V) llround(V)
-#endif
-#ifndef HDllroundf
-#define HDllroundf(V) llroundf(V)
-#endif
-#ifndef HDllroundl
-#define HDllroundl(V) llroundl(V)
-#endif
 #ifndef HDlocaltime
 #define HDlocaltime(T) localtime(T)
-#endif
-#ifndef HDlog
-#define HDlog(X) log(X)
-#endif
-#ifndef HDlog2
-#define HDlog2(X) log2(X)
-#endif
-#ifndef HDlog10
-#define HDlog10(X) log10(X)
-#endif
-#ifndef HDlround
-#define HDlround(V) lround(V)
-#endif
-#ifndef HDlroundf
-#define HDlroundf(V) lroundf(V)
-#endif
-#ifndef HDlroundl
-#define HDlroundl(V) lroundl(V)
 #endif
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
@@ -819,12 +759,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDperror
 #define HDperror(S) perror(S)
-#endif
-#ifndef HDpow
-#define HDpow(X, Y) pow(X, Y)
-#endif
-#ifndef HDpowf
-#define HDpowf(X, Y) powf(X, Y)
 #endif
 #ifndef HDpread
 #define HDpread(F, B, C, O) pread(F, B, C, O)
@@ -899,15 +833,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDrewind
 #define HDrewind(F) rewind(F)
 #endif
-#ifndef HDround
-#define HDround(V) round(V)
-#endif
-#ifndef HDroundf
-#define HDroundf(V) roundf(V)
-#endif
-#ifndef HDroundl
-#define HDroundl(V) roundl(V)
-#endif
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
 #endif
@@ -943,9 +868,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDsprintf
 #define HDsprintf sprintf /*varargs*/
-#endif
-#ifndef HDsqrt
-#define HDsqrt(X) sqrt(X)
 #endif
 #ifndef HDsscanf
 #define HDsscanf sscanf /*varargs*/

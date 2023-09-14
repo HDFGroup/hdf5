@@ -3241,7 +3241,7 @@ tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary
         TEST_ERROR;
     if (rdcc_nbytes != rdcc_nbytes_out)
         TEST_ERROR;
-    if (HDfabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
+    if (fabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
         TEST_ERROR;
 
     /* Get efile prefix property and verify */

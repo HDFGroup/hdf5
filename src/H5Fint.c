@@ -3307,7 +3307,7 @@ H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Index to retries based on log10 */
-    tmp     = HDlog10((double)retries);
+    tmp     = log10((double)retries);
     log_ind = (unsigned)tmp;
     assert(log_ind < f->shared->retries_nbins);
 
@@ -3345,9 +3345,9 @@ H5F_set_retries(H5F_t *f)
     /* Initialize the # of bins for retries */
     f->shared->retries_nbins = 0;
     if (f->shared->read_attempts > 1) {
-        /* Use HDceil to ensure that the log10 value is rounded up to the
+        /* Use ceil to ensure that the log10 value is rounded up to the
            nearest integer before casting to unsigned */
-        tmp                      = HDceil(HDlog10((double)f->shared->read_attempts));
+        tmp                      = ceil(log10((double)f->shared->read_attempts));
         f->shared->retries_nbins = (unsigned)tmp;
     }
 

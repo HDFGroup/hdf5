@@ -568,15 +568,15 @@ H5_timer_get_time_string(double seconds)
         remainder_sec = seconds;
 
         /* Extract days */
-        days = HDfloor(remainder_sec / H5_SEC_PER_DAY);
+        days = floor(remainder_sec / H5_SEC_PER_DAY);
         remainder_sec -= (days * H5_SEC_PER_DAY);
 
         /* Extract hours */
-        hours = HDfloor(remainder_sec / H5_SEC_PER_HOUR);
+        hours = floor(remainder_sec / H5_SEC_PER_HOUR);
         remainder_sec -= (hours * H5_SEC_PER_HOUR);
 
         /* Extract minutes */
-        minutes = HDfloor(remainder_sec / H5_SEC_PER_MIN);
+        minutes = floor(remainder_sec / H5_SEC_PER_MIN);
         remainder_sec -= (minutes * H5_SEC_PER_MIN);
 
         /* The # of seconds left is in remainder_sec */

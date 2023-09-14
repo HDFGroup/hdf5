@@ -47,7 +47,7 @@
 #define CHUNK_NY 4
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-#define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12.0)
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12.0)
 #endif
 
 /* Temporary filter IDs used for testing */

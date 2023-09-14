@@ -1531,7 +1531,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                         "can't delete subfiling config file");
 
         /* Try to delete each of the subfiles */
-        num_digits = (int)(HDlog10(n_subfiles) + 1);
+        num_digits = (int)(log10(n_subfiles) + 1);
 
         for (int i = 0; i < n_subfiles; i++) {
             /* TODO: No support for subfile directory prefix currently */

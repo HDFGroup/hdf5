@@ -803,7 +803,7 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
+    DWORD dwMilliseconds = (DWORD)ceil(nanosec / 1.0e6);
     DWORD ignore;
 
     /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
