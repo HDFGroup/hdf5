@@ -109,7 +109,7 @@
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */
-#define H5D_TEMP_BUF_SIZE (1024 * 1024)
+#define H5D_TEMP_BUF_SIZE (1024 * 2048)
 
 /* Default I/O vector size */
 #define H5D_IO_VECTOR_SIZE 1024

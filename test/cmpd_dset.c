@@ -104,8 +104,8 @@ typedef struct {
     long long r, s, t;
 } stype4;
 
-#define NX          50U
-#define NY          100U
+#define NX          100U
+#define NY          2000U
 #define PACK_NMEMBS 100
 
 static void  initialize_stype1(unsigned char *buf, size_t num);
