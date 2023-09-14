@@ -46,7 +46,7 @@
     "key_alloc_size" /* Initial allocation size for keys prefetched during map iteration */
 
 /* Default temporary buffer size */
-#define H5D_TEMP_BUF_SIZE (1024 * 2048)
+#define H5D_TEMP_BUF_SIZE (1024 * 1024)
 
 /* Default I/O vector size */
 #define H5D_IO_VECTOR_SIZE 1024
