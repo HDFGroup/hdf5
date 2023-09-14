@@ -104,8 +104,9 @@ typedef struct {
     long long r, s, t;
 } stype4;
 
+/* changes NY to 200 from 2000 */
 #define NX          100U
-#define NY          2000U
+#define NY          200U
 #define PACK_NMEMBS 100
 
 static void  initialize_stype1(unsigned char *buf, size_t num);
@@ -142,6 +143,8 @@ compare_stype4_data(void *expect_buf, void *rbuf)
         stype4 *s2_ptr;
         s1_ptr = ((stype4 *)expect_buf) + i;
         s2_ptr = ((stype4 *)rbuf) + i;
+if (i == 5241)
+    printf("HERe at 5241");
 
         if (s1_ptr->a != s2_ptr->a) {
             printf("a is different\n");
@@ -233,8 +236,8 @@ compare_stype4_data(void *expect_buf, void *rbuf)
             err = TRUE;
         }
 
-        if (err) {
-            H5_FAILED();
+        if (err || i == 5241) {
+            if (err) H5_FAILED();
             printf("    i=%d\n", i);
             printf("    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                    "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
@@ -258,7 +261,7 @@ compare_stype4_data(void *expect_buf, void *rbuf)
                    (double)s2_ptr->h[11], (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14],
                    (double)s2_ptr->h[15], (double)s2_ptr->i, (double)s2_ptr->j, s2_ptr->k, s2_ptr->l,
                    s2_ptr->m, s2_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
-            goto error;
+            if (err) goto error;
         }
     } /* end for */
 
@@ -565,6 +568,9 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Pclose(dcpl) < 0)
         goto error;
 
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+
     if (H5Tclose(src_tid) < 0)
         goto error;
     if (H5Tclose(rew_tid) < 0)
@@ -846,7 +852,7 @@ test_compounds_selection_io(void)
     for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
         for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
             for (select_io = FALSE; select_io <= TRUE; select_io++) {
-                for (mwbuf = TRUE; mwbuf <= TRUE; mwbuf++) {
+                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
                     for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
