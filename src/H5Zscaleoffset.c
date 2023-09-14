@@ -364,12 +364,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 #define H5Z_scaleoffset_max_min_3(i, d_nelmts, buf, filval, max, min, D_val)                                 \
     {                                                                                                        \
         i = 0;                                                                                               \
-        while (i < d_nelmts && fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                      \
+        while (i < d_nelmts && fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                          \
             i++;                                                                                             \
         if (i < d_nelmts)                                                                                    \
             min = max = buf[i];                                                                              \
         for (; i < d_nelmts; i++) {                                                                          \
-            if (fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                                     \
+            if (fabs((double)(buf[i] - filval)) < pow(10.0, -D_val))                                         \
                 continue; /* ignore fill value */                                                            \
             if (buf[i] > max)                                                                                \
                 max = buf[i];                                                                                \
@@ -1562,11 +1562,11 @@ H5Z__scaleoffset_precompress_fd(void *data, unsigned d_nelmts, enum H5Z_scaleoff
     FUNC_ENTER_PACKAGE
 
     if (type == t_float)
-        H5Z_scaleoffset_precompress_3(float, powf, fabsf, roundf, lroundf, llroundf, data, d_nelmts,
-                                      filavail, cd_values, minbits, minval, D_val);
+        H5Z_scaleoffset_precompress_3(float, powf, fabsf, roundf, lroundf, llroundf, data, d_nelmts, filavail,
+                                      cd_values, minbits, minval, D_val);
     else if (type == t_double)
-        H5Z_scaleoffset_precompress_3(double, pow, fabs, round, lround, llround, data, d_nelmts,
-                                      filavail, cd_values, minbits, minval, D_val);
+        H5Z_scaleoffset_precompress_3(double, pow, fabs, round, lround, llround, data, d_nelmts, filavail,
+                                      cd_values, minbits, minval, D_val);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

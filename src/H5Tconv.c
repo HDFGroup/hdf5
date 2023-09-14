@@ -4329,19 +4329,19 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 olap      = nelmts;
             }
             else if (src_p->shared->size >= dst_p->shared->size) {
-                double olap_d = ceil((double)(dst_p->shared->size) /
-                                       (double)(src_p->shared->size - dst_p->shared->size));
-                olap          = (size_t)olap_d;
+                double olap_d =
+                    ceil((double)(dst_p->shared->size) / (double)(src_p->shared->size - dst_p->shared->size));
+                olap = (size_t)olap_d;
                 sp = dp   = (uint8_t *)buf;
                 direction = 1;
             }
             else {
-                double olap_d = ceil((double)(src_p->shared->size) /
-                                       (double)(dst_p->shared->size - src_p->shared->size));
-                olap          = (size_t)olap_d;
-                sp            = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
-                dp            = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
-                direction     = -1;
+                double olap_d =
+                    ceil((double)(src_p->shared->size) / (double)(dst_p->shared->size - src_p->shared->size));
+                olap      = (size_t)olap_d;
+                sp        = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
+                dp        = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
+                direction = -1;
             }
 
             /*
@@ -7958,19 +7958,19 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 olap      = nelmts;
             }
             else if (src_p->shared->size >= dst_p->shared->size) {
-                double olap_d = ceil((double)(dst_p->shared->size) /
-                                       (double)(src_p->shared->size - dst_p->shared->size));
-                olap          = (size_t)olap_d;
+                double olap_d =
+                    ceil((double)(dst_p->shared->size) / (double)(src_p->shared->size - dst_p->shared->size));
+                olap = (size_t)olap_d;
                 sp = dp   = (uint8_t *)buf;
                 direction = 1;
             }
             else {
-                double olap_d = ceil((double)(src_p->shared->size) /
-                                       (double)(dst_p->shared->size - src_p->shared->size));
-                olap          = (size_t)olap_d;
-                sp            = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
-                dp            = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
-                direction     = -1;
+                double olap_d =
+                    ceil((double)(src_p->shared->size) / (double)(dst_p->shared->size - src_p->shared->size));
+                olap      = (size_t)olap_d;
+                sp        = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
+                dp        = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
+                direction = -1;
             }
 
             /* Allocate enough space for the buffer holding temporary
@@ -8583,19 +8583,19 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 olap      = nelmts;
             }
             else if (src_p->shared->size >= dst_p->shared->size) {
-                double olap_d = ceil((double)(dst_p->shared->size) /
-                                       (double)(src_p->shared->size - dst_p->shared->size));
-                olap          = (size_t)olap_d;
+                double olap_d =
+                    ceil((double)(dst_p->shared->size) / (double)(src_p->shared->size - dst_p->shared->size));
+                olap = (size_t)olap_d;
                 sp = dp   = (uint8_t *)buf;
                 direction = 1;
             }
             else {
-                double olap_d = ceil((double)(src_p->shared->size) /
-                                       (double)(dst_p->shared->size - src_p->shared->size));
-                olap          = (size_t)olap_d;
-                sp            = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
-                dp            = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
-                direction     = -1;
+                double olap_d =
+                    ceil((double)(src_p->shared->size) / (double)(dst_p->shared->size - src_p->shared->size));
+                olap      = (size_t)olap_d;
+                sp        = (uint8_t *)buf + (nelmts - 1) * src_p->shared->size;
+                dp        = (uint8_t *)buf + (nelmts - 1) * dst_p->shared->size;
+                direction = -1;
             }
 
             /* Allocate enough space for the buffer holding temporary
