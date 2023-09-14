@@ -6498,29 +6498,30 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 
   END SUBROUTINE h5pget_file_space_page_size_f
 
-
-
   SUBROUTINE h5pget_actual_selection_io_mode(plist_id, actual_selection_io_mode, hdferr)
 
     IMPLICIT NONE
-    INTEGER(HID_T)    , INTENT(IN)  :: plist_id
-    INTEGER(C_INT32_T), INTENT(OUT) :: actual_selection_io_mode
-    INTEGER           , INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN)  :: plist_id
+    INTEGER       , INTENT(OUT) :: actual_selection_io_mode
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT32_T)    :: c_actual_selection_io_mode
 
     INTERFACE
         INTEGER(C_INT) FUNCTION H5Pget_actual_selection_io_mode(plist_id, actual_selection_io_mode) &
              BIND(C, NAME='H5Pget_actual_selection_io_mode')
-          IMPORT :: HID_T, C_INT32_T
+          IMPORT :: HID_T, C_INT32_T, C_INT
           IMPLICIT NONE
           INTEGER(HID_T), VALUE :: plist_id
           INTEGER(C_INT32_T)    :: actual_selection_io_mode
         END FUNCTION H5Pget_actual_selection_io_mode
      END INTERFACE
 
-     hdferr = INT(H5Pget_actual_selection_io_mode(plist_id, actual_selection_io_mode))
+     hdferr = INT(H5Pget_actual_selection_io_mode(plist_id, c_actual_selection_io_mode))
+
+     actual_selection_io_mode = INT(c_actual_selection_io_mode)
 
    END SUBROUTINE h5pget_actual_selection_io_mode
-
 
 END MODULE H5P
 
