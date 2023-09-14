@@ -143,8 +143,8 @@ compare_stype4_data(void *expect_buf, void *rbuf)
         stype4 *s2_ptr;
         s1_ptr = ((stype4 *)expect_buf) + i;
         s2_ptr = ((stype4 *)rbuf) + i;
-if (i == 5241)
-    printf("HERe at 5241");
+        if (i == 5241)
+            printf("HERe at 5241");
 
         if (s1_ptr->a != s2_ptr->a) {
             printf("a is different\n");
@@ -256,7 +256,8 @@ if (i == 5241)
         }
 
         if (err || i == 5241) {
-            if (err) H5_FAILED();
+            if (err)
+                H5_FAILED();
             printf("    i=%d\n", i);
             printf("    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                    "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
@@ -280,7 +281,8 @@ if (i == 5241)
                    (double)s2_ptr->h[11], (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14],
                    (double)s2_ptr->h[15], (double)s2_ptr->i, (double)s2_ptr->j, s2_ptr->k, s2_ptr->l,
                    s2_ptr->m, s2_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
-            if (err) goto error;
+            if (err)
+                goto error;
         }
     } /* end for */
 
