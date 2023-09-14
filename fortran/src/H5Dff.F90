@@ -2396,7 +2396,7 @@ CONTAINS
 
     INTEGER(HID_T)    , INTENT(IN)  :: dset_id
     INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
-    INTEGER(C_INT32_T), INTENT(INOUT)  :: filters
+    INTEGER           , INTENT(INOUT) :: filters
     TYPE(C_PTR)                     :: buf
     INTEGER           , INTENT(OUT) :: hdferr
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
@@ -2404,6 +2404,7 @@ CONTAINS
     INTEGER(HID_T) :: dxpl_id_default
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
     INTEGER(HSIZE_T) :: i, rank
+    INTEGER(C_INT32_T) :: c_filters
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Dread_chunk(dset_id, dxpl_id, offset, filters, buf) &
@@ -2422,6 +2423,8 @@ CONTAINS
     dxpl_id_default = H5P_DEFAULT_F
     IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
 
+    c_filters = INT(filters, KIND=C_INT32_T)
+
     rank = SIZE(offset, KIND=HSIZE_T)
 
     ALLOCATE(offset_c(rank), STAT=hdferr)
@@ -2437,7 +2440,9 @@ CONTAINS
        offset_c(i) = offset(rank - i + 1)
     ENDDO
 
-    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, filters, buf))
+    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, c_filters, buf))
+
+    filters = INT(c_filters)
 
     DEALLOCATE(offset_c)
 
@@ -2462,7 +2467,7 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER(HID_T)    , INTENT(IN) :: dset_id
-    INTEGER(C_INT32_T), INTENT(IN) :: filters
+    INTEGER           , INTENT(IN) :: filters
     INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
     INTEGER(SIZE_T)   , INTENT(IN)  :: data_size
     TYPE(C_PTR)                     :: buf
@@ -2472,6 +2477,7 @@ CONTAINS
     INTEGER(HID_T) :: dxpl_id_default
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
     INTEGER(HSIZE_T) :: i, rank
+    INTEGER(C_INT32_T) :: c_filters
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) &
@@ -2505,6 +2511,8 @@ CONTAINS
     DO i = 1, rank
        offset_c(i) = offset(rank - i + 1)
     ENDDO
+
+    c_filters = INT(filters, C_INT32_T)
 
     hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf))
 

@@ -131,7 +131,7 @@ test_direct_chunk_write(hid_t file)
     int     data[NX][NY];
     int     i, j, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2] = {0, 0};
@@ -499,14 +499,14 @@ test_skip_compress_write1(hid_t file)
     herr_t  status;
     int     i, j, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2]  = {0, 0};
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
     int      aggression = 9; /* Compression aggression setting */
 
-    unsigned read_filter_mask = 0; /* filter mask after direct read */
+    uint32_t read_filter_mask = 0; /* filter mask after direct read */
     int      read_direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  read_buf_size = 0; /* buf size */
 
@@ -747,7 +747,7 @@ test_skip_compress_write2(hid_t file)
     herr_t  status;
     int     i, j, n;
 
-    unsigned filter_mask = 0; /* orig filter mask */
+    uint32_t filter_mask = 0; /* orig filter mask */
     int      origin_direct_buf[CHUNK_NX][CHUNK_NY];
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY];
@@ -755,7 +755,7 @@ test_skip_compress_write2(hid_t file)
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
     int      aggression = 9; /* Compression aggression setting */
 
-    unsigned read_filter_mask = 0; /* filter mask after direct read */
+    uint32_t read_filter_mask = 0; /* filter mask after direct read */
     int      read_direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  read_buf_size = 0; /* buf size */
 
@@ -956,7 +956,7 @@ test_data_conv(hid_t file)
     hid_t         st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t         array_dt;
 
-    unsigned   filter_mask = 0;
+    uint32_t   filter_mask = 0;
     src_type_t direct_buf[CHUNK_NX][CHUNK_NY];
     dst_type_t check_chunk[CHUNK_NX][CHUNK_NY];
     src_type_t read_chunk[CHUNK_NX][CHUNK_NY]; /* For H5Dread_chunk */
@@ -1178,7 +1178,7 @@ test_invalid_parameters(hid_t file)
     herr_t  status;
     int     i, j, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2]  = {0, 0};
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
@@ -1428,7 +1428,7 @@ test_direct_chunk_read_no_cache(hid_t file)
     int     data[NX][NY];
     int     i, j, k, l, n; /* local index variables */
 
-    unsigned filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
+    uint32_t filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
     int      direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5Dread and manually decompressed */
     int      check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t  offset[2];                       /* chunk offset used for H5Dread_chunk */
@@ -1606,7 +1606,7 @@ test_direct_chunk_read_cache(hid_t file, bool flush)
     int     data[NX][NY];
     int     i, j, k, l, n; /* local index variables */
 
-    unsigned filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
+    uint32_t filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
     int      direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5Dread and manually decompressed */
     int      check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t  offset[2];                       /* chunk offset used for H5Dread_chunk */
@@ -1804,7 +1804,7 @@ test_read_unfiltered_dset(hid_t file)
     int     data[NX][NY];
     int     i, j, k, l, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t  offset[2]     = {0, 0};
@@ -1958,7 +1958,7 @@ test_read_unallocated_chunk(hid_t file)
     herr_t  status;                  /* status from H5 function calls */
     hsize_t i, j;                    /* local index variables */
 
-    unsigned filter_mask = 0;                /* filter mask returned from H5Dread_chunk */
+    uint32_t filter_mask = 0;                /* filter mask returned from H5Dread_chunk */
     int      direct_buf[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread and manually decompressed */
     hsize_t  offset[2];                      /* chunk offset used for H5Dread_chunk */
 

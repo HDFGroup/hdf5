@@ -52,9 +52,9 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   LOGICAL        :: is_coll
   LOGICAL        :: is_coll_true = .TRUE.
 
-  INTEGER(C_INT32_T) :: local_no_collective_cause
-  INTEGER(C_INT32_T) :: global_no_collective_cause
-  INTEGER(C_INT32_T) :: no_selection_io_cause
+  INTEGER :: local_no_collective_cause
+  INTEGER :: global_no_collective_cause
+  INTEGER :: no_selection_io_cause
 
   !
   ! initialize the array data between the processes (3)
@@ -274,6 +274,13 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
 
   CALL h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
   CALL check("h5dwrite_f", hdferror, nerrors)
+
+  ! Verify bitwise operations are correct
+
+  IF( IOR(H5D_MPIO_DATATYPE_CONVERSION_F,H5D_MPIO_DATA_TRANSFORMS_F).NE.6)THEN
+     PRINT*, "Incorrect bitwise operations for Fortran defined constants"
+     nerrors = nerrors + 1
+  ENDIF
 
   CALL h5pget_no_selection_io_cause_f(dxpl_id, no_selection_io_cause, hdferror)
   CALL check("h5pget_no_selection_io_cause_f", hdferror, nerrors)
