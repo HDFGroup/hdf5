@@ -3014,8 +3014,8 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             if (FLT_FLOAT == dst_type) {
                 hw_f      = (float)(*((double *)aligned));
                 hw        = (unsigned char *)&hw_f;
-                underflow = HDfabs(*((double *)aligned)) < (double)FLT_MIN;
-                overflow  = HDfabs(*((double *)aligned)) > (double)FLT_MAX;
+                underflow = fabs(*((double *)aligned)) < (double)FLT_MIN;
+                overflow  = fabs(*((double *)aligned)) > (double)FLT_MAX;
             }
             else if (FLT_DOUBLE == dst_type) {
                 hw_d = *((double *)aligned);
@@ -3034,14 +3034,14 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             if (FLT_FLOAT == dst_type) {
                 hw_f      = (float)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_f;
-                underflow = HDfabsl(*((long double *)aligned)) < (long double)FLT_MIN;
-                overflow  = HDfabsl(*((long double *)aligned)) > (long double)FLT_MAX;
+                underflow = fabsl(*((long double *)aligned)) < (long double)FLT_MIN;
+                overflow  = fabsl(*((long double *)aligned)) > (long double)FLT_MAX;
             }
             else if (FLT_DOUBLE == dst_type) {
                 hw_d      = (double)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_d;
-                underflow = HDfabsl(*((long double *)aligned)) < (long double)DBL_MIN;
-                overflow  = HDfabsl(*((long double *)aligned)) > (long double)DBL_MAX;
+                underflow = fabsl(*((long double *)aligned)) < (long double)DBL_MIN;
+                overflow  = fabsl(*((long double *)aligned)) > (long double)DBL_MAX;
             }
             else {
                 hw_ld = *((long double *)aligned);
@@ -3120,32 +3120,32 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             if (FLT_FLOAT == dst_type) {
                 float x = 0.0;
                 memcpy(&x, &buf[j * dst_size], sizeof(float));
-                if (underflow && HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
+                if (underflow && fabsf(x) <= FLT_MIN && fabsf(hw_f) <= FLT_MIN)
                     continue; /* all underflowed, no error */
                 if (overflow && my_isinf(dendian, buf + j * sizeof(float), dst_size, dst_mpos, dst_msize,
                                          dst_epos, dst_esize))
                     continue; /* all overflowed, no error */
-                check_mant[0] = (double)HDfrexpf(x, check_expo + 0);
-                check_mant[1] = (double)HDfrexpf(hw_f, check_expo + 1);
+                check_mant[0] = (double)frexpf(x, check_expo + 0);
+                check_mant[1] = (double)frexpf(hw_f, check_expo + 1);
             }
             else if (FLT_DOUBLE == dst_type) {
                 double x = 0.0;
                 memcpy(&x, &buf[j * dst_size], sizeof(double));
-                if (underflow && HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
+                if (underflow && fabs(x) <= DBL_MIN && fabs(hw_d) <= DBL_MIN)
                     continue; /* all underflowed, no error */
                 if (overflow && my_isinf(dendian, buf + j * sizeof(double), dst_size, dst_mpos, dst_msize,
                                          dst_epos, dst_esize))
                     continue; /* all overflowed, no error */
-                check_mant[0] = HDfrexp(x, check_expo + 0);
-                check_mant[1] = HDfrexp(hw_d, check_expo + 1);
+                check_mant[0] = frexp(x, check_expo + 0);
+                check_mant[1] = frexp(hw_d, check_expo + 1);
 #if (H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE)
             }
             else {
                 long double x = 0.0L;
                 memcpy(&x, &buf[j * dst_size], sizeof(long double));
                 /* dst is largest float, no need to check underflow. */
-                check_mant[0] = (double)HDfrexpl(x, check_expo + 0);
-                check_mant[1] = (double)HDfrexpl(hw_ld, check_expo + 1);
+                check_mant[0] = (double)frexpl(x, check_expo + 0);
+                check_mant[1] = (double)frexpl(hw_ld, check_expo + 1);
 #endif
             }
             /* Special check for denormalized values */
@@ -3157,18 +3157,18 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 
                 /* Re-scale the mantissas based on any exponent difference */
                 if (expo_diff != 0)
-                    check_mant[0] = HDldexp(check_mant[0], expo_diff);
+                    check_mant[0] = ldexp(check_mant[0], expo_diff);
 
                 /* Compute the proper epsilon */
-                epsilon = HDldexp(epsilon, -valid_bits);
+                epsilon = ldexp(epsilon, -valid_bits);
 
                 /* Check for "close enough" fit with scaled epsilon value */
-                if (HDfabs(check_mant[0] - check_mant[1]) <= epsilon)
+                if (fabs(check_mant[0] - check_mant[1]) <= epsilon)
                     continue;
             } /* end if */
             else {
                 if (check_expo[0] == check_expo[1] &&
-                    HDfabs(check_mant[0] - check_mant[1]) < (double)FP_EPSILON)
+                    fabs(check_mant[0] - check_mant[1]) < (double)FP_EPSILON)
                     continue;
             } /* end else */
         }

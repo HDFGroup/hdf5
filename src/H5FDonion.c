@@ -995,7 +995,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "page size is not a power of two");
 
     /* Assign the page size */
-    log2_page_size                                      = HDlog2((double)(fa->page_size));
+    log2_page_size                                      = log2((double)(fa->page_size));
     file->curr_rev_record.archival_index.page_size_log2 = (uint32_t)log2_page_size;
 
     /* Proceed with open. */

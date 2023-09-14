@@ -2181,7 +2181,7 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
                                 "couldn't allocate space for subfile filename");
 
     num_subfiles = sf_context->sf_num_subfiles;
-    num_digits   = (int)(HDlog10(num_subfiles) + 1);
+    num_digits   = (int)(log10(num_subfiles) + 1);
 
     /*
      * For each subfile this IOC rank owns, generate the name
@@ -2364,7 +2364,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
                                         "failed to write to subfiling configuration file");
 
         /* Write out each subfile name to the configuration file */
-        num_digits = (int)(HDlog10(n_subfiles) + 1);
+        num_digits = (int)(log10(n_subfiles) + 1);
         for (int k = 0; k < n_subfiles; k++) {
             HDsnprintf(line_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
                        sf_context->h5_file_id, num_digits, k + 1, n_subfiles);

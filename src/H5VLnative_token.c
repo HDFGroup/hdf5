@@ -107,7 +107,7 @@ H5VL__native_token_to_str(void *obj, H5I_type_t obj_type, const H5O_token_t *tok
     if (addr == 0)
         addr_ndigits = 1;
     else
-        addr_ndigits = (size_t)(HDfloor(HDlog10((double)addr)) + 1);
+        addr_ndigits = (size_t)(floor(log10((double)addr)) + 1);
 
     if (NULL == (*token_str = H5MM_malloc(addr_ndigits + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for token string");
