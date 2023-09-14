@@ -541,7 +541,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if ((did = H5Dcreate2(fid, DSET_NAME[2], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-     if (H5Pset_preserve(dxpl, true) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         goto error;
 
     /* Write to the dataset with rew_tid */
@@ -567,7 +567,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     initialize_stype4(rew_buf, (size_t)NX * NY);
 
-     if (H5Pset_preserve(dxpl, true) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         goto error;
 
     /* Write data to the dataset with rew_tid */
