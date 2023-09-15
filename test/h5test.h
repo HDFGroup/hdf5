@@ -113,30 +113,30 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     } while (0)
 #define PASSED()                                                                                             \
     do {                                                                                                     \
-        HDputs(" PASSED");                                                                                   \
+        puts(" PASSED");                                                                                     \
         fflush(stdout);                                                                                      \
         n_tests_passed_g++;                                                                                  \
     } while (0)
 #define H5_FAILED()                                                                                          \
     do {                                                                                                     \
-        HDputs("*FAILED*");                                                                                  \
+        puts("*FAILED*");                                                                                    \
         fflush(stdout);                                                                                      \
         n_tests_failed_g++;                                                                                  \
     } while (0)
 #define H5_WARNING()                                                                                         \
     do {                                                                                                     \
-        HDputs("*WARNING*");                                                                                 \
+        puts("*WARNING*");                                                                                   \
         fflush(stdout);                                                                                      \
     } while (0)
 #define SKIPPED()                                                                                            \
     do {                                                                                                     \
-        HDputs(" -SKIP-");                                                                                   \
+        puts(" -SKIP-");                                                                                     \
         fflush(stdout);                                                                                      \
         n_tests_skipped_g++;                                                                                 \
     } while (0)
 #define PUTS_ERROR(s)                                                                                        \
     do {                                                                                                     \
-        HDputs(s);                                                                                           \
+        puts(s);                                                                                             \
         AT();                                                                                                \
         goto error;                                                                                          \
     } while (0)
@@ -162,7 +162,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDputs(s);                                                                                           \
+        puts(s);                                                                                             \
         goto error;                                                                                          \
     } while (0)
 
@@ -172,7 +172,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define TESTING_MULTIPART(WHAT)                                                                              \
     do {                                                                                                     \
         printf("Testing %-62s", WHAT);                                                                       \
-        HDputs("");                                                                                          \
+        puts("");                                                                                            \
         fflush(stdout);                                                                                      \
     } while (0)
 

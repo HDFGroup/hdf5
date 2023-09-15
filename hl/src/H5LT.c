@@ -1839,7 +1839,7 @@ H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
     }
 
     input_len = strlen(text);
-    myinput   = HDstrdup(text);
+    myinput   = strdup(text);
 
     if ((type_id = H5LTyyparse()) < 0) {
         free(myinput);
@@ -3267,7 +3267,7 @@ H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
     }
 
     /* Duplicate the path to use */
-    if (NULL == (tmp_path = HDstrdup(path))) {
+    if (NULL == (tmp_path = strdup(path))) {
         ret_value = FAIL;
         goto done;
     }

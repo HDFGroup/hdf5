@@ -1220,10 +1220,10 @@ H5FD__hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if (finfo1->mBlockSize != finfo2->mBlockSize) {
         HGOTO_DONE(-1);
     }
-    if (HDstrcmp(finfo1->mOwner, finfo2->mOwner)) {
+    if (strcmp(finfo1->mOwner, finfo2->mOwner)) {
         HGOTO_DONE(-1);
     }
-    if (HDstrcmp(finfo1->mGroup, finfo2->mGroup)) {
+    if (strcmp(finfo1->mGroup, finfo2->mGroup)) {
         HGOTO_DONE(-1);
     }
     if (finfo1->mPermissions != finfo2->mPermissions) {

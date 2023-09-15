@@ -155,7 +155,7 @@ create_datasets(hid_t fid, int comp_level, bool verbose, FILE *verbose_file, con
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v-2 B-tree.
      */
-    if (!HDstrcmp(index_type, "b2"))
+    if (!strcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
     /* Create dataspace for creating datasets */
@@ -384,7 +384,7 @@ main(int argc, char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
+                        if (strcmp(index_type, "ea") != 0 && strcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;
@@ -448,7 +448,7 @@ main(int argc, char *argv[])
     if (verbose) {
         char verbose_name[1024];
 
-        HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
+        snprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
         if (NULL == (verbose_file = fopen(verbose_name, "w"))) {
             fprintf(stderr, "Can't open verbose output file!\n");
             exit(EXIT_FAILURE);

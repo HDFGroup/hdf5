@@ -175,15 +175,15 @@ error:
 static herr_t
 init_error(void)
 {
-    ssize_t    cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME) + 1;
-    ssize_t    msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
+    ssize_t    cls_size = (ssize_t)strlen(ERR_CLS_NAME) + 1;
+    ssize_t    msg_size = (ssize_t)strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
     char      *cls_name = NULL;
     char      *msg      = NULL;
     H5E_type_t msg_type;
 
-    if (NULL == (cls_name = (char *)malloc(HDstrlen(ERR_CLS_NAME) + 1)))
+    if (NULL == (cls_name = (char *)malloc(strlen(ERR_CLS_NAME) + 1)))
         TEST_ERROR;
-    if (NULL == (msg = (char *)malloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
+    if (NULL == (msg = (char *)malloc(strlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
         TEST_ERROR;
 
     if ((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS)) < 0)
@@ -191,7 +191,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
+    if (strcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -216,7 +216,7 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
+    if (strcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
@@ -293,7 +293,7 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
 {
     char *real_desc = (char *)client_data;
 
-    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, real_desc) == 0)
+    if (err_desc->desc != NULL && strcmp(err_desc->desc, real_desc) == 0)
         return 0;
     else
         return -1;
@@ -345,10 +345,10 @@ test_long_desc(void)
                 long_desc) < 0)
         TEST_ERROR;
 
-    /* Create the string that should be in the description. Must use HDsnprintf here
+    /* Create the string that should be in the description. Must use snprintf here
      * because snprintf is _snprintf on Windows
      */
-    HDsnprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
+    snprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
 
     /* Make certain that the description is correct */
     if (H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, long_desc_cb, full_desc) < 0)
@@ -879,7 +879,7 @@ main(void)
      * the test file was pre-generated.
      */
     h5_fixname(DATAFILE, H5P_DEFAULT, filename, sizeof filename);
-    if (!h5_using_default_driver(env_h5_drvr) && HDstrcmp(env_h5_drvr, "stdio")) {
+    if (!h5_using_default_driver(env_h5_drvr) && strcmp(env_h5_drvr, "stdio")) {
         /* If not using the library's default VFD or the stdio VFD, force
          * the library's default VFD here. The test file was pre-generated
          * and can cause issues with many VFDs.

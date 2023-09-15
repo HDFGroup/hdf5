@@ -379,7 +379,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
         else
             text_to_write = hitchhiker_quote;
 
-        bytes_to_write = HDstrlen(text_to_write);
+        bytes_to_write = strlen(text_to_write);
 
         if (pass) {
             if ((header = HDopen(data_filename, O_WRONLY)) < 0) {
@@ -1063,7 +1063,7 @@ main(int argc, char **argv)
      * isn't true, then we can use a relative path that
      * should be valid for the autotools environment.
      */
-    test_argv0 = HDstrdup(argv[0]);
+    test_argv0 = strdup(argv[0]);
 
     if ((MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: Unable to initialize MPI\n");

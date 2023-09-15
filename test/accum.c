@@ -88,7 +88,7 @@ main(void)
     H5F_t   *f = NULL; /* File for all tests */
 
     /* Test Setup */
-    HDputs("Testing the metadata accumulator");
+    puts("Testing the metadata accumulator");
 
     /* File access property list */
     h5_reset();
@@ -147,7 +147,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All metadata accumulator tests passed.");
+    puts("All metadata accumulator tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
@@ -156,7 +156,7 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(false);
 
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return 1;
 } /* end main() */
 
@@ -2070,7 +2070,7 @@ test_swmr_write_big(bool newest_format)
 
     /* Not a Windows or POSIX system */
     SKIPPED();
-    HDputs("    Test skipped: Not a Windows or POSIX system.");
+    puts("    Test skipped: Not a Windows or POSIX system.");
     return 0;
 
 #else
@@ -2080,7 +2080,7 @@ test_swmr_write_big(bool newest_format)
     driver = HDgetenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return 0;
     }
 
@@ -2215,7 +2215,7 @@ test_swmr_write_big(bool newest_format)
 
         /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
         if ((pid = fork()) < 0) {
-            HDperror("fork");
+            perror("fork");
             FAIL_STACK_ERROR;
         }
         else if (0 == pid) { /* Child process */
@@ -2228,7 +2228,7 @@ test_swmr_write_big(bool newest_format)
             char *const new_argv[]    = {swmr_reader, NULL};
             /* Run the reader */
             status = execv(SWMR_READER, new_argv);
-            printf("errno from execv = %s\n", HDstrerror(errno));
+            printf("errno from execv = %s\n", strerror(errno));
             FAIL_STACK_ERROR;
         } /* end if */
 

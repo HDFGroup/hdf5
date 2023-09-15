@@ -68,10 +68,10 @@ parallel_print(const char *format, ...)
     va_start(ap, format);
 
     if (!g_Parallel)
-        HDvprintf(format, ap);
+        vprintf(format, ap);
     else {
         if (overflow_file == NULL) /*no overflow has occurred yet */ {
-            bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
+            bytes_written = vsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
             va_end(ap);
             va_start(ap, format);
 
@@ -84,13 +84,13 @@ parallel_print(const char *format, ...)
                     fprintf(rawerrorstream,
                             "warning: could not create overflow file.  Output may be truncated.\n");
                 else
-                    bytes_written = HDvfprintf(overflow_file, format, ap);
+                    bytes_written = vfprintf(overflow_file, format, ap);
             }
             else
                 outBuffOffset += (unsigned)bytes_written;
         }
         else
-            bytes_written = HDvfprintf(overflow_file, format, ap);
+            bytes_written = vfprintf(overflow_file, format, ap);
     }
     va_end(ap);
 }
@@ -114,7 +114,7 @@ error_msg(const char *fmt, ...)
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
     fprintf(rawerrorstream, "%s error: ", h5tools_getprogname());
-    HDvfprintf(rawerrorstream, fmt, ap);
+    vfprintf(rawerrorstream, fmt, ap);
 
     va_end(ap);
 }
@@ -138,7 +138,7 @@ warn_msg(const char *fmt, ...)
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
     fprintf(rawerrorstream, "%s warning: ", h5tools_getprogname());
-    HDvfprintf(rawerrorstream, fmt, ap);
+    vfprintf(rawerrorstream, fmt, ap);
     va_end(ap);
 }
 
@@ -241,10 +241,10 @@ parse_subset_params(const char *dset)
     H5TOOLS_START_DEBUG(" - dset:%s", dset);
     /* if dset name is quoted wait till after second quote to look for subset brackets */
     if (*dset == '"')
-        q_dset = HDstrchr(dset, '"');
+        q_dset = strchr(dset, '"');
     else
         q_dset = dset;
-    if ((brace = HDstrrchr(q_dset, '[')) != NULL) {
+    if ((brace = strrchr(q_dset, '[')) != NULL) {
         *brace++ = '\0';
 
         s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
@@ -388,8 +388,8 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
 
     /* create destination string
      */
-    start++;                                                /* advance past opening paren '(' */
-    cpy = (char *)malloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
+    start++;                                              /* advance past opening paren '(' */
+    cpy = (char *)malloc(sizeof(char) * (strlen(start))); /* no +1; less '(' */
     if (cpy == NULL) {
         ret_value = FAIL;
         goto done;
@@ -699,7 +699,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
                 else {
                     /* Use latest version of name */
                     free(found_obj->objname);
-                    found_obj->objname = HDstrdup(name);
+                    found_obj->objname = strdup(name);
 
                     /* Mark named datatype as having valid name */
                     found_obj->recorded = true;
@@ -785,7 +785,7 @@ add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, bool 
 
     /* Set information about object */
     memcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
-    table->objs[u].objname   = HDstrdup(objname);
+    table->objs[u].objname   = strdup(objname);
     table->objs[u].recorded  = record;
     table->objs[u].displayed = 0;
 }
@@ -843,7 +843,7 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* if path is root, return group type */
-    if (!HDstrcmp(linkpath, "/")) {
+    if (!strcmp(linkpath, "/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
         H5TOOLS_GOTO_DONE(2);
     }
@@ -1188,50 +1188,50 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
+            if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 if (show_progress) {
                     printf("  ERROR: aws_region value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->fa.aws_region, values[0], (HDstrlen(values[0]) + 1));
+            memcpy(fa->fa.aws_region, values[0], (strlen(values[0]) + 1));
             if (show_progress) {
                 printf("  aws_region set\n");
             }
 
-            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
+            if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
                 if (show_progress) {
                     printf("  ERROR: secret_id value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->fa.secret_id, values[1], (HDstrlen(values[1]) + 1));
+            memcpy(fa->fa.secret_id, values[1], (strlen(values[1]) + 1));
             if (show_progress) {
                 printf("  secret_id set\n");
             }
 
-            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
+            if (strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
                 if (show_progress) {
                     printf("  ERROR: secret_key value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->fa.secret_key, values[2], (HDstrlen(values[2]) + 1));
+            memcpy(fa->fa.secret_key, values[2], (strlen(values[2]) + 1));
             if (show_progress) {
                 printf("  secret_key set\n");
             }
 
-            if (HDstrlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
+            if (strlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
                 if (show_progress) {
                     printf("  ERROR: token value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->token, values[3], (HDstrlen(values[3]) + 1));
+            memcpy(fa->token, values[3], (strlen(values[3]) + 1));
             if (show_progress) {
                 printf("  token set\n");
             }
@@ -1288,22 +1288,22 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
      * WARNING: No error-checking is done on length of input strings...
      *          Silent overflow is possible, albeit unlikely.
      */
-    if (HDstrncmp(props[0], "", 1)) {
-        HDstrncpy(fapl_config_out->namenode_name, (const char *)props[0], HDstrlen(props[0]));
+    if (strncmp(props[0], "", 1)) {
+        strncpy(fapl_config_out->namenode_name, (const char *)props[0], strlen(props[0]));
     }
-    if (HDstrncmp(props[1], "", 1)) {
+    if (strncmp(props[1], "", 1)) {
         k = strtoul((const char *)props[1], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed port number wasn't");
         fapl_config_out->namenode_port = (int32_t)k;
     }
-    if (HDstrncmp(props[2], "", 1)) {
-        HDstrncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
+    if (strncmp(props[2], "", 1)) {
+        strncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], strlen(props[2]));
     }
-    if (HDstrncmp(props[3], "", 1)) {
-        HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
+    if (strncmp(props[3], "", 1)) {
+        strncpy(fapl_config_out->user_name, (const char *)props[3], strlen(props[3]));
     }
-    if (HDstrncmp(props[4], "", 1)) {
+    if (strncmp(props[4], "", 1)) {
         k = strtoul((const char *)props[4], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");

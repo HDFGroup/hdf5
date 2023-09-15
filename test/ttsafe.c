@@ -81,7 +81,7 @@ gen_name(int value)
 
     length                     = num_digits(MAX_NUM_NAME - 1);
     temp                       = (char *)malloc(NAME_OFFSET + length + 1);
-    temp                       = HDstrcpy(temp, "attrib");
+    temp                       = strcpy(temp, "attrib");
     temp[NAME_OFFSET + length] = '\0';
 
     for (i = (int)(length - 1); i >= 0; i--) {

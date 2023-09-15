@@ -681,11 +681,11 @@ main(void)
         goto error;
 
     /* Report status */
-    HDputs("All event set tests passed.");
+    puts("All event set tests passed.");
 
     exit(EXIT_SUCCESS);
 
 error:
-    HDputs("***** EVENT SET TESTS FAILED *****");
+    puts("***** EVENT SET TESTS FAILED *****");
     exit(EXIT_FAILURE);
 } /* end main() */

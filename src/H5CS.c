@@ -138,7 +138,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     fprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
         fprintf(stream, "  Back trace follows.");
-    HDfputc('\n', stream);
+    fputc('\n', stream);
 
     for (i = fstack->nused - 1; i >= 0; --i)
         fprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);

@@ -262,7 +262,7 @@ main(int argc, char *argv[])
         exit_value = 1;
         goto done;
     } /* end if */
-    if (HDstrchr(argv[1], '%'))
+    if (strchr(argv[1], '%'))
         if (H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT) < 0) {
             fprintf(stderr, "cannot set file access property list\n");
             exit_value = 1;
@@ -772,15 +772,15 @@ main(int argc, char *argv[])
         printf("%-*s ", VCOL, "Signature:");
         for (u = 0; u < sizeof(sig); u++) {
             if (sig[u] > ' ' && sig[u] <= '~' && '\\' != sig[u])
-                HDputchar(sig[u]);
+                putchar(sig[u]);
             else if ('\\' == sig[u]) {
-                HDputchar('\\');
-                HDputchar('\\');
+                putchar('\\');
+                putchar('\\');
             }
             else
                 printf("\\%03o", sig[u]);
         }
-        HDputchar('\n');
+        putchar('\n');
 
         fprintf(stderr, "unknown signature\n");
         exit_value = 4;

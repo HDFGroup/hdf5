@@ -47,13 +47,13 @@ test_find(void)
     n = H5T__bit_find(v1, (size_t)0, (size_t)0, H5T_BIT_LSB, true);
     if (-1 != n) {
         H5_FAILED();
-        HDputs("    Zero length test failed (lsb)!");
+        puts("    Zero length test failed (lsb)!");
         goto failed;
     }
     n = H5T__bit_find(v1, (size_t)0, (size_t)0, H5T_BIT_MSB, true);
     if (-1 != n) {
         H5_FAILED();
-        HDputs("    Zero length test failed (msb)!");
+        puts("    Zero length test failed (msb)!");
         goto failed;
     }
 
@@ -62,13 +62,13 @@ test_find(void)
     n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, true);
     if (-1 != n) {
         H5_FAILED();
-        HDputs("    Zero buffer test failed (lsb)!");
+        puts("    Zero buffer test failed (lsb)!");
         goto failed;
     }
     n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_MSB, true);
     if (-1 != n) {
         H5_FAILED();
-        HDputs("    Zero buffer test failed (msb)!");
+        puts("    Zero buffer test failed (msb)!");
         goto failed;
     }
 
@@ -95,13 +95,13 @@ test_find(void)
     n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, false);
     if (-1 != n) {
         H5_FAILED();
-        HDputs("    One buffer test failed (lsb)!");
+        puts("    One buffer test failed (lsb)!");
         goto failed;
     }
     n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_MSB, false);
     if (-1 != n) {
         H5_FAILED();
-        HDputs("    One buffer test failed (msb)!");
+        puts("    One buffer test failed (msb)!");
         goto failed;
     }
 
@@ -170,12 +170,12 @@ test_copy(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            HDputs("    Unabled to find copied region in destination");
+            puts("    Unabled to find copied region in destination");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
             H5_FAILED();
-            HDputs("    Found copied bits when we shouldn't have");
+            puts("    Found copied bits when we shouldn't have");
             goto failed;
         }
 
@@ -190,7 +190,7 @@ test_copy(void)
         }
         if (0 == size && n >= 0) {
             H5_FAILED();
-            HDputs("    Found copied bits and shouldn't have!");
+            puts("    Found copied bits and shouldn't have!");
             goto failed;
         }
         n = H5T__bit_find(v2, d_offset, 8 * sizeof(v2) - d_offset, H5T_BIT_LSB, 0);
@@ -203,7 +203,7 @@ test_copy(void)
         }
         if (d_offset + size == 8 * sizeof(v2) && n >= 0) {
             H5_FAILED();
-            HDputs("    High-order zeros are present and shouldn't be!");
+            puts("    High-order zeros are present and shouldn't be!");
             goto failed;
         }
 
@@ -221,7 +221,7 @@ test_copy(void)
         }
         if (0 == size && n >= 0) {
             H5_FAILED();
-            HDputs("    Found copied bits but shouldn't have (reverse)!");
+            puts("    Found copied bits but shouldn't have (reverse)!");
             goto failed;
         }
         n = H5T__bit_find(v2, (size_t)0, d_offset + size, H5T_BIT_MSB, 0);
@@ -234,7 +234,7 @@ test_copy(void)
         }
         if (0 == d_offset && n >= 0) {
             H5_FAILED();
-            HDputs("    Found leading original data but shouldn't have!");
+            puts("    Found leading original data but shouldn't have!");
             goto failed;
         }
     }
@@ -677,12 +677,12 @@ test_set(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            HDputs("    Unabled to find set region in buffer");
+            puts("    Unabled to find set region in buffer");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
             H5_FAILED();
-            HDputs("    Found set bits when we shouldn't have");
+            puts("    Found set bits when we shouldn't have");
             goto failed;
         }
 
@@ -697,7 +697,7 @@ test_set(void)
         }
         if (0 == size && n >= 0) {
             H5_FAILED();
-            HDputs("    Found set bits and shouldn't have!");
+            puts("    Found set bits and shouldn't have!");
             goto failed;
         }
         n = H5T__bit_find(v2, d_offset, 8 * sizeof(v2) - d_offset, H5T_BIT_LSB, 0);
@@ -710,7 +710,7 @@ test_set(void)
         }
         if (d_offset + size == 8 * sizeof(v2) && n >= 0) {
             H5_FAILED();
-            HDputs("    High-order zeros are present and shouldn't be!");
+            puts("    High-order zeros are present and shouldn't be!");
             goto failed;
         }
 
@@ -728,7 +728,7 @@ test_set(void)
         }
         if (0 == size && n >= 0) {
             H5_FAILED();
-            HDputs("    Found set bits but shouldn't have (reverse)!");
+            puts("    Found set bits but shouldn't have (reverse)!");
             goto failed;
         }
         n = H5T__bit_find(v2, (size_t)0, d_offset + size, H5T_BIT_MSB, 0);
@@ -741,7 +741,7 @@ test_set(void)
         }
         if (0 == d_offset && n >= 0) {
             H5_FAILED();
-            HDputs("    Found leading zeros but shouldn't have!");
+            puts("    Found leading zeros but shouldn't have!");
             goto failed;
         }
     }
@@ -792,12 +792,12 @@ test_clear(void)
                 break;
         if (size > 0 && j >= (int)sizeof(v2)) {
             H5_FAILED();
-            HDputs("    Unabled to find cleared region in buffer");
+            puts("    Unabled to find cleared region in buffer");
             goto failed;
         }
         if (0 == size && j < (int)sizeof(v2)) {
             H5_FAILED();
-            HDputs("    Found cleared bits when we shouldn't have");
+            puts("    Found cleared bits when we shouldn't have");
             goto failed;
         }
 
@@ -812,7 +812,7 @@ test_clear(void)
         }
         if (0 == size && n >= 0) {
             H5_FAILED();
-            HDputs("    Found cleared bits and shouldn't have!");
+            puts("    Found cleared bits and shouldn't have!");
             goto failed;
         }
         n = H5T__bit_find(v2, d_offset, 8 * sizeof(v2) - d_offset, H5T_BIT_LSB, 1);
@@ -825,7 +825,7 @@ test_clear(void)
         }
         if (d_offset + size == 8 * sizeof(v2) && n >= 0) {
             H5_FAILED();
-            HDputs("    High-order ones are present and shouldn't be!");
+            puts("    High-order ones are present and shouldn't be!");
             goto failed;
         }
 
@@ -843,7 +843,7 @@ test_clear(void)
         }
         if (0 == size && n >= 0) {
             H5_FAILED();
-            HDputs("    Found cleared bits but shouldn't have (reverse)!");
+            puts("    Found cleared bits but shouldn't have (reverse)!");
             goto failed;
         }
         n = H5T__bit_find(v2, (size_t)0, d_offset + size, H5T_BIT_MSB, 1);
@@ -856,7 +856,7 @@ test_clear(void)
         }
         if (0 == d_offset && n >= 0) {
             H5_FAILED();
-            HDputs("    Found leading ones but shouldn't have!");
+            puts("    Found leading ones but shouldn't have!");
             goto failed;
         }
     }

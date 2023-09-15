@@ -359,7 +359,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
 
     /* Copy the string for the API routine's arguments */
     /* (skip the six characters from the app's file, function and line # arguments) */
-    assert(0 == HDstrncmp(caller_args, "*s*sIu", 6));
+    assert(0 == strncmp(caller_args, "*s*sIu", 6));
     if (H5_trace_args(rs, caller_args + 6, ap) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments");
     if (NULL == (api_args = H5RS_get_str(rs)))

@@ -443,11 +443,11 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             assert(ent->source_dset.virtual_select);
 
             /* Source file name */
-            str_size[2 * i] = HDstrlen(ent->source_file_name) + (size_t)1;
+            str_size[2 * i] = strlen(ent->source_file_name) + (size_t)1;
             block_size += str_size[2 * i];
 
             /* Source dset name */
-            str_size[(2 * i) + 1] = HDstrlen(ent->source_dset_name) + (size_t)1;
+            str_size[(2 * i) + 1] = strlen(ent->source_dset_name) + (size_t)1;
             block_size += str_size[(2 * i) + 1];
 
             /* Source selection */
@@ -868,7 +868,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
     assert(source_dset->dset_name);
 
     /* Check if we need to open the source file */
-    if (HDstrcmp(source_dset->file_name, ".") != 0) {
+    if (strcmp(source_dset->file_name, ".") != 0) {
         unsigned intent; /* File access permissions */
 
         /* Get the virtual dataset's file open flags ("intent") */
@@ -1115,12 +1115,12 @@ H5D_virtual_parse_source_name(const char *source_name, H5O_storage_virtual_name_
 
     /* Initialize p and tmp_static_strlen */
     p                 = source_name;
-    tmp_static_strlen = tmp_strlen = HDstrlen(source_name);
+    tmp_static_strlen = tmp_strlen = strlen(source_name);
 
     /* Iterate over name */
     /* Note this will not work with UTF-8!  We should support this eventually
      * -NAF 5/18/2015 */
-    while ((pct = HDstrchr(p, '%'))) {
+    while ((pct = strchr(p, '%'))) {
         assert(pct >= p);
 
         /* Allocate name segment struct if necessary */
@@ -1336,10 +1336,10 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
         do {
             /* Add name segment */
             if (name_seg->name_segment) {
-                seg_len = HDstrlen(name_seg->name_segment);
+                seg_len = strlen(name_seg->name_segment);
                 assert(seg_len > 0);
                 assert(seg_len < name_len_rem);
-                HDstrncpy(p, name_seg->name_segment, name_len_rem);
+                strncpy(p, name_seg->name_segment, name_len_rem);
                 name_len_rem -= seg_len;
                 p += seg_len;
             } /* end if */
@@ -1347,7 +1347,7 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
             /* Add block number */
             if (nsubs_rem > 0) {
                 assert(blockno_len < name_len_rem);
-                if (HDsnprintf(p, name_len_rem, "%llu", (long long unsigned)blockno) < 0)
+                if (snprintf(p, name_len_rem, "%llu", (long long unsigned)blockno) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write block number to string");
                 name_len_rem -= blockno_len;
                 p += blockno_len;

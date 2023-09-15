@@ -119,15 +119,15 @@ onion_filepaths_init(const char *basename)
 
     if (NULL == (paths->canon = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         TEST_ERROR;
-    HDsnprintf(paths->canon, ONION_TEST_FIXNAME_SIZE, "%s", basename);
+    snprintf(paths->canon, ONION_TEST_FIXNAME_SIZE, "%s", basename);
 
     if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         TEST_ERROR;
-    HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
+    snprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
     if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         TEST_ERROR;
-    HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
+    snprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
     return paths;
 
@@ -848,7 +848,7 @@ test_fapl(void)
         TEST_ERROR;
     if (0 != info_out.force_write_open)
         TEST_ERROR;
-    if (HDstrcmp(info_in.comment, info_out.comment))
+    if (strcmp(info_in.comment, info_out.comment))
         TEST_ERROR;
 
     /* Cleanup */
@@ -1328,7 +1328,7 @@ test_revision_record_encode_decode(void)
     };
     size_t exp_size = H5FD_ONION_ENCODED_SIZE_REVISION_RECORD +
                       (H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
-                      HDstrlen("Example comment message.") + 1;
+                      strlen("Example comment message.") + 1;
 
     r_out.archival_index.list = NULL;
     r_out.comment             = NULL;
@@ -1478,15 +1478,15 @@ test_revision_record_encode_decode(void)
         TEST_ERROR;
     if (record.checksum != r_out.checksum)
         TEST_ERROR;
-    if (HDstrncmp(record.time_of_creation, r_out.time_of_creation, 16) != 0)
+    if (strncmp(record.time_of_creation, r_out.time_of_creation, 16) != 0)
         TEST_ERROR;
     if (record.comment_size != r_out.comment_size)
         TEST_ERROR;
-    if (record.comment_size != HDstrlen(r_out.comment) + 1)
+    if (record.comment_size != strlen(r_out.comment) + 1)
         TEST_ERROR;
-    if (HDstrlen(record.comment) != HDstrlen(r_out.comment))
+    if (strlen(record.comment) != strlen(r_out.comment))
         TEST_ERROR;
-    if (HDstrcmp(record.comment, r_out.comment) != 0)
+    if (strcmp(record.comment, r_out.comment) != 0)
         TEST_ERROR;
 
     if (H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR != r_out.archival_index.version)
@@ -1766,9 +1766,9 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
                 TEST_ERROR;
         }
         else {
-            if (HDstrlen(rev_out.comment) != HDstrlen(erp->comment))
+            if (strlen(rev_out.comment) != strlen(erp->comment))
                 TEST_ERROR;
-            if (HDstrcmp(rev_out.comment, erp->comment) != 0)
+            if (strcmp(rev_out.comment, erp->comment) != 0)
                 TEST_ERROR;
         }
         if (erp->n_index_entries != (uint64_t)(-1) &&
@@ -2585,7 +2585,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
 
         onion_info_p->revision_num = about[i].revision_num;
         if (about[i].comment != NULL) {
-            j = MIN(HDstrlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
+            j = MIN(strlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
             memcpy(onion_info_p->comment, about[i].comment, j);
         }
         onion_info_p->comment[j] = '\0';
@@ -2615,7 +2615,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
             if (memcmp(buf_vfy, wi->buf, wi->size) != 0) {
                 const unsigned char *_buf = wi->buf;
                 size_t               z    = 0;
-                HDputs("i  exp  act");
+                puts("i  exp  act");
                 for (z = 0; z < wi->size; z++)
                     printf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
                 fflush(stdout);
@@ -2746,7 +2746,7 @@ test_page_aligned_history_create(void)
     if (memcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
         printf("aoff: %" PRIu64 "\n", a_off);
-        HDputs("i exp act");
+        puts("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
             printf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
         }
@@ -2756,7 +2756,7 @@ test_page_aligned_history_create(void)
     if (memcmp(b_list_s, buf, a_off) != 0) {
         size_t k;
         printf("aoff: %" PRIu64 "\n", a_off);
-        HDputs("i exp act");
+        puts("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
             printf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
         }
@@ -4921,9 +4921,9 @@ main(void)
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
-    if ((0 != HDstrcmp(env_h5_drvr, "nomatch")) && (0 != HDstrcmp(env_h5_drvr, "sec2"))) {
+    if ((0 != strcmp(env_h5_drvr, "nomatch")) && (0 != strcmp(env_h5_drvr, "sec2"))) {
         SKIPPED();
-        HDputs("Onion VFD test skipped due to non-sec2 default VFD");
+        puts("Onion VFD test skipped due to non-sec2 default VFD");
         exit(EXIT_SUCCESS);
     }
 

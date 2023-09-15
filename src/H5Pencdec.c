@@ -311,9 +311,9 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
         size_t prop_value_len; /* Encoded size of property's value */
 
         /* Encode (or not, if the 'encode' flag is off) the property's name */
-        prop_name_len = HDstrlen(prop->name) + 1;
+        prop_name_len = strlen(prop->name) + 1;
         if (udata->encode) {
-            HDstrcpy((char *)*(udata->pp), prop->name);
+            strcpy((char *)*(udata->pp), prop->name);
             *(uint8_t **)(udata->pp) += prop_name_len;
         } /* end if */
         *(udata->enc_size_ptr) += prop_name_len;
@@ -683,7 +683,7 @@ H5P__decode(const void *buf)
 
         /* Get property list name */
         name = (const char *)p;
-        p += HDstrlen(name) + 1;
+        p += strlen(name) + 1;
 
         /* Find property with name */
         if (NULL == (prop = H5P__find_prop_plist(plist, name)))

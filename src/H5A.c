@@ -1580,7 +1580,7 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     assert(new_name);
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_name, new_name) != 0) {
+    if (strcmp(old_name, new_name) != 0) {
         H5VL_attr_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up VOL callback arguments */

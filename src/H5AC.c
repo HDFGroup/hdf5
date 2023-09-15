@@ -288,7 +288,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done     = NULL;
         aux_ptr->p0_image_len        = 0;
 
-        HDsnprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
+        snprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
 
         if (mpi_rank == 0) {
             if (NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1874,7 +1874,7 @@ H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
          * open the file, so we will content ourselves with a couple of
          * sanity checks on the length of the file name.
          */
-        name_len = HDstrlen(config_ptr->trace_file_name);
+        name_len = strlen(config_ptr->trace_file_name);
         if (name_len == 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name is empty");
         else if (name_len > H5AC__MAX_TRACE_FILE_NAME_LEN)

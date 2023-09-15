@@ -158,7 +158,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "fill raw");
     for (u = 0; u < nwrite; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         memset(the_data, 0xAA, (size_t)(size[0] * size[1]));
     }
@@ -166,7 +166,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("fill raw",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,
@@ -181,7 +181,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "fill hdf5");
     for (u = 0; u < nread; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
@@ -190,7 +190,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("fill hdf5",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,
@@ -205,7 +205,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "out raw");
     for (u = 0; u < nwrite; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         offset = HDlseek(fd, (off_t)0, SEEK_SET);
         assert(0 == offset);
@@ -216,7 +216,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("out raw",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,
@@ -231,7 +231,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "out hdf5");
     for (u = 0; u < nwrite; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         status = H5Dwrite(dset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, the_data);
         assert(status >= 0);
@@ -240,7 +240,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("out hdf5",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,
@@ -255,7 +255,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "in raw");
     for (u = 0; u < nread; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         offset = HDlseek(fd, (off_t)0, SEEK_SET);
         assert(0 == offset);
@@ -266,7 +266,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("in raw",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,
@@ -281,7 +281,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "in hdf5");
     for (u = 0; u < nread; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
@@ -290,7 +290,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("in hdf5",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,
@@ -310,7 +310,7 @@ main(void)
     t_start = H5_get_time();
     fprintf(stderr, HEADING, "in hdf5 partial");
     for (u = 0; u < nread; u++) {
-        HDputc(PROGRESS, stderr);
+        putc(PROGRESS, stderr);
         fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
@@ -319,7 +319,7 @@ main(void)
     getrusage(RUSAGE_SELF, &r_stop);
 #endif
     t_stop = H5_get_time();
-    HDputc('\n', stderr);
+    putc('\n', stderr);
     print_stats("in hdf5 partial",
 #ifdef H5_HAVE_GETRUSAGE
                 &r_start, &r_stop,

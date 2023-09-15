@@ -948,35 +948,35 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
     assert(driver_name);
     assert(driver_id);
 
-    if (!HDstrcmp(driver_name, "sec2")) {
+    if (!strcmp(driver_name, "sec2")) {
         if ((*driver_id = H5FD_SEC2) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize sec2 VFD");
     }
-    else if (!HDstrcmp(driver_name, "core") || !HDstrcmp(driver_name, "core_paged")) {
+    else if (!strcmp(driver_name, "core") || !strcmp(driver_name, "core_paged")) {
         if ((*driver_id = H5FD_CORE) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize core VFD");
     }
-    else if (!HDstrcmp(driver_name, "log")) {
+    else if (!strcmp(driver_name, "log")) {
         if ((*driver_id = H5FD_LOG) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize log VFD");
     }
-    else if (!HDstrcmp(driver_name, "family")) {
+    else if (!strcmp(driver_name, "family")) {
         if ((*driver_id = H5FD_FAMILY) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize family VFD");
     }
-    else if (!HDstrcmp(driver_name, "multi") || !HDstrcmp(driver_name, "split")) {
+    else if (!strcmp(driver_name, "multi") || !strcmp(driver_name, "split")) {
         if ((*driver_id = H5FD_MULTI) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize multi VFD");
     }
-    else if (!HDstrcmp(driver_name, "stdio")) {
+    else if (!strcmp(driver_name, "stdio")) {
         if ((*driver_id = H5FD_STDIO) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize stdio VFD");
     }
-    else if (!HDstrcmp(driver_name, "splitter")) {
+    else if (!strcmp(driver_name, "splitter")) {
         if ((*driver_id = H5FD_SPLITTER) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize splitter VFD");
     }
-    else if (!HDstrcmp(driver_name, "mpio")) {
+    else if (!strcmp(driver_name, "mpio")) {
 #ifdef H5_HAVE_PARALLEL
         if ((*driver_id = H5FD_MPIO) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize MPI I/O VFD");
@@ -984,7 +984,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "MPI-I/O VFD is not enabled");
 #endif
     }
-    else if (!HDstrcmp(driver_name, "direct")) {
+    else if (!strcmp(driver_name, "direct")) {
 #ifdef H5_HAVE_DIRECT
         if ((*driver_id = H5FD_DIRECT) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Direct I/O VFD");
@@ -992,7 +992,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Direct I/O VFD is not enabled");
 #endif
     }
-    else if (!HDstrcmp(driver_name, "mirror")) {
+    else if (!strcmp(driver_name, "mirror")) {
 #ifdef H5_HAVE_MIRROR_VFD
         if ((*driver_id = H5FD_MIRROR) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize mirror VFD");
@@ -1000,7 +1000,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Mirror VFD is not enabled");
 #endif
     }
-    else if (!HDstrcmp(driver_name, "hdfs")) {
+    else if (!strcmp(driver_name, "hdfs")) {
 #ifdef H5_HAVE_LIBHDFS
         if ((*driver_id = H5FD_HDFS) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize HDFS VFD");
@@ -1008,7 +1008,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "HDFS VFD is not enabled");
 #endif
     }
-    else if (!HDstrcmp(driver_name, "ros3")) {
+    else if (!strcmp(driver_name, "ros3")) {
 #ifdef H5_HAVE_ROS3_VFD
         if ((*driver_id = H5FD_ROS3) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize ROS3 VFD");
@@ -1016,7 +1016,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "ROS3 VFD is not enabled");
 #endif
     }
-    else if (!HDstrcmp(driver_name, "subfiling")) {
+    else if (!strcmp(driver_name, "subfiling")) {
 #ifdef H5_HAVE_SUBFILING_VFD
         if ((*driver_id = H5FD_SUBFILING) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Subfiling VFD");
@@ -1024,7 +1024,7 @@ H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Subfiling VFD is not enabled");
 #endif
     }
-    else if (!HDstrcmp(driver_name, "windows")) {
+    else if (!strcmp(driver_name, "windows")) {
 #ifdef H5_HAVE_WINDOWS
         if ((*driver_id = H5FD_WINDOWS) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Windows VFD");
@@ -1616,10 +1616,10 @@ H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
 
     /* Retrieve configuration string property */
     if ((config_str = H5P_peek_driver_config_str(plist))) {
-        size_t config_str_len = HDstrlen(config_str);
+        size_t config_str_len = strlen(config_str);
 
         if (config_buf) {
-            HDstrncpy(config_buf, config_str, buf_size);
+            strncpy(config_buf, config_str, buf_size);
             if (config_str_len >= buf_size)
                 config_buf[buf_size - 1] = '\0';
         }
@@ -1916,7 +1916,7 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
         HGOTO_DONE(-1);
     if (cls1->name != NULL && cls2->name == NULL)
         HGOTO_DONE(1);
-    if (0 != (cmp_value = HDstrcmp(cls1->name, cls2->name)))
+    if (0 != (cmp_value = strcmp(cls1->name, cls2->name)))
         HGOTO_DONE(cmp_value);
 
     /* Compare driver infos */
@@ -1941,7 +1941,7 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
     if (info1->driver_config_str != NULL && info2->driver_config_str == NULL)
         HGOTO_DONE(1);
     if (info1->driver_config_str) {
-        if (0 != (cmp_value = HDstrcmp(info1->driver_config_str, info2->driver_config_str)))
+        if (0 != (cmp_value = strcmp(info1->driver_config_str, info2->driver_config_str)))
             HGOTO_DONE(cmp_value);
     }
 
@@ -4097,7 +4097,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
 
     H5_DECODE_UNSIGNED(*pp, config->close_trace_file);
 
-    HDstrcpy(config->trace_file_name, (const char *)(*pp));
+    strcpy(config->trace_file_name, (const char *)(*pp));
     *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
 
     H5_DECODE_UNSIGNED(*pp, config->evictions_enabled);
@@ -4622,7 +4622,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled /*out*/, char *locati
     /* Get location size, including terminating NULL */
     if (location_size) {
         if (location_ptr)
-            *location_size = HDstrlen(location_ptr) + 1;
+            *location_size = strlen(location_ptr) + 1;
         else
             *location_size = 0;
     } /* end if */
@@ -4658,7 +4658,7 @@ H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != log_location)
-        len = HDstrlen(log_location);
+        len = strlen(log_location);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
@@ -4724,7 +4724,7 @@ H5P__facc_mdc_log_location_dec(const void **_pp, void *_value)
         /* Make a copy of the user's prefix string */
         if (NULL == (*log_location = (char *)H5MM_malloc(len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
-        HDstrncpy(*log_location, *(const char **)pp, len);
+        strncpy(*log_location, *(const char **)pp, len);
         (*log_location)[len] = '\0';
 
         *pp += len;
@@ -4804,7 +4804,7 @@ H5P__facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

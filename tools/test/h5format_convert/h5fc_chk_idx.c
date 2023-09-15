@@ -55,8 +55,8 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* Duplicate the file name  & dataset name */
-    fname = HDstrdup(argv[1]);
-    dname = HDstrdup(argv[2]);
+    fname = strdup(argv[1]);
+    dname = strdup(argv[2]);
 
     /* Try opening the file */
     if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, false, NULL, (size_t)0)) < 0) {

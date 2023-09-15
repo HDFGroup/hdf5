@@ -169,7 +169,7 @@ main(int argc, char *argv[])
     mirr_fa.magic          = H5FD_MIRROR_FAPL_MAGIC;
     mirr_fa.version        = H5FD_MIRROR_CURR_FAPL_T_VERSION;
     mirr_fa.handshake_port = SERVER_PORT;
-    HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
+    strncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
 
     if (NULL == (split_fa = calloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
         fprintf(stderr, "can't allocate memory for splitter config\n");
@@ -182,7 +182,7 @@ main(int argc, char *argv[])
     split_fa->version          = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
     split_fa->log_file_path[0] = '\0'; /* none */
     split_fa->ignore_wo_errs   = false;
-    HDstrncpy(split_fa->wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
+    strncpy(split_fa->wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
 
     /* Determine the need to send/wait message file*/
     if (UC_opts.launch == UC_READWRITE) {
@@ -259,7 +259,7 @@ main(int argc, char *argv[])
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((childpid = fork()) < 0) {
-            HDperror("fork");
+            perror("fork");
             Hgoto_error(1);
         }
     }
@@ -354,7 +354,7 @@ main(int argc, char *argv[])
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
-            HDperror("waitpid");
+            perror("waitpid");
             Hgoto_error(1);
         }
 

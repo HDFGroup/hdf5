@@ -317,7 +317,7 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (H5VL_GET_CONNECTOR_BY_NAME == op_data->key.kind) {
-        if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {
+        if (0 == strcmp(cls->name, op_data->key.u.name)) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
@@ -399,12 +399,12 @@ H5VL__set_def_conn(void)
         } /* end else-if */
         else {
             /* Check for VOL connectors that ship with the library */
-            if (!HDstrcmp(tok, "native")) {
+            if (!strcmp(tok, "native")) {
                 connector_id = H5VL_NATIVE;
                 if (H5I_inc_ref(connector_id, false) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "can't increment VOL connector refcount");
             } /* end if */
-            else if (!HDstrcmp(tok, "pass_through")) {
+            else if (!strcmp(tok, "pass_through")) {
                 connector_id = H5VL_PASSTHRU;
                 if (H5I_inc_ref(connector_id, false) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINC, FAIL, "can't increment VOL connector refcount");
@@ -1236,7 +1236,7 @@ H5VL__register_connector_by_class(const H5VL_class_t *cls, bool app_ref, hid_t v
     if (!cls->name)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
                     "VOL connector class name cannot be the NULL pointer");
-    if (0 == HDstrlen(cls->name))
+    if (0 == strlen(cls->name))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
                     "VOL connector class name cannot be the empty string");
     if (cls->info_cls.copy && !cls->info_cls.free)
@@ -1689,9 +1689,9 @@ H5VL__get_connector_name(hid_t id, char *name /*out*/, size_t size)
 
     cls = vol_obj->connector->cls;
 
-    len = HDstrlen(cls->name);
+    len = strlen(cls->name);
     if (name) {
-        HDstrncpy(name, cls->name, size);
+        strncpy(name, cls->name, size);
         if (len >= size)
             name[size - 1] = '\0';
     } /* end if */
@@ -1972,7 +1972,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
         *cmp_value = 1;
         HGOTO_DONE(SUCCEED);
     } /* end if */
-    if (0 != (*cmp_value = HDstrcmp(cls1->name, cls2->name)))
+    if (0 != (*cmp_value = strcmp(cls1->name, cls2->name)))
         HGOTO_DONE(SUCCEED);
 
     /* Compare connector VOL API versions */
@@ -2457,7 +2457,7 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, bool *suc
     /* Which kind of key are we looking for? */
     if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
         /* Check if plugin name matches VOL connector class name */
-        if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
+        if (cls->name && !strcmp(cls->name, key->vol.u.name))
             *success = true;
     } /* end if */
     else {

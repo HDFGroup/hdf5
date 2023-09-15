@@ -85,7 +85,7 @@ file_image_daisy_chain_test(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup file name */
-    HDsnprintf(file_name, 1024, "file_image_daisy_chain_test_%05d.h5", (int)mpi_rank);
+    snprintf(file_name, 1024, "file_image_daisy_chain_test_%05d.h5", (int)mpi_rank);
 
     if (mpi_rank == 0) {
 

@@ -10909,15 +10909,13 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
     assert(edge_size > 0);
     assert(edge_size <= 1000);
 
-    HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n",
-               test_num);
+    snprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, ("%s", test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    HDsnprintf(test_desc_1, sizeof(test_desc_1),
-               "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n", small_rank, large_rank, offset,
-               (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3],
-               (int)dim_selected[4]);
+    snprintf(test_desc_1, sizeof(test_desc_1), "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n",
+             small_rank, large_rank, offset, (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2],
+             (int)dim_selected[3], (int)dim_selected[4]);
     MESSAGE(7, ("%s", test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -11169,16 +11167,16 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
     assert(dims_selected >= 0);
     assert(dims_selected <= large_rank);
 
-    HDsnprintf(test_desc_0, sizeof(test_desc_0),
-               "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
+    snprintf(test_desc_0, sizeof(test_desc_0),
+             "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, ("%s", test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    HDsnprintf(test_desc_1, sizeof(test_desc_1),
-               "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n",
-               small_rank, large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
-               (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
-               dims_selected);
+    snprintf(test_desc_1, sizeof(test_desc_1),
+             "\tranks: %d/%d edge/chkr size: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
+             large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
+             (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
+             dims_selected);
     MESSAGE(7, ("%s", test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -11714,16 +11712,15 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
     assert(dims_selected >= 0);
     assert(dims_selected <= large_rank);
 
-    HDsnprintf(test_desc_0, sizeof(test_desc_0),
-               "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
+    snprintf(test_desc_0, sizeof(test_desc_0),
+             "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
     MESSAGE(7, ("%s", test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
-    HDsnprintf(test_desc_1, sizeof(test_desc_1),
-               "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
-               large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0],
-               (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
-               dims_selected);
+    snprintf(test_desc_1, sizeof(test_desc_1),
+             "\tranks: %d/%d edge: %d s/p offset: %d/%d dim_selected: %d/%d/%d/%d/%d:%d.\n", small_rank,
+             large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0], (int)dim_selected[1],
+             (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4], dims_selected);
     MESSAGE(7, ("%s", test_desc_1));
 
     /* copy the edge size into the dims array */
@@ -16127,7 +16124,7 @@ test_select(void)
     test_select_hyper_valid_combination(); /* Test different input combinations */
 
     /* The following tests are currently broken with the Direct VFD */
-    if (HDstrcmp(env_h5_drvr, "direct") != 0) {
+    if (strcmp(env_h5_drvr, "direct") != 0) {
         test_select_hyper_and_2d();  /* Test hyperslab intersection (AND) code for 2-D dataset */
         test_select_hyper_xor_2d();  /* Test hyperslab XOR code for 2-D dataset */
         test_select_hyper_notb_2d(); /* Test hyperslab NOTB code for 2-D dataset */

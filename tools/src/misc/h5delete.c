@@ -37,7 +37,7 @@ main(int argc, char *argv[])
 
     switch (argc) {
         case 3:
-            if (HDstrcmp(argv[1], "-f") != 0) {
+            if (strcmp(argv[1], "-f") != 0) {
                 usage();
                 return EXIT_FAILURE;
             }

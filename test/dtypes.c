@@ -309,7 +309,7 @@ test_copy(void)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Should not be able to close a predefined type!");
+        puts("    Should not be able to close a predefined type!");
         goto error;
     }
 
@@ -1850,7 +1850,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str) != 0) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || strcmp(rdata.str, wdata.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
@@ -1924,7 +1924,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str) != 0) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || strcmp(rdata.str, wdata.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
@@ -1998,12 +1998,12 @@ test_compound_10(void)
 
     for (i = 0; i < ARRAY_DIM; i++) {
         wdata[i].i1     = i * 10 + i;
-        wdata[i].str    = HDstrdup("C string A");
+        wdata[i].str    = strdup("C string A");
         wdata[i].str[9] = (char)(wdata[i].str[9] + i);
         wdata[i].i2     = i * 1000 + i * 10;
 
-        wdata[i].text.p = (void *)HDstrdup("variable-length text A\0");
-        len = wdata[i].text.len              = HDstrlen((char *)wdata[i].text.p) + 1;
+        wdata[i].text.p = (void *)strdup("variable-length text A\0");
+        len = wdata[i].text.len              = strlen((char *)wdata[i].text.p) + 1;
         ((char *)(wdata[i].text.p))[len - 2] = (char)(((char *)(wdata[i].text.p))[len - 2] + i);
         ((char *)(wdata[i].text.p))[len - 1] = '\0';
     }
@@ -2109,7 +2109,7 @@ test_compound_10(void)
 
     for (i = 0; i < ARRAY_DIM; i++) {
         if (rdata[i].i1 != wdata[i].i1 || rdata[i].i2 != wdata[i].i2 ||
-            HDstrcmp(rdata[i].str, wdata[i].str) != 0) {
+            strcmp(rdata[i].str, wdata[i].str) != 0) {
             H5_FAILED();
             AT();
             printf("incorrect read data\n");
@@ -2125,7 +2125,7 @@ test_compound_10(void)
 
         t1 = rdata[i].text.p;
         t2 = wdata[i].text.p;
-        if (HDstrcmp((char *)t1, (char *)t2) != 0) {
+        if (strcmp((char *)t1, (char *)t2) != 0) {
             H5_FAILED();
             AT();
             printf("incorrect VL read data\n");
@@ -2264,7 +2264,7 @@ test_compound_11(void)
         ((big_t *)buf)[u].s1 = (char *)malloc((size_t)32);
         if (!((big_t *)buf)[u].s1)
             TEST_ERROR;
-        HDsnprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
+        snprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
     } /* end for */
 
     /* Make copy of buffer before conversion */
@@ -2307,7 +2307,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
+        else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
@@ -2358,7 +2358,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
+        else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
@@ -2399,7 +2399,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
+        else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
@@ -2525,7 +2525,7 @@ test_compound_12(void)
     H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
-        HDputs("  Tries to cut off the last member. Should have failed.");
+        puts("  Tries to cut off the last member. Should have failed.");
         goto error;
     }
 
@@ -2971,14 +2971,14 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str) != 0) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || strcmp(rdata1.str, wdata1.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
         goto error;
     } /* end if */
 
-    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) != 0 ||
+    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || strcmp(rdata2.str, wdata2.str) != 0 ||
         rdata2.l1 != wdata2.l1 || rdata2.l2 != wdata2.l2 || rdata2.l3 != wdata2.l3 ||
         rdata2.l4 != wdata2.l4) {
         H5_FAILED();
@@ -3069,14 +3069,14 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str) != 0) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || strcmp(rdata1.str, wdata1.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
         goto error;
     } /* end if */
 
-    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) != 0 ||
+    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || strcmp(rdata2.str, wdata2.str) != 0 ||
         rdata2.l1 != wdata2.l1 || rdata2.l2 != wdata2.l2 || rdata2.l3 != wdata2.l3 ||
         rdata2.l4 != wdata2.l4) {
         H5_FAILED();
@@ -4028,7 +4028,7 @@ test_query(void)
         printf("Can't get name for enum member\n");
         goto error;
     } /* end if */
-    if (HDstrcmp("YELLOW", enum_name) != 0) {
+    if (strcmp("YELLOW", enum_name) != 0) {
         H5_FAILED();
         printf("Incorrect name for enum member\n");
         goto error;
@@ -4104,7 +4104,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Predefined types should not be modifiable!");
+        puts("    Predefined types should not be modifiable!");
         goto error;
     }
     H5E_BEGIN_TRY
@@ -4114,7 +4114,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Predefined types should not be closable!");
+        puts("    Predefined types should not be closable!");
         goto error;
     }
 
@@ -4132,7 +4132,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (ret_id >= 0) {
         H5_FAILED();
-        HDputs("    Attributes should not be allowed for transient types!");
+        puts("    Attributes should not be allowed for transient types!");
         goto error;
     }
 
@@ -4154,7 +4154,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Dataset datatypes should not be modifiable!");
+        puts("    Dataset datatypes should not be modifiable!");
         goto error;
     }
     if (H5Tclose(t2) < 0)
@@ -4177,7 +4177,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Dataset datatypes should not be modifiable!");
+        puts("    Dataset datatypes should not be modifiable!");
         goto error;
     }
     if (H5Tclose(t2) < 0)
@@ -4259,7 +4259,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Predefined types should not be committable!");
+        puts("    Predefined types should not be committable!");
         goto error;
     }
 
@@ -4272,7 +4272,7 @@ test_named(hid_t fapl)
         goto error;
     if (0 == status) {
         H5_FAILED();
-        HDputs("    H5Tcommitted() returned false!");
+        puts("    H5Tcommitted() returned false!");
         goto error;
     }
 
@@ -4284,7 +4284,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Committed type is not constant!");
+        puts("    Committed type is not constant!");
         goto error;
     }
 
@@ -4297,7 +4297,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Committed types should not be recommitted!");
+        puts("    Committed types should not be recommitted!");
         goto error;
     }
 
@@ -4322,7 +4322,7 @@ test_named(hid_t fapl)
         goto error;
     if (status) {
         H5_FAILED();
-        HDputs("    Copying a named type should result in a transient type!");
+        puts("    Copying a named type should result in a transient type!");
         goto error;
     }
     if (H5Tset_precision(t2, (size_t)256) < 0)
@@ -4341,7 +4341,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Opened named types should be named types!");
+        puts("    Opened named types should be named types!");
         goto error;
     }
 
@@ -4356,7 +4356,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Dataset type should be a named type!");
+        puts("    Dataset type should be a named type!");
         goto error;
     }
 
@@ -4375,7 +4375,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Dataset type should be a named type!");
+        puts("    Dataset type should be a named type!");
         goto error;
     }
 
@@ -4401,7 +4401,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Dataset type should be a named type!");
+        puts("    Dataset type should be a named type!");
         goto error;
     }
     if (H5Tclose(t2) < 0)
@@ -4429,7 +4429,7 @@ test_named(hid_t fapl)
         goto error;
     if (status) {
         H5_FAILED();
-        HDputs("    Copied type should not be a named type!");
+        puts("    Copied type should not be a named type!");
         goto error;
     }
     if ((dset = H5Dcreate2(file, "dset3", t2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -4440,7 +4440,7 @@ test_named(hid_t fapl)
         goto error;
     if (status) {
         H5_FAILED();
-        HDputs("    Datatype from dataset using copied type should not be a named type!");
+        puts("    Datatype from dataset using copied type should not be a named type!");
         goto error;
     }
     if (H5Tclose(t3) < 0)
@@ -4471,7 +4471,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Types should not be committable to a read-only file!");
+        puts("    Types should not be committable to a read-only file!");
         goto error;
     }
 
@@ -4485,7 +4485,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Types should not be committable to a read-only file!");
+        puts("    Types should not be committable to a read-only file!");
         goto error;
     }
 
@@ -4653,14 +4653,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Truncated C-string test failed");
+        puts("    Truncated C-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Extended C-string test failed");
+        puts("    Extended C-string test failed");
         goto error;
     }
     free(buf);
@@ -4684,14 +4684,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Truncated C buffer test failed");
+        puts("    Truncated C buffer test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Extended C buffer test failed");
+        puts("    Extended C buffer test failed");
         goto error;
     }
     free(buf);
@@ -4715,14 +4715,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Truncated Fortran-string test failed");
+        puts("    Truncated Fortran-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde     abcde     ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Extended Fortran-string test failed");
+        puts("    Extended Fortran-string test failed");
         goto error;
     }
     free(buf);
@@ -4749,7 +4749,7 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Non-terminated string test 1");
+        puts("    Non-terminated string test 1");
         goto error;
     }
     H5Tclose(dst_type);
@@ -4760,7 +4760,7 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Non-terminated string test 2");
+        puts("    Non-terminated string test 2");
         goto error;
     }
     memcpy(buf, "abcdeabcdexxxxxxxxxx", (size_t)20);
@@ -4768,7 +4768,7 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Non-terminated string test 2");
+        puts("    Non-terminated string test 2");
         goto error;
     }
     free(buf);
@@ -4792,14 +4792,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdefghi abcdefghi ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C string to Fortran test 1");
+        puts("    C string to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcdefghi\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C string test 1");
+        puts("    Fortran to C string test 1");
         goto error;
     }
     if (H5Tclose(dst_type) < 0)
@@ -4811,14 +4811,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C string to Fortran test 2");
+        puts("    C string to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C string test 2");
+        puts("    Fortran to C string test 2");
         goto error;
     }
     if (H5Tclose(src_type) < 0)
@@ -4834,14 +4834,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C string to Fortran test 3");
+        puts("    C string to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C string test 3");
+        puts("    Fortran to C string test 3");
         goto error;
     }
     free(buf);
@@ -4865,14 +4865,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C buffer to Fortran test 1");
+        puts("    C buffer to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C buffer test 1");
+        puts("    Fortran to C buffer test 1");
         goto error;
     }
     if (H5Tclose(dst_type) < 0)
@@ -4884,14 +4884,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C buffer to Fortran test 2");
+        puts("    C buffer to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C buffer test 2");
+        puts("    Fortran to C buffer test 2");
         goto error;
     }
     if (H5Tclose(src_type) < 0)
@@ -4907,14 +4907,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C buffer to Fortran test 3");
+        puts("    C buffer to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C buffer test 3");
+        puts("    Fortran to C buffer test 3");
         goto error;
     }
     if (H5Tclose(src_type) < 0)
@@ -4988,7 +4988,7 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
+    snprintf(s, sizeof(s), "Testing random string conversion speed");
     printf("%-70s", s);
     fflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5196,14 +5196,14 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
+    snprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     printf("%-70s", s);
     fflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
-    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
+    snprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     printf("%-70s", s);
     fflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -6802,7 +6802,7 @@ test_int_float_except(void)
     PASSED();
 #else  /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
     SKIPPED();
-    HDputs("    Test skipped due to int or float not 4 bytes.");
+    puts("    Test skipped due to int or float not 4 bytes.");
 #endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
     return 0;
 
@@ -7388,7 +7388,7 @@ test_named_indirect_reopen(hid_t fapl)
         TEST_ERROR;
     if (NULL == (tag_ret = H5Tget_tag(type)))
         TEST_ERROR;
-    if (HDstrcmp(tag, tag_ret) != 0)
+    if (strcmp(tag, tag_ret) != 0)
         TEST_ERROR;
     H5free_memory(tag_ret);
     tag_ret = NULL;
@@ -7404,7 +7404,7 @@ test_named_indirect_reopen(hid_t fapl)
         TEST_ERROR;
     if (NULL == (tag_ret = H5Tget_tag(type)))
         TEST_ERROR;
-    if (HDstrcmp(tag, tag_ret) != 0)
+    if (strcmp(tag, tag_ret) != 0)
         TEST_ERROR;
     H5free_memory(tag_ret);
     tag_ret = NULL;
@@ -8042,7 +8042,7 @@ test_deprec(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Types should not be committable to a read-only file!");
+        puts("    Types should not be committable to a read-only file!");
         goto error;
     }
 

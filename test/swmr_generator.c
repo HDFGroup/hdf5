@@ -115,7 +115,7 @@ gen_skeleton(const char *filename, bool verbose, bool swmr_write, int comp_level
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v2 B-tree.
      */
-    if (!HDstrcmp(index_type, "b2"))
+    if (!strcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
     /* Create file creation property list */
@@ -285,7 +285,7 @@ main(int argc, char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
+                        if (strcmp(index_type, "ea") != 0 && strcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;

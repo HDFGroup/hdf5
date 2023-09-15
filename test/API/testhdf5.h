@@ -147,7 +147,7 @@
                        "%s \n",                                                                              \
                        (where), (int)__LINE__, __FILE__, x);                                                 \
         }                                                                                                    \
-        if (HDstrcmp(x, val) != 0) {                                                                         \
+        if (strcmp(x, val) != 0) {                                                                           \
             TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d "                \
                           "in %s\n",                                                                         \
                           where, val, x, (int)__LINE__, __FILE__);                                           \
@@ -220,27 +220,27 @@
     }
 #define PASSED()                                                                                             \
     {                                                                                                        \
-        HDputs(" PASSED");                                                                                   \
+        puts(" PASSED");                                                                                     \
         fflush(stdout);                                                                                      \
     }
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
-        HDputs("*FAILED*");                                                                                  \
+        puts("*FAILED*");                                                                                    \
         fflush(stdout);                                                                                      \
     }
 #define H5_WARNING()                                                                                         \
     {                                                                                                        \
-        HDputs("*WARNING*");                                                                                 \
+        puts("*WARNING*");                                                                                   \
         fflush(stdout);                                                                                      \
     }
 #define SKIPPED()                                                                                            \
     {                                                                                                        \
-        HDputs(" -SKIP-");                                                                                   \
+        puts(" -SKIP-");                                                                                     \
         fflush(stdout);                                                                                      \
     }
 #define PUTS_ERROR(s)                                                                                        \
     {                                                                                                        \
-        HDputs(s);                                                                                           \
+        puts(s);                                                                                             \
         AT();                                                                                                \
         goto error;                                                                                          \
     }
@@ -266,7 +266,7 @@
     {                                                                                                        \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDputs(s);                                                                                           \
+        puts(s);                                                                                             \
         goto error;                                                                                          \
     }
 

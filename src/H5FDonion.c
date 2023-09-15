@@ -464,7 +464,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     HDtime(&rawtime);
     info = HDgmtime(&rawtime);
-    HDstrftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", info);
+    strftime(rec->time_of_creation, sizeof(rec->time_of_creation), "%Y%m%dT%H%M%SZ", info);
 
     rec->logical_eof = file->logical_eof;
 
@@ -799,7 +799,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 
     FUNC_ENTER_PACKAGE
 
-    if (!HDstrcmp(config_str, ""))
+    if (!strcmp(config_str, ""))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty");
 
     /* Initialize to the default values */
@@ -810,7 +810,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
     fa->revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     fa->force_write_open = 0;
     fa->creation_flags   = 0;
-    HDstrcpy(fa->comment, "initial comment");
+    strcpy(fa->comment, "initial comment");
 
     /* If a single integer is passed in as a string, it's a shortcut for the tools
      * (h5repack, h5diff, h5dump).  Otherwise, the string should have curly brackets,
@@ -829,51 +829,51 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
         H5FD__onion_remove_unused_symbols(config_str_copy);
 
         /* The configure string can't be empty after removing the curly brackets */
-        if (!HDstrcmp(config_str_copy, ""))
+        if (!strcmp(config_str_copy, ""))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty");
 
-        token1 = HDstrtok(config_str_copy, ":");
-        token2 = HDstrtok(NULL, ";");
+        token1 = strtok(config_str_copy, ":");
+        token2 = strtok(NULL, ";");
 
         do {
             if (token1 && token2) {
-                if (!HDstrcmp(token1, "version")) {
-                    if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_VERSION_CURR"))
+                if (!strcmp(token1, "version")) {
+                    if (!strcmp(token2, "H5FD_ONION_FAPL_INFO_VERSION_CURR"))
                         fa->version = H5FD_ONION_FAPL_INFO_VERSION_CURR;
                 }
-                else if (!HDstrcmp(token1, "backing_fapl_id")) {
-                    if (!HDstrcmp(token2, "H5P_DEFAULT"))
+                else if (!strcmp(token1, "backing_fapl_id")) {
+                    if (!strcmp(token2, "H5P_DEFAULT"))
                         fa->backing_fapl_id = H5P_DEFAULT;
                     else if (!strcmp(token2, "H5I_INVALID_HID"))
                         fa->backing_fapl_id = H5I_INVALID_HID;
                     else
                         fa->backing_fapl_id = strtoll(token2, NULL, 10);
                 }
-                else if (!HDstrcmp(token1, "page_size")) {
+                else if (!strcmp(token1, "page_size")) {
                     fa->page_size = (uint32_t)strtoul(token2, NULL, 10);
                 }
-                else if (!HDstrcmp(token1, "revision_num")) {
-                    if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST"))
+                else if (!strcmp(token1, "revision_num")) {
+                    if (!strcmp(token2, "H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST"))
                         fa->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
                     else
                         fa->revision_num = (uint64_t)strtoull(token2, NULL, 10);
                 }
-                else if (!HDstrcmp(token1, "force_write_open")) {
+                else if (!strcmp(token1, "force_write_open")) {
                     fa->force_write_open = (uint8_t)strtoul(token2, NULL, 10);
                 }
-                else if (!HDstrcmp(token1, "creation_flags")) {
+                else if (!strcmp(token1, "creation_flags")) {
                     fa->creation_flags = (uint8_t)strtoul(token2, NULL, 10);
                 }
-                else if (!HDstrcmp(token1, "comment")) {
-                    HDstrcpy(fa->comment, token2);
+                else if (!strcmp(token1, "comment")) {
+                    strcpy(fa->comment, token2);
                 }
                 else
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s",
                                 token1);
             }
 
-            token1 = HDstrtok(NULL, ":");
-            token2 = HDstrtok(NULL, ";");
+            token1 = strtok(NULL, ":");
+            token2 = strtok(NULL, ";");
         } while (token1);
     }
 
@@ -960,18 +960,18 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
 
     /* Allocate space for onion VFD file names */
-    if (NULL == (name_onion = H5MM_malloc(sizeof(char) * (HDstrlen(filename) + 7))))
+    if (NULL == (name_onion = H5MM_malloc(sizeof(char) * (strlen(filename) + 7))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate onion name string");
-    HDsnprintf(name_onion, HDstrlen(filename) + 7, "%s.onion", filename);
+    snprintf(name_onion, strlen(filename) + 7, "%s.onion", filename);
 
-    if (NULL == (recovery_file_nameery = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
+    if (NULL == (recovery_file_nameery = H5MM_malloc(sizeof(char) * (strlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate recovery name string");
-    HDsnprintf(recovery_file_nameery, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
+    snprintf(recovery_file_nameery, strlen(name_onion) + 10, "%s.recovery", name_onion);
     file->recovery_file_name = recovery_file_nameery;
 
-    if (NULL == (file->recovery_file_name = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
+    if (NULL == (file->recovery_file_name = H5MM_malloc(sizeof(char) * (strlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate recovery name string");
-    HDsnprintf(file->recovery_file_name, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
+    snprintf(file->recovery_file_name, strlen(name_onion) + 10, "%s.recovery", name_onion);
 
     /* Translate H5P_DEFAULT to a real fapl ID, if necessary */
     backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
@@ -1191,7 +1191,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to duplicate comment string");
 
         /* TODO: Lengths of strings should be size_t */
-        file->curr_rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
+        file->curr_rev_record.comment_size = (uint32_t)strlen(fa->comment) + 1;
     }
     file->origin_eof  = file->header.origin_eof;
     file->logical_eof = MAX(file->curr_rev_record.logical_eof, file->logical_eof);
@@ -1670,7 +1670,7 @@ H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revi
     H5TRACE3("e", "*six", filename, fapl_id, revision_count);
 
     /* Check args */
-    if (!filename || !HDstrcmp(filename, ""))
+    if (!filename || !strcmp(filename, ""))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid file name");
     if (!revision_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "revision count can't be null");

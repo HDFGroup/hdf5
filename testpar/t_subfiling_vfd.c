@@ -325,8 +325,8 @@ test_config_file(void)
         config_filename = malloc(PATH_MAX);
         VRFY(config_filename, "malloc succeeded");
 
-        HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
-                   SUBF_FILENAME, (uint64_t)file_info.st_ino);
+        snprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+                 SUBF_FILENAME, (uint64_t)file_info.st_ino);
 
         config_file = fopen(config_filename, "r");
         VRFY(config_file, "fopen succeeded");
@@ -347,27 +347,27 @@ test_config_file(void)
         config_buf[config_file_len] = '\0';
 
         /* Check the stripe_size field in the configuration file */
-        substr = HDstrstr(config_buf, "stripe_size");
-        VRFY(substr, "HDstrstr succeeded");
+        substr = strstr(config_buf, "stripe_size");
+        VRFY(substr, "strstr succeeded");
 
-        VRFY((HDsscanf(substr, "stripe_size=%" PRId64, &read_stripe_size) == 1), "HDsscanf succeeded");
+        VRFY((sscanf(substr, "stripe_size=%" PRId64, &read_stripe_size) == 1), "sscanf succeeded");
         VRFY((read_stripe_size == cfg.stripe_size), "Stripe size comparison succeeded");
 
         /* Check the aggregator_count field in the configuration file */
-        substr = HDstrstr(config_buf, "aggregator_count");
-        VRFY(substr, "HDstrstr succeeded");
+        substr = strstr(config_buf, "aggregator_count");
+        VRFY(substr, "strstr succeeded");
 
-        VRFY((HDsscanf(substr, "aggregator_count=%d", &read_aggr_count) == 1), "HDsscanf succeeded");
+        VRFY((sscanf(substr, "aggregator_count=%d", &read_aggr_count) == 1), "sscanf succeeded");
         if (cfg.stripe_count < num_iocs_g)
             VRFY((read_aggr_count == cfg.stripe_count), "Aggregator count comparison succeeded");
         else
             VRFY((read_aggr_count == num_iocs_g), "Aggregator count comparison succeeded");
 
         /* Check the subfile_count field in the configuration file */
-        substr = HDstrstr(config_buf, "subfile_count");
-        VRFY(substr, "HDstrstr succeeded");
+        substr = strstr(config_buf, "subfile_count");
+        VRFY(substr, "strstr succeeded");
 
-        VRFY((HDsscanf(substr, "subfile_count=%d", &read_stripe_count) == 1), "HDsscanf succeeded");
+        VRFY((sscanf(substr, "subfile_count=%d", &read_stripe_count) == 1), "sscanf succeeded");
         VRFY((read_stripe_count == cfg.stripe_count), "Stripe count comparison succeeded");
 
         /* Check the hdf5_file and subfile_dir fields in the configuration file */
@@ -379,21 +379,21 @@ test_config_file(void)
         tmp_buf = malloc(PATH_MAX);
         VRFY(tmp_buf, "malloc succeeded");
 
-        substr = HDstrstr(config_buf, "hdf5_file");
-        VRFY(substr, "HDstrstr succeeded");
+        substr = strstr(config_buf, "hdf5_file");
+        VRFY(substr, "strstr succeeded");
 
-        HDsnprintf(scan_format, sizeof(scan_format), "hdf5_file=%%%zus", (size_t)(PATH_MAX - 1));
-        VRFY((HDsscanf(substr, scan_format, tmp_buf) == 1), "HDsscanf succeeded");
+        snprintf(scan_format, sizeof(scan_format), "hdf5_file=%%%zus", (size_t)(PATH_MAX - 1));
+        VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
 
-        VRFY((HDstrcmp(tmp_buf, resolved_path) == 0), "HDstrcmp succeeded");
+        VRFY((strcmp(tmp_buf, resolved_path) == 0), "strcmp succeeded");
 
-        substr = HDstrstr(config_buf, "subfile_dir");
-        VRFY(substr, "HDstrstr succeeded");
+        substr = strstr(config_buf, "subfile_dir");
+        VRFY(substr, "strstr succeeded");
 
-        HDsnprintf(scan_format, sizeof(scan_format), "subfile_dir=%%%zus", (size_t)(PATH_MAX - 1));
-        VRFY((HDsscanf(substr, scan_format, tmp_buf) == 1), "HDsscanf succeeded");
+        snprintf(scan_format, sizeof(scan_format), "subfile_dir=%%%zus", (size_t)(PATH_MAX - 1));
+        VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
 
-        VRFY((HDstrcmp(tmp_buf, subfile_dir) == 0), "HDstrcmp succeeded");
+        VRFY((strcmp(tmp_buf, subfile_dir) == 0), "strcmp succeeded");
 
         free(tmp_buf);
         H5MM_free(subfile_dir);
@@ -405,18 +405,18 @@ test_config_file(void)
         /* Verify the name of each subfile is in the configuration file */
         num_digits = (int)(log10(cfg.stripe_count) + 1);
         for (size_t i = 0; i < (size_t)cfg.stripe_count; i++) {
-            HDsnprintf(subfile_name, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, (int)i + 1, cfg.stripe_count);
+            snprintf(subfile_name, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, (int)i + 1, cfg.stripe_count);
 
-            substr = HDstrstr(config_buf, subfile_name);
-            VRFY(substr, "HDstrstr succeeded");
+            substr = strstr(config_buf, subfile_name);
+            VRFY(substr, "strstr succeeded");
         }
 
         /* Verify that there aren't too many subfiles */
-        HDsnprintf(subfile_name, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                   (uint64_t)file_info.st_ino, num_digits, (int)cfg.stripe_count + 1, cfg.stripe_count);
-        substr = HDstrstr(config_buf, subfile_name);
-        VRFY(substr == NULL, "HDstrstr correctly failed");
+        snprintf(subfile_name, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, (int)cfg.stripe_count + 1, cfg.stripe_count);
+        substr = strstr(config_buf, subfile_name);
+        VRFY(substr == NULL, "strstr correctly failed");
 
         free(subfile_name);
         free(config_buf);
@@ -566,8 +566,8 @@ test_stripe_sizes(void)
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
 
-                HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                           (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
+                snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                         (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
@@ -582,8 +582,8 @@ test_stripe_sizes(void)
             }
 
             /* Verify that there aren't too many subfiles */
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
             subfile_ptr = fopen(tmp_filename, "r");
@@ -612,8 +612,8 @@ test_stripe_sizes(void)
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
 
-                HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                           (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
+                snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                         (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
@@ -628,8 +628,8 @@ test_stripe_sizes(void)
             }
 
             /* Verify that there aren't too many subfiles */
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
             subfile_ptr = fopen(tmp_filename, "r");
@@ -732,8 +732,8 @@ test_stripe_sizes(void)
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
 
-                HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                           (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
+                snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                         (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
@@ -748,8 +748,8 @@ test_stripe_sizes(void)
             }
 
             /* Verify that there aren't too many subfiles */
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
             subfile_ptr = fopen(tmp_filename, "r");
@@ -789,8 +789,8 @@ test_stripe_sizes(void)
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
 
-                HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                           (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
+                snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                         (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
                 subfile_ptr = fopen(tmp_filename, "r");
@@ -805,8 +805,8 @@ test_stripe_sizes(void)
             }
 
             /* Verify that there aren't too many subfiles */
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
             subfile_ptr = fopen(tmp_filename, "r");
@@ -908,7 +908,7 @@ test_selection_strategies(void)
                         else
                             stride = 16;
 
-                        HDsnprintf(sel_criteria, 128, "%d", stride);
+                        snprintf(sel_criteria, 128, "%d", stride);
 
                         expected_num_subfiles = ((num_active_ranks - 1) / stride) + 1;
 
@@ -930,7 +930,7 @@ test_selection_strategies(void)
                         else
                             n_iocs = 16;
 
-                        HDsnprintf(sel_criteria, 128, "%d", n_iocs);
+                        snprintf(sel_criteria, 128, "%d", n_iocs);
 
                         expected_num_subfiles = n_iocs;
 
@@ -946,10 +946,10 @@ test_selection_strategies(void)
                 }
 
                 if (criteria_format_choice == 0) {
-                    HDsnprintf(criteria_buf, 256, "%d:%s", strategy, sel_criteria);
+                    snprintf(criteria_buf, 256, "%d:%s", strategy, sel_criteria);
                 }
                 else if (criteria_format_choice == 1) {
-                    HDsnprintf(criteria_buf, 256, "%s", sel_criteria);
+                    snprintf(criteria_buf, 256, "%s", sel_criteria);
                 }
 
                 VRFY(HDsetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA, criteria_buf, 1) >= 0,
@@ -981,8 +981,8 @@ test_selection_strategies(void)
 
                     /* Ensure all the subfiles are present */
                     for (int i = 0; i < expected_num_subfiles; i++) {
-                        HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                                   (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
+                        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                                 (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
 
                         /* Ensure file exists */
                         subfile_ptr = fopen(tmp_filename, "r");
@@ -991,9 +991,9 @@ test_selection_strategies(void)
                     }
 
                     /* Ensure no extra subfiles are present */
-                    HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                               (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
-                               expected_num_subfiles);
+                    snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                             (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
+                             expected_num_subfiles);
 
                     /* Ensure file doesn't exist */
                     subfile_ptr = fopen(tmp_filename, "r");
@@ -1140,8 +1140,8 @@ test_read_different_stripe_size(void)
             h5_stat_size_t subfile_size;
             h5_stat_t      subfile_info;
 
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
             /* Ensure file exists */
             subfile_ptr = fopen(tmp_filename, "r");
@@ -1210,8 +1210,8 @@ test_read_different_stripe_size(void)
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         for (int j = 0; j < num_subfiles; j++) {
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles / 2);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles / 2);
 
             if (j < (num_subfiles / 2)) {
                 /* Ensure file exists */
@@ -1363,8 +1363,8 @@ test_subfiling_precreate_rank_0(void)
         for (int i = 0; i < num_subfiles; i++) {
             h5_stat_t subfile_info;
 
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
 
             /* Ensure file exists */
             subfile_ptr = fopen(tmp_filename, "r");
@@ -1379,8 +1379,8 @@ test_subfiling_precreate_rank_0(void)
         }
 
         /* Verify that there aren't too many subfiles */
-        HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
-                   (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
         /* Ensure file doesn't exist */
         subfile_ptr = fopen(tmp_filename, "r");
@@ -1935,14 +1935,14 @@ test_subfiling_h5fuse(void)
             VRFY(tmp_filename, "malloc succeeded");
 
             /* Generate name for configuration file */
-            HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
-                       SUBF_FILENAME, file_inode);
+            snprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+                     SUBF_FILENAME, file_inode);
 
-            args[0] = HDstrdup("env");
-            args[1] = HDstrdup("sh");
-            args[2] = HDstrdup("h5fuse.sh");
-            args[3] = HDstrdup("-q");
-            args[4] = HDstrdup("-f");
+            args[0] = strdup("env");
+            args[1] = strdup("sh");
+            args[2] = strdup("h5fuse.sh");
+            args[3] = strdup("-q");
+            args[4] = strdup("-f");
             args[5] = tmp_filename;
             args[6] = NULL;
 
@@ -2028,8 +2028,8 @@ test_subfiling_h5fuse(void)
         VRFY(filename_buf, "malloc succeeded");
 
         /* Generate name for configuration file */
-        HDsnprintf(filename_buf, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
-                   SUBF_FILENAME, file_inode);
+        snprintf(filename_buf, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+                 SUBF_FILENAME, file_inode);
 
         /* Delete the configuration file */
         if (HDremove(filename_buf) < 0) {
@@ -2039,8 +2039,8 @@ test_subfiling_h5fuse(void)
 
         for (int i = 0; i < num_subfiles; i++) {
             /* Generate name for each subfile */
-            HDsnprintf(filename_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME, file_inode,
-                       num_digits, i + 1, num_subfiles);
+            snprintf(filename_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME, file_inode,
+                     num_digits, i + 1, num_subfiles);
 
             /* Delete the subfile */
             if (HDremove(filename_buf) < 0) {
@@ -2101,7 +2101,7 @@ parse_subfiling_env_vars(void)
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
         assert(config_dir);
 
-        HDstrncpy(config_dir, env_value, PATH_MAX);
+        strncpy(config_dir, env_value, PATH_MAX);
 
         /* Just in case.. */
         config_dir[PATH_MAX - 1] = '\0';
@@ -2257,7 +2257,7 @@ main(int argc, char **argv)
     }
 
     /* Initialize to current working directory for now */
-    HDsnprintf(config_dir, PATH_MAX, ".");
+    snprintf(config_dir, PATH_MAX, ".");
 
     /* Grab values from environment variables if set */
     parse_subfiling_env_vars();
@@ -2283,7 +2283,7 @@ main(int argc, char **argv)
     }
 
     if (MAINPROCESS)
-        HDputs("");
+        puts("");
 
     /*
      * Set any unset Subfiling environment variables and re-run
@@ -2308,7 +2308,7 @@ main(int argc, char **argv)
             VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
         }
 
-        HDsnprintf(tmp, sizeof(tmp), "%" PRId64, stripe_size);
+        snprintf(tmp, sizeof(tmp), "%" PRId64, stripe_size);
 
         if (HDsetenv(H5FD_SUBFILING_STRIPE_SIZE, tmp, 1) < 0) {
             if (MAINPROCESS)
@@ -2428,13 +2428,13 @@ main(int argc, char **argv)
     }
 
     if (MAINPROCESS)
-        HDputs("");
+        puts("");
 
     if (nerrors)
         goto exit;
 
     if (MAINPROCESS)
-        HDputs("All Subfiling VFD tests passed\n");
+        puts("All Subfiling VFD tests passed\n");
 
 exit:
     if (must_unset_stripe_size_env)
