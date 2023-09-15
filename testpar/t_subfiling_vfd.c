@@ -403,7 +403,7 @@ test_config_file(void)
         VRFY(subfile_name, "malloc succeeded");
 
         /* Verify the name of each subfile is in the configuration file */
-        num_digits = (int)(HDlog10(cfg.stripe_count) + 1);
+        num_digits = (int)(log10(cfg.stripe_count) + 1);
         for (size_t i = 0; i < (size_t)cfg.stripe_count; i++) {
             HDsnprintf(subfile_name, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                        (uint64_t)file_info.st_ino, num_digits, (int)i + 1, cfg.stripe_count);
@@ -507,7 +507,7 @@ test_stripe_sizes(void)
             FILE *subfile_ptr;
 
             num_subfiles = 1;
-            num_digits   = (int)(HDlog10(num_subfiles) + 1);
+            num_digits   = (int)(log10(num_subfiles) + 1);
 
             nbytes = (size_t)(cfg.stripe_size * num_subfiles);
 
@@ -669,7 +669,7 @@ test_stripe_sizes(void)
         VRFY(file_ptr, "H5FDopen succeeded");
 
         num_subfiles = num_iocs_g;
-        num_digits   = (int)(HDlog10(num_subfiles) + 1);
+        num_digits   = (int)(log10(num_subfiles) + 1);
 
         nbytes = (size_t)(cfg.stripe_size * num_subfiles);
 
@@ -977,7 +977,7 @@ test_selection_strategies(void)
                      */
                     VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
-                    num_digits = (int)(HDlog10(expected_num_subfiles) + 1);
+                    num_digits = (int)(log10(expected_num_subfiles) + 1);
 
                     /* Ensure all the subfiles are present */
                     for (int i = 0; i < expected_num_subfiles; i++) {
@@ -1132,7 +1132,7 @@ test_read_different_stripe_size(void)
         h5_stat_t file_info;
         FILE     *subfile_ptr;
         int       num_subfiles = cfg.stripe_count;
-        int       num_digits   = (int)(HDlog10(num_subfiles) + 1);
+        int       num_digits   = (int)(log10(num_subfiles) + 1);
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
@@ -1205,7 +1205,7 @@ test_read_different_stripe_size(void)
         h5_stat_t file_info;
         FILE     *subfile_ptr;
         int       num_subfiles = cfg.stripe_count;
-        int       num_digits   = (int)(HDlog10(num_subfiles / 2) + 1);
+        int       num_digits   = (int)(log10(num_subfiles / 2) + 1);
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
@@ -1353,7 +1353,7 @@ test_subfiling_precreate_rank_0(void)
          */
 
         num_subfiles = cfg.stripe_count;
-        num_digits   = (int)(HDlog10(num_subfiles) + 1);
+        num_digits   = (int)(log10(num_subfiles) + 1);
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
@@ -2013,7 +2013,7 @@ test_subfiling_h5fuse(void)
     if (MAINPROCESS) {
         char *filename_buf;
         int   num_subfiles = num_iocs_g;
-        int   num_digits   = (int)(HDlog10(num_subfiles) + 1);
+        int   num_digits   = (int)(log10(num_subfiles) + 1);
 
         /* Delete the regular HDF5 file */
         H5Pset_fapl_sec2(fapl_id);
