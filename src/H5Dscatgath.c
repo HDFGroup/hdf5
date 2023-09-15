@@ -1453,7 +1453,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
             xubuf       = ubuf + curr_off;
 
             /* Copy the data into the right place. */
-printf("opt_read: curr_nelmts=%zu\n", curr_nelmts);
+            printf("opt_read: curr_nelmts=%zu\n", curr_nelmts);
             for (i = 0; i < curr_nelmts; i++) {
                 memmove(xubuf, xdbuf, copy_size);
 
@@ -1461,8 +1461,8 @@ printf("opt_read: curr_nelmts=%zu\n", curr_nelmts);
                 xdbuf += src_stride;
                 xubuf += dst_stride;
             } /* end for */
-printf("i = %zu after for loop\n", i);
-        }     /* end for */
+            printf("i = %zu after for loop\n", i);
+        } /* end for */
 
         /* Decrement number of elements left to process */
         nelmts -= elmtno;
