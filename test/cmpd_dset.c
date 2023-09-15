@@ -504,13 +504,13 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
         goto error;
 
-    rbuf = (unsigned char *)malloc(NX * NY * sizeof(stype4));
+    rbuf = (unsigned char *)calloc(NX * NY, sizeof(stype4));
 
-    rew_buf = (unsigned char *)malloc(NX * NY * sizeof(stype4));
+    rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype4));
     initialize_stype4(rew_buf, (size_t)NX * NY);
 
     /* Save a copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
-    save_rew_buf = (unsigned char *)malloc(NX * NY * sizeof(stype4));
+    save_rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype4));
     initialize_stype4(save_rew_buf, (size_t)NX * NY);
 
     /* Create dataset creation property list */
