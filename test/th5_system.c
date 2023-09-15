@@ -469,34 +469,34 @@ test_h5_strcasestr(void)
 }
 
 static void
-test_strcasestr(void)
+test_HDstrcasestr(void)
 {
     const char *const haystack = "My test string";
     char             *str      = NULL;
 
-    MESSAGE(5, ("Testing strcasestr\n"));
+    MESSAGE(5, ("Testing HDstrcasestr\n"));
 
-    /* check that strcasestr returns target in empty search */
-    str = strcasestr(haystack, "");
-    CHECK_PTR(str, "strcasestr for empty substring");
+    /* check that HDstrcasestr returns target in empty search */
+    str = HDstrcasestr(haystack, "");
+    CHECK_PTR(str, "HDstrcasestr for empty substring");
     if (str)
-        VERIFY_STR(str, haystack, "comparing strcasestr to original string for empty substring");
+        VERIFY_STR(str, haystack, "comparing HDstrcasestr to original string for empty substring");
 
-    /* Check that strcasestr find a string of same case */
-    str = strcasestr(haystack, "string");
-    CHECK_PTR(str, "strcasestr for substring of same case");
+    /* Check that HDstrcasestr find a string of same case */
+    str = HDstrcasestr(haystack, "string");
+    CHECK_PTR(str, "HDstrcasestr for substring of same case");
     if (str)
-        VERIFY_STR(str, "string", "comparing strcasestr for substring of same case");
+        VERIFY_STR(str, "string", "comparing HDstrcasestr for substring of same case");
 
-    /* Check that strcasestr find a string of different case */
-    str = strcasestr(haystack, "sTrInG");
-    CHECK_PTR(str, "strcasestr for substring of different case");
+    /* Check that HDstrcasestr find a string of different case */
+    str = HDstrcasestr(haystack, "sTrInG");
+    CHECK_PTR(str, "HDstrcasestr for substring of different case");
     if (str)
-        VERIFY_STR(str, "string", "comparing strcasestr for substring of different case");
+        VERIFY_STR(str, "string", "comparing HDstrcasestr for substring of different case");
 
-    /* Check that strcasestr returns NULL if no match is found */
-    str = strcasestr(haystack, "nomatch");
-    CHECK_PTR_NULL(str, "strcasestr search with no match");
+    /* Check that HDstrcasestr returns NULL if no match is found */
+    str = HDstrcasestr(haystack, "nomatch");
+    CHECK_PTR_NULL(str, "HDstrcasestr search with no match");
 }
 
 static void
@@ -558,7 +558,7 @@ test_h5_system(void)
     test_h5_dirname();
     test_h5_basename();
     test_h5_strcasestr();
-    test_strcasestr();
+    test_HDstrcasestr();
     test_h5_strndup();
 }
 
