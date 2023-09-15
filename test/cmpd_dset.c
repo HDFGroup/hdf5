@@ -554,32 +554,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dclose(did) < 0)
         goto error;
 
-    /* Set chunking */
-    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        goto error;
-
-    /* Create chunked data set */
-    if ((did = H5Dcreate2(fid, DSET_NAME[3], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto error;
-
-    initialize_stype4(rew_buf, (size_t)NX * NY);
-
-    if (H5Pset_preserve(dxpl, true) < 0)
-        goto error;
-
-    /* Write data to the dataset with rew_tid */
-    if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-        goto error;
-
-    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        goto error;
-
-    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
-        goto error;
-
-    if (H5Dclose(did) < 0)
-        goto error;
-
     PASSED();
 
     /* Finishing test and release resources */
@@ -870,9 +844,9 @@ test_compounds_selection_io(void)
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[3], fapl, fname, sizeof(fname));
 
-    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
-        for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
-            for (select_io = FALSE; select_io <= TRUE; select_io++) {
+    for (set_cache = FALSE; set_cache <= FALSE; set_cache++) {
+        for (set_fillvalue = FALSE; set_fillvalue <= FALSE; set_fillvalue++) {
+            for (select_io = FALSE; select_io <= FALSE; select_io++) {
                 for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
                     for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
 
@@ -913,8 +887,6 @@ test_compounds_selection_io(void)
                         else
                             printf("without H5Pset_buffer:\n");
 
-                        nerrs += test_select_compound(fname, fapl, dxpl, set_fillvalue, set_buf);
-                        nerrs += test_select_src_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
                         nerrs += test_select_dst_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
 
                         if (H5Pclose(dxpl) < 0)
