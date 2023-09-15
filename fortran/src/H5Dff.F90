@@ -2402,7 +2402,7 @@ CONTAINS
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
 
     INTEGER(HID_T) :: dxpl_id_default
-    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: c_offset
     INTEGER(HSIZE_T) :: i, rank
     INTEGER(C_INT32_T) :: c_filters
 
@@ -2427,7 +2427,7 @@ CONTAINS
 
     rank = SIZE(offset, KIND=HSIZE_T)
 
-    ALLOCATE(offset_c(rank), STAT=hdferr)
+    ALLOCATE(c_offset(rank), STAT=hdferr)
     IF (hdferr .NE. 0 ) THEN
        hdferr = -1
        RETURN
@@ -2437,14 +2437,14 @@ CONTAINS
     ! Reverse dimensions due to C-FORTRAN storage order
     !
     DO i = 1, rank
-       offset_c(i) = offset(rank - i + 1)
+       c_offset(i) = offset(rank - i + 1)
     ENDDO
 
-    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, c_filters, buf))
+    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, c_offset, c_filters, buf))
 
     filters = INT(c_filters)
 
-    DEALLOCATE(offset_c)
+    DEALLOCATE(c_offset)
 
   END SUBROUTINE h5dread_chunk_f
 
@@ -2475,7 +2475,7 @@ CONTAINS
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
 
     INTEGER(HID_T) :: dxpl_id_default
-    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: c_offset
     INTEGER(HSIZE_T) :: i, rank
     INTEGER(C_INT32_T) :: c_filters
 
@@ -2499,7 +2499,7 @@ CONTAINS
 
     rank = SIZE(offset, KIND=HSIZE_T)
 
-    ALLOCATE(offset_c(rank), STAT=hdferr)
+    ALLOCATE(c_offset(rank), STAT=hdferr)
     IF (hdferr .NE. 0 ) THEN
        hdferr = -1
        RETURN
@@ -2509,14 +2509,14 @@ CONTAINS
     ! Reverse dimensions due to C-FORTRAN storage order
     !
     DO i = 1, rank
-       offset_c(i) = offset(rank - i + 1)
+       c_offset(i) = offset(rank - i + 1)
     ENDDO
 
     c_filters = INT(filters, C_INT32_T)
 
-    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf))
+    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, c_filters, c_offset, data_size, buf))
 
-    DEALLOCATE(offset_c)
+    DEALLOCATE(c_offset)
 
   END SUBROUTINE h5dwrite_chunk_f
 
