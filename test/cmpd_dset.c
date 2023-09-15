@@ -537,7 +537,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
             goto error;
     }
 
-
     /* Set chunking */
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
         goto error;
