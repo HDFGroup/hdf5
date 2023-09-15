@@ -511,7 +511,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer");
 
     /* Get a pointer to a buffer that's large enough  */
-    if (NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+    if (NULL == (comp = (char *)H5WB_actual(wb, (strlen(name) + 1))))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
     /* Traverse the path */
@@ -555,7 +555,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         if (lookup_status) {
             /* Sanity check link and indicate it's valid */
             assert(lnk.type >= H5L_TYPE_HARD);
-            assert(!HDstrcmp(comp, lnk.name));
+            assert(!strcmp(comp, lnk.name));
             link_valid = true;
 
             /* Build object location from the link */

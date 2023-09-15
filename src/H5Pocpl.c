@@ -1178,14 +1178,14 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* Check for actual name */
         if (s) {
-            HDstrncpy(name, s, namelen);
+            strncpy(name, s, namelen);
             name[namelen - 1] = '\0';
         } /* end if */
         else {
             /* Check for unknown library filter */
             /* (probably from a future version of the library) */
             if (filter->id < 256) {
-                HDstrncpy(name, "Unknown library filter", namelen);
+                strncpy(name, "Unknown library filter", namelen);
                 name[namelen - 1] = '\0';
             } /* end if */
             else
@@ -1572,7 +1572,7 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
             if (pline1->filter[u].name != NULL && pline2->filter[u].name == NULL)
                 HGOTO_DONE(1);
             if (pline1->filter[u].name != NULL)
-                if ((cmp_value = HDstrcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
+                if ((cmp_value = strcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
                     HGOTO_DONE(cmp_value);
 
             /* Check the number of parameters for the filter */

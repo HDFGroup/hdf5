@@ -116,28 +116,28 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
 
     for (i = 0; i < NUM_DSETS; i++) {
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
@@ -162,13 +162,13 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
             }
         }
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
-        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
-        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     }
@@ -252,7 +252,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
 
     for (i = 0; i < NUM_DSETS; i++) {
 
-        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", i);
+        snprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
 
@@ -311,9 +311,9 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
     H5FD_mem_t mt;
 
     /* Check for split or multi driver */
-    if (!HDstrcmp(env_h5_drvr, "split"))
+    if (!strcmp(env_h5_drvr, "split"))
         split = true;
-    else if (!HDstrcmp(env_h5_drvr, "multi"))
+    else if (!strcmp(env_h5_drvr, "multi"))
         multi = true;
 
     if (split || multi) {
@@ -2080,10 +2080,10 @@ main(void)
      * Page buffering depends on paged aggregation which is
      * currently disabled for multi/split drivers.
      */
-    if ((0 == HDstrcmp(env_h5_drvr, "multi")) || (0 == HDstrcmp(env_h5_drvr, "split"))) {
+    if ((0 == strcmp(env_h5_drvr, "multi")) || (0 == strcmp(env_h5_drvr, "split"))) {
 
         SKIPPED();
-        HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
+        puts("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
         exit(EXIT_SUCCESS);
     } /* end if */
 
@@ -2099,7 +2099,7 @@ main(void)
 
 #ifdef H5_HAVE_PARALLEL
 
-    HDputs("Page Buffering is disabled for parallel.");
+    puts("Page Buffering is disabled for parallel.");
     nerrors += verify_page_buffering_disabled(fapl, env_h5_drvr);
 
 #else /* H5_HAVE_PARALLEL */
@@ -2122,7 +2122,7 @@ main(void)
         FAIL_STACK_ERROR;
     api_ctx_pushed = false;
 
-    HDputs("All Page Buffering tests passed.");
+    puts("All Page Buffering tests passed.");
 
     exit(EXIT_SUCCESS);
 

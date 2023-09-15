@@ -494,7 +494,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                 if (!driver_env_var)
                     driver_env_var = HDF5_DRIVER;
 #endif
-                if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
+                if (driver_env_var && !strcmp(driver_env_var, "split")) {
                     /* split VFD */
                     if (subst_for_superblock)
                         suffix = ".h5.meta";
@@ -588,7 +588,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             /* This is a parallel system */
             char *subdir;
 
-            if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
+            if (!strcmp(prefix, HDF5_PARAPREFIX)) {
                 /*
                  * If the prefix specifies the HDF5_PARAPREFIX directory, then
                  * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
@@ -613,11 +613,11 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 
             if (!fullname[0]) {
                 /* We didn't append the prefix yet */
-                HDstrncpy(fullname, prefix, size);
+                strncpy(fullname, prefix, size);
                 fullname[size - 1] = '\0';
             }
 
-            if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
+            if (strlen(fullname) + strlen(base_name) + 1 < size) {
                 /*
                  * Append the base_name with a slash first. Multiple
                  * slashes are handled below.
@@ -632,10 +632,10 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                          * subdirectory.  Default to PREFIX's original
                          * prefix value.
                          */
-                        HDstrcpy(fullname, prefix);
+                        strcpy(fullname, prefix);
 
-                HDstrcat(fullname, "/");
-                HDstrcat(fullname, base_name);
+                strcat(fullname, "/");
+                strcat(fullname, base_name);
             }
             else {
                 /* Buffer is too small */
@@ -643,25 +643,25 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             }
         }
         else {
-            if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
+            if (snprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
                 /* Buffer is too small */
                 return NULL;
         }
     }
-    else if (HDstrlen(base_name) >= size) {
+    else if (strlen(base_name) >= size) {
         /* Buffer is too small */
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (strlen(fullname) + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        strcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -695,7 +695,7 @@ h5_rmprefix(const char *filename)
 {
     const char *ret_ptr;
 
-    if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
+    if ((ret_ptr = strstr(filename, ":")) == NULL)
         ret_ptr = filename;
     else
         ret_ptr++;
@@ -804,12 +804,12 @@ h5_get_libver_fapl(hid_t fapl)
      * If it's nothing (environment variable was whitespace)
      * just return the default fapl.
      */
-    HDstrncpy(buf, env, sizeof(buf));
+    strncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
     if (NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
-    if (!HDstrcmp(tok, "latest")) {
+    if (!strcmp(tok, "latest")) {
         /* use the latest format */
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             goto error;
@@ -928,7 +928,7 @@ h5_set_info_object(void)
     if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
         char *next, *valp;
 
-        valp = envp = next = HDstrdup(envp);
+        valp = envp = next = strdup(envp);
 
         if (!valp)
             return 0;
@@ -945,7 +945,7 @@ h5_set_info_object(void)
                 valp++;
 
             /* copy key/value pair into temporary buffer */
-            len  = HDstrcspn(valp, ";");
+            len  = strcspn(valp, ";");
             next = &valp[len];
             if (NULL == (key_val = (char *)calloc(1, len + 1)))
                 return -1;
@@ -954,7 +954,7 @@ h5_set_info_object(void)
             if (*next == ';')
                 ++next;
 
-            namep = HDstrncpy(key_val, valp, len);
+            namep = strncpy(key_val, valp, len);
 
             /* pass up any beginning whitespaces */
             while (*namep && (*namep == ' ' || *namep == '\t'))
@@ -964,13 +964,13 @@ h5_set_info_object(void)
                 continue; /* was all white space, so move to next k/v pair */
 
             /* eat up any ending white spaces */
-            endp = &namep[HDstrlen(namep) - 1];
+            endp = &namep[strlen(namep) - 1];
 
             while (endp && (*endp == ' ' || *endp == '\t'))
                 *endp-- = '\0';
 
             /* find the '=' */
-            valp = HDstrchr(namep, '=');
+            valp = strchr(namep, '=');
 
             if (valp != NULL) { /* it's a valid key/value pairing */
                 char *tmp_val = valp + 1;
@@ -1089,17 +1089,17 @@ h5_get_file_size(const char *filename, hid_t fapl)
             char          *driver_env_var = NULL;
 
             driver_env_var = HDgetenv(HDF5_DRIVER);
-            if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
+            if (driver_env_var && !strcmp(driver_env_var, "split")) {
                 for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     if (mt != H5FD_MEM_DRAW && mt != H5FD_MEM_SUPER)
                         continue;
 
                     /* Create the filename to query */
                     if (mt == H5FD_MEM_DRAW) {
-                        HDsnprintf(temp, sizeof temp, "%s.raw", filename);
+                        snprintf(temp, sizeof temp, "%s.raw", filename);
                     }
                     else {
-                        HDsnprintf(temp, sizeof temp, "%s.meta", filename);
+                        snprintf(temp, sizeof temp, "%s.meta", filename);
                     }
 
                     /* Check for existence of file */
@@ -1114,10 +1114,10 @@ h5_get_file_size(const char *filename, hid_t fapl)
                 }     /* end for */
             }
             else {
-                assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
                 for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     /* Create the filename to query */
-                    HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+                    snprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
 
                     /* Check for existence of file */
                     if (0 == HDaccess(temp, F_OK)) {
@@ -1159,7 +1159,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Try all filenames possible, until we find one that's missing */
             for (j = 0; /*void*/; j++) {
                 /* Create the filename to query */
-                HDsnprintf(temp, sizeof temp, filename, j);
+                snprintf(temp, sizeof temp, filename, j);
 
                 /* Check for existence of file */
                 if (HDaccess(temp, F_OK) < 0)
@@ -1216,7 +1216,7 @@ print_func(const char *format, ...)
     int     ret_value;
 
     va_start(arglist, format);
-    ret_value = HDvprintf(format, arglist);
+    ret_value = vprintf(format, arglist);
     va_end(arglist);
     return ret_value;
 }
@@ -1304,7 +1304,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
         if (mpi_rank == root) {
             env = HDgetenv(name);
             if (env) {
-                len = (int)HDstrlen(env);
+                len = (int)strlen(env);
                 MPI_Bcast(&len, 1, MPI_INT, root, comm);
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
             }
@@ -1319,7 +1319,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
             if (len >= 0) {
                 if (env == NULL)
                     env = (char *)malloc((size_t)len + 1);
-                else if (HDstrlen(env) < (size_t)len)
+                else if (strlen(env) < (size_t)len)
                     env = (char *)realloc(env, (size_t)len + 1);
 
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
@@ -1894,9 +1894,9 @@ H5_get_srcdir_filename(const char *filename)
     /* Build path to test file. We're checking the length so suppress
      * the gcc format-truncation warning.
      */
-    if ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+    if ((strlen(srcdir) + strlen(filename) + 1) < sizeof(srcdir_testpath)) {
         H5_GCC_DIAG_OFF("format-truncation")
-        HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
+        snprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
         H5_GCC_DIAG_ON("format-truncation")
         return srcdir_testpath;
     }
@@ -1924,8 +1924,8 @@ H5_get_srcdir(void)
         srcdir = config_srcdir;
 
     /* Build path to all test files */
-    if ((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
-        HDsnprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
+    if ((strlen(srcdir) + 2) < sizeof(srcdir_path)) {
+        snprintf(srcdir_path, sizeof(srcdir_path), "%s/", srcdir);
         return (srcdir_path);
     } /* end if */
     else
@@ -2079,7 +2079,7 @@ h5_using_default_driver(const char *drv_name)
         drv_name = HDgetenv(HDF5_DRIVER);
 
     if (drv_name)
-        return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
+        return (!strcmp(drv_name, "sec2") || !strcmp(drv_name, "nomatch"));
 
     return ret_val;
 }
@@ -2201,13 +2201,13 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
 
     if (drv_name) {
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") ||
-                !HDstrcmp(drv_name, "family") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
+            if (!strcmp(drv_name, "split") || !strcmp(drv_name, "multi") || !strcmp(drv_name, "family") ||
+                !strcmp(drv_name, H5FD_SUBFILING_NAME))
                 return true;
         }
 
         if ((flags & H5_EXCLUDE_NON_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "splitter"))
+            if (!strcmp(drv_name, "splitter"))
                 return true;
         }
     }

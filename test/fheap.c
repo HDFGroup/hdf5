@@ -517,7 +517,7 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
      */
     size_t test_desc_len = strlen(base_desc) + sizeof(" ") + strlen(del_str);
     test_desc            = H5MM_malloc(test_desc_len);
-    (void)HDsnprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
+    (void)snprintf(test_desc, test_desc_len, "%s %s", base_desc, del_str);
 
     TESTING(test_desc);
     H5MM_xfree(test_desc);
@@ -7449,7 +7449,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
             if (H5HF_remove(fh, heap_id[j]) < 0)
                 FAIL_STACK_ERROR;
 
-            HDsnprintf(obj2.b, sizeof(obj2.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
+            snprintf(obj2.b, sizeof(obj2.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
             if (H5HF_insert(fh, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
                 FAIL_STACK_ERROR;
         } /* end for */
@@ -7460,7 +7460,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
         /* Insert object */
         memset(heap_id[i], 0, id_len);
-        HDsnprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
+        snprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if (H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -15968,7 +15968,7 @@ main(void)
         envval = "nomatch";
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -16112,12 +16112,12 @@ main(void)
             switch (curr_test) {
                 /* "Normal" testing parameters */
                 case FHEAP_TEST_NORMAL:
-                    HDputs("Testing with normal parameters");
+                    puts("Testing with normal parameters");
                     break;
 
                 /* "Re-open heap" testing parameters */
                 case FHEAP_TEST_REOPEN:
-                    HDputs("Testing with reopen heap flag set");
+                    puts("Testing with reopen heap flag set");
                     tparam.reopen_heap = FHEAP_TEST_REOPEN;
                     break;
 
@@ -16149,12 +16149,12 @@ main(void)
                     switch (fill) {
                         /* "Bulk fill" heap blocks with 'large' objects */
                         case FHEAP_TEST_FILL_LARGE:
-                            HDputs("Bulk-filling blocks w/large objects");
+                            puts("Bulk-filling blocks w/large objects");
                             break;
 
                         /* "Bulk fill" heap blocks with 'single' objects */
                         case FHEAP_TEST_FILL_SINGLE:
-                            HDputs("Bulk-filling blocks w/single object");
+                            puts("Bulk-filling blocks w/single object");
                             break;
 
                         /* An unknown test? */
@@ -16354,12 +16354,12 @@ main(void)
                     switch (id_len) {
                         /* Use "normal" form for 'huge' object's heap IDs */
                         case 0:
-                            HDputs("Using 'normal' heap ID format for 'huge' objects");
+                            puts("Using 'normal' heap ID format for 'huge' objects");
                             break;
 
                         /* Use "direct" form for 'huge' object's heap IDs */
                         case 1:
-                            HDputs("Using 'direct' heap ID format for 'huge' objects");
+                            puts("Using 'direct' heap ID format for 'huge' objects");
 
                             /* Adjust actual length of heap IDs for directly storing 'huge' object's file
                              * offset & length in heap ID */
@@ -16369,8 +16369,8 @@ main(void)
                         /* Use "direct" storage for 'huge' objects and larger IDs for 'tiny' objects */
                         case 2:
                             small_cparam.id_len = 37;
-                            HDputs("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
-                                   "'tiny' objects");
+                            puts("Using 'direct' heap ID format for 'huge' objects and larger IDs for "
+                                 "'tiny' objects");
                             tparam.actual_id_len = 37;
                             break;
 
@@ -16436,7 +16436,7 @@ main(void)
                 printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */
-                HDputs("Using 'small' heap creation parameters");
+                puts("Using 'small' heap creation parameters");
 
                 /* (reduce size of tests when re-opening each time) */
                 /* XXX: Try to speed things up enough that these tests don't have to be reduced when
@@ -16458,7 +16458,7 @@ main(void)
                                             fapl, &small_cparam, &tparam);
 
                 /* Random tests using "large" heap creation parameters */
-                HDputs("Using 'large' heap creation parameters");
+                puts("Using 'large' heap creation parameters");
                 tparam.actual_id_len = LARGE_HEAP_ID_LEN;
 
                 /* (reduce size of tests when re-opening each time) */
@@ -16513,7 +16513,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All fractal heap tests passed.");
+    puts("All fractal heap tests passed.");
 
     /* Release space for the shared objects */
     H5MM_xfree(shared_wobj_g);
@@ -16538,7 +16538,7 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5MM_xfree(shared_wobj_g);

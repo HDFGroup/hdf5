@@ -4082,8 +4082,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME);
@@ -4127,8 +4127,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_crt_order_increasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME);
@@ -4145,8 +4145,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_crt_order_increasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2);
@@ -4163,8 +4163,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_crt_order_increasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3);
@@ -4195,8 +4195,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_crt_order_decreasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME);
@@ -4213,8 +4213,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_crt_order_decreasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2);
@@ -4231,8 +4231,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_crt_order_decreasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3);
@@ -4257,8 +4257,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_name_order_increasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME);
@@ -4275,8 +4275,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_name_order_increasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2);
@@ -4293,8 +4293,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_name_order_increasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3);
@@ -4319,8 +4319,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_name_order_decreasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME);
@@ -4337,8 +4337,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_name_order_decreasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME2);
@@ -4355,8 +4355,8 @@ test_get_attribute_name(void)
                 PART_ERROR(H5Aget_name_by_idx_name_order_decreasing);
             }
 
-            if (HDstrncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
-                          strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
+            if (strncmp(name_buf, ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3,
+                        strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3) + 1)) {
                 H5_FAILED();
                 printf("    retrieved attribute name '%s' didn't match '%s'\n", name_buf,
                        ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME3);
@@ -6553,8 +6553,8 @@ test_attribute_iterate_group(void)
     for (i = 0; i < ATTRIBUTE_ITERATE_TEST_NUM_ATTRS; i++) {
         char attr_name[ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE];
 
-        HDsnprintf(attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE,
-                   ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d", (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - i - 1));
+        snprintf(attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE, ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d",
+                 (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - i - 1));
 
         if ((attr_id = H5Acreate2(group_id, attr_name, attr_dtype, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) <
             0) {
@@ -6962,8 +6962,8 @@ test_attribute_iterate_dataset(void)
     for (i = 0; i < ATTRIBUTE_ITERATE_TEST_NUM_ATTRS; i++) {
         char attr_name[ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE];
 
-        HDsnprintf(attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE,
-                   ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d", (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - i - 1));
+        snprintf(attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE, ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d",
+                 (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - i - 1));
 
         if ((attr_id = H5Acreate2(dset_id, attr_name, attr_dtype, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) <
             0) {
@@ -7381,8 +7381,8 @@ test_attribute_iterate_datatype(void)
     for (i = 0; i < ATTRIBUTE_ITERATE_TEST_NUM_ATTRS; i++) {
         char attr_name[ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE];
 
-        HDsnprintf(attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE,
-                   ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d", (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - i - 1));
+        snprintf(attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE, ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d",
+                 (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - i - 1));
 
         if ((attr_id = H5Acreate2(type_id, attr_name, attr_dtype, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) <
             0) {
@@ -10990,18 +10990,18 @@ attr_iter_callback1(hid_t location_id, const char *attr_name, const H5A_info_t *
      */
     test_iteration = (counter_val / ATTRIBUTE_ITERATE_TEST_NUM_ATTRS);
     if (test_iteration == 0 || test_iteration == 3) {
-        HDsnprintf(expected_attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE,
-                   ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d",
-                   (int)(counter_val % ATTRIBUTE_ITERATE_TEST_NUM_ATTRS));
+        snprintf(expected_attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE,
+                 ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d",
+                 (int)(counter_val % ATTRIBUTE_ITERATE_TEST_NUM_ATTRS));
     }
     else {
-        HDsnprintf(
+        snprintf(
             expected_attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE,
             ATTRIBUTE_ITERATE_TEST_ATTR_NAME "%d",
             (int)(ATTRIBUTE_ITERATE_TEST_NUM_ATTRS - (counter_val % ATTRIBUTE_ITERATE_TEST_NUM_ATTRS) - 1));
     }
 
-    if (HDstrncmp(attr_name, expected_attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE)) {
+    if (strncmp(attr_name, expected_attr_name, ATTRIBUTE_ITERATE_TEST_ATTR_NAME_BUF_SIZE)) {
         printf("    attribute name '%s' didn't match expected name '%s'\n", attr_name, expected_attr_name);
         ret_val = H5_ITER_ERROR;
         goto done;

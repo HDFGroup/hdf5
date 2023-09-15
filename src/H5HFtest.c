@@ -178,7 +178,7 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
             else if(cparam1->pline.filter[u].name && !cparam2->pline.filter[u].name)
                 HGOTO_DONE(1);
             else if(cparam1->pline.filter[u].name && cparam2->pline.filter[u].name) {
-                if((ret_value = HDstrcmp(cparam1->pline.filter[u].name, cparam2->pline.filter[u].name)))
+                if((ret_value = strcmp(cparam1->pline.filter[u].name, cparam2->pline.filter[u].name)))
                     HGOTO_DONE(ret_value);
             } /* end if */
 #endif

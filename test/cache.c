@@ -4355,20 +4355,20 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     if (cache_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache_ptr NULL on entry to single entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache_ptr NULL on entry to single entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
         pass = false;
 
-        HDsnprintf(msg, (size_t)128, "cache not empty at beginning of multi entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache not empty at beginning of multi entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((spec_size < 1) || (spec == NULL)) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "missing/bad test spec on entry to multi entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "missing/bad test spec on entry to multi entry test #%d.", test_num);
         failure_mssg = msg;
     }
 
@@ -4380,8 +4380,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
             (spec[u].entry_index > max_indices[spec[u].entry_type])) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "bad data in spec[%u] on entry to multi entry test #%d.", u,
-                       test_num);
+            snprintf(msg, (size_t)128, "bad data in spec[%u] on entry to multi entry test #%d.", u, test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4412,8 +4411,8 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
         if (!pass) {
 
-            HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in multi entry test #%d.", flush_flags,
-                       test_num);
+            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in multi entry test #%d.", flush_flags,
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4428,8 +4427,8 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Bad status on entry %u after flush in multi entry test #%d.", u,
-                       test_num);
+            snprintf(msg, (size_t)128, "Bad status on entry %u after flush in multi entry test #%d.", u,
+                     test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4443,8 +4442,8 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
              ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size after flush in multi entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in multi entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4457,14 +4456,14 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
         if (!pass) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in multi entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Flush failed on cleanup in multi entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in multi entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in multi entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4510,20 +4509,20 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
     if (cache_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache_ptr NULL on entry to pe multi entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache_ptr NULL on entry to pe multi entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
         pass = false;
 
-        HDsnprintf(msg, (size_t)128, "cache not empty at beginning of pe multi entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache not empty at beginning of pe multi entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((spec_size < 1) || (spec == NULL)) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "missing/bad test spec on entry to pe multi entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "missing/bad test spec on entry to pe multi entry test #%d.", test_num);
         failure_mssg = msg;
     }
 
@@ -4536,8 +4535,8 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
             (spec[u].num_pins > MAX_PINS)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "bad data in spec[%u] on entry to pe multi entry test #%d.", u,
-                       test_num);
+            snprintf(msg, (size_t)128, "bad data in spec[%u] on entry to pe multi entry test #%d.", u,
+                     test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4573,8 +4572,8 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
         if (!pass) {
 
-            HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in pe multi entry test #%d.",
-                       flush_flags, test_num);
+            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in pe multi entry test #%d.",
+                     flush_flags, test_num);
             failure_mssg = msg;
         }
     }
@@ -4590,8 +4589,8 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Bad status on entry %u after flush in pe multi entry test #%d.", u,
-                       test_num);
+            snprintf(msg, (size_t)128, "Bad status on entry %u after flush in pe multi entry test #%d.", u,
+                     test_num);
             failure_mssg = msg;
         }
         u++;
@@ -4605,8 +4604,8 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
              ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size after flush in pe multi entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in pe multi entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -4619,14 +4618,14 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
         if (!pass) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in pe multi entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Flush failed on cleanup in pe multi entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected cache len/size after cleanup in pe multi entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in pe multi entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8041,20 +8040,20 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
     if (cache_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache_ptr NULL on entry to flush op test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache_ptr NULL on entry to flush op test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
         pass = false;
 
-        HDsnprintf(msg, (size_t)128, "cache not empty at beginning of flush op test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache not empty at beginning of flush op test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((spec_size < 1) || (spec == NULL)) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "missing/bad test spec on entry to flush op test #%d.", test_num);
+        snprintf(msg, (size_t)128, "missing/bad test spec on entry to flush op test #%d.", test_num);
         failure_mssg = msg;
     }
 
@@ -8068,7 +8067,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             (spec[i].num_flush_ops > MAX_FLUSH_OPS)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "bad data in spec[%d] on entry to flush op test #%d.", i, test_num);
+            snprintf(msg, (size_t)128, "bad data in spec[%d] on entry to flush op test #%d.", i, test_num);
             failure_mssg = msg;
         }
         i++;
@@ -8083,7 +8082,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             (check[i].expected_size <= (size_t)0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "bad data in check[%d] on entry to flush op test #%d.", i, test_num);
+            snprintf(msg, (size_t)128, "bad data in check[%d] on entry to flush op test #%d.", i, test_num);
             failure_mssg = msg;
         }
         i++;
@@ -8127,8 +8126,8 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             (cache_ptr->index_size != init_expected_index_size)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size before flush in flush op test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size before flush in flush op test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8140,8 +8139,8 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
         if (!pass) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in flush op test #%d.", flush_flags,
-                       test_num);
+            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in flush op test #%d.", flush_flags,
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8157,7 +8156,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             (entry_ptr->destroyed != spec[i].expected_destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Bad status on entry %d after flush op test #%d.", i, test_num);
+            snprintf(msg, (size_t)128, "Bad status on entry %d after flush op test #%d.", i, test_num);
             failure_mssg = msg;
         }
         i++;
@@ -8171,8 +8170,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             if (check[i].in_cache != entry_in_cache(cache_ptr, check[i].entry_type, check[i].entry_index)) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "Check1 failed on entry %d after flush op test #%d.", i,
-                           test_num);
+                snprintf(msg, (size_t)128, "Check1 failed on entry %d after flush op test #%d.", i, test_num);
                 failure_mssg = msg;
             }
 
@@ -8194,8 +8192,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
                 (entry_ptr->destroyed != check[i].expected_destroyed)) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i,
-                           test_num);
+                snprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i, test_num);
                 failure_mssg = msg;
             }
             i++;
@@ -8211,8 +8208,8 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
              ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size after flush in flush op test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in flush op test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -8224,15 +8221,15 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
         if (!pass) {
 
-            HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in flush op test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Flush failed on cleanup in flush op test #%d.", test_num);
             failure_mssg = msg;
         }
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
                  (cache_ptr->clean_index_size != 0) || (cache_ptr->dirty_index_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected cache len/size/cs/ds after cleanup in flush op test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size/cs/ds after cleanup in flush op test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -10723,20 +10720,20 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
     if (cache_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache_ptr NULL on entry to single entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache_ptr NULL on entry to single entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache not empty at beginning of single entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache not empty at beginning of single entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((entry_type < 0) || (entry_type >= NUMBER_OF_ENTRY_TYPES) || (entry_idx < 0) ||
              (entry_idx > max_indices[entry_type])) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "Bad parameters on entry to single entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "Bad parameters on entry to single entry test #%d.", test_num);
         failure_mssg = msg;
     }
 
@@ -10763,8 +10760,8 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
         if (!pass) { /* construct and set actual failure message */
 
-            HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.",
-                       flush_flags, test_num);
+            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.", flush_flags,
+                     test_num);
 
             failure_mssg = msg;
         }
@@ -10773,8 +10770,8 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
                  (entry_ptr->destroyed != expected_destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry status after flush in single entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected entry status after flush in single entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
         else if ((((flush_flags & H5C__FLUSH_INVALIDATE_FLAG) == 0) &&
@@ -10783,8 +10780,8 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
                   ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size after flush in single entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after flush in single entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
     }
@@ -10796,14 +10793,14 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
         if (!pass) { /* construct and set actual failure message */
 
-            HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in single entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Flush failed on cleanup in single entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in single entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Unexpected cache len/size after cleanup in single entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
         else {
@@ -10842,21 +10839,20 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
     if (cache_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache_ptr NULL on entry to pinned single entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "cache_ptr NULL on entry to pinned single entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache not empty at beginning of pinned single entry test #%d.",
-                   test_num);
+        snprintf(msg, (size_t)128, "cache not empty at beginning of pinned single entry test #%d.", test_num);
         failure_mssg = msg;
     }
     else if ((entry_type < 0) || (entry_type >= NUMBER_OF_ENTRY_TYPES) || (entry_idx < 0) ||
              (entry_idx > max_indices[entry_type])) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "Bad parameters on entry to pinned single entry test #%d.", test_num);
+        snprintf(msg, (size_t)128, "Bad parameters on entry to pinned single entry test #%d.", test_num);
         failure_mssg = msg;
     }
 
@@ -10893,8 +10889,8 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
         if (!pass) { /* construct and set the correct failure message */
 
-            HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in pinned single entry test #%d.",
-                       flush_flags, test_num);
+            snprintf(msg, (size_t)128, "flush with flags 0x%x failed in pinned single entry test #%d.",
+                     flush_flags, test_num);
             failure_mssg = msg;
         }
         else if ((entry_ptr->deserialized != expected_deserialized) ||
@@ -10902,8 +10898,8 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
                  (entry_ptr->destroyed != expected_destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected entry status after flush in pinned single entry test #%d.", test_num);
+            snprintf(msg, (size_t)128, "Unexpected entry status after flush in pinned single entry test #%d.",
+                     test_num);
             failure_mssg = msg;
         }
         else if ((((flush_flags & H5C__FLUSH_INVALIDATE_FLAG) == 0) &&
@@ -10912,8 +10908,8 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
                   ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected cache len/size after flush in pinned single entry test #%d.", test_num);
+            snprintf(msg, (size_t)128,
+                     "Unexpected cache len/size after flush in pinned single entry test #%d.", test_num);
             failure_mssg = msg;
         }
     }
@@ -10941,15 +10937,14 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
         if (!pass) {
 
-            HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in pinned single entry test #%d.",
-                       test_num);
+            snprintf(msg, (size_t)128, "Flush failed on cleanup in pinned single entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected cache len/size after cleanup in pinned single entry test #%d.", test_num);
+            snprintf(msg, (size_t)128,
+                     "Unexpected cache len/size after cleanup in pinned single entry test #%d.", test_num);
             failure_mssg = msg;
         }
         else {
@@ -11023,13 +11018,13 @@ check_get_entry_status(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
+            snprintf(msg, (size_t)128, "Unexpected status 1.");
             failure_mssg = msg;
         }
     }
@@ -11049,13 +11044,13 @@ check_get_entry_status(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
         }
         else if (!in_cache || is_dirty || is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+            snprintf(msg, (size_t)128, "Unexpected status 2.");
             failure_mssg = msg;
         }
     }
@@ -11073,13 +11068,13 @@ check_get_entry_status(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
         }
         else if (!in_cache || is_dirty || !is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+            snprintf(msg, (size_t)128, "Unexpected status 3.");
             failure_mssg = msg;
         }
     }
@@ -11097,13 +11092,13 @@ check_get_entry_status(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
         }
         else if (!in_cache || is_dirty || is_protected || !is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
+            snprintf(msg, (size_t)128, "Unexpected status 4.");
             failure_mssg = msg;
         }
     }
@@ -11121,13 +11116,13 @@ check_get_entry_status(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || !is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
+            snprintf(msg, (size_t)128, "Unexpected status 5.");
             failure_mssg = msg;
         }
     }
@@ -11145,13 +11140,13 @@ check_get_entry_status(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 6.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 6.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
+            snprintf(msg, (size_t)128, "Unexpected status 6.");
             failure_mssg = msg;
         }
     }
@@ -11230,19 +11225,19 @@ check_expunge_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
+            snprintf(msg, (size_t)128, "Unexpected status 1.");
             failure_mssg = msg;
         }
         else if ((entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 1.");
             failure_mssg = msg;
         }
     }
@@ -11266,19 +11261,19 @@ check_expunge_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
         }
         else if (!in_cache || is_dirty || is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+            snprintf(msg, (size_t)128, "Unexpected status 2.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 2.");
             failure_mssg = msg;
         }
     }
@@ -11304,19 +11299,19 @@ check_expunge_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+            snprintf(msg, (size_t)128, "Unexpected status 3.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 3.");
             failure_mssg = msg;
         }
     }
@@ -11340,19 +11335,19 @@ check_expunge_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
+            snprintf(msg, (size_t)128, "Unexpected status 4.");
             failure_mssg = msg;
         }
         else if ((entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 4.");
             failure_mssg = msg;
         }
     }
@@ -11376,19 +11371,19 @@ check_expunge_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
+            snprintf(msg, (size_t)128, "Unexpected status 5.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 5.");
             failure_mssg = msg;
         }
     }
@@ -11414,19 +11409,19 @@ check_expunge_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 6.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 6.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
+            snprintf(msg, (size_t)128, "Unexpected status 6.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 6.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 6.");
             failure_mssg = msg;
         }
     }
@@ -11956,13 +11951,13 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
     if (cache_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "cache_ptr NULL on entry to move test #%u.", test_num);
+        snprintf(msg, (size_t)128, "cache_ptr NULL on entry to move test #%u.", test_num);
         failure_mssg = msg;
     }
     else if (spec_ptr == NULL) {
 
         pass = false;
-        HDsnprintf(msg, (size_t)128, "spec_ptr NULL on entry to move test #%u.", test_num);
+        snprintf(msg, (size_t)128, "spec_ptr NULL on entry to move test #%u.", test_num);
         failure_mssg = msg;
     }
 
@@ -11976,7 +11971,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
             (!(entry_ptr->at_main_addr)) || (entry_ptr->addr != entry_ptr->main_addr)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "bad entry_ptr in move test #%u.", test_num);
+            snprintf(msg, (size_t)128, "bad entry_ptr in move test #%u.", test_num);
             failure_mssg = msg;
         }
     }
@@ -12006,7 +12001,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
             if (!(entry_ptr->header.is_pinned)) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "Pinned entry not pinned after move in test #%u.", test_num);
+                snprintf(msg, (size_t)128, "Pinned entry not pinned after move in test #%u.", test_num);
                 failure_mssg = msg;
             }
 
@@ -12023,8 +12018,8 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
                     if (test_ptr == NULL) {
 
                         pass = false;
-                        HDsnprintf(msg, (size_t)128, "Pinned entry not in pel after move in test #%u.",
-                                   test_num);
+                        snprintf(msg, (size_t)128, "Pinned entry not in pel after move in test #%u.",
+                                 test_num);
                         failure_mssg = msg;
                     }
                 } /* end else */
@@ -12037,7 +12032,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
             if (entry_ptr->header.is_pinned) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "Unpinned entry pinned after move in test #%u.", test_num);
+                snprintf(msg, (size_t)128, "Unpinned entry pinned after move in test #%u.", test_num);
                 failure_mssg = msg;
             }
 
@@ -12047,8 +12042,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
                 if ((entry_ptr->header.prev != NULL) ||
                     (cache_ptr->LRU_head_ptr != (H5C_cache_entry_t *)entry_ptr)) {
                     pass = false;
-                    HDsnprintf(msg, (size_t)128, "Entry not at head of LRU after move in test #%u.",
-                               test_num);
+                    snprintf(msg, (size_t)128, "Entry not at head of LRU after move in test #%u.", test_num);
                     failure_mssg = msg;
                 }
             } /* end else */
@@ -12058,8 +12052,7 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
             if (!(entry_ptr->header.is_protected)) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "Protected entry not protected after move in test #%u.",
-                           test_num);
+                snprintf(msg, (size_t)128, "Protected entry not protected after move in test #%u.", test_num);
                 failure_mssg = msg;
             }
 
@@ -12070,8 +12063,8 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
             if (entry_ptr->header.is_protected) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "Unprotected entry not unprotected after move in test #%u.",
-                           test_num);
+                snprintf(msg, (size_t)128, "Unprotected entry not unprotected after move in test #%u.",
+                         test_num);
                 failure_mssg = msg;
             }
         } /* end else */
@@ -12141,13 +12134,13 @@ check_pin_protected_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_pin_protected_entry() reports failure.");
+            snprintf(msg, (size_t)128, "H5C_pin_protected_entry() reports failure.");
             failure_mssg = msg;
         }
         else if (!(entry_ptr->header.is_pinned)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "entry not pinned when it should be.");
+            snprintf(msg, (size_t)128, "entry not pinned when it should be.");
             failure_mssg = msg;
         }
         else {
@@ -12270,7 +12263,7 @@ check_resize_entry(unsigned paged)
             (cache_ptr->slist_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 1.");
             failure_mssg = msg;
         }
     }
@@ -12286,7 +12279,7 @@ check_resize_entry(unsigned paged)
             (cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 2.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 2.");
             failure_mssg = msg;
         }
     }
@@ -12299,19 +12292,19 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
         }
         else if (!in_cache || is_dirty || !is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
+            snprintf(msg, (size_t)128, "Unexpected status 1.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 1.");
             failure_mssg = msg;
         }
     }
@@ -12323,7 +12316,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
+            snprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
         }
         else {
@@ -12333,7 +12326,7 @@ check_resize_entry(unsigned paged)
             if (result < 0) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 1.");
+                snprintf(msg, (size_t)128, "H5C_unprotect() reports failure 1.");
                 failure_mssg = msg;
             }
             else {
@@ -12355,7 +12348,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2))))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 3.");
             failure_mssg = msg;
         }
     }
@@ -12368,20 +12361,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || is_pinned ||
                  (reported_entry_size != (LARGE_ENTRY_SIZE / 2))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+            snprintf(msg, (size_t)128, "Unexpected status 2.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 2.");
             failure_mssg = msg;
         }
     }
@@ -12398,7 +12391,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
+            snprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
         }
         else {
@@ -12408,7 +12401,7 @@ check_resize_entry(unsigned paged)
             if (result < 0) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 2.");
+                snprintf(msg, (size_t)128, "H5C_unprotect() reports failure 2.");
                 failure_mssg = msg;
             }
             else {
@@ -12430,7 +12423,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 4.");
             failure_mssg = msg;
         }
     }
@@ -12443,20 +12436,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || is_pinned ||
                  (reported_entry_size != LARGE_ENTRY_SIZE)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+            snprintf(msg, (size_t)128, "Unexpected status 3.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 3.");
             failure_mssg = msg;
         }
     }
@@ -12475,7 +12468,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 1.");
+            snprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 1.");
             failure_mssg = msg;
         }
     }
@@ -12487,7 +12480,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4))))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 5.");
             failure_mssg = msg;
         }
     }
@@ -12500,20 +12493,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || !is_pinned ||
                  (reported_entry_size != (LARGE_ENTRY_SIZE / 4))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
+            snprintf(msg, (size_t)128, "Unexpected status 4.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 4.");
             failure_mssg = msg;
         }
     }
@@ -12525,7 +12518,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 2.");
+            snprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 2.");
             failure_mssg = msg;
         }
     }
@@ -12537,7 +12530,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 6.");
             failure_mssg = msg;
         }
     }
@@ -12550,20 +12543,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || !is_pinned ||
                  (reported_entry_size != LARGE_ENTRY_SIZE)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
+            snprintf(msg, (size_t)128, "Unexpected status 5.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 5.");
             failure_mssg = msg;
         }
     }
@@ -12583,19 +12576,19 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 6.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 6.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
+            snprintf(msg, (size_t)128, "Unexpected status 6.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 6.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 6.");
             failure_mssg = msg;
         }
     }
@@ -12606,7 +12599,7 @@ check_resize_entry(unsigned paged)
             ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 7.");
             failure_mssg = msg;
         }
     }
@@ -12619,7 +12612,7 @@ check_resize_entry(unsigned paged)
             ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 8.");
             failure_mssg = msg;
         }
 
@@ -12647,7 +12640,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 9.");
             failure_mssg = msg;
         }
     }
@@ -12664,7 +12657,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 10.");
             failure_mssg = msg;
         }
     }
@@ -12677,19 +12670,19 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 7.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 7.");
             failure_mssg = msg;
         }
         else if (!in_cache || is_dirty || !is_protected || is_pinned) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 7.");
+            snprintf(msg, (size_t)128, "Unexpected status 7.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 7.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 7.");
             failure_mssg = msg;
         }
     }
@@ -12701,7 +12694,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
+            snprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
         }
         else {
@@ -12711,7 +12704,7 @@ check_resize_entry(unsigned paged)
             if (result < 0) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 3.");
+                snprintf(msg, (size_t)128, "H5C_unprotect() reports failure 3.");
                 failure_mssg = msg;
             }
             else {
@@ -12735,7 +12728,7 @@ check_resize_entry(unsigned paged)
               (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)))))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 11.");
             failure_mssg = msg;
         }
     }
@@ -12748,20 +12741,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 8.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 8.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || is_pinned ||
                  (reported_entry_size != (LARGE_ENTRY_SIZE / 2))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 8.");
+            snprintf(msg, (size_t)128, "Unexpected status 8.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 8.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 8.");
             failure_mssg = msg;
         }
     }
@@ -12778,7 +12771,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
+            snprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
         }
         else {
@@ -12788,7 +12781,7 @@ check_resize_entry(unsigned paged)
             if (result < 0) {
 
                 pass = false;
-                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 4.");
+                snprintf(msg, (size_t)128, "H5C_unprotect() reports failure 4.");
                 failure_mssg = msg;
             }
             else {
@@ -12810,7 +12803,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 12.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 12.");
             failure_mssg = msg;
         }
     }
@@ -12823,20 +12816,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 9.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 9.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || is_pinned ||
                  (reported_entry_size != LARGE_ENTRY_SIZE)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 9.");
+            snprintf(msg, (size_t)128, "Unexpected status 9.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 9.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 9.");
             failure_mssg = msg;
         }
     }
@@ -12855,7 +12848,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 3.");
+            snprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 3.");
             failure_mssg = msg;
         }
     }
@@ -12869,7 +12862,7 @@ check_resize_entry(unsigned paged)
               (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)))))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 13.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 13.");
             failure_mssg = msg;
         }
     }
@@ -12882,20 +12875,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 10.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 10.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || !is_pinned ||
                  (reported_entry_size != (LARGE_ENTRY_SIZE / 4))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 10.");
+            snprintf(msg, (size_t)128, "Unexpected status 10.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 10.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 10.");
             failure_mssg = msg;
         }
     }
@@ -12907,7 +12900,7 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 4.");
+            snprintf(msg, (size_t)128, "H5C_resize_entry() reports failure 4.");
             failure_mssg = msg;
         }
     }
@@ -12919,7 +12912,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE))))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 14.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 14.");
             failure_mssg = msg;
         }
     }
@@ -12932,20 +12925,20 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 11.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 11.");
             failure_mssg = msg;
         }
         else if (!in_cache || !is_dirty || is_protected || !is_pinned ||
                  (reported_entry_size != LARGE_ENTRY_SIZE)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 11.");
+            snprintf(msg, (size_t)128, "Unexpected status 11.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 11.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 11.");
             failure_mssg = msg;
         }
     }
@@ -12965,19 +12958,19 @@ check_resize_entry(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 12.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 12.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 12.");
+            snprintf(msg, (size_t)128, "Unexpected status 12.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 12.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 12.");
             failure_mssg = msg;
         }
     }
@@ -12989,7 +12982,7 @@ check_resize_entry(unsigned paged)
              ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 15.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 15.");
             failure_mssg = msg;
         }
     }
@@ -13012,7 +13005,7 @@ check_resize_entry(unsigned paged)
             ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 16.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 16.");
             failure_mssg = msg;
         }
     }
@@ -13139,7 +13132,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 1.");
             failure_mssg = msg;
         }
     }
@@ -13155,7 +13148,7 @@ check_evictions_enabled(unsigned paged)
         if ((result != SUCCEED) || (evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected evictions enabled 1.");
+            snprintf(msg, (size_t)128, "Unexpected evictions enabled 1.");
             failure_mssg = msg;
         }
     }
@@ -13183,7 +13176,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 2.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 2.");
             failure_mssg = msg;
         }
     }
@@ -13209,7 +13202,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 3.");
             failure_mssg = msg;
         }
     }
@@ -13227,19 +13220,19 @@ check_evictions_enabled(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 1.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
+            snprintf(msg, (size_t)128, "Unexpected status 1.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 1.");
             failure_mssg = msg;
         }
     }
@@ -13265,7 +13258,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 4.");
             failure_mssg = msg;
         }
     }
@@ -13283,19 +13276,19 @@ check_evictions_enabled(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 2.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+            snprintf(msg, (size_t)128, "Unexpected status 2.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 2.");
             failure_mssg = msg;
         }
     }
@@ -13311,7 +13304,7 @@ check_evictions_enabled(unsigned paged)
         if (result != SUCCEED) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "can't disable evictions 1.");
+            snprintf(msg, (size_t)128, "can't disable evictions 1.");
             failure_mssg = msg;
         }
     }
@@ -13328,7 +13321,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != false)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 5.");
             failure_mssg = msg;
         }
     }
@@ -13355,7 +13348,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != false)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 6.");
             failure_mssg = msg;
         }
     }
@@ -13381,7 +13374,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != false)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 7.");
             failure_mssg = msg;
         }
     }
@@ -13397,7 +13390,7 @@ check_evictions_enabled(unsigned paged)
         if (result != SUCCEED) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "can't enable evictions 1.");
+            snprintf(msg, (size_t)128, "can't enable evictions 1.");
             failure_mssg = msg;
         }
     }
@@ -13424,7 +13417,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 8.");
             failure_mssg = msg;
         }
     }
@@ -13454,7 +13447,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 9.");
             failure_mssg = msg;
         }
     }
@@ -13472,19 +13465,19 @@ check_evictions_enabled(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 3.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+            snprintf(msg, (size_t)128, "Unexpected status 3.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 3.");
             failure_mssg = msg;
         }
     }
@@ -13502,19 +13495,19 @@ check_evictions_enabled(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 4.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
+            snprintf(msg, (size_t)128, "Unexpected status 4.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 4.");
             failure_mssg = msg;
         }
     }
@@ -13530,7 +13523,7 @@ check_evictions_enabled(unsigned paged)
         if (result != SUCCEED) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "can't disable evictions 2.");
+            snprintf(msg, (size_t)128, "can't disable evictions 2.");
             failure_mssg = msg;
         }
     }
@@ -13559,7 +13552,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != false)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 10.");
             failure_mssg = msg;
         }
     }
@@ -13575,7 +13568,7 @@ check_evictions_enabled(unsigned paged)
         if (result != SUCCEED) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "can't enable evictions 2.");
+            snprintf(msg, (size_t)128, "can't enable evictions 2.");
             failure_mssg = msg;
         }
     }
@@ -13601,7 +13594,7 @@ check_evictions_enabled(unsigned paged)
             (cache_ptr->evictions_enabled != true)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
+            snprintf(msg, (size_t)128, "Unexpected cache status 11.");
             failure_mssg = msg;
         }
     }
@@ -13619,19 +13612,19 @@ check_evictions_enabled(unsigned paged)
         if (result < 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
+            snprintf(msg, (size_t)128, "H5C_get_entry_status() reports failure 5.");
             failure_mssg = msg;
         }
         else if (in_cache) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
+            snprintf(msg, (size_t)128, "Unexpected status 5.");
             failure_mssg = msg;
         }
         else if ((!entry_ptr->deserialized) || (entry_ptr->serialized) || (!entry_ptr->destroyed)) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
+            snprintf(msg, (size_t)128, "Unexpected entry history 5.");
             failure_mssg = msg;
         }
     }
@@ -13647,7 +13640,7 @@ check_evictions_enabled(unsigned paged)
         if (result != SUCCEED) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "can't disable evictions 3.");
+            snprintf(msg, (size_t)128, "can't disable evictions 3.");
             failure_mssg = msg;
         }
     }
@@ -33863,7 +33856,7 @@ main(void)
     printf("=========================================\n");
 
     if (!h5_using_default_driver(NULL)) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+        puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }
 

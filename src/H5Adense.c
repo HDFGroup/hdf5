@@ -369,7 +369,7 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = name;
-    udata.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = H5A__dense_fnd_cb; /* v2 B-tree comparison callback */
@@ -507,7 +507,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.common.fheap        = fheap;
     udata.common.shared_fheap = shared_fheap;
     udata.common.name         = attr->shared->name;
-    udata.common.name_hash    = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
+    udata.common.name_hash    = H5_checksum_lookup3(attr->shared->name, strlen(attr->shared->name), 0);
     H5_CHECKED_ASSIGN(udata.common.flags, uint8_t, mesg_flags, unsigned);
     udata.common.corder        = attr->shared->crt_idx;
     udata.common.found_op      = NULL;
@@ -748,7 +748,7 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = attr->shared->name;
-    udata.name_hash     = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
+    udata.name_hash     = H5_checksum_lookup3(attr->shared->name, strlen(attr->shared->name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = NULL;
@@ -881,7 +881,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = old_name;
-    udata.name_hash     = H5_checksum_lookup3(old_name, HDstrlen(old_name), 0);
+    udata.name_hash     = H5_checksum_lookup3(old_name, strlen(old_name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = H5A__dense_fnd_cb; /* v2 B-tree comparison callback */
@@ -1339,7 +1339,7 @@ H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     udata.common.fheap         = fheap;
     udata.common.shared_fheap  = shared_fheap;
     udata.common.name          = name;
-    udata.common.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.common.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.common.found_op      = H5A__dense_fnd_cb; /* v2 B-tree comparison callback */
     udata.common.found_op_data = &attr_copy;
     udata.corder_bt2_addr      = ainfo->corder_bt2_addr;
@@ -1432,7 +1432,7 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_udata.shared_fheap = bt2_udata->shared_fheap;
             other_bt2_udata.name         = fh_udata.attr->shared->name;
             other_bt2_udata.name_hash =
-                H5_checksum_lookup3(fh_udata.attr->shared->name, HDstrlen(fh_udata.attr->shared->name), 0);
+                H5_checksum_lookup3(fh_udata.attr->shared->name, strlen(fh_udata.attr->shared->name), 0);
             other_bt2_udata.found_op      = NULL;
             other_bt2_udata.found_op_data = NULL;
         } /* end else */
@@ -1668,7 +1668,7 @@ H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, bool *at
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = name;
-    udata.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = NULL; /* v2 B-tree comparison callback */

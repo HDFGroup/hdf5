@@ -60,7 +60,7 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
         if (format != NULL) {
             va_list args;
             va_start(args, format);
-            HDvfprintf(stream, format, args);
+            vfprintf(stream, format, args);
             va_end(args);
         }
 
@@ -158,7 +158,7 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
         info->prefix[0] = '\0';
 
         if (prefix && *prefix) {
-            HDstrncpy(info->prefix, prefix, MIRROR_LOG_PREFIX_MAX);
+            strncpy(info->prefix, prefix, MIRROR_LOG_PREFIX_MAX);
         }
 
         if (path && *path) {

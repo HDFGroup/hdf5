@@ -281,7 +281,7 @@ H5FD_mpio_init(void)
 
         /* Check if MPI driver has been loaded dynamically */
         env = HDgetenv(HDF5_DRIVER);
-        if (env && !HDstrcmp(env, "mpio")) {
+        if (env && !strcmp(env, "mpio")) {
             int mpi_initialized = 0;
 
             /* Initialize MPI if not already initialized */

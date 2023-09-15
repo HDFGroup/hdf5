@@ -78,7 +78,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
         va_list ap;
 
         va_copy(ap, _ap);
-        ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        ret = vsnprintf(buf, bufsz, fmt, ap);
         va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
             *bufp = buf;
@@ -642,7 +642,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
 
         if (NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
-        name_len = HDstrlen(name) + 1;
+        name_len = strlen(name) + 1;
         if (NULL == (new_name = (char *)H5MM_malloc(name_len)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
@@ -654,7 +654,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         if (H5_CHECK_ABS_DRIVE(name)) {
             drive  = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
-            HDstrncpy(new_name, &name[2], name_len);
+            strncpy(new_name, &name[2], name_len);
         } /* end if */
           /*
            * Windows: name[0] is a '/' or '\'
@@ -662,14 +662,14 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
            * Unix: does not apply
            */
         else if (H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
-            HDsnprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
+            snprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
-            HDstrncpy(new_name, &name[1], name_len);
+            strncpy(new_name, &name[1], name_len);
         }
         /* totally relative for Unix and Windows: get current working directory  */
         else {
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
-            HDstrncpy(new_name, name, name_len);
+            strncpy(new_name, name, name_len);
         } /* end if */
 
         if (retcwd != NULL) {
@@ -677,17 +677,17 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             size_t path_len;
 
             assert(cwdpath);
-            cwdlen = HDstrlen(cwdpath);
+            cwdlen = strlen(cwdpath);
             assert(cwdlen);
             assert(new_name);
-            path_len = cwdlen + HDstrlen(new_name) + 2;
+            path_len = cwdlen + strlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-            HDstrncpy(full_path, cwdpath, cwdlen + 1);
+            strncpy(full_path, cwdpath, cwdlen + 1);
             if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
-                HDstrncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
-            HDstrncat(full_path, new_name, path_len - (cwdlen + 1) - HDstrlen(H5_DIR_SEPS));
+                strncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
+            strncat(full_path, new_name, path_len - (cwdlen + 1) - strlen(H5_DIR_SEPS));
         } /* end if */
     }     /* end else */
 
@@ -734,8 +734,8 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
     assert(path2);
 
     if (path1)
-        path1_len = HDstrlen(path1);
-    path2_len = HDstrlen(path2);
+        path1_len = strlen(path1);
+    path2_len = strlen(path2);
 
     if (path1 == NULL || *path1 == '\0' || H5_CHECK_ABSOLUTE(path2)) {
 
@@ -753,7 +753,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
              */
             if (NULL == (*full_name = (char *)H5MM_malloc(path2_len + 3)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate path2 buffer");
-            HDsnprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
+            snprintf(*full_name, (path2_len + 3), "%c:%s", path1[0], path2);
         } /* end if */
         else {
             /* On windows path2 is path absolute name ("\foo\bar"),
@@ -777,9 +777,9 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer");
 
         /* Compose the full file name */
-        HDsnprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
-                   path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
-                   (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
+        snprintf(*full_name, (path1_len + path2_len + 2 + 2), "%s%s%s",
+                 path1, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
+                 (H5_CHECK_DELIMITER(path1[path1_len - 1]) ? "" : H5_DIR_SEPS), path2);
     } /* end else */
 
 done:
@@ -1000,7 +1000,7 @@ H5_dirname(const char *path, char **dirname)
     if (!dirname)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL");
 
-    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+    if (NULL == (sep = strrchr(path, H5_DIR_SEPC))) {
         /* Pathname with no file separator characters */
         out = H5MM_strdup(".");
     }
@@ -1109,7 +1109,7 @@ H5_basename(const char *path, char **basename)
     if (!basename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "basename can't be NULL");
 
-    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+    if (NULL == (sep = strrchr(path, H5_DIR_SEPC))) {
         if (*path == '\0')
             /* Empty pathname */
             out = H5MM_strdup(".");
@@ -1206,7 +1206,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         if (H5_optind >= argc || argv[H5_optind][0] != '-' || argv[H5_optind][1] == '\0') {
             return EOF;
         }
-        else if (HDstrcmp(argv[H5_optind], "--") == 0) {
+        else if (strcmp(argv[H5_optind], "--") == 0) {
             H5_optind++;
             return EOF;
         }
@@ -1216,19 +1216,19 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         /* long command line option */
         int        i;
         const char ch      = '=';
-        char      *arg     = HDstrdup(&argv[H5_optind][2]);
+        char      *arg     = strdup(&argv[H5_optind][2]);
         size_t     arg_len = 0;
 
         H5_optarg = strchr(&argv[H5_optind][2], ch);
-        arg_len   = HDstrlen(&argv[H5_optind][2]);
+        arg_len   = strlen(&argv[H5_optind][2]);
         if (H5_optarg) {
-            arg_len -= HDstrlen(H5_optarg);
+            arg_len -= strlen(H5_optarg);
             H5_optarg++; /* skip the equal sign */
         }
         arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            if (HDstrcmp(arg, l_opts[i].name) == 0) {
+            if (strcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 optchar = l_opts[i].shortval;
 
@@ -1278,7 +1278,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         /* short command line option */
         optchar = argv[H5_optind][sp];
 
-        if (optchar == ':' || (cp = HDstrchr(opts, optchar)) == 0) {
+        if (optchar == ':' || (cp = strchr(opts, optchar)) == 0) {
             if (H5_opterr)
                 fprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optchar);
 

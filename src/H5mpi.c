@@ -812,7 +812,7 @@ H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_required)
         MPI_Info_get(info_used, "romio_visibility_immediate", MPI_MAX_INFO_VAL - 1, value, &flag))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info");
 
-    if (flag && !HDstrcmp(value, "false"))
+    if (flag && !strcmp(value, "false"))
         *file_sync_required = true;
 
     if (MPI_SUCCESS != MPI_Info_free(&info_used))
@@ -820,9 +820,9 @@ H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_required)
 
     /* Force setting the flag via env variable (temp solution before the flag is implemented in MPI) */
     sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
+    if (sync_env_var && (!strcmp(sync_env_var, "TRUE") || !strcmp(sync_env_var, "1")))
         *file_sync_required = true;
-    if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
+    if (sync_env_var && (!strcmp(sync_env_var, "FALSE") || !strcmp(sync_env_var, "0")))
         *file_sync_required = false;
 
 done:

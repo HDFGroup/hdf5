@@ -67,7 +67,7 @@ test_path_env(hid_t fapl)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int)i + 1);
+        snprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -83,7 +83,7 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Pget_efile_prefix(dapl, buffer, sizeof(buffer)) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("efile prefix not set correctly");
 
     /* Create dataset */
@@ -161,11 +161,11 @@ main(void)
 
         /* Set the fapl for different file formats */
         if (latest_format) {
-            HDputs("\nTesting with the latest file format:");
+            puts("\nTesting with the latest file format:");
             current_fapl_id = fapl_id_new;
         } /* end if */
         else {
-            HDputs("Testing with the default file format:");
+            puts("Testing with the default file format:");
             current_fapl_id = fapl_id_old;
         } /* end else */
 
@@ -179,7 +179,7 @@ main(void)
     if (H5Pclose(fapl_id_new) < 0)
         FAIL_STACK_ERROR;
 
-    HDputs("All external storage tests passed.");
+    puts("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
     if (h5_cleanup(EXT_ENV_FNAME, fapl_id_old)) {

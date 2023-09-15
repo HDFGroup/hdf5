@@ -360,7 +360,7 @@ H5G__node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get key name");
 
     /* Set return value */
-    ret_value = HDstrcmp(s1, s2);
+    ret_value = strcmp(s1, s2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -406,13 +406,13 @@ H5G__node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
     /* left side */
     if ((s = (const char *)H5HL_offset_into(udata->heap, lt_key->offset)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get key name");
-    if (HDstrcmp(udata->name, s) <= 0)
+    if (strcmp(udata->name, s) <= 0)
         ret_value = (-1);
     else {
         /* right side */
         if ((s = (const char *)H5HL_offset_into(udata->heap, rt_key->offset)) == NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get key name");
-        if (HDstrcmp(udata->name, s) > 0)
+        if (strcmp(udata->name, s) > 0)
             ret_value = 1;
     } /* end else */
 
@@ -476,7 +476,7 @@ H5G__node_found(H5F_t *f, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key, bool
 
         if ((s = (const char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)) == NULL)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get symbol table name");
-        cmp = HDstrcmp(udata->common.name, s);
+        cmp = strcmp(udata->common.name, s);
 
         if (cmp < 0)
             rt = idx;
@@ -574,7 +574,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_A
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get symbol table name");
 
         /* Check if symbol is already present */
-        if (0 == (cmp = HDstrcmp(udata->common.name, s)))
+        if (0 == (cmp = strcmp(udata->common.name, s)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR, "symbol is already present in symbol table");
 
         if (cmp < 0)
@@ -727,7 +727,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
             idx = (lt + rt) / 2;
             if ((s = (const char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)) == NULL)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get symbol table name");
-            cmp = HDstrcmp(udata->common.name, s);
+            cmp = strcmp(udata->common.name, s);
             if (cmp < 0)
                 rt = idx;
             else
@@ -740,7 +740,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
         /* Get a pointer to the name of the link */
         if (NULL == (lnk.name = (char *)H5HL_offset_into(udata->common.heap, sn->entry[idx].name_off)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get link name");
-        link_name_len = HDstrlen(lnk.name) + 1;
+        link_name_len = strlen(lnk.name) + 1;
 
         /* Set up rest of link structure */
         lnk.corder_valid = false;
@@ -778,7 +778,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
             if (lnk.u.soft.name) {
                 size_t soft_link_len; /* Length of string in local heap */
 
-                soft_link_len = HDstrlen(lnk.u.soft.name) + 1;
+                soft_link_len = strlen(lnk.u.soft.name) + 1;
                 if (H5HL_remove(f, udata->common.heap, sn->entry[idx].cache.slink.lval_offset,
                                 soft_link_len) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR,

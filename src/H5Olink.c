@@ -303,7 +303,7 @@ H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const
     assert(lnk);
 
     /* Get length of link's name */
-    len = (uint64_t)HDstrlen(lnk->name);
+    len = (uint64_t)strlen(lnk->name);
     assert(len > 0);
 
     /* encode */
@@ -370,7 +370,7 @@ H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const
 
         case H5L_TYPE_SOFT:
             /* Store the link value */
-            len = (uint16_t)HDstrlen(lnk->u.soft.name);
+            len = (uint16_t)strlen(lnk->u.soft.name);
             assert(len > 0);
             UINT16ENCODE(p, len);
             H5MM_memcpy(p, lnk->u.soft.name, (size_t)len);
@@ -486,7 +486,7 @@ H5O__link_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_
     HDcompile_assert(sizeof(uint64_t) >= sizeof(size_t));
 
     /* Get name's length */
-    name_len = (uint64_t)HDstrlen(lnk->name);
+    name_len = (uint64_t)strlen(lnk->name);
 
     /* Determine correct value for name size bits */
     if (name_len > 4294967295)
@@ -514,8 +514,8 @@ H5O__link_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_
             break;
 
         case H5L_TYPE_SOFT:
-            ret_value += 2 +                         /* Link value length */
-                         HDstrlen(lnk->u.soft.name); /* Link value */
+            ret_value += 2 +                       /* Link value length */
+                         strlen(lnk->u.soft.name); /* Link value */
             break;
 
         case H5L_TYPE_ERROR:
@@ -816,7 +816,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
             if (lnk->type >= H5L_TYPE_UD_MIN) {
                 if (lnk->type == H5L_TYPE_EXTERNAL) {
                     const char *objname =
-                        (const char *)lnk->u.ud.udata + (HDstrlen((const char *)lnk->u.ud.udata) + 1);
+                        (const char *)lnk->u.ud.udata + (strlen((const char *)lnk->u.ud.udata) + 1);
 
                     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                             "External File Name:", (const char *)lnk->u.ud.udata);

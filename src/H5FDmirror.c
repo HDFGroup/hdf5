@@ -615,7 +615,7 @@ H5FD_mirror_xmit_decode_open(H5FD_mirror_xmit_open_t *out, const unsigned char *
     n_eaten += H5FD__mirror_xmit_decode_uint64(&(out->maxaddr), &buf[n_eaten]);
     n_eaten += H5FD__mirror_xmit_decode_uint64(&(out->size_t_blob), &buf[n_eaten]);
     assert((H5FD_MIRROR_XMIT_OPEN_SIZE - H5FD_MIRROR_XMIT_FILEPATH_MAX) == n_eaten);
-    HDstrncpy(out->filename, (const char *)&buf[n_eaten], H5FD_MIRROR_XMIT_FILEPATH_MAX - 1);
+    strncpy(out->filename, (const char *)&buf[n_eaten], H5FD_MIRROR_XMIT_FILEPATH_MAX - 1);
     out->filename[H5FD_MIRROR_XMIT_FILEPATH_MAX - 1] = 0; /* force final NULL */
 
     return H5FD_MIRROR_XMIT_OPEN_SIZE;
@@ -653,7 +653,7 @@ H5FD_mirror_xmit_decode_reply(H5FD_mirror_xmit_reply_t *out, const unsigned char
     n_eaten += H5FD_mirror_xmit_decode_header(&(out->pub), buf);
     n_eaten += H5FD__mirror_xmit_decode_uint32(&(out->status), &buf[n_eaten]);
     assert((H5FD_MIRROR_XMIT_REPLY_SIZE - H5FD_MIRROR_STATUS_MESSAGE_MAX) == n_eaten);
-    HDstrncpy(out->message, (const char *)&buf[n_eaten], H5FD_MIRROR_STATUS_MESSAGE_MAX - 1);
+    strncpy(out->message, (const char *)&buf[n_eaten], H5FD_MIRROR_STATUS_MESSAGE_MAX - 1);
     out->message[H5FD_MIRROR_STATUS_MESSAGE_MAX - 1] = 0; /* force NULL term */
 
     return H5FD_MIRROR_XMIT_REPLY_SIZE;
@@ -825,7 +825,7 @@ H5FD_mirror_xmit_encode_open(unsigned char *dest, const H5FD_mirror_xmit_open_t 
     n_writ += H5FD__mirror_xmit_encode_uint64(&dest[n_writ], x->maxaddr);
     n_writ += H5FD__mirror_xmit_encode_uint64(&dest[n_writ], x->size_t_blob);
     assert((H5FD_MIRROR_XMIT_OPEN_SIZE - H5FD_MIRROR_XMIT_FILEPATH_MAX) == n_writ);
-    HDstrncpy((char *)&dest[n_writ], x->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
+    strncpy((char *)&dest[n_writ], x->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
 
     return H5FD_MIRROR_XMIT_OPEN_SIZE;
 } /* end H5FD_mirror_xmit_encode_open() */
@@ -860,7 +860,7 @@ H5FD_mirror_xmit_encode_reply(unsigned char *dest, const H5FD_mirror_xmit_reply_
     n_writ += H5FD_mirror_xmit_encode_header(dest, (const H5FD_mirror_xmit_t *)&(x->pub));
     n_writ += H5FD__mirror_xmit_encode_uint32(&dest[n_writ], x->status);
     assert((H5FD_MIRROR_XMIT_REPLY_SIZE - H5FD_MIRROR_STATUS_MESSAGE_MAX) == n_writ);
-    HDstrncpy((char *)&dest[n_writ], x->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    strncpy((char *)&dest[n_writ], x->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
 
     return H5FD_MIRROR_XMIT_REPLY_SIZE;
 } /* end H5FD_mirror_xmit_encode_reply() */
@@ -1360,7 +1360,7 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
-    if (HDstrlen(name) >= H5FD_MIRROR_XMIT_FILEPATH_MAX)
+    if (strlen(name) >= H5FD_MIRROR_XMIT_FILEPATH_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "filename is too long");
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
@@ -1417,7 +1417,7 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     open_xmit->flags       = (uint32_t)flags;
     open_xmit->maxaddr     = (uint64_t)maxaddr;
     open_xmit->size_t_blob = (uint64_t)((size_t)(-1));
-    HDsnprintf(open_xmit->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX - 1, "%s", name);
+    snprintf(open_xmit->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX - 1, "%s", name);
 
     xmit_buf = H5FL_BLK_MALLOC(xmit, H5FD_MIRROR_XMIT_BUFFER_MAX);
     if (NULL == xmit_buf)
@@ -1512,15 +1512,14 @@ done:
              * We can ignore any response from the writer, if we receive
              * any reply at all.
              */
-            if (HDwrite(file->sock_fd, "GOODBYE", HDstrlen("GOODBYE")) < 0) {
+            if (HDwrite(file->sock_fd, "GOODBYE", strlen("GOODBYE")) < 0) {
                 HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to transmit close");
                 if (HDclose(file->sock_fd) < 0)
                     HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close socket");
                 file->sock_fd = -1; /* invalidate for later */
             }                       /* end if problem writing goodbye; go down hard */
             else if (HDshutdown(file->sock_fd, SHUT_WR) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't shutdown socket write: %s",
-                            HDstrerror(errno));
+                HDONE_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't shutdown socket write: %s", strerror(errno));
         } /* end if xmit encode failed */
 
         if (file->sock_fd >= 0)

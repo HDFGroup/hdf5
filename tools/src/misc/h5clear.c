@@ -167,7 +167,7 @@ parse_command_line(int argc, const char *const *argv)
         goto error;
     } /* end if */
 
-    fname_g = HDstrdup(argv[H5_optind]);
+    fname_g = strdup(argv[H5_optind]);
 
 done:
     return (0);
@@ -260,7 +260,7 @@ main(int argc, char *argv[])
     }
 
     /* Duplicate the file name */
-    fname = HDstrdup(fname_g);
+    fname = strdup(fname_g);
 
     /* Get a copy of the file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {

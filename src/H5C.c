@@ -138,7 +138,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     for (i = 0; i <= max_type_id; i++) {
         assert((class_table_ptr)[i]);
-        assert(HDstrlen((class_table_ptr)[i]->name) > 0);
+        assert(strlen((class_table_ptr)[i]->name) > 0);
     } /* end for */
 
     if (NULL == (cache_ptr = H5FL_CALLOC(H5C_t)))

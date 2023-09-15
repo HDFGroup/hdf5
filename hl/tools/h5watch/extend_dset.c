@@ -403,8 +403,8 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* Get the dataset name to be extended */
-    fname   = HDstrdup(argv[1]);
-    dname   = HDstrdup(argv[2]);
+    fname   = strdup(argv[1]);
+    dname   = strdup(argv[2]);
     action1 = atoi(argv[3]);
     action2 = atoi(argv[4]);
 

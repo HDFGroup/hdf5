@@ -491,7 +491,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     }
 #else  /* NDEBUG */
     SKIPPED();
-    HDputs("    Not tested when assertions are disabled");
+    puts("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -1678,12 +1678,12 @@ main(void)
         switch (curr_test) {
             /* "Normal" testing parameters */
             case FARRAY_TEST_NORMAL:
-                HDputs("Testing with NORMAL PARAMETERS");
+                puts("Testing with NORMAL PARAMETERS");
                 break;
 
             /* "Re-open array" testing parameters */
             case FARRAY_TEST_REOPEN:
-                HDputs("Testing with reopen array flag set");
+                puts("Testing with reopen array flag set");
                 tparam.reopen_array = FARRAY_TEST_REOPEN;
                 break;
 
@@ -1710,25 +1710,25 @@ main(void)
             switch (curr_iter) {
                 /* "Forward" testing parameters */
                 case FARRAY_ITER_FW:
-                    HDputs("Testing with forward iteration");
+                    puts("Testing with forward iteration");
                     tparam.fiter = &fa_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case FARRAY_ITER_RV:
-                    HDputs("Testing with reverse iteration");
+                    puts("Testing with reverse iteration");
                     tparam.fiter = &fa_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case FARRAY_ITER_RND:
-                    HDputs("Testing with random iteration");
+                    puts("Testing with random iteration");
                     tparam.fiter = &fa_iter_rnd;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case FARRAY_ITER_CYC:
-                    HDputs("Testing with cyclic iteration");
+                    puts("Testing with cyclic iteration");
                     tparam.fiter = &fa_iter_cyc;
                     break;
 
@@ -1782,7 +1782,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All fixed array tests passed.");
+    puts("All fixed array tests passed.");
 
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
@@ -1790,7 +1790,7 @@ main(void)
     exit(EXIT_SUCCESS);
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {

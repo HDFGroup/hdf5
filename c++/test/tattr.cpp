@@ -1604,7 +1604,7 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char flstring_att_check[ATTR_LEN];
         gr_flattr1.read(fls_type, flstring_att_check);
-        if (HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
@@ -1614,7 +1614,7 @@ test_string_attr(FileAccPropList &fapl)
         char  *fl_dyn_string_att_check;
         fl_dyn_string_att_check = new char[attr_size + 1];
         gr_flattr1.read(fls_type, fl_dyn_string_att_check);
-        if (HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), fl_dyn_string_att_check);
         delete[] fl_dyn_string_att_check;
@@ -1629,9 +1629,9 @@ test_string_attr(FileAccPropList &fapl)
                           ATTRSTR_DATA.c_str(), read_flstr1.c_str());
 
         // Read and verify the attribute string as a string of chars.
-        HDstrcpy(flstring_att_check, "");
+        strcpy(flstring_att_check, "");
         gr_flattr2.read(fls_type, flstring_att_check);
-        if (HDstrcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(flstring_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,flstring_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), flstring_att_check);
 
@@ -1660,7 +1660,7 @@ test_string_attr(FileAccPropList &fapl)
         // Read and verify the attribute string as a string of chars.
         char *string_att_check;
         gr_vlattr.read(vls_type, &string_att_check);
-        if (HDstrcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
         free(string_att_check);

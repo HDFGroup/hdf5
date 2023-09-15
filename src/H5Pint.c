@@ -1677,7 +1677,7 @@ H5P__open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key)
     /* Check if the class object has the same parent as the new class */
     if (obj->parent == key->parent) {
         /* Check if they have the same name */
-        if (HDstrcmp(obj->name, key->name) == 0) {
+        if (strcmp(obj->name, key->name) == 0) {
             key->new_class = obj;
             ret_value      = 1; /* Indicate a match */
         }                       /* end if */
@@ -3603,7 +3603,7 @@ H5P__cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2)
     assert(prop2);
 
     /* Check the name */
-    if ((cmp_value = HDstrcmp(prop1->name, prop2->name)) != 0)
+    if ((cmp_value = strcmp(prop1->name, prop2->name)) != 0)
         HGOTO_DONE(cmp_value);
 
     /* Check the size of properties */
@@ -3738,7 +3738,7 @@ H5P__cmp_class(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
         HGOTO_DONE(0);
 
     /* Check the name */
-    if ((cmp_value = HDstrcmp(pclass1->name, pclass2->name)) != 0)
+    if ((cmp_value = strcmp(pclass1->name, pclass2->name)) != 0)
         HGOTO_DONE(cmp_value);
 
     /* Check the number of properties */
@@ -5350,13 +5350,13 @@ H5P__get_class_path(H5P_genclass_t *pclass)
             /* Allocate enough space for the parent class's path, plus the '/'
              * separator, this class's name and the string terminator
              */
-            ret_str_len = HDstrlen(par_path) + HDstrlen(pclass->name) + 1 +
+            ret_str_len = strlen(par_path) + strlen(pclass->name) + 1 +
                           3; /* Extra "+3" to quiet GCC warning - 2019/07/05, QAK */
             if (NULL == (ret_value = (char *)H5MM_malloc(ret_str_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name");
 
             /* Build the full path for this class */
-            HDsnprintf(ret_value, ret_str_len, "%s/%s", par_path, pclass->name);
+            snprintf(ret_value, ret_str_len, "%s/%s", par_path, pclass->name);
 
             /* Free the parent class's path */
             H5MM_xfree(par_path);
@@ -5411,7 +5411,7 @@ H5P__open_class_path(const char *path)
     /* Find the generic property class with this full path */
     curr_name  = tmp_path;
     curr_class = NULL;
-    while (NULL != (delimit = HDstrchr(curr_name, '/'))) {
+    while (NULL != (delimit = strchr(curr_name, '/'))) {
         /* Change the delimiter to terminate the string */
         *delimit = '\0';
 

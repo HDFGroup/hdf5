@@ -181,7 +181,7 @@ generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned c
 {
     assert(name_buf);
 
-    HDsnprintf(name_buf, name_buf_length, "%u-%04u", level, count);
+    snprintf(name_buf, name_buf_length, "%u-%04u", level, count);
 
     return 0;
 } /* end generate_name() */
@@ -209,7 +209,7 @@ generate_symbols(void)
             char name_buf[64];
 
             generate_name(name_buf, sizeof(name_buf), u, v);
-            symbol_info[u][v].name     = HDstrdup(name_buf);
+            symbol_info[u][v].name     = strdup(name_buf);
             symbol_info[u][v].dsid     = -1;
             symbol_info[u][v].nrecords = 0;
         } /* end for */

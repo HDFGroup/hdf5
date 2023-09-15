@@ -641,12 +641,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
 #endif
-#ifndef HDfgetc
-#define HDfgetc(F) fgetc(F)
-#endif
-#ifndef HDfgets
-#define HDfgets(S, N, F) fgets(S, N, F)
-#endif
 #ifndef HDfileno
 #define HDfileno(F) fileno(F)
 #endif
@@ -676,15 +670,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 
 #endif /* HDflock */
 
-#ifndef HDfputc
-#define HDfputc(C, F) fputc(C, F)
-#endif
-#ifndef HDfputs
-#define HDfputs(S, F) fputs(S, F)
-#endif
-#ifndef HDfscanf
-#define HDfscanf fscanf
-#endif
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
@@ -696,9 +681,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
-#endif
-#ifndef HDgetc
-#define HDgetc(F) getc(F)
 #endif
 #ifndef HDgetcwd
 #define HDgetcwd(S, Z) getcwd(S, Z)
@@ -718,12 +700,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgetpid
 #define HDgetpid() getpid()
 #endif
-
-/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
-#ifdef HDgets
-#undef HDgets
-#endif
-
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif
@@ -757,20 +733,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDopendir
 #define HDopendir(S) opendir(S)
 #endif
-#ifndef HDperror
-#define HDperror(S) perror(S)
-#endif
 #ifndef HDpread
 #define HDpread(F, B, C, O) pread(F, B, C, O)
-#endif
-#ifndef HDputc
-#define HDputc(C, F) putc(C, F)
-#endif
-#ifndef HDputchar
-#define HDputchar(C) putchar(C)
-#endif
-#ifndef HDputs
-#define HDputs(S) puts(S)
 #endif
 #ifndef HDpwrite
 #define HDpwrite(F, B, C, O) pwrite(F, B, C, O)
@@ -836,9 +800,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
 #endif
-#ifndef HDscanf
-#define HDscanf scanf /*varargs*/
-#endif
 #ifndef HDsetbuf
 #define HDsetbuf(F, S) setbuf(F, S)
 #endif
@@ -863,20 +824,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsleep
 #define HDsleep(N) sleep(N)
 #endif
-#ifndef HDsnprintf
-#define HDsnprintf snprintf /*varargs*/
-#endif
-#ifndef HDsprintf
-#define HDsprintf sprintf /*varargs*/
-#endif
-#ifndef HDsscanf
-#define HDsscanf sscanf /*varargs*/
-#endif
 #ifndef HDstat
 #define HDstat(S, B) stat(S, B)
-#endif
-#ifndef HDstrcat
-#define HDstrcat(X, Y) strcat(X, Y)
 #endif
 #ifndef HDstrcasestr
 #if defined(H5_HAVE_STRCASESTR)
@@ -885,56 +834,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
 #endif
 #endif
-#ifndef HDstrchr
-#define HDstrchr(S, C) strchr(S, C)
-#endif
-#ifndef HDstrcmp
-#define HDstrcmp(X, Y) strcmp(X, Y)
-#endif
 #ifndef HDstrcasecmp
 #define HDstrcasecmp(X, Y) strcasecmp(X, Y)
 #endif
-#ifndef HDstrcpy
-#define HDstrcpy(X, Y) strcpy(X, Y)
-#endif
-#ifndef HDstrcspn
-#define HDstrcspn(X, Y) strcspn(X, Y)
-#endif
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif
-#ifndef HDstrerror
-#define HDstrerror(N) strerror(N)
-#endif
-#ifndef HDstrftime
-#define HDstrftime(S, Z, F, T) strftime(S, Z, F, T)
-#endif
-#ifndef HDstrlen
-#define HDstrlen(S) strlen(S)
-#endif
-#ifndef HDstrnlen
-#define HDstrnlen(S, L) strnlen(S, L)
-#endif
-#ifndef HDstrncat
-#define HDstrncat(X, Y, Z) strncat(X, Y, Z)
-#endif
-#ifndef HDstrncmp
-#define HDstrncmp(X, Y, Z) strncmp(X, Y, Z)
-#endif
-#ifndef HDstrncpy
-#define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
-#endif
 #ifndef HDstrndup
 #define HDstrndup(S, N) strndup(S, N)
-#endif
-#ifndef HDstrrchr
-#define HDstrrchr(S, C) strrchr(S, C)
-#endif
-#ifndef HDstrstr
-#define HDstrstr(X, Y) strstr(X, Y)
-#endif
-#ifndef HDstrtok
-#define HDstrtok(X, Y) strtok(X, Y)
 #endif
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
@@ -969,18 +873,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
-#ifndef HDvfprintf
-#define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
-#endif
-#ifndef HDvprintf
-#define HDvprintf(FMT, A) vprintf(FMT, A)
-#endif
-#ifndef HDvsprintf
-#define HDvsprintf(S, FMT, A) vsprintf(S, FMT, A)
-#endif
-#ifndef HDvsnprintf
-#define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif
@@ -1095,8 +987,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         char *slash, *backslash;                                                                             \
                                                                                                              \
-        slash     = HDstrrchr(NAME, H5_DIR_SLASH_SEPC);                                                      \
-        backslash = HDstrrchr(NAME, H5_DIR_SEPC);                                                            \
+        slash     = strrchr(NAME, H5_DIR_SLASH_SEPC);                                                        \
+        backslash = strrchr(NAME, H5_DIR_SEPC);                                                              \
         if (backslash > slash)                                                                               \
             (ptr = backslash);                                                                               \
         else                                                                                                 \
@@ -1111,7 +1003,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_CHECK_ABSOLUTE(NAME)          (H5_CHECK_DELIMITER(*NAME))
 #define H5_CHECK_ABS_DRIVE(NAME)         (0)
 #define H5_CHECK_ABS_PATH(NAME)          (0)
-#define H5_GET_LAST_DELIMITER(NAME, ptr) ptr = HDstrrchr(NAME, H5_DIR_SEPC);
+#define H5_GET_LAST_DELIMITER(NAME, ptr) ptr = strrchr(NAME, H5_DIR_SEPC);
 
 #endif /* H5_HAVE_WINDOW_PATH */
 

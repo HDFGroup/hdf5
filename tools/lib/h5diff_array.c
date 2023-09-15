@@ -519,14 +519,14 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to first string */
                     s1 = *(char **)((void *)mem1);
                     if (s1)
-                        size1 = HDstrlen(s1);
+                        size1 = strlen(s1);
                     else
                         size1 = 0;
 
                     /* Get pointer to second string */
                     s2 = *(char **)((void *)mem2);
                     if (s2)
-                        size2 = HDstrlen(s2);
+                        size2 = strlen(s2);
                     else
                         size2 = 0;
                 }
@@ -535,7 +535,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to first string */
                     s1 = (char *)mem1;
                     if (s1)
-                        size1 = HDstrlen(s1);
+                        size1 = strlen(s1);
                     else
                         size1 = 0;
 
@@ -545,7 +545,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to second string */
                     s2 = (char *)mem2;
                     if (s2)
-                        size2 = HDstrlen(s2);
+                        size2 = strlen(s2);
                     else
                         size2 = 0;
 
@@ -648,11 +648,11 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                      */
                     err1 = H5Tenum_nameof(opts->m_tid, mem1, enum_name1, sizeof enum_name1);
                     if (err1 < 0)
-                        HDsnprintf(enum_name1, sizeof(enum_name1), "**INVALID VALUE**");
+                        snprintf(enum_name1, sizeof(enum_name1), "**INVALID VALUE**");
 
                     err2 = H5Tenum_nameof(opts->m_tid, mem2, enum_name2, sizeof enum_name2);
                     if (err2 < 0)
-                        HDsnprintf(enum_name2, sizeof(enum_name2), "**INVALID VALUE**");
+                        snprintf(enum_name2, sizeof(enum_name2), "**INVALID VALUE**");
 
                     /* One or more bad enum values */
                     if (err1 < 0 || err2 < 0) {
@@ -669,7 +669,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     }
                     else {
                         /* Both enum values were valid */
-                        if (HDstrcmp(enum_name1, enum_name2) != 0) {
+                        if (strcmp(enum_name1, enum_name2) != 0) {
                             nfound                 = 1;
                             opts->print_percentage = 0;
                             print_pos(opts, elemtno, 0);

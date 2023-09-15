@@ -139,7 +139,7 @@ extern char H5_api_test_parallel_filename[];
     {                                                                                                        \
         if (MAINPROCESS) {                                                                                   \
             printf("Testing %-62s", WHAT);                                                                   \
-            HDputs("");                                                                                      \
+            puts("");                                                                                        \
             fflush(stdout);                                                                                  \
         }                                                                                                    \
     }

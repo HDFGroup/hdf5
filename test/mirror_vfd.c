@@ -143,9 +143,9 @@ populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char
     if (NULL == (path = calloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
         TEST_ERROR;
 
-    if (HDsnprintf(path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
-                   (dirname[HDstrlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
-                   basename) > H5FD_SPLITTER_PATH_MAX)
+    if (snprintf(path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
+                 (dirname[strlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
+                 basename) > H5FD_SPLITTER_PATH_MAX)
         TEST_ERROR;
 
     if (h5suffix == true) {
@@ -192,7 +192,7 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
 
     if (basename == NULL || *basename == 0)
         TEST_ERROR;
-    if (HDsnprintf(baselogname, H5FD_SPLITTER_PATH_MAX, "%s_err.log", basename) > H5FD_SPLITTER_PATH_MAX)
+    if (snprintf(baselogname, H5FD_SPLITTER_PATH_MAX, "%s_err.log", basename) > H5FD_SPLITTER_PATH_MAX)
         TEST_ERROR;
 
     if (populate_filepath(MIRROR_WO_DIR, baselogname, splitter_config->wo_fapl_id, names->log, false) < 0)
@@ -248,7 +248,7 @@ test_fapl_configuration(void)
     if (SERVER_HANDSHAKE_PORT != fa_out.handshake_port)
         TEST_ERROR;
 
-    if (HDstrncmp(SERVER_IP_ADDRESS, (const char *)fa_out.remote_ip, H5FD_MIRROR_MAX_IP_LEN))
+    if (strncmp(SERVER_IP_ADDRESS, (const char *)fa_out.remote_ip, H5FD_MIRROR_MAX_IP_LEN))
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)
@@ -936,7 +936,7 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
         TEST_ERROR;
     if (xmit_out->size_t_blob != xmit_in->size_t_blob)
         TEST_ERROR;
-    if (HDstrncmp(xmit_out->filename, xmit_in->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
+    if (strncmp(xmit_out->filename, xmit_in->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
         PRINT_BUFFER_DIFF(xmit_out->filename, xmit_in->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
         TEST_ERROR;
     }
@@ -965,7 +965,7 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
     /* Update expected "filepath" in structure */
     for (size_t i = 0x20; i < H5FD_MIRROR_XMIT_FILEPATH_MAX + 0x20; i++)
         xmit_in->filename[i - 0x20] = (i > 0xFF) ? 0 : (char)i;
-    if (HDstrncmp(xmit_out->filename, xmit_in->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
+    if (strncmp(xmit_out->filename, xmit_in->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX) != 0) {
         PRINT_BUFFER_DIFF(xmit_out->filename, xmit_in->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
         TEST_ERROR;
     }
@@ -1056,7 +1056,7 @@ test_encdec_reply(H5FD_mirror_xmit_t xmit_mock)
         TEST_ERROR;
     if (xmit_out.status != xmit_in.status)
         TEST_ERROR;
-    if (HDstrncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
+    if (strncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
         PRINT_BUFFER_DIFF(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
         TEST_ERROR;
     }
@@ -1081,7 +1081,7 @@ test_encdec_reply(H5FD_mirror_xmit_t xmit_mock)
     /* Update expected "message" in structure */
     for (i = 0x10; i < H5FD_MIRROR_STATUS_MESSAGE_MAX + 0x10; i++)
         xmit_in.message[i - 0x10] = (i > 0xFF) ? 0 : (char)i;
-    if (HDstrncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
+    if (strncmp(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX) != 0) {
         PRINT_BUFFER_DIFF(xmit_out.message, xmit_in.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
         TEST_ERROR;
     }
@@ -1234,7 +1234,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     mirror_conf.magic          = H5FD_MIRROR_FAPL_MAGIC;
     mirror_conf.version        = H5FD_MIRROR_CURR_FAPL_T_VERSION;
     mirror_conf.handshake_port = opts->portno;
-    if (HDstrncpy(mirror_conf.remote_ip, opts->ip, H5FD_MIRROR_MAX_IP_LEN) == NULL)
+    if (strncpy(mirror_conf.remote_ip, opts->ip, H5FD_MIRROR_MAX_IP_LEN) == NULL)
         TEST_ERROR;
     if ((splitter_config->wo_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
@@ -1246,9 +1246,9 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
         TEST_ERROR;
 
     /* Set file paths for w/o and logfile */
-    if (HDstrncpy(splitter_config->wo_path, (const char *)names->wo, H5FD_SPLITTER_PATH_MAX) == NULL)
+    if (strncpy(splitter_config->wo_path, (const char *)names->wo, H5FD_SPLITTER_PATH_MAX) == NULL)
         TEST_ERROR;
-    if (HDstrncpy(splitter_config->log_file_path, (const char *)names->log, H5FD_SPLITTER_PATH_MAX) == NULL)
+    if (strncpy(splitter_config->log_file_path, (const char *)names->log, H5FD_SPLITTER_PATH_MAX) == NULL)
         TEST_ERROR;
 
     /* Create Splitter FAPL */
@@ -1452,21 +1452,21 @@ _create_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_
     /* Create dataspace IDs */
     for (unsigned m = min_dset; m <= max_dset; m++) {
         if ((dataspace_ids[m] = H5Screate_simple(2, dset_dims, NULL)) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create dataspace ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to create dataspace ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
 
     /* Create dataset IDs */
     for (unsigned m = min_dset; m <= max_dset; m++) {
-        if (HDsnprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
+        if (snprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
 
         if ((dataset_ids[m] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_ids[m], H5P_DEFAULT,
                                          dcpl_id, H5P_DEFAULT)) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create dset ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to create dset ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1474,7 +1474,7 @@ _create_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_
     /* Get file space IDs */
     for (unsigned m = min_dset; m <= max_dset; m++) {
         if ((filespace_ids[m] = H5Dget_space(dataset_ids[m])) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create filespace ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to create filespace ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1522,13 +1522,13 @@ _open_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_t 
 
     /* Open dataset IDs */
     for (unsigned m = min_dset; m <= max_dset; m++) {
-        if (HDsnprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
+        if (snprintf(dset_name, DSET_NAME_LEN, "/dset%03d", m) > DSET_NAME_LEN) {
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to compose dset name %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
 
         if ((dataset_ids[m] = H5Dopen2(file_id, dset_name, H5P_DEFAULT)) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to open dset ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to open dset ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1536,7 +1536,7 @@ _open_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_t 
     /* Open filespace IDs */
     for (unsigned m = min_dset; m <= max_dset; m++) {
         if ((filespace_ids[m] = H5Dget_space(dataset_ids[m])) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to get filespace ID %d\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to get filespace ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1575,16 +1575,16 @@ _close_chunking_ids(unsigned min_dset, unsigned max_dset, hid_t *dataspace_ids, 
         LOGPRINT(3, "closing ids[%d]\n", m);
         if (dataspace_ids) {
             if (H5Sclose(dataspace_ids[m]) < 0) {
-                HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to close dataspace_id[%d]\n", m);
+                snprintf(mesg, MIRR_MESG_SIZE, "unable to close dataspace_id[%d]\n", m);
                 FAIL_PUTS_ERROR(mesg);
             }
         }
         if (H5Dclose(dataset_ids[m]) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to close dataset_id[%d]\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to close dataset_id[%d]\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
         if (H5Sclose(filespace_ids[m]) < 0) {
-            HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to close filespace_id[%d]\n", m);
+            snprintf(mesg, MIRR_MESG_SIZE, "unable to close filespace_id[%d]\n", m);
             FAIL_PUTS_ERROR(mesg);
         }
     }
@@ -1635,7 +1635,7 @@ _verify_datasets(unsigned min_dset, unsigned max_dset, hid_t *filespace_ids, hid
 
                 if (H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id, filespace_ids[m], H5P_DEFAULT,
                             data_chunk) < 0) {
-                    HDsnprintf(mesg, MIRR_MESG_SIZE, "      H5Dread() [%d][%d][%d]\n", i, j, m);
+                    snprintf(mesg, MIRR_MESG_SIZE, "      H5Dread() [%d][%d][%d]\n", i, j, m);
                     FAIL_PUTS_ERROR(mesg);
                 }
 
@@ -1643,8 +1643,8 @@ _verify_datasets(unsigned min_dset, unsigned max_dset, hid_t *filespace_ids, hid
                     for (l = 0; l < CHUNK_DIM; l++) {
                         if ((unsigned)data_chunk[k][l] !=
                             ((DSET_DIM * DSET_DIM * m) + (DSET_DIM * (i + k)) + j + l)) {
-                            HDsnprintf(mesg, MIRR_MESG_SIZE, "      MISMATCH [%d][%d][%d][%d][%d]\n", i, j, m,
-                                       k, l);
+                            snprintf(mesg, MIRR_MESG_SIZE, "      MISMATCH [%d][%d][%d][%d][%d]\n", i, j, m,
+                                     k, l);
                             FAIL_PUTS_ERROR(mesg);
                         }
                     }
@@ -2059,7 +2059,7 @@ test_vanishing_datasets(const struct mt_opts *opts)
 
         /* Delete datasets */
         if (i >= max_at_one_time) {
-            if (HDsnprintf(namebuf, DSET_NAME_LEN, "/dset%02d", (i - max_at_one_time)) > DSET_NAME_LEN)
+            if (snprintf(namebuf, DSET_NAME_LEN, "/dset%02d", (i - max_at_one_time)) > DSET_NAME_LEN)
                 TEST_ERROR;
             if (H5Ldelete(file_id, namebuf, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -2067,7 +2067,7 @@ test_vanishing_datasets(const struct mt_opts *opts)
 
         /* Write to datasets */
         if (i < (max_loops - max_at_one_time)) {
-            if (HDsnprintf(namebuf, DSET_NAME_LEN, "/dset%02d", i) > DSET_NAME_LEN)
+            if (snprintf(namebuf, DSET_NAME_LEN, "/dset%02d", i) > DSET_NAME_LEN)
                 TEST_ERROR;
             if ((dset_id = H5Dcreate2(file_id, namebuf, H5T_STD_U32LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT,
                                       H5P_DEFAULT)) < 0)
@@ -2191,7 +2191,7 @@ test_concurrent_access(const struct mt_opts *opts)
         char  name[16] = "";
         hid_t fapl_id  = H5I_INVALID_HID;
 
-        HDsnprintf(name, 15, "concurrent%d", i);
+        snprintf(name, 15, "concurrent%d", i);
         if ((fapl_id = create_mirroring_split_fapl(name, &bundle[i].names, opts)) < 0)
             TEST_ERROR;
         bundle[i].fapl_id = fapl_id;
@@ -2296,12 +2296,12 @@ parse_args(int argc, char **argv, struct mt_opts *opts)
     int i = 0;
 
     opts->portno = SERVER_HANDSHAKE_PORT;
-    HDstrncpy(opts->ip, SERVER_IP_ADDRESS, H5FD_MIRROR_MAX_IP_LEN);
+    strncpy(opts->ip, SERVER_IP_ADDRESS, H5FD_MIRROR_MAX_IP_LEN);
 
     for (i = 1; i < argc; i++) { /* start with first possible option argument */
-        if (!HDstrncmp(argv[i], "--ip=", 5))
-            HDstrncpy(opts->ip, argv[i] + 5, H5FD_MIRROR_MAX_IP_LEN);
-        else if (!HDstrncmp(argv[i], "--port=", 7))
+        if (!strncmp(argv[i], "--ip=", 5))
+            strncpy(opts->ip, argv[i] + 5, H5FD_MIRROR_MAX_IP_LEN);
+        else if (!strncmp(argv[i], "--port=", 7))
             opts->portno = atoi(argv[i] + 7);
         else {
             printf("Unrecognized option: '%s'\n", argv[i]);
@@ -2310,8 +2310,8 @@ parse_args(int argc, char **argv, struct mt_opts *opts)
     } /* end for each argument from command line */
 
     /* Auto-replace 'localhost' with numeric IP */
-    if (!HDstrncmp(opts->ip, "localhost", 10)) /* include NUL terminator */
-        HDstrncpy(opts->ip, "127.0.0.1", H5FD_MIRROR_MAX_IP_LEN);
+    if (!strncmp(opts->ip, "localhost", 10)) /* include NUL terminator */
+        strncpy(opts->ip, "127.0.0.1", H5FD_MIRROR_MAX_IP_LEN);
 
     return 0;
 } /* end parse_args() */
@@ -2346,7 +2346,7 @@ confirm_server(struct mt_opts *opts)
     while (1) {
         if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
             if (attempt > 10) {
-                printf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
+                printf("ERROR connect() (%d)\n%s\n", errno, strerror(errno));
                 return -1;
             }
 
@@ -2359,7 +2359,7 @@ confirm_server(struct mt_opts *opts)
 
             attempt++;
             HDsleep(1);
-            printf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
+            printf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, strerror(errno));
 
             /* Re-open socket for retry */
             live_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -2374,7 +2374,7 @@ confirm_server(struct mt_opts *opts)
 
     /* Request confirmation from the server */
     if (HDwrite(live_socket, "CONFIRM", 8) == -1) {
-        printf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR write() (%d)\n%s\n", errno, strerror(errno));
         return -1;
     }
 
@@ -2383,7 +2383,7 @@ confirm_server(struct mt_opts *opts)
         printf("ERROR read() can't receive data\n");
         return -1;
     }
-    if (HDstrncmp("ALIVE", mybuf, 6)) {
+    if (strncmp("ALIVE", mybuf, 6)) {
         printf("ERROR read() didn't receive data from server\n");
         return -1;
     }

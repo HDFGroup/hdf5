@@ -187,22 +187,22 @@ parse_args(int argc, char **argv, struct op_args *args_out)
 
     /* Loop over arguments after program name */
     for (int i = 1; i < argc; i++) {
-        if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
+        if (!strncmp(argv[i], "-h", 3) || !strncmp(argv[i], "--help", 7)) {
             mirror_log(NULL, V_INFO, "found help argument");
             args_out->help = 1;
             return 0;
         } /* end if help */
-        else if (!HDstrncmp(argv[i], "--port=", 7)) {
+        else if (!strncmp(argv[i], "--port=", 7)) {
             mirror_log(NULL, V_INFO, "parsing 'main_port' (%s)", argv[i] + 7);
             args_out->main_port = atoi(argv[i] + 7);
         } /* end if port */
-        else if (!HDstrncmp(argv[i], "--verbosity=", 12)) {
+        else if (!strncmp(argv[i], "--verbosity=", 12)) {
             mirror_log(NULL, V_INFO, "parsing 'verbosity' (%s)", argv[i] + 12);
             args_out->verbosity = (unsigned int)atoi(argv[i] + 12);
         } /* end if verbosity */
-        else if (!HDstrncmp(argv[i], "--logpath=", 10)) {
+        else if (!strncmp(argv[i], "--logpath=", 10)) {
             mirror_log(NULL, V_INFO, "parsing 'logpath' (%s)", argv[i] + 10);
-            HDstrncpy(args_out->log_path, argv[i] + 10, PATH_MAX);
+            strncpy(args_out->log_path, argv[i] + 10, PATH_MAX);
         } /* end if logpath */
         else {
             mirror_log(NULL, V_ERR, "unrecognized argument: %s", argv[i]);
@@ -257,7 +257,7 @@ prepare_listening_socket(struct server_run *run)
     mirror_log(run->loginfo, V_INFO, "bind()");
     ret = bind(ret_value, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret < 0) {
-        mirror_log(run->loginfo, V_ERR, "bind() %s", HDstrerror(errno));
+        mirror_log(run->loginfo, V_ERR, "bind() %s", strerror(errno));
         goto error;
     }
 
@@ -517,7 +517,7 @@ handle_requests(struct server_run *run)
         /* Respond to handshake message.
          */
 
-        if (!HDstrncmp("SHUTDOWN", mybuf, 8)) {
+        if (!strncmp("SHUTDOWN", mybuf, 8)) {
             /* Stop operation if told to stop */
             mirror_log(run->loginfo, V_INFO, "received SHUTDOWN!", ret);
 
@@ -533,7 +533,7 @@ handle_requests(struct server_run *run)
             connfd = -1;
             goto done;
         } /* end if explicit "SHUTDOWN" directive */
-        if (!HDstrncmp("CONFIRM", mybuf, 7)) {
+        if (!strncmp("CONFIRM", mybuf, 7)) {
             /* Confirm operation */
             if ((ret = HDwrite(connfd, "ALIVE", 6)) < 0) {
                 mirror_log(run->loginfo, V_ERR, "write:%d", ret);

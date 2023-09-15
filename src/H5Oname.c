@@ -122,7 +122,7 @@ H5O__name_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, ui
     assert(mesg && mesg->s);
 
     /* encode */
-    HDstrcpy((char *)p, mesg->s);
+    strcpy((char *)p, mesg->s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__name_encode() */
@@ -196,7 +196,7 @@ H5O__name_size(const H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared
     assert(f);
     assert(mesg);
 
-    ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
+    ret_value = mesg->s ? strlen(mesg->s) + 1 : 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_size() */

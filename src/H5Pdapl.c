@@ -324,7 +324,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != vds_file_pref)
-        len = HDstrlen(vds_file_pref);
+        len = strlen(vds_file_pref);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
@@ -388,7 +388,7 @@ H5P__dapl_vds_file_pref_dec(const void **_pp, void *_value)
         /* Make a copy of the user's prefix string */
         if (NULL == (*vds_file_pref = (char *)H5MM_malloc(len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
-        HDstrncpy(*vds_file_pref, *(const char **)pp, len);
+        strncpy(*vds_file_pref, *(const char **)pp, len);
         (*vds_file_pref)[len] = '\0';
 
         *pp += len;
@@ -465,7 +465,7 @@ H5P__dapl_vds_file_pref_cmp(const void *value1, const void *value2, size_t H5_AT
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -564,7 +564,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != efile_pref)
-        len = HDstrlen(efile_pref);
+        len = strlen(efile_pref);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
@@ -628,7 +628,7 @@ H5P__dapl_efile_pref_dec(const void **_pp, void *_value)
         /* Make a copy of the user's prefix string */
         if (NULL == (*efile_pref = (char *)H5MM_malloc(len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
-        HDstrncpy(*efile_pref, *(const char **)pp, len);
+        strncpy(*efile_pref, *(const char **)pp, len);
         (*efile_pref)[len] = '\0';
 
         *pp += len;
@@ -705,7 +705,7 @@ H5P__dapl_efile_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1449,9 +1449,9 @@ H5Pget_efile_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     /* Check for prefix being set */
     if (my_prefix) {
         /* Copy to user's buffer, if given */
-        len = HDstrlen(my_prefix);
+        len = strlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, size);
+            strncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
@@ -1539,9 +1539,9 @@ H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     /* Check for prefix being set */
     if (my_prefix) {
         /* Copy to user's buffer, if given */
-        len = HDstrlen(my_prefix);
+        len = strlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, size);
+            strncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */

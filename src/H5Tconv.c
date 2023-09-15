@@ -2026,7 +2026,7 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         for (i = 0; i < src_nmembs; i++) {
             src2dst[i] = -1;
             for (j = 0; j < dst_nmembs; j++) {
-                if (!HDstrcmp(src->shared->u.compnd.memb[i].name, dst->shared->u.compnd.memb[j].name)) {
+                if (!strcmp(src->shared->u.compnd.memb[i].name, dst->shared->u.compnd.memb[j].name)) {
                     H5_CHECKED_ASSIGN(src2dst[i], int, j, unsigned);
                     break;
                 } /* end if */
@@ -2687,7 +2687,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     for (i = 0, j = 0; i < src->shared->u.enumer.nmembs && j < dst->shared->u.enumer.nmembs; i++, j++) {
         while (j < dst->shared->u.enumer.nmembs &&
-               HDstrcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]) != 0)
+               strcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]) != 0)
             j++;
         if (j >= dst->shared->u.enumer.nmembs)
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,

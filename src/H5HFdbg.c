@@ -398,7 +398,7 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         /* Calculate the length */
         len = end - start;
 
-        HDsnprintf(temp_str, sizeof(temp_str), "Section #%u:", (unsigned)udata->sect_count);
+        snprintf(temp_str, sizeof(temp_str), "Section #%u:", (unsigned)udata->sect_count);
         fprintf(udata->stream, "%*s%-*s %8zu, %8zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
                 temp_str, start, len);
         udata->sect_count++;
@@ -591,13 +591,13 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, bool dump_internal, FILE *strea
     else
         fprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
     for (u = 0; u < hdr->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
-        HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (block size: %lu)", (unsigned)u,
-                   (unsigned long)hdr->man_dtable.row_block_size[u]);
+        snprintf(temp_str, sizeof(temp_str), "Row #%u: (block size: %lu)", (unsigned)u,
+                 (unsigned long)hdr->man_dtable.row_block_size[u]);
         fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
         for (v = 0; v < hdr->man_dtable.cparam.width; v++) {
             size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
-            HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
+            snprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
             if (hdr->filter_len > 0)
                 fprintf(stream, "%*s%-*s %9" PRIuHADDR "/%6zu/%x\n", indent + 6, "", MAX(0, fwidth - 6),
                         temp_str, iblock->ents[off].addr, iblock->filt_ents[off].size,
@@ -616,13 +616,12 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, bool dump_internal, FILE *strea
                          H5VM_log2_of2(hdr->man_dtable.cparam.width);
         for (u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
             num_indirect_rows = (H5VM_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
-            HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (# of rows: %u)", (unsigned)u,
-                       num_indirect_rows);
+            snprintf(temp_str, sizeof(temp_str), "Row #%u: (# of rows: %u)", (unsigned)u, num_indirect_rows);
             fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
             for (v = 0; v < hdr->man_dtable.cparam.width; v++) {
                 size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
-                HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
+                snprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
                 fprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
                         iblock->ents[off].addr);
             } /* end for */

@@ -50,7 +50,7 @@ test_h5_dirname(void)
 
     /* Check that H5_dirname fails for a NULL dirname pointer */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir", H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir", H5_DIR_SEPS, H5_DIR_SEPS);
     H5E_BEGIN_TRY
     {
         ret = H5_dirname(path, NULL);
@@ -72,7 +72,7 @@ test_h5_dirname(void)
      * doesn't contain the system file separator character
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdirname");
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdirname");
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, ".", "comparing H5_dirname with non-separated path to \".\"");
     H5MM_free(dirname);
@@ -82,7 +82,7 @@ test_h5_dirname(void)
      * for the simple path containing just the system file separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with file separator path to file separator");
     H5MM_free(dirname);
@@ -93,7 +93,7 @@ test_h5_dirname(void)
      * component
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir", H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir", H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with leading separator path to file separator");
     H5MM_free(dirname);
@@ -104,8 +104,8 @@ test_h5_dirname(void)
      * a path component
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with leading separators path to file separator");
     H5MM_free(dirname);
@@ -115,7 +115,7 @@ test_h5_dirname(void)
      * contains a path component and a trailing separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s", H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s", H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, ".", "comparing H5_dirname with trailing separator path to \".\"");
     H5MM_free(dirname);
@@ -125,8 +125,8 @@ test_h5_dirname(void)
      * contains a path component and several trailing separators
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, ".", "comparing H5_dirname with trailing separators path to \".\"");
     H5MM_free(dirname);
@@ -137,7 +137,7 @@ test_h5_dirname(void)
      * component and a trailing separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS,
                "comparing H5_dirname with leading and trailing separator path to file separator");
@@ -149,8 +149,8 @@ test_h5_dirname(void)
      * path component and a trailing separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(
         dirname, H5_DIR_SEPS,
@@ -163,8 +163,8 @@ test_h5_dirname(void)
      * component and several trailing separators
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS,
                "comparing H5_dirname with leading separator and trailing separators path to file separator");
@@ -176,8 +176,8 @@ test_h5_dirname(void)
      * path component and several trailing separators
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS,
                "comparing H5_dirname with leading and trailing separators path to file separator");
@@ -188,7 +188,7 @@ test_h5_dirname(void)
      * "normal" pathname that has no leading separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir", H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir", H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, "topdir", "comparing H5_dirname with normal path to proper dirname");
     H5MM_free(dirname);
@@ -198,7 +198,7 @@ test_h5_dirname(void)
      * "normal" pathname that has a leading separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir", H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS "topdir", "comparing H5_dirname with normal path to proper dirname");
     H5MM_free(dirname);
@@ -208,7 +208,7 @@ test_h5_dirname(void)
      * "normal" pathname that has a leading and trailing separator
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS "topdir", "comparing H5_dirname with normal path to proper dirname");
     H5MM_free(dirname);
@@ -218,8 +218,8 @@ test_h5_dirname(void)
      * contrived pathname
      */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s%s%sfinaldir%s", H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s%s%sfinaldir%s", H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS "topdir" H5_DIR_SEPS "underdir",
                "comparing H5_dirname with contrived path to proper dirname");
@@ -254,7 +254,7 @@ test_h5_basename(void)
 
     /* Check that H5_basename fails for a NULL basename pointer */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir", H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir", H5_DIR_SEPS, H5_DIR_SEPS);
     H5E_BEGIN_TRY
     {
         ret = H5_basename(path, NULL);
@@ -276,7 +276,7 @@ test_h5_basename(void)
      * path that doesn't contain the system file separator character
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdirname");
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdirname");
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdirname", "comparing H5_basename with non-separated path to same path");
     H5MM_free(basename);
@@ -286,7 +286,7 @@ test_h5_basename(void)
      * for the simple path containing just the system file separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, H5_DIR_SEPS, "comparing H5_basename with file separator path to file separator");
     H5MM_free(basename);
@@ -297,7 +297,7 @@ test_h5_basename(void)
      * component
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir", H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir", H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading separator path to filename component");
@@ -309,8 +309,8 @@ test_h5_basename(void)
      * component
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading separators path to filename component");
@@ -321,7 +321,7 @@ test_h5_basename(void)
      * path which contains a path component and a trailing separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s", H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s", H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with trailing separator path to filename component");
@@ -333,8 +333,8 @@ test_h5_basename(void)
      * separators
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with trailing separators path to filename component");
@@ -346,7 +346,7 @@ test_h5_basename(void)
      * and a trailing separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading and trailing separator path to filename component");
@@ -358,8 +358,8 @@ test_h5_basename(void)
      * component and a trailing separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(
         basename, "testdir",
@@ -372,8 +372,8 @@ test_h5_basename(void)
      * and several trailing separators
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(
         basename, "testdir",
@@ -386,8 +386,8 @@ test_h5_basename(void)
      * component and several trailing separators
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%s%s%s%stestdir%s%s%s%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading and trailing separators path to filename component");
@@ -398,7 +398,7 @@ test_h5_basename(void)
      * a "normal" pathname that has no leading separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir", H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir", H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "underdir", "comparing H5_basename with normal path to proper basename");
     H5MM_free(basename);
@@ -408,7 +408,7 @@ test_h5_basename(void)
      * a "normal" pathname that has a leading separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir", H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "underdir", "comparing H5_basename with normal path to proper basename");
     H5MM_free(basename);
@@ -418,7 +418,7 @@ test_h5_basename(void)
      * a "normal" pathname that has a leading and trailing separator
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "underdir", "comparing H5_basename with normal path to proper basename");
     H5MM_free(basename);
@@ -428,8 +428,8 @@ test_h5_basename(void)
      * contrived pathname
      */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s%s%sfinaldir%s", H5_DIR_SEPS, H5_DIR_SEPS,
-               H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
+    snprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s%s%sfinaldir%s", H5_DIR_SEPS, H5_DIR_SEPS,
+             H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "finaldir", "comparing H5_basename with contrived path to proper basename");
     H5MM_free(basename);
@@ -469,34 +469,34 @@ test_h5_strcasestr(void)
 }
 
 static void
-test_HDstrcasestr(void)
+test_strcasestr(void)
 {
     const char *const haystack = "My test string";
     char             *str      = NULL;
 
-    MESSAGE(5, ("Testing HDstrcasestr\n"));
+    MESSAGE(5, ("Testing strcasestr\n"));
 
-    /* check that HDstrcasestr returns target in empty search */
-    str = HDstrcasestr(haystack, "");
-    CHECK_PTR(str, "HDstrcasestr for empty substring");
+    /* check that strcasestr returns target in empty search */
+    str = strcasestr(haystack, "");
+    CHECK_PTR(str, "strcasestr for empty substring");
     if (str)
-        VERIFY_STR(str, haystack, "comparing HDstrcasestr to original string for empty substring");
+        VERIFY_STR(str, haystack, "comparing strcasestr to original string for empty substring");
 
-    /* Check that HDstrcasestr find a string of same case */
-    str = HDstrcasestr(haystack, "string");
-    CHECK_PTR(str, "HDstrcasestr for substring of same case");
+    /* Check that strcasestr find a string of same case */
+    str = strcasestr(haystack, "string");
+    CHECK_PTR(str, "strcasestr for substring of same case");
     if (str)
-        VERIFY_STR(str, "string", "comparing HDstrcasestr for substring of same case");
+        VERIFY_STR(str, "string", "comparing strcasestr for substring of same case");
 
-    /* Check that HDstrcasestr find a string of different case */
-    str = HDstrcasestr(haystack, "sTrInG");
-    CHECK_PTR(str, "HDstrcasestr for substring of different case");
+    /* Check that strcasestr find a string of different case */
+    str = strcasestr(haystack, "sTrInG");
+    CHECK_PTR(str, "strcasestr for substring of different case");
     if (str)
-        VERIFY_STR(str, "string", "comparing HDstrcasestr for substring of different case");
+        VERIFY_STR(str, "string", "comparing strcasestr for substring of different case");
 
-    /* Check that HDstrcasestr returns NULL if no match is found */
-    str = HDstrcasestr(haystack, "nomatch");
-    CHECK_PTR_NULL(str, "HDstrcasestr search with no match");
+    /* Check that strcasestr returns NULL if no match is found */
+    str = strcasestr(haystack, "nomatch");
+    CHECK_PTR_NULL(str, "strcasestr search with no match");
 }
 
 static void
@@ -532,7 +532,7 @@ test_h5_strndup(void)
     str = H5MM_xfree(str);
 
     /* Check that H5_strndup correctly performs identical copies */
-    str = H5_strndup(teststr, HDstrlen(teststr));
+    str = H5_strndup(teststr, strlen(teststr));
     CHECK_PTR(str, "H5_strndup for identical copy");
     if (str)
         VERIFY_STR(str, teststr, "comparing H5_strndup for identical copy to original string");
@@ -542,7 +542,7 @@ test_h5_strndup(void)
      * Check that H5_strndup correctly performs copies when
      * `n` is greater than the original string
      */
-    str = H5_strndup(teststr, HDstrlen(teststr) + 2);
+    str = H5_strndup(teststr, strlen(teststr) + 2);
     CHECK_PTR(str, "H5_strndup for larger 'n'");
     if (str)
         VERIFY_STR(str, teststr, "comparing H5_strndup with larger 'n' value to original string");
@@ -558,7 +558,7 @@ test_h5_system(void)
     test_h5_dirname();
     test_h5_basename();
     test_h5_strcasestr();
-    test_HDstrcasestr();
+    test_strcasestr();
     test_h5_strndup();
 }
 

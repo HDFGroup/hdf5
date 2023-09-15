@@ -134,7 +134,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     assert(header != NULL);
     assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature");
 
     if (buf[4] != H5FD_ONION_HEADER_VERSION_CURR)

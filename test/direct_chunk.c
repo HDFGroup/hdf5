@@ -2313,10 +2313,10 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All direct chunk read/write tests passed.");
+    puts("All direct chunk read/write tests passed.");
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 }

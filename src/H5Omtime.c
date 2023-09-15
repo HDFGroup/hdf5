@@ -271,8 +271,8 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, u
 
     /* encode */
     tm = HDgmtime(mesg);
-    HDsprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
-              tm->tm_hour, tm->tm_min, tm->tm_sec);
+    sprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
+            tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_encode() */
@@ -416,7 +416,7 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     /* debug */
     tm = HDlocaltime(mesg);
 
-    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

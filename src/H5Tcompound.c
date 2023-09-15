@@ -410,7 +410,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Does NAME already exist in PARENT? */
     for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
+        if (!strcmp(parent->shared->u.compnd.memb[i].name, name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique");
 
     /* Does the new member overlap any existing member ? */

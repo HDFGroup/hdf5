@@ -390,7 +390,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Attach 8 attributes to the dataset */
     for (i = 0; i < 8; i++) {
-        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
+        snprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(did2, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_INT, &i) < 0)
@@ -854,7 +854,7 @@ verify_group_cork(bool swmr)
 
     /* Attach 8 attributes to the third group: GRP3 */
     for (i = 0; i < 8; i++) {
-        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
+        snprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(gid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -1069,7 +1069,7 @@ verify_named_cork(bool swmr)
 
     /* Attach 8 attributes to datatype: DT3 */
     for (i = 0; i < 8; i++) {
-        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
+        snprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(tid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -2236,7 +2236,7 @@ main(void)
              */
             driver = HDgetenv(HDF5_DRIVER);
             if (!H5FD__supports_swmr_test(driver)) {
-                HDputs("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
+                puts("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
                 continue;
             }
         }

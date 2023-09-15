@@ -276,7 +276,7 @@ SUBROUTINE test_iter_group(cleanup, total_error)
   lnames(ndatasets+2) = "grp0000000"
 
 !!$
-!!$    lnames[NDATASETS] = HDstrdup("grp");
+!!$    lnames[NDATASETS] = strdup("grp");
 !!$    CHECK(lnames[NDATASETS], NULL, "strdup");
 !!$
 

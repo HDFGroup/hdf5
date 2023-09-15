@@ -708,7 +708,7 @@ H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key, con
     fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for (u = 0; u < udata->ndims; u++)
         fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", (key->scaled[u] * udata->common.layout->dim[u]));
-    HDfputs("}\n", stream);
+    fputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_debug_key() */

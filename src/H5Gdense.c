@@ -394,7 +394,7 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
     udata.common.f             = f;
     udata.common.fheap         = fheap;
     udata.common.name          = lnk->name;
-    udata.common.name_hash     = H5_checksum_lookup3(lnk->name, HDstrlen(lnk->name), 0);
+    udata.common.name_hash     = H5_checksum_lookup3(lnk->name, strlen(lnk->name), 0);
     udata.common.corder        = lnk->corder;
     udata.common.found_op      = NULL;
     udata.common.found_op_data = NULL;
@@ -502,7 +502,7 @@ H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, bool *fo
     udata.f             = f;
     udata.fheap         = fheap;
     udata.name          = name;
-    udata.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.found_op      = H5G__dense_lookup_cb; /* v2 B-tree comparison callback */
     udata.found_op_data = lnk;
 
@@ -1004,11 +1004,11 @@ H5G__dense_get_name_by_idx_fh_cb(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link");
 
     /* Get the length of the name */
-    udata->name_len = HDstrlen(lnk->name);
+    udata->name_len = strlen(lnk->name);
 
     /* Copy the name into the user's buffer, if given */
     if (udata->name) {
-        HDstrncpy(udata->name, lnk->name, MIN((udata->name_len + 1), udata->name_size));
+        strncpy(udata->name, lnk->name, MIN((udata->name_len + 1), udata->name_size));
         if (udata->name_len >= udata->name_size)
             udata->name[udata->name_size - 1] = '\0';
     } /* end if */
@@ -1146,11 +1146,11 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound");
 
         /* Get the length of the name */
-        *name_len = HDstrlen(ltable.lnks[n].name);
+        *name_len = strlen(ltable.lnks[n].name);
 
         /* Copy the name into the user's buffer, if given */
         if (name) {
-            HDstrncpy(name, ltable.lnks[n].name, MIN((*name_len + 1), name_size));
+            strncpy(name, ltable.lnks[n].name, MIN((*name_len + 1), name_size));
             if (*name_len >= name_size)
                 name[name_size - 1] = '\0';
         } /* end if */
@@ -1306,7 +1306,7 @@ H5G__dense_remove(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_
     udata.common.f             = f;
     udata.common.fheap         = fheap;
     udata.common.name          = name;
-    udata.common.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.common.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.common.found_op      = NULL;
     udata.common.found_op_data = NULL;
     udata.rem_from_fheap       = true;
@@ -1418,7 +1418,7 @@ H5G__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_udata.fheap = bt2_udata->fheap;
             other_bt2_udata.name  = fh_udata.lnk->name;
             other_bt2_udata.name_hash =
-                H5_checksum_lookup3(fh_udata.lnk->name, HDstrlen(fh_udata.lnk->name), 0);
+                H5_checksum_lookup3(fh_udata.lnk->name, strlen(fh_udata.lnk->name), 0);
             other_bt2_udata.found_op      = NULL;
             other_bt2_udata.found_op_data = NULL;
         } /* end else */

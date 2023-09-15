@@ -53,12 +53,12 @@ main(void)
 
     printf("%-70s", "Testing alignment in compound datatypes");
 
-    HDstrcpy(string5, "Hi!");
+    strcpy(string5, "Hi!");
     HDunlink(fname);
     fil = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     if (fil < 0) {
-        HDputs("*FAILED*");
+        puts("*FAILED*");
         return 1;
     }
 
@@ -125,7 +125,7 @@ main(void)
     data = (char *)malloc(H5Tget_size(fix));
 
     if (!data) {
-        HDperror("malloc() failed");
+        perror("malloc() failed");
         HDabort();
     }
 
@@ -138,7 +138,7 @@ main(void)
 out:
     if (error < 0) {
         result = 1;
-        HDputs("*FAILED - HDF5 library error*");
+        puts("*FAILED - HDF5 library error*");
     }
     else if (!(H5_FLT_ABS_EQUAL(fok[0], fptr[0])) || !(H5_FLT_ABS_EQUAL(fok[1], fptr[1])) ||
              !(H5_FLT_ABS_EQUAL(fnok[0], fptr[2])) || !(H5_FLT_ABS_EQUAL(fnok[1], fptr[3]))) {
@@ -179,10 +179,10 @@ out:
                "                    %6f = %f\n",
                (double)fok[0], (double)fptr[0], (double)fok[1], (double)fptr[1], (double)fnok[0],
                (double)fptr[2], (double)fnok[1], (double)fptr[3]);
-        HDputs("*FAILED - compound type alignmnent problem*");
+        puts("*FAILED - compound type alignmnent problem*");
     }
     else {
-        HDputs(" PASSED");
+        puts(" PASSED");
     }
 
     if (data)

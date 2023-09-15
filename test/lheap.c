@@ -91,13 +91,13 @@ main(void)
         goto error;
     }
     for (i = 0; i < NOBJS; i++) {
-        HDsnprintf(buf, sizeof(buf), "%03d-", i);
+        snprintf(buf, sizeof(buf), "%03d-", i);
         for (j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if (j > 4)
             buf[j] = '\0';
 
-        if (H5HL_insert(f, heap, HDstrlen(buf) + 1, buf, &obj[i]) < 0) {
+        if (H5HL_insert(f, heap, strlen(buf) + 1, buf, &obj[i]) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -131,7 +131,7 @@ main(void)
         goto error;
     }
     for (i = 0; i < NOBJS; i++) {
-        HDsnprintf(buf, sizeof(buf), "%03d-", i);
+        snprintf(buf, sizeof(buf), "%03d-", i);
         for (j = 4; j < i; j++)
             buf[j] = (char)('0' + j % 10);
         if (j > 4)
@@ -149,7 +149,7 @@ main(void)
             goto error;
         }
 
-        if (HDstrcmp(s, buf) != 0) {
+        if (strcmp(s, buf) != 0) {
             H5_FAILED();
             printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             printf("    got: \"%s\"\n", s);
@@ -204,13 +204,13 @@ main(void)
         FAIL_STACK_ERROR;
     api_ctx_pushed = false;
 
-    HDputs("All local heap tests passed.");
+    puts("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5Fclose(file);

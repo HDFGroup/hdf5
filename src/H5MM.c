@@ -112,7 +112,7 @@ H5MM_xstrdup(const char *s)
     FUNC_ENTER_NOAPI(NULL)
 
     if (s)
-        if (NULL == (ret_value = HDstrdup(s)))
+        if (NULL == (ret_value = strdup(s)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -140,7 +140,7 @@ H5MM_strdup(const char *s)
 
     if (!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed");
-    if (NULL == (ret_value = HDstrdup(s)))
+    if (NULL == (ret_value = strdup(s)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed");
 
 done:

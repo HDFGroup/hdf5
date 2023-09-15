@@ -284,7 +284,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *foun
                         continue;
 
                     /* Check if specified VOL connector name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
+                    if (!strcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
                         matched = true;
                 }
                 else {
@@ -308,7 +308,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *foun
                         continue;
 
                     /* Check if specified VFD name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
+                    if (!strcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
                         matched = true;
                 }
                 else {

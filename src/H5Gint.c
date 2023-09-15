@@ -931,7 +931,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Check if we will need more space to store this link's relative path */
     /* ("+2" is for string terminator and possible '/' for group separator later) */
-    link_name_len = HDstrlen(lnk->name);
+    link_name_len = strlen(lnk->name);
     len_needed    = udata->curr_path_len + link_name_len + 2;
     if (len_needed > udata->path_buf_size) {
         void *new_path; /* Pointer to new path buffer */
@@ -945,7 +945,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Build the link's relative path name */
     assert(udata->path[old_path_len] == '\0');
-    HDstrncpy(&(udata->path[old_path_len]), lnk->name, link_name_len + 1);
+    strncpy(&(udata->path[old_path_len]), lnk->name, link_name_len + 1);
     udata->curr_path_len += link_name_len;
 
     /* Construct the link info from the link message */
@@ -1008,7 +1008,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
                 /* Add the path separator to the current path */
                 assert(udata->path[udata->curr_path_len] == '\0');
-                HDstrncpy(&(udata->path[udata->curr_path_len]), "/", (size_t)2);
+                strncpy(&(udata->path[udata->curr_path_len]), "/", (size_t)2);
                 udata->curr_path_len++;
 
                 /* Attempt to get the link info for this group */

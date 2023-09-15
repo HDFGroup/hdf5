@@ -114,7 +114,7 @@ main(void)
     /* Create attributes in the group */
     for (i = ATTR_COUNT; i >= 0; i--) {
         /* Set up the attribute name */
-        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
+        snprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Create the attribute */
         if ((aid = H5Acreate2(gid, aname, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -160,7 +160,7 @@ main(void)
     /* Delete the attributes */
     for (i = 0; i <= ATTR_COUNT; i++) {
         /* Set up the attribute name */
-        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
+        snprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Delete the attribute */
         if (H5Adelete(gid, aname) < 0)

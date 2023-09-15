@@ -562,7 +562,7 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
             stub_file_id = UINT64_MAX;
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                     "couldn't stat HDF5 stub file, errno = %d, error message = '%s'", errno,
-                                    HDstrerror(errno));
+                                    strerror(errno));
         }
         else
             stub_file_id = (uint64_t)st.st_ino;
@@ -668,7 +668,7 @@ H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_par
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &mpi_rank)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
-        HDsnprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
+        snprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
 
         if (NULL == (sf_context->sf_logfile = fopen(sf_context->sf_logfile_name, "a")))
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
@@ -778,7 +778,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     /* Check if a prefix has been set for the configuration file name */
     prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
     if (prefix_env) {
-        if (NULL == (new_context->config_file_prefix = HDstrdup(prefix_env)))
+        if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
     }
 
@@ -1202,7 +1202,7 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
          * '1:64' to specify the "every Nth rank" strategy with a
          * criteria of '64'.
          */
-        opt_value = HDstrchr(env_value, ':');
+        opt_value = strchr(env_value, ':');
         if (opt_value) {
             long check_value;
 
@@ -1815,13 +1815,13 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     sf_context->sf_logfile = NULL;
 #endif
 
-    if (NULL == (sf_context->h5_filename = HDstrdup(base_filename)))
+    if (NULL == (sf_context->h5_filename = strdup(base_filename)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling filename");
 
     /* Check for a subfile name prefix setting in the environment */
     if ((env_value = HDgetenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
-        if (NULL == (sf_context->subfile_prefix = HDstrdup(env_value)))
+        if (NULL == (sf_context->subfile_prefix = strdup(env_value)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
     }
 
@@ -2204,8 +2204,8 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
          * and the configuration file will be named:
          *   ABC.h5.subfile_<file-number>.config
          */
-        HDsnprintf(filepath, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
-                   sf_context->h5_file_id, num_digits, subfile_idx, num_subfiles);
+        snprintf(filepath, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
+                 sf_context->h5_file_id, num_digits, subfile_idx, num_subfiles);
 
         if ((sf_context->sf_fids[i] = HDopen(filepath, file_acc_flags, mode)) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "failed to open subfile");
@@ -2302,8 +2302,8 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
-               base_filename, sf_context->h5_file_id);
+    snprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+             base_filename, sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
     errno = 0;
@@ -2334,42 +2334,42 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
                                     "couldn't allocate buffer for writing to subfiling configuration file");
 
         /* Write the subfiling stripe size to the configuration file */
-        HDsnprintf(line_buf, PATH_MAX, "stripe_size=%" PRId64 "\n", sf_context->sf_stripe_size);
-        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        snprintf(line_buf, PATH_MAX, "stripe_size=%" PRId64 "\n", sf_context->sf_stripe_size);
+        if (fwrite(line_buf, strlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the number of I/O concentrators to the configuration file */
-        HDsnprintf(line_buf, PATH_MAX, "aggregator_count=%d\n", sf_context->topology->n_io_concentrators);
-        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        snprintf(line_buf, PATH_MAX, "aggregator_count=%d\n", sf_context->topology->n_io_concentrators);
+        if (fwrite(line_buf, strlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the number of subfiles to the configuration file */
-        HDsnprintf(line_buf, PATH_MAX, "subfile_count=%d\n", n_subfiles);
-        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        snprintf(line_buf, PATH_MAX, "subfile_count=%d\n", n_subfiles);
+        if (fwrite(line_buf, strlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the base HDF5 filename to the configuration file */
-        HDsnprintf(line_buf, PATH_MAX, "hdf5_file=%s\n", sf_context->h5_filename);
-        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        snprintf(line_buf, PATH_MAX, "hdf5_file=%s\n", sf_context->h5_filename);
+        if (fwrite(line_buf, strlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write the optional subfile directory prefix to the configuration file */
-        HDsnprintf(line_buf, PATH_MAX, "subfile_dir=%s\n", subfile_dir);
-        if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+        snprintf(line_buf, PATH_MAX, "subfile_dir=%s\n", subfile_dir);
+        if (fwrite(line_buf, strlen(line_buf), 1, config_file) != 1)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                         "failed to write to subfiling configuration file");
 
         /* Write out each subfile name to the configuration file */
         num_digits = (int)(log10(n_subfiles) + 1);
         for (int k = 0; k < n_subfiles; k++) {
-            HDsnprintf(line_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
-                       sf_context->h5_file_id, num_digits, k + 1, n_subfiles);
+            snprintf(line_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
+                     sf_context->h5_file_id, num_digits, k + 1, n_subfiles);
 
-            if (fwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+            if (fwrite(line_buf, strlen(line_buf), 1, config_file) != 1)
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                             "failed to write to subfiling configuration file");
         }
@@ -2430,8 +2430,8 @@ open_config_file(const char *base_filename, const char *config_dir, uint64_t fil
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
-               base_filename, file_id);
+    snprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+             base_filename, file_id);
 
     /* Determine whether a subfiling configuration file exists */
     errno = 0;
@@ -2509,11 +2509,11 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
     config_buf[config_file_len] = '\0';
 
     if (stripe_size) {
-        if (NULL == (substr = HDstrstr(config_buf, "stripe_size")))
+        if (NULL == (substr = strstr(config_buf, "stripe_size")))
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                                     "malformed subfiling configuration file - no stripe size entry");
 
-        if (EOF == HDsscanf(substr, "stripe_size=%" PRId64, &read_stripe_size))
+        if (EOF == sscanf(substr, "stripe_size=%" PRId64, &read_stripe_size))
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
                                         "couldn't get stripe size from subfiling configuration file");
 
@@ -2526,11 +2526,11 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
     }
 
     if (num_subfiles) {
-        if (NULL == (substr = HDstrstr(config_buf, "subfile_count")))
+        if (NULL == (substr = strstr(config_buf, "subfile_count")))
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                                     "malformed subfiling configuration file - no subfile count entry");
 
-        if (EOF == HDsscanf(substr, "subfile_count=%" PRId64, &read_num_subfiles))
+        if (EOF == sscanf(substr, "subfile_count=%" PRId64, &read_num_subfiles))
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
                                         "couldn't get number of subfiles from subfiling configuration file");
 
@@ -2594,7 +2594,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
                     H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
                 /* If filepath is just the filename, set up path using CWD */
-                if (!HDstrcmp(file_dirname, ".")) {
+                if (!strcmp(file_dirname, ".")) {
                     if (NULL == (resolved_path = malloc(PATH_MAX)))
                         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                                 "can't allocate buffer for filepath");
@@ -2608,24 +2608,24 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
                         H5_SUBFILING_GOTO_ERROR(
                             H5E_VFL, H5E_CANTGET, FAIL,
                             "can't get current working directory, errno = %d, error message = '%s'", errno,
-                            HDstrerror(errno));
+                            strerror(errno));
 
-                    HDsnprintf(resolved_path, PATH_MAX, "%s/%s", cwd, file_basename);
+                    snprintf(resolved_path, PATH_MAX, "%s/%s", cwd, file_basename);
                 }
                 else {
                     /* Otherwise, just use what was given as the pathname */
-                    if (NULL == (resolved_path = HDstrdup(filepath)))
+                    if (NULL == (resolved_path = strdup(filepath)))
                         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
                 }
             }
             else
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                         "can't resolve subfile path, errno = %d, error message = '%s'", errno,
-                                        HDstrerror(errno));
+                                        strerror(errno));
         }
 
         if (resolved_path) {
-            H5_CHECKED_ASSIGN(path_len, hsize_t, (HDstrlen(resolved_path) + 1), size_t);
+            H5_CHECKED_ASSIGN(path_len, hsize_t, (strlen(resolved_path) + 1), size_t);
         }
         else
             path_len = HSIZE_UNDEF;
@@ -3138,13 +3138,13 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
     H5FD_ioc_begin_thread_exclusive();
 
     if (sf_context->sf_logfile) {
-        HDvfprintf(sf_context->sf_logfile, fmt, log_args);
-        HDfputs("\n", sf_context->sf_logfile);
+        vfprintf(sf_context->sf_logfile, fmt, log_args);
+        fputs("\n", sf_context->sf_logfile);
         fflush(sf_context->sf_logfile);
     }
     else {
-        HDvprintf(fmt, log_args);
-        HDputs("");
+        vprintf(fmt, log_args);
+        puts("");
         fflush(stdout);
     }
 
