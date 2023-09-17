@@ -448,7 +448,7 @@ error:
     if (save_rew_buf)
         free(save_rew_buf);
 
-    HDputs("*** SELECT SRC SUBSET TEST FAILED ***");
+    printf("*** SELECT SRC SUBSET TEST FAILED ***");
     return 1;
 } /* test_select_src_subset() */
 
@@ -597,7 +597,7 @@ error:
     if (save_rew_buf)
         free(save_rew_buf);
 
-    HDputs("*** SELECT DST SUBSET TEST FAILED ***");
+    printf("*** SELECT DST SUBSET TEST FAILED ***");
     return 1;
 } /* test_select_dst_subset */
 
