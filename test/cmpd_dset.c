@@ -846,8 +846,8 @@ test_compounds_selection_io(void)
     for (set_cache = FALSE; set_cache <= FALSE; set_cache++) {
         for (set_fillvalue = FALSE; set_fillvalue <= FALSE; set_fillvalue++) {
             for (select_io = FALSE; select_io <= FALSE; select_io++) {
-                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
-                    for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
+                for (mwbuf = TRUE; mwbuf <= TRUE; mwbuf++) {
+                    for (set_buf = FALSE; set_buf <= FALSE; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
                             goto error;
