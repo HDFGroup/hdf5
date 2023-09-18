@@ -542,8 +542,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
         }
 
         memset(tmp_buf, 0,
-               smine_nelmts *
-                 MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size));
+               smine_nelmts * MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size));
 
         /*
          * Gather the data from disk into the datatype conversion
