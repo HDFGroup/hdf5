@@ -343,13 +343,13 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
 
     /* Allocate space and initialize data */
-    rbuf = (unsigned char *)malloc(NX * NY * sizeof(stype3));
+    rbuf = (unsigned char *)calloc(NX * NY, sizeof(stype3));
 
-    rew_buf = (unsigned char *)malloc(NX * NY * sizeof(stype3));
+    rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype3));
     initialize_stype3(rew_buf, (size_t)NX * NY);
 
     /* Save a copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
-    save_rew_buf = (unsigned char *)malloc(NX * NY * sizeof(stype3));
+    save_rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype3));
     initialize_stype3(save_rew_buf, (size_t)NX * NY);
 
     /* Create dataset creation property list */
@@ -639,15 +639,15 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     hsize_t        memb_size[1] = {4};
 
     /* Allocate buffers */
-    if (NULL == (s1 = (s1_t *)malloc(sizeof(s1_t) * NX * NY)))
+    if (NULL == (s1 = (s1_t *)calloc(NX * NY, sizeof(s1_t))))
         goto error;
-    if (NULL == (rbuf1 = (s1_t *)malloc(sizeof(s1_t) * NX * NY)))
+    if (NULL == (rbuf1 = (s1_t *)calloc(NX * NY, sizeof(s1_t))))
         goto error;
-    if (NULL == (s3 = (s3_t *)malloc(sizeof(s3_t) * NX * NY)))
+    if (NULL == (s3 = (s3_t *)calloc(NX * NY, sizeof(s3_t))))
         goto error;
-    if (NULL == (save_s3 = (s3_t *)malloc(sizeof(s3_t) * NX * NY)))
+    if (NULL == (save_s3 = (s3_t *)calloc(NX * NY, sizeof(s3_t))))
         goto error;
-    if (NULL == (rbuf3 = (s3_t *)malloc(sizeof(s3_t) * NX * NY)))
+    if (NULL == (rbuf3 = (s3_t *)calloc(NX * NY, sizeof(s3_t))))
         goto error;
 
     /* Create the file */
