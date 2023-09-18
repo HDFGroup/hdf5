@@ -554,8 +554,11 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
             n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
             if (n != smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
-        } else
-memset(tmp_buf, 0, smine_nelmts * MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size));
+        }
+        else
+            memset(tmp_buf, 0,
+                   smine_nelmts *
+                       MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size));
 
         /*
          * Gather data
