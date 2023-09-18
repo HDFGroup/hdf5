@@ -1308,17 +1308,7 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-# This cmake function requires that the non-default doxyfile settings are provided with set (DOXYGEN_xxx) commands
-# In addition the doxyfile aliases @INCLUDE option is not supported and would need to be provided in a set (DOXYGEN_ALIASES) command.
-#  doxygen_add_docs (hdf5lib_doc
-##      ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${HDF5_DOXYGEN_DIR}/dox
-#      ${DOXYGEN_INPUT_DIRECTORY}
-#      ALL
-#      WORKING_DIRECTORY ${HDF5_SRC_DIR}
-#      COMMENT "Generating HDF5 library Source Documentation"
-#  )
-
-# This custom target and doxygen/configure work together
+  # This custom target and doxygen/configure work together
   # Replace variables inside @@ with the current values
   add_custom_target (hdf5lib_doc ALL
         COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile

@@ -9,7 +9,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-option (USE_LIBAEC "Use AEC library as SZip Filter" OFF)
+option (USE_LIBAEC "Use AEC library as SZip Filter" ON)
 option (USE_LIBAEC_STATIC "Use static AEC library " OFF)
 option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" 0)
 option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" 0)
