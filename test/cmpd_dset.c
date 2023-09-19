@@ -1941,6 +1941,13 @@ create_stype4(void)
         H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG) < 0)
         goto error;
 
+        printf("HOFFSET for stype4: a=%zu, b=%zu, c=%zu, d=%zu, e=%zu, f=%zu, g=%zu, h=%zu, i=%zu, j=%zu, k=%zu, l=%zu, m=%zu, n=%zu, o=%zu, p=%zu, q=%zu, r=%zu, s=%zu, t=%zu; TOT=%zu\n",
+            HOFFSET(stype4, a), HOFFSET(stype4, b), HOFFSET(stype4, c), HOFFSET(stype4, d), HOFFSET(stype4, e),\
+            HOFFSET(stype4, f), HOFFSET(stype4, g), HOFFSET(stype4, h), HOFFSET(stype4, i), HOFFSET(stype4, j),\
+            HOFFSET(stype4, k), HOFFSET(stype4, l), HOFFSET(stype4, m), HOFFSET(stype4, n), HOFFSET(stype4, o),\
+            HOFFSET(stype4, p), HOFFSET(stype4, q), HOFFSET(stype4, r), HOFFSET(stype4, s), HOFFSET(stype4, t),
+            H5Tget_size(tid));
+
     if (H5Tclose(array_dt1) < 0)
         goto error;
     if (H5Tclose(array_dt2) < 0)
