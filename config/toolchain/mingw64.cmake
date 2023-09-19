@@ -11,4 +11,4 @@ set (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set (CMAKE_CROSSCOMPILING_EMULATOR wine64)
 
 include_directories(/usr/${TOOLCHAIN_PREFIX}/include)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On CACHE BOOL "Export windows symbols")
+set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On CACHE BOOL "Export windows symbols")

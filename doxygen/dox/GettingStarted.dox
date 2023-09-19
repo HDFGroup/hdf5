@@ -50,10 +50,10 @@ Parallel HDF5, and the HDF5-1.10 VDS and SWMR new features:
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-<a href="https://portal.hdfgroup.org/display/HDF5/Introduction+to+Parallel+HDF5">Introduction to Parallel HDF5</a>
+\ref IntroParHDF5
 </td>
 <td>
-A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @ref LearnBasics topic first. 
+A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @ref LearnBasics topic first.
 </td>
 </tr>
 <tr>
