@@ -484,6 +484,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     hid_t          dcpl    = H5I_INVALID_HID;
     hid_t          dxpl    = H5I_INVALID_HID;
     hsize_t        dims[2] = {NX, NY};
+    hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
     int            fillvalue = (-1);
     size_t         ss, ss1, ss2;
@@ -541,6 +542,29 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
 
     /* Write to the dataset with rew_tid */
+    if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
+        goto error;
+
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
+
+    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+     /* Set chunking */
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        goto error;
+
+    /* Create chunked data set */
+    if ((did = H5Dcreate2(fid, DSET_NAME[3], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    initialize_stype4(rew_buf, (size_t)NX * NY);
+
+    /* Write data to the dataset with rew_tid */
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
 
@@ -843,11 +867,11 @@ test_compounds_selection_io(void)
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[3], fapl, fname, sizeof(fname));
 
-    for (set_cache = FALSE; set_cache <= FALSE; set_cache++) {
-        for (set_fillvalue = FALSE; set_fillvalue <= FALSE; set_fillvalue++) {
-            for (select_io = FALSE; select_io <= FALSE; select_io++) {
-                for (mwbuf = TRUE; mwbuf <= TRUE; mwbuf++) {
-                    for (set_buf = FALSE; set_buf <= FALSE; set_buf++) {
+    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
+        for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
+            for (select_io = FALSE; select_io <= TRUE; select_io++) {
+                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
+                    for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
                             goto error;
@@ -1940,13 +1964,6 @@ create_stype4(void)
         H5Tinsert(tid, "s", HOFFSET(stype4, s), H5T_NATIVE_LLONG) < 0 ||
         H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG) < 0)
         goto error;
-
-        printf("HOFFSET for stype4: a=%zu, b=%zu, c=%zu, d=%zu, e=%zu, f=%zu, g=%zu, h=%zu, i=%zu, j=%zu, k=%zu, l=%zu, m=%zu, n=%zu, o=%zu, p=%zu, q=%zu, r=%zu, s=%zu, t=%zu; TOT=%zu\n",
-            HOFFSET(stype4, a), HOFFSET(stype4, b), HOFFSET(stype4, c), HOFFSET(stype4, d), HOFFSET(stype4, e),\
-            HOFFSET(stype4, f), HOFFSET(stype4, g), HOFFSET(stype4, h), HOFFSET(stype4, i), HOFFSET(stype4, j),\
-            HOFFSET(stype4, k), HOFFSET(stype4, l), HOFFSET(stype4, m), HOFFSET(stype4, n), HOFFSET(stype4, o),\
-            HOFFSET(stype4, p), HOFFSET(stype4, q), HOFFSET(stype4, r), HOFFSET(stype4, s), HOFFSET(stype4, t),
-            H5Tget_size(tid));
 
     if (H5Tclose(array_dt1) < 0)
         goto error;
