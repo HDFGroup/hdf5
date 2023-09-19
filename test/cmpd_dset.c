@@ -479,11 +479,11 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 {
     hid_t          fid     = H5I_INVALID_HID;
     hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID;
-    hid_t          did     = H5I_INVALID_HID;
-    hid_t          sid     = H5I_INVALID_HID;
-    hid_t          dcpl    = H5I_INVALID_HID;
-    hid_t          dxpl    = H5I_INVALID_HID;
-    hsize_t        dims[2] = {NX, NY};
+    hid_t          did           = H5I_INVALID_HID;
+    hid_t          sid           = H5I_INVALID_HID;
+    hid_t          dcpl          = H5I_INVALID_HID;
+    hid_t          dxpl          = H5I_INVALID_HID;
+    hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
     int            fillvalue = (-1);
@@ -554,7 +554,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dclose(did) < 0)
         goto error;
 
-     /* Set chunking */
+    /* Set chunking */
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
         goto error;
 
