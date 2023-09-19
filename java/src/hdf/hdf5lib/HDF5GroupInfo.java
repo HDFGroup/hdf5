@@ -164,7 +164,7 @@ public class HDF5GroupInfo {
     public long getOID() { return objno[0]; }
 
     /**
-     * /** Converts this object to a String representation.
+     * Converts this object to a String representation.
      *
      * @return a string representation of this object
      */
