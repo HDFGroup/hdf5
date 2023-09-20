@@ -39,9 +39,7 @@ main(int argc, char **argv)
 
     /* test if we can initialize the library with MPI being finalized
        and create a file serially */
-    if (H5open() < 0) {
-        nerrors = nerrors + 1;
-    }
+    VRFY((H5open() >= 0), "H5open succeeded");
 
     if (mpi_rank == 0) {
         char  filename[1024];
@@ -54,9 +52,7 @@ main(int argc, char **argv)
         file_id = -1;
     }
 
-    if (H5close() < 0) {
-        nerrors = nerrors + 1;
-    }
+    VRFY((H5close() >= 0), "H5close succeeded");
 
     if (MAINPROCESS) {
         if (0 == nerrors)
