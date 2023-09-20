@@ -1,0 +1,72 @@
+
+group1   group2
+---------------------------------------
+    x      x                   
+
+group  : </g1> and </g1>
+0 differences found
+Warning: different storage datatype
+Not comparable: <VLstring> or <VLstring> is of mixed string type
+Warning: different storage datatype
+Not comparable: <VLstring2D> or <VLstring2D> is of mixed string type
+Warning: different storage datatype
+Not comparable: <VLstring3D> or <VLstring3D> is of mixed string type
+attribute: <array of </g1>> and <array of </g1>>
+0 differences found
+attribute: <array2D of </g1>> and <array2D of </g1>>
+0 differences found
+attribute: <array3D of </g1>> and <array3D of </g1>>
+0 differences found
+attribute: <bitfield of </g1>> and <bitfield of </g1>>
+0 differences found
+attribute: <bitfield2D of </g1>> and <bitfield2D of </g1>>
+0 differences found
+attribute: <bitfield3D of </g1>> and <bitfield3D of </g1>>
+0 differences found
+attribute: <compound of </g1>> and <compound of </g1>>
+0 differences found
+attribute: <compound2D of </g1>> and <compound2D of </g1>>
+0 differences found
+attribute: <compound3D of </g1>> and <compound3D of </g1>>
+0 differences found
+attribute: <enum of </g1>> and <enum of </g1>>
+0 differences found
+attribute: <enum2D of </g1>> and <enum2D of </g1>>
+0 differences found
+attribute: <enum3D of </g1>> and <enum3D of </g1>>
+0 differences found
+attribute: <float of </g1>> and <float of </g1>>
+0 differences found
+attribute: <float2D of </g1>> and <float2D of </g1>>
+0 differences found
+attribute: <float3D of </g1>> and <float3D of </g1>>
+0 differences found
+attribute: <integer of </g1>> and <integer of </g1>>
+0 differences found
+attribute: <integer2D of </g1>> and <integer2D of </g1>>
+0 differences found
+attribute: <integer3D of </g1>> and <integer3D of </g1>>
+0 differences found
+attribute: <opaque of </g1>> and <opaque of </g1>>
+0 differences found
+attribute: <opaque2D of </g1>> and <opaque2D of </g1>>
+0 differences found
+attribute: <opaque3D of </g1>> and <opaque3D of </g1>>
+0 differences found
+Warning: different storage datatype
+Not comparable: <string> or <string> is of mixed string type
+Warning: different storage datatype
+Not comparable: <string2D> or <string2D> is of mixed string type
+Warning: different storage datatype
+Not comparable: <string3D> or <string3D> is of mixed string type
+attribute: <vlen of </g1>> and <vlen of </g1>>
+0 differences found
+attribute: <vlen2D of </g1>> and <vlen2D of </g1>>
+0 differences found
+attribute: <vlen3D of </g1>> and <vlen3D of </g1>>
+0 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects without details of differences.
+EXIT CODE: 0

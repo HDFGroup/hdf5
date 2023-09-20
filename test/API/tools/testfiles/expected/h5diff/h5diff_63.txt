@@ -1,0 +1,10 @@
+dataset: </string4> and </string4>
+size:           [3]           [3]
+position        string4         string4         difference          
+------------------------------------------------------------
+[ 1 ]                         8
+[ 1 ]                         9
+[ 2 ]            8             
+[ 2 ]            9             
+4 differences found
+EXIT CODE: 1

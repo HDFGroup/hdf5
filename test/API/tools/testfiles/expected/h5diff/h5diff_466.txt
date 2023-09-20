@@ -1,0 +1,5 @@
+obj1 </soft_link1> is a dangling link.
+obj2 </soft_link1> is a dangling link.
+dangling link: </soft_link1> and </soft_link1>
+0 differences found
+EXIT CODE: 0
