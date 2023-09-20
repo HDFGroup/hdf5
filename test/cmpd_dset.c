@@ -135,7 +135,6 @@ static int
 compare_stype4_data(void *expect_buf, void *rbuf)
 {
     int      i;
-    unsigned err = FALSE;
 
     for (i = 0; i < (int)(NX * NY); i++) {
         stype4 *s1_ptr;
@@ -143,143 +142,57 @@ compare_stype4_data(void *expect_buf, void *rbuf)
         s1_ptr = ((stype4 *)expect_buf) + i;
         s2_ptr = ((stype4 *)rbuf) + i;
 
-        if (s1_ptr->a != s2_ptr->a) {
-            printf("a is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->b != s2_ptr->b) {
-            printf("b is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->c[0] != s2_ptr->c[0]) {
-            printf("c[0] is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->c[2] != s2_ptr->c[2]) {
-            printf("c[2] is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->c[4] != s2_ptr->c[4]) {
-            printf("c[4] is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->c[6] != s2_ptr->c[6]) {
-            printf("c[6] is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->d != s2_ptr->d) {
-            printf("d is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->e != s2_ptr->e) {
-            printf("e is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f)) {
-            printf("f is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g)) {
-            printf("g is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1])) {
-            printf("h[1] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3])) {
-            printf("h[3] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5])) {
-            printf("h[5] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7])) {
-            printf("h[7] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9])) {
-            printf("h[9] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11])) {
-            printf("h[11] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13])) {
-            printf("h[13] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15])) {
-            printf("h[15] is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i)) {
-            printf("i is different\n");
-            err = TRUE;
-        }
-        else if (!H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j)) {
-            printf("j is different\n");
-            err = TRUE;
-        }
-        else if (!H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k)) {
-            printf("k is different\n");
-            err = TRUE;
-        }
-        else if (!H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l)) {
-            printf("l is different\n");
-            err = TRUE;
-        }
-        else if (!H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m)) {
-            printf("m is different\n");
-            err = TRUE;
-        }
-        else if (!H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n)) {
-            printf("n is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->o != s2_ptr->o) {
-            printf("o is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->p != s2_ptr->p) {
-            printf("p is different\n");
-            err = TRUE;
-        }
-        else if (s1_ptr->q != s2_ptr->q) {
-            printf("q is different\n");
-            err = TRUE;
-        }
-
-        if (err) {
-            if (err)
-                H5_FAILED();
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || 
+            s1_ptr->c[0] != s2_ptr->c[0] || s1_ptr->c[1] != s2_ptr->c[1] || 
+            s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] || 
+            s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[5] != s2_ptr->c[5] ||
+            s1_ptr->c[6] != s2_ptr->c[6] || s1_ptr->c[7] != s2_ptr->c[7] ||
+            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f) || !H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[0], s2_ptr->h[0]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1]) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[2], s2_ptr->h[2]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3]) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[4], s2_ptr->h[4]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5]) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[6], s2_ptr->h[6]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7]) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[8], s2_ptr->h[8]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9]) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[10], s2_ptr->h[10]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[12], s2_ptr->h[12]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[14], s2_ptr->h[14]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15]) || 
+            !H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i) || !H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j) || 
+            !H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k) || !H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l) || 
+            !H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m) || !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n) || 
+            s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p || s1_ptr->q != s2_ptr->q) {
+            H5_FAILED();
             printf("    i=%d\n", i);
             printf("    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                    "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
                    "o=%ld, p=%ld, q=%ld}\n",
-                   s1_ptr->a, s1_ptr->b, s1_ptr->c[0], s1_ptr->c[1], s1_ptr->c[2], s1_ptr->c[3], s1_ptr->c[4],
-                   s1_ptr->c[5], s1_ptr->c[6], s1_ptr->c[7], s1_ptr->d, s1_ptr->e, (double)s1_ptr->f,
-                   (double)s1_ptr->g, (double)s1_ptr->h[0], (double)s1_ptr->h[1], (double)s1_ptr->h[2],
-                   (double)s1_ptr->h[3], (double)s1_ptr->h[4], (double)s1_ptr->h[5], (double)s1_ptr->h[6],
-                   (double)s1_ptr->h[7], (double)s1_ptr->h[8], (double)s1_ptr->h[9], (double)s1_ptr->h[10],
-                   (double)s1_ptr->h[11], (double)s1_ptr->h[12], (double)s1_ptr->h[13], (double)s1_ptr->h[14],
-                   (double)s1_ptr->h[15], (double)s1_ptr->i, (double)s1_ptr->j, s1_ptr->k, s1_ptr->l,
-                   s1_ptr->m, s1_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
+                   s1_ptr->a, s1_ptr->b, 
+                   s1_ptr->c[0], s1_ptr->c[1], s1_ptr->c[2], s1_ptr->c[3], 
+                   s1_ptr->c[4], s1_ptr->c[5], s1_ptr->c[6], s1_ptr->c[7], 
+                   s1_ptr->d, s1_ptr->e, 
+                   (double)s1_ptr->f, (double)s1_ptr->g, 
+                   (double)s1_ptr->h[0], (double)s1_ptr->h[1], (double)s1_ptr->h[2], (double)s1_ptr->h[3], 
+                   (double)s1_ptr->h[4], (double)s1_ptr->h[5], (double)s1_ptr->h[6], (double)s1_ptr->h[7], 
+                   (double)s1_ptr->h[8], (double)s1_ptr->h[9], (double)s1_ptr->h[10], (double)s1_ptr->h[11], 
+                   (double)s1_ptr->h[12], (double)s1_ptr->h[13], (double)s1_ptr->h[14], (double)s1_ptr->h[15], 
+                   (double)s1_ptr->i, (double)s1_ptr->j, 
+                   s1_ptr->k, s1_ptr->l, s1_ptr->m, s1_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
             printf("    rbuf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                    "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
                    "o=%ld, p=%ld, q=%ld}\n",
-                   s2_ptr->a, s2_ptr->b, s2_ptr->c[0], s2_ptr->c[1], s2_ptr->c[2], s2_ptr->c[3], s2_ptr->c[4],
-                   s2_ptr->c[5], s2_ptr->c[6], s2_ptr->c[7], s2_ptr->d, s2_ptr->e, (double)s2_ptr->f,
-                   (double)s2_ptr->g, (double)s2_ptr->h[0], (double)s2_ptr->h[1], (double)s2_ptr->h[2],
-                   (double)s2_ptr->h[3], (double)s2_ptr->h[4], (double)s2_ptr->h[5], (double)s2_ptr->h[6],
-                   (double)s2_ptr->h[7], (double)s2_ptr->h[8], (double)s2_ptr->h[9], (double)s2_ptr->h[10],
-                   (double)s2_ptr->h[11], (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14],
-                   (double)s2_ptr->h[15], (double)s2_ptr->i, (double)s2_ptr->j, s2_ptr->k, s2_ptr->l,
-                   s2_ptr->m, s2_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
-            if (err)
-                goto error;
+                   s2_ptr->a, s2_ptr->b, 
+                   s2_ptr->c[0], s2_ptr->c[1], s2_ptr->c[2], s2_ptr->c[3], 
+                   s2_ptr->c[4], s2_ptr->c[5], s2_ptr->c[6], s2_ptr->c[7], 
+                   s2_ptr->d, s2_ptr->e, 
+                   (double)s2_ptr->f, (double)s2_ptr->g, 
+                   (double)s2_ptr->h[0], (double)s2_ptr->h[1], (double)s2_ptr->h[2], (double)s2_ptr->h[3], 
+                   (double)s2_ptr->h[4], (double)s2_ptr->h[5], (double)s2_ptr->h[6], (double)s2_ptr->h[7], 
+                   (double)s2_ptr->h[8], (double)s2_ptr->h[9], (double)s2_ptr->h[10], (double)s2_ptr->h[11], 
+                   (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14], (double)s2_ptr->h[15], 
+                   (double)s2_ptr->i, (double)s2_ptr->j, 
+                   s2_ptr->k, s2_ptr->l, s2_ptr->m, s2_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
+
+            goto error;
         }
     } /* end for */
 
@@ -315,12 +228,12 @@ error:
 static unsigned
 test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillvalue, unsigned set_buf)
 {
-    hid_t          fid;
-    hid_t          rew_tid, src_tid;
-    hid_t          did;
-    hid_t          sid;
-    hid_t          dcpl;
-    hid_t          dxpl;
+    hid_t          fid = H5I_INVALID_HID;
+    hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID;
+    hid_t          did = H5I_INVALID_HID;
+    hid_t          sid = H5I_INVALID_HID;
+    hid_t          dcpl = H5I_INVALID_HID;
+    hid_t          dxpl = H5I_INVALID_HID;
     hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
@@ -415,8 +328,6 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dclose(did) < 0)
         goto error;
 
-    PASSED();
-
     /* Finishing test and release resources */
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
@@ -429,8 +340,10 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     if (H5Tclose(src_tid) < 0)
         FAIL_STACK_ERROR;
+
     if (H5Tclose(rew_tid) < 0)
         FAIL_STACK_ERROR;
+
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
 
@@ -438,9 +351,22 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     free(rew_buf);
     free(save_rew_buf);
 
+    PASSED();
     return 0;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Tclose(src_tid);
+        H5Tclose(rew_tid);
+    }
+    H5E_END_TRY
+
     if (rbuf)
         free(rbuf);
     if (rew_buf)
@@ -448,7 +374,7 @@ error:
     if (save_rew_buf)
         free(save_rew_buf);
 
-    printf("*** SELECT SRC SUBSET TEST FAILED ***");
+    printf("\n*** SELECT SRC SUBSET TEST FAILED ***\n");
     return 1;
 } /* test_select_src_subset() */
 
@@ -545,6 +471,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
 
+    /* Read from the dataset with rew_tid */
     if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
@@ -568,6 +495,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
         goto error;
 
+    /* Read frm the dataset with rew_tid */
     if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
@@ -576,8 +504,6 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     if (H5Dclose(did) < 0)
         goto error;
-
-    PASSED();
 
     /* Finishing test and release resources */
     if (H5Sclose(sid) < 0)
@@ -591,6 +517,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     if (H5Tclose(src_tid) < 0)
         goto error;
+
     if (H5Tclose(rew_tid) < 0)
         goto error;
     if (H5Fclose(fid) < 0)
@@ -600,6 +527,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     free(rew_buf);
     free(save_rew_buf);
 
+    PASSED();
     return 0;
 
 error:
@@ -607,6 +535,7 @@ error:
     {
         H5Sclose(sid);
         H5Pclose(dcpl);
+        H5Pclose(dxpl);
         H5Dclose(did);
         H5Fclose(fid);
         H5Tclose(src_tid);
@@ -621,7 +550,7 @@ error:
     if (save_rew_buf)
         free(save_rew_buf);
 
-    printf("*** SELECT DST SUBSET TEST FAILED ***");
+    printf("\n*** SELECT DST SUBSET TEST FAILED ***\n");
     return 1;
 } /* test_select_dst_subset */
 
@@ -644,8 +573,8 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 {
     /* s1_t type */
     s1_t *s1 = NULL;
-    hid_t s1_tid;
-    hid_t s3_tid;
+    hid_t s1_tid = H5I_INVALID_HID;
+    hid_t s3_tid = H5I_INVALID_HID;
 
     /* Buffers */
     s3_t *s3      = NULL;
@@ -655,8 +584,12 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Other variables */
     unsigned int   i;
-    hid_t          fid, did, sid, dcpl, dxpl;
-    hid_t          array_dt;
+    hid_t          fid = H5I_INVALID_HID;
+    hid_t          did = H5I_INVALID_HID;
+    hid_t          sid = H5I_INVALID_HID; 
+    hid_t          dcpl = H5I_INVALID_HID; 
+    hid_t          dxpl = H5I_INVALID_HID; 
+    hid_t          array_dt = H5I_INVALID_HID;
     static hsize_t dim[]     = {NX, NY};
     int            fillvalue = (-1);
     size_t         ss, ss1, ss2;
@@ -800,10 +733,26 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     /*
      * Release resources.
      */
-    H5Dclose(did);
-    H5Fclose(fid);
-    H5Pclose(dcpl);
-    H5Pclose(dxpl);
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Tclose(s1_tid) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Tclose(s3_tid) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
 
     /* Release buffers */
     free(s1);
@@ -815,7 +764,17 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     return 0;
 
 error:
-    printf("*** SELECT COMPOUND DATASET TESTS FAILED ***");
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Tclose(s1_tid);
+        H5Tclose(s3_tid);
+    }
+    H5E_END_TRY
 
     /* Release resources */
     if (s1)
@@ -829,6 +788,7 @@ error:
     if (rbuf3)
         free(rbuf3);
 
+    printf("\n*** SELECT COMPOUND DATASET TESTS FAILED ***\n");
     return 1;
 } /* test_select_compound() */
 
