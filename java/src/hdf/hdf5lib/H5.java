@@ -271,7 +271,7 @@ public class H5 implements java.io.Serializable {
      * </ul>
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = {1, 10, 10};
+    public final static int LIB_VERSION[] = {1, 10, 11};
 
     /**
      * @ingroup JH5
