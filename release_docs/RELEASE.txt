@@ -1,4 +1,4 @@
-HDF5 version 1.10.11-1 currently under development
+HDF5 version 1.10.12-1 currently under development
 ================================================================================
 
 
@@ -49,32 +49,12 @@ New Features
 
     Configuration:
     -------------
-    - Added support for CMake presets file.
-
-      CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
-      that allow users to specify common configure options and share them with others.
-      HDF added a CMakePresets.json file of a typical configuration and support
-      file, config/cmake-presets/hidden-presets.json. 
-      Also added a section to INSTALL_CMake.txt with very basic explanation of the
-      process to use CMakePresets.
-
-    - Enabled instrumentation of the library by default in CMake for parallel
-      debug builds
-
-      HDF5 can be configured to instrument portions of the parallel library to
-      aid in debugging. Autotools builds of HDF5 turn this capability on by
-      default for parallel debug builds and off by default for other build types.
-      CMake has been updated to match this behavior.
+    -
 
 
     Library:
     --------
-    - Change the error handling for a not found path in the find plugin process.
-
-      While attempting to load a plugin the HDF5 library will fail if one of the
-      directories in the plugin paths does not exist, even if there are more paths
-      to check. Instead of exiting the function with an error, just logged the error
-      and continue processing the list of paths to check.
+    -
 
 
     Parallel Library:
@@ -94,11 +74,7 @@ New Features
 
     Java Library:
     -------------
-    - HDF5GroupInfo class has been deprecated.
-
-      This class assumes that an object can contain four values which uniquely identify an
-      object among those HDF5 files which are open. This is no longer valid in future
-      HDF5 releases.
+    -
 
 
     Tools:
@@ -135,191 +111,22 @@ Bug Fixes since HDF5-1.10.10 release
 ===================================
     Library
     -------
-    - Fixed CVE-2018-11202
-
-      A malformed file could result in chunk index memory leaks. Under most
-      conditions (i.e., when the --enable-using-memchecker option is NOT
-      used), this would result in a small memory leak and and infinite loop
-      and abort when shutting down the library. The infinite loop would be
-      due to the "free list" package not being able to clear its resources
-      so the library couldn't shut down. When the "using a memory checker"
-      option is used, the free lists are disabled so there is just a memory
-      leak with no abort on library shutdown.
-
-      The chunk index resources are now correctly cleaned up when reading
-      misparsed files and valgrind confirms no memory leaks.
-
-    - Fixed a file space allocation bug in the parallel library for chunked
-      datasets
-
-      With the addition of support for incremental file space allocation for
-      chunked datasets with filters applied to them that are created/accessed
-      in parallel, a bug was introduced to the library's parallel file space
-      allocation code. This could cause file space to not be allocated correctly
-      for datasets without filters applied to them that are created with serial
-      file access and later opened with parallel file access. In turn, this could
-      cause parallel writes to those datasets to place incorrect data in the file.
-
-    - Fixed an assertion failure in Parallel HDF5 when a file can't be created
-      due to an invalid library version bounds setting
-
-      An assertion failure could occur in H5MF_settle_raw_data_fsm when a file
-      can't be created with Parallel HDF5 due to specifying the use of a paged,
-      persistent file free space manager
-      (H5Pset_file_space_strategy(..., H5F_FSPACE_STRATEGY_PAGE, 1, ...)) with
-      an invalid library version bounds combination
-      (H5Pset_libver_bounds(..., H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)). This
-      has now been fixed.
-
-    - Fixed an assertion in a previous fix for CVE-2016-4332
-
-      An assert could fail when processing corrupt files that have invalid
-      shared message flags (as in CVE-2016-4332).
-
-      The assert statement in question has been replaced with pointer checks
-      that don't raise errors. Since the function is in cleanup code, we do
-      our best to close and free things, even when presented with partially
-      initialized structs.
-
-      Fixes CVE-2016-4332 and HDFFV-9950 (confirmed via the cve_hdf5 repo)
-
-    - Seg fault on file close
-
-      h5debug fails at file close with core dump on a file that has an
-      illegal file size in its cache image.  In H5F__dest(), the library
-      performs all the closing operations for the file and keeps track of
-      the error encountered when reading the file cache image.  
-      At the end of the routine, it frees the file's file structure and 
-      returns error.  Due to the error return, the file object is not removed 
-      from the ID node table.  This eventually causes assertion failure in 
-      H5F__close_cb() when the library finally exits and tries to 
-      access that file object in the table for closing.
-
-      The closing routine, H5F__dest(), will not free the file structure if
-      there is error, keeping a valid file structure in the ID node table.
-      It will be freed later in H5F__close_cb() when the library exits and 
-      terminates the file package.
-
-      Fix for HDFFV-11052, CVE-2020-10812
-
-    - Fixed memory leaks that could occur when reading a dataset from a
-      malformed file
-
-      When attempting to read layout, pline, and efl information for a
-      dataset, memory leaks could occur if attempting to read pline/efl
-      information threw an error, which is due to the memory that was 
-      allocated for pline and efl not being properly cleaned up on error.  
-
-      Fixes Github issue #2602
-
-    - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
-
-      H5Ocopy was missing a check to determine whether the new object's
-      object header version is greater than version 1. Without this check,
-      copying of objects with object headers that are smaller than a
-      certain size would cause H5Ocopy to create an object header for the
-      new object that has a gap in the header data. According to the
-      HDF5 File Format Specification, this is not allowed for version
-      1 of the object header format.
-
-      Fixes GitHub issue #2653
-
-    - Fixed potential heap buffer overflow in decoding of link info message
-
-      Detections of buffer overflow were added for decoding version, index
-      flags, link creation order value, and the next three addresses.  The
-      checkings will remove the potential invalid read of any of these
-      values that could be triggered by a malformed file.
-
-      Fixes GitHub issue #2603
-
-    - Fixed potential buffer overrun issues in some object header decode routines
-
-      Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
-      ensure that memory buffers don't get overrun when decoding buffers read from
-      a (possibly corrupted) HDF5 file.
-
-    - Fixed a heap buffer overflow that occurs when reading from
-      a dataset with a compact layout within a malformed HDF5 file
-
-      During opening of a dataset that has a compact layout, the
-      library allocates a buffer that stores the dataset's raw data.
-      The dataset's object header that gets written to the file
-      contains information about how large of a buffer the library
-      should allocate. If this object header is malformed such that
-      it causes the library to allocate a buffer that is too small
-      to hold the dataset's raw data, future I/O to the dataset can
-      result in heap buffer overflows. To fix this issue, an extra
-      check is now performed for compact datasets to ensure that
-      the size of the allocated buffer matches the expected size
-      of the dataset's raw data (as calculated from the dataset's
-      dataspace and datatype information). If the two sizes do not
-      match, opening of the dataset will fail.
-
-      Fixes GitHub issue #2606
-
-    - Fix for CVE-2019-8396
-
-      Malformed HDF5 files may have truncated content which does not match
-      the expected size. When H5O__pline_decode() attempts to decode these it
-      may read past the end of the allocated space leading to heap overflows
-      as bounds checking is incomplete.
-
-      The fix ensures each element is within bounds before reading.
-
-      Fixes Jira issue HDFFV-10712, CVE-2019-8396, GitHub issue #2209
-
-    - Memory leak
-
-      Memory leak was detected when running h5dump with "pov".  The memory was allocated
-      via H5FL__malloc() in hdf5/src/H5FL.c
-
-      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
-      When deserializing the object header chunks for the file, memory is allocated for the
-      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
-      As error is encountered in loading the illegal message, the memory allocated for
-      cont_msg_info->msgs needs to be freed.
-
-      Fix for GitHub issue #2599
+    -
 
 
     Java Library
     ------------
-    - Fixed switch case 'L' block missing a break statement.
-
-      The HDF5Array.arrayify method is missing a break statement in the case 'L': section
-      which causes it to fall through and throw an HDF5JavaException when attempting to
-      read an Array[Array[Long]].
-
-      The error was fixed by inserting a break statement at the end of the case 'L': sections.
-
-      Fixes GitHub issue #3056
+    -
 
 
     Configuration
     -------------
-    - Fixed syntax of generator expressions used by CMake
-
-      Adding quotes around the generator expression should allow CMake to
-      correctly parse the expression. Generator expressions are typically
-      parsed after command arguments. If a generator expression contains
-      spaces, new lines, semicolons or other characters that may be
-      interpreted as command argument separators, the whole expression
-      should be surrounded by quotes when passed to a command. Failure to
-      do so may result in the expression being split and it may no longer
-      be recognized as a generator expression.
-
-      Fixes GitHub issue #2906
+    -
 
 
     Tools
     -----
-    - Names of objects with square brackets will have trouble without the
-      special argument, --no-compact-subset, on the h5dump command line.
-
-      h5diff did not have this option and now it has been added.
-
-      Fix for GitHub issue #2682
+    -
 
 
     Performance
