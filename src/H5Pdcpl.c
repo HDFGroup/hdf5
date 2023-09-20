@@ -463,13 +463,13 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             /* Iterate over entries */
             for (u = 0; u < layout->storage.u.virt.list_nused; u++) {
                 /* Source file name */
-                tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
+                tmp_size = strlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
                 H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
                 /* Source dataset name */
-                tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
+                tmp_size = strlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
                 H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
@@ -510,11 +510,11 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             /* Iterate over entries */
             for (u = 0; u < layout->storage.u.virt.list_nused; u++) {
                 /* Source file name */
-                tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
+                tmp_size = strlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
                 *size += tmp_size;
 
                 /* Source dataset name */
-                tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
+                tmp_size = strlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
                 *size += tmp_size;
 
                 /* Source selection */
@@ -632,7 +632,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                 /* Decode each entry */
                 for (u = 0; u < (size_t)nentries; u++) {
                     /* Source file name */
-                    tmp_size = HDstrlen((const char *)*pp) + 1;
+                    tmp_size = strlen((const char *)*pp) + 1;
                     if (NULL ==
                         (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
@@ -641,7 +641,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     *pp += tmp_size;
 
                     /* Source dataset name */
-                    tmp_size = HDstrlen((const char *)*pp) + 1;
+                    tmp_size = strlen((const char *)*pp) + 1;
                     if (NULL ==
                         (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
@@ -884,16 +884,16 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
                     HGOTO_DONE(1);
 
                 /* Compare source file names */
-                strcmp_ret = HDstrcmp(layout1->storage.u.virt.list[u].source_file_name,
-                                      layout2->storage.u.virt.list[u].source_file_name);
+                strcmp_ret = strcmp(layout1->storage.u.virt.list[u].source_file_name,
+                                    layout2->storage.u.virt.list[u].source_file_name);
                 if (strcmp_ret < 0)
                     HGOTO_DONE(-1);
                 if (strcmp_ret > 0)
                     HGOTO_DONE(1);
 
                 /* Compare source dataset names */
-                strcmp_ret = HDstrcmp(layout1->storage.u.virt.list[u].source_dset_name,
-                                      layout2->storage.u.virt.list[u].source_dset_name);
+                strcmp_ret = strcmp(layout1->storage.u.virt.list[u].source_dset_name,
+                                    layout2->storage.u.virt.list[u].source_dset_name);
                 if (strcmp_ret < 0)
                     HGOTO_DONE(-1);
                 if (strcmp_ret > 0)
@@ -1442,7 +1442,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
         /* Encode file list */
         for (u = 0; u < efl->nused; u++) {
             /* Calculate length of slot name and encode it */
-            len       = HDstrlen(efl->slot[u].name) + 1;
+            len       = strlen(efl->slot[u].name) + 1;
             enc_value = (uint64_t)len;
             enc_size  = H5VM_limit_enc_size(enc_value);
             assert(enc_size < 256);
@@ -1472,7 +1472,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
     /* Calculate size needed for encoding */
     *size += (1 + H5VM_limit_enc_size((uint64_t)efl->nused));
     for (u = 0; u < efl->nused; u++) {
-        len = HDstrlen(efl->slot[u].name) + 1;
+        len = strlen(efl->slot[u].name) + 1;
         *size += (1 + H5VM_limit_enc_size((uint64_t)len));
         *size += len;
         *size += (1 + H5VM_limit_enc_size((uint64_t)efl->slot[u].offset));
@@ -1689,7 +1689,7 @@ H5P__dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t H5_ATTR
             if (efl1->slot[u].name != NULL && efl2->slot[u].name == NULL)
                 HGOTO_DONE(1);
             if (efl1->slot[u].name != NULL)
-                if ((cmp_value = HDstrcmp(efl1->slot[u].name, efl2->slot[u].name)) != 0)
+                if ((cmp_value = strcmp(efl1->slot[u].name, efl2->slot[u].name)) != 0)
                     HGOTO_DONE(cmp_value);
 
             /* Check the file offset of the efl entry */
@@ -2418,8 +2418,8 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t idx, char *name /*out*/, size_t si
     assert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     assert(layout.storage.u.virt.list[idx].source_file_name);
     if (name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[idx].source_file_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[idx].source_file_name);
+        (void)strncpy(name, layout.storage.u.virt.list[idx].source_file_name, size);
+    ret_value = (ssize_t)strlen(layout.storage.u.virt.list[idx].source_file_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2476,8 +2476,8 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t idx, char *name /*out*/, size_t si
     assert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     assert(layout.storage.u.virt.list[idx].source_dset_name);
     if (name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[idx].source_dset_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[idx].source_dset_name);
+        (void)strncpy(name, layout.storage.u.virt.list[idx].source_dset_name, size);
+    ret_value = (ssize_t)strlen(layout.storage.u.virt.list[idx].source_dset_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2738,7 +2738,7 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out
 
     /* Return values */
     if (name_size > 0 && name)
-        HDstrncpy(name, efl.slot[idx].name, name_size);
+        strncpy(name, efl.slot[idx].name, name_size);
     /* XXX: Badness!
      *
      * The offset parameter is of type off_t and the offset field of H5O_efl_entry_t

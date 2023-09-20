@@ -488,7 +488,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
+        snprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -1272,7 +1272,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if (H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
-            if (HDstrcmp(objname, objname2) != 0)
+            if (strcmp(objname, objname2) != 0)
                 TEST_ERROR;
 
             /* Get link info */
@@ -1870,50 +1870,50 @@ main(void)
 
         /* Test with and without shared messages */
         if (configuration & CONFIG_SHARE_SRC) {
-            HDputs("\nTesting with shared src messages:");
+            puts("\nTesting with shared src messages:");
             fcpl_src = fcpl_shared;
         }
         else {
-            HDputs("\nTesting without shared src messages:");
+            puts("\nTesting without shared src messages:");
             fcpl_src = H5P_DEFAULT;
         }
         if (configuration & CONFIG_SHARE_DST) {
-            HDputs("Testing with shared dst messages:");
+            puts("Testing with shared dst messages:");
             fcpl_dst = fcpl_shared;
         }
         else {
-            HDputs("Testing without shared dst messages:");
+            puts("Testing without shared dst messages:");
             fcpl_dst = H5P_DEFAULT;
         }
 
         /* Set the FAPL for the source file's type of format */
         if (configuration & CONFIG_SRC_NEW_FORMAT) {
-            HDputs("Testing with latest format for source file:");
+            puts("Testing with latest format for source file:");
             src_fapl = fapl2;
 
             /* Test with and without dense attributes */
             if (configuration & CONFIG_DENSE) {
-                HDputs("Testing with dense attributes:");
+                puts("Testing with dense attributes:");
                 num_attributes_g = max_compact + 1;
             }
             else {
-                HDputs("Testing without dense attributes:");
+                puts("Testing without dense attributes:");
                 num_attributes_g = MAX(min_dense, 2) - 2;
             }
         } /* end if */
         else {
-            HDputs("Testing with oldest file format for source file:");
+            puts("Testing with oldest file format for source file:");
             src_fapl         = fapl;
             num_attributes_g = 4;
         } /* end else */
 
         /* Set the FAPL for the destination file's type of format */
         if (configuration & CONFIG_DST_NEW_FORMAT) {
-            HDputs("Testing with latest format for destination file:");
+            puts("Testing with latest format for destination file:");
             dst_fapl = fapl2;
         } /* end if */
         else {
-            HDputs("Testing with oldest file format for destination file:");
+            puts("Testing with oldest file format for destination file:");
             dst_fapl = fapl;
         } /* end else */
 
@@ -1934,7 +1934,7 @@ main(void)
         exit(EXIT_FAILURE);
     } /* end if */
 
-    HDputs("All object copying tests passed.");
+    puts("All object copying tests passed.");
 
     /* close property list.
      * NOTE: if this property list is not closed and the test is

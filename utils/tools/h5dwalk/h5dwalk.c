@@ -97,7 +97,7 @@ static void
 save_command(const char *argv0)
 {
     assert(argv0);
-    user_cmd = HDstrdup(argv0);
+    user_cmd = strdup(argv0);
 }
 
 static void
@@ -328,7 +328,7 @@ distribution_parse(struct distribute_option *option, const char *string)
         return -1;
     }
 
-    str = HDstrdup(string);
+    str = strdup(string);
     /* Parse separators */
     ptr  = str + strlen("size:");
     next = ptr;
@@ -761,9 +761,9 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
     FILE *config = fopen(config_filename, "r");
     if (config == NULL)
         return -1;
-    while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
+    while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
         struct stat statbuf;
-        char       *eol = HDstrchr(linebuf, '\n');
+        char       *eol = strchr(linebuf, '\n');
         if (eol)
             *eol = '\0';
         if (HDstat(linebuf, &statbuf) == 0) {
@@ -835,10 +835,10 @@ copy_args(int argc, const char *argv[], int *mfu_argc, int *copy_len)
     save_command(argv[0]);
 
     for (i = 0; i < argc; i++) {
-        argv_copy[i] = HDstrdup(argv[i]);
+        argv_copy[i] = strdup(argv[i]);
         bytes_copied += (int)(strlen(argv[i]) + 1);
-        argv_copy[i] = HDstrdup(argv[i]);
-        if (check_mfu_args && (HDstrncmp(argv[i], "-T", 2) == 0)) {
+        argv_copy[i] = strdup(argv[i]);
+        if (check_mfu_args && (strncmp(argv[i], "-T", 2) == 0)) {
             check_mfu_args = 0;
             *mfu_argc      = i + 1;
         }
@@ -878,7 +878,7 @@ get_copy_count(char *fname, char *appname)
     hash_index = filehash % NAME_ENTRIES;
     if (filename_cache[hash_index].name == NULL) {
         filename_cache[hash_index].hash      = apphash;
-        filename_cache[hash_index].name      = HDstrdup(fname);
+        filename_cache[hash_index].name      = strdup(fname);
         filename_cache[hash_index].next      = NULL;
         filename_cache[hash_index].nextCount = 1;
         return 0;
@@ -906,7 +906,7 @@ get_copy_count(char *fname, char *appname)
         nextEntry = (hash_entry_t *)malloc(sizeof(hash_entry_t));
         if (nextEntry) {
             lastEntry->next      = nextEntry;
-            nextEntry->name      = HDstrdup(fname);
+            nextEntry->name      = strdup(fname);
             nextEntry->hash      = apphash;
             nextEntry->next      = NULL;
             nextEntry->nextCount = 1;
@@ -929,7 +929,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
 #else
 
     /* create a copy of the 1st file passed to the application */
-    HDstrcpy(filepath, fname);
+    strcpy(filepath, fname);
 
     if (log_output_in_single_file || use_stdout) {
         pid_t   pid;
@@ -992,7 +992,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             nbytes    = strlen(cmdline);
             /* Record the command line for the log! */
             if (nbytes < remaining) {
-                HDstrcpy(&buf[offset], cmdline);
+                strcpy(&buf[offset], cmdline);
                 thisbuft->chars += nbytes;
                 thisbuft->count -= nbytes;
                 remaining -= nbytes;
@@ -1014,7 +1014,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                 thisbuft->bufsize = BUFT_SIZE;
                 thisbuft->dt      = MPI_CHAR;
                 /* Copy the remaining cmdline text into the new buffer */
-                HDstrcpy(buf, nextpart);
+                strcpy(buf, nextpart);
                 /* And update our buffer info */
                 // thisbuft->chars = strlen(nextpart) +1;
                 thisbuft->chars = strlen(nextpart);
@@ -1061,8 +1061,8 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
         char   logpath[2048];
         char   logErrors[2048];
         char   current_dir[2048];
-        char  *logbase = HDstrdup(basename(filepath));
-        char  *thisapp = HDstrdup(basename(toolname));
+        char  *logbase = strdup(basename(filepath));
+        char  *thisapp = strdup(basename(toolname));
 
         if (processing_inputfile == 0)
             log_instance = get_copy_count(logbase, thisapp);
@@ -1071,12 +1071,12 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             if ((log_instance > 0) || processing_inputfile) {
                 if (processing_inputfile)
                     log_instance = current_input_index;
-                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d",
-                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
+                snprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d",
+                         HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
             }
             else {
-                HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log",
-                           HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
+                snprintf(logpath, sizeof(logpath), "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)),
+                         logbase, thisapp);
             }
         }
         else {
@@ -1085,17 +1085,17 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                 if (processing_inputfile)
                     log_instance = current_input_index;
                 if (txtlog[log_len - 1] == '/')
-                    HDsnprintf(logpath, sizeof(logpath), "%s%s_%s.log_%d", txtlog, logbase, thisapp,
-                               log_instance);
+                    snprintf(logpath, sizeof(logpath), "%s%s_%s.log_%d", txtlog, logbase, thisapp,
+                             log_instance);
                 else
-                    HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", txtlog, logbase, thisapp,
-                               log_instance);
+                    snprintf(logpath, sizeof(logpath), "%s/%s_%s.log_%d", txtlog, logbase, thisapp,
+                             log_instance);
             }
             else {
                 if (txtlog[log_len - 1] == '/')
-                    HDsnprintf(logpath, sizeof(logpath), "%s%s_%s.log", txtlog, logbase, thisapp);
+                    snprintf(logpath, sizeof(logpath), "%s%s_%s.log", txtlog, logbase, thisapp);
                 else
-                    HDsnprintf(logpath, sizeof(logpath), "%s/%s_%s.log", txtlog, logbase, thisapp);
+                    snprintf(logpath, sizeof(logpath), "%s/%s_%s.log", txtlog, logbase, thisapp);
             }
         }
 
@@ -1105,8 +1105,8 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
              * copy of the logpath variable.
              */
             log_len = strlen(logpath);
-            HDstrcpy(logErrors, logpath);
-            HDstrcpy(&logErrors[log_len - 3], "err");
+            strcpy(logErrors, logpath);
+            strcpy(&logErrors[log_len - 3], "err");
         }
         if (mfu_debug_level == MFU_LOG_VERBOSE) {
             printf("\tCreating logfile: %s\n", logpath);
@@ -1161,7 +1161,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     toolname = buf;
 
     /* Get a copy of fname */
-    HDstrcpy(filepath, fname);
+    strcpy(filepath, fname);
 
     /* allocate a char* for each item in the argv array,
      * plus one more for a trailing NULL
@@ -1173,10 +1173,10 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     char   cmdline[2048];
     char **argv = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
 
-    argv[k++] = HDstrdup(toolname);
+    argv[k++] = strdup(toolname);
 
     memset(cmdline, 0, sizeof(cmdline));
-    buf += HDstrlen(toolname) + 1;
+    buf += strlen(toolname) + 1;
     /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
         if (buf[0] == '&') {
@@ -1193,26 +1193,26 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             if (fname_arg == NULL) {
                 printf("[%d] Warning: Unable to resolve file_substitution %d (idx=%ld)\n", sg_mpi_rank,
                        file_substituted, idx);
-                argv[k] = HDstrdup(fname);
+                argv[k] = strdup(fname);
             }
             else {
-                argv[k] = HDstrdup(fname_arg);
+                argv[k] = strdup(fname_arg);
                 file_substituted++;
             }
         }
         else {
-            argv[k] = HDstrdup(buf);
-            buf += HDstrlen(argv[k]) + 1;
+            argv[k] = strdup(buf);
+            buf += strlen(argv[k]) + 1;
         }
     }
 
-    HDsnprintf(cmdline, sizeof(cmdline), "\n---------\nCommand:");
+    snprintf(cmdline, sizeof(cmdline), "\n---------\nCommand:");
     b_offset = strlen(cmdline);
     for (k = 0; k < count; k++) {
-        HDsprintf(&cmdline[b_offset], " %s", argv[k]);
+        sprintf(&cmdline[b_offset], " %s", argv[k]);
         b_offset = strlen(cmdline);
     }
-    HDsprintf(&cmdline[b_offset], "\n");
+    sprintf(&cmdline[b_offset], "\n");
     run_command(count, argv, cmdline, fname);
 
     mfu_free(argv);
@@ -1244,7 +1244,7 @@ static void
 add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count __attribute__((unused)))
 {
     char cmdline[2048];
-    HDsnprintf(cmdline, sizeof(cmdline), "\n---------\nCommand: %s\n", cmdstring);
+    snprintf(cmdline, sizeof(cmdline), "\n---------\nCommand: %s\n", cmdstring);
     argv[argc] = NULL;
     run_command(argc, argv, cmdline, argv[f_index[0]]);
     return;
@@ -1270,7 +1270,7 @@ process_input_file(char *inputname, int myrank, int size)
      */
     processing_inputfile = 1;
 
-    while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
+    while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
         const char *delim   = " \n";
         char       *cmdline = NULL;
         char       *cmd     = NULL;
@@ -1285,8 +1285,8 @@ process_input_file(char *inputname, int myrank, int size)
         if (eol) {
             *eol = '\0';
         }
-        cmdline = HDstrdup(linebuf);
-        cmd     = HDstrtok(linebuf, delim);
+        cmdline = strdup(linebuf);
+        cmd     = strtok(linebuf, delim);
         if (cmd) {
             arg = cmd;
             while (arg != NULL) {
@@ -1401,29 +1401,29 @@ main(int argc, char *argv[])
                 h5dwalk_exit(EXIT_FAILURE);
                 break;
             case 'i':
-                inputname    = HDstrdup(H5_optarg);
+                inputname    = strdup(H5_optarg);
                 last_mfu_arg = H5_optind;
                 if (inputname)
                     tool_selected = 1;
                 break;
             case 'o':
-                outputname   = HDstrdup(H5_optarg);
+                outputname   = strdup(H5_optarg);
                 last_mfu_arg = H5_optind;
                 if (outputname) {
                     log_output_in_single_file = 1;
-                    output_log_file           = HDstrdup(H5_optarg);
+                    output_log_file           = strdup(H5_optarg);
                     text                      = 1; /* Format TXT, not HDF5 */
                 }
                 break;
             case 'E':
                 log_errors_in_file = 1;
-                errlog             = HDstrdup(H5_optarg);
+                errlog             = strdup(H5_optarg);
                 last_mfu_arg       = H5_optind;
                 break;
             case 'l':
                 log_stdout_in_file = 1;
                 if (H5_optarg)
-                    txtlog = HDstrdup(H5_optarg);
+                    txtlog = strdup(H5_optarg);
                 break;
             case 'T':
                 /* We need to stop parsing user options at this point.
@@ -1562,7 +1562,7 @@ main(int argc, char *argv[])
         mfu_dst_file = mfu_file_new();
         destpath     = &paths[1];
         path2        = destpath->path;
-        pathlen_total += HDstrlen(path2);
+        pathlen_total += strlen(path2);
         mfu_flist_walk_param_paths(1, destpath, walk_opts, flist2, mfu_dst_file);
     }
 
@@ -1616,8 +1616,8 @@ main(int argc, char *argv[])
                 k++;
             }
             else {
-                HDstrcpy(ptr, argv[i]);
-                ptr += HDstrlen(argv[i]);
+                strcpy(ptr, argv[i]);
+                ptr += strlen(argv[i]);
             }
             *ptr++ = 0;
         }

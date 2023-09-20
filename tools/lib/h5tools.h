@@ -40,7 +40,7 @@
 #define PUTSTREAM(X, S)                                                                                      \
     do {                                                                                                     \
         if (S != NULL)                                                                                       \
-            HDfputs(X, S);                                                                                   \
+            fputs(X, S);                                                                                     \
     } while (0)
 
 /*

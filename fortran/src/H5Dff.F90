@@ -2396,14 +2396,15 @@ CONTAINS
 
     INTEGER(HID_T)    , INTENT(IN)  :: dset_id
     INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
-    INTEGER(C_INT32_T), INTENT(INOUT)  :: filters
+    INTEGER           , INTENT(INOUT) :: filters
     TYPE(C_PTR)                     :: buf
     INTEGER           , INTENT(OUT) :: hdferr
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
 
     INTEGER(HID_T) :: dxpl_id_default
-    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: c_offset
     INTEGER(HSIZE_T) :: i, rank
+    INTEGER(C_INT32_T) :: c_filters
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Dread_chunk(dset_id, dxpl_id, offset, filters, buf) &
@@ -2422,9 +2423,11 @@ CONTAINS
     dxpl_id_default = H5P_DEFAULT_F
     IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
 
+    c_filters = INT(filters, KIND=C_INT32_T)
+
     rank = SIZE(offset, KIND=HSIZE_T)
 
-    ALLOCATE(offset_c(rank), STAT=hdferr)
+    ALLOCATE(c_offset(rank), STAT=hdferr)
     IF (hdferr .NE. 0 ) THEN
        hdferr = -1
        RETURN
@@ -2434,12 +2437,14 @@ CONTAINS
     ! Reverse dimensions due to C-FORTRAN storage order
     !
     DO i = 1, rank
-       offset_c(i) = offset(rank - i + 1)
+       c_offset(i) = offset(rank - i + 1)
     ENDDO
 
-    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, offset_c, filters, buf))
+    hdferr = INT(H5Dread_chunk(dset_id, dxpl_id_default, c_offset, c_filters, buf))
 
-    DEALLOCATE(offset_c)
+    filters = INT(c_filters)
+
+    DEALLOCATE(c_offset)
 
   END SUBROUTINE h5dread_chunk_f
 
@@ -2462,7 +2467,7 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER(HID_T)    , INTENT(IN) :: dset_id
-    INTEGER(C_INT32_T), INTENT(IN) :: filters
+    INTEGER           , INTENT(IN) :: filters
     INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
     INTEGER(SIZE_T)   , INTENT(IN)  :: data_size
     TYPE(C_PTR)                     :: buf
@@ -2470,8 +2475,9 @@ CONTAINS
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
 
     INTEGER(HID_T) :: dxpl_id_default
-    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: offset_c
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: c_offset
     INTEGER(HSIZE_T) :: i, rank
+    INTEGER(C_INT32_T) :: c_filters
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Dwrite_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) &
@@ -2493,7 +2499,7 @@ CONTAINS
 
     rank = SIZE(offset, KIND=HSIZE_T)
 
-    ALLOCATE(offset_c(rank), STAT=hdferr)
+    ALLOCATE(c_offset(rank), STAT=hdferr)
     IF (hdferr .NE. 0 ) THEN
        hdferr = -1
        RETURN
@@ -2503,12 +2509,14 @@ CONTAINS
     ! Reverse dimensions due to C-FORTRAN storage order
     !
     DO i = 1, rank
-       offset_c(i) = offset(rank - i + 1)
+       c_offset(i) = offset(rank - i + 1)
     ENDDO
 
-    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, filters, offset_c, data_size, buf))
+    c_filters = INT(filters, C_INT32_T)
 
-    DEALLOCATE(offset_c)
+    hdferr = INT(H5Dwrite_chunk(dset_id, dxpl_id_default, c_filters, c_offset, data_size, buf))
+
+    DEALLOCATE(c_offset)
 
   END SUBROUTINE h5dwrite_chunk_f
 

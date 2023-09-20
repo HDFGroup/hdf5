@@ -604,7 +604,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     assert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
     assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_REVISION_RECORD_VERSION_CURR != buf[4])

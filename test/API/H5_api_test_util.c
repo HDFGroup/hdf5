@@ -410,7 +410,7 @@ generate_random_datatype_compound(H5T_class_t H5_ATTR_UNUSED parent_class, bool 
         size_t member_size;
         char   member_name[256];
 
-        HDsnprintf(member_name, 256, "compound_member%zu", i);
+        snprintf(member_name, 256, "compound_member%zu", i);
 
         if ((compound_members[i] = generate_random_datatype(H5T_COMPOUND, is_compact)) < 0) {
             printf("    couldn't create compound datatype member %zu\n", i);
@@ -514,7 +514,7 @@ generate_random_datatype_enum(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_A
         char name[ENUM_TYPE_MAX_MEMBER_NAME_LENGTH];
         int  enum_val;
 
-        HDsnprintf(name, ENUM_TYPE_MAX_MEMBER_NAME_LENGTH, "enum_val%zu", i);
+        snprintf(name, ENUM_TYPE_MAX_MEMBER_NAME_LENGTH, "enum_val%zu", i);
 
         do {
             enum_val = rand();
@@ -750,7 +750,7 @@ prefix_filename(const char *prefix, const char *filename, char **filename_out)
         goto done;
     }
 
-    HDsnprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", prefix, filename);
+    snprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", prefix, filename);
 
     *filename_out = out_buf;
 

@@ -142,7 +142,7 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     if (!compat_w_default_vfd) {
         SKIPPED();
-        HDputs("    The current VFD is not compatible with the default VFD.");
+        puts("    The current VFD is not compatible with the default VFD.");
         return 0;
     }
 
@@ -2411,7 +2411,7 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, bool new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_start_swmr_write_concur() */
 
@@ -3241,19 +3241,19 @@ tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary
         TEST_ERROR;
     if (rdcc_nbytes != rdcc_nbytes_out)
         TEST_ERROR;
-    if (HDfabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
+    if (fabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
         TEST_ERROR;
 
     /* Get efile prefix property and verify */
     if (H5Pget_efile_prefix(dapl, efile_prefix_out, sizeof(efile_prefix_out)) < 0)
         TEST_ERROR;
-    if (HDstrncmp(efile_prefix, efile_prefix_out, sizeof(efile_prefix_out)))
+    if (strncmp(efile_prefix, efile_prefix_out, sizeof(efile_prefix_out)))
         TEST_ERROR;
 
     /* Get virtual prefix property and verify */
     if (H5Pget_virtual_prefix(vds_dapl1, virtual_prefix_out, sizeof(virtual_prefix_out)) < 0)
         TEST_ERROR;
-    if (HDstrncmp(virtual_prefix, virtual_prefix_out, sizeof(virtual_prefix_out)))
+    if (strncmp(virtual_prefix, virtual_prefix_out, sizeof(virtual_prefix_out)))
         TEST_ERROR;
 
     /* Get virtual printf gap property and verify */
@@ -5188,7 +5188,7 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_concur() */
@@ -5581,7 +5581,7 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_swmr_concur() */
@@ -6608,7 +6608,7 @@ test_file_locking(hid_t in_fapl, bool turn_locking_on, bool env_var_override)
     else
         TESTING("File locking: OFF");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 #else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
     hid_t  fid  = H5I_INVALID_HID;  /* File ID */
@@ -7083,7 +7083,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, bool new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_refresh_concur() */
 
@@ -7753,7 +7753,7 @@ main(void)
      * disabled.
      */
     lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
+    if (lock_env_var && !strcmp(lock_env_var, "FALSE"))
         use_file_locking = false;
     else
         use_file_locking = true;
@@ -7828,7 +7828,7 @@ main(void)
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
      */
-    if (NULL == driver || !HDstrcmp(driver, "") || !HDstrcmp(driver, "sec2"))
+    if (NULL == driver || !strcmp(driver, "") || !strcmp(driver, "sec2"))
         nerrors += test_swmr_vfd_flag();
 
     /* Test multiple opens via different locking flags */

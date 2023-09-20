@@ -1213,14 +1213,14 @@ test_get_obj_ids(void)
 
     /* creates NGROUPS groups under the root group */
     for (m = 0; m < NGROUPS; m++) {
-        HDsnprintf(gname, sizeof(gname), "group%d", m);
+        snprintf(gname, sizeof(gname), "group%d", m);
         gid[m] = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(gid[m], FAIL, "H5Gcreate2");
     }
 
     /* create NDSETS datasets under the root group */
     for (n = 0; n < NDSETS; n++) {
-        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
+        snprintf(dname, sizeof(dname), "dataset%d", n);
         dset[n] = H5Dcreate2(fid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1280,7 +1280,7 @@ test_get_obj_ids(void)
 
     /* Open NDSETS datasets under the root group */
     for (n = 0; n < NDSETS; n++) {
-        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
+        snprintf(dname, sizeof(dname), "dataset%d", n);
         dset[n] = H5Dopen2(fid, dname, H5P_DEFAULT);
         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1837,7 +1837,7 @@ test_file_is_accessible(const char *env_h5_drvr)
     /* This test is not currently working for the family VFD.
      * There are failures when creating files with userblocks.
      */
-    if (0 != HDstrcmp(env_h5_drvr, "family")) {
+    if (0 != strcmp(env_h5_drvr, "family")) {
         /* Create a file creation property list with a non-default user block size */
         fcpl_id = H5Pcreate(H5P_FILE_CREATE);
         CHECK(fcpl_id, H5I_INVALID_HID, "H5Pcreate");
@@ -3065,8 +3065,8 @@ test_userblock_file_size(const char *env_h5_drvr)
     herr_t        ret;              /* Generic return value */
 
     /* Don't run with multi/split, family or direct drivers */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split") ||
-        !HDstrcmp(env_h5_drvr, "family") || !HDstrcmp(env_h5_drvr, "direct"))
+    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split") ||
+        !strcmp(env_h5_drvr, "family") || !strcmp(env_h5_drvr, "direct"))
         return;
 
     /* Output message about test being performed */
@@ -4119,7 +4119,7 @@ test_filespace_info(const char *env_h5_drvr)
     MESSAGE(5, ("Testing file creation public routines: H5Pget/set_file_space_strategy & "
                 "H5Pget/set_file_space_page_size\n"));
 
-    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
 
     fapl = h5_fileaccess();
     h5_fixname(FILESPACE_NAME[0], fapl, filename, sizeof filename);
@@ -4542,8 +4542,8 @@ test_file_freespace(const char *env_h5_drvr)
     hsize_t        expected_fs_del;        /* Freespace expected after delete */
     herr_t         ret;                    /* Return value */
 
-    split_vfd = !HDstrcmp(env_h5_drvr, "split");
-    multi_vfd = !HDstrcmp(env_h5_drvr, "multi");
+    split_vfd = !strcmp(env_h5_drvr, "split");
+    multi_vfd = !strcmp(env_h5_drvr, "multi");
 
     if (!split_vfd && !multi_vfd) {
         fapl = h5_fileaccess();
@@ -4630,7 +4630,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Create datasets in file */
             for (u = 0; u < 10; u++) {
-                HDsnprintf(name, sizeof(name), "Dataset %u", u);
+                snprintf(name, sizeof(name), "Dataset %u", u);
                 dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
                 CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4653,7 +4653,7 @@ test_file_freespace(const char *env_h5_drvr)
 #endif
             /* Delete datasets in file */
             for (k = 9; k >= 0; k--) {
-                HDsnprintf(name, sizeof(name), "Dataset %u", (unsigned)k);
+                snprintf(name, sizeof(name), "Dataset %u", (unsigned)k);
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
             } /* end for */
@@ -4721,8 +4721,8 @@ test_sects_freespace(const char *env_h5_drvr, bool new_format)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing H5Fget_free_sections()--free-space section info in the file\n"));
 
-    split_vfd = !HDstrcmp(env_h5_drvr, "split");
-    multi_vfd = !HDstrcmp(env_h5_drvr, "multi");
+    split_vfd = !strcmp(env_h5_drvr, "split");
+    multi_vfd = !strcmp(env_h5_drvr, "multi");
 
     if (!split_vfd && !multi_vfd) {
 
@@ -4784,7 +4784,7 @@ test_sects_freespace(const char *env_h5_drvr, bool new_format)
 
         /* Create datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsnprintf(name, sizeof(name), "Dataset %u", u);
+            snprintf(name, sizeof(name), "Dataset %u", u);
             dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4802,7 +4802,7 @@ test_sects_freespace(const char *env_h5_drvr, bool new_format)
 
         /* Delete odd-numbered datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsnprintf(name, sizeof(name), "Dataset %u", u);
+            snprintf(name, sizeof(name), "Dataset %u", u);
             if (u % 2) {
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
@@ -7819,7 +7819,7 @@ test_incr_filesize(void)
 
         /* Create datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsnprintf(name, sizeof(name), "Dataset %u", u);
+            snprintf(name, sizeof(name), "Dataset %u", u);
             dset = H5Dcreate2(fid, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 

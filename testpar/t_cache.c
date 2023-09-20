@@ -6273,7 +6273,7 @@ trace_file_check(int metadata_write_strategy)
         } /* end if */
 
         if (nerrors == 0) {
-            HDsnprintf(trace_file_name, sizeof(trace_file_name), "t_cache_trace.txt.%d", (int)file_mpi_rank);
+            snprintf(trace_file_name, sizeof(trace_file_name), "t_cache_trace.txt.%d", (int)file_mpi_rank);
 
             if ((trace_file_ptr = fopen(trace_file_name, "r")) == NULL) {
 
@@ -6289,10 +6289,10 @@ trace_file_check(int metadata_write_strategy)
             if ((*expected_output)[i] == NULL)
                 expected_line_len = (size_t)0;
             else
-                expected_line_len = HDstrlen((*expected_output)[i]);
+                expected_line_len = strlen((*expected_output)[i]);
 
-            if (HDfgets(buffer, 255, trace_file_ptr) != NULL)
-                actual_line_len = HDstrlen(buffer);
+            if (fgets(buffer, 255, trace_file_ptr) != NULL)
+                actual_line_len = strlen(buffer);
             else
                 actual_line_len = (size_t)0;
 
@@ -6327,8 +6327,7 @@ trace_file_check(int metadata_write_strategy)
             }
             /* We directly compare the header line (line 0) */
             else if (0 == i) {
-                if ((actual_line_len != expected_line_len) ||
-                    (HDstrcmp(buffer, (*expected_output)[i]) != 0)) {
+                if ((actual_line_len != expected_line_len) || (strcmp(buffer, (*expected_output)[i]) != 0)) {
 
                     nerrors++;
                     if (verbose) {
@@ -6347,9 +6346,9 @@ trace_file_check(int metadata_write_strategy)
             else {
                 char *tok = NULL; /* token for actual line */
 
-                tok = HDstrtok(buffer, " ");
+                tok = strtok(buffer, " ");
 
-                if (HDstrcmp(tok, (*expected_output)[i]) != 0) {
+                if (strcmp(tok, (*expected_output)[i]) != 0) {
 
                     nerrors++;
                     if (verbose) {

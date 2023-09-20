@@ -724,7 +724,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
     }
     else {
         if (sf_context->config_file_prefix) {
-            ret_value += HDstrlen(sf_context->config_file_prefix) + 1;
+            ret_value += strlen(sf_context->config_file_prefix) + 1;
         }
     }
 
@@ -780,7 +780,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
     /* Encode driver name */
-    HDstrncpy(name, "Subfilin", 9);
+    strncpy(name, "Subfilin", 9);
     name[8] = '\0';
 
     /* Encode configuration structure magic number */
@@ -802,7 +802,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
 
     /* Encode config file prefix string length */
     if (sf_context->config_file_prefix) {
-        prefix_len = HDstrlen(sf_context->config_file_prefix) + 1;
+        prefix_len = strlen(sf_context->config_file_prefix) + 1;
         H5_CHECKED_ASSIGN(tmpu64, uint64_t, prefix_len, size_t);
     }
     else
@@ -862,7 +862,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
-    if (HDstrncmp(name, "Subfilin", 9))
+    if (strncmp(name, "Subfilin", 9))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
 
     /* Decode configuration structure magic number */
@@ -2426,7 +2426,7 @@ H5FD__subfiling_lock(H5FD_t *_file, bool rw)
 
     if (file->fa.require_ioc) {
 #ifdef VERBOSE
-        HDputs("Subfiling driver doesn't support file locking");
+        puts("Subfiling driver doesn't support file locking");
 #endif
     }
     else {

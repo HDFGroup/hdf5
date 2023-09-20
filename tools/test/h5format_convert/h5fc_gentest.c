@@ -799,8 +799,8 @@ main(void)
 
             memset(filename, 0, sizeof(filename));
             if (!new_format)
-                HDstrcat(filename, "old_");
-            HDstrcat(filename, FILENAME[i]);
+                strcat(filename, "old_");
+            strcat(filename, FILENAME[i]);
 
             gen_ext(filename, new_format, i);
         } /* end for */

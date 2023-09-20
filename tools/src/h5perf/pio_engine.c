@@ -278,7 +278,7 @@ do_pio(parameters param)
         /* Open file for write */
         char base_name[256];
 
-        HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
+        snprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, FILENAME_MAX);
         if (pio_debug_level > 0)
             fprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
@@ -431,11 +431,11 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         }
         else {
             /* We didn't append the prefix yet */
-            HDstrncpy(fullname, prefix, size);
+            strncpy(fullname, prefix, size);
             fullname[size - 1] = '\0';
         }
 
-        if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
+        if ((strlen(fullname) + strlen(base_name) + 1) < size) {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
             h5_stat_t buf;
@@ -445,31 +445,31 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
                 if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                      * Default to PREFIX's original prefix value. */
-                    HDstrcpy(fullname, prefix);
+                    strcpy(fullname, prefix);
                 }
 
-            HDstrcat(fullname, "/");
-            HDstrcat(fullname, base_name);
+            strcat(fullname, "/");
+            strcat(fullname, base_name);
         }
         else {
             /* Buffer is too small */
             return NULL;
         }
     }
-    else if (HDstrlen(base_name) >= size) {
+    else if (strlen(base_name) >= size) {
         /* Buffer is too small */
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (strlen(fullname) + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        strcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -887,7 +887,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                     }     /* end if */
                 }         /* end else */
 
-                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
+                snprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, h5dcpl);
 
                 if (h5ds_id < 0) {
@@ -1862,7 +1862,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                 break;
 
             case PHDF5:
-                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
+                snprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DOPEN(fd->h5fd, dname);
                 if (h5ds_id < 0) {
                     fprintf(stderr, "HDF5 Dataset open failed\n");

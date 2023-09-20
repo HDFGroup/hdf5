@@ -550,7 +550,7 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     /* Copy to ensure correct alignment */
     H5MM_memcpy(&s, _vl, sizeof(char *));
 
-    *len = HDstrlen(s);
+    *len = strlen(s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_getlen() */

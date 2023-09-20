@@ -519,14 +519,14 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to first string */
                     s1 = *(char **)((void *)mem1);
                     if (s1)
-                        size1 = HDstrlen(s1);
+                        size1 = strlen(s1);
                     else
                         size1 = 0;
 
                     /* Get pointer to second string */
                     s2 = *(char **)((void *)mem2);
                     if (s2)
-                        size2 = HDstrlen(s2);
+                        size2 = strlen(s2);
                     else
                         size2 = 0;
                 }
@@ -535,7 +535,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to first string */
                     s1 = (char *)mem1;
                     if (s1)
-                        size1 = HDstrlen(s1);
+                        size1 = strlen(s1);
                     else
                         size1 = 0;
 
@@ -545,7 +545,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to second string */
                     s2 = (char *)mem2;
                     if (s2)
-                        size2 = HDstrlen(s2);
+                        size2 = strlen(s2);
                     else
                         size2 = 0;
 
@@ -648,11 +648,11 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                      */
                     err1 = H5Tenum_nameof(opts->m_tid, mem1, enum_name1, sizeof enum_name1);
                     if (err1 < 0)
-                        HDsnprintf(enum_name1, sizeof(enum_name1), "**INVALID VALUE**");
+                        snprintf(enum_name1, sizeof(enum_name1), "**INVALID VALUE**");
 
                     err2 = H5Tenum_nameof(opts->m_tid, mem2, enum_name2, sizeof enum_name2);
                     if (err2 < 0)
-                        HDsnprintf(enum_name2, sizeof(enum_name2), "**INVALID VALUE**");
+                        snprintf(enum_name2, sizeof(enum_name2), "**INVALID VALUE**");
 
                     /* One or more bad enum values */
                     if (err1 < 0 || err2 < 0) {
@@ -669,7 +669,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     }
                     else {
                         /* Both enum values were valid */
-                        if (HDstrcmp(enum_name1, enum_name2) != 0) {
+                        if (strcmp(enum_name1, enum_name2) != 0) {
                             nfound                 = 1;
                             opts->print_percentage = 0;
                             print_pos(opts, elemtno, 0);
@@ -1688,8 +1688,8 @@ diff_float_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_float);
-            isnan2 = HDisnan(temp2_float);
+            isnan1 = isnan(temp1_float);
+            isnan2 = isnan(temp2_float);
         }
 
         /* both not NaN, do the comparison */
@@ -1725,8 +1725,8 @@ diff_float_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_float);
-            isnan2 = HDisnan(temp2_float);
+            isnan1 = isnan(temp1_float);
+            isnan2 = isnan(temp2_float);
         }
         /* both not NaN, do the comparison */
         if ((!isnan1 && !isnan2)) {
@@ -1773,8 +1773,8 @@ diff_float_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_float);
-            isnan2 = HDisnan(temp2_float);
+            isnan1 = isnan(temp1_float);
+            isnan2 = isnan(temp2_float);
         }
 
         /* both not NaN, do the comparison */
@@ -1866,8 +1866,8 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_double);
-            isnan2 = HDisnan(temp2_double);
+            isnan1 = isnan(temp1_double);
+            isnan2 = isnan(temp2_double);
         }
 
         /* both not NaN, do the comparison */
@@ -1902,8 +1902,8 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_double);
-            isnan2 = HDisnan(temp2_double);
+            isnan1 = isnan(temp1_double);
+            isnan2 = isnan(temp2_double);
         }
         /* both not NaN, do the comparison */
         if (!isnan1 && !isnan2) {
@@ -1948,8 +1948,8 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_double);
-            isnan2 = HDisnan(temp2_double);
+            isnan1 = isnan(temp1_double);
+            isnan2 = isnan(temp2_double);
         }
 
         /* both not NaN, do the comparison */
@@ -2041,8 +2041,8 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_double);
-            isnan2 = HDisnan(temp2_double);
+            isnan1 = isnan(temp1_double);
+            isnan2 = isnan(temp2_double);
         }
 
         /* both not NaN, do the comparison */
@@ -2076,8 +2076,8 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_double);
-            isnan2 = HDisnan(temp2_double);
+            isnan1 = isnan(temp1_double);
+            isnan2 = isnan(temp2_double);
         }
 
         /* both not NaN, do the comparison */
@@ -2123,8 +2123,8 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
          *-------------------------------------------------------------------------
          */
         if (opts->do_nans) {
-            isnan1 = HDisnan(temp1_double);
-            isnan2 = HDisnan(temp2_double);
+            isnan1 = isnan(temp1_double);
+            isnan2 = isnan(temp2_double);
         }
 
         /* both not NaN, do the comparison */
@@ -3140,8 +3140,8 @@ equal_double(double value, double expected, diff_opt_t *opts)
          * detect NaNs
          *-------------------------------------------------------------------------
          */
-        bool isnan1 = HDisnan(value);
-        bool isnan2 = HDisnan(expected);
+        bool isnan1 = isnan(value);
+        bool isnan2 = isnan(expected);
 
         /*-------------------------------------------------------------------------
          * we consider NaN == NaN to be true
@@ -3187,8 +3187,8 @@ equal_ldouble(long double value, long double expected, diff_opt_t *opts)
          * detect NaNs
          *-------------------------------------------------------------------------
          */
-        bool isnan1 = HDisnan(value);
-        bool isnan2 = HDisnan(expected);
+        bool isnan1 = isnan(value);
+        bool isnan2 = isnan(expected);
 
         /*-------------------------------------------------------------------------
          * we consider NaN == NaN to be true
@@ -3233,8 +3233,8 @@ equal_float(float value, float expected, diff_opt_t *opts)
          * detect NaNs
          *-------------------------------------------------------------------------
          */
-        bool isnan1 = HDisnan(value);
-        bool isnan2 = HDisnan(expected);
+        bool isnan1 = isnan(value);
+        bool isnan2 = isnan(expected);
 
         /*-------------------------------------------------------------------------
          * we consider NaN == NaN to be true

@@ -9928,7 +9928,7 @@ main(void)
     ExpressMode = GetTestExpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
-    if (!HDstrcmp(envval, "direct"))
+    if (!strcmp(envval, "direct"))
         ExpressMode = 2;
 
     if (ExpressMode > 1)
@@ -10038,14 +10038,14 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All v2 B-tree tests passed.");
+    puts("All v2 B-tree tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {

@@ -446,7 +446,7 @@ static FILE             *debug_stream             = NULL;
                                                                                                              \
         if (trace_flag) {                                                                                    \
             H5D_MPIO_DEBUG_VA(rank, "%s%s", trace_in_pre, __func__);                                         \
-            debug_indent += (int)HDstrlen(trace_in_pre);                                                     \
+            debug_indent += (int)strlen(trace_in_pre);                                                       \
         }                                                                                                    \
     } while (0)
 
@@ -455,7 +455,7 @@ static FILE             *debug_stream             = NULL;
         bool trace_flag = H5D_mpio_debug_flags_s[(int)'t'];                                                  \
                                                                                                              \
         if (trace_flag) {                                                                                    \
-            debug_indent -= (int)HDstrlen(trace_out_pre);                                                    \
+            debug_indent -= (int)strlen(trace_out_pre);                                                      \
             H5D_MPIO_DEBUG_VA(rank, "%s%s", trace_out_pre, __func__);                                        \
         }                                                                                                    \
     } while (0)
@@ -861,14 +861,14 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
              * so, prepend a semicolon to separate the messages.
              */
             if (buf_space_left && local_cause_bytes_written) {
-                HDstrncat(local_cause, "; ", buf_space_left);
+                strncat(local_cause, "; ", buf_space_left);
                 local_cause_bytes_written += MIN(buf_space_left, 2);
                 buf_space_left -= MIN(buf_space_left, 2);
             }
 
             if (buf_space_left) {
-                HDstrncat(local_cause, cause_str, buf_space_left);
-                local_cause_bytes_written += MIN(buf_space_left, HDstrlen(cause_str));
+                strncat(local_cause, cause_str, buf_space_left);
+                local_cause_bytes_written += MIN(buf_space_left, strlen(cause_str));
             }
         }
 
@@ -884,14 +884,14 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
              * so, prepend a semicolon to separate the messages.
              */
             if (buf_space_left && global_cause_bytes_written) {
-                HDstrncat(global_cause, "; ", buf_space_left);
+                strncat(global_cause, "; ", buf_space_left);
                 global_cause_bytes_written += MIN(buf_space_left, 2);
                 buf_space_left -= MIN(buf_space_left, 2);
             }
 
             if (buf_space_left) {
-                HDstrncat(global_cause, cause_str, buf_space_left);
-                global_cause_bytes_written += MIN(buf_space_left, HDstrlen(cause_str));
+                strncat(global_cause, cause_str, buf_space_left);
+                global_cause_bytes_written += MIN(buf_space_left, strlen(cause_str));
             }
         }
     }
@@ -1111,7 +1111,7 @@ H5D__piece_io(H5D_io_info_t *io_info)
         char   debug_log_filename[1024];
         time_t time_now;
 
-        HDsnprintf(debug_log_filename, 1024, "H5Dmpio_debug.rank%d", mpi_rank);
+        snprintf(debug_log_filename, 1024, "H5Dmpio_debug.rank%d", mpi_rank);
 
         if (NULL == (debug_log_file = fopen(debug_log_filename, "a")))
             HGOTO_ERROR(H5E_IO, H5E_OPENERROR, FAIL, "couldn't open debugging log file");

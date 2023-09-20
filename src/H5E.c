@@ -170,8 +170,8 @@ H5E_init(void)
 
     /* Allocate the HDF5 error class */
     assert(H5E_ERR_CLS_g == (-1));
-    HDsnprintf(lib_vers, sizeof(lib_vers), "%u.%u.%u%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-               (HDstrlen(H5_VERS_SUBRELEASE) > 0 ? "-" H5_VERS_SUBRELEASE : ""));
+    snprintf(lib_vers, sizeof(lib_vers), "%u.%u.%u%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+             (strlen(H5_VERS_SUBRELEASE) > 0 ? "-" H5_VERS_SUBRELEASE : ""));
     if (NULL == (cls = H5E__register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, lib_vers)))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "class initialization failed");
     if ((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, cls, false)) < 0)
@@ -569,11 +569,11 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
     assert(cls);
 
     /* Get the class's name */
-    len = (ssize_t)HDstrlen(cls->cls_name);
+    len = (ssize_t)strlen(cls->cls_name);
 
     /* Set the user's buffer, if provided */
     if (name) {
-        HDstrncpy(name, cls->cls_name, size);
+        strncpy(name, cls->cls_name, size);
         if ((size_t)len >= size)
             name[size - 1] = '\0';
     } /* end if */

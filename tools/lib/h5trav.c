@@ -126,7 +126,7 @@ trav_token_add(trav_addr_t *visited, H5O_token_t *token, const char *path)
     /* Append it */
     idx = visited->nused++;
     memcpy(&visited->objs[idx].token, token, sizeof(H5O_token_t));
-    visited->objs[idx].path = HDstrdup(path);
+    visited->objs[idx].path = strdup(path);
 } /* end trav_token_add() */
 
 /*-------------------------------------------------------------------------
@@ -172,17 +172,17 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo, void *_uda
 
     /* Create the full path name for the link */
     if (udata->is_absolute) {
-        size_t base_len     = HDstrlen(udata->base_grp_name);
+        size_t base_len     = strlen(udata->base_grp_name);
         size_t add_slash    = base_len ? ((udata->base_grp_name)[base_len - 1] != '/') : 1;
-        size_t new_name_len = base_len + add_slash + HDstrlen(path) + 1 +
+        size_t new_name_len = base_len + add_slash + strlen(path) + 1 +
                               3; /* Extra "+3" to quiet GCC warning - 2019/07/05, QAK */
 
         if (NULL == (new_name = (char *)malloc(new_name_len)))
             return (H5_ITER_ERROR);
         if (add_slash)
-            HDsnprintf(new_name, new_name_len, "%s/%s", udata->base_grp_name, path);
+            snprintf(new_name, new_name_len, "%s/%s", udata->base_grp_name, path);
         else
-            HDsnprintf(new_name, new_name_len, "%s%s", udata->base_grp_name, path);
+            snprintf(new_name, new_name_len, "%s%s", udata->base_grp_name, path);
         full_name = new_name;
     } /* end if */
     else
@@ -326,7 +326,7 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
 
         /* Append it */
         idx                     = info->nused++;
-        info->paths[idx].path   = HDstrdup(path);
+        info->paths[idx].path   = strdup(path);
         info->paths[idx].type   = obj_type;
         info->paths[idx].fileno = 0;
 
@@ -349,7 +349,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
     H5O_info2_t oinfo;
     size_t      idx = info->nused - 1;
 
-    if (info->paths[idx].path && HDstrcmp(info->paths[idx].path, ".") != 0)
+    if (info->paths[idx].path && strcmp(info->paths[idx].path, ".") != 0)
         H5Oget_info_by_name3(loc_id, info->paths[idx].path, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     else
         H5Oget_info3(loc_id, &oinfo, H5O_INFO_BASIC);
@@ -452,11 +452,11 @@ h5trav_getindex(const trav_info_t *info, const char *obj)
     /* Loop over all paths in 'info' struct, looking for object */
     for (u = 0; u < info->nused; u++) {
         /* Check for object name having full path (with leading '/') */
-        if (HDstrcmp(obj, info->paths[u].path) == 0)
+        if (strcmp(obj, info->paths[u].path) == 0)
             return ((ssize_t)u);
 
         /* Check for object name without leading '/' */
-        if (HDstrcmp(obj, (info->paths[u].path + 1)) == 0)
+        if (strcmp(obj, (info->paths[u].path + 1)) == 0)
             return ((ssize_t)u);
     } /* end for */
 
@@ -611,11 +611,11 @@ h5trav_getindext(const char *name, const trav_table_t *table)
     if (table) {
         for (i = 0; i < table->nobjs; i++) {
             /* Check for object name having full path (with leading '/') */
-            if (HDstrcmp(name, table->objs[i].name) == 0)
+            if (strcmp(name, table->objs[i].name) == 0)
                 return ((int)i);
 
             /* Check for object name without leading '/' */
-            if (HDstrcmp(name, table->objs[i].name + 1) == 0)
+            if (strcmp(name, table->objs[i].name + 1) == 0)
                 return ((int)i);
 
             /* search also in the list of links */
@@ -624,11 +624,11 @@ h5trav_getindext(const char *name, const trav_table_t *table)
 
                 for (j = 0; j < table->objs[i].nlinks; j++) {
                     /* Check for object name having full path (with leading '/') */
-                    if (HDstrcmp(name, table->objs[i].links[j].new_name) == 0)
+                    if (strcmp(name, table->objs[i].links[j].new_name) == 0)
                         return ((int)i);
 
                     /* Check for object name without leading '/' */
-                    if (HDstrcmp(name, table->objs[i].links[j].new_name + 1) == 0)
+                    if (strcmp(name, table->objs[i].links[j].new_name + 1) == 0)
                         return ((int)i);
                 } /* end for */
             }     /* end if */
@@ -664,7 +664,7 @@ trav_table_add(trav_table_t *table, const char *path, const H5O_info2_t *oinfo)
             table->objs[new_obj].obj_token = H5O_TOKEN_UNDEF;
         table->objs[new_obj].flags[0] = table->objs[new_obj].flags[1] = 0;
         table->objs[new_obj].is_same_trgobj                           = 0;
-        table->objs[new_obj].name                                     = (char *)HDstrdup(path);
+        table->objs[new_obj].name                                     = (char *)strdup(path);
         table->objs[new_obj].type      = oinfo ? (h5trav_type_t)oinfo->type : H5TRAV_TYPE_LINK;
         table->objs[new_obj].nlinks    = 0;
         table->objs[new_obj].sizelinks = 0;
@@ -694,7 +694,7 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
                 size_t n;
 
                 /* already inserted? */
-                if (HDstrcmp(table->objs[i].name, path) == 0)
+                if (strcmp(table->objs[i].name, path) == 0)
                     return;
 
                 /* allocate space if necessary */
@@ -706,7 +706,7 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
 
                 /* insert it */
                 n                                = table->objs[i].nlinks++;
-                table->objs[i].links[n].new_name = (char *)HDstrdup(path);
+                table->objs[i].links[n].new_name = (char *)strdup(path);
 
                 return;
             } /* end if */
@@ -741,7 +741,7 @@ trav_table_addflags(const unsigned *flags, char *name, h5trav_type_t type, trav_
         table->objs[new_obj].flags[0]       = flags[0];
         table->objs[new_obj].flags[1]       = flags[1];
         table->objs[new_obj].is_same_trgobj = 0;
-        table->objs[new_obj].name           = (char *)HDstrdup(name);
+        table->objs[new_obj].name           = (char *)strdup(name);
         table->objs[new_obj].type           = type;
         table->objs[new_obj].nlinks         = 0;
         table->objs[new_obj].sizelinks      = 0;
@@ -1086,13 +1086,13 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
     visited->objs[idx].path = NULL;
 
     if (type == H5L_TYPE_EXTERNAL) {
-        if (NULL == (visited->objs[idx].file = HDstrdup(file))) {
+        if (NULL == (visited->objs[idx].file = strdup(file))) {
             visited->nused--;
             H5TOOLS_GOTO_ERROR(FAIL, "visited data structure name allocation failed");
         } /* end if */
     }     /* end if */
 
-    if (NULL == (visited->objs[idx].path = HDstrdup(path))) {
+    if (NULL == (visited->objs[idx].path = strdup(path))) {
         visited->nused--;
         if (visited->objs[idx].file)
             free(visited->objs[idx].file);
@@ -1120,10 +1120,10 @@ symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, c
     for (u = 0; u < visited->nused; u++) {
         /* Check for symlink values already in array */
         /* check type and path pair to distinguish between symbolic links */
-        if ((visited->objs[u].type == type) && !HDstrcmp(visited->objs[u].path, path)) {
+        if ((visited->objs[u].type == type) && !strcmp(visited->objs[u].path, path)) {
             /* if external link, file need to be matched as well */
             if (visited->objs[u].type == H5L_TYPE_EXTERNAL)
-                if (!HDstrcmp(visited->objs[u].file, file))
+                if (!strcmp(visited->objs[u].file, file))
                     return (true);
 
             return (true);

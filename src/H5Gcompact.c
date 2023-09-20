@@ -214,11 +214,11 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound");
 
     /* Get the length of the name */
-    *name_len = HDstrlen(ltable.lnks[idx].name);
+    *name_len = strlen(ltable.lnks[idx].name);
 
     /* Copy the name into the user's buffer, if given */
     if (name) {
-        HDstrncpy(name, ltable.lnks[idx].name, MIN((*name_len + 1), name_size));
+        strncpy(name, ltable.lnks[idx].name, MIN((*name_len + 1), name_size));
         if (*name_len >= name_size)
             name[name_size - 1] = '\0';
     } /* end if */
@@ -255,7 +255,7 @@ H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, vo
     assert(udata);
 
     /* If we've found the right link, get the object type */
-    if (HDstrcmp(lnk->name, udata->name) == 0) {
+    if (strcmp(lnk->name, udata->name) == 0) {
         /* Replace path names for link being removed */
         if (H5G__link_name_replace(udata->file, udata->grp_full_path_r, lnk) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get object type");
@@ -412,7 +412,7 @@ H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_ud
     assert(udata);
 
     /* Check for name to get information */
-    if (HDstrcmp(lnk->name, udata->name) == 0) {
+    if (strcmp(lnk->name, udata->name) == 0) {
         if (udata->lnk) {
             /* Copy link information */
             if (NULL == H5O_msg_copy(H5O_LINK_ID, lnk, udata->lnk))

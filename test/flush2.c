@@ -134,7 +134,7 @@ file_ok(const char *filename, hid_t fapl_id, bool check_second_dset)
     if ((top_gid = H5Gopen2(fid, "top_group", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < NGROUPS; i++) {
-        HDsnprintf(group_name, sizeof(group_name), "group%02d", i);
+        snprintf(group_name, sizeof(group_name), "group%02d", i);
         if ((gid = H5Gopen2(top_gid, group_name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -288,7 +288,7 @@ main(void)
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();
-        HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+        puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
         TEST_ERROR;
 #endif
@@ -315,7 +315,7 @@ main(void)
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
-            HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+            puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
             TEST_ERROR;
 #endif
@@ -374,7 +374,7 @@ main(void)
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();
-        HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+        puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
         TEST_ERROR;
 #endif
@@ -403,7 +403,7 @@ main(void)
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
-            HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+            puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
             TEST_ERROR;
 #endif

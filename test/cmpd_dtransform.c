@@ -46,8 +46,8 @@ main(void)
     /* Compound datatype */
     if (NULL == (atts = malloc(sizeof(att_t))))
         TEST_ERROR;
-    HDstrcpy(atts[0].name, "Name");
-    HDstrcpy(atts[0].unit, "Unit");
+    strcpy(atts[0].name, "Name");
+    strcpy(atts[0].unit, "Unit");
 
     /* String type */
     if ((str_dtyp_id = H5Tcopy(H5T_C_S1)) < 0)
@@ -113,9 +113,9 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Verify attribute */
-    if (HDstrcmp(atts_res[0].name, atts[0].name) != 0)
+    if (strcmp(atts_res[0].name, atts[0].name) != 0)
         TEST_ERROR;
-    if (HDstrcmp(atts_res[0].unit, atts[0].unit) != 0)
+    if (strcmp(atts_res[0].unit, atts[0].unit) != 0)
         TEST_ERROR;
 
     /* Read the data */

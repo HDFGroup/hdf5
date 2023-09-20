@@ -117,7 +117,7 @@ main(void)
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -155,11 +155,11 @@ main(void)
 
             /* Set the FAPL for the chunk cache settings */
             if (chunk_cache) {
-                HDputs(" and chunk cache enabled:");
+                puts(" and chunk cache enabled:");
                 my_fapl = fapl;
             } /* end if */
             else {
-                HDputs(" and chunk cache disabled:");
+                puts(" and chunk cache disabled:");
                 my_fapl = fapl2;
             } /* end else */
 
@@ -209,7 +209,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All H5Dset_extent tests passed.");
+    puts("All H5Dset_extent tests passed.");
 
     return 0;
 

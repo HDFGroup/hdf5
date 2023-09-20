@@ -391,12 +391,12 @@ h5tools_dump_region_attribute(hid_t region_id, FILE *stream, const h5tool_format
     h5tools_print_datatype(stream, buffer, info, ctx, atype, true);
     ctx->indent_level--;
 
-    if (HDstrlen(h5tools_dump_header_format->datatypeblockend)) {
+    if (strlen(h5tools_dump_header_format->datatypeblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datatypeblockend);
-        if (HDstrlen(h5tools_dump_header_format->datatypeend))
+        if (strlen(h5tools_dump_header_format->datatypeend))
             h5tools_str_append(buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->datatypeend))
+    if (strlen(h5tools_dump_header_format->datatypeend))
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datatypeend);
 
     dimension_break =
@@ -411,12 +411,12 @@ h5tools_dump_region_attribute(hid_t region_id, FILE *stream, const h5tool_format
 
     h5tools_print_dataspace(buffer, region_space);
 
-    if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
+    if (strlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
-        if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+        if (strlen(h5tools_dump_header_format->dataspaceend))
             h5tools_str_append(buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+    if (strlen(h5tools_dump_header_format->dataspaceend))
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
 
     dimension_break =
@@ -765,12 +765,12 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
     h5tools_print_datatype(stream, buffer, info, ctx, dtype, true);
     ctx->indent_level--;
 
-    if (HDstrlen(h5tools_dump_header_format->datatypeblockend)) {
+    if (strlen(h5tools_dump_header_format->datatypeblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datatypeblockend);
-        if (HDstrlen(h5tools_dump_header_format->datatypeend))
+        if (strlen(h5tools_dump_header_format->datatypeend))
             h5tools_str_append(buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->datatypeend))
+    if (strlen(h5tools_dump_header_format->datatypeend))
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datatypeend);
 
     dimension_break =
@@ -785,12 +785,12 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
 
     h5tools_print_dataspace(buffer, region_space);
 
-    if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
+    if (strlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
-        if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+        if (strlen(h5tools_dump_header_format->dataspaceend))
             h5tools_str_append(buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+    if (strlen(h5tools_dump_header_format->dataspaceend))
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
 
     dimension_break =
@@ -828,13 +828,13 @@ done:
 
         /* Render the dataend element begin */
         h5tools_str_reset(buffer);
-        if (HDstrlen(h5tools_dump_header_format->datablockend)) {
+        if (strlen(h5tools_dump_header_format->datablockend)) {
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datablockend);
-            if (HDstrlen(h5tools_dump_header_format->dataend))
+            if (strlen(h5tools_dump_header_format->dataend))
                 h5tools_str_append(buffer, " ");
         }
 
-        if (HDstrlen(h5tools_dump_header_format->dataend))
+        if (strlen(h5tools_dump_header_format->dataend))
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataend);
         dimension_break = h5tools_render_element(stream, &outputformat, ctx, buffer, curr_pos, ncols,
                                                  region_elmt_counter, elmt_counter);
@@ -1119,12 +1119,12 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
     h5tools_print_datatype(stream, buffer, info, ctx, dtype, true);
     ctx->indent_level--;
 
-    if (HDstrlen(h5tools_dump_header_format->datatypeblockend)) {
+    if (strlen(h5tools_dump_header_format->datatypeblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datatypeblockend);
-        if (HDstrlen(h5tools_dump_header_format->datatypeend))
+        if (strlen(h5tools_dump_header_format->datatypeend))
             h5tools_str_append(buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->datatypeend))
+    if (strlen(h5tools_dump_header_format->datatypeend))
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datatypeend);
 
     dimension_break =
@@ -1139,12 +1139,12 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
 
     h5tools_print_dataspace(buffer, region_space);
 
-    if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
+    if (strlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
-        if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+        if (strlen(h5tools_dump_header_format->dataspaceend))
             h5tools_str_append(buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+    if (strlen(h5tools_dump_header_format->dataspaceend))
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
 
     dimension_break =
@@ -1183,13 +1183,13 @@ done:
 
         /* Render the dataend element begin */
         h5tools_str_reset(buffer);
-        if (HDstrlen(h5tools_dump_header_format->datablockend)) {
+        if (strlen(h5tools_dump_header_format->datablockend)) {
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->datablockend);
-            if (HDstrlen(h5tools_dump_header_format->dataend))
+            if (strlen(h5tools_dump_header_format->dataend))
                 h5tools_str_append(buffer, " ");
         }
 
-        if (HDstrlen(h5tools_dump_header_format->dataend))
+        if (strlen(h5tools_dump_header_format->dataend))
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataend);
         dimension_break = h5tools_render_element(stream, &outputformat, ctx, buffer, curr_pos, ncols,
                                                  region_elmt_counter, elmt_counter);
@@ -2807,7 +2807,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
 
         h5tools_str_reset(buffer);
         h5tools_str_append(buffer, "\"%s\"", name[i]);
-        nchars = (int)HDstrlen(name[i]);
+        nchars = (int)strlen(name[i]);
         h5tools_str_append(buffer, "%*s ", MAX(0, 16 - nchars), "");
 
         if (native < 0) {
@@ -2891,12 +2891,12 @@ h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info, h5tools_context
     h5tools_str_append(&buffer, "%s %s ", h5tools_dump_header_format->datatypebegin,
                        h5tools_dump_header_format->datatypeblockbegin);
     h5tools_print_datatype(stream, &buffer, info, ctx, type, true);
-    if (HDstrlen(h5tools_dump_header_format->datatypeblockend)) {
+    if (strlen(h5tools_dump_header_format->datatypeblockend)) {
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datatypeblockend);
-        if (HDstrlen(h5tools_dump_header_format->datatypeend))
+        if (strlen(h5tools_dump_header_format->datatypeend))
             h5tools_str_append(&buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->datatypeend))
+    if (strlen(h5tools_dump_header_format->datatypeend))
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datatypeend);
 
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -2938,12 +2938,12 @@ h5tools_dump_dataspace(FILE *stream, const h5tool_format_t *info, h5tools_contex
 
     h5tools_print_dataspace(&buffer, type);
 
-    if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
+    if (strlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
-        if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+        if (strlen(h5tools_dump_header_format->dataspaceend))
             h5tools_str_append(&buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+    if (strlen(h5tools_dump_header_format->dataspaceend))
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->dataspaceend);
 
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -3154,7 +3154,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     if (dcpl_id >= 0)
         nfilters = H5Pget_nfilters(dcpl_id);
 
-    HDstrcpy(f_name, "\0");
+    strcpy(f_name, "\0");
 
     /*-------------------------------------------------------------------------
      * STORAGE_LAYOUT
@@ -3897,12 +3897,12 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info, h5tools_contex
 
     h5tools_str_reset(&buffer);
 
-    if (HDstrlen(h5tools_dump_header_format->attributeblockend)) {
+    if (strlen(h5tools_dump_header_format->attributeblockend)) {
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->attributeblockend);
-        if (HDstrlen(h5tools_dump_header_format->attributeend))
+        if (strlen(h5tools_dump_header_format->attributeend))
             h5tools_str_append(&buffer, " ");
     }
-    if (HDstrlen(h5tools_dump_header_format->attributeend))
+    if (strlen(h5tools_dump_header_format->attributeend))
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->attributeend);
 
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -4478,13 +4478,13 @@ done:
     h5tools_simple_prefix(stream, &outputformat, ctx, (hsize_t)0, 0);
 
     h5tools_str_reset(&buffer);
-    if (HDstrlen(h5tools_dump_header_format->datablockend)) {
+    if (strlen(h5tools_dump_header_format->datablockend)) {
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datablockend);
-        if (HDstrlen(h5tools_dump_header_format->dataend))
+        if (strlen(h5tools_dump_header_format->dataend))
             h5tools_str_append(&buffer, " ");
     }
 
-    if (HDstrlen(h5tools_dump_header_format->dataend))
+    if (strlen(h5tools_dump_header_format->dataend))
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->dataend);
     h5tools_render_element(stream, &outputformat, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                            (hsize_t)0);
@@ -4496,12 +4496,12 @@ done:
         h5tools_simple_prefix(stream, &outputformat, ctx, (hsize_t)0, 0);
 
         h5tools_str_reset(&buffer);
-        if (HDstrlen(h5tools_dump_header_format->subsettingblockend)) {
+        if (strlen(h5tools_dump_header_format->subsettingblockend)) {
             h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->subsettingblockend);
-            if (HDstrlen(h5tools_dump_header_format->subsettingend))
+            if (strlen(h5tools_dump_header_format->subsettingend))
                 h5tools_str_append(&buffer, " ");
         }
-        if (HDstrlen(h5tools_dump_header_format->subsettingend))
+        if (strlen(h5tools_dump_header_format->subsettingend))
             h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->subsettingend);
         h5tools_render_element(stream, &outputformat, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                (hsize_t)0);

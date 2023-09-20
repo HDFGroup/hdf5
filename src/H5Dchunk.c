@@ -7174,7 +7174,7 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         for (u = 0; u < udata->ndims; u++)
             fprintf(udata->stream, "%s%" PRIuHSIZE, (u ? ", " : ""),
                     (chunk_rec->scaled[u] * udata->chunk_dim[u]));
-        HDfputs("]\n", udata->stream);
+        fputs("]\n", udata->stream);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(H5_ITER_CONT)
@@ -7281,10 +7281,10 @@ H5D__chunk_stats(const H5D_t *dset, bool headers)
             miss_rate = 0.0;
         }
         if (miss_rate > 100) {
-            HDsnprintf(ascii, sizeof(ascii), "%7d%%", (int)(miss_rate + 0.5));
+            snprintf(ascii, sizeof(ascii), "%7d%%", (int)(miss_rate + 0.5));
         }
         else {
-            HDsnprintf(ascii, sizeof(ascii), "%7.2f%%", miss_rate);
+            snprintf(ascii, sizeof(ascii), "%7.2f%%", miss_rate);
         }
 
         fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n", "raw data chunks", rdcc->stats.nhits,

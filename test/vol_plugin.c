@@ -334,7 +334,7 @@ main(void)
 
     h5_reset();
 
-    HDputs("Testing VOL connector plugin functionality.");
+    puts("Testing VOL connector plugin functionality.");
 
     nerrors += test_registration_by_name() < 0 ? 1 : 0;
     nerrors += test_registration_by_value() < 0 ? 1 : 0;
@@ -346,7 +346,7 @@ main(void)
         exit(EXIT_FAILURE);
     }
 
-    HDputs("All VOL connector plugin tests passed.");
+    puts("All VOL connector plugin tests passed.");
 
     exit(EXIT_SUCCESS);
 

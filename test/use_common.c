@@ -69,7 +69,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 exit(EXIT_SUCCESS);
                 break;
             case 'f': /* usecase data file name */
-                opts->filename = HDstrdup(optarg);
+                opts->filename = strdup(optarg);
                 break;
             case 'i': /* iterations */
                 if ((opts->iterations = atoi(optarg)) <= 0) {
@@ -137,12 +137,12 @@ parse_option(int argc, char *const argv[], options_t *opts)
     /* set test file name if not given */
     if (!opts->filename) {
         /* default data file name is <progname>.h5 */
-        if ((opts->filename = (char *)malloc(HDstrlen(opts->progname) + 4)) == NULL) {
+        if ((opts->filename = (char *)malloc(strlen(opts->progname) + 4)) == NULL) {
             fprintf(stderr, "malloc: failed\n");
             Hgoto_error(-1);
         }
-        HDstrcpy(opts->filename, opts->progname);
-        HDstrcat(opts->filename, ".h5");
+        strcpy(opts->filename, opts->progname);
+        strcat(opts->filename, ".h5");
     }
 
 done:

@@ -563,7 +563,7 @@ external_links(void)
 
             /* test opening a group that is to an external link, the external linked
                file should inherit the source file's access properties */
-            HDsnprintf(link_path, sizeof(link_path), "%s%s%s", group_path, "/", link_name);
+            snprintf(link_path, sizeof(link_path), "%s%s%s", group_path, "/", link_name);
             group = H5Gopen2(fid, link_path, H5P_DEFAULT);
             VRFY((group >= 0), "H5Gopen succeeded");
             ret = H5Gclose(group);

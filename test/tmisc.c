@@ -448,8 +448,8 @@ test_misc2_write_attribute(void)
     hid_t        type;
     herr_t       ret;
     misc2_struct data, data_check;
-    char        *string_att1 = HDstrdup("string attribute in file one");
-    char        *string_att2 = HDstrdup("string attribute in file two");
+    char        *string_att1 = strdup("string attribute in file one");
+    char        *string_att2 = strdup("string attribute in file two");
 
     type = misc2_create_type();
 
@@ -1088,7 +1088,7 @@ test_misc6(void)
     /* Loop through adding attributes to each dataset */
     for (u = 0; u < MISC6_NUMATTR; u++) {
         /* Create name for attribute */
-        HDsnprintf(attr_name, sizeof(attr_name), "Attr#%u", u);
+        snprintf(attr_name, sizeof(attr_name), "Attr#%u", u);
 
         /* Open the file */
         loc_id = H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -2115,11 +2115,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for (i = 0; i < MISC12_SPACE1_DIM1; i++)
-        if (HDstrcmp(wdata[i], rdata[i]) != 0)
+        if (strcmp(wdata[i], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n", __LINE__, i, wdata[i], i,
                           rdata[i]);
     for (; i < (MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE); i++)
-        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
+        if (strcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n", __LINE__, i - MISC12_SPACE1_DIM1,
                           wdata1[i - MISC12_SPACE1_DIM1], i, rdata[i]);
 
@@ -2338,7 +2338,7 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(user_block, "calloc");
 
     /* Copy in the user block data */
-    memcpy(user_block, str, HDstrlen(str));
+    memcpy(user_block, str, strlen(str));
 
     /* Open the new file */
     new_fp = fopen(new_name, "wb");
@@ -2869,13 +2869,13 @@ test_misc16(void)
 
     /* Compare data read in */
     for (i = 0; i < MISC16_SPACE_DIM; i++) {
-        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+        if (strlen(wdata[i]) != strlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+        if (strcmp(wdata[i], rdata[i]) != 0) {
             TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
                           (unsigned)__LINE__, (int)i, wdata[i], (int)i, rdata[i]);
             continue;
@@ -2954,13 +2954,13 @@ test_misc17(void)
 
     /* Compare data in the way of strings. */
     for (i = 0; i < MISC17_SPACE_DIM1; i++) {
-        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+        if (strlen(wdata[i]) != strlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+        if (strcmp(wdata[i], rdata[i]) != 0) {
             TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
                           (unsigned)__LINE__, (int)i, wdata[i], (int)i, rdata[i]);
             continue;
@@ -3066,7 +3066,7 @@ test_misc18(void)
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for (u = 0; u < 10; u++) {
         /* Set up attribute name */
-        HDsnprintf(attr_name, sizeof(attr_name), "Attr %u", u);
+        snprintf(attr_name, sizeof(attr_name), "Attr %u", u);
 
         /* Create & close attribute on first dataset */
         aid = H5Acreate2(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -5572,7 +5572,7 @@ test_misc30(void)
                 CHECK(ret, FAIL, "test_misc30_get_info");
             }
 
-            HDsnprintf(gname, sizeof(gname), "/g0/group%d", i);
+            snprintf(gname, sizeof(gname), "/g0/group%d", i);
             gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(gid, FAIL, "H5Gcreate2");
 

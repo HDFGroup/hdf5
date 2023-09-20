@@ -141,7 +141,7 @@ H5PL_init(void)
      * H5PLpublic.h) means we don't want to load plugins.
      */
     if (NULL != (env_var = HDgetenv(HDF5_PLUGIN_PRELOAD)))
-        if (!HDstrcmp(env_var, H5PL_NO_PLUGIN)) {
+        if (!strcmp(env_var, H5PL_NO_PLUGIN)) {
             H5PL_plugin_control_mask_g = 0;
             H5PL_allow_plugins_g       = false;
         }

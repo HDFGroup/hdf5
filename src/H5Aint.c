@@ -947,7 +947,7 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf, size_t *attr_name_len)
     assert(attr_name_len);
 
     /* Get the real attribute length */
-    nbytes = HDstrlen(attr->shared->name);
+    nbytes = strlen(attr->shared->name);
 
     /* Compute the string length which will fit into the user's buffer */
     copy_len = MIN(buf_size - 1, nbytes);
@@ -1701,7 +1701,7 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
     FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(
-        HDstrcmp((*(const H5A_t *const *)attr1)->shared->name, (*(const H5A_t *const *)attr2)->shared->name))
+        strcmp((*(const H5A_t *const *)attr1)->shared->name, (*(const H5A_t *const *)attr2)->shared->name))
 } /* end H5A__attr_cmp_name_inc() */
 
 /*-------------------------------------------------------------------------
@@ -1724,7 +1724,7 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
     FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(
-        HDstrcmp((*(const H5A_t *const *)attr2)->shared->name, (*(const H5A_t *const *)attr1)->shared->name))
+        strcmp((*(const H5A_t *const *)attr2)->shared->name, (*(const H5A_t *const *)attr1)->shared->name))
 } /* end H5A__attr_cmp_name_dec() */
 
 /*-------------------------------------------------------------------------
@@ -2547,7 +2547,7 @@ H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_na
     FUNC_ENTER_PACKAGE
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_attr_name, new_attr_name) != 0) {
+    if (strcmp(old_attr_name, new_attr_name) != 0) {
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;

@@ -604,7 +604,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                         "ran off end of input buffer while decoding");
 
                         /* Source file name */
-                        tmp_size = HDstrnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
+                        tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
                         if (tmp_size == (size_t)avail_buffer_space)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding - unterminated source "
@@ -625,7 +625,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                         "ran off end of input buffer while decoding");
 
                         /* Source dataset name */
-                        tmp_size = HDstrnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
+                        tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
                         if (tmp_size == (size_t)avail_buffer_space)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding - unterminated source "

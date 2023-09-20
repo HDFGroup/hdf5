@@ -361,7 +361,7 @@ print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname, con
     int         n;
 
     if (show_file_name_g)
-        HDsnprintf(fullname, sizeof(fullname), "%s/%s", iter->fname, oname + iter->name_start);
+        snprintf(fullname, sizeof(fullname), "%s/%s", iter->fname, oname + iter->name_start);
     else
         name = oname + iter->name_start;
 
@@ -372,7 +372,7 @@ print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname, con
         const char *last_sep; /* The location of the last group separator */
 
         /* Find the last component of the path name */
-        if (NULL == (last_sep = HDstrrchr(name, '/')))
+        if (NULL == (last_sep = strrchr(name, '/')))
             last_sep = name;
         else {
             last_sep++;
@@ -1381,9 +1381,9 @@ dump_dataset_values(hid_t dset)
     }
     outputformat.arr_linebreak = 0;
     /* Floating point types should display full precision */
-    HDsnprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
+    snprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
     outputformat.fmt_float = fmt_float;
-    HDsnprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
+    snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     outputformat.fmt_double = fmt_double;
 
     if (hexdump_g) {
@@ -1397,7 +1397,7 @@ dump_dataset_values(hid_t dset)
         outputformat.ascii     = true;
         outputformat.elmt_suf1 = "";
         outputformat.elmt_suf2 = "";
-        HDsnprintf(string_prefix, sizeof(string_prefix), "%s\"", outputformat.line_pre);
+        snprintf(string_prefix, sizeof(string_prefix), "%s\"", outputformat.line_pre);
         outputformat.line_pre = string_prefix;
         outputformat.line_suf = "\"";
     }
@@ -1550,9 +1550,9 @@ dump_attribute_values(hid_t attr)
     }
     outputformat.arr_linebreak = 0;
     /* Floating point types should display full precision */
-    HDsnprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
+    snprintf(fmt_float, sizeof(fmt_float), "%%1.%dg", FLT_DIG);
     outputformat.fmt_float = fmt_float;
-    HDsnprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
+    snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     outputformat.fmt_double = fmt_double;
 
     if (hexdump_g) {
@@ -1566,7 +1566,7 @@ dump_attribute_values(hid_t attr)
         outputformat.ascii     = true;
         outputformat.elmt_suf1 = "";
         outputformat.elmt_suf2 = "";
-        HDsnprintf(string_prefix, sizeof(string_prefix), "%s\"", outputformat.line_pre);
+        snprintf(string_prefix, sizeof(string_prefix), "%s\"", outputformat.line_pre);
         outputformat.line_pre = string_prefix;
         outputformat.line_suf = "\"";
     }
@@ -1995,7 +1995,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 filt_id   = H5Pget_filter2(dcpl, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
                                            sizeof(f_name), f_name, NULL);
                 f_name[sizeof(f_name) - 1] = '\0';
-                HDsnprintf(s, sizeof(s), "Filter-%d:", i);
+                snprintf(s, sizeof(s), "Filter-%d:", i);
                 h5tools_str_append(&buffer, "    %-10s %s-%u %s {", s, (f_name[0] ? f_name : "method"),
                                    (unsigned)filt_id, ((filt_flags & H5Z_FLAG_OPTIONAL) ? "OPT" : ""));
                 for (cd_num = 0; cd_num < cd_nelmts; cd_num++)
@@ -2182,7 +2182,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                 else
                     tm = HDlocaltime(&(oinfo->mtime));
                 if (tm) {
-                    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+                    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "    %-10s %s\n", "Modified:", buf);
                     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos,
@@ -2700,88 +2700,88 @@ main(int argc, char *argv[])
 
     /* Switches come before non-switch arguments */
     for (argno = 1; argno < argc && '-' == argv[argno][0]; argno++) {
-        if (!HDstrcmp(argv[argno], "--")) {
+        if (!strcmp(argv[argno], "--")) {
             /* Last switch */
             argno++;
             break;
         }
-        else if (!HDstrcmp(argv[argno], "--help")) {
+        else if (!strcmp(argv[argno], "--help")) {
             usage();
             leave(EXIT_SUCCESS);
         }
-        else if (!HDstrcmp(argv[argno], "--address")) {
+        else if (!strcmp(argv[argno], "--address")) {
             address_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--data")) {
+        else if (!strcmp(argv[argno], "--data")) {
             data_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--enable-error-stack")) {
+        else if (!strcmp(argv[argno], "--enable-error-stack")) {
             enable_error_stack = 1;
         }
-        else if (!HDstrcmp(argv[argno], "--errors")) {
+        else if (!strcmp(argv[argno], "--errors")) {
             /* deprecated --errors */
             enable_error_stack = 1;
         }
-        else if (!HDstrcmp(argv[argno], "--follow-symlinks")) {
+        else if (!strcmp(argv[argno], "--follow-symlinks")) {
             follow_symlink_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--no-dangling-links")) {
+        else if (!strcmp(argv[argno], "--no-dangling-links")) {
             no_dangling_link_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--external")) {
+        else if (!strcmp(argv[argno], "--external")) {
             follow_elink_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--full")) {
+        else if (!strcmp(argv[argno], "--full")) {
             fullname_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--group")) {
+        else if (!strcmp(argv[argno], "--group")) {
             grp_literal_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--label")) {
+        else if (!strcmp(argv[argno], "--label")) {
             label_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--recursive")) {
+        else if (!strcmp(argv[argno], "--recursive")) {
             recursive_g = true;
             fullname_g  = true;
         }
-        else if (!HDstrcmp(argv[argno], "--simple")) {
+        else if (!strcmp(argv[argno], "--simple")) {
             simple_output_g = true;
         }
-        else if (!HDstrcmp(argv[argno], "--string")) {
+        else if (!strcmp(argv[argno], "--string")) {
             string_g = true;
         }
-        else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
+        else if (!strncmp(argv[argno], "--vol-value=", (size_t)12)) {
             vol_info.type    = VOL_BY_VALUE;
             vol_info.u.value = (H5VL_class_value_t)atoi(argv[argno] + 12);
             custom_vol_fapl  = true;
         }
-        else if (!HDstrncmp(argv[argno], "--vol-name=", (size_t)11)) {
+        else if (!strncmp(argv[argno], "--vol-name=", (size_t)11)) {
             vol_info.type   = VOL_BY_NAME;
             vol_info.u.name = argv[argno] + 11;
             custom_vol_fapl = true;
         }
-        else if (!HDstrncmp(argv[argno], "--vol-info=", (size_t)11)) {
+        else if (!strncmp(argv[argno], "--vol-info=", (size_t)11)) {
             vol_info.info_string = argv[argno] + 11;
         }
-        else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
+        else if (!strncmp(argv[argno], "--vfd=", (size_t)6)) {
             vfd_info.type   = VFD_BY_NAME;
             vfd_info.u.name = argv[argno] + 6;
             custom_vfd_fapl = true;
         }
-        else if (!HDstrncmp(argv[argno], "--vfd-value=", (size_t)12)) {
+        else if (!strncmp(argv[argno], "--vfd-value=", (size_t)12)) {
             vfd_info.type    = VFD_BY_VALUE;
             vfd_info.u.value = (H5FD_class_value_t)atoi(argv[argno] + 12);
             custom_vfd_fapl  = true;
         }
-        else if (!HDstrncmp(argv[argno], "--vfd-name=", (size_t)11)) {
+        else if (!strncmp(argv[argno], "--vfd-name=", (size_t)11)) {
             vfd_info.type   = VFD_BY_NAME;
             vfd_info.u.name = argv[argno] + 11;
             custom_vfd_fapl = true;
         }
-        else if (!HDstrncmp(argv[argno], "--vfd-info=", (size_t)11)) {
+        else if (!strncmp(argv[argno], "--vfd-info=", (size_t)11)) {
             vfd_info.info = (const void *)(argv[argno] + 11);
         }
-        else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
+        else if (!strncmp(argv[argno], "--width=", (size_t)8)) {
             width_g = (int)strtol(argv[argno] + 8, &rest, 0);
 
             if (0 == width_g)
@@ -2791,7 +2791,7 @@ main(int argc, char *argv[])
                 leave(EXIT_FAILURE);
             }
         }
-        else if (!HDstrcmp(argv[argno], "--width")) {
+        else if (!strcmp(argv[argno], "--width")) {
             if ((argno + 1) >= argc) {
                 usage();
                 leave(EXIT_FAILURE);
@@ -2805,17 +2805,17 @@ main(int argc, char *argv[])
                 leave(EXIT_FAILURE);
             }
         }
-        else if (!HDstrcmp(argv[argno], "--verbose")) {
+        else if (!strcmp(argv[argno], "--verbose")) {
             verbose_g++;
         }
-        else if (!HDstrcmp(argv[argno], "--version")) {
+        else if (!strcmp(argv[argno], "--version")) {
             print_version(h5tools_getprogname());
             leave(EXIT_SUCCESS);
         }
-        else if (!HDstrcmp(argv[argno], "--hexdump")) {
+        else if (!strcmp(argv[argno], "--hexdump")) {
             hexdump_g = true;
         }
-        else if (!HDstrncmp(argv[argno], "-w", (size_t)2)) {
+        else if (!strncmp(argv[argno], "-w", (size_t)2)) {
             if (argv[argno][2]) {
                 s = argv[argno] + 2;
             }
@@ -2836,7 +2836,7 @@ main(int argc, char *argv[])
                 leave(EXIT_FAILURE);
             }
         }
-        else if (!HDstrncmp(argv[argno], "--s3-cred=", (size_t)10)) {
+        else if (!strncmp(argv[argno], "--s3-cred=", (size_t)10)) {
 #ifdef H5_HAVE_ROS3_VFD
             char const *start = NULL;
 
@@ -2863,7 +2863,7 @@ main(int argc, char *argv[])
             leave(EXIT_FAILURE);
 #endif
         }
-        else if (!HDstrncmp(argv[argno], "--hdfs-attrs=", (size_t)13)) {
+        else if (!strncmp(argv[argno], "--hdfs-attrs=", (size_t)13)) {
 #ifdef H5_HAVE_LIBHDFS
             char const *start = NULL;
 
@@ -2983,13 +2983,13 @@ main(int argc, char *argv[])
     /* Setup a custom fapl for file accesses */
     if (custom_vol_fapl || custom_vfd_fapl) {
 #ifdef H5_HAVE_ROS3_VFD
-        if (custom_vfd_fapl && (0 == HDstrcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))) {
+        if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))) {
             if (!vfd_info.info)
                 vfd_info.info = &ros3_fa;
         }
 #endif
 #ifdef H5_HAVE_LIBHDFS
-        if (custom_vfd_fapl && (0 == HDstrcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))) {
+        if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))) {
             if (!vfd_info.info)
                 vfd_info.info = &hdfs_fa;
         }
@@ -3021,7 +3021,7 @@ main(int argc, char *argv[])
         symlink_trav_t symlink_list;
         size_t         u;
 
-        fname   = HDstrdup(argv[argno++]);
+        fname   = strdup(argv[argno++]);
         oname   = NULL;
         file_id = H5I_INVALID_HID;
 
@@ -3037,7 +3037,7 @@ main(int argc, char *argv[])
 
             /* Shorten the file name; lengthen the object name */
             x     = oname;
-            oname = HDstrrchr(fname, '/');
+            oname = strrchr(fname, '/');
             if (x)
                 *x = '/';
             if (!oname)
@@ -3055,10 +3055,10 @@ main(int argc, char *argv[])
             /* Always use absolute paths to avoid confusion, keep track of where
              * to begin path name output */
             *oname        = '/';
-            iter.base_len = HDstrlen(oname);
+            iter.base_len = strlen(oname);
             iter.base_len -= oname[iter.base_len - 1] == '/';
             x = oname;
-            if (NULL == (oname = HDstrdup(oname))) {
+            if (NULL == (oname = strdup(oname))) {
                 fprintf(rawerrorstream, "memory allocation failed\n");
                 leave(EXIT_FAILURE);
             }
@@ -3090,7 +3090,7 @@ main(int argc, char *argv[])
         symlink_list.objs                        = NULL;
 
         /* Check for root group as object name */
-        if (HDstrcmp(oname, root_name) != 0) {
+        if (strcmp(oname, root_name) != 0) {
             /* Check the type of link given */
             if (H5Lget_info2(file_id, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t           curr_pos = 0; /* total data element position   */

@@ -658,7 +658,7 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
 
     /* calculate prefix length */
     if (NULL != elink_pref)
-        len = HDstrlen(elink_pref);
+        len = strlen(elink_pref);
 
     enc_value = (uint64_t)len;
     enc_size  = H5VM_limit_enc_size(enc_value);
@@ -724,7 +724,7 @@ H5P__lacc_elink_pref_dec(const void **_pp, void *_value)
         /* Make a copy of the user's prefix string */
         if (NULL == (*elink_pref = (char *)H5MM_malloc(len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix");
-        HDstrncpy(*elink_pref, *(const char **)pp, len);
+        strncpy(*elink_pref, *(const char **)pp, len);
         (*elink_pref)[len] = '\0';
 
         *pp += len;
@@ -804,7 +804,7 @@ H5P__lacc_elink_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_
     if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
     if (NULL != pref1 && NULL != pref2)
-        ret_value = HDstrcmp(pref1, pref2);
+        ret_value = strcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -977,9 +977,9 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     /* Check for prefix being set */
     if (my_prefix) {
         /* Copy to user's buffer, if given */
-        len = HDstrlen(my_prefix);
+        len = strlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, size);
+            strncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */

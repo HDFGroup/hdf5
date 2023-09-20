@@ -619,7 +619,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
+        snprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -685,7 +685,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
+        snprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -1551,7 +1551,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if (H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
-            if (HDstrcmp(objname, objname2) != 0)
+            if (strcmp(objname, objname2) != 0)
                 TEST_ERROR;
 
             /* Get link info */
@@ -4425,7 +4425,7 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     (void)src_fapl;
     (void)dst_fapl; /* Silence compiler */
     SKIPPED();
-    HDputs("    Deflation filter not available");
+    puts("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++)
@@ -4848,7 +4848,7 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     (void)src_fapl;
     (void)dst_fapl; /* Silence compiler */
     SKIPPED();
-    HDputs("    Deflation filter not available");
+    puts("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++)
@@ -6835,11 +6835,11 @@ attach_attribute_compound_vlstr(hid_t loc_id)
         goto done;
 
     /* Write to the attribute */
-    len   = HDstrlen(ATTR_CMPD_STRING) + 1;
+    len   = strlen(ATTR_CMPD_STRING) + 1;
     buf.i = 9;
     if (NULL == (buf.v = (char *)calloc(len, sizeof(char))))
         goto done;
-    HDstrncpy(buf.v, ATTR_CMPD_STRING, len);
+    strncpy(buf.v, ATTR_CMPD_STRING, len);
     if (H5Awrite(aid, cmpd_tid, &buf) < 0)
         goto done;
 
@@ -6915,9 +6915,9 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     /* Compare the attributes' data */
     if (rbuf.i != rbuf2.i)
         FAIL_STACK_ERROR;
-    if (HDstrlen(rbuf.v) != HDstrlen(rbuf2.v))
+    if (strlen(rbuf.v) != strlen(rbuf2.v))
         FAIL_STACK_ERROR;
-    if (memcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)) != 0)
+    if (memcmp(rbuf.v, rbuf2.v, strlen(rbuf.v)) != 0)
         FAIL_STACK_ERROR;
 
     /* Reclaim vlen buffer */
@@ -7164,7 +7164,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     (void)src_fapl;
     (void)dst_fapl; /* Silence compiler */
     SKIPPED();
-    HDputs("    Deflation filter not available");
+    puts("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
@@ -7795,17 +7795,17 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
 
     /* create nested sub-groups & datasets */
     for (i = 0; i < NUM_SUB_GROUPS; i++) {
-        HDsnprintf(objname, sizeof(objname), "Group #%d", i);
+        snprintf(objname, sizeof(objname), "Group #%d", i);
         if ((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         for (j = 0; j < NUM_SUB_GROUPS; j++) {
-            HDsnprintf(objname, sizeof(objname), "Group #%d", j);
+            snprintf(objname, sizeof(objname), "Group #%d", j);
             if ((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 TEST_ERROR;
 
             for (k = 0; k < NUM_DATASETS; k++) {
-                HDsnprintf(objname, sizeof(objname), "Dataset #%d", k);
+                snprintf(objname, sizeof(objname), "Dataset #%d", k);
 
                 /* add a dataset to the group */
                 if ((did = H5Dcreate2(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
@@ -8078,12 +8078,12 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
     /* create wide sub-group hierarchy, with multiple links to higher groups */
     for (u = 0; u < NUM_WIDE_LOOP_GROUPS; u++) {
-        HDsnprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB, u);
+        snprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB, u);
         if ((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         for (v = 0; v < NUM_WIDE_LOOP_GROUPS; v++) {
-            HDsnprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB_SUB2, v);
+            snprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB_SUB2, v);
             if ((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR;
 
@@ -16239,7 +16239,7 @@ test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl
 
     /* Create groups */
     for (i = 0; i < 9; i++) {
-        HDsnprintf(grp_name, sizeof(grp_name), "grp%d", i);
+        snprintf(grp_name, sizeof(grp_name), "grp%d", i);
         if ((gid = H5Gcreate2(fid1, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Gclose(gid) < 0)
@@ -17185,52 +17185,52 @@ main(void)
 
         /* Test with and without shared messages */
         if (configuration & CONFIG_SHARE_SRC) {
-            HDputs("\nTesting with shared src messages:");
+            puts("\nTesting with shared src messages:");
             fcpl_src = fcpl_shared;
         }
         else {
-            HDputs("\nTesting without shared src messages:");
+            puts("\nTesting without shared src messages:");
             fcpl_src = H5P_DEFAULT;
         }
         if (configuration & CONFIG_SHARE_DST) {
-            HDputs("Testing with shared dst messages:");
+            puts("Testing with shared dst messages:");
             fcpl_dst  = fcpl_shared;
             same_file = false;
         }
         else {
-            HDputs("Testing without shared dst messages:");
+            puts("Testing without shared dst messages:");
             fcpl_dst = H5P_DEFAULT;
         }
 
         /* Set the FAPL for the source file's type of format */
         if (configuration & CONFIG_SRC_NEW_FORMAT) {
-            HDputs("Testing with latest format for source file:");
+            puts("Testing with latest format for source file:");
             src_fapl = fapl2;
 
             /* Test with and without dense attributes */
             if (configuration & CONFIG_DENSE) {
-                HDputs("Testing with dense attributes:");
+                puts("Testing with dense attributes:");
                 num_attributes_g = max_compact + 1;
             }
             else {
-                HDputs("Testing without dense attributes:");
+                puts("Testing without dense attributes:");
                 num_attributes_g = MAX(min_dense, 2) - 2;
             }
         } /* end if */
         else {
-            HDputs("Testing with oldest file format for source file:");
+            puts("Testing with oldest file format for source file:");
             src_fapl         = fapl;
             num_attributes_g = 4;
         } /* end else */
 
         /* Set the FAPL for the destination file's type of format */
         if (configuration & CONFIG_DST_NEW_FORMAT) {
-            HDputs("Testing with latest format for destination file:");
+            puts("Testing with latest format for destination file:");
             dst_fapl  = fapl2;
             same_file = false;
         } /* end if */
         else {
-            HDputs("Testing with oldest file format for destination file:");
+            puts("Testing with oldest file format for destination file:");
             dst_fapl = fapl;
         } /* end else */
 
@@ -17292,7 +17292,7 @@ main(void)
                                     false, "H5Ocopy(): expand external link");
 
         /* Splitter VFD currently has external link-related bugs */
-        if (HDstrcmp(env_h5_drvr, "splitter")) {
+        if (strcmp(env_h5_drvr, "splitter")) {
             nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
                                         H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG, false,
                                         "H5Ocopy(): expand soft and external links");
@@ -17407,7 +17407,7 @@ main(void)
         exit(EXIT_FAILURE);
     } /* end if */
 
-    HDputs("All object copying tests passed.");
+    puts("All object copying tests passed.");
 
     /* close property list.
      * NOTE: if this property list is not closed and the test is

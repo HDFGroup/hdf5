@@ -89,16 +89,16 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
     opts->magic  = MSHS_OPTS_MAGIC;
     opts->help   = 0;
     opts->portno = MSHS_DEFAULT_PORTNO;
-    HDstrncpy(opts->ip, MSHS_DEFAULT_IP, MSHS_IP_STR_SIZE);
+    strncpy(opts->ip, MSHS_DEFAULT_IP, MSHS_IP_STR_SIZE);
 
     for (i = 1; i < argc; i++) { /* start with first possible option argument */
-        if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
+        if (!strncmp(argv[i], "-h", 3) || !strncmp(argv[i], "--help", 7)) {
             opts->help = 1;
         }
-        else if (!HDstrncmp(argv[i], "--ip=", 5)) {
-            HDstrncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
+        else if (!strncmp(argv[i], "--ip=", 5)) {
+            strncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
         }
-        else if (!HDstrncmp(argv[i], "--port=", 7)) {
+        else if (!strncmp(argv[i], "--port=", 7)) {
             opts->portno = atoi(argv[i] + 7);
         }
         else {
@@ -110,8 +110,8 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
     } /* end for each argument from command line */
 
     /* auto-replace 'localhost' with numeric IP */
-    if (!HDstrncmp(opts->ip, "localhost", 10)) { /* include null terminator */
-        HDstrncpy(opts->ip, "127.0.0.1", MSHS_IP_STR_SIZE);
+    if (!strncmp(opts->ip, "localhost", 10)) { /* include null terminator */
+        strncpy(opts->ip, "127.0.0.1", MSHS_IP_STR_SIZE);
     }
 
     return 0;
@@ -149,12 +149,12 @@ send_shutdown(struct mshs_opts *opts)
     memset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
 
     if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
-        printf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR connect() (%d)\n%s\n", errno, strerror(errno));
         return -1;
     }
 
     if (HDwrite(live_socket, "SHUTDOWN", 9) == -1) {
-        printf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR write() (%d)\n%s\n", errno, strerror(errno));
         return -1;
     }
 
@@ -163,7 +163,7 @@ send_shutdown(struct mshs_opts *opts)
         printf("ERROR read() can't receive data\n");
         return -1;
     }
-    if (HDstrncmp("CLOSING", mybuf, 8)) {
+    if (strncmp("CLOSING", mybuf, 8)) {
         printf("ERROR read() didn't receive data from server\n");
         return -1;
     }
