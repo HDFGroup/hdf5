@@ -41,7 +41,7 @@ set (HL_REFERENCE_TEST_FILES
 #-- Copy the necessary files.
 # --------------------------------------------------------------------
 foreach (h5_file ${HL_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_HL_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}" "hl_test_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/${h5_file}" "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}" "hl_test_files")
 endforeach ()
 add_custom_target(hl_test_files ALL COMMENT "Copying files needed by hl_test tests" DEPENDS ${hl_test_files_list})
 

@@ -19,203 +19,224 @@
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
-  set (LIST_HDF5_TEST_FILES
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/bounds_latest_latest.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_attr.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_attr_refs.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_deflate.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_early.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_ext.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_f32le.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_f32le_ex-0.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_f32le_ex.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fill.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fletcher.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_hlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d_ex-0.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d_ex-1.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_1d_ex.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_2d.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_2d_ex-0.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_2d_ex.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_3d.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_3d_ex-0.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_int32le_3d_ex.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layouto.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout2.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout3.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_named_dtypes.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nested_8bit_enum.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nested_8bit_enum_deflated.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_CVE-2018-17432.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_CVE-2018-14460.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nbit.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_objs.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_refs.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_shuffle.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_soffset.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_szip.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-0.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-1.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-2.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex-3.dat
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_uint8be_ex.h5
+  set (LIST_REPACK_TEST_FILES
+      bounds_latest_latest.h5
+      h5repack_attr.h5
+      h5repack_attr_refs.h5
+      h5repack_deflate.h5
+      h5repack_early.h5
+      h5repack_ext.h5
+      h5repack_f32le.h5
+      h5repack_f32le_ex-0.dat
+      h5repack_f32le_ex.h5
+      h5repack_fill.h5
+      h5repack_filters.h5
+      h5repack_fletcher.h5
+      h5repack_hlink.h5
+      h5repack_int32le_1d.h5
+      h5repack_int32le_1d_ex-0.dat
+      h5repack_int32le_1d_ex-1.dat
+      h5repack_int32le_1d_ex.h5
+      h5repack_int32le_2d.h5
+      h5repack_int32le_2d_ex-0.dat
+      h5repack_int32le_2d_ex.h5
+      h5repack_int32le_3d.h5
+      h5repack_int32le_3d_ex-0.dat
+      h5repack_int32le_3d_ex.h5
+      h5repack_layout.h5
+      h5repack_layouto.h5
+      h5repack_layout2.h5
+      h5repack_layout3.h5
+      h5repack_layout.UD.h5
+      h5repack_named_dtypes.h5
+      h5repack_nested_8bit_enum.h5
+      h5repack_nested_8bit_enum_deflated.h5
+      h5repack_CVE-2018-17432.h5
+      h5repack_CVE-2018-14460.h5
+      h5repack_nbit.h5
+      h5repack_objs.h5
+      h5repack_refs.h5
+      h5repack_shuffle.h5
+      h5repack_soffset.h5
+      h5repack_szip.h5
+      h5repack_uint8be.h5
+      h5repack_uint8be_ex-0.dat
+      h5repack_uint8be_ex-1.dat
+      h5repack_uint8be_ex-2.dat
+      h5repack_uint8be_ex-3.dat
+      h5repack_uint8be_ex.h5
       # fsm
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_aggr.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fsm_aggr_nopersist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_fsm_aggr_persist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_none.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_nopersist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_persist.h5
-      # h5diff/testfile
-      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
+      h5repack_aggr.h5
+      h5repack_fsm_aggr_nopersist.h5
+      h5repack_fsm_aggr_persist.h5
+      h5repack_none.h5
+      h5repack_paged_nopersist.h5
+      h5repack_paged_persist.h5
+  )
+  # h5diff/testfile
+  set (LIST_DIFF_TEST_FILES
+      h5diff_attr1.h5
+  )
+  # tools/testfiles/vds
+  set (LIST_VDS_TEST_FILES
+      1_a.h5
+      1_b.h5
+      1_c.h5
+      1_d.h5
+      1_e.h5
+      1_f.h5
+      1_vds.h5
+      2_a.h5
+      2_b.h5
+      2_c.h5
+      2_d.h5
+      2_e.h5
+      2_vds.h5
+      3_1_vds.h5
+      3_2_vds.h5
+      4_0.h5
+      4_1.h5
+      4_2.h5
+      4_vds.h5
+      5_a.h5
+      5_b.h5
+      5_c.h5
+      5_vds.h5
+  )
+  set (LIST_COPY_TEST_FILES
+      h5copy_extlinks_src.h5
+      h5copy_extlinks_trg.h5
+  )
+  set (LIST_HDF5_TEST_FILES
       # tools/testfiles for external links
-      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinkfar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlinktar.h5
-      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_trg.h5
+      tsoftlinks.h5
+      textlinkfar.h5
+      textlinksrc.h5
+      textlinktar.h5
+      textlink.h5
       # tools/testfiles
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00000.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00001.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00002.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00003.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00004.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00005.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00006.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00007.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00008.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00009.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tfamily00010.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tordergr.h5
+      tfamily00000.h5
+      tfamily00001.h5
+      tfamily00002.h5
+      tfamily00003.h5
+      tfamily00004.h5
+      tfamily00005.h5
+      tfamily00006.h5
+      tfamily00007.h5
+      tfamily00008.h5
+      tfamily00009.h5
+      tfamily00010.h5
+      tordergr.h5
       # reference conversion files
-      ${HDF5_TOOLS_DIR}/testfiles/tattrreg.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
-      # tools/testfiles/vds
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_c.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_d.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_e.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_f.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/1_vds.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/2_a.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/2_b.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/2_c.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/2_d.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/2_e.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/2_vds.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/3_1_vds.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/3_2_vds.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/4_0.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/4_1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/4_2.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/4_vds.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/5_a.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/5_b.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/5_c.h5
-      ${HDF5_TOOLS_DIR}/testfiles/vds/5_vds.h5
+      tattrreg.h5
+      tdatareg.h5
       # tools/testfiles onion VFD files
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5.onion
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5.onion
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5.onion
+      tst_onion_dset_1d.h5
+      tst_onion_dset_1d.h5.onion
+      tst_onion_dset_ext.h5
+      tst_onion_dset_ext.h5.onion
+      tst_onion_objs.h5
+      tst_onion_objs.h5.onion
   )
 
   set (LIST_OTHER_TEST_FILES
-      h5repack-help.txt
       h5repack_ext.bin
       h5repack.info
       ublock.bin
   )
 
   set (LIST_TST_TEST_FILES
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5-gzip_verbose_filters
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_test.h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_version_test.h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_zero.h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5
+      h5repack-help.txt
+      h5repack_filters.h5-gzip_verbose_filters.tst
+      h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
+      plugin_test.h5repack_layout.h5.tst
+      plugin_version_test.h5repack_layout.h5.tst
+      plugin_zero.h5repack_layout.h5.tst
+      plugin_none.h5repack_layout.UD.h5.tst
       # tools/testfiles for external links
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-merge.tsoftlinks.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-merge.textlinkfar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-merge.textlinksrc.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-merge.textlinktar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-merge.textlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5
+      tsoftlinks-merge.tsoftlinks.h5.tst
+      textlinkfar-merge.textlinkfar.h5.tst
+      textlinksrc-merge.textlinksrc.h5.tst
+      textlinktar-merge.textlinktar.h5.tst
+      textlink-merge.textlink.h5.tst
+      h5copy_extlinks_src-merge.h5copy_extlinks_src.h5.tst
   )
 
   set (LIST_DDL_TEST_FILES
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/crtorder.tordergr.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/deflate_limit.h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_test
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_version_test
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5-plugin_none
+      crtorder.tordergr.h5.ddl
+      deflate_limit.h5repack_layout.h5.ddl
+      h5repack_layout.h5.ddl
+      h5repack_layout.h5-plugin_test.ddl
+      h5repack_layout.h5-plugin_version_test.ddl
+      h5repack_layout.h5-plugin_zero.ddl
+      h5repack_layout.UD.h5-plugin_none.ddl
       # fsm
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/STG.h5repack_none.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SPT.h5repack_aggr.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SP.h5repack_fsm_aggr_nopersist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/S.h5repack_fsm_aggr_persist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/GS.h5repack_paged_nopersist.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/SP.h5repack_paged_persist.h5
+      STG.h5repack_none.h5.ddl
+      SPT.h5repack_aggr.h5.ddl
+      SP.h5repack_fsm_aggr_nopersist.h5.ddl
+      S.h5repack_fsm_aggr_persist.h5.ddl
+      GS.h5repack_paged_nopersist.h5.ddl
+      SP.h5repack_paged_persist.h5.ddl
       # vds
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/2_vds.h5-vds_chunk3x6x9-v
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/3_1_vds.h5-vds_chunk2x5x8-v
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa-v
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti-v
+      1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+      2_vds.h5-vds_chunk3x6x9-v.ddl
+      3_1_vds.h5-vds_chunk2x5x8-v.ddl
+      4_vds.h5-vds_compa-v.ddl
+      4_vds.h5-vds_conti-v.ddl
       # refs
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/attrregion.tattrreg.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/dataregion.tdatareg.h5
+      attrregion.tattrreg.h5.ddl
+      dataregion.tdatareg.h5.ddl
       # tools/testfiles for external links
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-base.textlinkfar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-base.textlinksrc.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-base.textlinktar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-base.textlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-base.tsoftlinks.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-base.h5copy_extlinks_src.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-prune.textlinkfar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-prune.textlinksrc.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-prune.textlinktar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-prune.textlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-prune.tsoftlinks.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-prune.h5copy_extlinks_src.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-mergeprune.textlinkfar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-mergeprune.textlinksrc.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-mergeprune.textlinktar.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-mergeprune.textlink.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-mergeprune.tsoftlinks.h5
-      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5
+      textlinkfar-base.textlinkfar.h5.ddl
+      textlinksrc-base.textlinksrc.h5.ddl
+      textlinktar-base.textlinktar.h5.ddl
+      textlink-base.textlink.h5.ddl
+      tsoftlinks-base.tsoftlinks.h5.ddl
+      h5copy_extlinks_src-base.h5copy_extlinks_src.h5.ddl
+      textlinkfar-prune.textlinkfar.h5.ddl
+      textlinksrc-prune.textlinksrc.h5.ddl
+      textlinktar-prune.textlinktar.h5.ddl
+      textlink-prune.textlink.h5.ddl
+      tsoftlinks-prune.tsoftlinks.h5.ddl
+      h5copy_extlinks_src-prune.h5copy_extlinks_src.h5.ddl
+      textlinkfar-mergeprune.textlinkfar.h5.ddl
+      textlinksrc-mergeprune.textlinksrc.h5.ddl
+      textlinktar-mergeprune.textlinktar.h5.ddl
+      textlink-mergeprune.textlink.h5.ddl
+      tsoftlinks-mergeprune.tsoftlinks.h5.ddl
+      h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5.ddl
   )
 
+  foreach (h5_file ${LIST_REPACK_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+  endforeach ()
+
+  foreach (h5_file ${LIST_COPY_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5copy/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+  endforeach ()
+
+  foreach (h5_file ${LIST_DIFF_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+  endforeach ()
+
+  foreach (h5_file ${LIST_VDS_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+  endforeach ()
+
   foreach (h5_file ${LIST_HDF5_TEST_FILES})
-    get_filename_component(fname "${h5_file}" NAME)
-    HDFTEST_COPY_FILE("${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_TST_TEST_FILES})
-    get_filename_component(fname "${h5_file}" NAME)
-    HDFTEST_COPY_FILE("${h5_file}.tst" "${PROJECT_BINARY_DIR}/testfiles/${fname}.tst" "h5repack_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_DDL_TEST_FILES})
-    get_filename_component(fname "${h5_file}" NAME)
-    HDFTEST_COPY_FILE("${h5_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/${fname}.ddl" "h5repack_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
   add_custom_target(h5repack_files ALL COMMENT "Copying files needed by h5repack tests" DEPENDS ${h5repack_files_list})
 
