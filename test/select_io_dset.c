@@ -3334,7 +3334,7 @@ main(void)
     printf("All selection I/O dataset tests passed.\n");
     printf("===================================\n");
 
-printf("Adding one line\n");
+    printf("Adding one line\n");
     h5_cleanup(FILENAME, fapl);
 
     exit(EXIT_SUCCESS);
