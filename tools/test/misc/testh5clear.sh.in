@@ -40,7 +40,6 @@ verbose=yes
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5CLEAR_TESTFILES="$SRC_TOOLS/test/misc/testfiles"
 
