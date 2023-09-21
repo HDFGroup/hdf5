@@ -46,7 +46,7 @@ HDFLIB_HOME="$top_srcdir/java/lib"
 BLDDIR="."
 BLDLIBDIR="$BLDDIR/testlibs"
 HDFTEST_HOME="$top_srcdir/java/test"
-TOOLS_TESTFILES="$top_srcdir/tools/testfiles"
+DUMP_TESTFILES="$top_srcdir/tools/test/h5dump/testfiles"
 
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
 TESTJARFILE=jar@PACKAGE_TARNAME@test.jar

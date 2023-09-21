@@ -1894,9 +1894,9 @@ H5_get_srcdir_filename(const char *filename)
     /* Build path to test file. We're checking the length so suppress
      * the gcc format-truncation warning.
      */
-    if ((strlen(srcdir) + strlen("/testfiles/") + strlen(filename) + 1) < sizeof(srcdir_testpath)) {
+    if ((strlen(srcdir) + strlen("testfiles/") + strlen(filename) + 1) < sizeof(srcdir_testpath)) {
         H5_GCC_DIAG_OFF("format-truncation")
-        snprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s/testfiles/%s", srcdir, filename);
+        snprintf(srcdir_testpath, sizeof(srcdir_testpath), "%stestfiles/%s", srcdir, filename);
         H5_GCC_DIAG_ON("format-truncation")
         return srcdir_testpath;
     }
