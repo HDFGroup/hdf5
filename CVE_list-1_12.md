@@ -1,18 +1,18 @@
 | CVE issue number                                                           | 1.12.0 | 1.12.1 | 1.12.2 | 1.12.3 |
 | :------------------------------------------------------------------------- | :----- | :----- | :----- | :----- |
-| [CVE-2022-26061](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-26061)          | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
-| [CVE-2022-25972](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25972)          | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
-| [CVE-2022-25942](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25942)          | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
+| [CVE-2022-26061](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-26061)          | UNT      | UNT      | UNT      | UNT      |
+| [CVE-2022-25972](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25972)          | UNT      | UNT      | UNT      | UNT      |
+| [CVE-2022-25942](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25942)          | UNT      | UNT      | UNT      | UNT      |
 | [CVE-2021-46244](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-46244)          | ❌       | ❌       | ❌       | ✅       |
 | [CVE-2021-46243](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-46243)          | ❌       | ❌       | ❌       | ✅       |
 | [CVE-2021-46242](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-46242)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2021-45833](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45833)          | ❌       | ❌       | ❌       | ✅       |
-| [CVE-2021-45832](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45832)          | UNTESTED | UNTESTED | UNTESTED | UNTESTED |
+| [CVE-2021-45832](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45832)          | UNT      | UNT      | UNT      | UNT      |
 | [CVE-2021-45830](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45830)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2021-45829](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45829)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2021-37501](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-37501)          | ❌       | ❌       | ❌       | ✅       |
 | [CVE-2021-36977](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-36977)          | ✅       | ✅       | ✅       | ✅       |
-| [CVE-2021-31009](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-31009)          |   N/A    |    N/A    |   N/A    |   N/A    |
+| [CVE-2021-31009](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-31009)          |   N/A    |   N/A    |   N/A    |   N/A    |
 | [CVE-2020-10812](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-10812)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2020-10811](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-10811)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2020-10810](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-10810)          | ✅       | ✅       | ✅       | ✅       |
@@ -69,6 +69,7 @@
 | [CVE-2016-4330](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4330)            | ✅       | ✅       | ✅       | ✅       |
 
 ## NOTES
+* "UNT" denotes "UNTESTED"
 1. CVE-2021-45832 has no known proof of vulnerability file. The H5E code that could produce an infinite loop has been reworked, but without a vulnerable file or test program it's difficult to tell if this issue has been fixed. The stack trace provided with the CVE only contains part of the trace, so we don't even know the entry point into the library.
 2. CVE-2021-31009 is not a specific vulnerability against HDF5.
 3. CVE-2022-25942, CVE-2022-25972, and CVE-2022-26061 are not tested. Those vulnerabilities involve the high-level GIF tools and can be avoided by disabling those tools at build time.
