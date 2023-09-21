@@ -205,7 +205,7 @@ error:
  *              I/O testing:
  *
  *              Test the optimization of compound data writing, rewriting,
- *              and reading when the source type is a subset of destination
+ *              and reading when the source type is a subset of the destination
  *              type.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -2004,7 +2004,7 @@ error:
  * Function:    test_hdf5_src_subset
  *
  * Purpose:    Test the optimization of compound data writing, rewriting,
- *              and reading when the source type is a subset of destination
+ *              and reading when the source type is a subset of the destination
  *              type.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -2216,7 +2216,7 @@ error:
  *                      TYPE5 E;
  *                  };
  *              This optimization is for the Chicago company.  This test
- *              is in opposite of test_hdf5_src_subset.
+ *              is the opposite of test_hdf5_src_subset.
  *
  * Return:    Success:    0
  *
