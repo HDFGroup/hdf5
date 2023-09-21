@@ -1001,7 +1001,7 @@ done:
  * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;
- *  deletes all filters if FILTER is H5Z_FILTER_NONE
+ *  deletes all filters if FILTER is H5Z_FILTER_ALL
  *
  * Return: Non-negative on success/Negative on failure
  *
