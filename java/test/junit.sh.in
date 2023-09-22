@@ -258,12 +258,12 @@ COPY_DATAFILES_TO_BLDDIR()
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateL2.hdf
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO1.hdf
     $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterateO2.hdf
-    $CP -f $TOOLS_TESTFILES/trefer_reg.h5 $BLDDIR/trefer_reg.h5
-    $CP -f $TOOLS_TESTFILES/trefer_attr.h5 $BLDDIR/trefer_attr.h5
-    $CP -f $TOOLS_TESTFILES/tdatareg.h5 $BLDDIR/tdatareg.h5
-    $CP -f $TOOLS_TESTFILES/tattrreg.h5 $BLDDIR/tattrreg.h5
-    $CP -f $TOOLS_TESTFILES/tintsattrs.h5 $BLDDIR/tintsattrs.h5
-    $CP -f $TOOLS_TESTFILES/tfloatsattrs.h5 $BLDDIR/tfloatsattrs.h5
+    $CP -f $DUMP_TESTFILES/trefer_reg.h5 $BLDDIR/trefer_reg.h5
+    $CP -f $DUMP_TESTFILES/trefer_attr.h5 $BLDDIR/trefer_attr.h5
+    $CP -f $DUMP_TESTFILES/tdatareg.h5 $BLDDIR/tdatareg.h5
+    $CP -f $DUMP_TESTFILES/tattrreg.h5 $BLDDIR/tattrreg.h5
+    $CP -f $DUMP_TESTFILES/tintsattrs.h5 $BLDDIR/tintsattrs.h5
+    $CP -f $DUMP_TESTFILES/tfloatsattrs.h5 $BLDDIR/tfloatsattrs.h5
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()

@@ -97,9 +97,9 @@ TESTING() {
 # $2 -- expected return code
 # $3 and on -- arguments for h5watch
 TOOLTEST() {
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
+    expect="$srcdir/testfiles/$1"
+    actual="testfiles/`basename $1 .ddl`.out"
+    actual_err="testfiles/`basename $1 .ddl`.err"
     shift
     retvalexpect=$1
     shift
@@ -146,10 +146,10 @@ TOOLTEST() {
 # $2 -- expected return code
 # $3 and on -- arguments for h5watch
 TOOLTEST_ERR() {
-    expect="$srcdir/../testfiles/$1"
-    expect_err="$srcdir/../testfiles/`basename $1 .ddl`.err"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.out.err"
+    expect="$srcdir/testfiles/$1"
+    expect_err="$srcdir/testfiles/`basename $1 .ddl`.err"
+    actual="testfiles/`basename $1 .ddl`.out"
+    actual_err="testfiles/`basename $1 .ddl`.out.err"
     shift
     retvalexpect=$1
     shift
@@ -201,8 +201,8 @@ try=0
 while [ $try -lt $TRY_MAX ] ;
 do
     cp $WATCHFILE $TESTFILE                             # Copy the file being watched/extended to a temporary file
-    actual="../testfiles/`basename $3 .ddl`.out"        # The actual output
-    expect="$srcdir/../testfiles/$3"                    # The expected output
+    actual="testfiles/`basename $3 .ddl`.out"        # The actual output
+    expect="$srcdir/testfiles/$3"                    # The expected output
     #
     # Set up options and object to h5watch
     if test -z "$2"; then
