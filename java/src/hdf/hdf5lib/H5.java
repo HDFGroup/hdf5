@@ -8607,7 +8607,7 @@ public class H5 implements java.io.Serializable {
      * @ingroup JH5P
      *
      * H5Premove_filter deletes a filter from the dataset creation property list;
-     *                  deletes all filters if filter is H5Z_FILTER_NONE
+     *                  deletes all filters if filter is H5Z_FILTER_ALL
      *
      * @param obj_id
      *            IN: Property list identifier.

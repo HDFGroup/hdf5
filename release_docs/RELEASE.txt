@@ -240,6 +240,10 @@ New Features
 
     Fortran Library:
     ----------------
+
+    - Fixed an uninitialized error return value for hdferr
+      to return the error state of the h5aopen_by_idx_f API.
+
     - Added h5pget_vol_cap_flags_f and related Fortran VOL
       capability definitions.
 

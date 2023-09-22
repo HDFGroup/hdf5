@@ -1568,7 +1568,7 @@ done:
  * Function: H5Z_delete
  *
  * Purpose:  Delete filter FILTER from pipeline PLINE;
- *           deletes all filters if FILTER is H5Z_FILTER_NONE
+ *           deletes all filters if FILTER is H5Z_FILTER_ALL
  *
  * Return:   Non-negative on success
  *           Negative on failure

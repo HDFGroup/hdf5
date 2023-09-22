@@ -36,7 +36,7 @@ const char *FILENAMES[NFILENAME + 1] = {"reloc_t_pread_data_file", "reloc_t_prea
 
 bool               pass             = true;
 static const char *random_hdf5_text = "Now is the time for all first-time-users of HDF5 to read their \
-manual or go thru the tutorials!\n\
+manual or go through the tutorials!\n\
 While you\'re at it, now is also the time to read up on MPI-IO.";
 
 static const char *hitchhiker_quote = "A common mistake that people make when trying to design something\n\
@@ -359,7 +359,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* Add a userblock to the head of the datafile.
      * We will use this to for a functional test of the
-     * file open optimization.  This is superblock
+     * file open optimization.  This superblock
      * relocation is done by the rank 0 process associated
      * with the communicator being used.  For test 1, we
      * utilize MPI_COMM_WORLD, so group_rank 0 is the
@@ -464,7 +464,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
  *
  *              The global MPI rank is used for reading and
  *              writing data for process specific data in the
- *              dataset.  We do this rather simplisticly, i.e.
+ *              dataset.  We do this rather simplistically, i.e.
  *               rank 0:  writes/reads 0-9999
  *               rank 1:  writes/reads 1000-1999
  *               rank 2:  writes/reads 2000-2999
@@ -1032,7 +1032,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
  *
  *              The test consists of creating two separate HDF datasets
  *              in which random text is inserted at the start of each
- *              file using the 'j5jam' application.  This forces the
+ *              file using the 'h5jam' application.  This forces the
  *              HDF5 file superblock to a non-zero offset.
  *              Having created the two independent files, we create two
  *              non-overlapping MPI groups, each of which is then tasked
@@ -1055,13 +1055,13 @@ main(int argc, char **argv)
     MPI_Comm group_comm = MPI_COMM_NULL;
 
     /* I don't believe that argv[0] can ever be NULL.
-     * It should thus be safe to dup and save as a check
-     * for cmake testing. Note that in our Cmake builds,
+     * It should thus be safe to duplicate and save as a check
+     * for CMake testing. Note that in our CMake builds,
      * all executables are located in the same directory.
      * We assume (but we'll check) that the h5jam utility
      * is in the directory as this executable.  If that
      * isn't true, then we can use a relative path that
-     * should be valid for the autotools environment.
+     * should be valid for the Autotools environment.
      */
     test_argv0 = strdup(argv[0]);
 
