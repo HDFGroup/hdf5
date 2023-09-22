@@ -169,7 +169,7 @@ set (HDF5_REFERENCE_TEST_FILES
 )
 
 foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST/${h5_file}" "HDF5_TEST_LIB_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST/testfiles/${h5_file}" "HDF5_TEST_LIB_files")
 endforeach ()
 
 add_custom_target(HDF5_TEST_LIB_files ALL COMMENT "Copying files needed by HDF5_TEST_LIB tests" DEPENDS ${HDF5_TEST_LIB_files_list})
