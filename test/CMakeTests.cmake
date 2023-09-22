@@ -36,7 +36,7 @@ add_custom_command (
 )
 
 foreach (h5_tfile ${HDF5_TEST_FILES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/H5TEST/${h5_tfile}" "HDF5_TEST_LIB_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/H5TEST/testfiles/${h5_tfile}" "HDF5_TEST_LIB_files")
 endforeach ()
 
 set (HDF5_REFERENCE_FILES
@@ -48,7 +48,7 @@ set (HDF5_REFERENCE_FILES
 )
 
 foreach (ref_file ${HDF5_REFERENCE_FILES})
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/H5TEST/${ref_file}" "HDF5_TEST_LIB_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/H5TEST/testfiles/${ref_file}" "HDF5_TEST_LIB_files")
 endforeach ()
 
 # --------------------------------------------------------------------

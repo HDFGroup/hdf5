@@ -49,7 +49,7 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
-SRC_H5DUMP_ERRORFILES="$srcdir/errfiles"
+SRC_H5DUMP_ERRORFILES="$SRC_TOOLS/test/h5dump/errfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
@@ -134,19 +134,19 @@ $SRC_H5DUMP_OUTFILES/pbits/tpbitsUnsignedLongLong16.ddl
 "
 
 LIST_ERROR_TEST_FILES="
-${SRC_H5DUMP_ERRORFILES}/tnofilename-with-packed-bits.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsCharLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsCharOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsIncomplete.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsIntLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsIntOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLengthPositive.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLongLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLongOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsMaxExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsOffsetNegative.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tnofilename-with-packed-bits.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsCharLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsCharOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsIncomplete.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsIntLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsIntOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLengthPositive.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLongLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsLongOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsMaxExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/pbits/tpbitsOffsetNegative.err
 "
 
 #

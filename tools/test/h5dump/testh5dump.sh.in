@@ -56,7 +56,8 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
-SRC_H5DUMP_ERRORFILES="$srcdir/errfiles"
+SRC_H5DUMP_ERRORFILES="$SRC_TOOLS/test/h5dump/errfiles"
+SRC_H5DUMP_EXPFILES="$SRC_TOOLS/test/h5dump/exportfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
@@ -207,7 +208,6 @@ $SRC_H5DUMP_OUTFILES/tall-3.ddl
 $SRC_H5DUMP_OUTFILES/tall-4s.ddl
 $SRC_H5DUMP_OUTFILES/tall-5s.ddl
 $SRC_H5DUMP_OUTFILES/tall-6.ddl
-$SRC_H5DUMP_OUTFILES/tall-6.exp
 $SRC_H5DUMP_OUTFILES/tall-7.ddl
 $SRC_H5DUMP_OUTFILES/tall-7N.ddl
 $SRC_H5DUMP_OUTFILES/tallfilters.ddl
@@ -315,13 +315,10 @@ $SRC_H5DUMP_OUTFILES/tnoattrddl.ddl
 $SRC_H5DUMP_OUTFILES/tnodata.ddl
 $SRC_H5DUMP_OUTFILES/tnoddl.ddl
 $SRC_H5DUMP_OUTFILES/tnoddlfile.ddl
-$SRC_H5DUMP_OUTFILES/tnoddlfile.exp
 $SRC_H5DUMP_OUTFILES/tno-subset.ddl
 $SRC_H5DUMP_OUTFILES/tnullspace.ddl
 $SRC_H5DUMP_OUTFILES/trawdatafile.ddl
-$SRC_H5DUMP_OUTFILES/trawdatafile.exp
 $SRC_H5DUMP_OUTFILES/trawssetfile.ddl
-$SRC_H5DUMP_OUTFILES/trawssetfile.exp
 $SRC_H5DUMP_OUTFILES/zerodim.ddl
 $SRC_H5DUMP_OUTFILES/tordergr1.ddl
 $SRC_H5DUMP_OUTFILES/tordergr2.ddl
@@ -353,8 +350,6 @@ $SRC_H5DUMP_OUTFILES/tslink-D.ddl
 $SRC_H5DUMP_OUTFILES/tsplit_file.ddl
 $SRC_H5DUMP_OUTFILES/tstr-1.ddl
 $SRC_H5DUMP_OUTFILES/tstr-2.ddl
-$SRC_H5DUMP_OUTFILES/tstr2bin2.exp
-$SRC_H5DUMP_OUTFILES/tstr2bin6.exp
 $SRC_H5DUMP_OUTFILES/tstring.ddl
 $SRC_H5DUMP_OUTFILES/tstring2.ddl
 $SRC_H5DUMP_OUTFILES/tstringe.ddl
@@ -371,17 +366,26 @@ $SRC_H5DUMP_OUTFILES/tvlenstr_array.ddl
 $SRC_H5DUMP_OUTFILES/tvlstr.ddl
 $SRC_H5DUMP_OUTFILES/tvms.ddl
 $SRC_H5DUMP_OUTFILES/twidedisplay.ddl
-$SRC_H5DUMP_OUTFILES/twithddl.exp
 $SRC_H5DUMP_OUTFILES/twithddlfile.ddl
-$SRC_H5DUMP_OUTFILES/twithddlfile.exp
 $SRC_H5DUMP_OUTFILES/h5dump-help.txt
 $SRC_H5DUMP_OUTFILES/out3.h5import
-$SRC_H5DUMP_OUTFILES/tbinregR.exp
 $SRC_H5DUMP_OUTFILES/err_attr_dspace.ddl
 $SRC_H5DUMP_OUTFILES/tst_onion_objs.ddl
 $SRC_H5DUMP_OUTFILES/tst_onion_dset_ext.ddl
 $SRC_H5DUMP_OUTFILES/tst_onion_dset_1d.ddl
 $SRC_H5DUMP_OUTFILES/tst_onion_revision_count.ddl
+"
+
+LIST_EXPORT_TEST_FILES="
+$SRC_H5DUMP_EXPFILES/tall-6.exp
+$SRC_H5DUMP_EXPFILES/tbinregR.exp
+$SRC_H5DUMP_EXPFILES/tnoddlfile.exp
+$SRC_H5DUMP_EXPFILES/trawdatafile.exp
+$SRC_H5DUMP_EXPFILES/trawssetfile.exp
+$SRC_H5DUMP_EXPFILES/tstr2bin2.exp
+$SRC_H5DUMP_EXPFILES/tstr2bin6.exp
+$SRC_H5DUMP_EXPFILES/twithddl.exp
+$SRC_H5DUMP_EXPFILES/twithddlfile.exp
 "
 
 LIST_ERROR_TEST_FILES="
@@ -415,7 +419,7 @@ ${SRC_H5DUMP_ERRORFILES}/tslink-D.err
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_ERROR_TEST_FILES"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_EXPORT_TEST_FILES $LIST_ERROR_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {

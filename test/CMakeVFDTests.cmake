@@ -26,19 +26,19 @@ endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (h5_tfile ${HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/${h5_tfile}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (ref_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}/${ref_file}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/${ref_file}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (vfdtest ${VFD_LIST})
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}/${h5_file}" "HDF5_VFDTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_TEST_BINARY_DIR}/${vfdtest}/testfiles/${h5_file}" "HDF5_VFDTEST_LIB_files")
   endforeach ()
 endforeach ()
 

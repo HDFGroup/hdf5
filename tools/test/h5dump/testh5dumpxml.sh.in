@@ -79,7 +79,6 @@ $SRC_H5DUMP_TESTFILES/xml/tname-sp.h5
 $SRC_H5DUMP_TESTFILES/xml/tnodata.h5
 $SRC_H5DUMP_TESTFILES/xml/tobjref.h5
 $SRC_H5DUMP_TESTFILES/xml/topaque.h5
-$SRC_H5DUMP_TESTFILES/xml/torderattr.h5
 $SRC_H5DUMP_TESTFILES/xml/tref.h5
 $SRC_H5DUMP_TESTFILES/xml/tref-escapes.h5
 $SRC_H5DUMP_TESTFILES/xml/tref-escapes-at.h5
@@ -108,7 +107,6 @@ $SRC_H5DUMP_TESTFILES/tloop.h5
 $SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
 $SRC_H5DUMP_TESTFILES/tnestedcomp.h5
 $SRC_H5DUMP_TESTFILES/tnullspace.h5
-$SRC_H5DUMP_TESTFILES/tobjref.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
 $SRC_H5DUMP_TESTFILES/tsaf.h5
 $SRC_H5DUMP_TESTFILES/tslink.h5

@@ -60,7 +60,7 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 # copy test files and expected output files from source dirs to test dir
 #
 COPY_TESTFILES="
-$SRC_H5MKGRP_TESTFILES/h5mkgrp_help.txt
+$SRC_H5MKGRP_OUTFILES/h5mkgrp_help.txt
 $SRC_H5MKGRP_OUTFILES/h5mkgrp_single.ls
 $SRC_H5MKGRP_OUTFILES/h5mkgrp_single_v.ls
 $SRC_H5MKGRP_OUTFILES/h5mkgrp_single_p.ls

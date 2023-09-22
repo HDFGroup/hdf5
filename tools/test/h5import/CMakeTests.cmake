@@ -45,6 +45,8 @@
       dbinuin16.h5.txt
       dbinuin32.h5.txt
       dtxtstr.h5.txt
+  )
+  set (HDF5_REFERENCE_DDL_FILES
       tall_fp32.ddl
       tall_i32.ddl
       tintsattrs_u32.ddl
@@ -78,7 +80,11 @@
   endforeach ()
 
   foreach (txt_file ${HDF5_REFERENCE_TXT_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
+  endforeach ()
+
+  foreach (txt_file ${HDF5_REFERENCE_DDL_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5import_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
