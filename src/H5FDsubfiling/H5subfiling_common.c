@@ -1365,7 +1365,8 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
         if (app_layout->layout[i].node_local_rank == 0)
             app_layout->node_count++;
 
-    assert(app_layout->node_count > 0);
+    if (app_layout->node_count <= 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "node count less than or equal to zero");
 
     if (NULL ==
         (app_layout->node_ranks = malloc((size_t)app_layout->node_count * sizeof(*app_layout->node_ranks))))
