@@ -417,7 +417,6 @@ jobs:
             --enable-shared \
             --enable-threadsafe \
             --disable-hl \
-            --${{ matrix.parallel }}-parallel \
             --${{ matrix.mirror_vfd }}-mirror-vfd \
             --${{ matrix.direct_vfd }}-direct-vfd \
             --${{ matrix.ros3_vfd }}-ros3-vfd \
