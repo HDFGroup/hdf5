@@ -156,8 +156,11 @@ sub create_public ($) {
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
 
-    # Rename previous file
-#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
+    # Remove previous file
+    if (-e "${prefix}${file}")
+    {
+        unlink "${prefix}${file}"
+    }
 
     # Open new header file
     open HEADER, ">${prefix}${file}" or die "unable to modify source";
@@ -224,8 +227,12 @@ sub create_init ($) {
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
 
-    # Rename previous file
-#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
+
+    # Remove previous file
+    if (-e "${prefix}${file}")
+    {
+        unlink "${prefix}${file}"
+    }    
 
     # Open new header file
     open HEADER, ">${prefix}${file}" or die "unable to modify source";
@@ -282,9 +289,13 @@ sub create_term ($) {
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
 
-    # Rename previous file
-#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
 
+    # Remove previous file
+    if (-e "${prefix}${file}")
+    {
+        unlink "${prefix}${file}"
+    }
+    
     # Open new header file
     open HEADER, ">${prefix}${file}" or die "unable to modify source";
 
@@ -330,8 +341,11 @@ sub create_define ($) {
     my $sect_name;              # Section of minor error messages
     my $sect_desc;              # Description of section
 
-    # Rename previous file
-#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
+    # Remove previous file
+    if (-e "${prefix}${file}")
+    {
+        unlink "${prefix}${file}"
+    }
 
     # Open new header file
     open HEADER, ">${prefix}${file}" or die "unable to modify source";

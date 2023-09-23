@@ -164,8 +164,11 @@ sub create_public ($) {
     my $file = "H5overflow.h";   # Name of file to generate
     my $name;                   # Name of function
 
-    # Rename previous file
-#    rename "${prefix}${file}", "${prefix}${file}~" or die "unable to make backup";
+    # Remove previous file
+    if (-e "${prefix}${file}")
+    {
+        unlink "${prefix}${file}"
+    }
 
     # Open new header file
     open HEADER, ">${prefix}${file}" or die "unable to modify source";
