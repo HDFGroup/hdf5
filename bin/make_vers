@@ -466,7 +466,7 @@ sub create_public ($) {
     }
 
     # Open new header file
-    open HEADER, ">${prefix}${file}"  or die "unable to modify source";
+    open HEADER, ">${prefix}${file}" or die "unable to modify source";
 
     # Create file contents
     print_copyright(*HEADER);
