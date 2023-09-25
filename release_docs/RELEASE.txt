@@ -276,7 +276,7 @@ Bug Fixes Since HDF5-1.10.10 Release
       The fuzzed file "pov" was an HDF5 file containing an illegal continuation
       message.  When deserializing the object header chunks for the file, memory
       was allocated for the array of continuation messages, but this memory was
-      never freed when an error ocurred.
+      never freed when an error occurred.
 
       The allocated memory is now properly released.
 
@@ -323,7 +323,6 @@ Bug Fixes Since HDF5-1.10.10 Release
 
       h5dump has the special argument, --no-compact-subset to allow the use of
       ‘[‘ and ‘]’ in dataset names.  h5diff now has this option as well.
-
 
       Fixes GitHub issue #2682
 
