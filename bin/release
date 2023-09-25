@@ -162,8 +162,8 @@ tar2zip()
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake/config-time
+#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake/config-time
 
 
 # Parameters:
@@ -211,8 +211,8 @@ tar2cmakezip()
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -V -O hdf5.log" > build-VS2022-64.bat; chmod 755 build-VS2022-64.bat)
 
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/config-time/LIBAEC.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/config-time/ZLib.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.zip $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
@@ -260,8 +260,8 @@ tar2cmakezip()
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake/config-time
+#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake/config-time
 
 
 # Parameters:
@@ -303,8 +303,8 @@ tar2cmaketgz()
     (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
 
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/config-time/LIBAEC.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/config-time/ZLib.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
@@ -333,8 +333,8 @@ tar2cmaketgz()
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake/config-time
+#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake/config-time
 #
 # 5. For HPC-CMake tgz file the following are also needed in the top-level directory:
 #        README_HPC                 copied from release_docs
@@ -382,8 +382,8 @@ tar2hpccmaketgz()
     (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
 
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/config-time/LIBAEC.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/config-time/ZLib.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
