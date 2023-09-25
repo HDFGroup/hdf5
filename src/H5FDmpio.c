@@ -2032,7 +2032,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_vector()
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
