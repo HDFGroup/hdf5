@@ -35,13 +35,13 @@ CONTENTS
 ========
 
 - New Features
-- Support for new platforms and languages
-- Bug Fixes since HDF5-1.10.10
+- Support for New Platforms, Languages and Compilers
+- Bug Fixes Since HDF5-1.10.10 Release
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
 - Known Problems
-- CMake vs. Autotools installations
+- CMake vs. Autotools Installations
 
 
 New Features
@@ -52,11 +52,11 @@ New Features
     - Added support for CMake presets file.
 
       CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
-      that allow users to specify common configure options and share them with others.
-      HDF added a CMakePresets.json file of a typical configuration and support
-      file, config/cmake-presets/hidden-presets.json. 
-      Also added a section to INSTALL_CMake.txt with very basic explanation of the
-      process to use CMakePresets.
+      that allow users to specify common configure options and share them with
+      others.  This release added a CMakePresets.json file of a typical
+      configuration and support file, config/cmake-presets/hidden-presets.json.
+      It also added a section to INSTALL_CMake.txt with a very basic explanation
+      of the process to use CMakePresets.
 
     - Enabled instrumentation of the library by default in CMake for parallel
       debug builds
@@ -69,12 +69,12 @@ New Features
 
     Library:
     --------
-    - Change the error handling for a not found path in the find plugin process.
+    - Changed the error handling for a not found path in the find plugin process.
 
       While attempting to load a plugin the HDF5 library will fail if one of the
       directories in the plugin paths does not exist, even if there are more paths
-      to check. Instead of exiting the function with an error, just logged the error
-      and continue processing the list of paths to check.
+      to check. Instead of exiting the function with an error, it now just logs
+      the error and continues processing the list of paths to check.
 
 
     Parallel Library:
@@ -94,11 +94,11 @@ New Features
 
     Java Library:
     -------------
-    - HDF5GroupInfo class has been deprecated.
+    - Deprecated the HDF5GroupInfo class.
 
-      This class assumes that an object can contain four values which uniquely identify an
-      object among those HDF5 files which are open. This is no longer valid in future
-      HDF5 releases.
+      This class assumes that an object can contain four values which uniquely
+      identify an object among those HDF5 files which are open. This is no
+      longer valid in future HDF5 releases.
 
 
     Tools:
@@ -126,25 +126,25 @@ New Features
     -
 
 
-Support for new platforms, languages and compilers
+Support for New Platforms, Languages and Compilers
 ==================================================
     -
 
 
-Bug Fixes since HDF5-1.10.10 release
+Bug Fixes Since HDF5-1.10.10 Release
 ===================================
     Library
     -------
-    - Fixed CVE-2018-11202
+    - Fixed CVE-2018-11202, a malformed file could result in chunk index
+      memory leaks.
 
-      A malformed file could result in chunk index memory leaks. Under most
-      conditions (i.e., when the --enable-using-memchecker option is NOT
-      used), this would result in a small memory leak and and infinite loop
-      and abort when shutting down the library. The infinite loop would be
-      due to the "free list" package not being able to clear its resources
-      so the library couldn't shut down. When the "using a memory checker"
-      option is used, the free lists are disabled so there is just a memory
-      leak with no abort on library shutdown.
+      Under most conditions (i.e., when the --enable-using-memchecker option is
+      NOT used), this would result in a small memory leak and and infinite loop
+      and abort when shutting down the library. The infinite loop would be due
+      to the "free list" package not being able to clear its resources so the
+      library couldn't shut down. When the "using a memory checker" option is
+      used, the free lists are disabled so there is just a memory leak with no
+      abort on library shutdown.
 
       The chunk index resources are now correctly cleaned up when reading
       misparsed files and valgrind confirms no memory leaks.
@@ -183,32 +183,33 @@ Bug Fixes since HDF5-1.10.10 release
 
       Fixes CVE-2016-4332 and HDFFV-9950 (confirmed via the cve_hdf5 repo)
 
-    - Seg fault on file close
+    - Fixed segfault on file close
 
       h5debug fails at file close with core dump on a file that has an
       illegal file size in its cache image.  In H5F__dest(), the library
       performs all the closing operations for the file and keeps track of
-      the error encountered when reading the file cache image.  
-      At the end of the routine, it frees the file's file structure and 
-      returns error.  Due to the error return, the file object is not removed 
-      from the ID node table.  This eventually causes assertion failure in 
-      H5F__close_cb() when the library finally exits and tries to 
+      the error encountered when reading the file cache image.
+      At the end of the routine, it frees the file's file structure and
+      returns an error.  Due to the error return, the file object is not removed
+      from the ID node table.  This eventually causes assertion failure in
+      H5F__close_cb() when the library finally exits and tries to
       access that file object in the table for closing.
 
       The closing routine, H5F__dest(), will not free the file structure if
-      there is error, keeping a valid file structure in the ID node table.
-      It will be freed later in H5F__close_cb() when the library exits and 
+      there is an error, keeping a valid file structure in the ID node table.
+      It will be freed later in H5F__close_cb() when the library exits and
       terminates the file package.
 
-      Fix for HDFFV-11052, CVE-2020-10812
+      Fixes HDFFV-11052, CVE-2020-10812
 
     - Fixed memory leaks that could occur when reading a dataset from a
       malformed file
 
       When attempting to read layout, pline, and efl information for a
       dataset, memory leaks could occur if attempting to read pline/efl
-      information threw an error, which is due to the memory that was 
-      allocated for pline and efl not being properly cleaned up on error.  
+      information throws an error.  The leaks would occur because the memory
+      that was allocated for pline and efl was not properly cleaned up by
+      error handling.
 
       Fixes Github issue #2602
 
@@ -216,7 +217,7 @@ Bug Fixes since HDF5-1.10.10 release
 
       H5Ocopy was missing a check to determine whether the new object's
       object header version is greater than version 1. Without this check,
-      copying of objects with object headers that are smaller than a
+      copying an object with an object header that is smaller than a
       certain size would cause H5Ocopy to create an object header for the
       new object that has a gap in the header data. According to the
       HDF5 File Format Specification, this is not allowed for version
@@ -228,7 +229,7 @@ Bug Fixes since HDF5-1.10.10 release
 
       Detections of buffer overflow were added for decoding version, index
       flags, link creation order value, and the next three addresses.  The
-      checkings will remove the potential invalid read of any of these
+      checks will remove the potential invalid read of any of these
       values that could be triggered by a malformed file.
 
       Fixes GitHub issue #2603
@@ -236,11 +237,11 @@ Bug Fixes since HDF5-1.10.10 release
     - Fixed potential buffer overrun issues in some object header decode routines
 
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
-      ensure that memory buffers don't get overrun when decoding buffers read from
-      a (possibly corrupted) HDF5 file.
+      ensure that memory buffers are not overrun when decoding buffers read from
+      a possibly corrupted HDF5 file.
 
     - Fixed a heap buffer overflow that occurs when reading from
-      a dataset with a compact layout within a malformed HDF5 file
+      a dataset with a compact layout within a malformed HDF5 file.
 
       During opening of a dataset that has a compact layout, the
       library allocates a buffer that stores the dataset's raw data.
@@ -258,7 +259,8 @@ Bug Fixes since HDF5-1.10.10 release
 
       Fixes GitHub issue #2606
 
-    - Fix for CVE-2019-8396
+    - Fixed CVE-2019-8396, malformed HDF5 files where content does not match
+      expected size.
 
       Malformed HDF5 files may have truncated content which does not match
       the expected size. When H5O__pline_decode() attempts to decode these it
@@ -269,29 +271,28 @@ Bug Fixes since HDF5-1.10.10 release
 
       Fixes Jira issue HDFFV-10712, CVE-2019-8396, GitHub issue #2209
 
-    - Memory leak
+    - Fixed memory leak when running h5dump with proof of vulnerability file.
 
-      Memory leak was detected when running h5dump with "pov".  The memory was allocated
-      via H5FL__malloc() in hdf5/src/H5FL.c
+      The fuzzed file "pov" was an HDF5 file containing an illegal continuation
+      message.  When deserializing the object header chunks for the file, memory
+      was allocated for the array of continuation messages, but this memory was
+      never freed when an error ocurred.
 
-      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
-      When deserializing the object header chunks for the file, memory is allocated for the
-      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
-      As error is encountered in loading the illegal message, the memory allocated for
-      cont_msg_info->msgs needs to be freed.
+      The allocated memory is now properly released.
 
-      Fix for GitHub issue #2599
+      Fixes GitHub issue #2599
 
 
     Java Library
     ------------
     - Fixed switch case 'L' block missing a break statement.
 
-      The HDF5Array.arrayify method is missing a break statement in the case 'L': section
-      which causes it to fall through and throw an HDF5JavaException when attempting to
-      read an Array[Array[Long]].
+      The HDF5Array.arrayify method is missing a break statement in the
+      case 'L': section which causes it to fall through and throw an
+      HDF5JavaException when attempting to read an Array[Array[Long]].
 
-      The error was fixed by inserting a break statement at the end of the case 'L': sections.
+      The error was fixed by inserting a break statement at the end of
+      the case 'L': sections.
 
       Fixes GitHub issue #3056
 
@@ -314,12 +315,17 @@ Bug Fixes since HDF5-1.10.10 release
 
     Tools
     -----
-    - Names of objects with square brackets will have trouble without the
-      special argument, --no-compact-subset, on the h5dump command line.
+    - Added option --no-compact-subset to h5diff
 
-      h5diff did not have this option and now it has been added.
+      When the name of an object contains square brackets, h5diff was not able
+      to parse it correctly because “[ ]” were interpreted as the compact form
+      of subsetting.
 
-      Fix for GitHub issue #2682
+      h5dump has the special argument, --no-compact-subset to allow the use of
+      ‘[‘ and ‘]’ in dataset names.  h5diff now has this option as well.
+
+
+      Fixes GitHub issue #2682
 
 
     Performance
@@ -491,10 +497,6 @@ Platforms Tested
 
 Known Problems
 ==============
-    Setting a variable-length dataset fill value will leak the memory allocated
-    for the p field of the hvl_t struct. A fix is in progress for this.
-    HDFFV-10840
-
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
@@ -509,8 +511,8 @@ Known Problems
         testphdf5 (ecdsetw, selnone, cchunk1, cchunk3, cchunk4, and actualio)
         t_shapesame (sscontig2)
 
-    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
-    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+    CPP ptable test fails on both VS2017 and VS2019 with Intel and Clang compilers,
+    JIRA issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
 
     The subsetting option in ph5diff currently will fail and should be avoided.
     The subsetting option works correctly in serial h5diff.
@@ -560,5 +562,5 @@ The issues with the gif tool are:
     HDFFV-11048 CVE-2020-10809
 These CVE issues have not yet been addressed and can be avoided by not building
 the gif tool. Disable building the High-Level tools with these options:
-    autotools:   --disable-hltools
-    cmake:       HDF5_BUILD_HL_TOOLS=OFF
+    autotools:   --disable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=OFF
