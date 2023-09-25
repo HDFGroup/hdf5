@@ -9134,7 +9134,7 @@ main(void)
     bool        api_ctx_pushed = false;     /* Whether API context pushed */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

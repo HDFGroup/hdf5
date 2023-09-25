@@ -467,7 +467,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     /* Determine if driver is set by environment variable. If it is,
      * only generate a suffix if fixing the filename for the superblock
      * file. */
-    driver_env_var = HDgetenv(HDF5_DRIVER);
+    driver_env_var = getenv(HDF5_DRIVER);
     if (driver_env_var && (H5P_DEFAULT == fapl) && subst_for_superblock)
         fapl = H5P_FILE_ACCESS_DEFAULT;
 
@@ -526,7 +526,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 #endif /* H5_HAVE_PARALLEL */
     }
     else {
-        if (HDgetenv(HDF5_NOCLEANUP))
+        if (getenv(HDF5_NOCLEANUP))
             SetTestNoCleanup();
     }
 
@@ -574,7 +574,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
          * For serial:
          *      First use the environment variable, then try the constant
          */
-        prefix = HDgetenv("HDF5_PREFIX");
+        prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
         if (!prefix)
@@ -596,8 +596,8 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  */
                 char *user, *login;
 
-                user   = HDgetenv("USER");
-                login  = HDgetenv("LOGIN");
+                user   = getenv("USER");
+                login  = getenv("LOGIN");
                 subdir = (user ? user : login);
 
                 if (subdir) {
@@ -787,7 +787,7 @@ h5_get_libver_fapl(hid_t fapl)
     char        buf[1024];    /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
-    env = HDgetenv("HDF5_LIBVER_BOUNDS");
+    env = getenv("HDF5_LIBVER_BOUNDS");
 #ifdef HDF5_LIBVER_BOUNDS
     /* Use the environment variable, then the compile-time constant */
     if (!env)
@@ -925,7 +925,7 @@ h5_set_info_object(void)
     int   ret_value = 0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
+    if ((envp = getenv("HDF5_MPI_INFO")) != NULL) {
         char *next, *valp;
 
         valp = envp = next = strdup(envp);
@@ -1088,7 +1088,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             h5_stat_size_t tot_size       = 0;
             char          *driver_env_var = NULL;
 
-            driver_env_var = HDgetenv(HDF5_DRIVER);
+            driver_env_var = getenv(HDF5_DRIVER);
             if (driver_env_var && !strcmp(driver_env_var, "split")) {
                 for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     if (mt != H5FD_MEM_DRAW && mt != H5FD_MEM_SUPER)
@@ -1302,7 +1302,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
         /* The root task does the getenv call
          * and sends the result to the other tasks */
         if (mpi_rank == root) {
-            env = HDgetenv(name);
+            env = getenv(name);
             if (env) {
                 len = (int)strlen(env);
                 MPI_Bcast(&len, 1, MPI_INT, root, comm);
@@ -1339,7 +1339,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
         /* use original getenv */
         if (env)
             free(env);
-        env = HDgetenv(name);
+        env = getenv(name);
     } /* end if */
 
     return env;
@@ -1917,7 +1917,7 @@ H5_get_srcdir_filename(const char *filename)
 const char *
 H5_get_srcdir(void)
 {
-    const char *srcdir = HDgetenv("srcdir");
+    const char *srcdir = getenv("srcdir");
 
     /* Check for using the srcdir from configure time */
     if (NULL == srcdir)
@@ -2076,7 +2076,7 @@ h5_using_default_driver(const char *drv_name)
     assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
     if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+        drv_name = getenv(HDF5_DRIVER);
 
     if (drv_name)
         return (!strcmp(drv_name, "sec2") || !strcmp(drv_name, "nomatch"));
@@ -2197,7 +2197,7 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
     bool ret_val = false;
 
     if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+        drv_name = getenv(HDF5_DRIVER);
 
     if (drv_name) {
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {

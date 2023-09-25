@@ -430,7 +430,7 @@ done:
 static inline const H5FD_core_fapl_t *
 H5FD__core_get_default_config(void)
 {
-    char *driver = HDgetenv(HDF5_DRIVER);
+    char *driver = getenv(HDF5_DRIVER);
 
     if (driver) {
         if (!strcmp(driver, "core"))
@@ -462,7 +462,7 @@ H5FD_core_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))

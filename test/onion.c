@@ -4918,7 +4918,7 @@ main(void)
     /* The onion VFD only supports the sec2 VFD under the hood, so skip this
      * test when the environment variable has been set to something else
      */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     if ((0 != strcmp(env_h5_drvr, "nomatch")) && (0 != strcmp(env_h5_drvr, "sec2"))) {

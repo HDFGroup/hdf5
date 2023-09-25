@@ -244,7 +244,7 @@ H5FD_log_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))

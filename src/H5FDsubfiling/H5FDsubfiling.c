@@ -585,7 +585,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
     config_out->shared_cfg.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
 
-    if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
+    if ((h5_require_ioc = getenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = atoi(h5_require_ioc);
         if (value_check == 0)
             config_out->require_ioc = false;

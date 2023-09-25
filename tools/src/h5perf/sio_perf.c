@@ -777,7 +777,7 @@ report_parameters(struct options *opts)
     }
 
     {
-        char *prefix = HDgetenv("HDF5_PREFIX");
+        char *prefix = getenv("HDF5_PREFIX");
 
         fprintf(output, "Env HDF5_PREFIX=%s\n", (prefix ? prefix : "not set"));
     }
