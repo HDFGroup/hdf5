@@ -261,6 +261,11 @@ New Features
       h5pget_file_space_page_size_f, h5pset_file_space_page_size_f,
       h5pget_file_space_strategy_f, h5pset_file_space_strategy_f
 
+    - Removed "-commons" linking option on Darwin, as COMMON and EQUIVALENCE
+      are no longer used in the Fortran source.
+
+      Fixes GitHub issue #3571
+
     C++ Library:
     ------------
     -
