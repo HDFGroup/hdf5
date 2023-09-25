@@ -634,7 +634,7 @@ TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
     char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
-    unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
+    unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)
