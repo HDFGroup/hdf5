@@ -2120,7 +2120,6 @@ main(int argc, char **argv)
     bool     must_unset_ioc_per_node_env     = false;
     bool     must_unset_ioc_thread_count_env = false;
     bool     must_unset_config_dir_env       = false;
-    char    *env_value                       = NULL;
     int      required                        = MPI_THREAD_MULTIPLE;
     int      provided                        = 0;
 
@@ -2346,8 +2345,7 @@ main(int argc, char **argv)
         must_unset_ioc_thread_count_env = true;
     }
 
-    env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
-    if (NULL != env_value) {
+    if (NULL != HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX)) {
         int rand_value = 0;
 
         if (MAINPROCESS)
