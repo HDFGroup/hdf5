@@ -2756,7 +2756,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
         /* Find first non-whitespace character from start;
          * reduce total length per character.
          */
-        while ((s_len > 0) && isspace((unsigned char)s[0]) && s_len > 0) {
+        while (s_len > 0 && isspace((unsigned char)s[0])) {
             s++;
             s_len--;
         }
