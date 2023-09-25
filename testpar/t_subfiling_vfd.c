@@ -2345,7 +2345,7 @@ main(int argc, char **argv)
         must_unset_ioc_thread_count_env = true;
     }
 
-    if (NULL != HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX)) {
+    if (NULL == HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX)) {
         int rand_value = 0;
 
         if (MAINPROCESS)
