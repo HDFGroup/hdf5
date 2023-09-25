@@ -65,6 +65,11 @@ New Features
     -
 
 
+    - Removed "-commons" linking option on Darwin, as COMMON and EQUIVALENCE
+      are no longer used in the Fortran source.
+
+      Fixes GitHub issue #3571
+
     C++ Library:
     ------------
     -
