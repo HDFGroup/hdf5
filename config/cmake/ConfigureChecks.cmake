@@ -843,8 +843,8 @@ if (HDF5_BUILD_FORTRAN)
          "
     )
 
-    C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
-    message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
+    # C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
+    # message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
     # dnl The output from the above program will be:
     # dnl  -- long double decimal precision  --  __float128 decimal precision
