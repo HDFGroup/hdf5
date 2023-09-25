@@ -55,7 +55,7 @@ if (TEST_STRINGS STREQUAL "YES")
   endif ()
   # if the return value is !=${TEST_EXPECT} bail out
   if (NOT TEST_RESULT EQUAL TEST_EXPECT)
-    message (STATUS "Failed: The output of ${TEST_FOLDER}/${TEST_ONEFILE} did not match ${TEST_FOLDER}/${TEST_TWOFILE}.\n${TEST_ERROR}")
+    message (FATAL_ERROR "Failed: The output of ${TEST_FOLDER}/${TEST_ONEFILE} did not match ${TEST_FOLDER}/${TEST_TWOFILE}.\n${TEST_ERROR}")
   endif ()
 else ()
   if (CMAKE_VERSION VERSION_LESS "3.14.0")
