@@ -122,7 +122,7 @@ H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
  *          The attribute is created with the specified datatype and dataspace,
  *          \p type_id and \p space_id.
  *
- *          \plist_unused{acpl}
+ *          \plist_unused{aapl_id}
  *
  *          The attribute identifier returned by this function must be released
  *          with H5Aclose() resource leaks will develop.
@@ -183,7 +183,7 @@ H5_DLL hid_t  H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id
  *          The attribute is created with the specified datatype and
  *          dataspace, \p type_id and \p space_id.
  *
- *          \plist_unused{aapl}
+ *          \plist_unused{aapl_id}
  *
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to access
