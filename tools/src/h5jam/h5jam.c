@@ -420,8 +420,8 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
     } /* end if */
 
     while (howmuch > 0) {
-        HDlseek(outfid, (off_t)to, SEEK_SET);
-        HDlseek(infid, (off_t)from, SEEK_SET);
+        HDlseek(outfid, (HDoff_t)to, SEEK_SET);
+        HDlseek(infid, (HDoff_t)from, SEEK_SET);
 
         if (howmuch > 512) {
             nchars = HDread(infid, buf, (unsigned)512);
@@ -499,7 +499,7 @@ write_pad(int ofile, hsize_t old_where, hsize_t *new_where)
 
     buf[0] = '\0';
 
-    HDlseek(ofile, (off_t)old_where, SEEK_SET);
+    HDlseek(ofile, (HDoff_t)old_where, SEEK_SET);
 
     psize = compute_user_block_size(old_where);
     psize -= old_where;
