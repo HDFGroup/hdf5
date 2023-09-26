@@ -167,7 +167,7 @@ TestUsage(void)
     print_func("verbose   controls the amount of information displayed\n");
     print_func("exclude   to exclude tests by name\n");
     print_func("only      to name tests which should be run\n");
-    print_func("begin     start at the name of the test givin\n");
+    print_func("begin     start at the name of the test given\n");
     print_func("summary   prints a summary of test results at the end\n");
     print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
     print_func("help      print out this information\n");
