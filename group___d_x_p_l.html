@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.de95c02</span>
+   &#160;<span id="projectnumber">1.15.0.08b574d</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -141,7 +141,7 @@ $(document).ready(function(){initNavTree('group___d_x_p_l.html',''); initResizab
 <tr>
 <td><a class="el" href="group___d_x_p_l.html#ga0b53b19c37bda96d3578ce38b3858ea3" title="Sets a ratio threshold for collective I/O.">H5Pset_dxpl_mpio_chunk_opt_ratio</a> </td><td>Sets a ratio threshold for collective I/O.  </td></tr>
 <tr>
-<td><a class="el" href="group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3" title="Sets data transfer mode.">H5Pset_dxpl_mpio_collective_opt</a> </td><td>Sets a flag governing the use of independent versus collective I/O.  </td></tr>
+<td><a class="el" href="group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3" title="Sets low-level data transfer mode.">H5Pset_dxpl_mpio_collective_opt</a> </td><td>Sets a flag governing the use of independent versus collective I/O.  </td></tr>
 <tr>
 <td><a class="el" href="group___d_x_p_l.html#ga37ec8c3b3f1880ed6e1b300bc4ee9ed5" title="Retrieves the type of chunk optimization that HDF5 actually performed on the last parallel I/O call (...">H5Pget_mpio_actual_chunk_opt_mode</a> </td><td>Gets the type of chunk optimization that HDF5 actually performed on the last parallel I/O call.  </td></tr>
 <tr>
@@ -179,7 +179,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:gab66eca0259c33d575b4050eebfb6f2cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the data transfer mode.  <a href="group___d_x_p_l.html#gab66eca0259c33d575b4050eebfb6f2cd">More...</a><br /></td></tr>
 <tr class="separator:gab66eca0259c33d575b4050eebfb6f2cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacb30d14d1791ec7ff9ee73aa148a51a3"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3">H5Pset_dxpl_mpio_collective_opt</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, <a class="el" href="_h5_f_dmpi_8h.html#afaf7d5667632176e8daca47549e29fb8">H5FD_mpio_collective_opt_t</a> opt_mode)</td></tr>
-<tr class="memdesc:gacb30d14d1791ec7ff9ee73aa148a51a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets data transfer mode.  <a href="group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3">More...</a><br /></td></tr>
+<tr class="memdesc:gacb30d14d1791ec7ff9ee73aa148a51a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets low-level data transfer mode.  <a href="group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3">More...</a><br /></td></tr>
 <tr class="separator:gacb30d14d1791ec7ff9ee73aa148a51a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadc911ad42f580ce2df327383188ed4ba"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_x_p_l.html#gadc911ad42f580ce2df327383188ed4ba">H5Pset_dxpl_mpio_chunk_opt</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, <a class="el" href="_h5_f_dmpi_8h.html#aad0ca234af678f0f0976d810ee2bf246">H5FD_mpio_chunk_opt_t</a> opt_mode)</td></tr>
 <tr class="memdesc:gadc911ad42f580ce2df327383188ed4ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a flag specifying linked-chunk I/O or multi-chunk I/O.  <a href="group___d_x_p_l.html#gadc911ad42f580ce2df327383188ed4ba">More...</a><br /></td></tr>
@@ -1445,7 +1445,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets data transfer mode. </p>
+<p>Sets low-level data transfer mode. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">dxpl_id</td><td>Dataset transfer property list identifier </td></tr>
@@ -1454,8 +1454,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___d_x_p_l.html#ga001a22b64f60b815abf5de8b4776f09e" title="Sets data transfer mode.">H5Pset_dxpl_mpio()</a> sets the data transfer property list <code>dxpl_id</code> to use transfer mode xfer_mode. The property list can then be used to control the I/O transfer mode during data I/O operations.</p>
-<p>Valid transfer modes are <a class="el" href="_h5_f_dmpi_8h.html#a99bc5a964089fea144e7056b004bcc16a6c67820a8798cd75a6f0ebbb44e9a2af">H5FD_MPIO_INDEPENDENT</a> (default) and <a class="el" href="_h5_f_dmpi_8h.html#a99bc5a964089fea144e7056b004bcc16a75d4dc80546ad3c16d2d7647ab267fab">H5FD_MPIO_COLLECTIVE</a>.</p>
+<p><a class="el" href="group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3" title="Sets low-level data transfer mode.">H5Pset_dxpl_mpio_collective_opt()</a> sets the data transfer property list <code>dxpl_id</code> to use transfer mode <code>opt_mode</code> when performing I/O. This allows the application to specify collective I/O at the HDF5 interface level (with the <a class="el" href="group___d_x_p_l.html#ga001a22b64f60b815abf5de8b4776f09e" title="Sets data transfer mode.">H5Pset_dxpl_mpio()</a> API routine), while controlling whether the actual I/O is performed collectively (e.g., via MPI_File_write_at_all) or independently (e.g., via MPI_File_write_at). If the collectivity setting at the HDF5 interface level (set via <a class="el" href="group___d_x_p_l.html#ga001a22b64f60b815abf5de8b4776f09e" title="Sets data transfer mode.">H5Pset_dxpl_mpio()</a>) is not set to H5FD_MPIO_COLLECTIVE, this setting will be ignored.</p>
+<p>Valid transfer modes are <a class="el" href="_h5_f_dmpi_8h.html#afaf7d5667632176e8daca47549e29fb8a3816f1011586f6f6f57ce6c2a6c2fcbe">H5FD_MPIO_COLLECTIVE_IO</a> (default) and <a class="el" href="_h5_f_dmpi_8h.html#afaf7d5667632176e8daca47549e29fb8aaacd91139f703159fde84fb5f7778886">H5FD_MPIO_INDIVIDUAL_IO</a>.</p>
 <dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
