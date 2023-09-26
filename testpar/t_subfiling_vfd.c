@@ -1939,12 +1939,11 @@ test_subfiling_h5fuse(void)
                      SUBF_FILENAME, file_inode);
 
             args[0] = strdup("env");
-            args[1] = strdup("sh");
-            args[2] = strdup("h5fuse.sh");
-            args[3] = strdup("-q");
-            args[4] = strdup("-f");
-            args[5] = tmp_filename;
-            args[6] = NULL;
+            args[1] = strdup("./h5fuse.sh");
+            args[2] = strdup("-q");
+            args[3] = strdup("-f");
+            args[4] = tmp_filename;
+            args[5] = NULL;
 
             /* Call h5fuse script from MPI rank 0 */
             execvp("env", args);
@@ -2121,7 +2120,6 @@ main(int argc, char **argv)
     bool     must_unset_ioc_per_node_env     = false;
     bool     must_unset_ioc_thread_count_env = false;
     bool     must_unset_config_dir_env       = false;
-    char    *env_value                       = NULL;
     int      required                        = MPI_THREAD_MULTIPLE;
     int      provided                        = 0;
 
@@ -2347,7 +2345,7 @@ main(int argc, char **argv)
         must_unset_ioc_thread_count_env = true;
     }
 
-    if (!(env_value = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
+    if (NULL == getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX)) {
         int rand_value = 0;
 
         if (MAINPROCESS)
