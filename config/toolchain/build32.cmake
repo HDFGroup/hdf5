@@ -42,7 +42,7 @@ elseif(MINGW)
   set (CMAKE_CROSSCOMPILING_EMULATOR wine)
 
   include_directories(/usr/${TOOLCHAIN_PREFIX}/include)
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On CACHE BOOL "Export windows symbols")
+  set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On CACHE BOOL "Export windows symbols")
 else ()
   set (CMAKE_SYSTEM_NAME Linux)
 

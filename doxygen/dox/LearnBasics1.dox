@@ -642,7 +642,7 @@ See the programming example for an illustration of the use of these calls.
 \subsection subsecLBDsetCreateContent File Contents
 The contents of the file dset.h5 (dsetf.h5 for FORTRAN) are shown below:
 <table>
-<caption>Contents of dset.h5 ( dsetf.h5)</caption>
+<caption>Contents of dset.h5 (dsetf.h5)</caption>
 <tr>
 <td>
 \image html imgLBDsetCreate.gif
