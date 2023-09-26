@@ -1,4 +1,4 @@
-HDF5 version 1.10.11 released on 2023-09-21
+HDF5 version 1.10.11 released on 2023-09-25
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
