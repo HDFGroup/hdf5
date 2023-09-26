@@ -83,7 +83,7 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  *              system by increasing the number of processes writing to
  *              adjacent locations in the HDF5 file.
  *
- *              To attempt to minimize this, we now arange matters such
+ *              To attempt to minimize this, we now arrange matters such
  *              that each process writes n adjacent entries in the
  *              candidate list, and marks all others clean.  We must do
  *              this in such a fashion as to guarantee that each entry

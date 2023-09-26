@@ -41,7 +41,7 @@
   )
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5repart_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5repart_files")
   endforeach ()
   add_custom_target(h5repart_files ALL COMMENT "Copying files needed by h5repart tests" DEPENDS ${h5repart_files_list})
 

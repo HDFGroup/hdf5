@@ -123,7 +123,7 @@ main(void)
     unsigned                       u;
     herr_t H5_ATTR_NDEBUG_UNUSED   status;
     hssize_t H5_ATTR_NDEBUG_UNUSED n;
-    off_t H5_ATTR_NDEBUG_UNUSED    offset;
+    HDoff_t H5_ATTR_NDEBUG_UNUSED  offset;
     hsize_t                        start[2];
     hsize_t                        count[2];
 
@@ -207,7 +207,7 @@ main(void)
     for (u = 0; u < nwrite; u++) {
         putc(PROGRESS, stderr);
         fflush(stderr);
-        offset = HDlseek(fd, (off_t)0, SEEK_SET);
+        offset = HDlseek(fd, 0, SEEK_SET);
         assert(0 == offset);
         n = HDwrite(fd, the_data, (size_t)(size[0] * size[1]));
         assert(n >= 0 && (size_t)n == (size[0] * size[1]));
@@ -257,7 +257,7 @@ main(void)
     for (u = 0; u < nread; u++) {
         putc(PROGRESS, stderr);
         fflush(stderr);
-        offset = HDlseek(fd, (off_t)0, SEEK_SET);
+        offset = HDlseek(fd, 0, SEEK_SET);
         assert(0 == offset);
         n = HDread(fd, the_data, (size_t)(size[0] * size[1]));
         assert(n >= 0 && (size_t)n == (size[0] * size[1]));

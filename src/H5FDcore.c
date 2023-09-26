@@ -362,7 +362,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
-    if ((HDoff_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
+    if ((HDoff_t)addr != HDlseek(file->fd, (HDoff_t)addr, SEEK_SET))
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
 #endif /* H5_HAVE_PREADWRITE */
 
@@ -430,7 +430,7 @@ done:
 static inline const H5FD_core_fapl_t *
 H5FD__core_get_default_config(void)
 {
-    char *driver = HDgetenv(HDF5_DRIVER);
+    char *driver = getenv(HDF5_DRIVER);
 
     if (driver) {
         if (!strcmp(driver, "core"))
@@ -462,7 +462,7 @@ H5FD_core_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))

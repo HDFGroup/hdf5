@@ -225,7 +225,7 @@ H5FD_ioc_init(void)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register IOC VFD");
 
         /* Check if IOC VFD has been loaded dynamically */
-        env_var = HDgetenv(HDF5_DRIVER);
+        env_var = getenv(HDF5_DRIVER);
         if (env_var && !strcmp(env_var, H5FD_IOC_NAME)) {
             int mpi_initialized = 0;
             int provided        = 0;
@@ -1494,7 +1494,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                     "can't allocate config file name buffer");
 
         /* Check if a prefix has been set for the configuration file name */
-        prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+        prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
 
         /* TODO: No support for subfile directory prefix currently */
         /* TODO: Possibly try loading config file prefix from file before deleting */

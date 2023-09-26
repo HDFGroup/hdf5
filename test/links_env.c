@@ -61,7 +61,7 @@ external_link_env(hid_t fapl, bool new_format)
     else
         TESTING("external links via environment variable");
 
-    if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
+    if ((envval = getenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
     if (strcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR;
@@ -149,7 +149,7 @@ main(void)
     int         nerrors = 0; /* Error from tests */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
