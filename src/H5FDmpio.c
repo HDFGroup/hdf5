@@ -559,13 +559,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_dxpl_mpio_collective_opt
  *
- * Purpose:     To set a flag to choose linked chunk I/O or multi-chunk I/O
- *              without involving decision-making inside HDF5
- *
- * Note:        The library will do linked chunk I/O or multi-chunk I/O without
- *              involving communications for decision-making process.
- *              The library won't behave as it asks for only when we find
- *              that the low-level MPI-IO package doesn't support this.
+ * Purpose:     Set the data transfer property list DXPL_ID to use transfer
+ *              mode OPT_MODE during I/O. This allows the application to
+ *              specify collective I/O at the HDF5 interface level (with
+ *              the H5Pset_dxpl_mpio routine), while controlling whether
+ *              the actual I/O is performed collectively (e.g., via
+ *              MPI_File_write_at_all) or independently (e.g., via
+ *              MPI_File_write_at).
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -2032,7 +2032,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_vector()
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective

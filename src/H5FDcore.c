@@ -362,7 +362,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
-    if ((HDoff_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
+    if ((HDoff_t)addr != HDlseek(file->fd, (HDoff_t)addr, SEEK_SET))
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
 #endif /* H5_HAVE_PREADWRITE */
 

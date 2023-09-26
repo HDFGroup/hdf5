@@ -1074,14 +1074,6 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  ## tell libtool to do the right thing with COMMON symbols, this fixes
-  ## corrupt values with COMMON and EQUIVALENCE when building shared
-  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
-  case "`uname`" in
-    Darwin*)
-    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
-    ;;
-  esac
 
   ## Report results of check(s)
 

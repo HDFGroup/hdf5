@@ -143,7 +143,7 @@ is_sparse(void)
 
     if ((fd = HDopen("x.h5", O_RDWR | O_TRUNC | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
         return 0;
-    if (HDlseek(fd, (off_t)(1024 * 1024), SEEK_SET) != 1024 * 1024)
+    if (HDlseek(fd, (HDoff_t)(1024 * 1024), SEEK_SET) != 1024 * 1024)
         return 0;
     if (5 != HDwrite(fd, "hello", (size_t)5))
         return 0;
@@ -267,7 +267,7 @@ enough_room(hid_t fapl)
         if ((fd[i] = HDopen(name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
             goto done;
         }
-        if ((off_t)size != HDlseek(fd[i], (off_t)size, SEEK_SET)) {
+        if ((HDoff_t)size != HDlseek(fd[i], (HDoff_t)size, SEEK_SET)) {
             goto done;
         }
         if (1 != HDwrite(fd[i], "X", (size_t)1)) {
