@@ -212,8 +212,8 @@ done:
  *              const char *attr_name;  IN: Name of attribute to locate and open
  *              hid_t type_id;          IN: ID of datatype for attribute
  *              hid_t space_id;         IN: ID of dataspace for attribute
- *              hid_t acpl_id;          IN: ID of creation property list (currently not used)
- *              hid_t aapl_id;          IN: Attribute access property list
+ *              hid_t acpl_id;          IN: ID of creation property list
+ *              hid_t aapl_id;          IN: ID of Attribute access property list (currently not used)
  *
  * Return:      Success:    An ID for the created attribute
  *
@@ -352,8 +352,8 @@ done:
         const char *attr_name;  IN: Name of attribute to locate and open
         hid_t type_id;          IN: ID of datatype for attribute
         hid_t space_id;         IN: ID of dataspace for attribute
-        hid_t acpl_id;          IN: ID of creation property list (currently not used)
-        hid_t aapl_id;          IN: Attribute access property list
+        hid_t acpl_id;          IN: ID of creation property list
+        hid_t aapl_id;          IN: ID of Attribute access property list (currently not used)
         hid_t lapl_id;          IN: Link access property list
  RETURNS
     Non-negative on success/H5I_INVALID_HID on failure
