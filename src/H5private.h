@@ -694,9 +694,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDgetdrive() 0
 #endif
 
-#ifndef HDgetenv
-#define HDgetenv(S) getenv(S)
-#endif
 #ifndef HDgetpid
 #define HDgetpid() getpid()
 #endif
