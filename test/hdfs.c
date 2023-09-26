@@ -1579,7 +1579,7 @@ main(void)
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
-    hdfs_namenode_name_env = HDgetenv("HDFS_TEST_NAMENODE_NAME");
+    hdfs_namenode_name_env = getenv("HDFS_TEST_NAMENODE_NAME");
     if (hdfs_namenode_name_env == NULL || hdfs_namenode_name_env[0] == '\0') {
         strncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
     }

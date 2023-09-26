@@ -100,7 +100,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv(HDF5_NOCLEANUP))
+    if (!getenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     free(filename);
 }
@@ -197,7 +197,7 @@ static void
 get_unique_name(void)
 {
     const char *prefix = NULL;
-    const char *env    = HDgetenv("HDF5_PREFIX");
+    const char *env    = getenv("HDF5_PREFIX");
 
     if (env)
         prefix = env;

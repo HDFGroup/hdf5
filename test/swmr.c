@@ -7742,7 +7742,7 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv(HDF5_DRIVER);
+    driver = getenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
@@ -7752,7 +7752,7 @@ main(void)
      * about file locking. File locking should be used unless explicitly
      * disabled.
      */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !strcmp(lock_env_var, "FALSE"))
         use_file_locking = false;
     else

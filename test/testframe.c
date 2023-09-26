@@ -445,7 +445,7 @@ GetTestExpress(void)
 #endif
 
         /* Check if HDF5TestExpress is set to override the default level */
-        env_val = HDgetenv("HDF5TestExpress");
+        env_val = getenv("HDF5TestExpress");
         if (env_val) {
             if (strcmp(env_val, "0") == 0)
                 express_val = 0;
@@ -633,8 +633,8 @@ void
 TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
-    char         *env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
-    unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
+    char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+    unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)
