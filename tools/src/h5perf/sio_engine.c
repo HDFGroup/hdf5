@@ -139,9 +139,7 @@ do_sio(parameters param, results *res)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
-        GOTOERROR(FAIL);
-
+    /* MUST initialize fd early since we check its file IDs in cleanup code */
     switch (iot) {
         case POSIXIO:
             fd.posixfd  = -1;
@@ -156,6 +154,9 @@ do_sio(parameters param, results *res)
             fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
             GOTOERROR(FAIL);
     }
+
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
+        GOTOERROR(FAIL);
 
     linear_buf_size = 1;
 
