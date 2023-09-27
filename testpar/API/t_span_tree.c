@@ -21,7 +21,7 @@
    one in collective mode,
    2) We will read two datasets with the same hyperslab selection settings,
       1.  independent read to read independent output,
-          independent read to read collecive   output,
+          independent read to read collective   output,
     Compare the result,
     If the result is the same, then collective write succeeds.
       2.  collective read to read independent output,
@@ -498,7 +498,7 @@ coll_write_test(int chunk_factor)
 
          For testing collective hyperslab selection write
          In this test, we are using independent read to check
-         the correctedness of collective write compared with
+         the correctness of collective write compared with
          independent write,
 
          In order to thoroughly test this feature, we choose
@@ -593,7 +593,7 @@ coll_write_test(int chunk_factor)
     mspaceid = H5Screate_simple(MSPACE_RANK, mdim, NULL);
 
     /*
-     * Select two hyperslabs in memory. Hyperslabs has the same
+     * Select two hyperslabs in memory. Hyperslabs have the same
      * size and shape as the selected hyperslabs for the file dataspace
      * Only the starting point is different.
      * The first selection
@@ -833,7 +833,7 @@ coll_read_test(void)
     mspaceid = H5Screate_simple(MSPACE_RANK, mdim, NULL);
 
     /*
-     * Select two hyperslabs in memory. Hyperslabs has the same
+     * Select two hyperslabs in memory. Hyperslabs have the same
      * size and shape as the selected hyperslabs for the file dataspace.
      * Only the starting point is different.
      * The first selection
@@ -967,7 +967,7 @@ coll_read_test(void)
 **      sel_rank fastest changing indices, with origin (in the
 **    higher indices) as indicated by the start array.
 **
-**    Note that this function, is hard coded to presume a
+**    Note that this function is hard-coded to presume a
 **    maximum dataspace rank of 5.
 **
 **    While this maximum is declared as a constant, increasing
@@ -1045,7 +1045,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
      * Note that the following computation depends on the C99
      * requirement that integer division discard any fraction
      * (truncation towards zero) to function correctly. As we
-     * now require C99, this shouldn't be a problem, but noting
+     * now require C99, this shouldn't be a problem, but note
      * it may save us some pain if we are ever obliged to support
      * pre-C99 compilers again.
      */
@@ -1074,7 +1074,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
     /* Now set up the stride and block arrays, and portions of the start
      * and count arrays that will not be altered during the selection of
-     * the checker board.
+     * the checkerboard.
      */
     i = 0;
     while (i < ds_offset) {
@@ -1294,13 +1294,13 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 **    expected data.  Return true if it does, and false
 **      otherwise.
 **
-**    The supplied buffer is presumed to this process's slice
+**    The supplied buffer is presumed to be this process's slice
 **    of the target data set.  Each such slice will be an
 **    n-cube of rank (rank -1) and the supplied edge_size with
 **    origin (mpi_rank, 0, ... , 0) in the target data set.
 **
 **    Further, the buffer is presumed to be the result of reading
-**    or writing a checker board selection of an m (1 <= m <
+**    or writing a checkerboard selection of an m (1 <= m <
 **      rank) dimensional slice through this processes slice
 **    of the target data set.  Also, this slice must be parallel
 **    to the fastest changing indices.
@@ -1311,7 +1311,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 **      with the natural numbers listed in order from the origin
 **    along the fastest changing axis.
 **
-**      Thus for a 20x10x10 dataset, the value stored in location
+**      Thus, for a 20x10x10 dataset, the value stored in location
 **    (x, y, z) (assuming that z is the fastest changing index
 **    and x the slowest) is assumed to be:
 **
@@ -1319,7 +1319,7 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 **
 **    Further, supposing that this is process 10, this process's
 **    slice of the dataset would be a 10 x 10 2-cube with origin
-**    (10, 0, 0) in the data set, and would be initialize (prior
+**    (10, 0, 0) in the data set, and would be initialized (prior
 **    to the checkerboard selection) as follows:
 **
 **        1000, 1001, 1002, ... 1008, 1009
@@ -2398,11 +2398,11 @@ lower_dim_size_comp_test(void)
  *
  *        1) Reads or writes exactly one chunk,
  *
- *        2) Has no in memory buffer for any other chunk.
+ *        2) Has no in-memory buffer for any other chunk.
  *
- *        The test differers from Rob Latham's bug report in
- *        that is runs with an arbitrary number of processes,
- *        and uses a 1 dimensional dataset.
+ *        The test differs from Rob Latham's bug report in
+ *        that it runs with an arbitrary number of processes,
+ *        and uses a 1-dimensional dataset.
  *
  * Return:    void
  *-------------------------------------------------------------------------
