@@ -76,9 +76,9 @@
       tpbitsUnsignedLongLong16.ddl
   )
   set (HDF5_REFERENCE_TEST_PBITS
-      ${HDF5_TOOLS_DIR}/testfiles/packedbits.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5
-      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
+      packedbits.h5
+      tarray1.h5
+      tcompound.h5
   )
   set (HDF5_ERROR_REFERENCE_PBITS
       tnofilename-with-packed-bits.err
@@ -97,19 +97,15 @@
   )
 
   foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
-    get_filename_component(fname "${pbits_h5_file}" NAME)
-    HDFTEST_COPY_FILE("${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}" "h5dump_pbits_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${pbits_h5_file}" "h5dump_pbits_files")
   endforeach ()
-
 
   foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
-    get_filename_component(fname "${ddl_pbits}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}" "h5dump_pbits_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${ddl_pbits}" "h5dump_pbits_files")
   endforeach ()
 
-  foreach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
-    get_filename_component(fname "${ddl_pbits}" NAME)
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}" "h5dump_pbits_files")
+  foreach (ddl_err_pbits ${HDF5_ERROR_REFERENCE_PBITS})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/pbits/${ddl_err_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${ddl_err_pbits}" "h5dump_pbits_files")
   endforeach ()
   add_custom_target(h5dump_pbits_files ALL COMMENT "Copying files needed by h5dump_pbits tests" DEPENDS ${h5dump_pbits_files_list})
 

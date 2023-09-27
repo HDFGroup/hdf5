@@ -736,7 +736,7 @@ h5_set_info_object(void)
     int   ret_value = 0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
+    if ((envp = getenv("HDF5_MPI_INFO")) != NULL) {
         char *next, *valp;
 
         valp = envp = next = strdup(envp);
@@ -1215,7 +1215,7 @@ report_parameters(struct options *opts)
         fprintf(output, "Contiguous\n");
 
     {
-        char *prefix = HDgetenv("HDF5_PARAPREFIX");
+        char *prefix = getenv("HDF5_PARAPREFIX");
 
         fprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank, (prefix ? prefix : "not set"));
     }

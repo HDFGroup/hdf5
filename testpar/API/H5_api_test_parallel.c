@@ -236,13 +236,13 @@ main(int argc, char **argv)
 
     srand(seed);
 
-    if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
+    if (NULL == (test_path_prefix = getenv(HDF5_API_TEST_PATH_PREFIX)))
         test_path_prefix = "";
 
     snprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
              PARALLEL_TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = getenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)
             printf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";

@@ -402,7 +402,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = HDgetenv("HDF5_PARAPREFIX");
+    prefix = getenv("HDF5_PARAPREFIX");
 
 #ifdef HDF5_PARAPREFIX
     if (!prefix)
@@ -416,8 +416,8 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
          * directory instead. */
         char *user, *login, *subdir;
 
-        user   = HDgetenv("USER");
-        login  = HDgetenv("LOGIN");
+        user   = getenv("USER");
+        login  = getenv("LOGIN");
         subdir = (user ? user : login);
 
         if (subdir) {

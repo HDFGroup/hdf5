@@ -2093,7 +2093,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Override possible environment variable & re-initialize default VOL connector */
-    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
+    conn_env_str = getenv(HDF5_VOL_CONNECTOR);
     if (conn_env_str) {
         if (NULL == (conn_env_str = strdup(conn_env_str)))
             TEST_ERROR;
@@ -2256,7 +2256,7 @@ test_vol_cap_flags(void)
         TEST_ERROR;
 
     /* If using the native VOL by default, check flags again with H5P_DEFAULT */
-    vol_env = HDgetenv(HDF5_VOL_CONNECTOR);
+    vol_env = getenv(HDF5_VOL_CONNECTOR);
     if (!vol_env || (0 == strcmp(vol_env, "native"))) {
         H5VL_class_t *cls;
         hid_t         connector_id;
@@ -2338,8 +2338,8 @@ test_get_vol_name(void)
 
     TESTING("getting connector name");
 
-    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
-    if (NULL == (conn_env_str = HDgetenv("HDF5_VOL_CONNECTOR")))
+    conn_env_str = getenv(HDF5_VOL_CONNECTOR);
+    if (NULL == (conn_env_str = getenv("HDF5_VOL_CONNECTOR")))
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
@@ -2629,7 +2629,7 @@ main(void)
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

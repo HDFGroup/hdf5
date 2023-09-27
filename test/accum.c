@@ -2077,7 +2077,7 @@ test_swmr_write_big(bool newest_format)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv(HDF5_DRIVER);
+    driver = getenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         SKIPPED();
         puts("    Test skipped due to VFD not supporting SWMR I/O.");

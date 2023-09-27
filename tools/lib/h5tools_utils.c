@@ -994,7 +994,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
     int         ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
-    if (NULL != (env_str = HDgetenv("H5TOOLS_BUFSIZE"))) {
+    if (NULL != (env_str = getenv("H5TOOLS_BUFSIZE"))) {
         errno                = 0;
         hyperslab_bufsize_mb = strtol(env_str, (char **)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)

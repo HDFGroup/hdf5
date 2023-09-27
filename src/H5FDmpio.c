@@ -280,7 +280,7 @@ H5FD_mpio_init(void)
         H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), false);
 
         /* Check if MPI driver has been loaded dynamically */
-        env = HDgetenv(HDF5_DRIVER);
+        env = getenv(HDF5_DRIVER);
         if (env && !strcmp(env, "mpio")) {
             int mpi_initialized = 0;
 
@@ -299,7 +299,7 @@ H5FD_mpio_init(void)
         const char *s; /* String for environment variables */
 
         /* Allow MPI buf-and-file-type optimizations? */
-        s = HDgetenv("HDF5_MPI_OPT_TYPES");
+        s = getenv("HDF5_MPI_OPT_TYPES");
         if (s && isdigit(*s))
             H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? false : true;
 
@@ -308,7 +308,7 @@ H5FD_mpio_init(void)
         memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
 
         /* Retrieve MPI-IO debugging environment variable */
-        s = HDgetenv("H5FD_mpio_Debug");
+        s = getenv("H5FD_mpio_Debug");
         if (s)
             H5FD__mpio_parse_debug_str(s);
 #endif /* H5FDmpio_DEBUG */
@@ -2432,7 +2432,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_vector
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2954,7 +2954,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3325,7 +3325,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
