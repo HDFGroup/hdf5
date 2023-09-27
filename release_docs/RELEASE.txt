@@ -310,6 +310,17 @@ Bug Fixes Since HDF5-1.12.2 Release
 
       Fixes HDFFV-11052, CVE-2020-10812
 
+    - Fixed memory leaks that could occur when reading a dataset from a
+      malformed file
+
+      When attempting to read layout, pline, and efl information for a
+      dataset, memory leaks could occur if attempting to read pline/efl
+      information throws an error.  The leaks would occur because the memory
+      that was allocated for pline and efl was not properly cleaned up by
+      error handling.
+
+      Fixes Github issue #2602
+
     - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
 
       H5Ocopy was missing a check to determine whether the new object's
