@@ -816,7 +816,7 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     hid_t          array_dt  = H5I_INVALID_HID;
     static hsize_t dim[]     = {NX, NY};
     int            fillvalue = (-1);
-    size_t         ss, ss1, ss2;
+    size_t         ss = 0, ss1 = 0, ss2 = 0;
     hsize_t        memb_size[1] = {4};
 
     /* Allocate buffers */
