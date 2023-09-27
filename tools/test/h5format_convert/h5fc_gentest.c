@@ -136,7 +136,6 @@ gen_non(const char *fname)
      */
 
     /* Create dataspace */
-    max_dims[0] = 10;
     max_dims[0] = H5S_UNLIMITED;
     max_dims[1] = H5S_UNLIMITED;
     if ((sid = H5Screate_simple(2, dims2, max_dims)) < 0)
