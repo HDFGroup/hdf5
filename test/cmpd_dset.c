@@ -228,7 +228,7 @@ error:
 static int
 compare_s1_data(void *expect_buf, void *rbuf)
 {
-    int      i;
+    int   i;
     s1_t *s1_ptr;
     s1_t *s2_ptr;
 
@@ -237,9 +237,8 @@ compare_s1_data(void *expect_buf, void *rbuf)
         s1_ptr = ((s1_t *)expect_buf) + i;
         s2_ptr = ((s1_t *)rbuf) + i;
 
-        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || 
-            s1_ptr->c[0] != s2_ptr->c[0] || s1_ptr->c[1] != s2_ptr->c[1] || 
-            s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
+            s1_ptr->c[1] != s2_ptr->c[1] || s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
             s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e) {
             H5_FAILED();
             printf("    i=%d\n", i);
@@ -269,7 +268,7 @@ error:
 static int
 compare_s1_s3_data(void *expect_buf, void *rbuf)
 {
-    int      i;
+    int   i;
     s1_t *s1_ptr;
     s3_t *s2_ptr;
 
@@ -277,9 +276,8 @@ compare_s1_s3_data(void *expect_buf, void *rbuf)
         s1_ptr = ((s1_t *)expect_buf) + i;
         s2_ptr = ((s3_t *)rbuf) + i;
 
-        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || 
-            s1_ptr->c[0] != s2_ptr->c[0] || s1_ptr->c[1] != s2_ptr->c[1] || 
-            s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
+            s1_ptr->c[1] != s2_ptr->c[1] || s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
             s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e) {
             H5_FAILED();
             printf("    i=%d\n", i);
@@ -309,7 +307,7 @@ error:
 static int
 compare_s7_data(void *expect_buf, void *rbuf)
 {
-    int      i;
+    int   i;
     s7_t *s1_ptr;
     s7_t *s2_ptr;
 
@@ -337,7 +335,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    compare_s7_s8_data
  *
- * Purpose:     Compare data read in rbuf with expected data 
+ * Purpose:     Compare data read in rbuf with expected data
  *              in expect_buf: save_s7, save_s8.
  *
  * Return:      Success:        0
@@ -349,14 +347,14 @@ error:
 static int
 compare_a_d_data(void *exp1_buf, void *exp2_buf, void *rbuf)
 {
-    int i;
+    int   i;
     s7_t *s1_ptr;
     s8_t *s2_ptr;
     s7_t *rbuf_ptr;
 
     for (i = 0; i < (int)(NX * NY); i++) {
-        s1_ptr = ((s7_t *)exp1_buf) + i;
-        s2_ptr = ((s8_t *)exp2_buf) + i;
+        s1_ptr   = ((s7_t *)exp1_buf) + i;
+        s2_ptr   = ((s8_t *)exp2_buf) + i;
         rbuf_ptr = ((s7_t *)rbuf) + i;
 
         if (s2_ptr->a != rbuf_ptr->a || s1_ptr->d != rbuf_ptr->d) {
@@ -378,7 +376,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    compare_a_b_c_data
  *
- * Purpose:     Compare data read in rbuf with expected data 
+ * Purpose:     Compare data read in rbuf with expected data
  *              in expect_buf: save_s8, save_rbuf8.
  *
  * Return:      Success:        0
@@ -390,14 +388,14 @@ error:
 static int
 compare_a_b_c_data(void *exp1_buf, void *exp2_buf, void *rbuf)
 {
-    int i;
+    int   i;
     s8_t *s1_ptr;
     s8_t *s2_ptr;
     s8_t *rbuf_ptr;
 
     for (i = 0; i < (int)(NX * NY); i++) {
-        s1_ptr = ((s8_t *)exp1_buf) + i;
-        s2_ptr = ((s8_t *)exp2_buf) + i;
+        s1_ptr   = ((s8_t *)exp1_buf) + i;
+        s2_ptr   = ((s8_t *)exp2_buf) + i;
         rbuf_ptr = ((s8_t *)rbuf) + i;
 
         if (s1_ptr->a != rbuf_ptr->a || s2_ptr->b != rbuf_ptr->b || s2_ptr->c != rbuf_ptr->c) {
@@ -415,8 +413,6 @@ error:
     return FAIL;
 
 } /* compare_a_b_c_data() */
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_select_src_subset
@@ -792,22 +788,22 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     hid_t s3_tid = H5I_INVALID_HID;
     hid_t s7_tid = H5I_INVALID_HID;
     hid_t s8_tid = H5I_INVALID_HID;
-    
+
     /* Buffers */
-    s1_t *s1 = NULL;
+    s1_t *s1      = NULL;
     s1_t *save_s1 = NULL;
     s3_t *s3      = NULL;
     s3_t *save_s3 = NULL;
     s1_t *rbuf1   = NULL;
     s3_t *rbuf3   = NULL;
 
-    s7_t *s7 = NULL;
+    s7_t *s7      = NULL;
     s7_t *save_s7 = NULL;
-    s7_t *rbuf7 = NULL;
+    s7_t *rbuf7   = NULL;
 
-    s8_t *s8 = NULL;
-    s8_t *save_s8 = NULL;
-    s8_t *rbuf8 = NULL;
+    s8_t *s8         = NULL;
+    s8_t *save_s8    = NULL;
+    s8_t *rbuf8      = NULL;
     s8_t *save_rbuf8 = NULL;
 
     /* Other variables */
@@ -852,7 +848,6 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
         goto error;
     if (NULL == (save_rbuf8 = (s8_t *)calloc(NX * NY, sizeof(s8_t))))
         goto error;
-
 
     /* Create the file */
     if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
@@ -995,7 +990,7 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
         goto error;
 
     if (H5Tinsert(s7_tid, "a", HOFFSET(s7_t, a), H5T_NATIVE_INT) < 0 ||
-        H5Tinsert(s7_tid, "d", HOFFSET(s7_t, d), H5T_NATIVE_INT) < 0) 
+        H5Tinsert(s7_tid, "d", HOFFSET(s7_t, d), H5T_NATIVE_INT) < 0)
         goto error;
 
     /* Initialize buffer with s7_t */
