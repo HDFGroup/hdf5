@@ -168,7 +168,7 @@ New Features
     - Added version of H5Rget_name to return the name as a Java string.
 
       Other functions that use the "get_name" process use "get_size" before 
-      retrieving the name. This happens in the JNI wrapper  implementation of 
+      retrieving the name. This happens in the JNI wrapper implementation of 
       the function. Now H5Rget_name has a H5Rget_name_string which returns the 
       string like similar functions.
 
@@ -243,8 +243,8 @@ Bug Fixes since HDF5-1.12.2 release
 ===================================
     Library
     -------
-    - Fixed memory leak and shut down when reading a malformed file.
-// I wrote the above heading. Please check. // 
+    - Fixed memory leak during shut down.
+
       A malformed file could result in chunk index memory leaks. Under most
       conditions (i.e., when the --enable-using-memchecker option is NOT
       used), this would result in a small memory leak and and infinite loop
@@ -319,32 +319,28 @@ Bug Fixes since HDF5-1.12.2 release
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
       ensure that memory buffers don't get overrun when decoding buffers read from
       a possibly corrupted HDF5 file.
-// The below bullet and paragraph wrap at a different point. This drives me crazy but what's the wrap point anyway? // 
-    - Fixed a heap buffer overflow that occurs when reading from
-      a dataset with a compact layout within a malformed HDF5 file.
 
-      During opening of a dataset that has a compact layout, the
-      library allocates a buffer that stores the dataset's raw data.
-      The dataset's object header that gets written to the file
-      contains information about how large of a buffer the library
-      should allocate. If this object header is malformed such that
-      it causes the library to allocate a buffer that is too small
-      to hold the dataset's raw data, future I/O to the dataset can
-      result in heap buffer overflows. To fix this issue, an extra
-      check is now performed for compact datasets to ensure that
-      the size of the allocated buffer matches the expected size
-      of the dataset's raw data (as calculated from the dataset's
-      dataspace and datatype information). If the two sizes do not
-      match, opening of the dataset will fail.
+    - Fixed a heap buffer overflow that occurs when reading from a dataset with
+      a compact layout within a malformed HDF5 file.
+
+      During opening of a dataset that has a compact layout, the library allocates 
+      a buffer that stores the dataset's raw data. The dataset's object header that
+      gets written to the file contains information about how large of a buffer the
+      library should allocate. If this object header is malformed such that it causes
+      the library to allocate a buffer that is too small to hold the dataset's raw data,
+      future I/O to the dataset can result in heap buffer overflows. To fix this issue, 
+      an extra check is now performed for compact datasets to ensure that the size of the 
+      allocated buffer matches the expected size of the dataset's raw data (as calculated
+      from the dataset's dataspace and datatype information). If the two sizes do not match, 
+      opening of the dataset will fail.
 
       Fixes GitHub issue #2606
 
     - Fixed an issue with malformed HDF5 files causing heap overflow.
 
-      Malformed HDF5 files may have truncated content which does not match
-      the expected size. When H5O__pline_decode() attempts to decode these it
-      may read past the end of the allocated space leading to heap overflows
-      as bounds checking is incomplete.
+      Malformed HDF5 files may have truncated content which does not match the expected size. 
+      When H5O__pline_decode() attempts to decode these it may read past the end of the 
+      allocated space leading to heap overflows as bounds checking is incomplete.
 
       The fix ensures each element is within bounds before reading.
 
@@ -361,17 +357,15 @@ Bug Fixes since HDF5-1.12.2 release
 
       Fixes GitHub issue #2599
 
-    - Fixed a memory corruption issue that can occur when reading
-      from a dataset using a hyperslab selection in the file
-      dataspace and a point selection in the memory dataspace.
+    - Fixed a memory corruption issue that can occur when reading from a dataset 
+      using a hyperslab selection in the file dataspace and a point selection in
+      the memory dataspace.
 
-      When reading from a dataset using a hyperslab selection in
-      the dataset's file dataspace and a point selection in the
-      dataset's memory dataspace where the file dataspace's "rank"
-      is greater than the memory dataspace's "rank", memory corruption
-      could occur due to an incorrect number of selection points
-      being copied when projecting the point selection onto the
-      hyperslab selection's dataspace.
+      When reading from a dataset using a hyperslab selection in the dataset's file
+      dataspace and a point selection in the dataset's memory dataspace where the file
+      dataspace's "rank" is greater than the memory dataspace's "rank", memory
+      corruption could occur due to an incorrect number of selection points being copied
+      when projecting the point selection onto the hyperslab selection's dataspace.
 
       Fixes CVE-2021-37501 and GHSA-rfgw-5vq3-wrjf
 
@@ -539,17 +533,21 @@ Bug Fixes since HDF5-1.12.2 release
 
     Tools
     -----
-    - Names of objects with square brackets will have trouble without the
-      special argument, --no-compact-subset, on the h5dump command line.
+    - Added option --no-compact-subset to h5diff.
 
-      h5diff did not have this option and now it has been added.
+     When the name of an object contains square brackets, h5diff was not able
+     to parse it correctly because “[ ]” were interpreted as the compact form
+     of subsetting.
+
+     h5dump has the special argument, --no-compact-subset to allow the use of
+     ‘[‘ and ‘]’ in dataset names.  h5diff now has this option as well.
 
       Fixes GitHub issue #2682
 
-    - In the tools traverse function, an error in either visit call
-      will bypass the cleanup of the local data variables.
+    - Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
 
-      Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
+      In the tools traverse function, an error in either visit call
+      will bypass the cleanup of the local data variables.
 
       Fixes GitHub issue #2598
 
@@ -604,41 +602,52 @@ Bug Fixes since HDF5-1.12.2 release
 Platforms Tested
 ===================
 
-    Linux 5.13.14-200.fc34           GNU gcc (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
-    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
-    Fedora34                         clang version 12.0.1 (Fedora 12.0.1-1.fc34)
+    Linux 5.19.0-1023-aws            GNU gcc, gfortran, g++
+    #24-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
+    Ubuntu 22.04                     Ubuntu clang version 14.0.0-1ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
+                                     ifort (IFORT) 2021.9.0 20230302
                                      (cmake and autotools)
 
-    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
-    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
-    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
-    Linux 5.8.0-63-generic           GNU gcc (GCC) 10.3.0-1ubuntu1
-    #71-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 10.3.0-1ubuntu1
-    Ubuntu20.10                      Ubuntu clang version 11.0.0-2
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
+    #1 SMP x86_64 GNU/Linux              cce/15.0.0
+    (frontier)                           gcc/12.2.0
+                                     (cmake)
+
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.4.0-1ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.4.0-1ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4ubuntu1
+                                     Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
+                                     ifort (IFORT) 2021.9.0 20230302
                                      (cmake and autotools)
 
-    Linux 5.3.18-22-default          GNU gcc (SUSE Linux) 7.5.0
-    #1 SMP x86_64  GNU/Linux         GNU Fortran (SUSE Linux) 7.5.0
-    SUSE15sp2                        clang version 7.0.1 (tags/RELEASE_701/final 349238)
-                                     (cmake and autotools)
+    Linux 4.14.0-115.35.1.1chaos     aue/openmpi/4.1.4-arm-22.1.0.12
+    #1 SMP aarch64 GNU/Linux             Arm C/C++/Fortran Compiler version 22.1
+    (stria)                              (based on LLVM 13.0.1)
+                                     (cmake)
+
+    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1
+    (vortex)                             GCC 8.3.1
+                                         XL 2021.09.22
+                                     (cmake)
 
     Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux             clang 8.0.1, 11.0.1
-    (lassen)                             GCC 7.3.1
-                                         XL 16.1.1.2
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
+    (lassen)                             GCC 8.3.1
+                                         XL 16.1.1.2, 2021.09.22, 2022.08.05
                                      (cmake)
 
-    Linux-4.12.14-150.75-default     cray-mpich/7.7.10
-    #1 SMP x86_64 GNU/Linux              GCC 7.3.0, 8.2.0
-    (cori)                               Intel (R) Version 19.0.3.199
-                                     (cmake)
-
-    Linux-4.12.14-197.86-default     cray-mpich/7.7.6
-    # 1SMP x86_64 GNU/Linux              GCC  7.3.0, 9.3.0, 10.2.0
-    (mutrino)                            Intel (R) Version 17.0.4, 18.0.5, 19.1.3
-                                     (cmake)
+    Linux-4.12.14-197.99-default     cray-mpich/7.7.14
+    #1 SMP x86_64 GNU/Linux              cce 12.0.3
+    (theta)                              GCC 11.2.0
+                                         llvm 9.0
+                                         Intel 19.1.2
 
     Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
@@ -647,47 +656,57 @@ Platforms Tested
     Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
     Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-    (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
-                                         Version 7.2.0, Version 8.3.0, Version 9.1.0
+    (jelly/kituo/moohan)                 Version 4.9.3, Version 7.2.0, Version 8.3.0,
+                                         Version 9.1.0, Version 10.2.0
                                      Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                      compilers:
                                          Version 17.0.0.098 Build 20160721
                                      GNU C (gcc) and C++ (g++) 4.8.5 compilers
-                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                         with NAG Fortran Compiler Release 7.1(Hanzomon)
                                      Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
-                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                         with NAG Fortran Compiler Release 7.1(Hanzomon)
                                      MPICH 3.1.4 compiled with GCC 4.9.3
                                      MPICH 3.3 compiled with GCC 7.2.0
-                                     OpenMPI 2.1.6 compiled with icc 18.0.1
-                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     OpenMPI 3.1.3 compiled with GCC 7.2.0 and 4.1.2
+                                         compiled with GCC 9.1.0
                                      PGI C, Fortran, C++ for 64-bit target on
                                      x86_64;
-                                         Version 19.10-0
+                                         Versions 18.4.0 and 19.10-0
+                                     NVIDIA nvc, nvfortran and nvc++ version 22.5-0
+                                     (autotools and cmake)
 
-    Linux-3.10.0-1127.0.0.1chaos     openmpi-4.0.0
+
+    Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
     #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
     (quartz)                             GCC 7.3.0, 8.1.0
-                                         Intel 16.0.4, 18.0.2, 19.0.4
+                                         Intel 19.0.4, 2022.2, oneapi.2022.2
+
+    Linux-3.10.0-1160.90.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (skybridge)                          Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.90.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (attaway)                            Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.90.1.1chaos    openmpi-intel/4.1
+    #1 SMP x86_64 GNU/Linux              Intel/19.1.2, 21.3.0 and 22.2.0
+    (chama)                          (cmake)
 
     macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
     Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
-    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 20210609
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
 
     macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
     Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
     (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
 
-    macOS High Sierra 10.13.6        Apple LLVM version 10.0.0 (clang-1000.10.44.4)
-    64-bit                           gfortran GNU Fortran (GCC) 6.3.0
-    (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
-
-    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
-    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
-    (kite)                           Intel icc/icpc/ifort version 17.0.2
-
     Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
     64-bit                           gfortran GNU Fortran (GCC) 5.2.0
     (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
+
 
     Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
@@ -698,12 +717,12 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 
-                                        w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
+                                    Visual Studio 2022 w/ clang 15.0.1
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
@@ -730,8 +749,8 @@ Known Problems
     images, but since this is a collective operation, a deadlock is possible
     if one or more processes do not participate.
 
-    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
-    issue: HDFFV-10628. This test will pass with VS2015 with Intel compiler.
+    CPP ptable test fails on both VS2017 and VS2019 with Intel and Clang compilers,
+    JIRA issue: HDFFV-10628. This test will pass with VS2015 with Intel compiler.
 
     The subsetting option in ph5diff currently will fail and should be avoided.
     The subsetting option works correctly in serial h5diff.
