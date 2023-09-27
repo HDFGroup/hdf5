@@ -2286,7 +2286,7 @@ lower_dim_size_comp_test(void)
  *        2) Has no in memory buffer for any other chunk.
  *
  *        The test differers from Rob Latham's bug report in
- *        that is runs with an arbitrary number of proceeses,
+ *        that is runs with an arbitrary number of processes,
  *        and uses a 1 dimensional dataset.
  *
  * Return:    void
