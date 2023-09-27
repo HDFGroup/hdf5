@@ -2432,7 +2432,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_vector
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2954,7 +2954,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3325,7 +3325,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
