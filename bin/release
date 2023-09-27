@@ -469,8 +469,6 @@ test "$verbose" && echo "   Running tar..." 1>&2
 (cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
 
 # Compress
-#SHA256=$HDF5_VERS.sha256
-cp /dev/null $DEST/$SHA256
 for comp in $methods; do
     case $comp in
         tar)
