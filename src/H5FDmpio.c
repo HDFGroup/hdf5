@@ -2694,7 +2694,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      */
     file->eof = HADDR_UNDEF;
 
-    /* check to see if the local eof has changed been extended, and update if so */
+    /* check to see if the local eof has been extended, and update if so */
     if (max_addr > file->local_eof)
         file->local_eof = max_addr;
 
