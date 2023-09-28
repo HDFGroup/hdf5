@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.e736039</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -229,8 +229,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The basic template for a <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver configuration filename. The format specifiers correspond to:</p>
-<p>s -&gt; base filename, e.g. "file.h5" PRIu64 -&gt; file inode, e.g. 11273556</p>
+<p>The basic printf-style template for a <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver configuration filename. The format specifiers correspond to:</p>
+<dl class="section user"><dt>%s</dt><dd>base filename, e.g. "file.h5"</dd></dl>
+<dl class="section user"><dt>%PRIu64</dt><dd>file inode, e.g. 11273556</dd></dl>
 <p>yielding a filename such as:</p>
 <p>file.h5.subfile_11273556.config </p>
 
@@ -307,10 +308,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The basic template for a subfile filename. The format specifiers correspond to:</p>
-<p>s -&gt; base filename, e.g. "file.h5" PRIu64 -&gt; file inode, e.g. 11273556 %0*d -&gt; number (starting at 1) signifying the Nth (out of total number of subfiles) subfile. Zero-padded according to the number of digits in the number of subfiles (calculated by log10(num_subfiles) + 1) d -&gt; number of subfiles</p>
+<p>The basic printf-style template for a <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver subfile filename. The format specifiers correspond to:</p>
+<dl class="section user"><dt>%s</dt><dd>base filename, e.g. "file.h5"</dd></dl>
+<dl class="section user"><dt>%PRIu64</dt><dd>file inode, e.g. 11273556</dd></dl>
+<dl class="section user"><dt>%0*d</dt><dd>number (starting at 1) signifying the Nth (out of total number of subfiles) subfile. Zero-padded according to the number of digits in the number of subfiles (calculated by <code>log10(num_subfiles) + 1)</code></dd></dl>
+<dl class="section user"><dt>%d</dt><dd>number of subfiles</dd></dl>
 <p>yielding filenames such as:</p>
-<p>file.h5.subfile_11273556_01_of_10 file.h5.subfile_11273556_02_of_10 file.h5.subfile_11273556_10_of_10 </p>
+<p>file.h5.subfile_11273556_01_of_10 <br  />
+file.h5.subfile_11273556_02_of_10 <br  />
+file.h5.subfile_11273556_10_of_10 <br  />
+</p>
 
 </div>
 </div>
