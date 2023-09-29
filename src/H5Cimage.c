@@ -1096,8 +1096,6 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl
 
     /* Sanity checks */
     assert(f);
-    assert(f->shared);
-    assert(f->shared->cache == f->shared->cache);
 
     /* Check arguments */
     if (cache_ptr == NULL)
@@ -1117,7 +1115,7 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl
 
         cache_ptr->image_ctl = default_image_ctl;
         assert(!(cache_ptr->image_ctl.generate_image));
-    } /* end if */
+    }
     else {
 #endif /* H5_HAVE_PARALLEL */
         /* A cache image can only be generated if the file is opened read / write
@@ -1139,9 +1137,9 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl
 
             cache_ptr->image_ctl = default_image_ctl;
             assert(!(cache_ptr->image_ctl.generate_image));
-        } /* end else */
+        }
 #ifdef H5_HAVE_PARALLEL
-    }  /* end else */
+    }
 #endif /* H5_HAVE_PARALLEL */
 
 done:
