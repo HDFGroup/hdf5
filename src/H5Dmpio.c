@@ -123,7 +123,29 @@ typedef struct H5D_chunk_alloc_info_t {
 
 /*
  * Information for a chunk pertaining to the dataset's chunk
- * index entry for the chunk
+ * index entry for the chunk.
+ *
+ * NOTE: To support efficient lookups of H5D_filtered_collective_chunk_info_t
+ * structures during parallel writes to filtered chunks, the
+ * chunk_idx and dset_oloc_addr fields of this structure are used
+ * together as a key for a hash table by following the approach
+ * outlined at https://troydhanson.github.io/uthash/userguide.html#_compound_keys.
+ * This means the following:
+ *
+ * - Instances of this structure should be memset to 0 when
+ *   used for hashing to ensure that any padding between the
+ *   chunk_idx and dset_oloc_addr fields does not affect the
+ *   generated key.
+ *
+ * - The chunk_idx and dset_oloc_addr fields should be arranged
+ *   in that specific order, as the code currently relies on
+ *   this ordering when calculating the key length and it
+ *   performs memory operations on the structure starting from
+ *   the chunk_idx field and using the calculated key length.
+ *
+ * - The chunk_idx and dset_oloc_addr fields should ideally
+ *   be arranged next to each other in the structure to minimize
+ *   the calculated key length.
  */
 typedef struct H5D_chunk_index_info_t {
     /*
