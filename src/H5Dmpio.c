@@ -4299,7 +4299,15 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     (void)mpi_rank;
 #endif
 
-    /* Cache some info about each dataset for later use */
+    /*
+     * To support the multi-dataset I/O case, cache some info (chunk size,
+     * fill buffer and fill dataspace, etc.) about each dataset involved
+     * in the I/O operation for use when processing chunks below. If only
+     * one dataset is involved, this information is the same for every chunk
+     * processed in this function. Otherwise, if multiple datasets are
+     * involved, a hash table is used to quickly match a particular chunk
+     * with the cached information pertaining to the dataset it resides in.
+     */
     for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
         H5O_fill_t *fill_msg;
 
@@ -4618,7 +4626,15 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     H5D_MPIO_TIME_START(mpi_rank, "Filtered collective chunk update");
 #endif
 
-    /* Cache some info about each dataset for later use */
+    /*
+     * To support the multi-dataset I/O case, cache some info (chunk size,
+     * fill buffer and fill dataspace, etc.) about each dataset involved
+     * in the I/O operation for use when processing chunks below. If only
+     * one dataset is involved, this information is the same for every chunk
+     * processed in this function. Otherwise, if multiple datasets are
+     * involved, a hash table is used to quickly match a particular chunk
+     * with the cached information pertaining to the dataset it resides in.
+     */
     for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
         H5O_fill_t *fill_msg;
 
@@ -5069,7 +5085,15 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
     H5D_MPIO_TIME_START(mpi_rank, "Reallocation of chunk file space");
 #endif
 
-    /* Cache some info about each dataset for later use */
+    /*
+     * To support the multi-dataset I/O case, cache some info (chunk size,
+     * fill buffer and fill dataspace, etc.) about each dataset involved
+     * in the I/O operation for use when processing chunks below. If only
+     * one dataset is involved, this information is the same for every chunk
+     * processed in this function. Otherwise, if multiple datasets are
+     * involved, a hash table is used to quickly match a particular chunk
+     * with the cached information pertaining to the dataset it resides in.
+     */
     for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
         /* Skip this dataset if no I/O is being performed */
         if (di[dset_idx].skip_io)
@@ -5336,7 +5360,15 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
     H5D_MPIO_TIME_START(mpi_rank, "Reinsertion of modified chunks into chunk index");
 #endif
 
-    /* Cache some info about each dataset for later use */
+    /*
+     * To support the multi-dataset I/O case, cache some info (chunk size,
+     * fill buffer and fill dataspace, etc.) about each dataset involved
+     * in the I/O operation for use when processing chunks below. If only
+     * one dataset is involved, this information is the same for every chunk
+     * processed in this function. Otherwise, if multiple datasets are
+     * involved, a hash table is used to quickly match a particular chunk
+     * with the cached information pertaining to the dataset it resides in.
+     */
     for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
         /* Skip this dataset if no I/O is being performed */
         if (di[dset_idx].skip_io)
