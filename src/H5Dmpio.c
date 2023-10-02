@@ -3216,7 +3216,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                  * or has unallocated chunks. In either case, the list should get
                  * sorted.
                  */
-                if (buf_idx) {
+                if (!need_sort && buf_idx) {
                     haddr_t curr_chunk_offset = local_info_array[buf_idx].chunk_current.offset;
                     haddr_t prev_chunk_offset = local_info_array[buf_idx - 1].chunk_current.offset;
 
