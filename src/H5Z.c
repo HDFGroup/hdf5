@@ -485,7 +485,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5Z__check_unregister_group_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     hid_t         ocpl_id         = -1;
     H5Z_object_t *object          = (H5Z_object_t *)key;
@@ -494,10 +494,8 @@ H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void 
 
     FUNC_ENTER_PACKAGE
 
-    assert(obj_ptr);
-
     /* Get the group creation property */
-    if ((ocpl_id = H5G_get_create_plist((H5G_t *)obj_ptr)) < 0)
+    if ((ocpl_id = H5Gget_create_plist(obj_id)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get group creation property list");
 
     /* Check if the filter is in the group creation property list */
@@ -535,7 +533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5Z__check_unregister_dset_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     hid_t         ocpl_id         = -1;
     H5Z_object_t *object          = (H5Z_object_t *)key;
@@ -544,10 +542,8 @@ H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *
 
     FUNC_ENTER_PACKAGE
 
-    assert(obj_ptr);
-
     /* Get the dataset creation property */
-    if ((ocpl_id = H5D_get_create_plist((H5D_t *)obj_ptr)) < 0)
+    if ((ocpl_id = H5Dget_create_plist(obj_id)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get dataset creation property list");
 
     /* Check if the filter is in the dataset creation property list */
@@ -581,26 +577,38 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARALLEL_USED *key)
+H5Z__flush_file_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARALLEL_USED *key)
 {
-    H5F_t *f = (H5F_t *)obj_ptr; /* File object for operations */
+
 #ifdef H5_HAVE_PARALLEL
     H5Z_object_t *object = (H5Z_object_t *)key;
 #endif                     /* H5_HAVE_PARALLEL */
     int ret_value = false; /* Return value */
+    unsigned int intent = 0;
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    assert(obj_ptr);
     assert(key);
 
     /* Do a global flush if the file is opened for write */
-    if (H5F_ACC_RDWR & H5F_INTENT(f)) {
+    if (H5Fget_intent(obj_id, &intent) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Failed to get file intent");
+
+    if (H5F_ACC_RDWR & intent) {
 
 #ifdef H5_HAVE_PARALLEL
+        H5G_loc_t loc;
+        H5F_t *f = NULL;
+
         /* Check if MPIO driver is used */
+        if (H5G_loc(obj_id, &loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+        f = loc.oloc->file;
+        assert(f);
+
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+        
             /* Sanity check for collectively calling H5Zunregister, if requested */
             /* (Sanity check assumes that a barrier on one file's comm
              *  is sufficient (i.e. that there aren't different comms for
@@ -610,7 +618,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARA
                 MPI_Comm mpi_comm; /* File's communicator */
 
                 /* Retrieve the file communicator */
-                if (MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(f)))
+                if (H5F_mpi_retrieve_comm(obj_id, H5P_DEFAULT, &mpi_comm) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get MPI communicator");
 
                 /* Issue the barrier */
@@ -624,7 +632,7 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARA
 #endif        /* H5_HAVE_PARALLEL */
 
         /* Call the flush routine for mounted file hierarchies */
-        if (H5F_flush_mounts((H5F_t *)obj_ptr) < 0)
+        if (H5Fflush(obj_id, H5F_SCOPE_GLOBAL) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy");
     } /* end if */
 
