@@ -1114,6 +1114,31 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         }
     }
 
+#ifdef H5_HAVE_PARALLEL
+    /*
+     * If collective metadata reads are enabled, ensure all ranks
+     * have the dataset's chunk index open (if it was created) to
+     * prevent possible metadata inconsistency issues or unintentional
+     * independent metadata reads later on.
+     */
+    if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_HAS_MPI) &&
+        H5F_shared_get_coll_metadata_reads(io_info->f_sh) &&
+        H5D__chunk_is_space_alloc(&dataset->shared->layout.storage)) {
+        H5D_chunk_ud_t udata;
+        hsize_t        scaled[H5O_LAYOUT_NDIMS] = {0};
+
+        /*
+         * TODO: Until the dataset chunk index callback structure has
+         * callbacks for checking if an index is opened and also for
+         * directly opening the index, the following fake chunk lookup
+         * serves the purpose of forcing a chunk index open operation
+         * on all ranks
+         */
+        if (H5D__chunk_lookup(dataset, scaled, &udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to collectively open dataset chunk index");
+    }
+#endif
+
 done:
     if (file_space_normalized == true)
         if (H5S_hyper_denormalize_offset(dinfo->file_space, old_offset) < 0)

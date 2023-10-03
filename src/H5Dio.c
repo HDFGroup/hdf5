@@ -233,6 +233,10 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             dset_info[i].buf.vp = (void *)(((uint8_t *)dset_info[i].buf.vp) + buf_adj);
         } /* end if */
 
+        /* Set up I/O operation */
+        if (H5D__dset_ioinfo_init(dset_info[i].dset, &(dset_info[i]), &(store[i])) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation");
+
         /* Check if any filters are applied to the dataset */
         if (dset_info[i].dset->shared->dcpl_cache.pline.nused > 0)
             io_info.filtered_count++;
@@ -274,10 +278,6 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             io_skipped           = io_skipped + 1;
         } /* end if */
         else {
-            /* Set up I/O operation */
-            if (H5D__dset_ioinfo_init(dset_info[i].dset, &(dset_info[i]), &(store[i])) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation");
-
             /* Sanity check that space is allocated, if there are elements */
             if (dset_info[i].nelmts > 0)
                 assert(
@@ -288,22 +288,23 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                     dset_info[i].dset->shared->dcpl_cache.efl.nused > 0 ||
                     dset_info[i].dset->shared->layout.type == H5D_COMPACT);
 
-            /* Call storage method's I/O initialization routine */
-            if (dset_info[i].layout_ops.io_init &&
-                (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
             dset_info[i].skip_io = false;
-            io_op_init++;
-
-            /* Reset metadata tagging */
-            H5AC_tag(prev_tag, NULL);
         }
+
+        /* Call storage method's I/O initialization routine */
+        if (dset_info[i].layout_ops.io_init &&
+            (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
+        io_op_init++;
+
+        /* Reset metadata tagging */
+        H5AC_tag(prev_tag, NULL);
     } /* end of for loop */
 
-    assert(io_op_init + io_skipped == count);
+    assert(io_op_init == count);
 
     /* If no datasets have I/O, we're done */
-    if (io_op_init == 0)
+    if (io_skipped == count)
         HGOTO_DONE(SUCCEED);
 
     /* Perform second phase of type info initialization */
@@ -449,8 +450,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
 done:
     /* Shut down the I/O op information */
-    for (i = 0; i < count; i++)
-        if (!dset_info[i].skip_io && dset_info[i].layout_ops.io_term &&
+    for (i = 0; i < io_op_init; i++)
+        if (dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
 
@@ -875,7 +876,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
 done:
     /* Shut down the I/O op information */
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < io_op_init; i++) {
         assert(!dset_info[i].skip_io);
         if (dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)

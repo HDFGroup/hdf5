@@ -250,6 +250,24 @@ typedef struct H5D_filtered_collective_chunk_info_t {
 } H5D_filtered_collective_chunk_info_t;
 
 /*
+ * Information cached about each dataset involved when performing
+ * collective I/O on filtered chunks.
+ */
+typedef struct H5D_mpio_filtered_dset_info_t {
+    const H5D_dset_io_info_t *dset_io_info;
+    H5D_fill_buf_info_t       fb_info;
+    H5D_chk_idx_info_t        chunk_idx_info;
+    hsize_t                   file_chunk_size;
+    haddr_t                   dset_oloc_addr;
+    H5S_t                    *fill_space;
+    bool                      should_fill;
+    bool                      fb_info_init;
+    bool                      index_empty;
+
+    UT_hash_handle hh;
+} H5D_mpio_filtered_dset_info_t;
+
+/*
  * Top-level structure that contains an array of H5D_filtered_collective_chunk_info_t
  * chunk info structures for collective filtered I/O, as well as other useful information.
  * The struct's fields are as follows:
@@ -267,6 +285,10 @@ typedef struct H5D_filtered_collective_chunk_info_t {
  *                    will contain the chunk's "chunk index" value that can be used for chunk
  *                    lookup operations.
  *
+ * chunk_hash_table_keylen - The calculated length of the key used for the chunk info hash
+ *                           table, depending on whether collective I/O is being performed
+ *                           on a single or multiple filtered datasets.
+ *
  * num_chunks_infos - The number of entries in the `chunk_infos` array.
  *
  * num_chunks_to_read - The number of entries (or chunks) in the `chunk_infos` array that
@@ -281,6 +303,25 @@ typedef struct H5D_filtered_collective_chunk_info_t {
  *                      of chunk info structures to determine how big of I/O vectors to
  *                      allocate during read operations, as an example.
  *
+ * all_dset_indices_empty - A boolean determining whether all the datasets involved in the
+ *                          I/O operation have empty chunk indices. If this is the case,
+ *                          collective read operations can be skipped during processing
+ *                          of chunks.
+ *
+ * no_dset_index_insert_methods - A boolean determining whether all the datasets involved
+ *                                in the I/O operation have no chunk index insertion
+ *                                methods. If this is the case, collective chunk reinsertion
+ *                                operations can be skipped during processing of chunks.
+ *
+ * single_dset_info - A pointer to a H5D_mpio_filtered_dset_info_t structure containing
+ *                    information that is used when performing collective I/O on a single
+ *                    filtered dataset.
+ *
+ * dset_info_hash_table - A hash table storing H5D_mpio_filtered_dset_info_t structures
+ *                        that is populated when performing collective I/O on multiple
+ *                        filtered datasets at a time using the multi-dataset I/O API
+ *                        routines.
+ *
  */
 typedef struct H5D_filtered_collective_io_info_t {
     H5D_filtered_collective_chunk_info_t *chunk_infos;
@@ -288,6 +329,13 @@ typedef struct H5D_filtered_collective_io_info_t {
     size_t                                chunk_hash_table_keylen;
     size_t                                num_chunk_infos;
     size_t                                num_chunks_to_read;
+    bool                                  all_dset_indices_empty;
+    bool                                  no_dset_index_insert_methods;
+
+    union {
+        H5D_mpio_filtered_dset_info_t *single_dset_info;
+        H5D_mpio_filtered_dset_info_t *dset_info_hash_table;
+    } dset_info;
 } H5D_filtered_collective_io_info_t;
 
 /*
@@ -319,8 +367,8 @@ typedef struct H5D_chunk_insert_info_t {
 static herr_t H5D__piece_io(H5D_io_info_t *io_info);
 static herr_t H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info,
                                              int mpi_rank, int mpi_size);
-static herr_t H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info,
-                                                      int mpi_rank, int mpi_size);
+static herr_t H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_infos,
+                                                      size_t num_dset_infos, int mpi_rank, int mpi_size);
 static herr_t H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank);
 static herr_t H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_infos,
                                                      size_t num_dset_infos, int mpi_rank, int mpi_size);
@@ -1312,7 +1360,7 @@ H5D__piece_io(H5D_io_info_t *io_info)
                     default:                 /* multiple chunk IO via threshold */
                         /* Check if there are any filters in the pipeline */
                         if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0) {
-                            if (H5D__multi_chunk_filtered_collective_io(io_info, &io_info->dsets_info[i],
+                            if (H5D__multi_chunk_filtered_collective_io(io_info, &io_info->dsets_info[i], 1,
                                                                         mpi_rank, mpi_size) < 0)
                                 HGOTO_ERROR(
                                     H5E_IO,
@@ -1927,6 +1975,9 @@ done:
 
     HASH_CLEAR(hh, chunk_list.chunk_hash_table);
 
+    if (rank_chunks_assigned_map)
+        H5MM_free(rank_chunks_assigned_map);
+
     /* Free resources used by a rank which had some selection */
     if (chunk_list.chunk_infos) {
         for (size_t i = 0; i < chunk_list.num_chunk_infos; i++)
@@ -1936,8 +1987,35 @@ done:
         H5MM_free(chunk_list.chunk_infos);
     } /* end if */
 
-    if (rank_chunks_assigned_map)
-        H5MM_free(rank_chunks_assigned_map);
+    /* Free resources used by cached dataset info */
+    if ((num_dset_infos == 1) && (chunk_list.dset_info.single_dset_info)) {
+        H5D_mpio_filtered_dset_info_t *curr_dset_info = chunk_list.dset_info.single_dset_info;
+
+        if (curr_dset_info->fb_info_init && H5D__fill_term(&curr_dset_info->fb_info) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
+        if (curr_dset_info->fill_space && H5S_close(curr_dset_info->fill_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
+
+        H5MM_free(chunk_list.dset_info.single_dset_info);
+        chunk_list.dset_info.single_dset_info = NULL;
+    }
+    else if ((num_dset_infos > 1) && (chunk_list.dset_info.dset_info_hash_table)) {
+        H5D_mpio_filtered_dset_info_t *curr_dset_info;
+        H5D_mpio_filtered_dset_info_t *tmp;
+
+        HASH_ITER(hh, chunk_list.dset_info.dset_info_hash_table, curr_dset_info, tmp)
+        {
+            HASH_DELETE(hh, chunk_list.dset_info.dset_info_hash_table, curr_dset_info);
+
+            if (curr_dset_info->fb_info_init && H5D__fill_term(&curr_dset_info->fb_info) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
+            if (curr_dset_info->fill_space && H5S_close(curr_dset_info->fill_space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
+
+            H5MM_free(curr_dset_info);
+            curr_dset_info = NULL;
+        }
+    }
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -2243,8 +2321,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, int mpi_rank,
-                                        int mpi_size)
+H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_infos,
+                                        size_t num_dset_infos, int mpi_rank, int mpi_size)
 {
     H5D_filtered_collective_io_info_t chunk_list     = {0};
     unsigned char                   **chunk_msg_bufs = NULL;
@@ -2254,9 +2332,10 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
     int                               mpi_code;
     herr_t                            ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_TAG(dset_info->dset->oloc.addr)
+    FUNC_ENTER_PACKAGE_TAG(dset_infos->dset->oloc.addr)
 
     assert(io_info);
+    assert(num_dset_infos == 1); /* Currently only supported with 1 dataset at a time */
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
@@ -2274,7 +2353,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
     H5CX_set_mpio_actual_io_mode(H5D_MPIO_CHUNK_COLLECTIVE);
 
     /* Build a list of selected chunks in the collective IO operation */
-    if (H5D__mpio_collective_filtered_chunk_io_setup(io_info, dset_info, 1, mpi_rank, &chunk_list) < 0)
+    if (H5D__mpio_collective_filtered_chunk_io_setup(io_info, dset_infos, 1, mpi_rank, &chunk_list) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list");
 
     /* Retrieve the maximum number of chunks selected for any rank */
@@ -2288,7 +2367,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
 
     if (io_info->op_type == H5D_IO_OP_READ) { /* Filtered collective read */
         for (size_t i = 0; i < max_num_chunks; i++) {
-            H5D_filtered_collective_io_info_t single_chunk_list = {0};
+            H5D_filtered_collective_io_info_t single_chunk_list = chunk_list;
 
             /* Check if this rank has a chunk to work on for this iteration */
             have_chunk_to_process = (i < chunk_list.num_chunk_infos);
@@ -2308,7 +2387,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
                 single_chunk_list.num_chunks_to_read = 0;
             }
 
-            if (H5D__mpio_collective_filtered_chunk_read(&single_chunk_list, io_info, dset_info, 1,
+            if (H5D__mpio_collective_filtered_chunk_read(&single_chunk_list, io_info, dset_infos, 1,
                                                          mpi_rank) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't read filtered chunks");
 
@@ -2336,7 +2415,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
          * collective re-allocation and re-insertion of chunks modified by other ranks.
          */
         for (size_t i = 0; i < max_num_chunks; i++) {
-            H5D_filtered_collective_io_info_t single_chunk_list = {0};
+            H5D_filtered_collective_io_info_t single_chunk_list = chunk_list;
 
             /* Check if this rank has a chunk to work on for this iteration */
             have_chunk_to_process =
@@ -2357,21 +2436,18 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
                 single_chunk_list.num_chunks_to_read = 0;
             }
 
-            single_chunk_list.chunk_hash_table        = chunk_list.chunk_hash_table;
-            single_chunk_list.chunk_hash_table_keylen = chunk_list.chunk_hash_table_keylen;
-
             /* Proceed to update the chunk this rank owns (if any left) with its
              * own modification data and data from other ranks, before re-filtering
              * the chunks. As chunk reads are done collectively here, all ranks
              * must participate.
              */
             if (H5D__mpio_collective_filtered_chunk_update(&single_chunk_list, chunk_msg_bufs,
-                                                           chunk_msg_bufs_len, io_info, dset_info, 1,
+                                                           chunk_msg_bufs_len, io_info, dset_infos, 1,
                                                            mpi_rank) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't update modified chunks");
 
             /* All ranks now collectively re-allocate file space for all chunks */
-            if (H5D__mpio_collective_filtered_chunk_reallocate(&single_chunk_list, NULL, io_info, dset_info,
+            if (H5D__mpio_collective_filtered_chunk_reallocate(&single_chunk_list, NULL, io_info, dset_infos,
                                                                1, mpi_rank, mpi_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                             "couldn't collectively re-allocate file space for chunks");
@@ -2390,7 +2466,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info
             /* Participate in the collective re-insertion of all chunks modified
              * in this iteration into the chunk index
              */
-            if (H5D__mpio_collective_filtered_chunk_reinsert(&single_chunk_list, NULL, io_info, dset_info, 1,
+            if (H5D__mpio_collective_filtered_chunk_reinsert(&single_chunk_list, NULL, io_info, dset_infos, 1,
                                                              mpi_rank, mpi_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                             "couldn't collectively re-insert modified chunks into chunk index");
@@ -2418,6 +2494,36 @@ done:
 
         H5MM_free(chunk_list.chunk_infos);
     } /* end if */
+
+    /* Free resources used by cached dataset info */
+    if ((num_dset_infos == 1) && (chunk_list.dset_info.single_dset_info)) {
+        H5D_mpio_filtered_dset_info_t *curr_dset_info = chunk_list.dset_info.single_dset_info;
+
+        if (curr_dset_info->fb_info_init && H5D__fill_term(&curr_dset_info->fb_info) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
+        if (curr_dset_info->fill_space && H5S_close(curr_dset_info->fill_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
+
+        H5MM_free(chunk_list.dset_info.single_dset_info);
+        chunk_list.dset_info.single_dset_info = NULL;
+    }
+    else if ((num_dset_infos > 1) && (chunk_list.dset_info.dset_info_hash_table)) {
+        H5D_mpio_filtered_dset_info_t *curr_dset_info;
+        H5D_mpio_filtered_dset_info_t *tmp;
+
+        HASH_ITER(hh, chunk_list.dset_info.dset_info_hash_table, curr_dset_info, tmp)
+        {
+            HASH_DELETE(hh, chunk_list.dset_info.dset_info_hash_table, curr_dset_info);
+
+            if (curr_dset_info->fb_info_init && H5D__fill_term(&curr_dset_info->fb_info) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
+            if (curr_dset_info->fill_space && H5S_close(curr_dset_info->fill_space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
+
+            H5MM_free(curr_dset_info);
+            curr_dset_info = NULL;
+        }
+    }
 
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
@@ -3032,6 +3138,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                                              H5D_filtered_collective_io_info_t *chunk_list)
 {
     H5D_filtered_collective_chunk_info_t *local_info_array    = NULL;
+    H5D_mpio_filtered_dset_info_t        *curr_dset_info      = NULL;
     size_t                                num_chunks_selected = 0;
     size_t                                num_chunks_to_read  = 0;
     size_t                                buf_idx             = 0;
@@ -3062,6 +3169,9 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
     else
         chunk_list->chunk_hash_table_keylen = sizeof(hsize_t);
 
+    chunk_list->all_dset_indices_empty       = true;
+    chunk_list->no_dset_index_insert_methods = true;
+
     /* Calculate size needed for total chunk list */
     for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
         /* Skip this dataset if no I/O is being performed */
@@ -3088,6 +3198,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
     for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
         H5D_chunk_ud_t udata;
+        H5O_fill_t    *fill_msg;
         haddr_t        prev_tag = HADDR_UNDEF;
 
         /* Skip this dataset if no I/O is being performed */
@@ -3102,12 +3213,101 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
             (di[dset_idx].layout->type == H5D_CONTIGUOUS))
             continue;
 
+        assert(di[dset_idx].layout->storage.type == H5D_CHUNKED);
+        assert(di[dset_idx].layout->storage.u.chunk.idx_type != H5D_CHUNK_IDX_NONE);
+
+        /*
+         * To support the multi-dataset I/O case, cache some info (chunk size,
+         * fill buffer and fill dataspace, etc.) about each dataset involved
+         * in the I/O operation for use when processing chunks. If only one
+         * dataset is involved, this information is the same for every chunk
+         * processed. Otherwise, if multiple datasets are involved, a hash
+         * table is used to quickly match a particular chunk with the cached
+         * information pertaining to the dataset it resides in.
+         */
+        if (NULL == (curr_dset_info = H5MM_malloc(sizeof(H5D_mpio_filtered_dset_info_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate space for dataset info");
+
+        memset(&curr_dset_info->fb_info, 0, sizeof(H5D_fill_buf_info_t));
+
+        H5D_MPIO_INIT_CHUNK_IDX_INFO(curr_dset_info->chunk_idx_info, di[dset_idx].dset);
+
+        curr_dset_info->dset_io_info    = &di[dset_idx];
+        curr_dset_info->file_chunk_size = di[dset_idx].dset->shared->layout.u.chunk.size;
+        curr_dset_info->dset_oloc_addr  = di[dset_idx].dset->oloc.addr;
+        curr_dset_info->fill_space      = NULL;
+        curr_dset_info->fb_info_init    = false;
+        curr_dset_info->index_empty     = false;
+
+        /* Determine if fill values should be written to chunks */
+        fill_msg = &di[dset_idx].dset->shared->dcpl_cache.fill;
+        curr_dset_info->should_fill =
+            (fill_msg->fill_time == H5D_FILL_TIME_ALLOC) ||
+            ((fill_msg->fill_time == H5D_FILL_TIME_IFSET) && fill_msg->fill_defined);
+
+        if (curr_dset_info->should_fill) {
+            hsize_t chunk_dims[H5S_MAX_RANK];
+
+            assert(di[dset_idx].dset->shared->ndims == di[dset_idx].dset->shared->layout.u.chunk.ndims - 1);
+            for (size_t dim_idx = 0; dim_idx < di[dset_idx].dset->shared->layout.u.chunk.ndims - 1; dim_idx++)
+                chunk_dims[dim_idx] = (hsize_t)di[dset_idx].dset->shared->layout.u.chunk.dim[dim_idx];
+
+            /* Get a dataspace for filling chunk memory buffers */
+            if (NULL == (curr_dset_info->fill_space = H5S_create_simple(
+                             di[dset_idx].dset->shared->layout.u.chunk.ndims - 1, chunk_dims, NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace");
+
+            /* Initialize fill value buffer */
+            if (H5D__fill_init(&curr_dset_info->fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
+                               (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
+                               (H5MM_free_t)H5D__chunk_mem_free,
+                               (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
+                               &di[dset_idx].dset->shared->dcpl_cache.fill, di[dset_idx].dset->shared->type,
+                               di[dset_idx].dset->shared->type_id, 0, curr_dset_info->file_chunk_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer");
+
+            curr_dset_info->fb_info_init = true;
+        }
+
+        /*
+         * If the dataset is incrementally allocated and hasn't been written
+         * to yet, the chunk index should be empty. In this case, a collective
+         * read of its chunks is essentially a no-op, so we can avoid that read
+         * later. If all datasets have empty chunk indices, we can skip the
+         * collective read entirely.
+         */
+        if (fill_msg->alloc_time == H5D_ALLOC_TIME_INCR)
+            if (H5D__chunk_index_empty(di[dset_idx].dset, &curr_dset_info->index_empty) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't determine if chunk index is empty");
+
+        if ((fill_msg->alloc_time != H5D_ALLOC_TIME_INCR) || !curr_dset_info->index_empty)
+            chunk_list->all_dset_indices_empty = false;
+
+        if (curr_dset_info->chunk_idx_info.storage->ops->insert)
+            chunk_list->no_dset_index_insert_methods = false;
+
+        /*
+         * For multi-dataset I/O, use a hash table to keep a mapping between
+         * chunks and the cached info for the dataset that they're in. Otherwise,
+         * we can just use the info object directly if only one dataset is being
+         * worked on.
+         */
+        if (num_dset_infos > 1) {
+            HASH_ADD(hh, chunk_list->dset_info.dset_info_hash_table, dset_oloc_addr, sizeof(haddr_t),
+                     curr_dset_info);
+        }
+        else
+            chunk_list->dset_info.single_dset_info = curr_dset_info;
+        curr_dset_info = NULL;
+
+        /*
+         * Now, each rank builds a local list of info about the chunks
+         * they have selected among the chunks in the current dataset
+         */
+
         /* Set metadata tagging with dataset oheader addr */
         H5AC_tag(di[dset_idx].dset->oloc.addr, &prev_tag);
 
-        /* Each rank builds a local list of the chunks they have
-         * selected among all the filtered datasets being processed
-         */
         if (H5SL_count(di[dset_idx].layout_io_info.chunk_map->dset_sel_pieces)) {
             H5SL_node_t *chunk_node;
             bool         filter_partial_edge_chunks;
@@ -3291,6 +3491,37 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
 done:
     if (ret_value < 0) {
+        /* Free temporary cached dataset info object */
+        if (curr_dset_info) {
+            if (curr_dset_info->fb_info_init && H5D__fill_term(&curr_dset_info->fb_info) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
+            if (curr_dset_info->fill_space && H5S_close(curr_dset_info->fill_space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
+
+            H5MM_free(curr_dset_info);
+            curr_dset_info = NULL;
+
+            if (num_dset_infos == 1)
+                chunk_list->dset_info.single_dset_info = NULL;
+        }
+
+        /* Free resources used by cached dataset info hash table */
+        if (num_dset_infos > 1) {
+            H5D_mpio_filtered_dset_info_t *tmp;
+
+            HASH_ITER(hh, chunk_list->dset_info.dset_info_hash_table, curr_dset_info, tmp)
+            {
+                HASH_DELETE(hh, chunk_list->dset_info.dset_info_hash_table, curr_dset_info);
+                H5MM_free(curr_dset_info);
+                curr_dset_info = NULL;
+            }
+        }
+
+        if (num_dset_infos == 1)
+            chunk_list->dset_info.single_dset_info = NULL;
+        else
+            chunk_list->dset_info.dset_info_hash_table = NULL;
+
         H5MM_free(local_info_array);
     }
 
@@ -4268,23 +4499,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 {
     H5Z_EDC_t err_detect; /* Error detection info */
     H5Z_cb_t  filter_cb;  /* I/O filter callback function */
-    bool      all_indices_empty = true;
-    herr_t    ret_value         = SUCCEED;
-
-    typedef struct {
-        const H5D_dset_io_info_t *dset_io_info;
-        H5D_fill_buf_info_t       fb_info;
-        hsize_t                   file_chunk_size;
-        H5S_t                    *fill_space;
-        bool                      should_fill;
-        bool                      fb_info_init;
-        bool                      index_empty;
-
-        UT_hash_handle hh;
-    } per_dset_info;
-    per_dset_info *dset_info = NULL;
-    per_dset_info *curr_info = NULL;
-    per_dset_info *tmp       = NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -4300,96 +4515,6 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
 #endif
 
     /*
-     * To support the multi-dataset I/O case, cache some info (chunk size,
-     * fill buffer and fill dataspace, etc.) about each dataset involved
-     * in the I/O operation for use when processing chunks below. If only
-     * one dataset is involved, this information is the same for every chunk
-     * processed in this function. Otherwise, if multiple datasets are
-     * involved, a hash table is used to quickly match a particular chunk
-     * with the cached information pertaining to the dataset it resides in.
-     */
-    for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
-        H5O_fill_t *fill_msg;
-
-        /* Skip this dataset if no I/O is being performed */
-        if (di[dset_idx].skip_io)
-            continue;
-
-        /* Only process filtered, chunked datasets. A contiguous dataset
-         * could possibly have filters in the DCPL pipeline, but the library
-         * will currently ignore optional filters in that case.
-         */
-        if ((di[dset_idx].dset->shared->dcpl_cache.pline.nused == 0) ||
-            (di[dset_idx].layout->type == H5D_CONTIGUOUS))
-            continue;
-
-        if (NULL == (curr_info = H5MM_malloc(sizeof(per_dset_info))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate space for dataset info");
-
-        memset(&curr_info->fb_info, 0, sizeof(H5D_fill_buf_info_t));
-
-        curr_info->dset_io_info    = &di[dset_idx];
-        curr_info->file_chunk_size = di[dset_idx].dset->shared->layout.u.chunk.size;
-        curr_info->fill_space      = NULL;
-        curr_info->fb_info_init    = false;
-        curr_info->index_empty     = false;
-
-        /* Determine if fill values should be written to chunks */
-        fill_msg               = &di[dset_idx].dset->shared->dcpl_cache.fill;
-        curr_info->should_fill = (fill_msg->fill_time == H5D_FILL_TIME_ALLOC) ||
-                                 ((fill_msg->fill_time == H5D_FILL_TIME_IFSET) && fill_msg->fill_defined);
-
-        if (curr_info->should_fill) {
-            hsize_t chunk_dims[H5S_MAX_RANK];
-
-            assert(di[dset_idx].dset->shared->ndims == di[dset_idx].dset->shared->layout.u.chunk.ndims - 1);
-            for (size_t dim_idx = 0; dim_idx < di[dset_idx].dset->shared->layout.u.chunk.ndims - 1; dim_idx++)
-                chunk_dims[dim_idx] = (hsize_t)di[dset_idx].dset->shared->layout.u.chunk.dim[dim_idx];
-
-            /* Get a dataspace for filling chunk memory buffers */
-            if (NULL == (curr_info->fill_space = H5S_create_simple(
-                             di[dset_idx].dset->shared->layout.u.chunk.ndims - 1, chunk_dims, NULL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace");
-
-            /* Initialize fill value buffer */
-            if (H5D__fill_init(&curr_info->fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
-                               (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
-                               (H5MM_free_t)H5D__chunk_mem_free,
-                               (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
-                               &di[dset_idx].dset->shared->dcpl_cache.fill, di[dset_idx].dset->shared->type,
-                               di[dset_idx].dset->shared->type_id, 0, curr_info->file_chunk_size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer");
-
-            curr_info->fb_info_init = true;
-        }
-
-        /*
-         * If the dataset is incrementally allocated and hasn't been written
-         * to yet, the chunk index should be empty. In this case, a collective
-         * read of its chunks is essentially a no-op, so we can avoid that read
-         * later. If all datasets have empty chunk indices, we can skip the
-         * collective read entirely.
-         */
-        if (fill_msg->alloc_time == H5D_ALLOC_TIME_INCR)
-            if (H5D__chunk_index_empty(di[dset_idx].dset, &curr_info->index_empty) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't determine if chunk index is empty");
-
-        if ((fill_msg->alloc_time != H5D_ALLOC_TIME_INCR) || !curr_info->index_empty)
-            all_indices_empty = false;
-
-        /*
-         * For multi-dataset I/O, use a hash table to keep a mapping between
-         * chunks and the cached info for the dataset that they're in. Otherwise,
-         * we can just use the info object directly if only one dataset is being
-         * worked on.
-         */
-        if (num_dset_infos > 1) {
-            HASH_ADD(hh, dset_info, dset_io_info, sizeof(H5D_dset_io_info_t *), curr_info);
-            curr_info = NULL;
-        }
-    }
-
-    /*
      * Allocate memory buffers for all chunks being read. Chunk data buffers are of
      * the largest size between the chunk's current filtered size and the chunk's true
      * size, as calculated by the number of elements in the chunk's file space extent
@@ -4403,18 +4528,18 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
      *    chunk size would of course be bad.
      */
     for (size_t info_idx = 0; info_idx < chunk_list->num_chunk_infos; info_idx++) {
-        H5D_filtered_collective_chunk_info_t *chunk_entry      = &chunk_list->chunk_infos[info_idx];
-        per_dset_info                        *cached_dset_info = curr_info;
+        H5D_filtered_collective_chunk_info_t *chunk_entry = &chunk_list->chunk_infos[info_idx];
+        H5D_mpio_filtered_dset_info_t        *cached_dset_info;
         hsize_t                               file_chunk_size;
 
         assert(chunk_entry->need_read);
 
         /* Find the cached dataset info for the dataset this chunk is in */
         if (num_dset_infos > 1) {
-            HASH_FIND(hh, dset_info, &chunk_entry->chunk_info->dset_info, sizeof(H5D_dset_io_info_t *),
-                      cached_dset_info);
+            HASH_FIND(hh, chunk_list->dset_info.dset_info_hash_table, &chunk_entry->index_info.dset_oloc_addr,
+                      sizeof(haddr_t), cached_dset_info);
             if (cached_dset_info == NULL) {
-                if (all_indices_empty)
+                if (chunk_list->all_dset_indices_empty)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find cached dataset info entry");
                 else {
                     /* Push an error, but participate in collective read */
@@ -4423,13 +4548,16 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
                 }
             }
         }
+        else
+            cached_dset_info = chunk_list->dset_info.single_dset_info;
+        assert(cached_dset_info);
 
         file_chunk_size = cached_dset_info->file_chunk_size;
 
         chunk_entry->chunk_buf_size = MAX(chunk_entry->chunk_current.length, file_chunk_size);
 
         if (NULL == (chunk_entry->buf = H5MM_malloc(chunk_entry->chunk_buf_size))) {
-            if (all_indices_empty)
+            if (chunk_list->all_dset_indices_empty)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer");
             else {
                 /* Push an error, but participate in collective read */
@@ -4474,7 +4602,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
                               cached_dset_info->dset_io_info->type_info.dset_type, chunk_entry->buf,
                               cached_dset_info->dset_io_info->type_info.mem_type,
                               cached_dset_info->fill_space) < 0) {
-                    if (all_indices_empty)
+                    if (chunk_list->all_dset_indices_empty)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "couldn't fill chunk buffer with fill value");
                     else {
@@ -4489,7 +4617,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     }
 
     /* Perform collective vector read if necessary */
-    if (!all_indices_empty)
+    if (!chunk_list->all_dset_indices_empty)
         if (H5D__mpio_collective_filtered_vec_io(chunk_list, io_info->f_sh, H5D_IO_OP_READ) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't perform vector I/O on filtered chunks");
 
@@ -4529,38 +4657,11 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     }
 
 done:
-    /* Free temporary cached dataset info object */
-    if (curr_info) {
-        if (curr_info->fb_info_init && H5D__fill_term(&curr_info->fb_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
-        if (curr_info->fill_space && H5S_close(curr_info->fill_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
-
-        H5MM_free(curr_info);
-        curr_info = NULL;
-    }
-
     /* Free all resources used by entries in the chunk list */
     for (size_t info_idx = 0; info_idx < chunk_list->num_chunk_infos; info_idx++) {
         if (chunk_list->chunk_infos[info_idx].buf) {
             H5MM_free(chunk_list->chunk_infos[info_idx].buf);
             chunk_list->chunk_infos[info_idx].buf = NULL;
-        }
-    }
-
-    /* Free resources used by cached dataset info */
-    if (num_dset_infos > 1) {
-        HASH_ITER(hh, dset_info, curr_info, tmp)
-        {
-            HASH_DELETE(hh, dset_info, curr_info);
-
-            if (curr_info->fb_info_init && H5D__fill_term(&curr_info->fb_info) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
-            if (curr_info->fill_space && H5S_close(curr_info->fill_space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
-
-            H5MM_free(curr_info);
-            curr_info = NULL;
         }
     }
 
@@ -4593,26 +4694,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     H5S_sel_iter_t *sel_iter = NULL; /* Dataspace selection iterator for H5D__scatter_mem */
     H5Z_EDC_t       err_detect;      /* Error detection info */
     H5Z_cb_t        filter_cb;       /* I/O filter callback function */
-    uint8_t        *key_buf           = NULL;
-    H5S_t          *dataspace         = NULL;
-    bool            sel_iter_init     = false;
-    bool            all_indices_empty = true;
-    herr_t          ret_value         = SUCCEED;
-
-    typedef struct {
-        const H5D_dset_io_info_t *dset_io_info;
-        H5D_fill_buf_info_t       fb_info;
-        hsize_t                   file_chunk_size;
-        H5S_t                    *fill_space;
-        bool                      should_fill;
-        bool                      fb_info_init;
-        bool                      index_empty;
-
-        UT_hash_handle hh;
-    } per_dset_info;
-    per_dset_info *dset_info = NULL;
-    per_dset_info *curr_info = NULL;
-    per_dset_info *tmp       = NULL;
+    uint8_t        *key_buf       = NULL;
+    H5S_t          *dataspace     = NULL;
+    bool            sel_iter_init = false;
+    herr_t          ret_value     = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -4625,96 +4710,6 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     H5D_MPIO_TRACE_ENTER(mpi_rank);
     H5D_MPIO_TIME_START(mpi_rank, "Filtered collective chunk update");
 #endif
-
-    /*
-     * To support the multi-dataset I/O case, cache some info (chunk size,
-     * fill buffer and fill dataspace, etc.) about each dataset involved
-     * in the I/O operation for use when processing chunks below. If only
-     * one dataset is involved, this information is the same for every chunk
-     * processed in this function. Otherwise, if multiple datasets are
-     * involved, a hash table is used to quickly match a particular chunk
-     * with the cached information pertaining to the dataset it resides in.
-     */
-    for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
-        H5O_fill_t *fill_msg;
-
-        /* Skip this dataset if no I/O is being performed */
-        if (di[dset_idx].skip_io)
-            continue;
-
-        /* Only process filtered, chunked datasets. A contiguous dataset
-         * could possibly have filters in the DCPL pipeline, but the library
-         * will currently ignore optional filters in that case.
-         */
-        if ((di[dset_idx].dset->shared->dcpl_cache.pline.nused == 0) ||
-            (di[dset_idx].layout->type == H5D_CONTIGUOUS))
-            continue;
-
-        if (NULL == (curr_info = H5MM_malloc(sizeof(per_dset_info))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate space for dataset info");
-
-        memset(&curr_info->fb_info, 0, sizeof(H5D_fill_buf_info_t));
-
-        curr_info->dset_io_info    = &di[dset_idx];
-        curr_info->file_chunk_size = di[dset_idx].dset->shared->layout.u.chunk.size;
-        curr_info->fill_space      = NULL;
-        curr_info->fb_info_init    = false;
-        curr_info->index_empty     = false;
-
-        /* Determine if fill values should be written to chunks */
-        fill_msg               = &di[dset_idx].dset->shared->dcpl_cache.fill;
-        curr_info->should_fill = (fill_msg->fill_time == H5D_FILL_TIME_ALLOC) ||
-                                 ((fill_msg->fill_time == H5D_FILL_TIME_IFSET) && fill_msg->fill_defined);
-
-        if (curr_info->should_fill) {
-            hsize_t chunk_dims[H5S_MAX_RANK];
-
-            assert(di[dset_idx].dset->shared->ndims == di[dset_idx].dset->shared->layout.u.chunk.ndims - 1);
-            for (size_t dim_idx = 0; dim_idx < di[dset_idx].dset->shared->layout.u.chunk.ndims - 1; dim_idx++)
-                chunk_dims[dim_idx] = (hsize_t)di[dset_idx].dset->shared->layout.u.chunk.dim[dim_idx];
-
-            /* Get a dataspace for filling chunk memory buffers */
-            if (NULL == (curr_info->fill_space = H5S_create_simple(
-                             di[dset_idx].dset->shared->layout.u.chunk.ndims - 1, chunk_dims, NULL)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk fill dataspace");
-
-            /* Initialize fill value buffer */
-            if (H5D__fill_init(&curr_info->fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
-                               (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
-                               (H5MM_free_t)H5D__chunk_mem_free,
-                               (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
-                               &di[dset_idx].dset->shared->dcpl_cache.fill, di[dset_idx].dset->shared->type,
-                               di[dset_idx].dset->shared->type_id, 0, curr_info->file_chunk_size) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer");
-
-            curr_info->fb_info_init = true;
-        }
-
-        /*
-         * If the dataset is incrementally allocated and hasn't been written
-         * to yet, the chunk index should be empty. In this case, a collective
-         * read of its chunks is essentially a no-op, so we can avoid that read
-         * later. If all datasets have empty chunk indices, we can skip the
-         * collective read entirely.
-         */
-        if (fill_msg->alloc_time == H5D_ALLOC_TIME_INCR)
-            if (H5D__chunk_index_empty(di[dset_idx].dset, &curr_info->index_empty) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't determine if chunk index is empty");
-
-        if ((fill_msg->alloc_time != H5D_ALLOC_TIME_INCR) || !curr_info->index_empty)
-            all_indices_empty = false;
-
-        /*
-         * For multi-dataset I/O, use a hash table to keep a mapping between
-         * chunks and the cached info for the dataset that they're in. Otherwise,
-         * we can just use the info object directly if only one dataset is being
-         * worked on.
-         */
-        if (num_dset_infos > 1) {
-            HASH_ADD(hh, dset_info, dset_io_info, sizeof(H5D_dset_io_info_t *), curr_info);
-            curr_info = NULL;
-        }
-    }
 
     /*
      * Allocate memory buffers for all owned chunks. Chunk data buffers are of the
@@ -4736,18 +4731,18 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
      *    chunk size would of course be bad.
      */
     for (size_t info_idx = 0; info_idx < chunk_list->num_chunk_infos; info_idx++) {
-        H5D_filtered_collective_chunk_info_t *chunk_entry      = &chunk_list->chunk_infos[info_idx];
-        per_dset_info                        *cached_dset_info = curr_info;
+        H5D_filtered_collective_chunk_info_t *chunk_entry = &chunk_list->chunk_infos[info_idx];
+        H5D_mpio_filtered_dset_info_t        *cached_dset_info;
         hsize_t                               file_chunk_size;
 
         assert(mpi_rank == chunk_entry->new_owner);
 
         /* Find the cached dataset info for the dataset this chunk is in */
         if (num_dset_infos > 1) {
-            HASH_FIND(hh, dset_info, &chunk_entry->chunk_info->dset_info, sizeof(H5D_dset_io_info_t *),
-                      cached_dset_info);
+            HASH_FIND(hh, chunk_list->dset_info.dset_info_hash_table, &chunk_entry->index_info.dset_oloc_addr,
+                      sizeof(haddr_t), cached_dset_info);
             if (cached_dset_info == NULL) {
-                if (all_indices_empty)
+                if (chunk_list->all_dset_indices_empty)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find cached dataset info entry");
                 else {
                     /* Push an error, but participate in collective read */
@@ -4756,6 +4751,9 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                 }
             }
         }
+        else
+            cached_dset_info = chunk_list->dset_info.single_dset_info;
+        assert(cached_dset_info);
 
         file_chunk_size = cached_dset_info->file_chunk_size;
 
@@ -4772,7 +4770,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
             chunk_entry->buf = H5MM_malloc(chunk_entry->chunk_buf_size);
 
         if (NULL == chunk_entry->buf) {
-            if (all_indices_empty)
+            if (chunk_list->all_dset_indices_empty)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk data buffer");
             else {
                 /* Push an error, but participate in collective read */
@@ -4821,7 +4819,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                                   cached_dset_info->dset_io_info->type_info.dset_type, chunk_entry->buf,
                                   cached_dset_info->dset_io_info->type_info.mem_type,
                                   cached_dset_info->fill_space) < 0) {
-                        if (all_indices_empty)
+                        if (chunk_list->all_dset_indices_empty)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                         "couldn't fill chunk buffer with fill value");
                         else {
@@ -4837,7 +4835,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
     }
 
     /* Perform collective vector read if necessary */
-    if (!all_indices_empty)
+    if (!chunk_list->all_dset_indices_empty)
         if (H5D__mpio_collective_filtered_vec_io(chunk_list, io_info->f_sh, H5D_IO_OP_READ) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't perform vector I/O on filtered chunks");
 
@@ -4985,33 +4983,6 @@ done:
 
     H5MM_free(key_buf);
 
-    /* Free temporary cached dataset info object */
-    if (curr_info) {
-        if (curr_info->fb_info_init && H5D__fill_term(&curr_info->fb_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
-        if (curr_info->fill_space && H5S_close(curr_info->fill_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
-
-        H5MM_free(curr_info);
-        curr_info = NULL;
-    }
-
-    /* Free resources used by cached dataset info */
-    if (num_dset_infos > 1) {
-        HASH_ITER(hh, dset_info, curr_info, tmp)
-        {
-            HASH_DELETE(hh, dset_info, curr_info);
-
-            if (curr_info->fb_info_init && H5D__fill_term(&curr_info->fb_info) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release fill buffer info");
-            if (curr_info->fill_space && H5S_close(curr_info->fill_space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close fill space");
-
-            H5MM_free(curr_info);
-            curr_info = NULL;
-        }
-    }
-
     /* On failure, try to free all resources used by entries in the chunk list */
     if (ret_value < 0) {
         for (size_t info_idx = 0; info_idx < chunk_list->num_chunk_infos; info_idx++) {
@@ -5064,16 +5035,6 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
     int                     mpi_code;
     herr_t                  ret_value = SUCCEED;
 
-    typedef struct {
-        H5D_chk_idx_info_t chunk_idx_info;
-        haddr_t            dset_oloc_addr;
-
-        UT_hash_handle hh;
-    } per_dset_info;
-    per_dset_info *dset_info = NULL;
-    per_dset_info *curr_info = NULL;
-    per_dset_info *tmp       = NULL;
-
     FUNC_ENTER_PACKAGE
 
     assert(chunk_list);
@@ -5084,49 +5045,6 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
     H5D_MPIO_TRACE_ENTER(mpi_rank);
     H5D_MPIO_TIME_START(mpi_rank, "Reallocation of chunk file space");
 #endif
-
-    /*
-     * To support the multi-dataset I/O case, cache some info (chunk size,
-     * fill buffer and fill dataspace, etc.) about each dataset involved
-     * in the I/O operation for use when processing chunks below. If only
-     * one dataset is involved, this information is the same for every chunk
-     * processed in this function. Otherwise, if multiple datasets are
-     * involved, a hash table is used to quickly match a particular chunk
-     * with the cached information pertaining to the dataset it resides in.
-     */
-    for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
-        /* Skip this dataset if no I/O is being performed */
-        if (di[dset_idx].skip_io)
-            continue;
-
-        /* Only process filtered, chunked datasets. A contiguous dataset
-         * could possibly have filters in the DCPL pipeline, but the library
-         * will currently ignore optional filters in that case.
-         */
-        if ((di[dset_idx].dset->shared->dcpl_cache.pline.nused == 0) ||
-            (di[dset_idx].layout->type == H5D_CONTIGUOUS))
-            continue;
-
-        if (NULL == (curr_info = H5MM_malloc(sizeof(per_dset_info))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate space for dataset info");
-
-        assert(di[dset_idx].layout->storage.type == H5D_CHUNKED);
-        assert(di[dset_idx].layout->storage.u.chunk.idx_type != H5D_CHUNK_IDX_NONE);
-        H5D_MPIO_INIT_CHUNK_IDX_INFO(curr_info->chunk_idx_info, di[dset_idx].dset);
-
-        curr_info->dset_oloc_addr = di[dset_idx].dset->oloc.addr;
-
-        /*
-         * For multi-dataset I/O, use a hash table to keep a mapping between
-         * chunks and the cached info for the dataset that they're in. Otherwise,
-         * we can just use the info object directly if only one dataset is being
-         * worked on.
-         */
-        if (num_dset_infos > 1) {
-            HASH_ADD(hh, dset_info, dset_oloc_addr, sizeof(haddr_t), curr_info);
-            curr_info = NULL;
-        }
-    }
 
     /*
      * Make sure it's safe to cast this rank's number
@@ -5197,20 +5115,21 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
     collective_list            = (H5D_chunk_alloc_info_t *)gathered_array;
     num_local_chunks_processed = 0;
     for (size_t entry_idx = 0; entry_idx < collective_num_entries; entry_idx++) {
-        H5D_chunk_alloc_info_t *coll_entry       = &collective_list[entry_idx];
-        per_dset_info          *cached_dset_info = curr_info;
-        bool                    need_insert;
-        bool                    update_local_chunk;
+        H5D_mpio_filtered_dset_info_t *cached_dset_info;
+        H5D_chunk_alloc_info_t        *coll_entry = &collective_list[entry_idx];
+        bool                           need_insert;
+        bool                           update_local_chunk;
 
-        /*
-         * If doing multi-dataset I/O, find the cached dataset
-         * info for the dataset this chunk is in
-         */
+        /* Find the cached dataset info for the dataset this chunk is in */
         if (num_dset_infos > 1) {
-            HASH_FIND(hh, dset_info, &coll_entry->dset_oloc_addr, sizeof(haddr_t), cached_dset_info);
+            HASH_FIND(hh, chunk_list->dset_info.dset_info_hash_table, &coll_entry->dset_oloc_addr,
+                      sizeof(haddr_t), cached_dset_info);
             if (cached_dset_info == NULL)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find cached dataset info entry");
         }
+        else
+            cached_dset_info = chunk_list->dset_info.single_dset_info;
+        assert(cached_dset_info);
 
         if (H5D__chunk_file_alloc(&cached_dset_info->chunk_idx_info, &coll_entry->chunk_current,
                                   &coll_entry->chunk_new, &need_insert, NULL) < 0)
@@ -5282,22 +5201,6 @@ done:
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     }
 
-    /* Free temporary cached dataset info object */
-    if (curr_info) {
-        H5MM_free(curr_info);
-        curr_info = NULL;
-    }
-
-    /* Free resources used by cached dataset info */
-    if (num_dset_infos > 1) {
-        HASH_ITER(hh, dset_info, curr_info, tmp)
-        {
-            HASH_DELETE(hh, dset_info, curr_info);
-            H5MM_free(curr_info);
-            curr_info = NULL;
-        }
-    }
-
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TIME_STOP(mpi_rank);
     H5D_MPIO_TRACE_EXIT(mpi_rank);
@@ -5330,24 +5233,12 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
     size_t       collective_num_entries = 0;
     bool         send_type_derived      = false;
     bool         recv_type_derived      = false;
-    bool         no_insert_methods      = true;
     void        *gathered_array         = NULL;
     int         *counts_disps_array     = NULL;
     int         *counts_ptr             = NULL;
     int         *displacements_ptr      = NULL;
     int          mpi_code;
     herr_t       ret_value = SUCCEED;
-
-    typedef struct {
-        H5D_chk_idx_info_t chunk_idx_info;
-        haddr_t            dset_oloc_addr;
-        H5D_t             *dset;
-
-        UT_hash_handle hh;
-    } per_dset_info;
-    per_dset_info *dset_info = NULL;
-    per_dset_info *curr_info = NULL;
-    per_dset_info *tmp       = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -5361,59 +5252,10 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
 #endif
 
     /*
-     * To support the multi-dataset I/O case, cache some info (chunk size,
-     * fill buffer and fill dataspace, etc.) about each dataset involved
-     * in the I/O operation for use when processing chunks below. If only
-     * one dataset is involved, this information is the same for every chunk
-     * processed in this function. Otherwise, if multiple datasets are
-     * involved, a hash table is used to quickly match a particular chunk
-     * with the cached information pertaining to the dataset it resides in.
-     */
-    for (size_t dset_idx = 0; dset_idx < num_dset_infos; dset_idx++) {
-        /* Skip this dataset if no I/O is being performed */
-        if (di[dset_idx].skip_io)
-            continue;
-
-        /* Only process filtered, chunked datasets. A contiguous dataset
-         * could possibly have filters in the DCPL pipeline, but the library
-         * will currently ignore optional filters in that case.
-         */
-        if ((di[dset_idx].dset->shared->dcpl_cache.pline.nused == 0) ||
-            (di[dset_idx].layout->type == H5D_CONTIGUOUS))
-            continue;
-
-        if (NULL == (curr_info = H5MM_malloc(sizeof(per_dset_info))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate space for dataset info");
-
-        assert(di[dset_idx].layout->storage.type == H5D_CHUNKED);
-        assert(di[dset_idx].layout->storage.u.chunk.idx_type != H5D_CHUNK_IDX_NONE);
-
-        H5D_MPIO_INIT_CHUNK_IDX_INFO(curr_info->chunk_idx_info, di[dset_idx].dset);
-
-        curr_info->dset_oloc_addr = di[dset_idx].dset->oloc.addr;
-
-        curr_info->dset = di[dset_idx].dset;
-
-        if (curr_info->chunk_idx_info.storage->ops->insert)
-            no_insert_methods = false;
-
-        /*
-         * For multi-dataset I/O, use a hash table to keep a mapping between
-         * chunks and the cached info for the dataset that they're in. Otherwise,
-         * we can just use the info object directly if only one dataset is being
-         * worked on.
-         */
-        if (num_dset_infos > 1) {
-            HASH_ADD(hh, dset_info, dset_oloc_addr, sizeof(haddr_t), curr_info);
-            curr_info = NULL;
-        }
-    }
-
-    /*
      * If no datasets involved have a chunk index 'insert'
      * operation, this function is a no-op
      */
-    if (no_insert_methods)
+    if (chunk_list->no_dset_index_insert_methods)
         HGOTO_DONE(SUCCEED);
 
     /*
@@ -5482,11 +5324,11 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
     }
 
     for (size_t entry_idx = 0; entry_idx < collective_num_entries; entry_idx++) {
-        H5D_chunk_insert_info_t *coll_entry = &((H5D_chunk_insert_info_t *)gathered_array)[entry_idx];
-        H5D_chunk_ud_t           chunk_ud;
-        per_dset_info           *cached_dset_info = curr_info;
-        haddr_t                  prev_tag         = HADDR_UNDEF;
-        hsize_t                  scaled_coords[H5O_LAYOUT_NDIMS];
+        H5D_mpio_filtered_dset_info_t *cached_dset_info;
+        H5D_chunk_insert_info_t       *coll_entry = &((H5D_chunk_insert_info_t *)gathered_array)[entry_idx];
+        H5D_chunk_ud_t                 chunk_ud;
+        haddr_t                        prev_tag = HADDR_UNDEF;
+        hsize_t                        scaled_coords[H5O_LAYOUT_NDIMS];
 
         /*
          * We only need to reinsert this chunk if we had to actually
@@ -5495,16 +5337,16 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         if (!coll_entry->index_info.need_insert)
             continue;
 
-        /*
-         * If doing multi-dataset I/O, find the cached dataset
-         * info for the dataset this chunk is in
-         */
+        /* Find the cached dataset info for the dataset this chunk is in */
         if (num_dset_infos > 1) {
-            HASH_FIND(hh, dset_info, &coll_entry->index_info.dset_oloc_addr, sizeof(haddr_t),
-                      cached_dset_info);
+            HASH_FIND(hh, chunk_list->dset_info.dset_info_hash_table, &coll_entry->index_info.dset_oloc_addr,
+                      sizeof(haddr_t), cached_dset_info);
             if (cached_dset_info == NULL)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find cached dataset info entry");
         }
+        else
+            cached_dset_info = chunk_list->dset_info.single_dset_info;
+        assert(cached_dset_info);
 
         chunk_ud.common.layout  = cached_dset_info->chunk_idx_info.layout;
         chunk_ud.common.storage = cached_dset_info->chunk_idx_info.storage;
@@ -5530,7 +5372,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
              *       callback that accepts a chunk index and provides the
              *       caller with the scaled coordinates for that chunk.
              */
-            H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset->shared->ndims,
+            H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset_io_info->dset->shared->ndims,
                                 cached_dset_info->chunk_idx_info.layout->u.earray.swizzled_down_chunks,
                                 scaled_coords);
 
@@ -5538,11 +5380,12 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
                                   cached_dset_info->chunk_idx_info.layout->u.earray.unlim_dim);
         }
         else {
-            H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset->shared->ndims,
-                                cached_dset_info->dset->shared->layout.u.chunk.down_chunks, scaled_coords);
+            H5VM_array_calc_pre(chunk_ud.chunk_idx, cached_dset_info->dset_io_info->dset->shared->ndims,
+                                cached_dset_info->dset_io_info->dset->shared->layout.u.chunk.down_chunks,
+                                scaled_coords);
         }
 
-        scaled_coords[cached_dset_info->dset->shared->ndims] = 0;
+        scaled_coords[cached_dset_info->dset_io_info->dset->shared->ndims] = 0;
 
 #ifndef NDEBUG
         /*
@@ -5565,7 +5408,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
             if (same_chunk) {
                 bool coords_match =
                     !memcmp(scaled_coords, chunk_list->chunk_infos[dbg_idx].chunk_info->scaled,
-                            cached_dset_info->dset->shared->ndims * sizeof(hsize_t));
+                            cached_dset_info->dset_io_info->dset->shared->ndims * sizeof(hsize_t));
 
                 assert(coords_match && "Calculated scaled coordinates for chunk didn't match "
                                        "chunk's actual scaled coordinates!");
@@ -5575,10 +5418,10 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
 #endif
 
         /* Set metadata tagging with dataset oheader addr */
-        H5AC_tag(cached_dset_info->dset->oloc.addr, &prev_tag);
+        H5AC_tag(cached_dset_info->dset_io_info->dset->oloc.addr, &prev_tag);
 
-        if ((cached_dset_info->chunk_idx_info.storage->ops->insert)(&cached_dset_info->chunk_idx_info,
-                                                                    &chunk_ud, cached_dset_info->dset) < 0)
+        if ((cached_dset_info->chunk_idx_info.storage->ops->insert)(
+                &cached_dset_info->chunk_idx_info, &chunk_ud, cached_dset_info->dset_io_info->dset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk address into index");
 
         /* Reset metadata tagging */
@@ -5596,22 +5439,6 @@ done:
     if (recv_type_derived) {
         if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&recv_type)))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    }
-
-    /* Free temporary cached dataset info object */
-    if (curr_info) {
-        H5MM_free(curr_info);
-        curr_info = NULL;
-    }
-
-    /* Free resources used by cached dataset info */
-    if (num_dset_infos > 1) {
-        HASH_ITER(hh, dset_info, curr_info, tmp)
-        {
-            HASH_DELETE(hh, dset_info, curr_info);
-            H5MM_free(curr_info);
-            curr_info = NULL;
-        }
     }
 
 #ifdef H5Dmpio_DEBUG
