@@ -1939,12 +1939,11 @@ test_subfiling_h5fuse(void)
                      SUBF_FILENAME, file_inode);
 
             args[0] = strdup("env");
-            args[1] = strdup("sh");
-            args[2] = strdup("h5fuse.sh");
-            args[3] = strdup("-q");
-            args[4] = strdup("-f");
-            args[5] = tmp_filename;
-            args[6] = NULL;
+            args[1] = strdup("./h5fuse.sh");
+            args[2] = strdup("-q");
+            args[3] = strdup("-f");
+            args[4] = tmp_filename;
+            args[5] = NULL;
 
             /* Call h5fuse script from MPI rank 0 */
             execvp("env", args);
@@ -2072,13 +2071,13 @@ parse_subfiling_env_vars(void)
 {
     char *env_value;
 
-    if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
+    if (NULL != (env_value = getenv(H5FD_SUBFILING_STRIPE_SIZE))) {
         stripe_size_g = strtoll(env_value, NULL, 0);
         if ((ERANGE == errno) || (stripe_size_g <= 0))
             stripe_size_g = -1;
     }
 
-    if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
+    if (NULL != (env_value = getenv(H5FD_SUBFILING_IOC_PER_NODE))) {
         ioc_per_node_g = strtol(env_value, NULL, 0);
         if ((ERANGE == errno) || (ioc_per_node_g <= 0))
             ioc_per_node_g = -1;
@@ -2092,13 +2091,13 @@ parse_subfiling_env_vars(void)
             ioc_per_node_g = node_local_size;
     }
 
-    if (NULL != (env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE))) {
+    if (NULL != (env_value = getenv(H5FD_IOC_THREAD_POOL_SIZE))) {
         ioc_thread_pool_size_g = atoi(env_value);
         if (ioc_thread_pool_size_g <= 0)
             ioc_thread_pool_size_g = -1;
     }
 
-    if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
+    if (NULL != (env_value = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
         assert(config_dir);
 
         strncpy(config_dir, env_value, PATH_MAX);
@@ -2121,7 +2120,6 @@ main(int argc, char **argv)
     bool     must_unset_ioc_per_node_env     = false;
     bool     must_unset_ioc_thread_count_env = false;
     bool     must_unset_config_dir_env       = false;
-    char    *env_value                       = NULL;
     int      required                        = MPI_THREAD_MULTIPLE;
     int      provided                        = 0;
 
@@ -2347,7 +2345,7 @@ main(int argc, char **argv)
         must_unset_ioc_thread_count_env = true;
     }
 
-    if (!(env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
+    if (NULL == getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX)) {
         int rand_value = 0;
 
         if (MAINPROCESS)

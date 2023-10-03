@@ -280,7 +280,7 @@ H5FD_mpio_init(void)
         H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), false);
 
         /* Check if MPI driver has been loaded dynamically */
-        env = HDgetenv(HDF5_DRIVER);
+        env = getenv(HDF5_DRIVER);
         if (env && !strcmp(env, "mpio")) {
             int mpi_initialized = 0;
 
@@ -299,7 +299,7 @@ H5FD_mpio_init(void)
         const char *s; /* String for environment variables */
 
         /* Allow MPI buf-and-file-type optimizations? */
-        s = HDgetenv("HDF5_MPI_OPT_TYPES");
+        s = getenv("HDF5_MPI_OPT_TYPES");
         if (s && isdigit(*s))
             H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? false : true;
 
@@ -308,7 +308,7 @@ H5FD_mpio_init(void)
         memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
 
         /* Retrieve MPI-IO debugging environment variable */
-        s = HDgetenv("H5FD_mpio_Debug");
+        s = getenv("H5FD_mpio_Debug");
         if (s)
             H5FD__mpio_parse_debug_str(s);
 #endif /* H5FDmpio_DEBUG */
@@ -559,13 +559,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_dxpl_mpio_collective_opt
  *
- * Purpose:     To set a flag to choose linked chunk I/O or multi-chunk I/O
- *              without involving decision-making inside HDF5
- *
- * Note:        The library will do linked chunk I/O or multi-chunk I/O without
- *              involving communications for decision-making process.
- *              The library won't behave as it asks for only when we find
- *              that the low-level MPI-IO package doesn't support this.
+ * Purpose:     Set the data transfer property list DXPL_ID to use transfer
+ *              mode OPT_MODE during I/O. This allows the application to
+ *              specify collective I/O at the HDF5 interface level (with
+ *              the H5Pset_dxpl_mpio routine), while controlling whether
+ *              the actual I/O is performed collectively (e.g., via
+ *              MPI_File_write_at_all) or independently (e.g., via
+ *              MPI_File_write_at).
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -2032,7 +2032,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_vector()
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2432,7 +2432,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_vector
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2694,7 +2694,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      */
     file->eof = HADDR_UNDEF;
 
-    /* check to see if the local eof has changed been extended, and update if so */
+    /* check to see if the local eof has been extended, and update if so */
     if (max_addr > file->local_eof)
         file->local_eof = max_addr;
 
@@ -2954,7 +2954,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3325,7 +3325,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3744,7 +3744,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UN
 
         /* In principle, it is possible for the size returned by the
          * call to MPI_File_get_size() to depend on whether writes from
-         * all proceeses have completed at the time process 0 makes the
+         * all processes have completed at the time process 0 makes the
          * call.
          *
          * In practice, most (all?) truncate calls will come after a barrier

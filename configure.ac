@@ -1074,14 +1074,6 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  ## tell libtool to do the right thing with COMMON symbols, this fixes
-  ## corrupt values with COMMON and EQUIVALENCE when building shared
-  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
-  case "`uname`" in
-    Darwin*)
-    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
-    ;;
-  esac
 
   ## Report results of check(s)
 
@@ -4206,6 +4198,11 @@ AC_CONFIG_FILES([Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
+if test -n "$TESTPARALLEL"; then
+  if test "X$SUBFILING_VFD" = "Xyes"; then
+    AC_CONFIG_LINKS([testpar/h5fuse.sh:utils/subfiling_vfd/h5fuse.sh])
+  fi
+fi
 
 AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
                 $MKDIR_P java/test/.classes;

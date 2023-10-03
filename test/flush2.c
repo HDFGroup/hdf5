@@ -236,7 +236,7 @@ main(void)
         PUTS_ERROR("bad vfd-dependent fapl");
 
     /* Check if the current VFD supports SWMR */
-    driver            = HDgetenv(HDF5_DRIVER);
+    driver            = getenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {

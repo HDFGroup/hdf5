@@ -38,17 +38,17 @@ h5haveexitcode=yes      # default is yes
 
 # source dirs
 SRC_TOOLS="$srcdir/../.."
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
 SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+SRC_H5LS_OUTFILES="$SRC_TOOLS/test/h5ls/expected"
 
 TEST_P_DIR=./testfiles
 TESTDIR=./testfiles/vds
@@ -65,38 +65,38 @@ test -d $TESTDIR || mkdir $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
-$SRC_H5LS_TESTFILES/vds/1_a.h5
-$SRC_H5LS_TESTFILES/vds/1_b.h5
-$SRC_H5LS_TESTFILES/vds/1_c.h5
-$SRC_H5LS_TESTFILES/vds/1_d.h5
-$SRC_H5LS_TESTFILES/vds/1_e.h5
-$SRC_H5LS_TESTFILES/vds/1_f.h5
-$SRC_H5LS_TESTFILES/vds/1_vds.h5
-$SRC_H5LS_TESTFILES/vds/2_a.h5
-$SRC_H5LS_TESTFILES/vds/2_b.h5
-$SRC_H5LS_TESTFILES/vds/2_c.h5
-$SRC_H5LS_TESTFILES/vds/2_d.h5
-$SRC_H5LS_TESTFILES/vds/2_e.h5
-$SRC_H5LS_TESTFILES/vds/2_vds.h5
-$SRC_H5LS_TESTFILES/vds/3_1_vds.h5
-$SRC_H5LS_TESTFILES/vds/3_2_vds.h5
-$SRC_H5LS_TESTFILES/vds/4_0.h5
-$SRC_H5LS_TESTFILES/vds/4_1.h5
-$SRC_H5LS_TESTFILES/vds/4_2.h5
-$SRC_H5LS_TESTFILES/vds/4_vds.h5
-$SRC_H5LS_TESTFILES/vds/5_a.h5
-$SRC_H5LS_TESTFILES/vds/5_b.h5
-$SRC_H5LS_TESTFILES/vds/5_c.h5
-$SRC_H5LS_TESTFILES/vds/5_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/1_a.h5
+$SRC_H5DUMP_TESTFILES/vds/1_b.h5
+$SRC_H5DUMP_TESTFILES/vds/1_c.h5
+$SRC_H5DUMP_TESTFILES/vds/1_d.h5
+$SRC_H5DUMP_TESTFILES/vds/1_e.h5
+$SRC_H5DUMP_TESTFILES/vds/1_f.h5
+$SRC_H5DUMP_TESTFILES/vds/1_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/2_a.h5
+$SRC_H5DUMP_TESTFILES/vds/2_b.h5
+$SRC_H5DUMP_TESTFILES/vds/2_c.h5
+$SRC_H5DUMP_TESTFILES/vds/2_d.h5
+$SRC_H5DUMP_TESTFILES/vds/2_e.h5
+$SRC_H5DUMP_TESTFILES/vds/2_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/3_1_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/3_2_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/4_0.h5
+$SRC_H5DUMP_TESTFILES/vds/4_1.h5
+$SRC_H5DUMP_TESTFILES/vds/4_2.h5
+$SRC_H5DUMP_TESTFILES/vds/4_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/5_a.h5
+$SRC_H5DUMP_TESTFILES/vds/5_b.h5
+$SRC_H5DUMP_TESTFILES/vds/5_c.h5
+$SRC_H5DUMP_TESTFILES/vds/5_vds.h5
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5LS_TESTFILES/vds/tvds-1.ls
-$SRC_H5LS_TESTFILES/vds/tvds-2.ls
-$SRC_H5LS_TESTFILES/vds/tvds-3_1.ls
-$SRC_H5LS_TESTFILES/vds/tvds-3_2.ls
-$SRC_H5LS_TESTFILES/vds/tvds-4.ls
-$SRC_H5LS_TESTFILES/vds/tvds-5.ls
+$SRC_H5LS_OUTFILES/vds/tvds-1.ls
+$SRC_H5LS_OUTFILES/vds/tvds-2.ls
+$SRC_H5LS_OUTFILES/vds/tvds-3_1.ls
+$SRC_H5LS_OUTFILES/vds/tvds-3_2.ls
+$SRC_H5LS_OUTFILES/vds/tvds-4.ls
+$SRC_H5LS_OUTFILES/vds/tvds-5.ls
 "
 
 

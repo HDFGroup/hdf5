@@ -571,7 +571,7 @@ done:
  *
  *    Headers list at `first_header` is not touched.
  *
- *    - Programmer should re-use or destroy `first_header` pointer
+ *    - Programmer should reuse or destroy `first_header` pointer
  *      (hrb_node_t *) as suits their purposes.
  *    - Recommend fetching prior to destroy()
  *      e.g., `reuse_node = hrb_to_die->first_header; destroy(hrb_to_die);`
@@ -2074,9 +2074,9 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 #endif
 
 #ifdef H5_HAVE_WIN32_API
-    ret = snprintf(awspath, 117, "%s/.aws/", HDgetenv("USERPROFILE"));
+    ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
 #else
-    ret = snprintf(awspath, 117, "%s/.aws/", HDgetenv("HOME"));
+    ret = snprintf(awspath, 117, "%s/.aws/", getenv("HOME"));
 #endif
     if (ret < 0 || (size_t)ret >= 117)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, FAIL, "unable to format home-aws path");
@@ -2531,7 +2531,7 @@ done:
  *     Create AWS4 "Signing Key" from secret key, AWS region, and timestamp.
  *
  *     Sequentially runs HMAC_SHA256 on strings in specified order,
- *     generating re-usable checksum (according to documentation, valid for
+ *     generating reusable checksum (according to documentation, valid for
  *     7 days from time given).
  *
  *     `secret` is `access key id` for targeted service/bucket/resource.
@@ -2756,7 +2756,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
         /* Find first non-whitespace character from start;
          * reduce total length per character.
          */
-        while ((s_len > 0) && isspace((unsigned char)s[0]) && s_len > 0) {
+        while (s_len > 0 && isspace((unsigned char)s[0])) {
             s++;
             s_len--;
         }

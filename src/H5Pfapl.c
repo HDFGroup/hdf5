@@ -851,7 +851,7 @@ H5P__facc_set_def_driver(void)
     FUNC_ENTER_PACKAGE
 
     /* Check if VFL driver environment variable is set */
-    driver_env_var = HDgetenv(HDF5_DRIVER);
+    driver_env_var = getenv(HDF5_DRIVER);
 
     /* Only parse VFL driver string if it's set */
     if (driver_env_var && *driver_env_var) {
@@ -889,7 +889,7 @@ H5P__facc_set_def_driver(void)
         }     /* end else */
 
         /* Retrieve driver configuration string from environment variable, if set. */
-        driver_config_env_var = HDgetenv(HDF5_DRIVER_CONFIG);
+        driver_config_env_var = getenv(HDF5_DRIVER_CONFIG);
 
         driver_prop.driver_id         = driver_id;
         driver_prop.driver_info       = NULL;
@@ -2596,10 +2596,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_sieve_buf_size
  *
- * Purpose:    Sets the maximum size of the data seive buffer used for file
+ * Purpose:    Sets the maximum size of the data sieve buffer used for file
  *      drivers which are capable of using data sieving.  The data sieve
  *      buffer is used when performing I/O on datasets in the file.  Using a
- *      buffer which is large anough to hold several pieces of the dataset
+ *      buffer which is large enough to hold several pieces of the dataset
  *      being read in for hyperslab selections boosts performance by quite a
  *      bit.
  *

@@ -244,7 +244,7 @@ H5F__parse_file_lock_env_var(htri_t *use_locks)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check the file locking environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && (!strcmp(lock_env_var, "FALSE") || !strcmp(lock_env_var, "0")))
         *use_locks = false; /* Override: Never use locks */
     else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "BEST_EFFORT") ||
@@ -875,9 +875,9 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
 
         /* Get the appropriate environment variable */
         if (H5F_PREFIX_VDS == prefix_type)
-            env_prefix = HDgetenv("HDF5_VDS_PREFIX");
+            env_prefix = getenv("HDF5_VDS_PREFIX");
         else if (H5F_PREFIX_ELINK == prefix_type)
-            env_prefix = HDgetenv("HDF5_EXT_PREFIX");
+            env_prefix = getenv("HDF5_EXT_PREFIX");
         else
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "prefix type is not sensible");
 

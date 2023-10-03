@@ -240,6 +240,10 @@ New Features
 
     Fortran Library:
     ----------------
+
+    - Fixed an uninitialized error return value for hdferr
+      to return the error state of the h5aopen_by_idx_f API.
+
     - Added h5pget_vol_cap_flags_f and related Fortran VOL
       capability definitions.
 
@@ -256,6 +260,11 @@ New Features
       h5sselect_shape_same_f, h5sselect_intersect_block_f,
       h5pget_file_space_page_size_f, h5pset_file_space_page_size_f,
       h5pget_file_space_strategy_f, h5pset_file_space_strategy_f
+
+    - Removed "-commons" linking option on Darwin, as COMMON and EQUIVALENCE
+      are no longer used in the Fortran source.
+
+      Fixes GitHub issue #3571
 
     C++ Library:
     ------------

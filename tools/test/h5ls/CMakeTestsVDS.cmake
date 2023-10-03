@@ -57,19 +57,20 @@
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   # copy the list of test files
-  foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5ls_vds_files")
+  foreach (listfiles ${LIST_HDF5_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listfiles}" "h5ls_vds_files")
+  endforeach ()
+
+  foreach (listothers ${LIST_OTHER_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/vds/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listothers}" "h5ls_vds_files")
   endforeach ()
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5ls_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listfiles}" "h5ls_vds_files")
   endforeach ()
 
-  foreach (listfiles ${LIST_OTHER_TEST_FILES})
-    get_filename_component(fname "${listfiles}" NAME)
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5LS_SOURCE_DIR}/vds_prefix/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${fname}" "h5ls_vds_files")
+  foreach (listothers ${LIST_OTHER_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/vds_prefix/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listothers}" "h5ls_vds_files")
   endforeach ()
 
   add_custom_target(h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds tests" DEPENDS ${h5ls_vds_files_list})

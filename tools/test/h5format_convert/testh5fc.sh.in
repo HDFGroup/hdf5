@@ -49,11 +49,10 @@ verbose=yes
 
 # source dirs
 SRC_TOOLS="$srcdir/../.."
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
@@ -61,6 +60,7 @@ SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5FORMCONV_TESTFILES="$SRC_TOOLS/test/h5format_convert/testfiles"
+SRC_H5FORMCONV_OUTFILES="$SRC_TOOLS/test/h5format_convert/expected"
 
 TESTDIR=./testfiles
 test -d $TESTDIR || mkdir $TESTDIR
@@ -103,39 +103,39 @@ $SRC_H5FORMCONV_TESTFILES/h5fc_err_level.h5
 "
 
 LIST_ERR_TEST_FILES="
-$SRC_H5FORMCONV_TESTFILES/h5fc_d_file.ddl.err
-$SRC_H5FORMCONV_TESTFILES/h5fc_dname.err
-$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistfile.ddl.err
-$SRC_H5FORMCONV_TESTFILES/h5fc_nonexistdset_file.ddl.err
+$SRC_H5FORMCONV_OUTFILES/h5fc_d_file.ddl.err
+$SRC_H5FORMCONV_OUTFILES/h5fc_dname.err
+$SRC_H5FORMCONV_OUTFILES/h5fc_nonexistfile.ddl.err
+$SRC_H5FORMCONV_OUTFILES/h5fc_nonexistdset_file.ddl.err
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5FORMCONV_TESTFILES/h5fc_help.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_nooption.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_d_file.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_dname.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_non_chunked.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_bt1.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_ndata_bt1.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_all.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_n_1d.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_n_all.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_i.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_s.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_f.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_if.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_is.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_sf.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_ext3_isf.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_i.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_s.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_f.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.ddl
-$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_err.ddl
-$SRC_H5FORMCONV_TESTFILES/h5fc_v_err.ddl.err
+$SRC_H5FORMCONV_OUTFILES/h5fc_help.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_nooption.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_d_file.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_dname.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_non_chunked.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_bt1.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_ndata_bt1.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_all.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_n_1d.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_n_all.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext1_i.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext1_s.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext1_f.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext2_if.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext2_is.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext2_sf.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_ext3_isf.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext1_i.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext1_s.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext1_f.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext2_if.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext2_is.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext2_sf.ddl
+$SRC_H5FORMCONV_OUTFILES/old_h5fc_ext3_isf.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_err.ddl
+$SRC_H5FORMCONV_OUTFILES/h5fc_v_err.ddl.err
 "
 
 #

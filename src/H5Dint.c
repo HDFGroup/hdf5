@@ -191,8 +191,8 @@ H5D_init(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
 
     /* Retrieve the prefixes of VDS and external file from the environment variable */
-    H5D_prefix_vds_env = HDgetenv("HDF5_VDS_PREFIX");
-    H5D_prefix_ext_env = HDgetenv("HDF5_EXTFILE_PREFIX");
+    H5D_prefix_vds_env = getenv("HDF5_VDS_PREFIX");
+    H5D_prefix_ext_env = getenv("HDF5_EXTFILE_PREFIX");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

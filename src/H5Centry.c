@@ -1737,7 +1737,7 @@ done:
  *              deserialized entry after it is inserted in the cache.
  *
  *              Since deserializing a prefetched entry is semantically
- *              equivalent to a load, issue an entry loaded nofification
+ *              equivalent to a load, issue an entry loaded notification
  *              if the notify callback is defined.
  *
  * Return:      SUCCEED on success, and FAIL on failure.

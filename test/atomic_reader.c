@@ -114,7 +114,7 @@ verify(int fd, unsigned int k)
     } /* end if */
 
     /* Position the file at the beginning */
-    if (lseek(fd, (off_t)0, SEEK_SET) < 0) {
+    if (lseek(fd, 0, SEEK_SET) < 0) {
         printf("READER: error from lseek\n");
         goto error;
     } /* end if */

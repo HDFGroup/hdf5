@@ -618,7 +618,7 @@ done:
  *              new MPI communicators that facilitate messaging between
  *              HDF5 clients and the IOCs.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------
@@ -776,7 +776,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     new_context->sf_group_comm = MPI_COMM_NULL;
 
     /* Check if a prefix has been set for the configuration file name */
-    prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+    prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
     if (prefix_env) {
         if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
@@ -851,7 +851,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
         char *env_value = NULL;
 
         /* Check for a subfiling stripe size setting from the environment */
-        if ((env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
+        if ((env_value = getenv(H5FD_SUBFILING_STRIPE_SIZE))) {
             long long stripe_size = -1;
 
             errno = 0;
@@ -981,7 +981,7 @@ init_app_topology(int64_t sf_context_id, H5FD_subfiling_params_t *subfiling_conf
         case SELECT_IOC_ONE_PER_NODE: {
             if (comm_size > 1) {
                 /* Check for an IOC-per-node value set in the environment */
-                if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
+                if ((env_value = getenv(H5FD_SUBFILING_IOC_PER_NODE))) {
                     errno          = 0;
                     ioc_select_val = strtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
@@ -1178,7 +1178,7 @@ static herr_t
 get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type, char **ioc_sel_info_str)
 {
     char  *opt_value = NULL;
-    char  *env_value = HDgetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
+    char  *env_value = getenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
     herr_t ret_value = SUCCEED;
 
     assert(ioc_selection_type);
@@ -1365,7 +1365,8 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
         if (app_layout->layout[i].node_local_rank == 0)
             app_layout->node_count++;
 
-    assert(app_layout->node_count > 0);
+    if (app_layout->node_count <= 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "node count less than or equal to zero");
 
     if (NULL ==
         (app_layout->node_ranks = malloc((size_t)app_layout->node_count * sizeof(*app_layout->node_ranks))))
@@ -1820,7 +1821,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
                                 "couldn't allocate space for subfiling filename");
 
     /* Check for a subfile name prefix setting in the environment */
-    if ((env_value = HDgetenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
+    if ((env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
         if (NULL == (sf_context->subfile_prefix = strdup(env_value)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
     }
@@ -1950,7 +1951,7 @@ done:
  *              discovery.  The number and mapping of IOC to MPI_rank
  *              is part of the sf_context->topology structure.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------
@@ -2685,7 +2686,7 @@ done:
  *              which actually manages all subfile closing via commands
  *              to the set of IO Concentrators.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------
@@ -2706,7 +2707,7 @@ done:
  *              Once the subfiles are closed, we initiate a teardown of
  *              the IOC and associated thread_pool threads.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------

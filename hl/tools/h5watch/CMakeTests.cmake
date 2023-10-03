@@ -58,7 +58,7 @@ set (H5WATCH_TEST_FILES
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 foreach (h5watch_file ${H5WATCH_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_HL_TOOLS_DIR}/testfiles/${h5watch_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5watch_file}" "H5WATCH_files")
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5watch_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5watch_file}" "H5WATCH_files")
 endforeach ()
 add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tests" DEPENDS ${H5WATCH_files_list})
 

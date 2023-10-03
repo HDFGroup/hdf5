@@ -275,7 +275,7 @@ H5_init_library(void)
 
     /* Debugging? */
     H5__debug_mask("-all");
-    H5__debug_mask(HDgetenv("HDF5_DEBUG"));
+    H5__debug_mask(getenv("HDF5_DEBUG"));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -887,7 +887,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         const char *s; /* Environment string for disabling version check */
 
         /* Allow different versions of the header files and library? */
-        s = HDgetenv("HDF5_DISABLE_VERSION_CHECK");
+        s = getenv("HDF5_DISABLE_VERSION_CHECK");
 
         if (s && isdigit(*s))
             disable_version_check = (unsigned int)strtol(s, NULL, 0);

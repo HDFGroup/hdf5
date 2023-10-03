@@ -190,7 +190,7 @@ main(int argc, char *argv[])
                 buf[u] = n;
 
             /* Position the file to the proper location */
-            if (lseek(fd, (off_t)(n * sizeof(unsigned int)), SEEK_SET) < 0) {
+            if (lseek(fd, (n * sizeof(unsigned int)), SEEK_SET) < 0) {
                 printf("WRITER: error from lseek\n");
                 goto error;
             } /* end if */
