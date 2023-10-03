@@ -983,7 +983,8 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     PASSED();
 
-    printf("    test_select_compound(): verify fix for non-optimized compound conversions with memory type larger than file ");
+    printf("    test_select_compound(): verify fix for non-optimized compound conversions with memory type "
+           "larger than file ");
 
     /* Create file type s7_tid */
     if ((s7_tid = H5Tcreate(H5T_COMPOUND, sizeof(s7_t))) < 0)
