@@ -59,21 +59,26 @@ STDOUT_FILTER() {
 # Remove them from the stderr result file.
 # $1 is the file name of the file to be filtered.
 # Cases of filter needed:
-# * LANL MPI:
+# 1. MPE:
+# In parallel mode and if MPE library is used, it prints the following
+# two message lines whether the MPE tracing is used or not.
+#    Writing logfile.
+#    Finished writing logfile.
+# 2. LANL MPI:
 # The LANL MPI will print some messages like the following,
 #    LA-MPI: *** mpirun (1.5.10)
 #    LA-MPI: *** 3 process(es) on 2 host(s): 2*fln21 1*fln22
 #    LA-MPI: *** libmpi (1.5.10)
 #    LA-MPI: *** Copyright 2001-2004, ACL, Los Alamos National Laboratory
-# * h5diff debug output:
+# 3. h5diff debug output:
 #    Debug output all have prefix "h5diff debug: ".
-# * AIX system prints messages like these when it is aborting:
+# 4. AIX system prints messages like these when it is aborting:
 #    ERROR: 0031-300  Forcing all remote tasks to exit due to exit code 1 in task 0
 #    ERROR: 0031-250  task 4: Terminated
 #    ERROR: 0031-250  task 3: Terminated
 #    ERROR: 0031-250  task 2: Terminated
 #    ERROR: 0031-250  task 1: Terminated
-# * LLNL Blue-Gene mpirun prints messages like there when it exit non-zero:
+# 5. LLNL Blue-Gene mpirun prints messages like there when it exit non-zero:
 #    <Apr 12 15:01:49.075658> BE_MPI (ERROR): The error message in the job record is as follows:
 #    <Apr 12 15:01:49.075736> BE_MPI (ERROR):   "killed by exit(1) on node 0"
 STDERR_FILTER() {
@@ -84,6 +89,12 @@ STDERR_FILTER() {
     cp $result_file $tmp_file
     sed -e '/ BE_MPI (ERROR): /d' \
 	< $tmp_file > $result_file
+    # Filter MPE messages
+    if test -n "$pmode"; then
+	cp $result_file $tmp_file
+	sed -e '/^Writing logfile./d' -e '/^Finished writing logfile./d' \
+	    < $tmp_file > $result_file
+    fi
     # Filter LANL MPI messages
     # and LLNL srun messages
     # and AIX error messages
@@ -98,4 +109,22 @@ STDERR_FILTER() {
 	    < $tmp_file > $result_file
     # clean up temporary files.
     rm -f $tmp_file
+}
+
+H5LS_FILTER() {
+    result_file=$1
+    sed -i '/Modified:.*/d' $result_file
+    sed -i 's/Location:.*/Location:  XXX:XXX/' $result_file
+    sed -i 's/with.*driver/with XXX driver/' $result_file
+}
+
+H5DUMP_FILTER() {
+    result_file=$1
+    sed -i '/OFFSET*/d' $result_file
+    sed -i '/^\s*SIZE*/d' $result_file
+}
+
+H5DIFF_FILTER() {
+    result_file=$1
+    sed -i 's/Referenced dataset.*/Referenced dataset      XXXXX            XXXXX/' $result_file
 }
