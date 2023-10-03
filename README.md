@@ -14,6 +14,8 @@ HDF5 version 1.15.0 currently under development
 [![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
+[HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
+
 *Please refer to the release_docs/INSTALL file for installation instructions.*
 
 This repository contains a high-performance library's source code and a file format
