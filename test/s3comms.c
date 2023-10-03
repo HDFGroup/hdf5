@@ -2520,7 +2520,7 @@ main(void)
         s3_test_credentials_loaded = 1;
     }
 
-    bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
+    bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
         printf("WARNING: S3 bucket url is not defined in environment "
                "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");

@@ -22656,7 +22656,7 @@ main(void)
     const char *env_h5_drvr; /* File Driver value from environment */
     bool        driver_is_default_compatible;
 
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

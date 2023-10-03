@@ -4054,7 +4054,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
     hsize_t dims[2]       = {100, 0};             /* The dataset dimension sizes */
     hsize_t maxdims[2]    = {100, H5S_UNLIMITED}; /* The dataset maximum dimension sizes */
-    hsize_t chunk_dims[2] = {5, 2};               /* The chunk dimesion sizes */
+    hsize_t chunk_dims[2] = {5, 2};               /* The chunk dimension sizes */
 
     TESTING("H5Fget/set_append_flush() for a chunked dataset's access property list");
 
@@ -4498,7 +4498,7 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 
     hsize_t dims[2]       = {0, 0};                         /* The dataset dimension sizes */
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED}; /* The dataset maximum dimension sizes */
-    hsize_t chunk_dims[2] = {5, 2};                         /* The chunk dimesion sizes */
+    hsize_t chunk_dims[2] = {5, 2};                         /* The chunk dimension sizes */
 
     TESTING("H5Fget/set_append_flush() for multiple opens of a chunked dataset");
 
@@ -7742,7 +7742,7 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv(HDF5_DRIVER);
+    driver = getenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
@@ -7752,7 +7752,7 @@ main(void)
      * about file locking. File locking should be used unless explicitly
      * disabled.
      */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !strcmp(lock_env_var, "FALSE"))
         use_file_locking = false;
     else

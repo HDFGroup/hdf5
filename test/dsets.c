@@ -626,7 +626,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDlseek(f, (HDoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -763,7 +763,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDlseek(f, (HDoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -15427,7 +15427,7 @@ main(void)
     int         i;
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 

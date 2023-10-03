@@ -694,9 +694,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDgetdrive() 0
 #endif
 
-#ifndef HDgetenv
-#define HDgetenv(S) getenv(S)
-#endif
 #ifndef HDgetpid
 #define HDgetpid() getpid()
 #endif
@@ -1585,7 +1582,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
         H5_PUSH_FUNC                                                                                         \
         {
 
-/* Use this macro for package-level functions which propgate errors, but don't issue them */
+/* Use this macro for package-level functions which propagate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
@@ -1603,7 +1600,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
         H5_PUSH_FUNC                                                                                         \
         {
 
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
+/* Use this macro for staticly-scoped functions which propagate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
 #define FUNC_ENTER_PACKAGE_NOERR_NOFS                                                                        \
     {                                                                                                        \

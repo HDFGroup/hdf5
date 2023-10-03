@@ -164,18 +164,24 @@ H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*
 /**
  * \ingroup DXPL
  *
- * \brief Sets data transfer mode
+ * \brief Sets low-level data transfer mode
  *
  * \dxpl_id
  * \param[in] opt_mode Transfer mode
  * \returns \herr_t
  *
- * \details H5Pset_dxpl_mpio() sets the data transfer property list \p dxpl_id
- *          to use transfer mode xfer_mode. The property list can then be used
- *          to control the I/O transfer mode during data I/O operations.
+ * \details H5Pset_dxpl_mpio_collective_opt() sets the data transfer property
+ *          list \p dxpl_id to use transfer mode \p opt_mode when performing
+ *          I/O. This allows the application to specify collective I/O at the
+ *          HDF5 interface level (with the H5Pset_dxpl_mpio() API routine),
+ *          while controlling whether the actual I/O is performed collectively
+ *          (e.g., via MPI_File_write_at_all) or independently (e.g., via
+ *          MPI_File_write_at). If the collectivity setting at the HDF5
+ *          interface level (set via H5Pset_dxpl_mpio()) is not set to
+ *          H5FD_MPIO_COLLECTIVE, this setting will be ignored.
  *
- *          Valid transfer modes are #H5FD_MPIO_INDEPENDENT (default) and
- *          #H5FD_MPIO_COLLECTIVE.
+ *          Valid transfer modes are #H5FD_MPIO_COLLECTIVE_IO (default) and
+ *          #H5FD_MPIO_INDIVIDUAL_IO.
  *
  * \since 1.4.0
  *

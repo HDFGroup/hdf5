@@ -610,7 +610,7 @@ H5D__mpio_debug_init(void)
     memset(H5D_mpio_debug_flags_s, 0, sizeof(H5D_mpio_debug_flags_s));
 
     /* Retrieve and parse the H5Dmpio debug string */
-    debug_str = HDgetenv("H5D_mpio_Debug");
+    debug_str = getenv("H5D_mpio_Debug");
     if (debug_str)
         H5D__mpio_parse_debug_str(debug_str);
 

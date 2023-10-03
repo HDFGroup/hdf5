@@ -139,9 +139,7 @@ do_sio(parameters param, results *res)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
-        GOTOERROR(FAIL);
-
+    /* MUST initialize fd early since we check its file IDs in cleanup code */
     switch (iot) {
         case POSIXIO:
             fd.posixfd  = -1;
@@ -156,6 +154,9 @@ do_sio(parameters param, results *res)
             fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
             GOTOERROR(FAIL);
     }
+
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
+        GOTOERROR(FAIL);
 
     linear_buf_size = 1;
 
@@ -310,7 +311,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = HDgetenv("HDF5_PREFIX");
+    prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
     if (!prefix)
@@ -324,8 +325,8 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
          * directory instead. */
         char *user, *login, *subdir;
 
-        user   = HDgetenv("USER");
-        login  = HDgetenv("LOGIN");
+        user   = getenv("USER");
+        login  = getenv("LOGIN");
         subdir = (user ? user : login);
 
         if (subdir) {
@@ -1259,7 +1260,7 @@ do_cleanupfile(iotype iot, char *filename)
         goto done;
 
     if (clean_file_g == -1)
-        clean_file_g = (HDgetenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
+        clean_file_g = (getenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
 
     if (clean_file_g) {
 
