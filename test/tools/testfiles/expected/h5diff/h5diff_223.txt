@@ -1,4 +1,0 @@
-Not comparable: </diffobjtypes/obj1> is of type H5G_DATASET and </diffobjtypes/obj1> is of type H5G_GROUP
-Not comparable: </diffobjtypes/obj2> is of type H5G_GROUP and </diffobjtypes/obj2> is of type H5G_TYPE
-Not comparable: </diffobjtypes/obj3> is of type H5G_TYPE and </diffobjtypes/obj3> is of type H5G_DATASET
-EXIT CODE: 0

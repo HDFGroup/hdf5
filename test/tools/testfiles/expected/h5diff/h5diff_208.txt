@@ -1,5 +1,0 @@
-Not comparable: </dset1> or </dset1> is an empty dataset
-Not comparable: </dset2> or </dset2> is an empty dataset
-Not comparable: </dset2> has rank 2, dimensions [0x0], max dimensions [0x0]
-and </dset2> has rank 2, dimensions [0x4], max dimensions [0x4]
-EXIT CODE: 0

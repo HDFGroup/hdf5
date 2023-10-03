@@ -1,9 +1,0 @@
-dataset: </dset1> and </dset2>
-size:           [6]           [6]
-position        dset1           dset2           difference          
-------------------------------------------------------------
-[ 1 ]          YIN              **INVALID VALUE**
-[ 2 ]          **INVALID VALUE** YIN              
-[ 5 ]          YIN              YANG             
-3 differences found
-EXIT CODE: 1

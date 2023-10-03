@@ -1,3 +1,0 @@
-external link: </ext_link4> and </ext_link4>
-0 differences found
-EXIT CODE: 0
