@@ -56,7 +56,7 @@ New Features
       configure step to use the content in commands like add_subdirectory(),
       include() or file() operations.
 
-      Removed HDF options for using this were:
+      Removed HDF options for using FETCH_CONTENT explicitly:
           BUILD_SZIP_WITH_FETCHCONTENT:BOOL
           BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
 
