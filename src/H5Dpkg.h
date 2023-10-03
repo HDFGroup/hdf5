@@ -544,7 +544,6 @@ struct H5D_shared_t {
                                 * dataset in certain circumstances)
                                 */
         H5D_rdcc_t chunk;      /* Information about chunked data */
-        H5SL_t    *sel_pieces; /* Skip list containing information for each piece selected */
     } cache;
 
     H5D_append_flush_t append_flush;   /* Append flush property information */
