@@ -571,7 +571,7 @@ done:
  *
  *    Headers list at `first_header` is not touched.
  *
- *    - Programmer should re-use or destroy `first_header` pointer
+ *    - Programmer should reuse or destroy `first_header` pointer
  *      (hrb_node_t *) as suits their purposes.
  *    - Recommend fetching prior to destroy()
  *      e.g., `reuse_node = hrb_to_die->first_header; destroy(hrb_to_die);`
@@ -2531,7 +2531,7 @@ done:
  *     Create AWS4 "Signing Key" from secret key, AWS region, and timestamp.
  *
  *     Sequentially runs HMAC_SHA256 on strings in specified order,
- *     generating re-usable checksum (according to documentation, valid for
+ *     generating reusable checksum (according to documentation, valid for
  *     7 days from time given).
  *
  *     `secret` is `access key id` for targeted service/bucket/resource.
