@@ -1,0 +1,11 @@
+dataset: </dset11a> and </dset11b>
+Warning: different storage datatype
+</dset11a> has file datatype H5T_STD_U16LE
+</dset11b> has file datatype H5T_STD_U32LE
+0 differences found
+Warning: different storage datatype
+<attr> has file datatype H5T_STD_U16LE
+<attr> has file datatype H5T_STD_U32LE
+attribute: <attr of </dset11a>> and <attr of </dset11b>>
+0 differences found
+EXIT CODE: 0

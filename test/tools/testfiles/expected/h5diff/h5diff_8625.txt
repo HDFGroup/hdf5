@@ -1,0 +1,10 @@
+dataset: </group/Compound_dset1> and </group_copy/Compound_dset3>
+Warning: different storage datatype
+Warning: different storage datatype
+Not comparable: </group/Compound_dset1> or </group_copy/Compound_dset3> is of mixed string type
+0 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects without details of differences.
+EXIT CODE: 0

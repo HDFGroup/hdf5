@@ -1,0 +1,21 @@
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Rget_obj_type3(): unable to get object token
+    major: References
+    minor: Can't get value
+  #001: (file name) line (number) in H5R__get_obj_token(): NULL token size
+    major: References
+    minor: Unable to copy object
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Rget_obj_type3(): unable to get object token
+    major: References
+    minor: Can't get value
+  #001: (file name) line (number) in H5R__get_obj_token(): NULL token size
+    major: References
+    minor: Unable to copy object
+H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+  #000: (file name) line (number) in h5tools_dump_data(): H5Rget_obj_type3 H5R_OBJECT1 failed
+    major: Failure in tools library
+    minor: error in function
+  #001: (file name) line (number) in h5tools_dump_data(): H5Rget_obj_type3 H5R_OBJECT1 failed
+    major: Failure in tools library
+    minor: error in function

@@ -1,0 +1,10 @@
+dataset: </string1> and </string1>
+size:           [3x4]           [3x4]
+position        string1         string1         difference          
+------------------------------------------------------------
+[ 1 0 ]            \000            5
+[ 1 1 ]            \000            6
+[ 1 2 ]            \000            7
+[ 1 3 ]            \000            8
+4 differences found
+EXIT CODE: 1
