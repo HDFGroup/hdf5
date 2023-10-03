@@ -983,20 +983,20 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     PASSED();
 
-    printf("    test_select_compound(): verify the CI window failure is fixed");
+    printf("    test_select_compound(): verify fix for non-optimized compound conversions with memory type larger than file ");
 
     /* Create file type s7_tid */
     if ((s7_tid = H5Tcreate(H5T_COMPOUND, sizeof(s7_t))) < 0)
         goto error;
 
-    if (H5Tinsert(s7_tid, "a", HOFFSET(s7_t, a), H5T_NATIVE_INT) < 0 ||
-        H5Tinsert(s7_tid, "d", HOFFSET(s7_t, d), H5T_NATIVE_INT) < 0)
+    if (H5Tinsert(s7_tid, "a", HOFFSET(s7_t, a), H5T_NATIVE_INT32) < 0 ||
+        H5Tinsert(s7_tid, "d", HOFFSET(s7_t, d), H5T_NATIVE_INT32) < 0)
         goto error;
 
     /* Initialize buffer with s7_t */
     for (i = 0; i < NX * NY; i++) {
-        s7[i].a = (int32_t)(i * 2 + 1);
-        s7[i].d = (int32_t)(i * 2 + 2);
+        s7[i].a = (int32_t)(7 * i + 1);
+        s7[i].d = (int32_t)(7 * i + 6);
     }
     memcpy(save_s7, s7, sizeof(s7_t) * NX * NY);
 
@@ -1004,16 +1004,16 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     if ((s8_tid = H5Tcreate(H5T_COMPOUND, sizeof(s8_t))) < 0)
         goto error;
 
-    if (H5Tinsert(s8_tid, "a", HOFFSET(s8_t, a), H5T_NATIVE_LONG) < 0 ||
-        H5Tinsert(s8_tid, "b", HOFFSET(s8_t, b), H5T_NATIVE_LONG) < 0 ||
-        H5Tinsert(s8_tid, "c", HOFFSET(s8_t, c), H5T_NATIVE_LONG) < 0)
+    if (H5Tinsert(s8_tid, "a", HOFFSET(s8_t, a), H5T_NATIVE_INT64) < 0 ||
+        H5Tinsert(s8_tid, "b", HOFFSET(s8_t, b), H5T_NATIVE_INT64) < 0 ||
+        H5Tinsert(s8_tid, "c", HOFFSET(s8_t, c), H5T_NATIVE_INT64) < 0)
         goto error;
 
     /* Initialize buffer with s8_t */
     for (i = 0; i < NX * NY; i++) {
-        s8[i].a = (int64_t)(i * 3 + 0);
-        s8[i].b = (int64_t)(i * 3 + 1);
-        s8[i].c = (int64_t)(i * 3 + 2);
+        s8[i].a = (int64_t)(1000 + 3 * i);
+        s8[i].b = (int64_t)(1001 + 3 * i);
+        s8[i].c = (int64_t)(1002 + 3 * i);
     }
     memcpy(save_s8, s8, sizeof(s8_t) * NX * NY);
 
@@ -1037,11 +1037,11 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     if ((did = H5Dcreate2(fid, "ss", s7_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
-    /* Write to the dataset with file type s7_tid */
+    /* Write to the dataset with mem type s7_tid */
     if (H5Dwrite(did, s7_tid, H5S_ALL, H5S_ALL, dxpl, s7) < 0)
         goto error;
 
-    /* Read from the dataset with file type s7_tid */
+    /* Read from the dataset with mem type s7_tid */
     if (H5Dread(did, s7_tid, H5S_ALL, H5S_ALL, dxpl, rbuf7) < 0)
         goto error;
 
@@ -1053,7 +1053,7 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
     if (H5Dwrite(did, s8_tid, H5S_ALL, H5S_ALL, dxpl, s8) < 0)
         goto error;
 
-    /* Read from the dataset with file type s7_tid */
+    /* Read from the dataset with mem type s7_tid */
     memset(rbuf7, 0, NX * NY * sizeof(s7_t));
     if (H5Dread(did, s7_tid, H5S_ALL, H5S_ALL, dxpl, rbuf7) < 0)
         goto error;
@@ -1064,13 +1064,13 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Initialize read buffer of s8_t with unique values */
     for (i = 0; i < NX * NY; i++) {
-        rbuf8[i].a = (int64_t)(i * 4 + 1);
-        rbuf8[i].b = (int64_t)(i * 4 + 2);
-        rbuf8[i].c = (int64_t)(i * 4 + 3);
+        rbuf8[i].a = (int64_t)(i * 4 + (2 * NX + 1));
+        rbuf8[i].b = (int64_t)(i * 4 + (2 * NX + 2));
+        rbuf8[i].c = (int64_t)(i * 4 + (2 * NX + 3));
     }
     memcpy(save_rbuf8, rbuf8, sizeof(s8_t) * NX * NY);
 
-    /* Read from the dataset with file type s8_tid */
+    /* Read from the dataset with mem type s8_tid */
     if (H5Dread(did, s8_tid, H5S_ALL, H5S_ALL, dxpl, rbuf8) < 0)
         goto error;
 
