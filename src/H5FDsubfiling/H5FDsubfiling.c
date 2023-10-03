@@ -2031,7 +2031,7 @@ done:
  *                          The contents of supplied buffers are undefined.
  *
  * Notes:       Thus function doesn't actually implement vector read.
- *              Instead, it comverts the vector read call into a series
+ *              Instead, it converts the vector read call into a series
  *              of scalar read calls.  Fix this when time permits.
  *
  *              Also, it didn't support the sizes and types optimization.
@@ -2191,7 +2191,7 @@ done:
  *                          subfiling writes have failed for some reason.
  *
  * Notes:       Thus function doesn't actually implement vector write.
- *              Instead, it comverts the vector write call into a series
+ *              Instead, it converts the vector write call into a series
  *              of scalar read calls.  Fix this when time permits.
  *
  *              Also, it didn't support the sizes and types optimization.

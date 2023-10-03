@@ -492,7 +492,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     /* Update history info to accommodate new revision */
 
     if (history->n_revisions == 0) {
-        unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
+        unsigned char *ptr = buf; /* reuse buffer space to compute checksum */
 
         assert(history->record_locs == NULL);
         history->n_revisions = 1;
@@ -508,7 +508,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         file->header.history_size += H5FD_ONION_ENCODED_SIZE_RECORD_POINTER;
     } /* end if no extant revisions in history */
     else {
-        unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
+        unsigned char *ptr = buf; /* reuse buffer space to compute checksum */
 
         assert(history->record_locs != NULL);
 
