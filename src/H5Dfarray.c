@@ -105,10 +105,14 @@ static herr_t H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize
 static herr_t H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
                                    haddr_t dset_ohdr_addr);
 static herr_t H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__farray_idx_close(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__farray_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open);
 static bool   H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                      const H5D_t *dset);
 static herr_t H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
+static herr_t H5D__farray_idx_load_metadata(const H5D_chk_idx_info_t *idx_info);
 static int    H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                       void *chunk_udata);
 static herr_t H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
@@ -123,7 +127,6 @@ static herr_t H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *str
 static herr_t H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Generic fixed array routines */
-static herr_t H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__farray_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
 /*********************/
@@ -135,9 +138,13 @@ const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
     true,                           /* Fixed array indices support SWMR access */
     H5D__farray_idx_init,           /* init */
     H5D__farray_idx_create,         /* create */
+    H5D__farray_idx_open,           /* open */
+    H5D__farray_idx_close,          /* close */
+    H5D__farray_idx_is_open,        /* is_open */
     H5D__farray_idx_is_space_alloc, /* is_space_alloc */
     H5D__farray_idx_insert,         /* insert */
     H5D__farray_idx_get_addr,       /* get_addr */
+    H5D__farray_idx_load_metadata,  /* load_metadata */
     NULL,                           /* resize */
     H5D__farray_idx_iterate,        /* iterate */
     H5D__farray_idx_remove,         /* remove */
@@ -727,55 +734,6 @@ H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
 } /* end H5D__farray_idx_init() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__farray_idx_open
- *
- * Purpose:     Opens an existing fixed array and initializes
- *              the layout struct with information about the storage.
- *
- * Return:      Success:    non-negative
- *              Failure:    negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info)
-{
-    H5D_farray_ctx_ud_t udata;               /* User data for fixed array open call */
-    herr_t              ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check args */
-    assert(idx_info);
-    assert(idx_info->f);
-    assert(idx_info->pline);
-    assert(idx_info->layout);
-    assert(H5D_CHUNK_IDX_FARRAY == idx_info->layout->idx_type);
-    assert(idx_info->storage);
-    assert(H5D_CHUNK_IDX_FARRAY == idx_info->storage->idx_type);
-    assert(H5_addr_defined(idx_info->storage->idx_addr));
-    assert(NULL == idx_info->storage->u.farray.fa);
-
-    /* Set up the user data */
-    udata.f          = idx_info->f;
-    udata.chunk_size = idx_info->layout->size;
-
-    /* Open the fixed array for the chunk index */
-    if (NULL ==
-        (idx_info->storage->u.farray.fa = H5FA_open(idx_info->f, idx_info->storage->idx_addr, &udata)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array");
-
-    /* Check for SWMR writes to the file */
-    if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
-        if (H5D__farray_idx_depend(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__farray_idx_open() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5D__farray_idx_create
  *
  * Purpose:     Creates a new indexed-storage fixed array and initializes
@@ -854,11 +812,114 @@ done:
 } /* end H5D__farray_idx_create() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__farray_idx_open
+ *
+ * Purpose:     Opens an existing fixed array and initializes
+ *              the layout struct with information about the storage.
+ *
+ * Return:      Success:    non-negative
+ *              Failure:    negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info)
+{
+    H5D_farray_ctx_ud_t udata;               /* User data for fixed array open call */
+    herr_t              ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(H5D_CHUNK_IDX_FARRAY == idx_info->layout->idx_type);
+    assert(idx_info->storage);
+    assert(H5D_CHUNK_IDX_FARRAY == idx_info->storage->idx_type);
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
+    assert(NULL == idx_info->storage->u.farray.fa);
+
+    /* Set up the user data */
+    udata.f          = idx_info->f;
+    udata.chunk_size = idx_info->layout->size;
+
+    /* Open the fixed array for the chunk index */
+    if (NULL ==
+        (idx_info->storage->u.farray.fa = H5FA_open(idx_info->f, idx_info->storage->idx_addr, &udata)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array");
+
+    /* Check for SWMR writes to the file */
+    if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+        if (H5D__farray_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
+                        "unable to create flush dependency on object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__farray_idx_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__farray_idx_close
+ *
+ * Purpose:     Closes an existing fixed array.
+ *
+ * Return:      Success:    non-negative
+ *              Failure:    negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__farray_idx_close(const H5D_chk_idx_info_t *idx_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(idx_info);
+    assert(idx_info->storage);
+    assert(H5D_CHUNK_IDX_FARRAY == idx_info->storage->idx_type);
+    assert(idx_info->storage->u.farray.fa);
+
+    if (H5FA_close(idx_info->storage->u.farray.fa) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
+    idx_info->storage->u.farray.fa = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__farray_idx_close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__farray_idx_is_open
+ *
+ * Purpose:     Query if the index is opened or not
+ *
+ * Return:      SUCCEED (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__farray_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(idx_info);
+    assert(idx_info->storage);
+    assert(H5D_CHUNK_IDX_FARRAY == idx_info->storage->idx_type);
+    assert(is_open);
+
+    *is_open = (NULL != idx_info->storage->u.btree2.bt2);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__farray_idx_is_open() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__farray_idx_is_space_alloc
  *
  * Purpose:     Query if space is allocated for index method
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
@@ -887,6 +948,7 @@ H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
                        const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5FA_t *fa;                  /* Pointer to fixed array structure */
+    bool    index_open;          /* Whether index is opened */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -901,7 +963,10 @@ H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     assert(udata);
 
     /* Check if the fixed array is open yet */
-    if (NULL == idx_info->storage->u.farray.fa) {
+    if (H5D__farray_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if fixed array is open");
+
+    if (!index_open) {
         /* Open the fixed array in file */
         if (H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array");
@@ -955,6 +1020,7 @@ H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 {
     H5FA_t *fa;                  /* Pointer to fixed array structure */
     hsize_t idx;                 /* Array index of chunk */
+    bool    index_open;          /* Whether index is opened */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -969,7 +1035,10 @@ H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     assert(udata);
 
     /* Check if the fixed array is open yet */
-    if (NULL == idx_info->storage->u.farray.fa) {
+    if (H5D__farray_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if fixed array is open");
+
+    if (!index_open) {
         /* Open the fixed array in file */
         if (H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array");
@@ -1015,6 +1084,50 @@ H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__farray_idx_get_addr() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__farray_idx_load_metadata
+ *
+ * Purpose:     Load additional chunk index metadata beyond the chunk index
+ *              itself.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__farray_idx_load_metadata(const H5D_chk_idx_info_t *idx_info)
+{
+    H5D_chunk_ud_t chunk_ud;
+    hsize_t        scaled[H5O_LAYOUT_NDIMS] = {0};
+    herr_t         ret_value                = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /*
+     * After opening a dataset that uses a fixed array, the
+     * fixed array data block will generally not be read in
+     * until an element is looked up for the first time. Since
+     * there isn't currently a good way of controlling that
+     * explicitly, perform a fake lookup of a chunk to cause
+     * it to be read in or created if it doesn't exist yet.
+     */
+    chunk_ud.common.layout  = idx_info->layout;
+    chunk_ud.common.storage = idx_info->storage;
+    chunk_ud.common.scaled  = scaled;
+
+    chunk_ud.chunk_block.offset = HADDR_UNDEF;
+    chunk_ud.chunk_block.length = 0;
+    chunk_ud.filter_mask        = 0;
+    chunk_ud.new_unfilt_chunk   = false;
+    chunk_ud.idx_hint           = UINT_MAX;
+
+    if (H5D__farray_idx_get_addr(idx_info, &chunk_ud) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't load fixed array data block");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__farray_idx_load_metadata() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__farray_idx_iterate_cb
@@ -1087,6 +1200,7 @@ H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
 {
     H5FA_t     *fa;               /* Pointer to fixed array structure */
     H5FA_stat_t fa_stat;          /* Fixed array statistics */
+    bool        index_open;       /* Whether index is opened */
     int         ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1102,7 +1216,10 @@ H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     assert(chunk_udata);
 
     /* Check if the fixed array is open yet */
-    if (NULL == idx_info->storage->u.farray.fa) {
+    if (H5D__farray_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if fixed array is open");
+
+    if (!index_open) {
         /* Open the fixed array in file */
         if (H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array");
@@ -1157,6 +1274,7 @@ H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 {
     H5FA_t *fa;                  /* Pointer to fixed array structure */
     hsize_t idx;                 /* Array index of chunk */
+    bool    index_open;          /* Whether index is opened */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1171,7 +1289,10 @@ H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     assert(udata);
 
     /* Check if the fixed array is open yet */
-    if (NULL == idx_info->storage->u.farray.fa) {
+    if (H5D__farray_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if fixed array is open");
+
+    if (!index_open) {
         /* Open the fixed array in file */
         if (H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array");
@@ -1302,9 +1423,8 @@ H5D__farray_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk addresses");
 
         /* Close fixed array */
-        if (H5FA_close(idx_info->storage->u.farray.fa) < 0)
+        if (H5D__farray_idx_close(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
-        idx_info->storage->u.farray.fa = NULL;
 
         /* Set up the user data */
         ctx_udata.f          = idx_info->f;
@@ -1334,6 +1454,7 @@ done:
 static herr_t
 H5D__farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_idx_info_t *idx_info_dst)
 {
+    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1352,10 +1473,14 @@ H5D__farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
     assert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source fixed array is open yet */
-    if (NULL == idx_info_src->storage->u.farray.fa)
+    if (H5D__farray_idx_is_open(idx_info_src, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if fixed array is open");
+
+    if (!index_open) {
         /* Open the fixed array in file */
         if (H5D__farray_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array");
+    }
 
     /* Set copied metadata tag */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)
@@ -1450,9 +1575,8 @@ H5D__farray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 
 done:
     if (idx_info->storage->u.farray.fa) {
-        if (H5FA_close(idx_info->storage->u.farray.fa) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
-        idx_info->storage->u.farray.fa = NULL;
+        if (H5D__farray_idx_close(idx_info) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1518,6 +1642,7 @@ H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 static herr_t
 H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
+    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1528,16 +1653,17 @@ H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->storage);
 
     /* Check if the fixed array is open */
-    if (idx_info->storage->u.farray.fa) {
+    if (H5D__farray_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if fixed array is open");
 
+    if (index_open) {
         /* Patch the top level file pointer contained in fa if needed */
         if (H5FA_patch_file(idx_info->storage->u.farray.fa, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch fixed array file pointer");
 
         /* Close fixed array */
-        if (H5FA_close(idx_info->storage->u.farray.fa) < 0)
+        if (H5D__farray_idx_close(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
-        idx_info->storage->u.farray.fa = NULL;
     } /* end if */
 
 done:

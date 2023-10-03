@@ -27,11 +27,11 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                    */
-#include "H5Dpkg.h"      /* Datasets				*/
+#include "H5Dpkg.h"      /* Datasets                             */
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5MFprivate.h" /* File space management                */
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* Vector and array functions		*/
+#include "H5MMprivate.h" /* Memory management                    */
+#include "H5VMprivate.h" /* Vector and array functions           */
 
 /****************/
 /* Local Macros */
@@ -92,7 +92,6 @@ static herr_t H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const vo
                                   const void *u_ctx);
 
 /* Helper routine */
-static herr_t H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
 /* Callback for H5B2_iterate() which is called in H5D__bt2_idx_iterate() */
@@ -114,10 +113,14 @@ static herr_t H5D__bt2_mod_cb(void *_record, void *_op_data, bool *changed);
 static herr_t H5D__bt2_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
                                 haddr_t dset_ohdr_addr);
 static herr_t H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__bt2_idx_close(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__bt2_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open);
 static bool   H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                   const H5D_t *dset);
 static herr_t H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
+static herr_t H5D__bt2_idx_load_metadata(const H5D_chk_idx_info_t *idx_info);
 static int    H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                    void *chunk_udata);
 static herr_t H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
@@ -139,9 +142,13 @@ const H5D_chunk_ops_t H5D_COPS_BT2[1] = {{
     true,                        /* Fixed array indices support SWMR access */
     H5D__bt2_idx_init,           /* init */
     H5D__bt2_idx_create,         /* create */
+    H5D__bt2_idx_open,           /* open */
+    H5D__bt2_idx_close,          /* close */
+    H5D__bt2_idx_is_open,        /* is_open */
     H5D__bt2_idx_is_space_alloc, /* is_space_alloc */
     H5D__bt2_idx_insert,         /* insert */
     H5D__bt2_idx_get_addr,       /* get_addr */
+    H5D__bt2_idx_load_metadata,  /* load_metadata */
     NULL,                        /* resize */
     H5D__bt2_idx_iterate,        /* iterate */
     H5D__bt2_idx_remove,         /* remove */
@@ -203,8 +210,8 @@ H5FL_ARR_DEFINE_STATIC(uint32_t, H5O_LAYOUT_NDIMS);
  *
  * Purpose:     Create client callback context
  *
- * Return:      Success:        non-NULL
- *              Failure:        NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -258,8 +265,8 @@ done:
  *
  * Purpose:     Destroy client callback context
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -286,10 +293,10 @@ H5D__bt2_dst_context(void *_ctx)
  * Function:    H5D__bt2_store
  *
  * Purpose:     Store native information into record for v2 B-tree
- *		(non-filtered)
+ *              (non-filtered)
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -308,8 +315,8 @@ H5D__bt2_store(void *record, const void *_udata)
 /*-------------------------------------------------------------------------
  * Function:    H5D__bt2_compare
  *
- * Purpose:     Compare two native information records, according to some key
- *		(non-filtered)
+ * Purpose:     Compare two native information records, according to some
+ *              key (non-filtered)
  *
  * Return:      <0 if rec1 < rec2
  *              =0 if rec1 == rec2
@@ -341,10 +348,10 @@ H5D__bt2_compare(const void *_udata, const void *_rec2, int *result)
  * Function:    H5D__bt2_unfilt_encode
  *
  * Purpose:     Encode native information into raw form for storing on disk
- *		(non-filtered)
+ *              (non-filtered)
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -373,10 +380,10 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
  * Function:    H5D__bt2_unfilt_decode
  *
  * Purpose:     Decode raw disk form of record into native form
- *		(non-filtered)
+ *              (non-filtered)
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -403,12 +410,12 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
 } /* H5D__bt2_unfilt_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_unfilt_debug
+ * Function:    H5D__bt2_unfilt_debug
  *
- * Purpose:	Debug native form of record (non-filtered)
+ * Purpose:     Debug native form of record (non-filtered)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -440,10 +447,10 @@ H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth, const void *_record,
  * Function:    H5D__bt2_filt_encode
  *
  * Purpose:     Encode native information into raw form for storing on disk
- *		(filtered)
+ *              (filtered)
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -473,13 +480,13 @@ H5D__bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
 } /* H5D__bt2_filt_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_filt_decode
+ * Function:    H5D__bt2_filt_decode
  *
- * Purpose:	Decode raw disk form of record into native form
- *		(filtered)
+ * Purpose:     Decode raw disk form of record into native form
+ *              (filtered)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -511,12 +518,12 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
 } /* H5D__bt2_filt_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_filt_debug
+ * Function:    H5D__bt2_filt_debug
  *
- * Purpose:	Debug native form of record (filtered)
+ * Purpose:     Debug native form of record (filtered)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -570,13 +577,13 @@ H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, const H5S_t
 } /* end H5D__bt2_idx_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__btree2_idx_depend
+ * Function:    H5D__btree2_idx_depend
  *
- * Purpose:	Create flush dependency between v2 B-tree and dataset's
+ * Purpose:     Create flush dependency between v2 B-tree and dataset's
  *              object header.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -629,63 +636,9 @@ done:
 } /* end H5D__btree2_idx_depend() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_open()
+ * Function:    H5D__bt2_idx_create
  *
- * Purpose:	Opens an existing v2 B-tree.
- *
- * Note:	This information is passively initialized from each index
- *              operation callback because those abstract chunk index operations
- *              are designed to work with the v2 B-tree chunk indices also,
- *              which don't require an 'open' for the data structure.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
-{
-    H5D_bt2_ctx_ud_t u_ctx;               /* user data for creating context */
-    herr_t           ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check args */
-    assert(idx_info);
-    assert(idx_info->f);
-    assert(idx_info->pline);
-    assert(idx_info->layout);
-    assert(H5D_CHUNK_IDX_BT2 == idx_info->layout->idx_type);
-    assert(idx_info->storage);
-    assert(H5_addr_defined(idx_info->storage->idx_addr));
-    assert(NULL == idx_info->storage->u.btree2.bt2);
-
-    /* Set up the user data */
-    u_ctx.f          = idx_info->f;
-    u_ctx.ndims      = idx_info->layout->ndims - 1;
-    u_ctx.chunk_size = idx_info->layout->size;
-    u_ctx.dim        = idx_info->layout->dim;
-
-    /* Open v2 B-tree for the chunk index */
-    if (NULL ==
-        (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->storage->idx_addr, &u_ctx)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset");
-
-    /* Check for SWMR writes to the file */
-    if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
-        if (H5D__btree2_idx_depend(idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
-                        "unable to create flush dependency on object header");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__bt2_idx_open() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_create
- *
- * Purpose:	Create the v2 B-tree for tracking dataset chunks
+ * Purpose:     Create the v2 B-tree for tracking dataset chunks
  *
  * Return:      SUCCEED/FAIL
  *
@@ -758,11 +711,120 @@ done:
 } /* end H5D__bt2_idx_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_is_space_alloc
+ * Function:    H5D__bt2_idx_open()
  *
- * Purpose:	Query if space is allocated for index method
+ * Purpose:     Opens an existing v2 B-tree.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Note:        This information is passively initialized from each index
+ *              operation callback because those abstract chunk index
+ *              operations are designed to work with the v2 B-tree chunk
+ *              indices also, which don't require an 'open' for the data
+ *              structure.
+ *
+ * Return:      Success:    non-negative
+ *              Failure:    negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
+{
+    H5D_bt2_ctx_ud_t u_ctx;               /* user data for creating context */
+    herr_t           ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    assert(idx_info);
+    assert(idx_info->f);
+    assert(idx_info->pline);
+    assert(idx_info->layout);
+    assert(H5D_CHUNK_IDX_BT2 == idx_info->layout->idx_type);
+    assert(idx_info->storage);
+    assert(H5_addr_defined(idx_info->storage->idx_addr));
+    assert(NULL == idx_info->storage->u.btree2.bt2);
+
+    /* Set up the user data */
+    u_ctx.f          = idx_info->f;
+    u_ctx.ndims      = idx_info->layout->ndims - 1;
+    u_ctx.chunk_size = idx_info->layout->size;
+    u_ctx.dim        = idx_info->layout->dim;
+
+    /* Open v2 B-tree for the chunk index */
+    if (NULL ==
+        (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->storage->idx_addr, &u_ctx)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset");
+
+    /* Check for SWMR writes to the file */
+    if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+        if (H5D__btree2_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL,
+                        "unable to create flush dependency on object header");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__bt2_idx_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__bt2_idx_close()
+ *
+ * Purpose:     Closes an existing v2 B-tree.
+ *
+ * Return:      Success:    non-negative
+ *              Failure:    negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__bt2_idx_close(const H5D_chk_idx_info_t *idx_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(idx_info);
+    assert(idx_info->storage);
+    assert(H5D_CHUNK_IDX_BT2 == idx_info->storage->idx_type);
+    assert(idx_info->storage->u.btree2.bt2);
+
+    if (H5B2_close(idx_info->storage->u.btree2.bt2) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close v2 B-tree");
+    idx_info->storage->u.btree2.bt2 = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__bt2_idx_close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__bt2_idx_is_open
+ *
+ * Purpose:     Query if the index is opened or not
+ *
+ * Return:      SUCCEED (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__bt2_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(idx_info);
+    assert(idx_info->storage);
+    assert(H5D_CHUNK_IDX_BT2 == idx_info->storage->idx_type);
+    assert(is_open);
+
+    *is_open = (NULL != idx_info->storage->u.btree2.bt2);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__bt2_idx_is_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__bt2_idx_is_space_alloc
+ *
+ * Purpose:     Query if space is allocated for index method
+ *
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
@@ -778,14 +840,14 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 } /* end H5D__bt2_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_mod_cb
+ * Function:    H5D__bt2_mod_cb
  *
- * Purpose:	Modify record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_update() which is called in
- *		H5D__bt2_idx_insert().
+ * Purpose:     Modify record for dataset chunk when it is found in a v2
+ *              B-tree. This is the callback for H5B2_update() which is
+ *              called in H5D__bt2_idx_insert().
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -817,18 +879,21 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, bool *changed)
 } /* end H5D__bt2_mod_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_insert
+ * Function:    H5D__bt2_idx_insert
  *
- * Purpose:	Insert chunk address into the indexing structure.
- *		A non-filtered chunk:
- *		  Should not exist
- *		  Allocate the chunk and pass chunk address back up
- *		A filtered chunk:
- *		  If it was not found, create the chunk and pass chunk address back up
- *		  If it was found but its size changed, reallocate the chunk and pass chunk address back up
- *		  If it was found but its size was the same, pass chunk address back up
+ * Purpose:     Insert chunk address into the indexing structure.
+ *              A non-filtered chunk:
+ *                Should not exist
+ *                Allocate the chunk and pass chunk address back up
+ *              A filtered chunk:
+ *                If it was not found, create the chunk and pass chunk
+ *                  address back up
+ *                If it was found but its size changed, reallocate the chunk
+ *                  and pass chunk address back up
+ *                If it was found but its size was the same, pass chunk
+ *                  address back up
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -839,6 +904,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     H5B2_t      *bt2;                 /* v2 B-tree handle for indexing chunks */
     H5D_bt2_ud_t bt2_udata;           /* User data for v2 B-tree calls */
     unsigned     u;                   /* Local index variable */
+    bool         index_open;          /* Whether index is opened */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -854,7 +920,10 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     assert(H5_addr_defined(udata->chunk_block.offset));
 
     /* Check if the v2 B-tree is open yet */
-    if (NULL == idx_info->storage->u.btree2.bt2) {
+    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
+
+    if (!index_open) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -889,14 +958,14 @@ done:
 } /* H5D__bt2_idx_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_found_cb
+ * Function:    H5D__bt2_found_cb
  *
- * Purpose:	Retrieve record for dataset chunk when it is found in a v2 B-tree.
- * 		This is the callback for H5B2_find() which is called in
- *		H5D__bt2_idx_get_addr() and H5D__bt2_idx_insert().
+ * Purpose:     Retrieve record for dataset chunk when it is found in a v2
+ *              B-tree. This is the callback for H5B2_find() which is called
+ *              in H5D__bt2_idx_get_addr() and H5D__bt2_idx_insert().
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -911,13 +980,13 @@ H5D__bt2_found_cb(const void *nrecord, void *op_data)
 } /* H5D__bt2_found_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_get_addr
+ * Function:    H5D__bt2_idx_get_addr
  *
- * Purpose:	Get the file address of a chunk if file space has been
- *		assigned.  Save the retrieved information in the udata
- *		supplied.
+ * Purpose:     Get the file address of a chunk if file space has been
+ *              assigned.  Save the retrieved information in the udata
+ *              supplied.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -928,6 +997,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     H5D_bt2_ud_t    bt2_udata;           /* User data for v2 B-tree calls */
     H5D_chunk_rec_t found_rec;           /* Record found from searching for object */
     unsigned        u;                   /* Local index variable */
+    bool            index_open;          /* Whether index is opened */
     bool            found;               /* Whether chunk was found */
     herr_t          ret_value = SUCCEED; /* Return value */
 
@@ -944,7 +1014,10 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     assert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if (NULL == idx_info->storage->u.btree2.bt2) {
+    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
+
+    if (!index_open) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -1003,16 +1076,36 @@ done:
 } /* H5D__bt2_idx_get_addr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_iterate_cb
+ * Function:    H5D__bt2_idx_load_metadata
  *
- * Purpose:	Translate the B-tree specific chunk record into a generic
+ * Purpose:     Load additional chunk index metadata beyond the chunk index
+ *              itself. Currently a no-op.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__bt2_idx_load_metadata(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* NO OP */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D__bt2_idx_load_metadata() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__bt2_idx_iterate_cb
+ *
+ * Purpose:     Translate the B-tree specific chunk record into a generic
  *              form and make the callback to the generic chunk callback
  *              routine.
- * 		This is the callback for H5B2_iterate() which is called in
- *		H5D__bt2_idx_iterate().
+ *              This is the callback for H5B2_iterate() which is called in
+ *              H5D__bt2_idx_iterate().
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1033,12 +1126,12 @@ H5D__bt2_idx_iterate_cb(const void *_record, void *_udata)
 } /* H5D__bt2_idx_iterate_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_iterate
+ * Function:    H5D__bt2_idx_iterate
  *
- * Purpose:	Iterate over the chunks in an index, making a callback
+ * Purpose:     Iterate over the chunks in an index, making a callback
  *              for each one.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1047,6 +1140,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
 {
     H5B2_t         *bt2;              /* v2 B-tree handle for indexing chunks */
     H5D_bt2_it_ud_t udata;            /* User data for B-tree iterator callback */
+    bool            index_open;       /* Whether index is opened */
     int             ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1062,7 +1156,10 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
     assert(chunk_udata);
 
     /* Check if the v2 B-tree is open yet */
-    if (NULL == idx_info->storage->u.btree2.bt2) {
+    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
+
+    if (!index_open) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -1087,15 +1184,16 @@ done:
 } /* end H5D__bt2_idx_iterate() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_remove_cb()
+ * Function:    H5D__bt2_remove_cb()
  *
- * Purpose:	Free space for 'dataset chunk' object as v2 B-tree
- *             	is being deleted or v2 B-tree node is removed.
- * 		This is the callback for H5B2_remove() and H5B2_delete() which
- *		which are called in H5D__bt2_idx_remove() and H5D__bt2_idx_delete().
+ * Purpose:     Free space for 'dataset chunk' object as v2 B-tree
+ *              is being deleted or v2 B-tree node is removed.
+ *              This is the callback for H5B2_remove() and H5B2_delete()
+ *              which are called in H5D__bt2_idx_remove() and
+ *              H5D__bt2_idx_delete().
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1121,11 +1219,11 @@ done:
 } /* H5D__bt2_remove_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_remove
+ * Function:    H5D__bt2_idx_remove
  *
- * Purpose:	Remove chunk from index.
+ * Purpose:     Remove chunk from index.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1135,6 +1233,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     H5B2_t      *bt2;                 /* v2 B-tree handle for indexing chunks */
     H5D_bt2_ud_t bt2_udata;           /* User data for v2 B-tree find call */
     unsigned     u;                   /* Local index variable */
+    bool         index_open;          /* Whether index is opened */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1149,7 +1248,10 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     assert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if (NULL == idx_info->storage->u.btree2.bt2) {
+    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
+
+    if (!index_open) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -1180,13 +1282,13 @@ done:
 } /* H5D__bt2_idx_remove() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_delete
+ * Function:    H5D__bt2_idx_delete
  *
- * Purpose:	Delete index and raw data storage for entire dataset
+ * Purpose:     Delete index and raw data storage for entire dataset
  *              (i.e. all chunks)
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:      Success:    Non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1233,17 +1335,18 @@ done:
 } /* end H5D__bt2_idx_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_copy_setup
+ * Function:    H5D__bt2_idx_copy_setup
  *
- * Purpose:	Set up any necessary information for copying chunks
+ * Purpose:     Set up any necessary information for copying chunks
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_idx_info_t *idx_info_dst)
 {
+    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1264,7 +1367,10 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
     assert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source v2 B-tree is open yet */
-    if (NULL == idx_info_src->storage->u.btree2.bt2)
+    if (H5D__bt2_idx_is_open(idx_info_src, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
+
+    if (!index_open)
         if (H5D__bt2_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
 
@@ -1284,11 +1390,11 @@ done:
 } /* end H5D__bt2_idx_copy_setup() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_copy_shutdown
+ * Function:    H5D__bt2_idx_copy_shutdown
  *
- * Purpose:	Shutdown any information from copying chunks
+ * Purpose:     Shutdown any information from copying chunks
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1324,8 +1430,8 @@ done:
  *
  * Purpose:     Retrieve the amount of index storage for chunked dataset
  *
- * Return:      Success:        Non-negative
- *              Failure:        negative
+ * Return:      Success:    Non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -1355,23 +1461,23 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 
     /* Get v2 B-tree size for indexing chunked dataset */
     if (H5B2_size(bt2_cdset, index_size) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve v2 B-tree storage info for chunked dataset");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                    "can't retrieve v2 B-tree storage info for chunked dataset");
 
 done:
     /* Close v2 B-tree index */
-    if (bt2_cdset && H5B2_close(bt2_cdset) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset");
-    idx_info->storage->u.btree2.bt2 = NULL;
+    if (H5D__bt2_idx_close(idx_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for tracking chunked dataset");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__bt2_idx_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_reset
+ * Function:    H5D__bt2_idx_reset
  *
- * Purpose:	Reset indexing information.
+ * Purpose:     Reset indexing information.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1392,11 +1498,11 @@ H5D__bt2_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr)
 } /* end H5D__bt2_idx_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_dump
+ * Function:    H5D__bt2_idx_dump
  *
- * Purpose:	Dump indexing information to a stream.
+ * Purpose:     Dump indexing information to a stream.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -1415,17 +1521,18 @@ H5D__bt2_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 } /* end H5D__bt2_idx_dump() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_dest
+ * Function:    H5D__bt2_idx_dest
  *
- * Purpose:	Release indexing information in memory.
+ * Purpose:     Release indexing information in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
+    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1436,16 +1543,17 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->storage);
 
     /* Check if the v2-btree is open */
-    if (idx_info->storage->u.btree2.bt2) {
+    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
 
+    if (index_open) {
         /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
 
         /* Close v2 B-tree */
-        if (H5B2_close(idx_info->storage->u.btree2.bt2) < 0)
+        if (H5D__bt2_idx_close(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree");
-        idx_info->storage->u.btree2.bt2 = NULL;
     } /* end if */
 
 done:

@@ -27,12 +27,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dpkg.h"      /* Datasets				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5private.h"   /* Generic Functions                    */
+#include "H5Dpkg.h"      /* Datasets                             */
+#include "H5Eprivate.h"  /* Error handling                       */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5MFprivate.h" /* File space management		*/
-#include "H5VMprivate.h" /* Vector functions			*/
+#include "H5MFprivate.h" /* File space management                */
+#include "H5VMprivate.h" /* Vector functions                     */
 
 /****************/
 /* Local Macros */
@@ -50,10 +50,14 @@
 static herr_t H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
                                    haddr_t dset_ohdr_addr);
 static herr_t H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__single_idx_open(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__single_idx_close(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__single_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open);
 static bool   H5D__single_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                      const H5D_t *dset);
 static herr_t H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
+static herr_t H5D__single_idx_load_metadata(const H5D_chk_idx_info_t *idx_info);
 static int    H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                       void *chunk_udata);
 static herr_t H5D__single_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
@@ -73,9 +77,13 @@ const H5D_chunk_ops_t H5D_COPS_SINGLE[1] = {{
     false,                          /* Single Chunk indexing doesn't current support SWMR access */
     H5D__single_idx_init,           /* init */
     H5D__single_idx_create,         /* create */
+    H5D__single_idx_open,           /* open */
+    H5D__single_idx_close,          /* close */
+    H5D__single_idx_is_open,        /* is_open */
     H5D__single_idx_is_space_alloc, /* is_space_alloc */
     H5D__single_idx_insert,         /* insert */
     H5D__single_idx_get_addr,       /* get_addr */
+    H5D__single_idx_load_metadata,  /* load_metadata */
     NULL,                           /* resize */
     H5D__single_idx_iterate,        /* iterate */
     H5D__single_idx_remove,         /* remove */
@@ -133,12 +141,12 @@ H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
 } /* end H5D__single_idx_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_create
+ * Function:    H5D__single_idx_create
  *
- * Purpose:	Set up Single Chunk Index: filtered or non-filtered
+ * Purpose:     Set up Single Chunk Index: filtered or non-filtered
  *
- * Return:	Non-negative on success
- *		Negative on failure.
+ * Return:      Non-negative on success
+ *              Negative on failure.
  *
  *-------------------------------------------------------------------------
  */
@@ -166,11 +174,73 @@ H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
 } /* end H5D__single_idx_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_is_space_alloc
+ * Function:    H5D__single_idx_open
  *
- * Purpose:	Query if space is allocated for the single chunk
+ * Purpose:     Opens an existing "single" index. Currently a no-op.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__single_idx_open(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* NO OP */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__single_idx_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__single_idx_close
+ *
+ * Purpose:     Closes an existing "single" index. Currently a no-op.
+ *
+ * Return:      SUCCEED (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__single_idx_close(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* NO OP */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__single_idx_close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__single_idx_is_open
+ *
+ * Purpose:     Query if the index is opened or not
+ *
+ * Return:      SUCCEED (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__single_idx_is_open(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_info, bool *is_open)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    assert(idx_info);
+    assert(idx_info->storage);
+    assert(H5D_CHUNK_IDX_SINGLE == idx_info->storage->idx_type);
+    assert(is_open);
+
+    *is_open = true;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__single_idx_is_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__single_idx_is_space_alloc
+ *
+ * Purpose:     Query if space is allocated for the single chunk
+ *
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -186,11 +256,11 @@ H5D__single_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 } /* end H5D__single_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_insert
+ * Function:    H5D__single_idx_insert
  *
- * Purpose:	Allocate space for the single chunk
+ * Purpose:     Allocate space for the single chunk
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -231,12 +301,12 @@ done:
 } /* H5D__single_idx_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_get_addr
+ * Function:    H5D__single_idx_get_addr
  *
- * Purpose:	Get the file address of a chunk.
- *		Save the retrieved information in the udata supplied.
+ * Purpose:     Get the file address of a chunk.
+ *              Save the retrieved information in the udata supplied.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -271,11 +341,31 @@ H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 } /* H5D__single_idx_get_addr() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_iterate
+ * Function:    H5D__single_idx_load_metadata
  *
- * Purpose:	Make callback for the single chunk
+ * Purpose:     Load additional chunk index metadata beyond the chunk index
+ *              itself. Currently a no-op.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__single_idx_load_metadata(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* NO OP */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5D__single_idx_load_metadata() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__single_idx_iterate
+ *
+ * Purpose:     Make callback for the single chunk
+ *
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -318,11 +408,11 @@ H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
 } /* end H5D__single_idx_iterate() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_remove
+ * Function:    H5D__single_idx_remove
  *
- * Purpose:	Remove the single chunk
+ * Purpose:     Remove the single chunk
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -357,12 +447,13 @@ done:
 } /* H5D__single_idx_remove() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_delete
+ * Function:    H5D__single_idx_delete
  *
- * Purpose:	Delete raw data storage for entire dataset (i.e. the only chunk)
+ * Purpose:     Delete raw data storage for entire dataset (i.e. the only
+ *              chunk)
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:      Success:    Non-negative
+ *              Failure:    negative
  *
  *-------------------------------------------------------------------------
  */
@@ -389,11 +480,12 @@ H5D__single_idx_delete(const H5D_chk_idx_info_t *idx_info)
 } /* end H5D__single_idx_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_copy_setup
+ * Function:    H5D__single_idx_copy_setup
  *
- * Purpose:	Set up any necessary information for copying the single chunk
+ * Purpose:     Set up any necessary information for copying the single
+ *              chunk
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -457,11 +549,11 @@ H5D__single_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t 
 } /* end H5D__single_idx_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_reset
+ * Function:    H5D__single_idx_reset
  *
- * Purpose:	Reset indexing information.
+ * Purpose:     Reset indexing information.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -481,11 +573,11 @@ H5D__single_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr)
 } /* end H5D__single_idx_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__single_idx_dump
+ * Function:    H5D__single_idx_dump
  *
- * Purpose:	Dump the address of the single chunk
+ * Purpose:     Dump the address of the single chunk
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
