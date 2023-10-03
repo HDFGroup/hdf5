@@ -1,0 +1,4 @@
+Warning: </vds_dset> or </vds_dset> is a virtual dataset
+Not comparable: </vds_dset> has rank 3, dimensions [5x18x8], max dimensions [18446744073709551615x18x8]
+and </vds_dset> has rank 3, dimensions [6x8x14], max dimensions [18446744073709551615x8x14]
+EXIT CODE: 0
