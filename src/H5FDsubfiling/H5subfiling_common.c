@@ -618,7 +618,7 @@ done:
  *              new MPI communicators that facilitate messaging between
  *              HDF5 clients and the IOCs.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------
@@ -1951,7 +1951,7 @@ done:
  *              discovery.  The number and mapping of IOC to MPI_rank
  *              is part of the sf_context->topology structure.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------
@@ -2686,7 +2686,7 @@ done:
  *              which actually manages all subfile closing via commands
  *              to the set of IO Concentrators.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------
@@ -2707,7 +2707,7 @@ done:
  *              Once the subfiles are closed, we initiate a teardown of
  *              the IOC and associated thread_pool threads.
  *
- * Return:      Success (0) or Faiure (non-zero)
+ * Return:      Success (0) or Failure (non-zero)
  * Errors:      If MPI operations fail for some reason.
  *
  *-------------------------------------------------------------------------

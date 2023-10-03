@@ -211,7 +211,7 @@
  *
  * `magic` (unsigned long)
  *
- *     "unique" idenfier number for the structure type
+ *     "unique" identifier number for the structure type
  *
  * `name` (char *)
  *
@@ -458,7 +458,7 @@ typedef struct {
  *
  * `signing_key` (unsigned char *)
  *
- *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "re-usable" signing
+ *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "reusable" signing
  *     key, generated via
  *     `HMAC-SHA256(HMAC-SHA256(HMAC-SHA256(HMAC-SHA256("AWS4<secret_key>",
  *         "<yyyyMMDD"), "<aws-region>"), "<aws-service>"), "aws4_request")`
