@@ -1995,7 +1995,7 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
  *              On failure, print an appropriate error message and
  *              return false.
  *
- * Return:      true if succussful, false otherwise.
+ * Return:      true if successful, false otherwise.
  *
  *-------------------------------------------------------------------------
  */

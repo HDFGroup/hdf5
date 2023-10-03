@@ -809,7 +809,7 @@ H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *          any object identifier is open for the object, the space will not be
  *          released until after the object identifier is closed.
  *
- *          Note that space identified as freespace is available for re-use only
+ *          Note that space identified as freespace is available for reuse only
  *          as long as the file remains open; once a file has been closed, the
  *          HDF5 library loses track of freespace. See “Freespace Management” in
  *          the \ref UG for further details.
