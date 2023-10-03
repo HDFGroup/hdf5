@@ -1469,7 +1469,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     H5I_iterate_ud_t *udata     = (H5I_iterate_ud_t *)_udata; /* User data for callback */
     int               ret_value = H5_ITER_CONT;               /* Callback return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Only invoke the callback function if this ID is visible externally and
      * its reference count is positive.
@@ -1486,6 +1486,9 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         object = H5I__unwrap((void *)info->object, type);
         H5_GCC_CLANG_DIAG_ON("cast-qual")
 
+        if (object == NULL)
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "failed to unwrap object ID");
+
         /* Invoke callback function */
         cb_ret_val = (*udata->user_func)((void *)object, info->id, udata->user_udata);
 
@@ -1496,6 +1499,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             ret_value = H5_ITER_ERROR; /* indicate failure (which terminates iteration) */
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__iterate_cb() */
 
