@@ -11277,7 +11277,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
     /* Now select the checkerboard selection in the (possibly larger) n-cube.
      *
      * Since we have already calculated the base start, stride, count,
-     * and block, re-use the values in setting up start, stride, count,
+     * and block, reuse the values in setting up start, stride, count,
      * and block.
      */
     for (i = 0; i < SS_DR_MAX_RANK; i++) {
@@ -12718,7 +12718,7 @@ test_space_update_diminfo(void)
 {
     hid_t               space_id;       /* Dataspace id */
     H5S_diminfo_valid_t diminfo_valid;  /* Diminfo status */
-    H5S_diminfo_valid_t rebuild_status; /* Diminfo status after rebuid */
+    H5S_diminfo_valid_t rebuild_status; /* Diminfo status after rebuild */
     H5S_sel_type        sel_type;       /* Selection type */
     herr_t              ret;            /* Return value */
 

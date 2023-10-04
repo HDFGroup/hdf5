@@ -184,7 +184,7 @@ typedef enum H5F_mem_t H5FD_mem_t;
 /*
  * Defining H5FD_FEAT_DATA_SIEVE for a VFL driver means that
  * the library will attempt to cache raw data as it is read from/written to
- * a file in a "data seive" buffer.  See Rajeev Thakur's papers:
+ * a file in a "data sieve" buffer.  See Rajeev Thakur's papers:
  *  http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz
  *  http://www.mcs.anl.gov/~thakur/papers/mpio-high-perf.ps.gz
  */
