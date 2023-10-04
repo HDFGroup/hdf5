@@ -78,27 +78,3 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   set (SZIP_FOUND 1)
   set (SZIP_INCLUDE_DIRS ${SZIP_INCLUDE_DIR_GEN} ${SZIP_INCLUDE_DIR})
 endmacro ()
-
-#-------------------------------------------------------------------------------
-macro (PACKAGE_SZIP_LIBRARY compress_type)
-  add_custom_target (SZIP-GenHeader-Copy ALL
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SZIP_INCLUDE_DIR_GEN}/aec_config.h ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-      COMMENT "Copying ${SZIP_INCLUDE_DIR_GEN}/aec_config.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
-  )
-  set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/aec_config.h)
-  if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "TGZ")
-    add_dependencies (SZIP-GenHeader-Copy SZIP)
-  endif ()
-endmacro ()
-
-#-------------------------------------------------------------------------------
-macro (PACKAGE_ZLIB_LIBRARY compress_type)
-  add_custom_target (ZLIB-GenHeader-Copy ALL
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_INCLUDE_DIR_GEN}/zconf.h ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-      COMMENT "Copying ${ZLIB_INCLUDE_DIR_GEN}/zconf.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
-  )
-  set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zconf.h)
-  if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "TGZ")
-    add_dependencies (ZLIB-GenHeader-Copy HDF5_ZLIB)
-  endif ()
-endmacro ()
