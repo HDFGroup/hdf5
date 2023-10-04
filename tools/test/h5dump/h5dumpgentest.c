@@ -11262,7 +11262,7 @@ gent_err_attr_dspace(void)
     hid_t   fcpl     = H5I_INVALID_HID; /* File access property list */
     hid_t   sid      = H5I_INVALID_HID; /* Dataspace identifier */
     hid_t   aid      = H5I_INVALID_HID; /* Attribute identifier */
-    hsize_t dims     = 2;               /* Dimensino size */
+    hsize_t dims     = 2;               /* Dimension size */
     int     wdata[2] = {7, 42};         /* The buffer to write */
     int     fd       = -1;              /* The file descriptor */
     char    val      = 6;               /* An invalid version */

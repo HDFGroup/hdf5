@@ -1149,7 +1149,7 @@ H5I_dec_app_ref_async(hid_t id, void **token)
     /* Sanity check */
     assert(id >= 0);
 
-    /* [Possibly] aynchronously decrement refcount on ID */
+    /* [Possibly] asynchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref(id, token)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't asynchronously decrement ID ref count");
 
@@ -1254,7 +1254,7 @@ H5I_dec_app_ref_always_close_async(hid_t id, void **token)
     /* Sanity check */
     assert(id >= 0);
 
-    /* [Possibly] aynchronously decrement refcount on ID */
+    /* [Possibly] asynchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_app_ref_always_close(id, token)) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTDEC, (-1), "can't asynchronously decrement ID ref count");
 

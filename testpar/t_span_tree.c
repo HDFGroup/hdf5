@@ -1354,14 +1354,14 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
                                 good_data = FALSE;
                             }
 
-                            /* zero out buffer for re-use */
+                            /* zero out buffer for reuse */
                             *val_ptr = 0;
                         }
                         else if (*val_ptr != 0) {
 
                             good_data = FALSE;
 
-                            /* zero out buffer for re-use */
+                            /* zero out buffer for reuse */
                             *val_ptr = 0;
                         }
 
