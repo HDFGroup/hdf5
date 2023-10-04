@@ -743,7 +743,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (fa.authenticate == TRUE) {
         /* compute signing key (part of AWS/S3 REST API)
          * can be re-used by user/key for 7 days after creation.
-         * find way to re-use/share
+         * find way to reuse/share
          */
         now = gmnow();
         HDassert(now != NULL);
@@ -865,7 +865,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     unsigned long long max_raw      = 0;
     unsigned long long bytes_raw    = 0;
     unsigned long long bytes_meta   = 0;
-    double             re_dub       = 0.0; /* re-usable double variable */
+    double             re_dub       = 0.0; /* reusable double variable */
     unsigned           suffix_i     = 0;
     const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 

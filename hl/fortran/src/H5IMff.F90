@@ -366,7 +366,7 @@ CONTAINS
 !>
 !! \ingroup FH5IM
 !!
-!! \brief This function dettaches a palette to an existing image dataset.
+!! \brief This function detaches a palette to an existing image dataset.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the image dataset.

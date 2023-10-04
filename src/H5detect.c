@@ -767,7 +767,7 @@ done:\n\
                           "/* ALIGNMENT and signal-handling status */\n"
                           "/****************************************/\n");
     if (align_status_g & STA_NoALIGNMENT)
-        fprintf(rawoutstream, "/* ALIGNAMENT test is not available */\n");
+        fprintf(rawoutstream, "/* ALIGNMENT test is not available */\n");
     if (align_status_g & STA_NoHandlerVerify)
         fprintf(rawoutstream, "/* Signal handlers verify test is not available */\n");
         /* The following is available in H5pubconf.h. Printing them here for */

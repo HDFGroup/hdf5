@@ -256,7 +256,7 @@ TOOLTEST h5stat_help2.ddl --help
 TOOLTEST h5stat_notexist.ddl notexist.h5
 TOOLTEST h5stat_nofile.ddl ''
 
-# Test file with groups, compressed datasets, user-applied fileters, etc.
+# Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
 TOOLTEST h5stat_filters.ddl h5stat_filters.h5
 TOOLTEST h5stat_filters-file.ddl  -f   h5stat_filters.h5
