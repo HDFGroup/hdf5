@@ -59,6 +59,16 @@ New Features
       Removed HDF options for using FETCH_CONTENT explicitly:
           BUILD_SZIP_WITH_FETCHCONTENT:BOOL
           BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+    - Thread-safety + static library disabled on Windows w/ CMake
+
+      The thread-safety feature requires hooks in DllMain(), which is only
+      present in the shared library.
+
+      We previously just warned about this, but now any CMake configuration
+      that tries to build thread-safety and the static library will fail.
+      This cannot be overridden with ALLOW_UNSUPPORTED.
+
+      Fixes GitHub issue #3613
 
     - Autotools builds now build the szip filter by default when an appropriate
       library is found
