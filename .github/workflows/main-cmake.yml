@@ -184,9 +184,7 @@ jobs:
             -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
             -DHDF5_BUILD_JAVA=${{ matrix.java }} \
             -DHDF5_BUILD_DOC=${{ matrix.docs }} \
-            -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
-            -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} \
             -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
@@ -213,9 +211,7 @@ jobs:
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
             -DHDF5_BUILD_DOC=OFF \
-            -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
-            -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} \
             -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
