@@ -289,7 +289,7 @@ main(int argc, char **argv)
     dataset = H5Dopen2(fid, "Dataset1", H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen succeeded", H5FATAL);
 
-    /* we can re-use the same mem_dataspace and file_dataspace
+    /* we can reuse the same mem_dataspace and file_dataspace
      * the H5Dwrite used since the dimension size is the same.
      */
 

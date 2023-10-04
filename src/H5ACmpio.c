@@ -1019,7 +1019,7 @@ done:
  *		dirty bytes count.
  *
  *		The rank 0 process then removes any references to the
- *		entry under its old address from the cleands and dirtied
+ *		entry under its old address from the cleaned and dirtied
  *		lists, and inserts an entry in the dirtied list under the
  *		new address.
  *

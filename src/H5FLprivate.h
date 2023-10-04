@@ -206,7 +206,7 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_REALLOC(t, blk, new_size)                                                                   \
     (uint8_t *)H5FL_blk_realloc(&(H5FL_BLK_NAME(t)), blk, new_size H5FL_TRACK_INFO)
 
-/* Check if there is a free block available to re-use */
+/* Check if there is a free block available to reuse */
 #define H5FL_BLK_AVAIL(t, size) H5FL_blk_free_block_avail(&(H5FL_BLK_NAME(t)), size)
 
 #else /* H5_NO_BLK_FREE_LISTS */

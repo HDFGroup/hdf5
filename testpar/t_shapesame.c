@@ -2468,14 +2468,14 @@ do {
                             good_data = FALSE;
                         }
 
-                        /* zero out buffer for re-use */
+                        /* zero out buffer for reuse */
                         *val_ptr = 0;
                     }
                     else if (*val_ptr != 0) {
 
                         good_data = FALSE;
 
-                        /* zero out buffer for re-use */
+                        /* zero out buffer for reuse */
                         *val_ptr = 0;
                     }
 
@@ -3969,7 +3969,7 @@ hid_t       fapl; /* file access property list */
 
 #ifdef USE_PAUSE
 /* pause the process for a moment to allow debugger to attach if desired. */
-/* Will pause more if greenlight file is not persent but will eventually */
+/* Will pause more if greenlight file is not present but will eventually */
 /* continue. */
 #include <sys/types.h>
 #include <sys/stat.h>

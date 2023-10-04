@@ -9404,7 +9404,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
-     * H5Pset_sieve_buf_size Sets the maximum size of the data seive buffer used for file
+     * H5Pset_sieve_buf_size Sets the maximum size of the data sieve buffer used for file
      *      drivers which are capable of using data sieving.  The data sieve
      *      buffer is used when performing I/O on datasets in the file.  Using a
      *      buffer which is large anough to hold several pieces of the dataset
@@ -9418,7 +9418,7 @@ public class H5 implements java.io.Serializable {
      * @param fapl_id
      *            IN: Identifier of property list to modify.
      * @param size
-     *            IN: maximum size of the data seive buffer.
+     *            IN: maximum size of the data sieve buffer.
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
