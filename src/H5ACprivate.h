@@ -25,7 +25,7 @@
 
 #include "H5ACpublic.h" /*public prototypes            */
 
-/* Pivate headers needed by this header */
+/* Private headers needed by this header */
 #include "H5private.h"   /* Generic Functions            */
 #include "H5Cprivate.h"  /* Cache                */
 #include "H5Fprivate.h"  /* File access                */

@@ -160,7 +160,7 @@
   ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
   ADD_H5_TEST (h5stat_nofile 1 '')
 
-# Test file with groups, compressed datasets, user-applied fileters, etc.
+# Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
   ADD_H5_TEST (h5stat_filters 0 h5stat_filters.h5)
   ADD_H5_TEST (h5stat_filters-file 0 -f h5stat_filters.h5)

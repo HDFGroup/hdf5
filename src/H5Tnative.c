@@ -579,7 +579,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
@@ -838,7 +838,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             tid         = H5T_NATIVE_B64;
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;

@@ -409,7 +409,7 @@ Bug Fixes since HDF5-1.10.3 release
     - Fixed a bug caused by bad tag value when condensing object header
       messages
 
-      There was an assertion failure when moving meessages from running a
+      There was an assertion failure when moving messages from running a
       user test program with library release hdf5.1.10.4. It was because
       the tag value (object header's address) was not set up when entering
       the library routine H5O__chunk_update_idx(), which will eventually
