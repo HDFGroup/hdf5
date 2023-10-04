@@ -1296,7 +1296,7 @@ H5T_get_actual_type(H5T_t *dt)
 /*-------------------------------------------------------------------------
  * Function:    H5T_save_refresh_state
  *
- * Purpose:     Save state for datatype reconstuction after a refresh.
+ * Purpose:     Save state for datatype reconstruction after a refresh.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1336,7 +1336,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_restore_refresh_state
  *
- * Purpose:     Restore state for datatype reconstuction after a refresh.
+ * Purpose:     Restore state for datatype reconstruction after a refresh.
  *
  * Return:      SUCCEED/FAIL
  *

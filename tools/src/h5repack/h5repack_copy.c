@@ -416,7 +416,7 @@ done:
  *   * hslab_nbytes_p : [OUT] total byte of the hyperslab
  *
  * Update:
- *   The hyperslab calucation would be depend on if the dataset is chunked
+ *   The hyperslab calculation would depend on if the dataset is chunked
  *   or not.
  *
  *   There care 3 conditions to cover:

@@ -513,7 +513,7 @@ test_multiple_files(hid_t file)
         FAIL_STACK_ERROR;
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
-    /* Re-use space below */
+    /* Reuse space below */
 
     /* ----------------------------------------------
      * Verify that too-small external files will fail

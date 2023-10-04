@@ -1443,7 +1443,7 @@ Known Problems
   filter script.
 
 * H5Ocopy() does not copy reg_ref attributes correctly when shared-message
-  is turn on. The value of the reference in the destination attriubte is
+  is turn on. The value of the reference in the destination attribute is
   wrong. This H5Ocopy problem will affect h5copy tool
 
 %%%%1.6.7%%%%   Release Information for hdf5-1.6.7 (31/January/08)

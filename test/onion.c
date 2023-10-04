@@ -1678,7 +1678,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     if (H5FD__onion_history_decode(buf, &history_out) != readsize)
         TEST_ERROR;
 
-    /* Re-use buffer space to sanity-check checksum for record pointer(s). */
+    /* Reuse buffer space to sanity-check checksum for record pointer(s). */
     assert(readsize >= sizeof(H5FD_onion_record_loc_t));
     for (size_t i = 0; i < history_out.n_revisions; i++) {
 

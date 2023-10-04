@@ -1335,7 +1335,7 @@ done:
         write_mem_spaces = NULL;
     }
 
-    /* Free bakcground buffer parameter arrays */
+    /* Free background buffer parameter arrays */
     H5MM_free(bkg_mem_spaces);
     bkg_mem_spaces = NULL;
     H5MM_free(bkg_file_spaces);
