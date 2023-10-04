@@ -946,7 +946,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint");
 
-    /* Only processor p0 will get the filesize and broadcast it. */
+    /* Only processor p0 will get the file size and broadcast it. */
     if (mpi_rank == 0) {
         /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
         if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(fh, &file_size)))
@@ -1283,7 +1283,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             /* Remember that views are used */
             use_view_this_time = true;
 
-            /* Prepare for a full-blown xfer using btype, ftype, and disp */
+            /* Prepare for a full-blown xfer using btype, ftype, and displacement */
             if (H5CX_get_mpi_coll_datatypes(&buf_type, &file_type) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
 
@@ -1404,7 +1404,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                  * MPI_Bcast.
                  */
                 bytes_read = -1;
-                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed for a rank 0", mpi_code)
             }
             else
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
@@ -2537,7 +2537,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
-        /* Compute max addr writted to */
+        /* Compute max address written to */
         if (count > 0)
             max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
 
