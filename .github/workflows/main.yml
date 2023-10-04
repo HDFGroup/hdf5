@@ -455,6 +455,7 @@ jobs:
         if: (matrix.generator != 'autogen') && ! (matrix.thread_safety.enabled)
 
 
+      # NOTE: Windows does not support static + thread-safe
       - name: CMake Configure (Thread-Safe)
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -464,6 +465,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
