@@ -538,13 +538,12 @@ struct H5D_shared_t {
 
     /* Buffered/cached information for types of raw data storage*/
     struct {
-        H5D_rdcdc_t contig;    /* Information about contiguous data */
-                               /* (Note that the "contig" cache
-                                * information can be used by a chunked
-                                * dataset in certain circumstances)
-                                */
-        H5D_rdcc_t chunk;      /* Information about chunked data */
-        H5SL_t    *sel_pieces; /* Skip list containing information for each piece selected */
+        H5D_rdcdc_t contig; /* Information about contiguous data */
+                            /* (Note that the "contig" cache
+                             * information can be used by a chunked
+                             * dataset in certain circumstances)
+                             */
+        H5D_rdcc_t chunk;   /* Information about chunked data */
     } cache;
 
     H5D_append_flush_t append_flush;   /* Append flush property information */
