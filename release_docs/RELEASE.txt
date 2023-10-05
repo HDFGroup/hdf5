@@ -219,7 +219,7 @@ New Features
       selection I/O should improve performance and reduce memory uses in some
       cases.
 
-    - Change the error handling for a not found path in the find plugin process.
+    - Changed the error handling for a not found path in the find plugin process.
 
       While attempting to load a plugin the HDF5 library will fail if one of the
       directories in the plugin paths does not exist, even if there are more paths
@@ -254,6 +254,10 @@ New Features
       functions to allow the library to modify the contents of write buffers, in
       order to avoid malloc/memcpy.  Currently only used for type conversion
       with selection I/O.
+
+    - Added H5Pset_fapl_ros3_token() and H5Pget_fapl_ros3_token() API functions
+      to set or get the session/security token. This token is needed when
+      making use of AWS temporary security credentials.
 
 
     Parallel Library:
