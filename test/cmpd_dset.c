@@ -996,8 +996,8 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Initialize buffer with s7_t */
     for (i = 0; i < NX * NY; i++) {
-        s7[i].a = (int32_t)(7 * i + 1);
-        s7[i].d = (int32_t)(7 * i + 6);
+        s7[i].a = (int32_t)(2 * i);
+        s7[i].d = (int32_t)(2 * i + 1);
     }
     memcpy(save_s7, s7, sizeof(s7_t) * NX * NY);
 
@@ -1012,9 +1012,9 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Initialize buffer with s8_t */
     for (i = 0; i < NX * NY; i++) {
-        s8[i].a = (int64_t)(1000 + 3 * i);
-        s8[i].b = (int64_t)(1001 + 3 * i);
-        s8[i].c = (int64_t)(1002 + 3 * i);
+        s8[i].a = (int64_t)(2 * NX * NY + 3 * i);
+        s8[i].b = (int64_t)(2 * NX * NY + 3 * i + 1);
+        s8[i].c = (int64_t)(2 * NX * NY + 3 * i + 2);
     }
     memcpy(save_s8, s8, sizeof(s8_t) * NX * NY);
 
@@ -1065,9 +1065,9 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Initialize read buffer of s8_t with unique values */
     for (i = 0; i < NX * NY; i++) {
-        rbuf8[i].a = (int64_t)(i * 4 + (2 * NX + 1));
-        rbuf8[i].b = (int64_t)(i * 4 + (2 * NX + 2));
-        rbuf8[i].c = (int64_t)(i * 4 + (2 * NX + 3));
+        rbuf8[i].a = (int64_t)(5 * NX * NY + 3 * i);
+        rbuf8[i].b = (int64_t)(5 * NX * NY + 3 * i + 1);
+        rbuf8[i].c = (int64_t)(5 * NX * NY + 3 * i + 2);
     }
     memcpy(save_rbuf8, rbuf8, sizeof(s8_t) * NX * NY);
 
