@@ -1404,7 +1404,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                  * MPI_Bcast.
                  */
                 bytes_read = -1;
-                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed for a rank 0", mpi_code)
+                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed for rank 0", mpi_code)
             }
             else
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
