@@ -255,10 +255,6 @@ New Features
       order to avoid malloc/memcpy.  Currently only used for type conversion
       with selection I/O.
 
-    - Added H5Pset_fapl_ros3_token() and H5Pget_fapl_ros3_token() API functions
-      to set or get the session/security token. This token is needed when
-      making use of AWS temporary security credentials.
-
 
     Parallel Library:
     -----------------
