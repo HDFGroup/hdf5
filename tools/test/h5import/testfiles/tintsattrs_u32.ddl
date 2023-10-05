@@ -1,4 +1,4 @@
-HDF5 "d-tintsattrs_u32.h5" {
+HDF5 "dstintsattrs_u32.h5" {
 GROUP "/" {
    DATASET "DU32BITS" {
       DATATYPE  H5T_STD_U32LE

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -542,7 +541,7 @@ typedef struct H5C_t H5C_t;
  *    ensure that the entry is ready to be flushed -- in particular,
  *    if the entry contains references to other entries that are in
  *    temporary file space, the pre-serialize callback must move those
- *    entries into real file space so that the serialzed entry will
+ *    entries into real file space so that the serialized entry will
  *    contain no invalid data.
  *
  *    One would think that the base address and length of

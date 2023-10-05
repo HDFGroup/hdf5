@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -162,10 +161,10 @@ H5WB_actual(H5WB_t *wb, size_t need)
         /* Sanity check */
         HDassert(wb->actual_size > wb->wrapped_size);
 
-        /* Check if we can re-use existing buffer */
+        /* Check if we can reuse existing buffer */
         if (need <= wb->alloc_size)
             HGOTO_DONE(wb->actual_buf)
-        /* Can't re-use existing buffer, free it and proceed */
+        /* Can't reuse existing buffer, free it and proceed */
         else
             wb->actual_buf = H5FL_BLK_FREE(extra_buf, wb->actual_buf);
     } /* end if */

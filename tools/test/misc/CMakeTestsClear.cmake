@@ -97,8 +97,12 @@
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if (last_test)
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
   endmacro ()
 
@@ -115,8 +119,12 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if (last_test)
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
   endmacro ()
 
@@ -144,7 +152,7 @@
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
           DEPENDS H5CLEAR_CMP-copy_${testname}
@@ -177,7 +185,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
           DEPENDS H5CLEAR_CMP-copy_${testname}
@@ -222,7 +230,7 @@
               -D "TEST_OUTPUT=${testname}_before_size.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}_before_size.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_before_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_TEST-copy_${testname}
@@ -253,7 +261,7 @@
               -D "TEST_OUTPUT=${testname}_after_size.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${resultfile}_after_size.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_after_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_INCR-${testname}
@@ -285,7 +293,7 @@
               -D "TEST_OUTPUT=${testname}_before_size.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname}
@@ -315,7 +323,7 @@
               -D "TEST_OUTPUT=${testname}_after_size.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${resultfile}_after_size.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_FAIL_INCR-${testname}

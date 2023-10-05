@@ -2,7 +2,6 @@
 ## (Use double hashes for copyright notice so that automake treats it as
 ## comments and does not pass it to Makefile.in)
 ## Copyright by The HDF Group.
-## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -20,12 +19,14 @@
 # AM_FCCPPFLAGS, FCCPPFLAGS are currently not used.
 
 PPFCCOMPILE = $(FC) $(FCDEFS) $(DEFAULT_INCLUDES)  $(FCINCLUDES) $(AM_FCCPPFLAGS) $(FCCPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
-LTPPFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(PPFCCOMPILE)
+LTPPFCCOMPILE = $(LIBTOOL) --silent --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(PPFCCOMPILE)
 
 # Treat all .f90 and .F90 files as preprocessed Fortran.
 .f90.o:
+	@if $(AM_V_P); then set -x; else echo "  PPFC     $@"; fi;    \
 	$(PPFCCOMPILE) -c -o $@ $<
 .F90.o:
+	@if $(AM_V_P); then set -x; else echo "  PPFC     $@"; fi;    \
 	$(PPFCCOMPILE) -c -o $@ $<
 
 include $(top_srcdir)/config/conclude.am

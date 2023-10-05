@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1170,9 +1169,14 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     ret_value = oh;
 
 done:
-    if (ret_value == NULL && oh)
+    if (ret_value == NULL && oh) {
+        /* Release any continuation messages built up */
+        if (cont_msg_info.msgs)
+            cont_msg_info.msgs = (H5O_cont_t *)H5FL_SEQ_FREE(H5O_cont_t, cont_msg_info.msgs);
+
         if (H5O_unprotect(loc, oh, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+    }
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O_protect() */

@@ -25,12 +25,12 @@ set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build C++ support" FORCE)
 
 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
 
+set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
+
 set (HDF5_INSTALL_MOD_FORTRAN "NO" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" FORCE)
 set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
 
 set (HDF5_BUILD_GENERATORS ON CACHE BOOL "Build Test Generators" FORCE)
-
-set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
 
 set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
 
@@ -44,17 +44,27 @@ set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
 
 set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
 
-set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 
+########################
+# compression options
+########################
+
+set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
+set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.2.13" CACHE STRING "Use ZLIB from original location" FORCE)
+set (ZLIB_TGZ_ORIGNAME "zlib-1.2.13.tar.gz" CACHE STRING "Use ZLIB from original compressed file" FORCE)
+set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
+
+set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
+set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
 set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
-
-set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of HDF5_ZLIB package" FORCE)
-set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
-set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
+set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6" CACHE STRING "Use LIBAEC from original location" FORCE)
+set (LIBAEC_TGZ_ORIGNAME "libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
+set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
 
 ########################
 # filter plugin options
@@ -63,6 +73,9 @@ set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
 set (PLUGIN_TGZ_NAME "hdf5_plugins.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
 
 set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
+set (H5PL_VERS_MAJOR "1" CACHE STRING "Major version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_MINOR "12" CACHE STRING "Minor version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_RELEASE "3" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
 
 #############
 # bitshuffle
@@ -180,4 +193,15 @@ set (ZFP_GIT_BRANCH "master" CACHE STRING "" FORCE)
 set (ZFP_TGZ_NAME "zfp.tar.gz" CACHE STRING "Use ZFP from compressed file" FORCE)
 
 set (ZFP_PACKAGE_NAME "zfp" CACHE STRING "Name of ZFP package" FORCE)
+
+######
+# zstd
+######
+
+set (ZSTD_GIT_URL "https://github.com/facebook/zstd" CACHE STRING "Use ZSTD from repository" FORCE)
+set (ZSTD_GIT_BRANCH "dev" CACHE STRING "" FORCE)
+
+set (ZSTD_TGZ_NAME "zstd.tar.gz" CACHE STRING "Use ZSTD from compressed file" FORCE)
+
+set (ZSTD_PACKAGE_NAME "zstd" CACHE STRING "Name of ZSTD package" FORCE)
 

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -182,7 +181,7 @@ is_exclude_path(char *path, h5trav_type_t type, diff_opt_t *opts)
 
     /* search objects in exclude list */
     while (NULL != exclude_path_ptr) {
-        /* if exclude path is is group, exclude its members as well */
+        /* if exclude path is in group, exclude its members as well */
         if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP) {
             ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, path, HDstrlen(exclude_path_ptr->obj_path));
             if (ret_cmp == 0) { /* found matching members */
@@ -246,7 +245,7 @@ is_exclude_attr(const char *path, h5trav_type_t type, diff_opt_t *opts)
 
     /* search objects in exclude list */
     while (NULL != exclude_ptr) {
-        /* if exclude path is is group, exclude its members as well */
+        /* if exclude path is in group, exclude its members as well */
         if (exclude_ptr->obj_type == H5TRAV_TYPE_GROUP) {
             ret_cmp = HDstrncmp(exclude_ptr->obj_path, path, HDstrlen(exclude_ptr->obj_path));
             if (ret_cmp == 0) { /* found matching members */

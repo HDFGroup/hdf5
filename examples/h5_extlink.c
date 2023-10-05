@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -412,7 +411,7 @@ UD_hard_create(const char *link_name, hid_t loc_group, const void *udata, size_t
         goto done;
     }
 
-    token = *((H5O_token_t *)udata);
+    token = *((const H5O_token_t *)udata);
 
     //! [H5Oopen_by_token_snip]
 
@@ -460,7 +459,7 @@ UD_hard_delete(const char *link_name, hid_t loc_group, const void *udata, size_t
         goto done;
     }
 
-    token = *((H5O_token_t *)udata);
+    token = *((const H5O_token_t *)udata);
 
     /* Open the object this link points to */
     target_obj = H5Oopen_by_token(loc_group, token);
@@ -499,7 +498,7 @@ UD_hard_traverse(const char *link_name, hid_t cur_group, const void *udata, size
     if (udata_size != sizeof(H5O_token_t))
         return H5I_INVALID_HID;
 
-    token = *((H5O_token_t *)udata);
+    token = *((const H5O_token_t *)udata);
 
     /* Open the object by token. If H5Oopen_by_token fails, ret_value will
      * be negative to indicate that the traversal function failed.

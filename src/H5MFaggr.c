@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -193,7 +192,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
         if ((f->shared->feature_flags & aggr->feature_flag) &&
             f->shared->fs_strategy != H5F_FSPACE_STRATEGY_NONE && !f->shared->closing) {
 #endif
-            haddr_t    aggr_frag_addr = HADDR_UNDEF; /* Address of aggregrator fragment */
+            haddr_t    aggr_frag_addr = HADDR_UNDEF; /* Address of aggregator fragment */
             hsize_t    aggr_frag_size = 0;           /* Size of aggregator fragment */
             hsize_t    alignment;                    /* Alignment of this section */
             hsize_t    aggr_mis_align = 0;           /* Misalignment of aggregator */
@@ -484,7 +483,7 @@ done:
                     }     /* end else */
                 }         /* end if */
                 else {
-                    /* The aggreator is not at end of file */
+                    /* The aggregator is not at end of file */
                     /* Check if aggregator has enough internal space to satisfy the extension. */
                     if (aggr->size >= extra_requested) {
                         /* Extend block into aggregator */

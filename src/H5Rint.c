@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1253,6 +1252,7 @@ static herr_t
 H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
 {
     const uint8_t *p        = (const uint8_t *)buf;
+    const uint8_t *p_end    = p + *nbytes - 1;
     size_t         buf_size = 0;
     unsigned       rank;
     H5S_t         *space;
@@ -1285,7 +1285,11 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
     if (H5S_set_extent_simple(space, rank, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set extent rank for selection")
-    if (H5S_SELECT_DESERIALIZE(&space, &p) < 0)
+
+    if (p - 1 > p_end)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Ran off end of buffer while decoding")
+
+    if (H5S_SELECT_DESERIALIZE(&space, &p, (size_t)(p_end - p + 1)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "can't deserialize selection")
 
     *nbytes    = buf_size;
@@ -1548,7 +1552,8 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbyt
     unsigned char *data  = NULL;
     H5O_token_t    token = {0};
     size_t         data_size;
-    const uint8_t *p;
+    const uint8_t *p         = NULL;
+    const uint8_t *p_end     = NULL;
     H5S_t         *space     = NULL;
     herr_t         ret_value = SUCCEED;
 
@@ -1564,7 +1569,8 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbyt
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get object address */
-    p = (const uint8_t *)data;
+    p     = (const uint8_t *)data;
+    p_end = p + data_size - 1;
     H5MM_memcpy(&token, p, token_size);
     p += token_size;
 
@@ -1584,7 +1590,11 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbyt
             HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, FAIL, "not found")
 
         /* Unserialize the selection */
-        if (H5S_SELECT_DESERIALIZE(&space, &p) < 0)
+
+        if (p - 1 >= p_end)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Ran off end of buffer while deserializing")
+
+        if (H5S_SELECT_DESERIALIZE(&space, &p, (size_t)(p_end - p + 1)) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "can't deserialize selection")
 
         *space_ptr = space;

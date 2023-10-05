@@ -8,13 +8,16 @@
  * These functions were created as part of a project supporting
  * NPP/NPOESS Data Production and Exploitation (
  * <a href="https://support.hdfgroup.org/projects/jpss/documentation">
- * project</a>, software).
+ * project</a>, <a href="https://gamma.hdfgroup.org/ftp/pub/outgoing/NPOESS/source">
+ * software </a>).
  * While they were written to facilitate access to NPP, NPOESS, and JPSS
  * data in the HDF5 format, these functions may be useful to anyone working
  * with region references, hyperslab selections, or bit-fields.
  *
- * Note that these functions are not part of the standard HDF5 distribution;
- * the software must be separately downloaded and installed.
+ * Note that these functions are not part of the standard HDF5 distribution; 
+ * the <a href="https://gamma.hdfgroup.org/ftp/pub/outgoing/NPOESS/source">
+ * software </a>
+ * must be separately downloaded and installed.
  *
  * A comprehensive guide to this library,
  * <a href="https://support.hdfgroup.org/projects/jpss/documentation/HL/UG/NPOESS_HL-UG.pdf">
@@ -28,7 +31,7 @@
  *        \n  Copies data from a referenced region to a region in a destination dataset.
  * - \ref H5LRcreate_ref_to_all
  *        \n  Creates a dataset with the region references to the data in all datasets located under a
- *        specified group in a file or creates a dataset with object references to all objects (groups or datasets) 
+ *        specified group in a file or creates a dataset with object references to all objects (groups or datasets)
  *        located under a specified group in a file.
  * - \ref H5LRcreate_region_references
  *        \n Creates an array of region references using an array of paths to
@@ -389,7 +392,7 @@ H5_HLRDLL herr_t H5LRread_region(hid_t obj_id,
  *
  * \details H5LRget_region_info() queries information about the data
  *          pointed by a region reference \p ref. It returns one of the
- *          absolute paths to a dataset, length of the path, dataset’s rank
+ *          absolute paths to a dataset, length of the path, dataset's rank
  *          and datatype, description of the referenced region and type of
  *          the referenced region. Any output argument can be NULL if that
  *          argument does not need to be returned.

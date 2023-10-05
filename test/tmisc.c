@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -329,6 +328,11 @@ typedef struct {
 #define MISC35_SPACE_DIM2 15
 #define MISC35_SPACE_DIM3 13
 #define MISC35_NPOINTS    10
+
+/* Definitions for misc. test #36 */
+/* The test file is formerly named h5_nrefs_POC.
+ *    See https://nvd.nist.gov/vuln/detail/CVE-2020-10812 */
+#define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
 
 /****************************************************************
 **
@@ -5906,6 +5910,39 @@ test_misc35(void)
 } /* end test_misc35() */
 
 /****************************************************************
+ * **
+ * **  test_misc36():
+ * **      Test for seg fault issue when closing the provided test file
+ * **      which has an illegal file size in its cache image.
+ * **      See HDFFV-11052/CVE-2020-10812 for details.
+ * **
+ * ****************************************************************/
+static void
+test_misc36(void)
+{
+    const char *fname;
+    hid_t       fid;
+    herr_t      ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Fix for HDFFV-11052/CVE-2020-10812"));
+
+    fname = H5_get_srcdir_filename(CVE_2020_10812_FILENAME);
+    fid   = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* This should fail due to the illegal file size.
+     * It should fail gracefully and not seg fault */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid);
+    }
+    H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fclose");
+
+} /* end test_misc36() */
+
+/****************************************************************
 **
 **  test_misc(): Main misc. test routine.
 **
@@ -5956,6 +5993,7 @@ test_misc(void)
     test_misc33();  /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
     test_misc34();  /* Test behavior of 0 and NULL in H5MM API calls */
     test_misc35();  /* Test behavior of free-list & allocation statistics API calls */
+    test_misc36();  /* Test for seg fault failure at file close */
 
 } /* test_misc() */
 

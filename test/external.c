@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -542,7 +541,7 @@ test_multiple_files(hid_t file)
         FAIL_STACK_ERROR
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR
-    /* Re-use space below */
+    /* Reuse space below */
 
     /* ----------------------------------------------
      * Verify that too-small external files will fail

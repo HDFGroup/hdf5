@@ -1,8 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
@@ -15,8 +12,6 @@
 static const char *FileHeader = "\n\
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
  * Copyright by The HDF Group.                                               *\n\
- * Copyright by the Board of Trustees of the University of Illinois.         *\n\
- * All rights reserved.                                                      *\n\
  *                                                                           *\n\
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n\
  * terms governing use, modification, and redistribution, is contained in    *\n\
@@ -772,7 +767,7 @@ done:\n\
                           "/* ALIGNMENT and signal-handling status */\n"
                           "/****************************************/\n");
     if (align_status_g & STA_NoALIGNMENT)
-        fprintf(rawoutstream, "/* ALIGNAMENT test is not available */\n");
+        fprintf(rawoutstream, "/* ALIGNMENT test is not available */\n");
     if (align_status_g & STA_NoHandlerVerify)
         fprintf(rawoutstream, "/* Signal handlers verify test is not available */\n");
         /* The following is available in H5pubconf.h. Printing them here for */

@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -12,14 +11,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the h5cc compiler tool
-# Created: Albert Cheng, 2007/4/11
-#
-# Modification:
-#	Albert Cheng, 2008/9/27
-#	Added -shlib tests and verbose control.
-#	Albert Cheng, 2009/10/28
-#	Added version compatibility tests.
-#
 
 srcdir=@srcdir@
 

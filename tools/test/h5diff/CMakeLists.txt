@@ -4,9 +4,9 @@ project (HDF5_TOOLS_TEST_H5DIFF C)
 # --------------------------------------------------------------------
 # Add the h5diff and test executables
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
   add_executable (h5diffgentest ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-  target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5diffgentest STATIC)
   target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
   set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
@@ -30,7 +30,7 @@ if (BUILD_SHARED_LIBS)
   set (H5DIFF_TOOL_PLUGIN_LIB_TARGET           ${H5DIFF_TOOL_PLUGIN_LIB_CORENAME})
 
   add_library (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_diff.c)
-  target_include_directories (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} SHARED)
   target_link_libraries (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} PRIVATE ${HDF5_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${H5DIFF_TOOL_PLUGIN_LIB_TARGET} ${H5DIFF_TOOL_PLUGIN_LIB_NAME} SHARED "LIB")

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -2503,7 +2502,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     hsize_t e_ext_dims[1] = {7};              /* Expanded dimension sizes */
     hsize_t s_ext_dims[1] = {3};              /* Shrunk dimension sizes */
     hsize_t max_dims0[1]  = {8};              /* Maximum dimension sizes */
-    hsize_t max_dims1[1]  = {H5S_UNLIMITED};  /* Maximum dimesion sizes for extensible array index */
+    hsize_t max_dims1[1]  = {H5S_UNLIMITED};  /* Maximum dimension sizes for extensible array index */
     hsize_t max_dims2[2]  = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dimension sizes for v2 B-tree index */
     hsize_t chunks[1] = {2}, chunks2[2] = {4, 5};           /* Chunk dimension sizes */
     hsize_t size;                                           /* File size */

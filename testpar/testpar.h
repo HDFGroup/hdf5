@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -31,8 +30,11 @@
  * mesg is not an empty string.
  */
 #define MESG(mesg)                                                                                           \
-    if (VERBOSE_MED && *mesg != '\0')                                                                        \
-    HDprintf("%s\n", mesg)
+    do {                                                                                                     \
+        if (VERBOSE_MED && *mesg != '\0') {                                                                  \
+            HDprintf("%s\n", mesg);                                                                          \
+        }                                                                                                    \
+    } while (0)
 
 /*
  * VRFY: Verify if the condition val is true.

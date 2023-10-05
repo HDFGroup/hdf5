@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -343,9 +342,6 @@ gtoken(char *s)
  *
  * Programmer:  pkmat
  *
- * Modifications: pvn
- *  7/23/2007. Added support for STR type, extra parameter FILE_ID
- *
  *-------------------------------------------------------------------------
  */
 
@@ -456,7 +452,7 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
 error:
     if (strm)
         HDfclose(strm);
-    return (retval);
+    return retval;
 }
 
 static int
@@ -1429,10 +1425,10 @@ processConfigurationFile(char *infile, struct Input *in)
     const char *err19  = "Unable to get integer value.\n";
     const char *err20  = "Unable to get subset values.\n";
 
-    /* create vector to map which keywords have been found
-     check vector after each keyword to check for violation
-     at the end check vector to see if required fields have been provided
-     process the output file according to the options
+    /* - create vector to map which keywords have been found
+     * - check vector after each keyword to check for violation
+     * - at the end check vector to see if required fields have been provided
+     * - process the output file according to the options
      */
 
     /* Initialize machine endian */
@@ -2435,7 +2431,7 @@ processConfigurationFile(char *infile, struct Input *in)
 error:
     if (strm)
         HDfclose(strm);
-    return (retval);
+    return retval;
 }
 
 static int
@@ -4743,7 +4739,7 @@ process(struct Options *opt)
     } /* STR */
 
     H5Fclose(file_id);
-    return (0);
+    return 0;
 }
 
 uint16_t
@@ -5085,7 +5081,7 @@ help(char *name)
 void
 usage(char *name)
 {
-    (void)HDfprintf(stdout, "\nUsage:\t%s -h[elp], OR\n", name);
+    (void)HDfprintf(stdout, "\nusage:\t%s -h[elp], OR\n", name);
     (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                     name);

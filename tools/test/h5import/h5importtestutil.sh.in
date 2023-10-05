@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -268,9 +267,9 @@ fi
 TOOLTEST5()
 {
 err=0
-$RUNSERIAL $DUMPER_BIN -p -d $3 $4 -o d-$1.bin -b NATIVE tmp_testfiles/$2 > d-$1.dmp
-$RUNSERIAL $H5IMPORT_BIN d-$1.bin -c d-$1.dmp -o d-$1.h5 > d-$1.imp
-$RUNSERIAL $DUMPER_BIN -p d-$1.h5 > log2
+$RUNSERIAL $DUMPER_BIN -p -d $3 $4 -o ds$1.bin -b NATIVE tmp_testfiles/$2 > ds$1.dmp
+$RUNSERIAL $H5IMPORT_BIN ds$1.bin -c ds$1.dmp -o ds$1.h5 > ds$1.imp
+$RUNSERIAL $DUMPER_BIN -p ds$1.h5 > log2
 $CP -f $SRC_H5IMPORT_TESTFILES/$1.ddl log1
 
 cmp -s log1 log2 || err=1

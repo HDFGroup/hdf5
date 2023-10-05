@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -665,10 +664,15 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         HDassert((oh_dst->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
 
         /* Determine whether to create gap or NULL message */
-        if (delta < H5O_SIZEOF_MSGHDR_OH(oh_dst))
+        if ((oh_dst->version > H5O_VERSION_1) && (delta < H5O_SIZEOF_MSGHDR_OH(oh_dst)))
             dst_oh_gap = delta;
-        else
+        else {
+            /* NULL message must be at least size of message header */
+            if (delta < H5O_SIZEOF_MSGHDR_OH(oh_dst))
+                delta = H5O_SIZEOF_MSGHDR_OH(oh_dst);
+
             dst_oh_null = delta;
+        }
 
         /* Increase destination object header size */
         dst_oh_size += delta;

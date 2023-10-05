@@ -19,7 +19,6 @@ $indent = 2;
 
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -35,8 +34,6 @@ $indent = 2;
 # Read in the public symbol version description text file and create the
 # appropriate headers needed by the library.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2007/07/10
 
 ##############################################################################
 # Print the copyright into an open file
@@ -46,7 +43,6 @@ sub print_copyright ($) {
 
     print $fh "/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
     print $fh " * Copyright by The HDF Group.                                               *\n";
-    print $fh " * Copyright by the Board of Trustees of the University of Illinois.         *\n";
     print $fh " * All rights reserved.                                                      *\n";
     print $fh " *                                                                           *\n";
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";

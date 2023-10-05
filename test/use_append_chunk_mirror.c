@@ -139,7 +139,7 @@ setup_parameters(int argc, char *const argv[], options_t *opts)
         opts->nplanes = (hsize_t)opts->chunksize;
 
     show_parameters(opts);
-    return (0);
+    return 0;
 } /* setup_parameters() */
 
 /* Overall Algorithm:
@@ -152,17 +152,17 @@ setup_parameters(int argc, char *const argv[], options_t *opts)
 int
 main(int argc, char *argv[])
 {
-    pid_t                      childpid = 0;
-    pid_t                      mypid, tmppid;
-    int                        child_status;
-    int                        child_wait_option = 0;
-    int                        ret_value         = 0;
-    int                        child_ret_value;
-    hbool_t                    send_wait = FALSE;
-    hid_t                      fid       = -1; /* File ID */
-    H5FD_mirror_fapl_t         mirr_fa;
-    H5FD_splitter_vfd_config_t split_fa;
-    hid_t                      mirr_fapl_id = H5I_INVALID_HID;
+    pid_t                       childpid = 0;
+    pid_t                       mypid, tmppid;
+    int                         child_status;
+    int                         child_wait_option = 0;
+    int                         ret_value         = 0;
+    int                         child_ret_value;
+    hbool_t                     send_wait = FALSE;
+    hid_t                       fid       = H5I_INVALID_HID;
+    H5FD_mirror_fapl_t          mirr_fa;
+    H5FD_splitter_vfd_config_t *split_fa     = NULL;
+    hid_t                       mirr_fapl_id = H5I_INVALID_HID;
 
     if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);
@@ -173,13 +173,18 @@ main(int argc, char *argv[])
     mirr_fa.handshake_port = SERVER_PORT;
     HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
 
-    split_fa.wo_fapl_id       = H5I_INVALID_HID;
-    split_fa.rw_fapl_id       = H5I_INVALID_HID;
-    split_fa.magic            = H5FD_SPLITTER_MAGIC;
-    split_fa.version          = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
-    split_fa.log_file_path[0] = '\0'; /* none */
-    split_fa.ignore_wo_errs   = FALSE;
-    HDstrncpy(split_fa.wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
+    if (NULL == (split_fa = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
+        HDfprintf(stderr, "can't allocate memory for splitter config\n");
+        Hgoto_error(1);
+    }
+
+    split_fa->wo_fapl_id       = H5I_INVALID_HID;
+    split_fa->rw_fapl_id       = H5I_INVALID_HID;
+    split_fa->magic            = H5FD_SPLITTER_MAGIC;
+    split_fa->version          = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
+    split_fa->log_file_path[0] = '\0'; /* none */
+    split_fa->ignore_wo_errs   = FALSE;
+    HDstrncpy(split_fa->wo_path, MIRROR_FILE_NAME, H5FD_SPLITTER_PATH_MAX);
 
     /* Determine the need to send/wait message file*/
     if (UC_opts.launch == UC_READWRITE) {
@@ -211,14 +216,14 @@ main(int argc, char *argv[])
         }
 
         /* Prepare parent "splitter" driver in UC_opts */
-        split_fa.wo_fapl_id = mirr_fapl_id;
-        split_fa.rw_fapl_id = H5P_DEFAULT;
-        UC_opts.fapl_id     = H5Pcreate(H5P_FILE_ACCESS);
+        split_fa->wo_fapl_id = mirr_fapl_id;
+        split_fa->rw_fapl_id = H5P_DEFAULT;
+        UC_opts.fapl_id      = H5Pcreate(H5P_FILE_ACCESS);
         if (UC_opts.fapl_id == H5I_INVALID_HID) {
             HDfprintf(stderr, "can't create creation FAPL\n");
             Hgoto_error(1);
         }
-        if (H5Pset_fapl_splitter(UC_opts.fapl_id, &split_fa) < 0) {
+        if (H5Pset_fapl_splitter(UC_opts.fapl_id, split_fa) < 0) {
             HDfprintf(stderr, "can't set creation FAPL\n");
             H5Eprint2(H5E_DEFAULT, stdout);
             Hgoto_error(1);
@@ -300,14 +305,14 @@ main(int argc, char *argv[])
     }
 
     /* Prepare parent "splitter" driver in UC_opts */
-    split_fa.wo_fapl_id = mirr_fapl_id;
-    split_fa.rw_fapl_id = H5P_DEFAULT;
-    UC_opts.fapl_id     = H5Pcreate(H5P_FILE_ACCESS);
+    split_fa->wo_fapl_id = mirr_fapl_id;
+    split_fa->rw_fapl_id = H5P_DEFAULT;
+    UC_opts.fapl_id      = H5Pcreate(H5P_FILE_ACCESS);
     if (UC_opts.fapl_id == H5I_INVALID_HID) {
         HDfprintf(stderr, "can't create creation FAPL\n");
         Hgoto_error(1);
     }
-    if (H5Pset_fapl_splitter(UC_opts.fapl_id, &split_fa) < 0) {
+    if (H5Pset_fapl_splitter(UC_opts.fapl_id, split_fa) < 0) {
         HDfprintf(stderr, "can't set creation FAPL\n");
         H5Eprint2(H5E_DEFAULT, stdout);
         Hgoto_error(1);
@@ -368,6 +373,8 @@ main(int argc, char *argv[])
     }
 
 done:
+    HDfree(split_fa);
+
     if (ret_value != 0) {
         HDprintf("Error(s) encountered\n");
     }
@@ -375,7 +382,7 @@ done:
         HDprintf("All passed\n");
     }
 
-    return (ret_value);
+    return ret_value;
 }
 
 #else /* H5_HAVE_MIRROR_VFD */

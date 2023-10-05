@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1763,7 +1762,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 
         /* In principle, it is possible for the size returned by the
          * call to MPI_File_get_size() to depend on whether writes from
-         * all proceeses have completed at the time process 0 makes the
+         * all processes have completed at the time process 0 makes the
          * call.
          *
          * In practice, most (all?) truncate calls will come after a barrier

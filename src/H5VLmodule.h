@@ -27,18 +27,18 @@
 #define H5_MY_PKG_ERR  H5E_VOL
 #define H5_MY_PKG_INIT YES
 
-/** \page H5VL_UG The HDF5 VOL plugin
+/** \page H5VL_UG The HDF5 Virtual Object Layer (VOL)
  *
- * \section sec_vol The HDF5 VOL plugin
+ * \section sec_vol The HDF5 Virtual Object Layer (VOL)
  *
- * \section subsec_vol_intro Introduction
+ * \subsection subsec_vol_intro Introduction
  * The virtual object layer is an abstraction layer in the HDF5 library that intercepts all API calls
- * that could potentially access objects in an HDF5 container and forwards those calls to a VOL connector,
- * which implements the storage. The user or application gets the benefit of using the familiar and
- * widely-used HDF5 data model and API, but can map the physical storage of the HDF5 file and objects
- * to storage that better meets the application's data needs.
+ * that could potentially access objects in an HDF5 container and forwards those calls to a VOL
+ * connector, which implements the storage. The user or application gets the benefit of using the
+ * familiar and widely-used HDF5 data model and API, but can map the physical storage of the HDF5 file
+ * and objects to storage that better meets the application’s data needs.
  *
- * \section subsec_vol_abstract_layer The VOL Abstraction Layer
+ * \subsection subsec_vol_abstract_layer The VOL Abstraction Layer
  * The VOL lies just under the public API. When a storage-oriented public APIcall is made, the library
  * performs a few sanity checks on the input parameters and then immediately invokes a VOL callback,
  * which resolves to an implementation in the VOL connector that was selected when opening or creating
@@ -74,11 +74,11 @@
  * For more information about which calls go through the VOL and the mechanism by which this is implemented,
  * see the connector author and library internals documentation.
  *
- * \section subsec_vol_connect VOL Connectors
+ * \subsection subsec_vol_connect VOL Connectors
  * A VOL connector can be implemented in several ways:
  * \li as a shared or static library linked to an application
  * \li as a dynamically loaded plugin, implemented as a shared library
- * \li and even as an internal connector, built into the HDF5 libraryitself
+ * \li and even as an internal connector, built into the HDF5 library itself
  *
  * This section mostly focuses on external connectors, both libraries and plugins, as those are expected
  * to be much more common than internal implementations.
@@ -122,7 +122,9 @@
  * \todo Describe the VOL plugin life cycle.
  *
  * \defgroup ASYNC Asynchronous Functions
- * \brief Asynchronous Functions
+ * \brief List of the asynchronous functions.
+ * \note The argument \p es_id associated with the asynchronous APIs is the \Emph{event set id}. See H5ES for
+ *context.
  *
  * \defgroup H5VLDEF Definitions
  * \ingroup H5VL

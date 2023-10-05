@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -456,6 +455,7 @@ public class HDFArray {
                     new HDF5JavaException("HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                 throw(ex);
             }
+            break;
         } // end of statement for arrays of boxed objects
         default:
             HDF5JavaException ex =
@@ -528,6 +528,7 @@ public class HDFArray {
                             new HDF5JavaException("HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                         throw(ex);
                     }
+                    break;
                 } // end of statement for arrays of boxed numerics
                 } // end of switch statement for arrays of primitives
 

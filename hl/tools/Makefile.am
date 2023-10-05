@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -19,7 +18,13 @@
 
 include $(top_srcdir)/config/commence.am
 
+if BUILD_TOOLS_HL_GIF_CONDITIONAL
+  TOOLS_GIF_DIR = gif2h5
+else
+  TOOLS_GIF_DIR =
+endif
+
 # All subdirectories
-SUBDIRS=gif2h5 h5watch
+SUBDIRS=h5watch $(TOOLS_GIF_DIR)
 
 include $(top_srcdir)/config/conclude.am

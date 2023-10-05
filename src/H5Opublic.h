@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -304,7 +303,7 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  *
  * \return \hid_tv{object}
  *
- * \details H5Open_by_idx() opens the nth object in the group specified by \p loc_id
+ * \details H5Oopen_by_idx() opens the nth object in the group specified by \p loc_id
  *          and \p group_name.
  *
  *          \p loc_id specifies a location identifier.

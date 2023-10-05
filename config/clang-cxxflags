@@ -1,7 +1,6 @@
 #                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -113,7 +112,7 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
             ;;
     esac
 
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch -std=c++98"
 
     ##############
     # Production #

@@ -48,7 +48,7 @@ if test "X-pgc++" = "X-$cxx_vendor"; then
     # General #
     ###########
 
-    H5_CXXFLAGS="$H5_CXXFLAGS -Minform=warn"
+    H5_CXXFLAGS="$H5_CXXFLAGS -std=c++98 -Minform=warn"
 
     ##############
     # Production #

@@ -837,7 +837,7 @@ Bug Fixes since HDF5-1.8.0 release
     - Support for TFLOPS, config/intel-osf1, is removed since the TFLOPS
       machine has long retired. AKC - 2009/10/06.
     - Added $(EXEEXT) extension to H5detect when it's executed in the
-      src/Makfile to generate H5Tinit.c so it works correctly on platforms
+      src/Makefile to generate H5Tinit.c so it works correctly on platforms
       that require the full extension when running executables.
       MAM - 2009/10/01 - BZ #1613
     - Configure will now set FC and CXX to "no" when fortran and c++
@@ -1734,6 +1734,6 @@ Known Problems
   filter script.
 
 * H5Ocopy() does not copy reg_ref attributes correctly when shared-message
-  is turn on. The value of the reference in the destination attriubte is
+  is turn on. The value of the reference in the destination attribute is
   wrong. This H5Ocopy problem will affect h5copy tool
 

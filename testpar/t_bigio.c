@@ -1866,7 +1866,7 @@ main(int argc, char **argv)
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
      * that we try to ensure that our bigio handling is actually
-     * envoked and tested.
+     * invoked and tested.
      */
     if (newsize != oldsize)
         bigcount = newsize * 2;

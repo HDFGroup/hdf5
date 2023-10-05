@@ -70,7 +70,18 @@ if (HDF5_TEST_SERIAL)
       NAME EXAMPLES-clear-objects
       COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
   )
-  set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
+  set_tests_properties (EXAMPLES-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME EXAMPLES-clean-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
+  )
+  set_tests_properties (EXAMPLES-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -83,9 +94,8 @@ if (HDF5_TEST_SERIAL)
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${example}.txt"
-          #-D "TEST_REFERENCE=${example}.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (EXAMPLES-${example} PROPERTIES FIXTURES_REQUIRED clear_EXAMPLES)
@@ -107,15 +117,14 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
       add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${parallel_example}> ${MPIEXEC_POSTFLAGS})
     else ()
       add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${parallel_example}>;${MPIEXEC_POSTFLAGS}"
-          -D "TEST_ARGS:STRING="
+          -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
+          -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${parallel_example}>;${MPIEXEC_POSTFLAGS}"
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${parallel_example}.out"
           -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
-          #-D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
     if (last_test)

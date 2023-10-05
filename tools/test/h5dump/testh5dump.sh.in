@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -184,6 +183,7 @@ $SRC_H5DUMP_TESTFILES/tvms.h5
 $SRC_H5DUMP_TESTFILES/err_attr_dspace.h5
 $SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_old.h5
 $SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_new.h5
+$SRC_H5DUMP_TESTFILES/tCVE-2021-37501_attr_decode.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -1485,6 +1485,10 @@ TOOLTEST err_attr_dspace.ddl err_attr_dspace.h5
 # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
 TOOLTEST_FAIL tCVE_2018_11206_fill_old.h5
 TOOLTEST_FAIL tCVE_2018_11206_fill_new.h5
+
+# test to verify fix for CVE-2021-37501: multiplication overflow in H5O__attr_decode()
+# https://github.com/ST4RF4LL/Something_Found/blob/main/HDF5_v1.13.0_h5dump_heap_overflow.assets/poc
+TOOLTEST_FAIL tCVE-2021-37501_attr_decode.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

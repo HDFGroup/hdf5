@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -816,8 +815,12 @@ main(int argc, char *argv[])
 done:
     if (fapl > 0)
         H5Pclose(fapl);
-    if (fid > 0)
-        H5Fclose(fid);
+    if (fid > 0) {
+        if (H5Fclose(fid) < 0) {
+            HDfprintf(stderr, "Error in closing file!\n");
+            exit_value = 1;
+        }
+    }
 
     /* Pop API context */
     if (api_ctx_pushed)

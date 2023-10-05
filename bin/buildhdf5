@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -13,8 +12,6 @@
 #
 # Build HDF5 library by doing configure, make, and tests.
 # Usage: See USAGE()
-# Programmer: Albert Cheng
-# Creation date: Jul  9, 2003
 
 # Some handy definitions
 USAGE()
@@ -26,7 +23,7 @@ can continue from a previous build.
 
 Command Syntax
 ==============
-buildhdf5 [-config] [-szlib] [-help] [-n] [-srcdir dir] [-fortran] [-cxx] [-pp] config-arguments ...
+buildhdf5 [-config] [-szlib] [-help] [-n] [-srcdir dir] [-fortran] [-cxx] [-java] [-pp] config-arguments ...
    -config:	run configure only. [default to do build too]
    -szlib:      configure in the szlib option
    -help:	show this help page
@@ -36,6 +33,7 @@ buildhdf5 [-config] [-szlib] [-help] [-n] [-srcdir dir] [-fortran] [-cxx] [-pp] 
              	    which will be passed to configure]
    -fortran:	add --enable-fortran
    -cxx:	add --enable-cxx
+   -java:       add --enable-java
    -pp:		add --enable-parallel
    all other arguments are passed to configure
 
@@ -252,6 +250,9 @@ while [ $# -gt 0 ]; do
 	-cxx)
 	    CONFIG_OP="$CONFIG_OP --enable-cxx"
 	    ;;
+        -java)
+            CONFIG_OP="$CONFIG_OP --enable-java"
+            ;;
 	-fortran)
 	    CONFIG_OP="$CONFIG_OP --enable-fortran"
 	    ;;

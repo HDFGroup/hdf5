@@ -1,7 +1,7 @@
 #include "hdf5.h"
 
 int
-main()
+main(void)
 {
     hid_t file;
     if ((file = H5Fcreate("foo.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)

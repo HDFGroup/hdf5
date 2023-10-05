@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -189,7 +188,7 @@ done:
  * Signature: (Ljava/lang/String;J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Fis_1accessible(JNIEnv *env, jclass clss, jstring name, jlong file_id)
+Java_hdf_hdf5lib_H5_H5Fis_1accessible(JNIEnv *env, jclass clss, jstring name, jlong fapl_id)
 {
     const char *fileName = NULL;
     htri_t      bval     = JNI_FALSE;
@@ -201,7 +200,7 @@ Java_hdf_hdf5lib_H5_H5Fis_1accessible(JNIEnv *env, jclass clss, jstring name, jl
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Fis_accessible: file name not pinned");
 
-    if ((bval = H5Fis_accessible(fileName, (hid_t)file_id)) < 0)
+    if ((bval = H5Fis_accessible(fileName, (hid_t)fapl_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
@@ -742,7 +741,7 @@ Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlon
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -765,7 +764,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlon
 
 done:
     return bval;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint */
 
 /*
  * Class:     hdf_hdf5lib_H5

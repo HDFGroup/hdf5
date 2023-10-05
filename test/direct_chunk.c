@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -414,7 +413,7 @@ test_direct_chunk_overwrite_data(hid_t fid)
     if ((sid = H5Screate_simple(OVERWRITE_NDIMS, dset_dims, dset_max_dims)) < 0)
         FAIL_STACK_ERROR
 
-    /* Set chunk size and filll value */
+    /* Set chunk size and fill value */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
     if (H5Pset_fill_value(dcpl_id, tid, &fill_value) < 0)

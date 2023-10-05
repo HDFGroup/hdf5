@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -43,7 +42,7 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *
  * Purpose:     High-level API to return the native type of a datatype.
  *              The native type is chosen by matching the size and class of
- *              querried datatype from the following native premitive
+ *              queried datatype from the following native premitive
  *              datatypes:
  *                      H5T_NATIVE_CHAR         H5T_NATIVE_UCHAR
  *                      H5T_NATIVE_SHORT        H5T_NATIVE_USHORT
@@ -589,7 +588,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
@@ -854,7 +853,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             tid         = H5T_NATIVE_B64;
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;

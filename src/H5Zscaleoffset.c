@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1297,6 +1296,9 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     }
     /* output; compress */
     else {
+        size_t used_bytes;
+        size_t unused_bytes;
+
         HDassert(nbytes == d_nelmts * p.size);
 
         /* before preprocess, convert to memory endianness order if needed */
@@ -1348,7 +1350,10 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         /* (Looks like an error in the original determination of how many
          *      bytes would be needed for parameters. - QAK, 2010/08/19)
          */
-        HDmemset(outbuf + 13, 0, (size_t)8);
+        used_bytes = 4 + 1 + sizeof(unsigned long long);
+        assert(used_bytes <= size_out);
+        unused_bytes = size_out - used_bytes;
+        HDmemset(outbuf + 13, 0, unused_bytes);
 
         /* special case: minbits equal to full precision */
         if (minbits == p.size * 8) {

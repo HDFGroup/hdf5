@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -43,7 +42,7 @@
 #define MAX_NUM_THREADS 32
 #define MAX_LOCK_CYCLES 1000000
 
-/* structure used to configure test threads in the recurive
+/* structure used to configure test threads in the recursive
  * R/W/ lock tests.
  */
 /***********************************************************************

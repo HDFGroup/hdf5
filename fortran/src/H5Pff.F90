@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -467,7 +466,7 @@ CONTAINS
 !!
 !! \brief Retrieves the version information of various objects for a file creation property list.
 !!
-!! \param prp_id   File createion property list identifier.
+!! \param prp_id   File creation property list identifier.
 !! \param boot     Super block version number.
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.
@@ -4037,29 +4036,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER         , INTENT(IN)  :: value
     INTEGER         , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pset
-
-!>
-!! \ingroup FH5P
-!!
-!! \brief Sets a property list value.
-!!
-!! \note  \fortran_obsolete
-!!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to modify.
-!! \param value  Property value, supported types are:
-!!               \li INTEGER
-!!               \li REAL
-!!               \li DOUBLE PRECISION
-!!               \li CHARACTER(LEN=*)
-!! \param hdferr \fortran_error
-!!
-  SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
-    INTEGER(HID_T), INTENT(IN) :: prp_id
-    CHARACTER(LEN=*), INTENT(IN) :: name
-    INTEGER,   INTENT(IN) :: value
-    INTEGER, INTENT(OUT) :: hdferr
   END SUBROUTINE h5pset_f
 !>
 !! \ingroup FH5P

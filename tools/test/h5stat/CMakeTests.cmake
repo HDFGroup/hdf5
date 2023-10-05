@@ -111,9 +111,12 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    set_tests_properties (H5STAT-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
@@ -135,9 +138,12 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    set_tests_properties (H5STAT-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
   endmacro ()
 
 ##############################################################################
@@ -145,17 +151,6 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    # Remove any output file left over from previous test run
-    foreach (ddl_file ${HDF5_REFERENCE_FILES})
-      set (CLEAR_LIST ${CLEAR_LIST} ${ddl_file}.out ${ddl_file}.out.err)
-    endforeach ()
-    add_test (
-      NAME H5STAT-clearall-objects
-      COMMAND ${CMAKE_COMMAND} -E remove ${CLEAR_LIST}
-    )
-  endif ()
 
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)
@@ -165,7 +160,7 @@
   ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
   ADD_H5_TEST (h5stat_nofile 1 '')
 
-# Test file with groups, compressed datasets, user-applied fileters, etc.
+# Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
   ADD_H5_TEST (h5stat_filters 0 h5stat_filters.h5)
   ADD_H5_TEST (h5stat_filters-file 0 -f h5stat_filters.h5)

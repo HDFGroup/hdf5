@@ -210,7 +210,7 @@ For details on compiling an HDF5 application:
 an extendible array dataset, pass in #H5P_DATASET_CREATE for the property list class.
 \li The #H5Pset_chunk call modifies a Dataset Creation Property List instance to store a chunked
 layout dataset and sets the size of the chunks used.
-\li To extend an unlimited dimension dataset use the the #H5Dset_extent call. Please be aware that
+\li To extend an unlimited dimension dataset use the #H5Dset_extent call. Please be aware that
 after this call, the dataset's dataspace must be refreshed with #H5Dget_space before more data can be accessed.
 \li The #H5Pget_chunk call retrieves the size of chunks for the raw data of a chunked layout dataset.
 \li Once there is no longer a need for a Property List instance, it should be closed with the #H5Pclose call.
@@ -945,7 +945,7 @@ For a more complete script (and to help resolve issues) see the script provided 
 
 \subsection subsecLBCompilingCMakeExamples HDF5 Examples
 The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
-in the share folder or you can go to the <a href="https://github.com/HDFGroup/hdf5_examples">HDF5 Examples</a> github repository.
+in the share folder or you can go to the <a href="https://github.com/HDFGroup/hdf5-examples">HDF5 Examples</a> github repository.
 
 Go into the share directory and follow the instructions in USING_CMake_examples.txt to build the examples.
 

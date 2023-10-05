@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -444,7 +443,7 @@ done:
  *              deserialized entry after it is inserted in the cache.
  *
  *              Since deserializing a prefetched entry is semantically
- *              equivalent to a load, issue an entry loaded nofification
+ *              equivalent to a load, issue an entry loaded notification
  *              if the notify callback is defined.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
@@ -1114,6 +1113,11 @@ H5C__load_cache_image(H5F_t *f)
     } /* end if */
 
 done:
+    if (ret_value < 0) {
+        if (H5F_addr_defined(cache_ptr->image_addr))
+            cache_ptr->image_buffer = H5MM_xfree(cache_ptr->image_buffer);
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__load_cache_image() */
 

@@ -10,7 +10,6 @@ my @ctypes = ( () );
 
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -23,8 +22,6 @@ my @ctypes = ( () );
 
 # Create assignment overflow #ifdefs
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2009/04/09
 
 ##############################################################################
 # Parse a meaningful line (not a comment or blank line) into the appropriate
@@ -61,7 +58,6 @@ sub print_copyright ($) {
 
     print $fh "/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
     print $fh " * Copyright by The HDF Group.                                               *\n";
-    print $fh " * Copyright by the Board of Trustees of the University of Illinois.         *\n";
     print $fh " * All rights reserved.                                                      *\n";
     print $fh " *                                                                           *\n";
     print $fh " * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n";

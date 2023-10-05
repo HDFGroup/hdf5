@@ -1,7 +1,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1380,14 +1379,14 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
                                 good_data = FALSE;
                             }
 
-                            /* zero out buffer for re-use */
+                            /* zero out buffer for reuse */
                             *val_ptr = 0;
                         }
                         else if (*val_ptr != 0) {
 
                             good_data = FALSE;
 
-                            /* zero out buffer for re-use */
+                            /* zero out buffer for reuse */
                             *val_ptr = 0;
                         }
 
@@ -2316,7 +2315,7 @@ lower_dim_size_comp_test(void)
  *        2) Has no in memory buffer for any other chunk.
  *
  *        The test differers from Rob Latham's bug report in
- *        that is runs with an arbitrary number of proceeses,
+ *        that is runs with an arbitrary number of processes,
  *        and uses a 1 dimensional dataset.
  *
  * Return:    void

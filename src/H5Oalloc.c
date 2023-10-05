@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1849,7 +1848,7 @@ H5O__move_msgs_forward(H5F_t *f, H5O_t *oh)
                                                  null_msg->raw + null_msg->raw_size, gap_size) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert gap in chunk")
 
-                                /* Re-use message # for new null message taking place of non-null message */
+                                /* Reuse message # for new null message taking place of non-null message */
                                 new_null_msg = v;
                             } /* end if */
                             else {

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -2848,7 +2847,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     int   status;    /*child exit status    */
 
     /*
-     * Some systems generage SIGFPE during floating point overflow and we
+     * Some systems generate SIGFPE during floating point overflow and we
      * cannot assume that we can continue from such a signal.  Therefore, we
      * fork here and let the child run the test and return the number of
      * failures with the exit status.

@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -183,7 +182,7 @@ CLEANUP() {
 
 #  SETUP file tocopy
 #    Clone a standard input file in the test directory
-#  Modification:
+#
 #    Was using "cp" command which means file $2 will inherit the permission
 #    setting of file $1.  If $1 is read-only, so will $2.  That will cause
 #    failure when the test attempts to write it later on.  Changed to use

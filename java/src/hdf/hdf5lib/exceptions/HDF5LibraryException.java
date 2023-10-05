@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -108,7 +107,7 @@ public class HDF5LibraryException extends HDF5Exception {
     /**
      * @ingroup JERRLIB
      *
-     * Return a error message for the minor error number.
+     * Return an error message for the minor error number.
      *
      * These messages come from <b>@ref H5E</b>.
      *

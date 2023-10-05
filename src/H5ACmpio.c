@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1020,7 +1019,7 @@ done:
  *		dirty bytes count.
  *
  *		The rank 0 process then removes any references to the
- *		entry under its old address from the cleands and dirtied
+ *		entry under its old address from the cleaned and dirtied
  *		lists, and inserts an entry in the dirtied list under the
  *		new address.
  *

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -57,6 +56,9 @@ import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_native_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @page HDF5LIB HDF5 Java API Package
@@ -229,7 +231,7 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This
  * may be used by Java exception handlers to print out the HDF5 error stack. <hr>
  *
- * @version HDF5 1.10.10 <br />
+ * @version HDF5 1.12.3 <br />
  *          <b>See also: </b>
  *          @ref HDFARRAY hdf.hdf5lib.HDFArray<br />
  *          @ref HDF5CONST hdf.hdf5lib.HDF5Constants<br />
@@ -258,7 +260,7 @@ public class H5 implements java.io.Serializable {
      */
     private static final long serialVersionUID = 6129888282117053288L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5.class);
+    private final static Logger log = LoggerFactory.getLogger(H5.class);
 
     /**
      * @ingroup JH5
@@ -5083,8 +5085,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param name
      *            IN: File name to check.
-     * @param file_id
-     *            IN: File identifier for a currently-open HDF5 file
+     * @param fapl_id
+     *            IN: File access property list identifier
      *
      * @return true if file is accessible, false if not.
      *
@@ -5093,7 +5095,7 @@ public class H5 implements java.io.Serializable {
      * @exception NullPointerException
      *            name is null.
      **/
-    public synchronized static native boolean H5Fis_accessible(String name, long file_id)
+    public synchronized static native boolean H5Fis_accessible(String name, long fapl_id)
         throws HDF5LibraryException, NullPointerException;
 
     /**
@@ -9402,7 +9404,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5P
      *
-     * H5Pset_sieve_buf_size Sets the maximum size of the data seive buffer used for file
+     * H5Pset_sieve_buf_size Sets the maximum size of the data sieve buffer used for file
      *      drivers which are capable of using data sieving.  The data sieve
      *      buffer is used when performing I/O on datasets in the file.  Using a
      *      buffer which is large anough to hold several pieces of the dataset
@@ -9416,7 +9418,7 @@ public class H5 implements java.io.Serializable {
      * @param fapl_id
      *            IN: Identifier of property list to modify.
      * @param size
-     *            IN: maximum size of the data seive buffer.
+     *            IN: maximum size of the data sieve buffer.
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
@@ -13774,7 +13776,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tcreate creates a new dataype of the specified class with the specified number of bytes.
+     * H5Tcreate creates a new datatype of the specified class with the specified number of bytes.
      *
      * @param tclass
      *            IN: Class of datatype to create.
@@ -15229,7 +15231,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tvlen_create creates a new variable-length (VL) dataype.
+     * H5Tvlen_create creates a new variable-length (VL) datatype.
      *
      * @param base_id
      *            IN: Identifier of parent datatype.

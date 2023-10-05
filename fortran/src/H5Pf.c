@@ -5,7 +5,6 @@
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1756,7 +1755,7 @@ DONE:
  * INPUTS
  *  prp_id   - property list identifier
  * OUTPUTS
- *  nfilters - number of filters defined in the filter pipline
+ *  nfilters - number of filters defined in the filter pipeline
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

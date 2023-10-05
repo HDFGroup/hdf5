@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -26,25 +25,6 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
-/* include the pthread header */
-#ifdef H5_HAVE_THREADSAFE
-#ifdef H5_HAVE_WIN32_API
-#ifndef H5_HAVE_WIN_THREADS
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN_THREADS */
-#else  /* H5_HAVE_WIN32_API */
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN32_API */
-#endif /* H5_HAVE_THREADSAFE */
-
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -56,7 +36,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /* POSIX headers */
 #ifdef H5_HAVE_SYS_TIME_H
@@ -80,6 +59,11 @@
 #ifdef H5_HAVE_STDINT_H
 #include <stdint.h>
 #endif
+#endif
+
+/* Include the Pthreads header, if necessary */
+#if defined(H5_HAVE_THREADSAFE) && defined(H5_HAVE_PTHREAD_H)
+#include <pthread.h>
 #endif
 
 /*
@@ -267,6 +251,16 @@
 #include "dmalloc.h"
 #endif /* H5_HAVE_DMALLOC_H */
 
+/* uthash is an external, header-only hash table implementation.
+ *
+ * We include the file directly in src/ and #define a few functions
+ * to use our internal memory calls.
+ */
+#define uthash_malloc(sz)    H5MM_malloc(sz)
+#define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
+#define HASH_NONFATAL_OOM    1              /* Don't abort() on out-of-memory */
+#include "uthash.h"
+
 /*
  * NT doesn't define SIGBUS, but since NT only runs on processors
  * that do not have alignment constraints a SIGBUS would never be
@@ -292,52 +286,68 @@
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.
  */
+/* clang-format off */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
-#define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
-#define H5_ATTR_UNUSED          __attribute__((unused))
-#ifdef H5_HAVE_PARALLEL
-#define H5_ATTR_PARALLEL_UNUSED __attribute__((unused))
-#define H5_ATTR_PARALLEL_USED   /*void*/
+#   define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
+#   define H5_ATTR_UNUSED          __attribute__((unused))
+
+#   ifdef H5_HAVE_PARALLEL
+#       define H5_ATTR_PARALLEL_UNUSED __attribute__((unused))
+#       define H5_ATTR_PARALLEL_USED   /*void*/
+#   else
+#       define H5_ATTR_PARALLEL_UNUSED /*void*/
+#       define H5_ATTR_PARALLEL_USED   __attribute__((unused))
+#   endif
+
+#   ifdef H5_NO_DEPRECATED_SYMBOLS
+#       define H5_ATTR_DEPRECATED_USED H5_ATTR_UNUSED
+#   else
+#       define H5_ATTR_DEPRECATED_USED /*void*/
+#   endif
+
+#   ifdef H5_DEBUG_API
+#       define H5_ATTR_DEBUG_API_USED /*void*/
+#   else
+#       define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
+#   endif
+
+#   ifndef NDEBUG
+#       define H5_ATTR_NDEBUG_UNUSED /*void*/
+#   else
+#       define H5_ATTR_NDEBUG_UNUSED H5_ATTR_UNUSED
+#   endif
+
+#   define H5_ATTR_NORETURN __attribute__((noreturn))
+#   define H5_ATTR_CONST    __attribute__((const))
+#   define H5_ATTR_PURE     __attribute__((pure))
+
+#   if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
+#       define H5_ATTR_FALLTHROUGH __attribute__((fallthrough));
+#   else
+#       define H5_ATTR_FALLTHROUGH /* FALLTHROUGH */
+#   endif
+
+#  if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#       define H5_ATTR_MALLOC __attribute__((malloc))
+#  else
+#       define H5_ATTR_MALLOC /*void*/
+#  endif
+
 #else
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   __attribute__((unused))
+#   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
+#   define H5_ATTR_UNUSED          /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED   /*void*/
+#   define H5_ATTR_DEBUG_API_USED  /*void*/
+#   define H5_ATTR_DEPRECATED_USED /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED /*void*/
+#   define H5_ATTR_PARALLEL_USED   /*void*/
+#   define H5_ATTR_NORETURN        /*void*/
+#   define H5_ATTR_CONST           /*void*/
+#   define H5_ATTR_PURE            /*void*/
+#   define H5_ATTR_FALLTHROUGH     /*void*/
+#   define H5_ATTR_MALLOC          /*void*/
 #endif
-#ifdef H5_NO_DEPRECATED_SYMBOLS
-#define H5_ATTR_DEPRECATED_USED H5_ATTR_UNUSED
-#else                           /* H5_NO_DEPRECATED_SYMBOLS */
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#endif                          /* H5_NO_DEPRECATED_SYMBOLS */
-#ifdef H5_DEBUG_API
-#define H5_ATTR_DEBUG_API_USED /*void*/
-#else                          /* H5_DEBUG_API */
-#define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
-#endif /* H5_DEBUG_API */
-#ifndef NDEBUG
-#define H5_ATTR_NDEBUG_UNUSED /*void*/
-#else                         /* NDEBUG */
-#define H5_ATTR_NDEBUG_UNUSED H5_ATTR_UNUSED
-#endif /* NDEBUG */
-#define H5_ATTR_NORETURN __attribute__((noreturn))
-#define H5_ATTR_CONST    __attribute__((const))
-#define H5_ATTR_PURE     __attribute__((pure))
-#if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
-#define H5_ATTR_FALLTHROUGH __attribute__((fallthrough));
-#else
-#define H5_ATTR_FALLTHROUGH /* FALLTHROUGH */
-#endif
-#else
-#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#define H5_ATTR_UNUSED          /*void*/
-#define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#define H5_ATTR_DEBUG_API_USED  /*void*/
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   /*void*/
-#define H5_ATTR_NORETURN        /*void*/
-#define H5_ATTR_CONST           /*void*/
-#define H5_ATTR_PURE            /*void*/
-#define H5_ATTR_FALLTHROUGH     /*void*/
-#endif
+/* clang-format on */
 
 /*
  * Networking headers used by the mirror VFD and related tests and utilities.
@@ -413,6 +423,20 @@
 
 /* Raise an integer to a power of 2 */
 #define H5_EXP2(n) (1 << (n))
+
+/* Check if a read of size bytes starting at ptr would overflow past
+ * the last valid byte, pointed to by buffer_end.
+ */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
+
+/* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
+ * that don't take a size parameter, where we need to skip the bounds checks.
+ *
+ * This is a separate macro since we don't want to inflict that behavior on
+ * the entire library.
+ */
+#define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
+    (skip ? FALSE : ((ptr) + (size)-1) > (buffer_end))
 
 /*
  * HDF Boolean type.
@@ -1485,6 +1509,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrlen
 #define HDstrlen(S) strlen(S)
 #endif
+#ifndef HDstrnlen
+#define HDstrnlen(S, L) strnlen(S, L)
+#endif
 #ifndef HDstrncat
 #define HDstrncat(X, Y, Z) strncat(X, Y, Z)
 #endif
@@ -1493,6 +1520,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrncpy
 #define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
+#endif
+#ifndef HDstrndup
+#define HDstrndup(S, N) strndup(S, N)
 #endif
 #ifndef HDstrpbrk
 #define HDstrpbrk(X, Y) strpbrk(X, Y)
@@ -2380,7 +2410,7 @@ H5_DLL herr_t H5CX_pop(void);
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for package-level functions which propgate errors, but don't issue them */
+/* Use this macro for package-level functions which propagate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                                            \
@@ -2405,14 +2435,14 @@ H5_DLL herr_t H5CX_pop(void);
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
+/* Use this macro for staticly-scoped functions which propagate errors, but don't issue them */
 #define FUNC_ENTER_STATIC_NOERR                                                                              \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                                            \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
+/* Use this macro for staticly-scoped functions which propagate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
 #define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
     {                                                                                                        \

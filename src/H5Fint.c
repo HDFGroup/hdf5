@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -81,7 +80,7 @@ static herr_t H5F__build_name(const char *prefix, const char *file_name, char **
 static char  *H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
-static herr_t H5F__dest(H5F_t *f, hbool_t flush);
+static herr_t H5F__dest(H5F_t *f, hbool_t flush, hbool_t free_on_failure);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
@@ -1382,7 +1381,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__dest(H5F_t *f, hbool_t flush)
+H5F__dest(H5F_t *f, hbool_t flush, hbool_t free_on_failure)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1648,7 +1647,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
     if (H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
-    f         = H5FL_FREE(H5F_t, f);
+
+    if ((ret_value >= 0) || free_on_failure)
+        f = H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__dest() */
@@ -1829,16 +1830,52 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     else
         tent_flags = flags;
 
-    if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-        if (tent_flags == flags)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
-                        name, tent_flags)
-        H5E_clear_stack(NULL);
-        tent_flags = flags;
+    /*
+     * When performing a tentative open of a file where we have stripped away
+     * flags such as H5F_ACC_CREAT from the specified file access flags, the
+     * H5E_BEGIN/END_TRY macros are used to suppress error output since there
+     * is an expectation that the tentative open might fail. Even though we
+     * explicitly clear the error stack after such a failure, the underlying
+     * file driver might maintain its own error stack and choose whether to
+     * display errors based on whether the library has disabled error reporting.
+     * Since we wish to suppress that error output as well for the case of
+     * tentative file opens, surrounding the file open call with the
+     * H5E_BEGIN/END_TRY macros is an explicit instruction to the file driver
+     * not to display errors. If the tentative file open call fails, another
+     * attempt at opening the file will be made without error output being
+     * suppressed.
+     *
+     * However, if stripping away the H5F_ACC_CREAT flag and others left us
+     * with the same file access flags as before, then we will skip this
+     * tentative file open and only make a single attempt at opening the file.
+     * In this case, we don't want to suppress error output since the underlying
+     * file driver might provide more details on why the file open failed.
+     */
+    if (tent_flags != flags) {
+        /* Make tentative attempt to open file */
+        H5E_BEGIN_TRY
+        {
+            lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
+        }
+        H5E_END_TRY;
+    }
+
+    /*
+     * If a tentative attempt to open the file wasn't necessary, attempt
+     * to open the file now. Otherwise, if the tentative open failed, clear
+     * the error stack and reset the file access flags, then make another
+     * attempt at opening the file.
+     */
+    if ((tent_flags == flags) || (lf == NULL)) {
+        if (tent_flags != flags) {
+            H5E_clear_stack(NULL);
+            tent_flags = flags;
+        }
+
         if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)
-    } /* end if */
+    }
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {
@@ -2108,7 +2145,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 done:
     if ((NULL == ret_value) && file)
-        if (H5F__dest(file, FALSE) < 0)
+        if (H5F__dest(file, FALSE, TRUE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2518,7 +2555,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
      * shared H5F_shared_t struct. If the reference count for the H5F_shared_t
      * struct reaches zero then destroy it also.
      */
-    if (H5F__dest(f, TRUE) < 0)
+    if (H5F__dest(f, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     /* Since we closed the file, this should be set to TRUE */

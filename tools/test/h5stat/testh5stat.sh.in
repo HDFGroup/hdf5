@@ -1,7 +1,6 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -12,10 +11,6 @@
 # help@hdfgroup.org.
 #
 # Tests for the h5stat tool
-#
-# Modifications:
-#     Vailin Choi; July 2013
-#     Add tests for -l, -m, -a options
 #
 
 srcdir=@srcdir@
@@ -261,7 +256,7 @@ TOOLTEST h5stat_help2.ddl --help
 TOOLTEST h5stat_notexist.ddl notexist.h5
 TOOLTEST h5stat_nofile.ddl ''
 
-# Test file with groups, compressed datasets, user-applied fileters, etc.
+# Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
 TOOLTEST h5stat_filters.ddl h5stat_filters.h5
 TOOLTEST h5stat_filters-file.ddl  -f   h5stat_filters.h5

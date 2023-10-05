@@ -4,9 +4,9 @@ project (HDF5_TOOLS_SRC_H5LS C)
 #-----------------------------------------------------------------------------
 # Add the h5ls executable
 #-----------------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5ls ${HDF5_TOOLS_SRC_H5LS_SOURCE_DIR}/h5ls.c)
-  target_include_directories (h5ls PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5ls PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5ls PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   #target_compile_definitions(h5ls PRIVATE H5_TOOLS_DEBUG)
   TARGET_C_PROPERTIES (h5ls STATIC)
@@ -19,7 +19,7 @@ endif ()
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5ls-shared ${HDF5_TOOLS_SRC_H5LS_SOURCE_DIR}/h5ls.c)
-  target_include_directories (h5ls-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5ls-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5ls-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   #target_compile_definitions(h5ls-shared PRIVATE H5_TOOLS_DEBUG)
   TARGET_C_PROPERTIES (h5ls-shared SHARED)
@@ -34,7 +34,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5LS_SRC_FORMAT h5ls)
   else ()
     clang_format (HDF5_H5LS_SRC_FORMAT h5ls-shared)

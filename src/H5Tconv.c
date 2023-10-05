@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -888,7 +887,17 @@ done:                                                                           
 /* Macro defining action on source data which needs to be aligned (before main action) */
 #define H5T_CONV_LOOP_PRE_SALIGN(ST)                                                                         \
     {                                                                                                        \
-        H5MM_memcpy(&src_aligned, src, sizeof(ST));                                                          \
+        /* The uint8_t * cast is required to avoid tripping over undefined behavior.                         \
+         *                                                                                                   \
+         * The typed pointer arrives via a void pointer, which may have any alignment.                       \
+         * We then cast it to a pointer to a type that is assumed to be aligned, which                       \
+         * is undefined behavior (section 6.3.2.3 paragraph 7 of the C99 standard).                          \
+         * In the past this hasn't caused many problems, but in some cases (e.g.                             \
+         * converting long doubles on macOS), an optimizing compiler might do the                            \
+         * wrong thing (in the macOS case, the conversion uses SSE, which has stricter                       \
+         * requirements about alignment).                                                                    \
+         */                                                                                                  \
+        H5MM_memcpy(&src_aligned, (const uint8_t *)src, sizeof(ST));                                         \
     }
 
 /* Macro defining action on source data which doesn't need to be aligned (before main action) */
@@ -920,7 +929,17 @@ done:                                                                           
 /* Macro defining action on destination data which needs to be aligned (after main action) */
 #define H5T_CONV_LOOP_POST_DALIGN(DT)                                                                        \
     {                                                                                                        \
-        H5MM_memcpy(dst, &dst_aligned, sizeof(DT));                                                          \
+        /* The uint8_t * cast is required to avoid tripping over undefined behavior.                         \
+         *                                                                                                   \
+         * The typed pointer arrives via a void pointer, which may have any alignment.                       \
+         * We then cast it to a pointer to a type that is assumed to be aligned, which                       \
+         * is undefined behavior (section 6.3.2.3 paragraph 7 of the C99 standard).                          \
+         * In the past this hasn't caused many problems, but in some cases (e.g.                             \
+         * converting long doubles on macOS), an optimizing compiler might do the                            \
+         * wrong thing (in the macOS case, the conversion uses SSE, which has stricter                       \
+         * requirements about alignment).                                                                    \
+         */                                                                                                  \
+        H5MM_memcpy((uint8_t *)dst, &dst_aligned, sizeof(DT));                                               \
     }
 
 /* Macro defining action on destination data which doesn't need to be aligned (after main action) */

@@ -2,35 +2,38 @@ HDF5 version 1.12.3-1 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
+[![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
+[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
+
 *Please refer to the release_docs/INSTALL file for installation instructions.*
 
-THE HDF GROUP
----------------
+This repository contains a high-performance library's source code and a file format
+specification that implement the HDF5® data model. The model has been adopted across
+many industries and this implementation has become a de facto data management standard
+in science, engineering, and research communities worldwide.
 
-The HDF Group is the developer of HDF5®, a high-performance software library and
-data format that has been adopted across multiple industries and has become a
-de facto standard in scientific and research communities.
-
-More information about The HDF Group, the HDF5 Community and the HDF5 software
-project, tools and services can be found at the Group's website.
-    
-   https://www.hdfgroup.org/
-
+The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more
+information about The HDF Group, the HDF5 Community, and other HDF5 software projects,
+tools, and services at [The HDF Group's website](https://www.hdfgroup.org/). 
 
 DOCUMENTATION
 -------------
 This release is fully functional for the API described in the documentation.
-    
+
    https://portal.hdfgroup.org/display/HDF5/The+HDF5+API
 
 Full Documentation and Programming Resources for this release can be found at
 
    https://portal.hdfgroup.org/display/HDF5
 
-See the RELEASE.txt file in the release_docs/ directory for information specific
+The latest doxygen documentation generated on changes to develop is available at:
+
+   https://hdfgroup.github.io/hdf5/
+
+See the [RELEASE.txt](/release_docs/RELEASE.txt) file in the [release_docs/](/release_docs/) directory for information specific
 to the features and updates included in this release of the library.
 
-Several more files are located within the release_docs/ directory with specific
+Several more files are located within the [release_docs/](/release_docs/) directory with specific
 details for several common platforms and configurations.
 
     INSTALL - Start Here. General instructions for compiling and installing the library
@@ -50,50 +53,27 @@ Information regarding Help Desk and Support services is available at
 
 FORUM and NEWS
 --------------
-The following public forums are provided for public announcements and discussions
+The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements and discussions
 of interest to the general HDF5 Community.
 
-   - Homepage of the Forum
-   https://forum.hdfgroup.org
-
-   - News and Announcement
+   - News and Announcements
    https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group
 
-   - HDF5 and HDF4 Topics
+   - HDF5 Topics
    https://forum.hdfgroup.org/c/hdf5
 
 These forums are provided as an open and public service for searching and reading.
 Posting requires completing a simple registration and allows one to join in the
-conversation.  Please read the following instructions pertaining to the Forum's
-use and configuration
-    https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
+conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
+) pertaining to the Forum's use and configuration.
 
-
-RELEASE SCHEDULE
-----------------
-
-![HDF5 release schedule](doc/img/release-schedule.png) 
-
-HDF5 does not release on a regular schedule. Instead, releases are driven by
-new features and bug fixes, though we try to have at least one release of each
-maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative. 
-
-| Release | New Features |
-| ------- | ------------ |
-| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O |
-| 1.13.3 | Multi-Dataset I/O |
-| 1.13.4 | Subfiling |
-
-This list of feature release versions is also tentative, and the specific release
-in which a feature is introduced may change.
 
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
     
-   https://gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/snapshots/
+   https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.12
 
 Source packages for current and previous releases are located at:
     

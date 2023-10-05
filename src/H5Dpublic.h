@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -239,7 +238,7 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
  */
-typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t size,
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size,
                                    void *op_data);
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
 
@@ -280,7 +279,7 @@ extern "C" {
  *
  *          \p loc_id may specify a file, group, dataset, named datatype,
  *          or attribute.  If an attribute, dataset, or named datatype is
- *          specified then the dataset will be created at the location
+ *          specified, then the dataset will be created at the location
  *          where the attribute, dataset, or named datatype is attached.
  *
  *          \p name may be either an absolute path in the file or a relative
@@ -291,7 +290,7 @@ extern "C" {
  *          file location where the dataset will be created, the datatype
  *          is copied and converted to a transient type.
  *
- *          The link creation property list, \p lcpl_id, governs creation
+ *          The link creation property list, \p lcpl_id, governs the creation
  *          of the link(s) by which the new dataset is accessed and the
  *          creation of any intermediate groups that may be missing.
  *
@@ -335,12 +334,12 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  *
  *          \p loc_id may specify a file, group, dataset, named datatype,
  *          or attribute.  If an attribute, dataset, or named datatype is
- *          specified then the dataset will be created at the location
+ *          specified, then the dataset will be created at the location
  *          where the attribute, dataset, or named datatype is attached.
  *
  *          The dataset’s datatype and dataspace are specified by
  *          \p type_id and \p space_id, respectively. These are the
- *          datatype and dataspace of the dataset as it will exist in
+ *          datatype and dataspace of the dataset as they will exist in
  *          the file, which may differ from the datatype and dataspace
  *          in application memory.
  *
@@ -424,6 +423,20 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
  * \details H5Dget_space_status() determines whether space has been allocated
  *          for the dataset \p dset_id.
  *
+ * \note \Bold{BUG:} Prior to the HDF5 1.14.0, 1.12.2 and 1.10.9 releases,
+ *       H5Dget_space_status() may return incorrect space allocation status
+ *       values for datasets with filters applied to them.
+ *       H5Dget_space_status() calculated the space allocation status by
+ *       comparing the sum of the sizes of all the allocated chunks in the
+ *       dataset against the total data size of the dataset, as calculated by
+ *       the number of elements in the dataset's dataspace multiplied by the
+ *       dataset's datatype size. If the dataset had any compression filters
+ *       applied to it and the dataset chunks were successfully compressed,
+ *       the sum of the sizes of the allocated dataset chunks would generally
+ *       always be less than the total data size of the dataset, and
+ *       H5Dget_space_status() wouldn't ever return
+ *       `H5D_SPACE_STATUS_ALLOCATED`.
+ *
  * \since 1.6.0
  *
  */
@@ -463,6 +476,9 @@ H5_DLL hid_t H5Dget_type(hid_t dset_id);
  * \details H5Dget_create_plist() returns an identifier for
  *          a copy of the dataset creation property list associated with
  *          the dataset specified by \p dset_id.
+ *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
  *
  */
 H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
@@ -633,6 +649,7 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  */
 H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask,
                                          haddr_t *addr, hsize_t *size);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -651,12 +668,12 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *          context \p op_data.
  *
  * \par Example
- * For each chunk, print the allocated chunk size (0 for un-allocated chunks).
+ * For each chunk, print the allocated chunk size (0 for unallocated chunks).
  * \snippet H5D_examples.c H5Dchunk_iter_cb
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
  *
- * \since 1.12.3, 1.13.0
+ * \since 1.12.3
  *
  */
 H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);
@@ -683,22 +700,22 @@ H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb
  *          specified by the index \p index. The chunk belongs to a set of
  *          chunks in the selection specified by \p fspace_id. If the queried
  *          chunk does not exist in the file, the size will be set to 0 and
- *          address to #HADDR_UNDEF. The value pointed to by filter_mask will
+ *          address to HADDR_UNDEF. The value pointed to by filter_mask will
  *          not be modified. \c NULL can be passed in for any \p out parameters.
  *
  *          \p chk_idx is the chunk index in the selection. The index value
  *          may have a value of 0 up to the number of chunks stored in
- *          the file that have a nonempty intersection with the file
- *          dataspace selection
+ *          the file that has a nonempty intersection with the file
+ *          dataspace selection.
  *
  *          \note As of 1.10.5, the dataspace intersection is not yet
- *          supported, hence, the index is of all the written chunks.
+ *          supported. Hence, the index is of all the written chunks.
  *
  *          \p fspace_id specifies the file dataspace selection.  It is
- *          intended to take #H5S_ALL for specifying the current selection.
+ *          intended to take #H5S_ALL to specify the current selection.
  *
  *          \note Please be aware that this function currently does not
- *          support non-trivial selections, thus \p fspace_id has no
+ *          support non-trivial selections; thus \p fspace_id has no
  *          effect. Also, the implementation does not handle the #H5S_ALL
  *          macro correctly.  As a workaround, an application can get
  *          the dataspace for the dataset using H5Dget_space() and pass that
@@ -718,7 +735,7 @@ H5_DLL herr_t H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_idx,
  *
  * \dset_id
  *
- * \return Returns the offset in bytes; otherwise, returns #HADDR_UNDEF,
+ * \return Returns the offset in bytes; otherwise, returns HADDR_UNDEF,
  *         a negative value.
  *
  * \details H5Dget_offset() returns the address in the file of
@@ -966,7 +983,7 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
  *          the file. Only one chunk can be written with this function.
  *
  *          \p filters is a mask providing a record of which filters are
- *          used with the the chunk. The default value of the mask is
+ *          used with the chunk. The default value of the mask is
  *          zero (0), indicating that all enabled filters are applied. A
  *          filter is skipped if the bit corresponding to the filter’s
  *          position in the pipeline (0 ≤ position < 32) is turned on.
@@ -1085,6 +1102,8 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
  *            be restarted at the point of exit; a second H5Diterate()
  *            call will always restart at the beginning.
  *
+ * \warning   Modifying the selection of \p space_id during iteration
+ *            will lead to undefined behavior.
  *
  * \since 1.10.2
  *
@@ -1287,7 +1306,7 @@ H5_DLL herr_t H5Drefresh(hid_t dset_id);
  *          \p op and scatters it to the supplied buffer \p dst_buf in a
  *          manner similar to data being written to a dataset.
  *
- *          \p dst_space_id is a dataspace which defines the extent of \p
+ *          \p dst_space_id is a dataspace that defines the extent of \p
  *          dst_buf and the selection within it to scatter the data to.
  *
  *          \p type_id is the datatype of the data to be scattered in both
@@ -1344,7 +1363,7 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hi
  *          enough to hold all the data if the callback function \p op is
  *          not provided.
  *
- *          \p op is a callback function which handles the gathered data.
+ *          \p op is a callback function that handles the gathered data.
  *          It is optional if \p dst_buf is large enough to hold all of the
  *          gathered data; required otherwise.
  *
@@ -1390,10 +1409,12 @@ H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, 
  */
 H5_DLL herr_t H5Dclose(hid_t dset_id);
 
+/// \cond DEV
 /* Internal API routines */
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
@@ -1472,10 +1493,10 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  *
  *          H5Dcreate() and H5Dcreate_anon() return a dataset identifier for
  *          success or a negative value for failure. The dataset identifier
- *          should eventually be closed by calling H5Dclose() to release
+ *          should eventually be closed by calling H5Dclose() to release the
  *          resources it uses.
  *
- *          See H5Dcreate_anon() for discussion of the differences between
+ *          See H5Dcreate_anon() for a discussion of the differences between
  *          H5Dcreate() and H5Dcreate_anon().
  *
  *          The HDF5 library provides flexible means of specifying a fill value,
@@ -1551,7 +1572,7 @@ H5_DLL hid_t H5Dopen1(hid_t loc_id, const char *name);
  *
  *          This function ensures that the dataset dimensions are of at least
  *          the sizes specified in size. The function H5Dset_extent() must be
- *          used if the dataset dimension sizes are are to be reduced.
+ *          used if the dataset dimension sizes are to be reduced.
  *
  * \version 1.8.0 Function deprecated in this release. Parameter size
  *                syntax changed to \Code{const hsize_t size[]} in this release.
@@ -1579,7 +1600,7 @@ H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
  *          The \p type_id must be the datatype stored in the buffer. The \p
  *          space_id describes the selection for the memory buffer to free the
  *          VL datatypes within. The \p dxpl_id is the dataset transfer property
- *          list which was used for the I/O transfer to create the buffer. And
+ *          list that was used for the I/O transfer to create the buffer. And
  *          \p buf is the pointer to the buffer to be reclaimed.
  *
  *          The VL structures (\ref hvl_t) in the user's buffer are modified to

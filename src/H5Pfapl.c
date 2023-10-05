@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -2166,7 +2165,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_sieve_buf_size
  *
- * Purpose:    Sets the maximum size of the data seive buffer used for file
+ * Purpose:    Sets the maximum size of the data sieve buffer used for file
  *      drivers which are capable of using data sieving.  The data sieve
  *      buffer is used when performing I/O on datasets in the file.  Using a
  *      buffer which is large anough to hold several pieces of the dataset

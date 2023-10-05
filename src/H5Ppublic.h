@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -2322,10 +2321,13 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
  *          (#H5Z_FILTER_FLETCHER32).
  *
- *          The array \p c_values contains \p cd_nelmts integers which are
- *          auxiliary data for the filter. The integer values will be
- *          stored in the dataset object header as part of the filter
- *          information.
+ *          The array \p cd_values contains \p cd_nelmts unsigned integers
+ *          which are auxiliary data for the filter. The values are typically
+ *          used as parameters to control the filter. In a filter's
+ *          \p set_local method (called from \p H5Dcreate), the values are
+ *          interpreted and possibly modified before they are used to control
+ *          the filter. These, possibly modified values, are then stored in
+ *          the dataset object header as auxiliary data for the filter.
  *
  *          The \p flags argument is a bit vector with the following
  *          fields specifying certain general properties of the filter:
@@ -5675,6 +5677,9 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
  *          are null pointers then the corresponding information is not
  *          returned.
  *
+ * \note On Windows, off_t is typically a 32-bit signed long value, which
+ *       limits the valid offset that can be returned to 2 GiB.
+ *
  * \version 1.6.4 \p idx parameter type changed to unsigned.
  * \since 1.0.0
  *
@@ -8054,9 +8059,8 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
                                               uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
 
-/* Link creation property list (LCPL) routines */
 /**
- * \ingroup STRCPL
+ * \ingroup LCPL
  *
  * \brief Determines whether property is set to enable creating missing
  *        intermediate groups
@@ -8087,7 +8091,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  */
 H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
 /**
- * \ingroup STRCPL
+ * \ingroup LCPL
  *
  * \brief Specifies in property list whether to create missing
  *        intermediate groups
@@ -8469,9 +8473,8 @@ H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size 
                                        size_t *key_alloc_size /*out*/);
 #endif /*  H5_HAVE_MAP_API */
 
-/* String creation property list (STRCPL) routines */
 /**
- * \ingroup STRCPL
+ * \ingroup ACPL
  *
  * \brief  Retrieves the character encoding used to create a link or
  *         attribute name
@@ -8500,7 +8503,7 @@ H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size 
  */
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 /**
- * \ingroup STRCPL
+ * \ingroup ACPL
  *
  * \brief Sets the character encoding used to encode link and attribute
  *        names

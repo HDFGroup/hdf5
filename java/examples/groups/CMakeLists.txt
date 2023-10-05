@@ -64,8 +64,9 @@ add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G
 
 if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
+  set (last_test "")
   foreach (example ${HDF_JAVA_EXAMPLES})
     if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")
       if (example STREQUAL "H5Ex_G_Compact")
@@ -78,7 +79,8 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
       else ()
         add_test (
             NAME JAVA_groups-${example}-clear-objects
-            COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+            COMMAND ${CMAKE_COMMAND} -E remove
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
         )
       endif ()
     else ()
@@ -86,6 +88,9 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
           NAME JAVA_groups-${example}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E echo "${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5 exists"
       )
+    endif ()
+    if (last_test)
+      set_tests_properties (JAVA_groups-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif ()
 
     add_test (
@@ -112,5 +117,28 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_groups-${example} PROPERTIES
         DEPENDS JAVA_groups-${example}-copy-objects
     )
+
+    if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")
+      if (example STREQUAL "H5Ex_G_Compact")
+        add_test (
+            NAME JAVA_groups-${example}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}1.h5
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}2.h5
+        )
+      else ()
+        add_test (
+            NAME JAVA_groups-${example}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+        )
+      endif ()
+      set_tests_properties (JAVA_groups-${example}-clean-objects PROPERTIES
+          DEPENDS JAVA_groups-${example}
+      )
+      set (last_test "JAVA_groups-${example}-clean-objects")
+    else ()
+      set (last_test "JAVA_groups-${example}")
+    endif ()
   endforeach ()
 endif ()

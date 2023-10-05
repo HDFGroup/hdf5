@@ -1,0 +1,569 @@
+/** @page IntroParContHyperslab Writing by Contiguous Hyperslab
+
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+<hr>
+
+This example shows how to write a contiguous buffer in memory to a contiguous hyperslab in a file. In this case,
+each parallel process writes a contiguous hyperslab to the file.
+
+In the C example (figure a), each hyperslab in memory consists of an equal number of consecutive rows. In the FORTRAN
+90 example (figure b), each hyperslab in memory consists of
+an equal number of consecutive columns. This reflects the difference in the storage order for C and FORTRAN 90.
+<table>
+<tr>
+<th><strong>Figure a</strong>   C Example</th>
+<th><strong>Figure b</strong>   Fortran Example</th>
+</tr><tr>
+<td>
+\image html pcont_hy_figa.gif
+</td>
+<td>
+\image html pcont_hy_figb.gif
+</td>
+</tr>
+</table>
+
+\section secIntroParContHyperslabC Writing a Contiguous Hyperslab in C
+In this example, you have a dataset of 8 (rows) x 5 (columns) and each process writes an equal number
+of rows to the dataset. The dataset hyperslab is defined as follows:
+\code
+     count [0] = dimsf [0] / number_processes
+     count [1] = dimsf [1]
+\endcode
+where,
+\code
+    dimsf [0] is the number of rows in the dataset
+    dimsf [1] is the number of columns in the dataset
+\endcode
+The offset for the hyperslab is different for each process:
+\code
+     offset [0] = k * count[0]
+     offset [1] = 0
+\endcode
+where,
+\code
+    "k" is the process id number
+    count [0] is the number of rows written in each hyperslab
+    offset [1] = 0 indicates to start at the beginning of the row
+\endcode
+
+The number of processes that you could use would be 1, 2, 4, or 8. The number of rows that would be written by each slab is as follows:
+<table>
+<tr>
+<th><strong>Processes</strong></th>
+<th><strong>Size of count[0](\# of rows) </strong></th>
+</tr><tr>
+<td>1</td><td>8</td>
+</tr><tr>
+<td>2</td><td>4</td>
+</tr><tr>
+<td>4</td><td>2</td>
+</tr><tr>
+<td>8</td><td>1</td>
+</tr>
+</table>
+
+If using 4 processes, then process 1 would look like:
+<table>
+<tr>
+<td>
+\image html pcont_hy_figc.gif
+</td>
+</tr>
+</table>
+
+The code would look like the following:
+\code
+    71      /*
+    72       * Each process defines dataset in memory and writes it to the hyperslab
+    73       * in the file.
+    74       */
+    75      count[0] = dimsf[0]/mpi_size;
+    76      count[1] = dimsf[1];
+    77      offset[0] = mpi_rank * count[0];
+    78      offset[1] = 0;
+    79      memspace = H5Screate_simple(RANK, count, NULL);
+    80
+    81      /*
+    82       * Select hyperslab in the file.
+    83       */
+    84      filespace = H5Dget_space(dset_id);
+    85      H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, count, NULL);
+\endcode
+
+Below is the example program:
+<table>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5Parallel/ph5_hyperslab_by_row.c">hyperslab_by_row.c</a>
+</td>
+</tr>
+</table>
+
+If using this example with 4 processes, then,
+\li    Process 0 writes "10"s to the file.
+\li    Process 1 writes "11"s.
+\li    Process 2 writes "12"s.
+\li    Process 3 writes "13"s.
+
+The following is the output from h5dump for the HDF5 file created by this example using 4 processes:
+\code
+HDF5 "SDS_row.h5" {
+GROUP "/" {
+   DATASET "IntArray" {
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 8, 5 ) / ( 8, 5 ) } 
+      DATA {
+         10, 10, 10, 10, 10,
+         10, 10, 10, 10, 10,
+         11, 11, 11, 11, 11,
+         11, 11, 11, 11, 11,
+         12, 12, 12, 12, 12,
+         12, 12, 12, 12, 12,
+         13, 13, 13, 13, 13,
+         13, 13, 13, 13, 13
+      } 
+   } 
+} 
+} 
+\endcode
+
+
+\section secIntroParContHyperslabFort Writing a Contiguous Hyperslab in Fortran
+In this example you have a dataset of 5 (rows) x 8 (columns). Since a contiguous hyperslab in Fortran 90
+consists of consecutive columns, each process will be writing an equal number of columns to the dataset.
+
+You would define the size of the hyperslab to write to the dataset as follows:
+\code
+      count(1) = dimsf(1)
+      count(2) = dimsf(2) / number_of_processes
+\endcode
+
+where,
+\code
+    dimsf(1) is the number of rows in the dataset
+    dimsf(2) is the number of columns
+\endcode
+
+The offset for the hyperslab dimension would be different for each process:
+\code
+      offset (1) = 0
+      offset (2) = k * count (2)
+\endcode
+
+where,
+\code
+    offset (1) = 0 indicates to start at the beginning of the column
+    "k" is the process id number
+    "count(2) is the number of columns to be written by each hyperslab
+\endcode
+
+The number of processes that could be used in this example are 1, 2, 4, or 8. The number of
+columns that could be written by each slab is as follows:
+<table>
+<tr>
+<th><strong>Processes</strong></th>
+<th><strong>Size of count (2)(\# of columns) </strong></th>
+</tr><tr>
+<td>1</td><td>8</td>
+</tr><tr>
+<td>2</td><td>4</td>
+</tr><tr>
+<td>4</td><td>2</td>
+</tr><tr>
+<td>8</td><td>1</td>
+</tr>
+</table>
+
+If using 4 processes, the offset and count parameters for Process 1 would look like:
+<table>
+<tr>
+<td>
+\image html pcont_hy_figd.gif
+</td>
+</tr>
+</table>
+
+The code would look like the following:
+\code
+    69       ! Each process defines dataset in memory and writes it to the hyperslab
+    70       ! in the file.
+    71       !
+    72       count(1) = dimsf(1)
+    73       count(2) = dimsf(2)/mpi_size
+    74       offset(1) = 0
+    75       offset(2) = mpi_rank * count(2)
+    76       CALL h5screate_simple_f(rank, count, memspace, error)
+    77       !
+    78       ! Select hyperslab in the file.
+    79       !
+    80       CALL h5dget_space_f(dset_id, filespace, error)
+    81       CALL h5sselect_hyperslab_f (filespace, H5S_SELECT_SET_F, offset, count, error)
+\endcode
+
+Below is the F90 example program which illustrates how to write contiguous hyperslabs by column in Parallel HDF5:
+<table>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_col.F90">hyperslab_by_col.F90</a>
+</td>
+</tr>
+</table>
+
+If you run this program with 4 processes and look at the output with h5dump you will notice that the output is
+much like the output shown above for the C example. This is because h5dump is written in C. The data would be
+displayed in columns if it was printed using Fortran 90 code.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+
+@page IntroParRegularSpaced Writing by Regularly Spaced Data
+
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+<hr>
+
+In this case, each process writes data from a contiguous buffer into disconnected locations in the file, using a regular pattern.
+
+In C it is done by selecting a hyperslab in a file that consists of regularly spaced columns. In F90, it is done by selecting a
+hyperslab in a file that consists of regularly spaced rows.
+<table>
+<tr>
+<th><strong>Figure a</strong>   C Example</th>
+<th><strong>Figure b</strong>   Fortran Example</th>
+</tr><tr>
+<td>
+\image html preg_figa.gif
+</td>
+<td>
+\image html preg_figb.gif
+</td>
+</tr>
+</table>
+
+\section secIntroParRegularSpacedC Writing Regularly Spaced Columns in C
+In this example, you have two processes that write to the same dataset, each writing to
+every other column in the dataset. For each process the hyperslab in the file is set up as follows:
+\code
+    89      count[0] = 1;
+    90      count[1] = dimsm[1];
+    91      offset[0] = 0;
+    92      offset[1] = mpi_rank;
+    93      stride[0] = 1;
+    94      stride[1] = 2;
+    95      block[0] = dimsf[0];
+    96      block[1] = 1;
+\endcode
+
+The stride is 2 for dimension 1 to indicate that every other position along this
+dimension will be written to. A stride of 1 indicates that every position along a dimension will be written to.
+
+For two processes, the mpi_rank will be either 0 or 1. Therefore:
+\li Process 0 writes to even columns (0, 2, 4...)
+\li Process 1 writes to odd columns (1, 3, 5...)
+
+The block size allows each process to write a column of data to every other position in the dataset.
+
+<table>
+<tr>
+<td>
+\image html preg_figc.gif
+</td>
+</tr>
+</table>
+
+Below is an example program for writing hyperslabs by column in Parallel HDF5:
+<table>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5Parallel/ph5_hyperslab_by_col.c">hyperslab_by_col.c</a>
+</td>
+</tr>
+</table>
+
+The following is the output from h5dump for the HDF5 file created by this example:
+\code
+HDF5 "SDS_col.h5" {
+GROUP "/" {
+   DATASET "IntArray" {
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 8, 6 ) / ( 8, 6 ) } 
+      DATA {
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200,
+         1, 2, 10, 20, 100, 200
+      } 
+   } 
+} 
+} 
+\endcode
+
+
+\section secIntroParRegularSpacedFort Writing Regularly Spaced Rows in Fortran
+In this example, you have two processes that write to the same dataset, each writing to every
+other row in the dataset. For each process the hyperslab in the file is set up as follows:
+
+
+You would define the size of the hyperslab to write to the dataset as follows:
+\code
+    83       ! Each process defines dataset in memory and writes it to 
+    84       ! the hyperslab in the file.
+    85       !
+    86       count(1) = dimsm(1)
+    87       count(2) = 1
+    88       offset(1) = mpi_rank
+    89       offset(2) = 0
+    90       stride(1) = 2
+    91       stride(2) = 1
+    92       block(1) = 1
+    93       block(2) = dimsf(2)
+\endcode
+
+The stride is 2 for dimension 1 to indicate that every other position along this dimension will
+be written to. A stride of 1 indicates that every position along a dimension will be written to.
+
+For two process, the mpi_rank will be either 0 or 1. Therefore:
+\li Process 0 writes to even rows (0, 2, 4 ...)
+\li Process 1 writes to odd rows (1, 3, 5 ...)
+
+The block size allows each process to write a row of data to every other position in the dataset,
+rather than just a point of data.
+
+The following shows the data written by Process 1 to the file:
+<table>
+<tr>
+<td>
+\image html preg_figd.gif
+</td>
+</tr>
+</table>
+
+Below is the example program for writing hyperslabs by column in Parallel HDF5:
+<table>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_row.F90">hyperslab_by_row.F90</a>
+</td>
+</tr>
+</table>
+
+The output for h5dump on the file created by this program will look like the output as shown above for the C example. This is
+because h5dump is written in C. The data would be displayed in rows if it were printed using Fortran 90 code.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+
+@page IntroParPattern Writing by Pattern
+
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+<hr>
+
+This is another example of writing data into disconnected locations in a file. Each process writes data from the contiguous
+buffer into regularly scattered locations in the file.
+
+Each process defines a hyperslab in the file as described below and writes data to it. The C and Fortran 90 examples below
+result in the same data layout in the file.
+
+<table>
+<tr>
+<th><strong>Figure a</strong>   C Example</th>
+<th><strong>Figure b</strong>   Fortran Example</th>
+</tr><tr>
+<td>
+\image html ppatt_figa.gif
+</td>
+<td>
+\image html ppatt_figb.gif
+</td>
+</tr>
+</table>
+
+The C and Fortran 90 examples use four processes to write the pattern shown above. Each process defines a hyperslab by:
+\li Specifying a stride of 2 for each dimension, which indicates that you wish to write to every other position along a dimension.
+\li Specifying a different offset for each process:
+<table>
+<tr>
+<th rowspan="3"><strong>C</strong></th><th>Process 0</th><th>Process 1</th><th>Process 2</th><th>Process 3</th>
+</tr><tr>
+<td>offset[0] = 0</td><td>offset[0] = 1</td><td>offset[0] = 0</td><td>offset[0] = 1</td>
+</tr><tr>
+<td>offset[1] = 0</td><td>offset[1] = 0</td><td>offset[1] = 1</td><td>offset[1] = 1</td>
+</tr><tr>
+<th rowspan="3"><strong>Fortran</strong></th><th>Process 0</th><th>Process 1</th><th>Process 2</th><th>Process 3</th>
+</tr><tr>
+<td>offset(1) = 0</td><td>offset(1) = 0</td><td>offset(1) = 1</td><td>offset(1) = 1</td>
+</tr><tr>
+<td>offset(2) = 0</td><td>offset(2) = 1</td><td>offset(2) = 0</td><td>offset(2) = 1</td>
+</tr>
+</table>
+\li Specifying the size of the slab to write. The count is the number of positions along a dimension to write to. If writing a 4 x 2 slab,
+then the count would be:
+<table>
+<tr>
+<th><strong>C</strong></th><th>Fortran</th>
+</tr><tr>
+<td>count[0] = 4</td><td>count(1) =  2</td>
+</tr><tr>
+<td>count[1] = 2</td><td>count(2) =  4</td>
+</tr>
+</table>
+
+For example, the offset, count, and stride parameters for Process 2 would look like:
+<table>
+<tr>
+<th><strong>Figure a</strong>   C Example</th>
+<th><strong>Figure b</strong>   Fortran Example</th>
+</tr><tr>
+<td>
+\image html ppatt_figc.gif
+</td>
+<td>
+\image html ppatt_figd.gif
+</td>
+</tr>
+</table>
+
+Below are example programs for writing hyperslabs by pattern in Parallel HDF5:
+<table>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5Parallel/ph5_hyperslab_by_pattern.c">hyperslab_by_pattern.c</a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_pattern.F90">hyperslab_by_pattern.F90</a>
+</td>
+</tr>
+</table>
+
+The following is the output from h5dump for the HDF5 file created in this example:
+\code
+HDF5 "SDS_pat.h5" {
+GROUP "/" {
+   DATASET "IntArray" {
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 8, 4 ) / ( 8, 4 ) } 
+      DATA {
+         1, 3, 1, 3,
+         2, 4, 2, 4,
+         1, 3, 1, 3,
+         2, 4, 2, 4,
+         1, 3, 1, 3,
+         2, 4, 2, 4,
+         1, 3, 1, 3,
+         2, 4, 2, 4
+      } 
+   } 
+} 
+} 
+\endcode
+The h5dump utility is written in C so the output is in C order.
+
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+
+@page IntroParChunk Writing by Chunk
+
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+<hr>
+
+In this example each process writes a "chunk" of data to a dataset. The C and Fortran 90
+examples result in the same data layout in the file.
+
+<table>
+<tr>
+<th><strong>Figure a</strong>   C Example</th>
+<th><strong>Figure b</strong>   Fortran Example</th>
+</tr><tr>
+<td>
+\image html pchunk_figa.gif
+</td>
+<td>
+\image html pchunk_figb.gif
+</td>
+</tr>
+</table>
+
+For this example, four processes are used, and a 4 x 2 chunk is written to the dataset by each process.
+
+To do this, you would:
+\li Use the block parameter to specify a chunk of size 4 x 2 (or 2 x 4 for Fortran).
+\li Use a different offset (start) for each process, based on the chunk size:
+<table>
+<tr>
+<th rowspan="3"><strong>C</strong></th><th>Process 0</th><th>Process 1</th><th>Process 2</th><th>Process 3</th>
+</tr><tr>
+<td>offset[0] = 0</td><td>offset[0] = 0</td><td>offset[0] = 4</td><td>offset[0] = 4</td>
+</tr><tr>
+<td>offset[1] = 0</td><td>offset[1] = 2</td><td>offset[1] = 0</td><td>offset[1] = 2</td>
+</tr><tr>
+<th rowspan="3"><strong>Fortran</strong></th><th>Process 0</th><th>Process 1</th><th>Process 2</th><th>Process 3</th>
+</tr><tr>
+<td>offset(1) = 0</td><td>offset(1) = 2</td><td>offset(1) = 0</td><td>offset(1) = 2</td>
+</tr><tr>
+<td>offset(2) = 0</td><td>offset(2) = 0</td><td>offset(2) = 4</td><td>offset(2) = 4</td>
+</tr>
+</table>
+
+For example, the offset and block parameters for Process 2 would look like:
+<table>
+<tr>
+<th><strong>Figure a</strong>   C Example</th>
+<th><strong>Figure b</strong>   Fortran Example</th>
+</tr><tr>
+<td>
+\image html pchunk_figc.gif
+</td>
+<td>
+\image html pchunk_figd.gif
+</td>
+</tr>
+</table>
+
+Below are example programs for writing hyperslabs by pattern in Parallel HDF5:
+<table>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5Parallel/ph5_hyperslab_by_chunk.c">hyperslab_by_chunk.c</a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/Fortran/H5Parallel/ph5_f90_hyperslab_by_chunk.F90">hyperslab_by_chunk.F90</a>
+</td>
+</tr>
+</table>
+
+The following is the output from h5dump for the HDF5 file created in this example:
+\code
+HDF5 "SDS_chnk.h5" {
+GROUP "/" {
+   DATASET "IntArray" {
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 8, 4 ) / ( 8, 4 ) } 
+      DATA {
+         1, 1, 2, 2,
+         1, 1, 2, 2,
+         1, 1, 2, 2,
+         1, 1, 2, 2,
+         3, 3, 4, 4,
+         3, 3, 4, 4,
+         3, 3, 4, 4,
+         3, 3, 4, 4
+      } 
+   } 
+} 
+} 
+\endcode
+The h5dump utility is written in C so the output is in C order.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+
+*/

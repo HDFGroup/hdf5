@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -17,7 +16,7 @@
  * + h5repack_<NAME>.h5
  * + h5repack_<NAME>_ex.h5
  * + h5repack_<NAME>_ex-<N>.dat
- * ...where NAME idenfities the type, and N is a positive decimal number;
+ * ...where NAME identifies the type, and N is a positive decimal number;
  * multiple external files (*.dat) are allowed per file, but they must
  * follow the pattern and be in contiguous numerical sequence starting at 0.
  *

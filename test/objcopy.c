@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -16392,6 +16391,68 @@ error:
     return (H5_ITER_ERROR);
 } /* end test_copy_iterate_cb */
 
+/*
+ * Test for a bug with copying of v1 object headers where the
+ * new object header would end up with a gap in the header data,
+ * which v1 object header shouldn't have.
+ */
+static int
+test_copy_cdt_v1_header_bug(hid_t fcpl_src, hid_t src_fapl)
+{
+    hid_t file_id   = H5I_INVALID_HID;
+    hid_t type_id   = H5I_INVALID_HID;
+    hid_t ocpypl_id = H5I_INVALID_HID;
+    char  src_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): bug with copying v1 object headers");
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+
+    if ((file_id = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
+        TEST_ERROR;
+
+    if ((type_id = H5Tcreate(H5T_STRING, 385)) < 0)
+        TEST_ERROR;
+    if (H5Tset_strpad(type_id, H5T_STR_NULLPAD) < 0)
+        TEST_ERROR;
+    if (H5Tset_cset(type_id, H5T_CSET_ASCII) < 0)
+        TEST_ERROR;
+
+    if (H5Tcommit2(file_id, "committed_str_type", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if ((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
+        TEST_ERROR;
+    if (H5Pset_copy_object(ocpypl_id, H5O_COPY_WITHOUT_ATTR_FLAG) < 0)
+        TEST_ERROR;
+
+    if (H5Ocopy(file_id, "committed_str_type", file_id, "committed_str_type2", ocpypl_id, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(type_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(ocpypl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(type_id);
+        H5Pclose(ocpypl_id);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY;
+
+    return 1;
+}
+
 static int
 test_copy_iterate(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
@@ -17555,6 +17616,8 @@ main(void)
             /* Test with dataset opened in the file or not */
             nerrors += test_copy_null_ref(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_null_ref_open(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
+
+            nerrors += test_copy_cdt_v1_header_bug(fcpl_src, src_fapl);
 
             nerrors += test_copy_iterate(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
         } /* end if */
