@@ -197,13 +197,9 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
     int          *inner_blocks      = NULL;  /* Arrays for MPI datatypes when "large" datatype needed */
     MPI_Aint     *inner_disps       = NULL;
     MPI_Datatype *inner_types       = NULL;
-#if MPI_VERSION < 3
-    int    *blocks = NULL; /* Array of block sizes for MPI hindexed create call */
-    hsize_t u;             /* Local index variable */
-#endif
-    hsize_t bigio_count;         /* Transition point to create derived type */
-    int     mpi_code;            /* MPI error code */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    hsize_t       bigio_count;         /* Transition point to create derived type */
+    int           mpi_code;            /* MPI error code */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -216,24 +212,10 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 
     /* Check whether standard or BIGIO processing will be employeed */
     if (bigio_count >= num_points) {
-#if H5_CHECK_MPI_VERSION(3, 0)
         /* Create an MPI datatype for the whole point selection */
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed_block((int)num_points, 1, disp, elmt_type, new_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
-#else
-        /* Allocate block sizes for MPI datatype call */
-        if (NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * num_points)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
-
-        for (u = 0; u < num_points; u++)
-            blocks[u] = 1;
-
-        /* Create an MPI datatype for the whole point selection */
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Type_create_hindexed((int)num_points, blocks, disp, elmt_type, new_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-#endif
 
         /* Commit MPI datatype for later use */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
@@ -267,43 +249,20 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
         if (NULL == (inner_disps = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * (size_t)total_types)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
-#if MPI_VERSION < 3
-        /* Allocate block sizes for MPI datatype call */
-        if (NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * bigio_count)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
-
-        for (u = 0; u < bigio_count; u++)
-            blocks[u] = 1;
-#endif
-
         for (i = 0; i < num_big_types; i++) {
-#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)bigio_count, 1,
                                                                           &disp[(hsize_t)i * bigio_count],
                                                                           elmt_type, &inner_types[i])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
-#else
-            if (MPI_SUCCESS !=
-                (mpi_code = MPI_Type_create_hindexed((int)bigio_count, blocks, &disp[i * bigio_count],
-                                                     elmt_type, &inner_types[i])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-#endif
             inner_blocks[i] = 1;
             inner_disps[i]  = 0;
         } /* end for*/
 
         if (remaining_points) {
-#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(
                                     remaining_points, 1, &disp[(hsize_t)num_big_types * bigio_count],
                                     elmt_type, &inner_types[num_big_types])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
-#else
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)remaining_points, blocks,
-                                                                    &disp[num_big_types * bigio_count],
-                                                                    elmt_type, &inner_types[num_big_types])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-#endif
             inner_blocks[num_big_types] = 1;
             inner_disps[num_big_types]  = 0;
         }
@@ -323,10 +282,6 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 done:
     if (elmt_type_created)
         MPI_Type_free(&elmt_type);
-#if MPI_VERSION < 3
-    if (blocks)
-        H5MM_free(blocks);
-#endif
     if (inner_types)
         H5MM_free(inner_types);
     if (inner_blocks)
