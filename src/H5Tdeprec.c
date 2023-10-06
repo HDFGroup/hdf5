@@ -97,6 +97,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     H5T_t            *dt      = NULL; /* High level datatype object that wraps the VOL object */
     H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
+    bool              is_native;           /* Whether the native VOL connector is in use */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -107,6 +108,21 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+
+    /* get the object from the loc_id */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL,
+                    "can't determine if VOL object is native connector object");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_VOL, FAIL,
+                    "H5Tcommit1 is only meant to be used with the native VOL connector");
+
     if (H5T_is_named(dt))
         HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed");
 
@@ -116,10 +132,6 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
-
-    /* get the object from the loc_id */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
     /* Commit the datatype */
     if (NULL == (data = H5VL_datatype_commit(vol_obj, &loc_params, name, type_id, H5P_LINK_CREATE_DEFAULT,

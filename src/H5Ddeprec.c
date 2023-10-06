@@ -306,8 +306,10 @@ done:
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
 {
-    H5S_t *space;     /* Dataspace for iteration */
-    herr_t ret_value; /* Return value */
+    H5S_t         *space;   /* Dataspace for iteration */
+    H5VL_object_t *vol_obj; /* VOL object */
+    bool           is_native = false;
+    herr_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iii*x", type_id, space_id, dxpl_id, buf);
@@ -319,6 +321,19 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
     if (!(H5S_has_extent(space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set");
+
+    /* Get the VOL object */
+    if (NULL == (vol_obj = H5I_object(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+    /* Check if using native VOL connector */
+    if (H5VL_object_is_native(vol_obj, &is_native) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if type uses native VOL connector");
+
+    /* Must use native VOL connector for this operation */
+    if (!is_native)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, FAIL,
+                    "H5Dvlen_reclaim is only meant to be used with the native VOL connector");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
