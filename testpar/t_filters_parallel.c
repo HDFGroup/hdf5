@@ -4396,6 +4396,8 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -4432,6 +4434,8 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4612,6 +4616,8 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -4648,6 +4654,8 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4830,6 +4838,8 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -4866,6 +4876,8 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5071,6 +5083,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -5108,6 +5122,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5299,6 +5315,8 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -5336,6 +5354,8 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5485,6 +5505,8 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -5522,6 +5544,8 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5737,6 +5761,8 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -5773,6 +5799,8 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5973,6 +6001,8 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -6010,6 +6040,8 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6219,6 +6251,8 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -6265,6 +6299,8 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6458,6 +6494,8 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -6495,6 +6533,8 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6702,6 +6742,8 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -6738,6 +6780,8 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6967,6 +7011,8 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -7003,6 +7049,8 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7213,6 +7261,8 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -7249,6 +7299,8 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7462,6 +7514,8 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -7498,6 +7552,8 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7717,6 +7773,8 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -7753,6 +7811,8 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7908,6 +7968,8 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     /* Write the file on the MAINPROCESS rank */
     if (MAINPROCESS) {
         /* Set up file access property list */
@@ -7963,6 +8025,8 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
@@ -8129,6 +8193,8 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -8178,6 +8244,8 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     return;
 }
