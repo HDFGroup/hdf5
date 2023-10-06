@@ -2545,9 +2545,11 @@ H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode)
     assert(head && *head);
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    /* This property is a special case - we want to wipe out any previous setting.  Copy the default setting if  */
-    if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT && !(*head)->ctx.actual_selection_io_mode_set && !(*head)->ctx.actual_selection_io_mode_valid) {
-        (*head)->ctx.actual_selection_io_mode = H5CX_def_dxpl_cache.actual_selection_io_mode;
+    /* This property is a special case - we want to wipe out any previous setting.  Copy the default setting
+     * if  */
+    if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT && !(*head)->ctx.actual_selection_io_mode_set &&
+        !(*head)->ctx.actual_selection_io_mode_valid) {
+        (*head)->ctx.actual_selection_io_mode     = H5CX_def_dxpl_cache.actual_selection_io_mode;
         (*head)->ctx.actual_selection_io_mode_set = true;
     }
     H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
@@ -3607,9 +3609,12 @@ H5CX__pop_common(bool update_dxpl_props)
 
     /* Check for cached DXPL properties to return to application */
     if (update_dxpl_props) {
-        /* actual_selection_io_mode is a special case - we always want to set it in the property list even if it was never set by the library, in that case it indicates no I/O was performed and we don't want to leave the (possibly incorrect) old value in the property list, so set from the default property list */
+        /* actual_selection_io_mode is a special case - we always want to set it in the property list even if
+         * it was never set by the library, in that case it indicates no I/O was performed and we don't want
+         * to leave the (possibly incorrect) old value in the property list, so set from the default property
+         * list */
         if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT && !(*head)->ctx.actual_selection_io_mode_set) {
-            (*head)->ctx.actual_selection_io_mode = H5CX_def_dxpl_cache.actual_selection_io_mode;
+            (*head)->ctx.actual_selection_io_mode     = H5CX_def_dxpl_cache.actual_selection_io_mode;
             (*head)->ctx.actual_selection_io_mode_set = true;
         }
 
