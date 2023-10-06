@@ -9246,6 +9246,25 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
+    /*
+     * Since we aren't writing fill values to the chunks of the
+     * datasets we just created, close and re-open file to ensure
+     * that file size is updated so we don't read past the end of
+     * the file later if doing multi-dataset I/O.
+     */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    open_datasets(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
+
     /* Allocate buffer for reading entire dataset */
     read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
@@ -9497,6 +9516,25 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+    /*
+     * Since we aren't writing fill values to the chunks of the
+     * datasets we just created, close and re-open file to ensure
+     * that file size is updated so we don't read past the end of
+     * the file later if doing multi-dataset I/O.
+     */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    open_datasets(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     /* Allocate buffer for reading entire dataset */
     read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
