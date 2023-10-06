@@ -32,6 +32,9 @@ fi
 # Figure out GNU C compiler flags
 . $srcdir/config/gnu-flags
 
+# Figure out NVIDIA C Compiler flags
+.  $srcdir/config/nvidia-flags
+
 # Figure out PGI C compiler flags
 . $srcdir/config/pgi-flags
 
@@ -112,6 +115,9 @@ fi
 
 # Figure out GNU FC compiler flags
 . $srcdir/config/gnu-fflags
+
+# Figure out NVIDIA FC compiler flags
+. $srcdir/config/nvidia-fflags
 
 # Figure out PGI FC compiler flags
 . $srcdir/config/pgi-fflags
@@ -205,6 +211,9 @@ fi
 # Figure out GNU CXX compiler flags
 . $srcdir/config/gnu-cxxflags
 
+# Figure out NVIDIA CXX compiler flags
+. $srcdir/config/nvidia-cxxflags
+
 # Figure out PGI CXX compiler flags
 . $srcdir/config/pgi-cxxflags
 
@@ -243,6 +252,10 @@ case $CC in
     *clang*)
         cc_version_info="`$CC $CFLAGS $H5_CFLAGS --version 2>&1 |\
             grep 'clang version' | sed 's/.*clang version \([-a-z0-9\.]*\).*/\1/'`"
+        ;;
+
+    *nvc*)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS -V 2>&1 | grep 'nvc'`
         ;;
 
     *)
@@ -296,6 +309,7 @@ case $FC in
     *pgf90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'pgf90'`
         ;;
+
     *nagfor*|*nagftn*)
         RM='rm -f'
         tmpfile=/tmp/cmpver.$$
@@ -310,6 +324,10 @@ case $FC in
         echo "compiler '$FC' is $fc_version_info"
 	;;
 
+    *nvfortran*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'nvfortran'`
+        ;;
+
      *)
         echo "No match to get fc_version_info for $FC"
         ;;
@@ -320,6 +338,9 @@ fi
 # check if the compiler_version_info is already set
 if test -z "$cxx_version_info"; then
 case $CXX in
+    *nvc++*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'nvc++'`
+        ;;
     *pgc++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'pgc++'`
         ;;
