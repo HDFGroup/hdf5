@@ -671,6 +671,12 @@ if (HDF5_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
   if (MPI_C_FOUND)
     set (H5_HAVE_PARALLEL 1)
+
+    # Require MPI standard 3.0 and greater
+    if (MPI_VERSION LESS 3)
+      message (FATAL_ERROR "HDF5 requires MPI standard 3.0 or greater")
+    endif ()
+
     # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
     set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}")

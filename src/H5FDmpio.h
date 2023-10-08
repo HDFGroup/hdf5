@@ -48,8 +48,8 @@ H5_DLL hid_t H5FD_mpio_init(void);
  * \brief Stores MPI IO communicator information to the file access property list
  *
  * \fapl_id
- * \param[in] comm MPI-2 communicator
- * \param[in] info MPI-2 info object
+ * \param[in] comm MPI communicator
+ * \param[in] info MPI info object
  * \returns \herr_t
  *
  * \details H5Pset_fapl_mpio() stores the user-supplied MPI IO parameters \p
@@ -61,12 +61,12 @@ H5_DLL hid_t H5FD_mpio_init(void);
  *          and is not a collective function.
  *
  *          \p comm is the MPI communicator to be used for file open, as defined
- *          in \c MPI_File_open of MPI-2. This function makes a duplicate of the
+ *          in \c MPI_File_open of MPI. This function makes a duplicate of the
  *          communicator, so modifications to \p comm after this function call
  *          returns have no effect on the file access property list.
  *
  *          \p info is the MPI Info object to be used for file open, as defined
- *          in MPI_File_open() of MPI-2. This function makes a duplicate copy of
+ *          in MPI_File_open() of MPI. This function makes a duplicate copy of
  *          the Info object, so modifications to the Info object after this
  *          function call returns will have no effect on the file access
  *          property list.
@@ -96,8 +96,8 @@ H5_DLL herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
  * \brief Returns MPI IO communicator information
  *
  * \fapl_id
- * \param[out] comm MPI-2 communicator
- * \param[out] info MPI-2 info object
+ * \param[out] comm MPI communicator
+ * \param[out] info MPI info object
  * \returns \herr_t
  *
  * \details If the file access property list is set to the #H5FD_MPIO driver,
