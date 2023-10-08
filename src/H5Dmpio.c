@@ -4065,7 +4065,6 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
                                         int mpi_rank, int H5_ATTR_NDEBUG_UNUSED mpi_size,
                                         unsigned char ***chunk_msg_bufs, int *chunk_msg_bufs_len)
 {
-#if H5_CHECK_MPI_VERSION(3, 0)
     H5D_filtered_collective_chunk_info_t *chunk_table       = NULL;
     H5S_sel_iter_t                       *mem_iter          = NULL;
     unsigned char                       **msg_send_bufs     = NULL;
@@ -4300,20 +4299,12 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
          * post a non-blocking receive to receive it
          */
         if (msg_flag) {
-#if H5_CHECK_MPI_VERSION(3, 0)
             MPI_Count msg_size = 0;
 
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&status, MPI_BYTE, &msg_size)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements_x failed", mpi_code)
 
             H5_CHECK_OVERFLOW(msg_size, MPI_Count, int);
-#else
-            int msg_size = 0;
-
-            if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&status, MPI_BYTE, &msg_size)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
-#endif
-
             if (msg_size <= 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid chunk modification message size");
 
@@ -4466,13 +4457,6 @@ done:
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
-#else
-    FUNC_ENTER_PACKAGE
-    HERROR(
-        H5E_DATASET, H5E_WRITEERROR,
-        "unable to send chunk modification data between MPI ranks - MPI version < 3 (MPI_Ibarrier missing)")
-    FUNC_LEAVE_NOAPI(FAIL)
-#endif
 } /* end H5D__mpio_share_chunk_modification_data() */
 
 /*-------------------------------------------------------------------------
