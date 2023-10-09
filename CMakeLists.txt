@@ -451,6 +451,12 @@ include (${HDF_RESOURCES_DIR}/ConfigureChecks.cmake)
 set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
 #-----------------------------------------------------------------------------
+# Include directories in the source or build tree should come before other
+# directories to prioritize headers in the sources over installed ones.
+#-----------------------------------------------------------------------------
+set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
+
+#-----------------------------------------------------------------------------
 # Mac OS X Options
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
