@@ -903,7 +903,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                         "Setting it to 2 or higher will suppress the warning messages totally.\n");
                 /* Mention the versions we are referring to */
                 fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
-                          (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+                        (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                 /* Show library build settings if available */
                 fprintf(stderr, "%s", H5build_settings);
 
@@ -920,7 +920,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                         version_mismatch_warning, disable_version_check);
                 /* Mention the versions we are referring to */
                 fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
-                          (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+                        (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
                 /* Show library build settings if available */
                 fprintf(stderr, "%s", H5build_settings);
 
