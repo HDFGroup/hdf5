@@ -47,6 +47,24 @@ New Features
 
     Configuration:
     -------------
+    - Removed CMake cross-compiling variables
+
+      * HDF5_USE_PREGEN
+      * HDF5_BATCH_H5DETECT
+
+      These were used to work around H5detect and H5make_libsettings and
+      are no longer required.
+
+    - Running H5make_libsettings is no longer required for cross-compiling
+
+      The functionality of H5make_libsettings is now handled via template files,
+      so H5make_libsettings has been removed.
+
+    - Running H5detect is no longer required for cross-compiling
+
+      The functionality of H5detect is now exercised at library startup,
+      so H5detect has been removed.
+
     - Thread-safety + static library disabled on Windows w/ CMake
 
       The thread-safety feature requires hooks in DllMain(), which is only

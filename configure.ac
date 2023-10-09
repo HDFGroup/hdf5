@@ -112,6 +112,10 @@ AC_CONFIG_COMMANDS([pubconf], [
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
   cp libhdf5.settings.TMP src/libhdf5.settings
   rm -f libhdf5.settings.TMP
+  echo "Post process src/H5build_settings.c"
+  sed '/^# /d' < src/H5build_settings.c > H5build_settings.TMP
+  cp H5build_settings.TMP src/H5build_settings.c
+  rm -f H5build_settings.TMP
 ])
 
 ## It's possible to configure for a host other than the one on which
@@ -3908,9 +3912,11 @@ AC_ARG_ENABLE([embedded-libinfo],
 
    if test "${enable_embedded_libinfo}" = "yes"; then
       AC_MSG_RESULT([yes])
+      BUILD_SETTINGS_FILE="src/H5build_settings.autotools.c.in"
       AC_DEFINE([HAVE_EMBEDDED_LIBINFO], [1],
                 [Define if library information should be embedded in the executables])
    else
+      BUILD_SETTINGS_FILE="src/H5build_settings.off.c.in"
       AC_MSG_RESULT([no])
     fi
 
@@ -4047,6 +4053,7 @@ AC_CONFIG_FILES([Makefile
                  doxygen/Doxyfile
                  src/Makefile
                  src/libhdf5.settings
+                 src/H5build_settings.c:${BUILD_SETTINGS_FILE}
                  test/Makefile
                  test/H5srcdir_str.h
                  test/test_abort_fail.sh
