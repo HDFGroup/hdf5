@@ -90,7 +90,6 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.10.11 | CVE fixes, last HDF5 1.10 release |
 | 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
 | 1.14.3 | CVE-free!, better cross-compile support |
 | 1.14.4 | S3 VFD improvements |
