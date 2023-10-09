@@ -46,12 +46,12 @@
 | [CVE-2018-13874](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13874)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2018-13873](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13873)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2018-13872](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13872)          | ✅       | ✅       | ✅       | ✅       |
-| [CVE-2018-13871](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13871)          | ✅       | ❌       | ❌       | ❌       |
+| [CVE-2018-13871](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13871)          | ✅       | ❌       | ❌       | ✅       |
 | [CVE-2018-13870](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13870)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2018-13869](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13869)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2018-13868](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13868)          | ✅       | ✅       | ✅       | ✅       |
-| [CVE-2018-13867](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13867)          | ❌       | ❌       | ❌       | ❌       |
-| [CVE-2018-13866](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13866)          | ❌       | ✅       | ✅       | ❌       |
+| [CVE-2018-13867](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13867)          | ❌       | ❌       | ❌       | ✅       |
+| [CVE-2018-13866](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-13866)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2018-11207](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11207)          | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2018-11206](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11206)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2018-11205](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11205)          | ❌       | ❌       | ❌       | ✅       |
@@ -60,11 +60,11 @@
 | [CVE-2018-11202](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11202)          | ❌       | ❌       | ❌       | ✅       |
 | [CVE-2017-17509](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17509)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2017-17508](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17508)          | ✅       | ✅       | ✅       | ✅       |
-| [CVE-2017-17507](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17507)          | ❌       | ❌       | ❌       | ❌       |
+| [CVE-2017-17507](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17507)          | ❌       | ❌       | ❌       | ✅       |
 | [CVE-2017-17506](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17506)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2017-17505](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17505)          | ✅       | ✅       | ✅       | ✅       |
 | [CVE-2016-4333](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4333)            | ❌       | ✅       | ✅       | ✅       |
-| [CVE-2016-4332](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4332)            | ❌       | ✅       | ✅       | ❌       |
+| [CVE-2016-4332](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4332)            | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2016-4331](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4331)            | ❌       | ✅       | ✅       | ✅       |
 | [CVE-2016-4330](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4330)            | ✅       | ✅       | ✅       | ✅       |
 
