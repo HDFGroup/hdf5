@@ -904,8 +904,8 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* Mention the versions we are referring to */
                 fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
                         (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
-                /* Show library settings if available */
-                fprintf(stderr, "%s", H5libhdf5_settings);
+                /* Show library build settings if available */
+                fprintf(stderr, "%s", H5build_settings);
 
                 /* Bail out now. */
                 HDfputs("Bye...\n", stderr);
@@ -921,8 +921,9 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* Mention the versions we are referring to */
                 fprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
                         (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
-                /* Show library settings if available */
-                fprintf(stderr, "%s", H5libhdf5_settings);
+                /* Show library build settings if available */
+                fprintf(stderr, "%s", H5build_settings);
+
                 break;
             default:
                 /* 2 or higher: continue silently */

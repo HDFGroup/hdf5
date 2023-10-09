@@ -1262,7 +1262,7 @@ extern H5_debug_t H5_debug_g;
 #define H5DEBUG(X) (H5_debug_g.pkg[H5_PKG_##X].stream)
 
 /* Embedded build information */
-extern const char H5libhdf5_settings[];
+extern const char H5build_settings[];
 
 /*-------------------------------------------------------------------------
  * Purpose: These macros are inserted automatically just after the

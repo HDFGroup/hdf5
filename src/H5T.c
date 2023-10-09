@@ -368,8 +368,7 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 /*********************/
 
 /*
- * Predefined data types. These are initialized at runtime in H5Tinit.c and
- * by H5T_init() in this source file.
+ * Predefined data types. These are initialized at runtime by H5T_init().
  *
  * If more of these are added, the new ones must be added to the list of
  * types to reset in H5T_term_package().
@@ -501,11 +500,7 @@ size_t H5T_NATIVE_FLOAT_ALIGN_g   = 0;
 size_t H5T_NATIVE_DOUBLE_ALIGN_g  = 0;
 size_t H5T_NATIVE_LDOUBLE_ALIGN_g = 0;
 
-/*
- * Alignment constraints for C9x types. These are initialized at run time in
- * H5Tinit.c if the types are provided by the system. Otherwise we set their
- * values to 0 here (no alignment calculated).
- */
+/* Alignment constraints for C99 types */
 size_t H5T_NATIVE_INT8_ALIGN_g        = 0;
 size_t H5T_NATIVE_UINT8_ALIGN_g       = 0;
 size_t H5T_NATIVE_INT_LEAST8_ALIGN_g  = 0;
@@ -752,12 +747,9 @@ H5T_init(void)
     /* Only 16 (numbered 0-15) are supported in the current file format */
     HDcompile_assert(H5T_NCLASSES < 16);
 
-    /*
-     * Initialize pre-defined native datatypes from code generated during
-     * the library configuration by H5detect.
-     */
-    if (H5T__init_native() < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    /* Initialize native floating-point datatypes */
+    if (H5T__init_native_float_types() < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize floating-point types");
 
     /* Initialize all other native types */
     if (H5T__init_native_internal() < 0)
