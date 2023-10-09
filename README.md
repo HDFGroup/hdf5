@@ -11,7 +11,6 @@ HDF5 version 1.15.0 currently under development
 [![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
 [![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
-[![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
