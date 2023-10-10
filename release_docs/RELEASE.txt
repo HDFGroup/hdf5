@@ -258,7 +258,16 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Added optimized support for the parallel compression feature when
+      using the multi-dataset I/O API routines collectively
+
+      Previously, calling H5Dwrite_multi/H5Dread_multi collectively in parallel
+      with a list containing one or more filtered datasets would cause HDF5 to
+      break out of the optimized multi-dataset I/O mode and instead perform I/O
+      by looping over each dataset in the I/O request. The library has now been
+      updated to perform I/O in a more optimized manner in this case by first
+      performing I/O on all the filtered datasets at once and then performing
+      I/O on all the unfiltered datasets at once.
 
 
     Fortran Library:

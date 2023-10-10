@@ -4102,7 +4102,7 @@ H5P_object_verify(hid_t plist_id, hid_t pclass_id)
 
     /* Compare the property list's class against the other class */
     if (H5P_isa_class(plist_id, pclass_id) != true)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, NULL, "property list is not a member of the class");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOMPARE, NULL, "property list is not a member of the class");
 
     /* Get the plist structure */
     if (NULL == (ret_value = (H5P_genplist_t *)H5I_object(plist_id)))
