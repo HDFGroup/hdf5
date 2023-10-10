@@ -31,7 +31,6 @@ extern "C" {
 #endif
 
 /** \page H5DS_UG The HDF5 High Level Dimension Scales
- * @todo Under Construction
  */
 
 /**\defgroup H5DS HDF5 Dimension Scales APIs (H5DS)

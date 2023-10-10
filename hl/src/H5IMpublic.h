@@ -18,7 +18,6 @@ extern "C" {
 #endif
 
 /** \page H5IM_UG The HDF5 High Level Images
- * @todo Under Construction
  */
 
 /**\defgroup H5IM HDF5 Images API (H5IM)

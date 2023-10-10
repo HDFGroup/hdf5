@@ -25,7 +25,6 @@
 #define H5_MY_PKG_ERR H5E_REFERENCE
 
 /** \page H5R_UG The HDF5 References
- * @todo Under Construction
  */
 
 /**

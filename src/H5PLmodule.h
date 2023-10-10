@@ -27,7 +27,6 @@
 #define H5_MY_PKG_ERR H5E_PLUGIN
 
 /** \page H5PL_UG The HDF5 Plugins
- * @todo Under Construction
  */
 
 /**

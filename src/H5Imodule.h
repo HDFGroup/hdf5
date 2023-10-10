@@ -26,7 +26,6 @@
 #define H5_MY_PKG_ERR H5E_ID
 
 /** \page H5I_UG The HDF5 Identifiers
- * @todo Under Construction
  */
 
 /**

@@ -18,7 +18,6 @@ extern "C" {
 #endif
 
 /** \page H5DO_UG The HDF5 High Level Optimizations
- * @todo Under Construction
  */
 
 /**\defgroup H5DO HDF5 Optimizations APIs (H5DO)

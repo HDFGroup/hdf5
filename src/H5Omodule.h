@@ -26,7 +26,6 @@
 #define H5_MY_PKG_ERR H5E_OHDR
 
 /** \page H5O_UG The HDF5 Objects
- * @todo Under Construction
  */
 
 /**

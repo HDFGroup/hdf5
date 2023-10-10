@@ -26,7 +26,6 @@
 #define H5_MY_PKG_ERR H5E_PLINE
 
 /** \page H5Z_UG The HDF5 Filters
- * @todo Under Construction
  */
 
 /**
