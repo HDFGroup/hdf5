@@ -52,6 +52,15 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_Fortran_COMPILER_VERS
   endif ()
 endif ()
 
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC")
+  if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
+    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fast -Mnoframe -s")
+  else ()
+    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Mbounds -Mchkptr -Mdclchk -g")
+  endif ()
+endif ()
+
 if (NOT MSVC AND NOT MINGW)
   # General flags
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
