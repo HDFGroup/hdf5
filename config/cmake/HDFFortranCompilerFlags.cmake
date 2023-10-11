@@ -51,10 +51,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_Fortran_COMPILER_VERS
     set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdiagnostics-urls=never -fno-diagnostics-color")
   endif ()
 endif ()
-if (CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
-    message (STATUS "... Select IEEE floating-point mode full")
-    list (APPEND HDF5_CMAKE_Fortran_FLAGS "-ieee=full")
-endif ()
+
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
     message (STATUS "... Select IEEE floating-point mode full")
     list (APPEND HDF5_CMAKE_Fortran_FLAGS "-ieee=full")
