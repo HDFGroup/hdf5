@@ -92,7 +92,7 @@ else
             fc_version_info=`$FC -V | grep Absoft`
             ;;
          # The NAG compiler
-	 nagfor*|nagftn*)
+	 *nagfor*|*nagftn*)
             RM='rm -f'
             tmpfile=/tmp/cmpver.$$
             $FC -V >& $tmpfile
