@@ -163,7 +163,7 @@ case $FC_BASENAME in
         # NOTE: The default is -ieee=stop, which will cause problems
         #       when the H5T module performs floating-point type
         #       introspection
-        H5_FCFLAGS="$H5_FCFLAGS -ieee=full"
+        AM_FCFLAGS="$AM_FCFLAGS -ieee=full"
         FSEARCH_DIRS=""
 
         # Production

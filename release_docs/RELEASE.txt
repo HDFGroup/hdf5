@@ -1002,6 +1002,12 @@ Platforms Tested
 Known Problems
 ==============
 
+    IEEE standard arithmetic enables software to raise exceptions such as overflow,
+    division by zero, and other illegal operations without interrupting or halting
+    the program flow. The HDF5 C library intentionally performs these exceptions.
+    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
+    to avoid stopping on an exception.
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
