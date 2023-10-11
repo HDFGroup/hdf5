@@ -203,7 +203,7 @@ main(int argc, char *argv[])
     if (opts->output_file) {
         if ((output = fopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
-            HDperror(opts->output_file);
+            perror(opts->output_file);
             goto finish;
         }
     }
@@ -627,7 +627,7 @@ output_report(const char *fmt, ...)
 
     va_start(ap, fmt);
     H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-    HDvfprintf(output, fmt, ap);
+    vfprintf(output, fmt, ap);
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     va_end(ap);
 }
@@ -644,7 +644,7 @@ print_indent(int indent)
     indent *= TAB_SPACE;
 
     for (; indent > 0; --indent)
-        HDfputc(' ', output);
+        fputc(' ', output);
 }
 
 static void
@@ -777,7 +777,7 @@ report_parameters(struct options *opts)
     }
 
     {
-        char *prefix = HDgetenv("HDF5_PREFIX");
+        char *prefix = getenv("HDF5_PREFIX");
 
         fprintf(output, "Env HDF5_PREFIX=%s\n", (prefix ? prefix : "not set"));
     }
@@ -921,7 +921,7 @@ parse_command_line(int argc, const char *const *argv)
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (HDstrlen(buf) > 1 || isdigit(buf[0])) {
+                    if (strlen(buf) > 1 || isdigit(buf[0])) {
                         size_t j;
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)

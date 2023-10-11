@@ -81,7 +81,7 @@ gen_name(int value)
 
     length                     = num_digits(MAX_NUM_NAME - 1);
     temp                       = (char *)malloc(NAME_OFFSET + length + 1);
-    temp                       = HDstrcpy(temp, "attrib");
+    temp                       = strcpy(temp, "attrib");
     temp[NAME_OFFSET + length] = '\0';
 
     for (i = (int)(length - 1); i >= 0; i--) {
@@ -131,7 +131,7 @@ main(int argc, char *argv[])
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !HDgetenv(HDF5_NOCLEANUP))
+    if (GetTestCleanup() && !getenv(HDF5_NOCLEANUP))
         TestCleanup();
 
     /* Release test infrastructure */

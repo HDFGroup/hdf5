@@ -288,7 +288,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -327,7 +327,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -521,7 +521,7 @@ test_fapl_config_validation(void)
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -796,7 +796,7 @@ test_vfd_open(void)
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -936,14 +936,14 @@ test_eof_eoa(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
+        puts("    s3 credentials are not loaded");
         fflush(stdout);
         return 0;
     }
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1044,14 +1044,14 @@ test_H5FDread_without_eoa_set_fails(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
+        puts("    s3 credentials are not loaded");
         fflush(stdout);
         return 0;
     }
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1215,14 +1215,14 @@ test_read(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
+        puts("    s3 credentials are not loaded");
         fflush(stdout);
         return 0;
     }
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1356,7 +1356,7 @@ test_noops_and_autofails(void)
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1473,14 +1473,14 @@ test_cmp(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
+        puts("    s3 credentials are not loaded");
         fflush(stdout);
         return 0;
     }
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1594,14 +1594,14 @@ test_H5F_integration(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
+        puts("    s3 credentials are not loaded");
         fflush(stdout);
         return 0;
     }
 
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1695,37 +1695,37 @@ main(void)
      * initialize test urls *
      ************************/
 
-    bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
+    bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
         printf("WARNING: S3 bucket url is not defined in environment "
                "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
-        HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
+        strncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
         s3_test_bucket_defined = true;
     }
 
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_text_restricted, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
-                                          (const char *)s3_test_bucket_url,
-                                          (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED)) {
+    if (S3_TEST_MAX_URL_SIZE < snprintf(url_text_restricted, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                        (const char *)s3_test_bucket_url,
+                                        (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED)) {
         printf("* ros3 setup failed (text_restricted) ! *\n");
         return 1;
     }
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_text_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
-                                          (const char *)s3_test_bucket_url,
-                                          (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC)) {
+    if (S3_TEST_MAX_URL_SIZE < snprintf(url_text_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                        (const char *)s3_test_bucket_url,
+                                        (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC)) {
         printf("* ros3 setup failed (text_public) ! *\n");
         return 1;
     }
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_h5_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
-                                          (const char *)s3_test_bucket_url,
-                                          (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
+    if (S3_TEST_MAX_URL_SIZE < snprintf(url_h5_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                        (const char *)s3_test_bucket_url,
+                                        (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
         printf("* ros3 setup failed (h5_public) ! *\n");
         return 1;
     }
-    if (S3_TEST_MAX_URL_SIZE < HDsnprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s",
-                                          (const char *)s3_test_bucket_url,
-                                          (const char *)S3_TEST_RESOURCE_MISSING)) {
+    if (S3_TEST_MAX_URL_SIZE < snprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                        (const char *)s3_test_bucket_url,
+                                        (const char *)S3_TEST_RESOURCE_MISSING)) {
         printf("* ros3 setup failed (missing) ! *\n");
         return 1;
     }
@@ -1745,12 +1745,11 @@ main(void)
     if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
-        HDstrncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region,
-                  H5FD_ROS3_MAX_REGION_LEN);
-        HDstrncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
-                  H5FD_ROS3_MAX_SECRET_ID_LEN);
-        HDstrncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
-                  H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        strncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+        strncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
+                H5FD_ROS3_MAX_SECRET_ID_LEN);
+        strncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
+                H5FD_ROS3_MAX_SECRET_KEY_LEN);
     }
 
     /******************

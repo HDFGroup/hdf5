@@ -193,7 +193,7 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Make an attempt to detect corrupted name or name length - HDFFV-10588 */
-    if (name_len != (HDstrnlen(attr->shared->name, name_len) + 1))
+    if (name_len != (strnlen(attr->shared->name, name_len) + 1))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "attribute name has different length than stored length");
 
     /* Determine pointer movement and check if it's valid */
@@ -360,7 +360,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
      * encoded lengths are exact but we pad each part except the data to be a
      * multiple of eight bytes (in the first version).
      */
-    name_len = HDstrlen(attr->shared->name) + 1;
+    name_len = strlen(attr->shared->name) + 1;
     UINT16ENCODE(p, name_len);
     UINT16ENCODE(p, attr->shared->dt_size);
     UINT16ENCODE(p, attr->shared->ds_size);
@@ -479,7 +479,7 @@ H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
                 2;  /*space size		*/
 
     /* Length of attribute name */
-    name_len = HDstrlen(attr->shared->name) + 1;
+    name_len = strlen(attr->shared->name) + 1;
 
     /* Version-specific size information */
     if (attr->shared->version == H5O_ATTR_VERSION_1)
@@ -831,13 +831,13 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
         case H5T_CSET_RESERVED_13:
         case H5T_CSET_RESERVED_14:
         case H5T_CSET_RESERVED_15:
-            HDsnprintf(buf, sizeof(buf), "H5T_CSET_RESERVED_%d", (int)(mesg->shared->encoding));
+            snprintf(buf, sizeof(buf), "H5T_CSET_RESERVED_%d", (int)(mesg->shared->encoding));
             s = buf;
             break;
 
         case H5T_CSET_ERROR:
         default:
-            HDsnprintf(buf, sizeof(buf), "Unknown character set: %d", (int)(mesg->shared->encoding));
+            snprintf(buf, sizeof(buf), "Unknown character set: %d", (int)(mesg->shared->encoding));
             s = buf;
             break;
     } /* end switch */

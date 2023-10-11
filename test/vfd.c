@@ -932,7 +932,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     int   i;
 
     /* Case 1: reopen file with 1st member file name and default property list */
-    HDsnprintf(first_name, sizeof(first_name), fname, 0);
+    snprintf(first_name, sizeof(first_name), fname, 0);
 
     H5E_BEGIN_TRY
     {
@@ -964,7 +964,7 @@ test_family_opens(char *fname, hid_t fa_pl)
         TEST_ERROR;
 
     /* Case 4: reopen file with wrong name template */
-    HDstrcpy(wrong_name, fname);
+    strcpy(wrong_name, fname);
     for (i = 0; i < 1024; i++)
         if (wrong_name[i] == '5') {
             wrong_name[i] = '4';
@@ -1232,19 +1232,19 @@ test_family_compat(void)
     h5_fixname(FILENAME[3], fapl, newname, sizeof(newname));
 
     pathname[0] = '\0';
-    HDstrcat(pathname, filename);
+    strcat(pathname, filename);
 
     /* The following code makes the copies of the family files in the source directory.
      * Since we're going to open the files with write mode, this protects the original
      * files.
      */
-    HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
-    HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
+    snprintf(newname_individual, sizeof(newname_individual), newname, counter);
+    snprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
 
     while (h5_make_local_copy(pathname_individual, newname_individual) >= 0) {
         counter++;
-        HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
-        HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
+        snprintf(newname_individual, sizeof(newname_individual), newname, counter);
+        snprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
     } /* end while */
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
@@ -1437,8 +1437,8 @@ test_multi_opens(char *fname)
     char  sf_name[1024];    /*name string "multi_file-s.h5"*/
 
     /* Case: reopen with the name of super file and default property list */
-    HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
-    HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
+    snprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
+    snprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY
     {
@@ -1512,19 +1512,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
+    snprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    HDsnprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
+    snprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 4;
 
-    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
+    snprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    HDsnprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
+    snprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX / 4) * 3;
 
@@ -1641,7 +1641,7 @@ test_multi(void)
     if ((atype = H5Tcopy(H5T_C_S1)) < 0)
         TEST_ERROR;
 
-    if (H5Tset_size(atype, HDstrlen(meta) + 1) < 0)
+    if (H5Tset_size(atype, strlen(meta) + 1) < 0)
         TEST_ERROR;
 
     if (H5Tset_strpad(atype, H5T_STR_NULLTERM) < 0)
@@ -1758,12 +1758,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
+    snprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
+    snprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
@@ -1775,12 +1775,12 @@ test_multi_compat(void)
     /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory
      */
-    HDsnprintf(filename_s, sizeof(filename_s), "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    HDsnprintf(newname_s, sizeof(newname_s), "%s-%c.h5", FILENAME[9], 's');
+    snprintf(filename_s, sizeof(filename_s), "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    snprintf(newname_s, sizeof(newname_s), "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    HDsnprintf(filename_r, sizeof(filename_r), "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    HDsnprintf(newname_r, sizeof(newname_r), "%s-%c.h5", FILENAME[9], 'r');
+    snprintf(filename_r, sizeof(filename_r), "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    snprintf(newname_r, sizeof(newname_r), "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
@@ -2295,9 +2295,9 @@ test_ros3(void)
     /* need a macro to compare instances of H5FD_ros3_fapl_t */
     if ((test_ros3_fa.version != ros3_fa_0.version) ||
         (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
-        (HDstrcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
-        (HDstrcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
-        (HDstrcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+        (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
         TEST_ERROR;
 
     h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
@@ -2399,8 +2399,8 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
             SPLITTER_TEST_FAULT("Write-Only driver mismatch\n");
         }
     }
-    if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
+    if ((strlen(info->wo_path) != strlen(fetched_info->wo_path)) ||
+        strncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
         fprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
@@ -2622,7 +2622,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     vfd_config->ignore_wo_errs = false;
     vfd_config->rw_fapl_id     = H5P_DEFAULT;
     vfd_config->wo_fapl_id     = fapl_id;
-    HDstrncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
+    strncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
     vfd_config->log_file_path[0] = '\0';
 
     H5E_BEGIN_TRY
@@ -3705,7 +3705,7 @@ test_ctl(void)
     hid_t                       sub_fapl_id = H5I_INVALID_HID;
 
     TESTING("VFD ctl callback");
-    HDputs("");
+    puts("");
 
     /* Register VFD for test */
     if ((driver_id = H5FDregister(&H5FD_ctl_test_vfd_g)) < 0)
@@ -4519,7 +4519,7 @@ test_vector_io(const char *vfd_name)
     void       *f_read_bufs_1[VECTOR_LEN];      /* fixed read bufs vector       */
     void       *f_read_bufs_2[VECTOR_LEN];      /* fixed read bufs vector       */
 
-    HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
+    snprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
     TESTING(test_title);
 
@@ -4528,14 +4528,14 @@ test_vector_io(const char *vfd_name)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    if (HDstrcmp(vfd_name, "sec2") == 0) {
+    if (strcmp(vfd_name, "sec2") == 0) {
 
         if (H5Pset_fapl_sec2(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     }
-    else if (HDstrcmp(vfd_name, "stdio") == 0) {
+    else if (strcmp(vfd_name, "stdio") == 0) {
 
         if (H5Pset_fapl_stdio(fapl_id) < 0)
             TEST_ERROR;
@@ -5052,7 +5052,7 @@ test_selection_io(const char *vfd_name)
     int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
     int        shorten_element_sizes; /* Whether to shorten the element sizes array */
 
-    HDsnprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
+    snprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
 
     TESTING(test_title);
 
@@ -5061,14 +5061,14 @@ test_selection_io(const char *vfd_name)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    if (HDstrcmp(vfd_name, "sec2") == 0) {
+    if (strcmp(vfd_name, "sec2") == 0) {
 
         if (H5Pset_fapl_sec2(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     }
-    else if (HDstrcmp(vfd_name, "stdio") == 0) {
+    else if (strcmp(vfd_name, "stdio") == 0) {
 
         if (H5Pset_fapl_stdio(fapl_id) < 0)
             TEST_ERROR;
@@ -5880,7 +5880,7 @@ main(void)
      * specific VFD to be set and HDF5_DRIVER being set can interfere
      * with that.
      */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr) {
         printf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
         exit(EXIT_SUCCESS);

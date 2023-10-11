@@ -36,9 +36,9 @@ my_errx(int code, const char *fmt, ...)
 
     (void)fprintf(stderr, "thread_id: ");
     va_start(ap, fmt);
-    (void)HDvfprintf(stderr, fmt, ap);
+    (void)vfprintf(stderr, fmt, ap);
     va_end(ap);
-    (void)HDfputc('\n', stderr);
+    (void)fputc('\n', stderr);
     exit(code);
 }
 
@@ -96,7 +96,7 @@ barrier_lock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_lock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, HDstrerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, strerror(rc));
     }
 }
 
@@ -106,7 +106,7 @@ barrier_unlock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_unlock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, HDstrerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, strerror(rc));
     }
 }
 
@@ -178,15 +178,15 @@ my_err(int code, const char *fmt, ...)
 
     (void)fprintf(stderr, "thread_id: ");
     va_start(ap, fmt);
-    (void)HDvfprintf(stderr, fmt, ap);
+    (void)vfprintf(stderr, fmt, ap);
     va_end(ap);
-    (void)fprintf(stderr, ": %s\n", HDstrerror(errno_copy));
+    (void)fprintf(stderr, ": %s\n", strerror(errno_copy));
     exit(code);
 }
 
 #define threads_failure(_call, _result)                                                                      \
     do {                                                                                                     \
-        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, HDstrerror(_result));             \
+        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, strerror(_result));               \
     } while (false)
 
 #define NTHREADS 5
@@ -204,7 +204,7 @@ atomic_printf(const char *fmt, ...)
     ssize_t nprinted, nwritten;
 
     va_start(ap, fmt);
-    nprinted = HDvsnprintf(buf, sizeof(buf), fmt, ap);
+    nprinted = vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 
     if (nprinted == -1)

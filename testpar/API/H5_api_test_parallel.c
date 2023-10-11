@@ -236,13 +236,13 @@ main(int argc, char **argv)
 
     srand(seed);
 
-    if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
+    if (NULL == (test_path_prefix = getenv(HDF5_API_TEST_PATH_PREFIX)))
         test_path_prefix = "";
 
-    HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-               PARALLEL_TEST_FILE_NAME);
+    snprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+             PARALLEL_TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = getenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)
             printf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";
@@ -253,7 +253,7 @@ main(int argc, char **argv)
 
         BEGIN_INDEPENDENT_OP(copy_connector_string)
         {
-            if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
+            if (NULL == (vol_connector_string_copy = strdup(vol_connector_string))) {
                 if (MAINPROCESS)
                     fprintf(stderr, "Unable to copy VOL connector string\n");
                 INDEPENDENT_OP_ERROR(copy_connector_string);
@@ -263,7 +263,7 @@ main(int argc, char **argv)
 
         BEGIN_INDEPENDENT_OP(get_connector_name)
         {
-            if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
+            if (NULL == (token = strtok(vol_connector_string_copy, " "))) {
                 if (MAINPROCESS)
                     fprintf(stderr, "Error while parsing VOL connector string\n");
                 INDEPENDENT_OP_ERROR(get_connector_name);
@@ -273,7 +273,7 @@ main(int argc, char **argv)
 
         vol_connector_name = token;
 
-        if (NULL != (token = HDstrtok(NULL, " "))) {
+        if (NULL != (token = strtok(NULL, " "))) {
             vol_connector_info = token;
         }
     }
@@ -307,7 +307,7 @@ main(int argc, char **argv)
          * Otherwise, HDF5 will default to running the tests
          * with the native connector, which could be misleading.
          */
-        if (0 != HDstrcmp(vol_connector_name, "native")) {
+        if (0 != strcmp(vol_connector_name, "native")) {
             htri_t is_registered;
 
             if ((is_registered = H5VLis_connector_registered_by_name(vol_connector_name)) < 0) {

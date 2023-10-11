@@ -31,121 +31,121 @@ main(void)
 
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("Default DCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_dcpl_") < 0)
+    if (test_plists("plist_files/def_dcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("DCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/dcpl_") < 0)
+    if (test_plists("plist_files/dcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE DAPLS *****/
     TESTING("Default DAPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_dapl_") < 0)
+    if (test_plists("plist_files/def_dapl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("DAPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/dapl_") < 0)
+    if (test_plists("plist_files/dapl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE DXPLS *****/
     TESTING("Default DXPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_dxpl_") < 0)
+    if (test_plists("plist_files/def_dxpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("DXPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/dxpl_") < 0)
+    if (test_plists("plist_files/dxpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE GCPLS *****/
     TESTING("Default GCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_gcpl_") < 0)
+    if (test_plists("plist_files/def_gcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("GCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/gcpl_") < 0)
+    if (test_plists("plist_files/gcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE LCPLS *****/
     TESTING("Default LCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_lcpl_") < 0)
+    if (test_plists("plist_files/def_lcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("LCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/lcpl_") < 0)
+    if (test_plists("plist_files/lcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE LAPLS *****/
     TESTING("Default LAPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_lapl_") < 0)
+    if (test_plists("plist_files/def_lapl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("LAPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/lapl_") < 0)
+    if (test_plists("plist_files/lapl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE OCPLS *****/
     TESTING("Default OCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_ocpl_") < 0)
+    if (test_plists("plist_files/def_ocpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("OCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/ocpl_") < 0)
+    if (test_plists("plist_files/ocpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE OCPYPLS *****/
     TESTING("Default OCPYPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_ocpypl_") < 0)
+    if (test_plists("plist_files/def_ocpypl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("OCPYPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/ocpypl_") < 0)
+    if (test_plists("plist_files/ocpypl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE FCPLS *****/
     TESTING("Default FCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_fcpl_") < 0)
+    if (test_plists("plist_files/def_fcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("FCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/fcpl_") < 0)
+    if (test_plists("plist_files/fcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE FAPLS *****/
     TESTING("Default FAPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_fapl_") < 0)
+    if (test_plists("plist_files/def_fapl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("FAPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/fapl_") < 0)
+    if (test_plists("plist_files/fapl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE STRCPLS *****/
     TESTING("Default STRCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_strcpl_") < 0)
+    if (test_plists("plist_files/def_strcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("STRCPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/strcpl_") < 0)
+    if (test_plists("plist_files/strcpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
     /******* ENCODE/DECODE ACPLS *****/
     TESTING("Default ACPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/def_acpl_") < 0)
+    if (test_plists("plist_files/def_acpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
     TESTING("ACPL Encoding/Decoding");
-    if (test_plists("testfiles/plist_files/acpl_") < 0)
+    if (test_plists("plist_files/acpl_") < 0)
         FAIL_STACK_ERROR;
     PASSED();
 
@@ -170,8 +170,8 @@ test_plists(const char *filename_prefix)
     for (config_1 = 0; config_1 < (NCONFIG - 1); config_1++)
         for (config_2 = config_1 + 1; config_2 < NCONFIG; config_2++) {
             /* Generate filename for file 1 */
-            if (HDsnprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
-                           config_1 & CONFIG_64 ? "64" : "32", config_1 & CONFIG_LE ? "le" : "be") < 0)
+            if (snprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
+                         config_1 & CONFIG_64 ? "64" : "32", config_1 & CONFIG_LE ? "le" : "be") < 0)
                 TEST_ERROR;
 
             /* Read file 1 */
@@ -186,8 +186,8 @@ test_plists(const char *filename_prefix)
             HDclose(fd_1);
 
             /* Generate filename for file 2 */
-            if (HDsnprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
-                           config_2 & CONFIG_64 ? "64" : "32", config_2 & CONFIG_LE ? "le" : "be") < 0)
+            if (snprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
+                         config_2 & CONFIG_64 ? "64" : "32", config_2 & CONFIG_LE ? "le" : "be") < 0)
                 TEST_ERROR;
 
             /* Read file 1 */

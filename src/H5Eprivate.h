@@ -122,7 +122,7 @@ typedef struct H5E_t H5E_t;
          * considered as an API change                                                                       \
          */                                                                                                  \
         HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
-                    HDstrerror(myerrno));                                                                    \
+                    strerror(myerrno));                                                                      \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
@@ -131,7 +131,7 @@ typedef struct H5E_t H5E_t;
          * considered as an API change                                                                       \
          */                                                                                                  \
         HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
-                    HDstrerror(myerrno));                                                                    \
+                    strerror(myerrno));                                                                      \
     }
 #else /* H5_HAVE_WIN32_API */
 /* On Windows we also emit the result of GetLastError(). This call returns a DWORD, which is always a
@@ -148,7 +148,7 @@ typedef struct H5E_t H5E_t;
          */                                                                                                  \
         HDONE_ERROR(majorcode, minorcode, retcode,                                                           \
                     "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
-                    myerrno, HDstrerror(myerrno), win_error);                                                \
+                    myerrno, strerror(myerrno), win_error);                                                  \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
@@ -159,7 +159,7 @@ typedef struct H5E_t H5E_t;
          */                                                                                                  \
         HGOTO_ERROR(majorcode, minorcode, retcode,                                                           \
                     "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
-                    myerrno, HDstrerror(myerrno), win_error);                                                \
+                    myerrno, strerror(myerrno), win_error);                                                  \
     }
 #endif /* H5_HAVE_WIN32_API */
 

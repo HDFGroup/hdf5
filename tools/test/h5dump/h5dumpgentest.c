@@ -588,7 +588,7 @@ gent_attribute(void)
     dims[0] = 24;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(root, "/attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsnprintf(buf, sizeof(buf), "attribute of root group");
+    snprintf(buf, sizeof(buf), "attribute of root group");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -963,7 +963,7 @@ gent_udlink(void)
     /* This ud link will dangle, but that's okay */
     fid = H5Fcreate(FILE54, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5Lcreate_ud(fid, "udlink1", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
-    HDstrcpy(buf, "foo");
+    strcpy(buf, "foo");
     H5Lcreate_ud(fid, "udlink2", (H5L_type_t)MY_LINKCLASS, buf, 4, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Fclose(fid);
@@ -1386,7 +1386,7 @@ gent_all(void)
     dims[0] = 10;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsnprintf(buf, sizeof(buf), "abcdefghi");
+    snprintf(buf, sizeof(buf), "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1422,7 +1422,7 @@ gent_all(void)
     dims[0] = 27;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsnprintf(buf, sizeof(buf), "1st attribute of dset1.1.1");
+    snprintf(buf, sizeof(buf), "1st attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1430,7 +1430,7 @@ gent_all(void)
     dims[0] = 27;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsnprintf(buf, sizeof(buf), "2nd attribute of dset1.1.1");
+    snprintf(buf, sizeof(buf), "2nd attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1629,7 +1629,7 @@ gent_many(void)
     dims[0] = 10;
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space2, H5P_DEFAULT, H5P_DEFAULT);
-    HDsnprintf(buf, sizeof(buf), "abcdefghi");
+    snprintf(buf, sizeof(buf), "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_CHAR, buf);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -1894,7 +1894,7 @@ gent_str(void)
                 for (l = 0; l < 10; l++)
                     comp1[i][j].a[k][l] = (l + j + k) * (l + j + k);
             for (k = 0; k < 12; k++)
-                HDstrcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
+                strcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
         }
 
     dataset = H5Dcreate2(fid, "/comp1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1967,9 +1967,9 @@ gent_str2(void)
     dims[0] = 3;
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", fxdlenstr2, space2, H5P_DEFAULT, H5P_DEFAULT);
-    HDsnprintf(&(buf2[0 * LENSTR2]), LENSTR2, "0123456789");
-    HDsnprintf(&(buf2[1 * LENSTR2]), LENSTR2, "abcdefghij");
-    HDsnprintf(&(buf2[2 * LENSTR2]), LENSTR2, "ABCDEFGHIJ");
+    snprintf(&(buf2[0 * LENSTR2]), LENSTR2, "0123456789");
+    snprintf(&(buf2[1 * LENSTR2]), LENSTR2, "abcdefghij");
+    snprintf(&(buf2[2 * LENSTR2]), LENSTR2, "ABCDEFGHIJ");
     H5Awrite(attr, fxdlenstr2, buf2);
     H5Sclose(space2);
     H5Tclose(fxdlenstr2);
@@ -1981,8 +1981,8 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of", i);
-        H5Tset_size(memtype, HDstrlen(buf) + 1);
+        snprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of", i);
+        H5Tset_size(memtype, strlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
     }
@@ -1994,8 +1994,8 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of string array", i);
-        H5Tset_size(memtype, HDstrlen(buf) + 1);
+        snprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of string array", i);
+        H5Tset_size(memtype, strlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
     }
@@ -2013,8 +2013,8 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of", i);
-        H5Tset_size(memtype, HDstrlen(buf) + 1);
+        snprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of", i);
+        H5Tset_size(memtype, strlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
     }
@@ -2026,8 +2026,8 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of string array", i);
-        H5Tset_size(memtype, HDstrlen(buf) + 1);
+        snprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of string array", i);
+        H5Tset_size(memtype, strlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
     }
@@ -2045,8 +2045,8 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of", i);
-        H5Tset_size(memtype, HDstrlen(buf) + 1);
+        snprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of", i);
+        H5Tset_size(memtype, strlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
     }
@@ -2058,8 +2058,8 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
-        H5Tset_size(memtype, HDstrlen(buf) + 1);
+        snprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
+        H5Tset_size(memtype, strlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
     }
@@ -3790,7 +3790,7 @@ gent_split_file(void)
     root = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     atype = H5Tcopy(H5T_C_S1);
-    H5Tset_size(atype, HDstrlen(meta) + 1);
+    H5Tset_size(atype, strlen(meta) + 1);
     H5Tset_strpad(atype, H5T_STR_NULLTERM);
 
     dims[0] = 1;
@@ -3879,12 +3879,12 @@ gent_multi(void)
     memset(memb_name, 0, sizeof memb_name);
     memset(memb_addr, 0, sizeof memb_addr);
 
-    assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+    assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
         memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt]  = mt;
-        HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+        sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
         memb_name[mt] = sv[mt];
         /*printf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
         memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
@@ -3928,7 +3928,7 @@ gent_large_objname(void)
     group = H5Gcreate2(fid, "this_is_a_large_group_name", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     for (i = 0; i < 50; ++i) {
-        HDsnprintf(grp_name, sizeof(grp_name), "this_is_a_large_group_name%d", i);
+        snprintf(grp_name, sizeof(grp_name), "this_is_a_large_group_name%d", i);
         group2 = H5Gcreate2(group, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Gclose(group2);
     }
@@ -3999,7 +3999,7 @@ gent_char(void)
     hid_t       sid1;    /* Dataspace ID     */
     hsize_t     dims1[1];
 
-    dims1[0] = HDstrlen(wdata);
+    dims1[0] = strlen(wdata);
 
     /* Create file */
     fid1 = H5Fcreate(FILE39, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -10877,10 +10877,10 @@ gent_compound_complex2(void)
                     /* Set up first nested compound */
                     buf[i].d.nested_a = (double)i;
 
-                    HDstrcpy(buf[i].d.nested_string, "This is a test string.");
+                    strcpy(buf[i].d.nested_string, "This is a test string.");
 
                     for (j = 0; j < 4; j++)
-                        HDstrcpy(buf[i].d.nested_string_array[j], "String test");
+                        strcpy(buf[i].d.nested_string_array[j], "String test");
 
                     /* Set up multiple nested compound */
                     buf[i].e.a = (float)i;
@@ -10892,9 +10892,9 @@ gent_compound_complex2(void)
                         buf[i].e.b.multiple_nested_d[j] = (long)(j - i * 10);
                     }
 
-                    HDstrcpy(buf[i].e.c.further_nested_string, "1234567890");
+                    strcpy(buf[i].e.c.further_nested_string, "1234567890");
                     for (j = 0; j < 4; j++)
-                        HDstrcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
+                        strcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
 
                     for (j = 0; j < 10; j++) {
                         buf[i].e.c.deep_nest.deep_nested_short[j]  = (short)(j + i * 10);
@@ -11262,7 +11262,7 @@ gent_err_attr_dspace(void)
     hid_t   fcpl     = H5I_INVALID_HID; /* File access property list */
     hid_t   sid      = H5I_INVALID_HID; /* Dataspace identifier */
     hid_t   aid      = H5I_INVALID_HID; /* Attribute identifier */
-    hsize_t dims     = 2;               /* Dimensino size */
+    hsize_t dims     = 2;               /* Dimension size */
     int     wdata[2] = {7, 42};         /* The buffer to write */
     int     fd       = -1;              /* The file descriptor */
     char    val      = 6;               /* An invalid version */
@@ -11346,16 +11346,16 @@ onion_filepaths_init(const char *basename)
     if (NULL == (paths = calloc(1, sizeof(struct onion_filepaths))))
         goto error;
 
-    if (NULL == (paths->canon = HDstrdup(basename)))
+    if (NULL == (paths->canon = strdup(basename)))
         goto error;
 
     if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
-    HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
+    snprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
     if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
-    HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
+    snprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
     return paths;
 

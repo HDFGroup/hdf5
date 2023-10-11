@@ -1,6 +1,6 @@
 name: hdf5 dev ctest runs
 
-# Controls when the action will run. Triggers the workflow on a schedule
+# Controls when the action will run. Triggers the workflow on a call
 on:
   workflow_call:
     inputs:

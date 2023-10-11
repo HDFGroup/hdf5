@@ -759,7 +759,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
             if (!factor)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
-            HDsscanf(current->tok_begin, "%ld", &factor->value.int_val);
+            sscanf(current->tok_begin, "%ld", &factor->value.int_val);
             break;
 
         case H5Z_XFORM_FLOAT:
@@ -767,7 +767,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
 
             if (!factor)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node");
-            HDsscanf(current->tok_begin, "%lf", &factor->value.float_val);
+            sscanf(current->tok_begin, "%lf", &factor->value.float_val);
             break;
 
         case H5Z_XFORM_SYMBOL:
@@ -1420,9 +1420,9 @@ H5Z_xform_create(const char *expr)
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points
      * A more sophisticated check is needed to support scientific notation.
      */
-    for (i = 0; i < HDstrlen(expr); i++) {
+    for (i = 0; i < strlen(expr); i++) {
         if (isalpha(expr[i])) {
-            if ((i > 0) && (i < (HDstrlen(expr) - 1))) {
+            if ((i > 0) && (i < (strlen(expr) - 1))) {
                 if (((expr[i] == 'E') || (expr[i] == 'e')) &&
                     (isdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
                     (isdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
@@ -1558,7 +1558,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 
         /* Find the number of times "x" is used in this equation, and allocate room for storing that many
          * points */
-        for (i = 0; i < HDstrlen(new_data_xform_prop->xform_exp); i++)
+        for (i = 0; i < strlen(new_data_xform_prop->xform_exp); i++)
             if (isalpha(new_data_xform_prop->xform_exp[i]))
                 count++;
 
@@ -1625,7 +1625,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
         ret_value = false;
 
         /* Check for trivial data transformation: expression = "x" */
-        if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
+        if ((strlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
             (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
             ret_value = true;
         } /* end if */

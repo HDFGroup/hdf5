@@ -542,9 +542,9 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* create a different name for a local copy of the data file to be
        opened with rd/wr file permissions in case build and test are
        done in the source directory. */
-    HDstrncpy(testfile, FILE_BOGUS, TESTFILE_LEN);
+    strncpy(testfile, FILE_BOGUS, TESTFILE_LEN);
     testfile[TESTFILE_LEN - 1] = '\0';
-    HDstrncat(testfile, ".copy", sizeof(testfile) - HDstrlen(testfile) - 1);
+    strncat(testfile, ".copy", sizeof(testfile) - strlen(testfile) - 1);
 
     /* Make a copy of the data file from svn. */
     if (h5_make_local_copy(FILE_BOGUS, testfile) < 0)
@@ -945,7 +945,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
      * ADD A (STRING) ATTRIBUTE AND MANIPULATE IT *
      **********************************************/
 
-    buf_size = HDstrlen(ATTR_LONG) + 1;
+    buf_size = strlen(ATTR_LONG) + 1;
     if (NULL == (in_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
     if (NULL == (out_buf = (char *)calloc(buf_size, sizeof(char))))
@@ -964,7 +964,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* Write attribute data */
-    HDstrcpy(in_buf, ATTR_SHORT);
+    strcpy(in_buf, ATTR_SHORT);
     if (H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
         TEST_ERROR;
 
@@ -975,12 +975,12 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf) != 0)
+    if (strcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* modify the string attribute */
     memset(in_buf, 0, buf_size);
-    HDstrcpy(in_buf, ATTR_LONG);
+    strcpy(in_buf, ATTR_LONG);
     if (H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
         TEST_ERROR;
 
@@ -990,7 +990,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf) != 0)
+    if (strcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* Close */
@@ -1010,7 +1010,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     for (i = 0; i < N_ATTRS; i++) {
 
         /* Set the attribute's name */
-        if (HDsnprintf(attr_name, ATTR_NAME_MAX, "int_attr_%d", i) < 0)
+        if (snprintf(attr_name, ATTR_NAME_MAX, "int_attr_%d", i) < 0)
             TEST_ERROR;
 
         /* Create an integer attribute on the dataset */
@@ -1839,7 +1839,7 @@ main(void)
     herr_t         ret;                    /* Generic return value */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -1876,8 +1876,8 @@ main(void)
             /* Display info about testing */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg), "Using file format version: (%s, %s)", low_string, high_string);
-            HDputs(msg);
+            snprintf(msg, sizeof(msg), "Using file format version: (%s, %s)", low_string, high_string);
+            puts(msg);
 
             /* test on object continuation block */
             if (test_cont(filename, fapl) < 0)
@@ -2084,23 +2084,23 @@ main(void)
             /* Test reading datasets with undefined object header messages
              * and the various "fail/mark if unknown" object header message flags
              */
-            HDputs("Accessing objects with unknown header messages: H5O_BOGUS_VALID_ID");
+            puts("Accessing objects with unknown header messages: H5O_BOGUS_VALID_ID");
             if (single_file_vfd) {
                 if (test_unknown(H5O_BOGUS_VALID_ID, filename, fapl) < 0)
                     TEST_ERROR;
             } /* end if */
             else {
                 SKIPPED();
-                HDputs("    Unknown header message test not supported with the current VFD.");
+                puts("    Unknown header message test not supported with the current VFD.");
             } /* end else */
-            HDputs("Accessing objects with unknown header messages: H5O_BOGUS_INVALID_ID");
+            puts("Accessing objects with unknown header messages: H5O_BOGUS_INVALID_ID");
             if (single_file_vfd) {
                 if (test_unknown(H5O_BOGUS_INVALID_ID, filename, fapl) < 0)
                     TEST_ERROR;
             } /* end if */
             else {
                 SKIPPED();
-                HDputs("    Unknown header message test not supported with the current VFD.");
+                puts("    Unknown header message test not supported with the current VFD.");
             } /* end else */
 
             /* Test object header creation metadata cache issues */
@@ -2140,19 +2140,19 @@ main(void)
             TEST_ERROR;
     }
     else
-        HDputs("Skipped SWMR tests for SWMR-incompatible VFD");
+        puts("Skipped SWMR tests for SWMR-incompatible VFD");
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = false;
 
-    HDputs("All object header tests passed.");
+    puts("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5Fclose(file);

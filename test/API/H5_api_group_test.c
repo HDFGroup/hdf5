@@ -1437,8 +1437,7 @@ test_get_group_info(void)
     /* Create multiple groups under the parent group */
     for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
         /* Create the groups with a reverse-ordering naming scheme to test creation order */
-        HDsnprintf(group_name, NAME_BUF_SIZE, "group %02u",
-                   (unsigned)(GROUP_GET_INFO_TEST_GROUP_NUMB - i - 1));
+        snprintf(group_name, NAME_BUF_SIZE, "group %02u", (unsigned)(GROUP_GET_INFO_TEST_GROUP_NUMB - i - 1));
 
         if ((group_id = H5Gcreate2(parent_group_id, group_name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) {
             H5_FAILED();

@@ -244,11 +244,11 @@ H5F__parse_file_lock_env_var(htri_t *use_locks)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check the file locking environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && (!HDstrcmp(lock_env_var, "FALSE") || !HDstrcmp(lock_env_var, "0")))
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && (!strcmp(lock_env_var, "FALSE") || !strcmp(lock_env_var, "0")))
         *use_locks = false; /* Override: Never use locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "BEST_EFFORT") ||
-                              !HDstrcmp(lock_env_var, "1")))
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "BEST_EFFORT") ||
+                              !strcmp(lock_env_var, "1")))
         *use_locks = true; /* Override: Always use locks */
     else
         *use_locks = FAIL; /* Environment variable not set, or not set correctly */
@@ -742,8 +742,8 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name /*ou
 
     FUNC_ENTER_PACKAGE
 
-    prefix_len = HDstrlen(prefix);
-    fname_len  = HDstrlen(file_name);
+    prefix_len = strlen(prefix);
+    fname_len  = strlen(file_name);
 
     /* Allocate a buffer to hold the filename + prefix + possibly the delimiter + terminating null byte */
     if (NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2 +
@@ -751,10 +751,9 @@ H5F__build_name(const char *prefix, const char *file_name, char **full_name /*ou
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate filename buffer");
 
     /* Compose the full file name */
-    HDsnprintf(*full_name, (prefix_len + fname_len + 2 + 2), "%s%s%s",
-               prefix, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
-               ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS),
-               file_name);
+    snprintf(*full_name, (prefix_len + fname_len + 2 + 2), "%s%s%s",
+             prefix, /* Extra "+2" to quiet GCC warning - 2019/07/05, QAK */
+             ((prefix_len == 0 || H5_CHECK_DELIMITER(prefix[prefix_len - 1])) ? "" : H5_DIR_SEPS), file_name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -782,7 +781,7 @@ H5F__getenv_prefix_name(char **env_prefix /*in,out*/)
     ret_value = *env_prefix;
 
     /* Advance to next component, if possible */
-    strret = HDstrchr(*env_prefix, H5_COLON_SEPC);
+    strret = strchr(*env_prefix, H5_COLON_SEPC);
     if (strret == NULL)
         *env_prefix = NULL;
     else {
@@ -829,7 +828,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Copy the file name to use */
     if (NULL == (temp_file_name = H5MM_strdup(file_name)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    temp_file_name_len = HDstrlen(temp_file_name);
+    temp_file_name_len = strlen(temp_file_name);
 
     /* Target file_name is an absolute pathname: see RM for detailed description */
     if (H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
@@ -851,7 +850,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             ptr++;
 
             /* Copy into the temp. file name */
-            HDstrncpy(temp_file_name, ptr, temp_file_name_len);
+            strncpy(temp_file_name, ptr, temp_file_name_len);
             temp_file_name[temp_file_name_len - 1] = '\0';
         } /* end if */
     }     /* end if */
@@ -865,7 +864,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             H5E_clear_stack(NULL);
 
             /* Strip "<drive-letter>:" */
-            HDstrncpy(temp_file_name, &file_name[2], temp_file_name_len);
+            strncpy(temp_file_name, &file_name[2], temp_file_name_len);
             temp_file_name[temp_file_name_len - 1] = '\0';
         } /* end if */
     }     /* end if */
@@ -876,9 +875,9 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
 
         /* Get the appropriate environment variable */
         if (H5F_PREFIX_VDS == prefix_type)
-            env_prefix = HDgetenv("HDF5_VDS_PREFIX");
+            env_prefix = getenv("HDF5_VDS_PREFIX");
         else if (H5F_PREFIX_ELINK == prefix_type)
-            env_prefix = HDgetenv("HDF5_EXT_PREFIX");
+            env_prefix = getenv("HDF5_EXT_PREFIX");
         else
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "prefix type is not sensible");
 
@@ -1280,11 +1279,11 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             if (H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &mdc_log_location) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get mdc log location");
             if (mdc_log_location != NULL) {
-                size_t len = HDstrlen(mdc_log_location);
+                size_t len = strlen(mdc_log_location);
                 if (NULL == (f->shared->mdc_log_location = (char *)H5MM_calloc((len + 1) * sizeof(char))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                 "can't allocate memory for mdc log file name");
-                HDstrncpy(f->shared->mdc_log_location, mdc_log_location, len);
+                strncpy(f->shared->mdc_log_location, mdc_log_location, len);
             }
             else
                 f->shared->mdc_log_location = NULL;
@@ -3166,7 +3165,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
      *
      *                                          JRM -- 11/11/22
      */
-    if (HDstrcmp(fd_ptr->cls->name, "multi") == 0)
+    if (strcmp(fd_ptr->cls->name, "multi") == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not supported for multi file driver.");
 
     /* While the family file driver is conceptually fully compatible
@@ -3188,7 +3187,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_le
      * in the future.
      *                                   JRM -- 12/21/11
      */
-    if (HDstrcmp(fd_ptr->cls->name, "family") == 0)
+    if (strcmp(fd_ptr->cls->name, "family") == 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "Not supported for family file driver.");
 
     /* Go get the actual file size */
@@ -3307,7 +3306,7 @@ H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Index to retries based on log10 */
-    tmp     = HDlog10((double)retries);
+    tmp     = log10((double)retries);
     log_ind = (unsigned)tmp;
     assert(log_ind < f->shared->retries_nbins);
 
@@ -3345,9 +3344,9 @@ H5F_set_retries(H5F_t *f)
     /* Initialize the # of bins for retries */
     f->shared->retries_nbins = 0;
     if (f->shared->read_attempts > 1) {
-        /* Use HDceil to ensure that the log10 value is rounded up to the
+        /* Use ceil to ensure that the log10 value is rounded up to the
            nearest integer before casting to unsigned */
-        tmp                      = HDceil(HDlog10((double)f->shared->read_attempts));
+        tmp                      = ceil(log10((double)f->shared->read_attempts));
         f->shared->retries_nbins = (unsigned)tmp;
     }
 

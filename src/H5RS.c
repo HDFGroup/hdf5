@@ -113,7 +113,7 @@ H5RS__xstrdup(H5RS_str_t *rs, const char *s)
     assert(rs);
 
     if (s) {
-        size_t len = HDstrlen(s);
+        size_t len = strlen(s);
 
         /* Determine size of buffer to allocate */
         rs->max = H5RS_ALLOC_SIZE;
@@ -322,7 +322,7 @@ H5RS_wrap(const char *s)
     ret_value->s = (char *)s;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
-    ret_value->len = HDstrlen(s);
+    ret_value->len = strlen(s);
     ret_value->end = ret_value->s + ret_value->len;
 
     ret_value->wrapped = true;
@@ -372,7 +372,7 @@ H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...)
     /* Attempt to write formatted output into the managed string */
     va_start(args1, fmt);
     va_copy(args2, args1);
-    while ((out_len = (size_t)HDvsnprintf(rs->end, (rs->max - rs->len), fmt, args1)) >= (rs->max - rs->len)) {
+    while ((out_len = (size_t)vsnprintf(rs->end, (rs->max - rs->len), fmt, args1)) >= (rs->max - rs->len)) {
         /* Allocate a large enough buffer */
         if (H5RS__resize_for_append(rs, out_len) < 0)
             HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer");
@@ -418,7 +418,7 @@ H5RS_acat(H5RS_str_t *rs, const char *s)
 
     /* Concatenate the provided string on to the managed string */
     if (*s) {
-        size_t len = HDstrlen(s);
+        size_t len = strlen(s);
 
         /* Allocate the underlying string, if necessary */
         if (H5RS__prepare_for_append(rs) < 0)
@@ -464,7 +464,7 @@ H5RS_ancat(H5RS_str_t *rs, const char *s, size_t n)
 
     /* Concatenate the provided string on to the managed string */
     if (n && *s) {
-        size_t len = HDstrlen(s);
+        size_t len = strlen(s);
 
         /* Limit characters to copy to the minimum of 'n' and 'len' */
         n = MIN(len, n);
@@ -677,7 +677,7 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
     assert(rs2);
     assert(rs2->s);
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(rs1->s, rs2->s))
+    FUNC_LEAVE_NOAPI(strcmp(rs1->s, rs2->s))
 } /* end H5RS_cmp() */
 
 /*--------------------------------------------------------------------------
@@ -707,7 +707,7 @@ H5RS_len(const H5RS_str_t *rs)
     assert(rs);
     assert(rs->s);
 
-    FUNC_LEAVE_NOAPI(HDstrlen(rs->s))
+    FUNC_LEAVE_NOAPI(strlen(rs->s))
 } /* end H5RS_len() */
 
 /*--------------------------------------------------------------------------

@@ -274,7 +274,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -313,7 +313,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -374,7 +374,7 @@ test_fapl_config_validation(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -579,7 +579,7 @@ test_hdfs_fapl(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl ");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -662,7 +662,7 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -915,7 +915,7 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1025,7 +1025,7 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1124,7 +1124,7 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1331,7 +1331,7 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1467,7 +1467,7 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1579,13 +1579,13 @@ main(void)
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
-    hdfs_namenode_name_env = HDgetenv("HDFS_TEST_NAMENODE_NAME");
+    hdfs_namenode_name_env = getenv("HDFS_TEST_NAMENODE_NAME");
     if (hdfs_namenode_name_env == NULL || hdfs_namenode_name_env[0] == '\0') {
-        HDstrncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
     }
     else {
-        HDstrncpy(/* TODO: error-check? */
-                  default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(/* TODO: error-check? */
+                default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
 #endif /* H5_HAVE_LIBHDFS */
 

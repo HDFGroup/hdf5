@@ -53,7 +53,7 @@ static const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_
 #define PRINT_CONFIG(...)                                                                                    \
     do {                                                                                                     \
         printf("Config: " __VA_ARGS__);                                                                      \
-        HDputs("");                                                                                          \
+        puts("");                                                                                            \
     } while (0)
 
 #else /* VDS_TEST_VERBOSE */
@@ -65,7 +65,7 @@ char vds_test_str_g[128]   = "";
 /* Replacement for TESTING_2 for non-verbose-output */
 #define TESTING_2_SUPPRESSED(WHAT)                                                                           \
     do {                                                                                                     \
-        HDsnprintf(vds_test_str_g, sizeof(vds_test_str_g), WHAT);                                            \
+        snprintf(vds_test_str_g, sizeof(vds_test_str_g), WHAT);                                              \
     } while (0)
 
 /* Suppress output from PASSED() */
@@ -84,7 +84,7 @@ char vds_test_str_g[128]   = "";
 /* Replacement for printf for printing configuration for non-verbose output */
 #define PRINT_CONFIG(...)                                                                                    \
     do {                                                                                                     \
-        HDsnprintf(vds_config_str_g, sizeof(vds_config_str_g), __VA_ARGS__);                                 \
+        snprintf(vds_config_str_g, sizeof(vds_config_str_g), __VA_ARGS__);                                   \
     } while (0)
 
 #endif /* VDS_TEST_VERBOSE */
@@ -309,27 +309,27 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char
     /* Check filename */
     if ((str_len = H5Pget_virtual_filename(dcpl, i, NULL, (size_t)0)) < 0)
         TEST_ERROR;
-    if ((size_t)str_len != HDstrlen(filename))
+    if ((size_t)str_len != strlen(filename))
         TEST_ERROR;
     assert((size_t)str_len < sizeof(name_out));
     if ((str_len = H5Pget_virtual_filename(dcpl, i, name_out, sizeof(name_out))) < 0)
         TEST_ERROR;
-    if ((size_t)str_len != HDstrlen(filename))
+    if ((size_t)str_len != strlen(filename))
         TEST_ERROR;
-    if (HDstrncmp(name_out, filename, (size_t)str_len + 1) != 0)
+    if (strncmp(name_out, filename, (size_t)str_len + 1) != 0)
         TEST_ERROR;
 
     /* Check dsetname */
     if ((str_len = H5Pget_virtual_dsetname(dcpl, i, NULL, (size_t)0)) < 0)
         TEST_ERROR;
-    if ((size_t)str_len != HDstrlen(dsetname))
+    if ((size_t)str_len != strlen(dsetname))
         TEST_ERROR;
     assert((size_t)str_len < sizeof(name_out));
     if ((str_len = H5Pget_virtual_dsetname(dcpl, i, name_out, sizeof(name_out))) < 0)
         TEST_ERROR;
-    if ((size_t)str_len != HDstrlen(dsetname))
+    if ((size_t)str_len != strlen(dsetname))
         TEST_ERROR;
-    if (HDstrncmp(name_out, dsetname, (size_t)str_len + 1) != 0)
+    if (strncmp(name_out, dsetname, (size_t)str_len + 1) != 0)
         TEST_ERROR;
 
     return 0;
@@ -1062,9 +1062,9 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
             TEST_ERROR;
 
         /* Create file and dataset names */
-        (void)HDsnprintf(tmp_filename, sizeof(tmp_filename), "src_file%u", i);
+        (void)snprintf(tmp_filename, sizeof(tmp_filename), "src_file%u", i);
         tmp_filename[sizeof(tmp_filename) - 1] = '\0';
-        (void)HDsnprintf(tmp_dsetname, sizeof(tmp_dsetname), "src_dset%u", i);
+        (void)snprintf(tmp_dsetname, sizeof(tmp_dsetname), "src_dset%u", i);
         tmp_dsetname[sizeof(tmp_dsetname) - 1] = '\0';
 
         /* Add virtual layout mapping */
@@ -1086,11 +1086,11 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
     /* Verify virtual layout */
     for (i = 0; i < LIST_DOUBLE_SIZE; i++) {
         /* Generate source file name */
-        (void)HDsnprintf(tmp_filename, sizeof(tmp_filename), "src_file%u", i);
+        (void)snprintf(tmp_filename, sizeof(tmp_filename), "src_file%u", i);
         tmp_filename[sizeof(tmp_filename) - 1] = '\0';
 
         /* Generate source dset name */
-        (void)HDsnprintf(tmp_dsetname, sizeof(tmp_dsetname), "src_dset%u", i);
+        (void)snprintf(tmp_dsetname, sizeof(tmp_dsetname), "src_dset%u", i);
         tmp_dsetname[sizeof(tmp_dsetname) - 1] = '\0';
 
         /* Check that the mapping in the DCPL is correct */
@@ -1247,7 +1247,7 @@ test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     if (H5Pget_virtual_prefix(dapl, buffer, sizeof(buffer)) < 0)
         TEST_ERROR_SUPPRESSED;
 
-    if (HDstrcmp(buffer, TMPDIR) != 0)
+    if (strcmp(buffer, TMPDIR) != 0)
         FAIL_PUTS_ERROR("vds prefix not set correctly");
 
     /* Create source dataspace */
@@ -12320,7 +12320,7 @@ main(void)
     bool         driver_is_parallel;
     int          nerrors = 0;
 
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -12336,8 +12336,8 @@ main(void)
      * doesn't support parallel reads and the splitter VFD has external
      * link-related bugs.
      */
-    if (driver_is_parallel || !HDstrcmp(env_h5_drvr, "splitter")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+    if (driver_is_parallel || !strcmp(env_h5_drvr, "splitter")) {
+        puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }
 
@@ -12376,10 +12376,10 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg),
-                       "Testing virtual dataset I/O with file version bounds: (%s, %s):", low_string,
-                       high_string);
-            HDputs(msg);
+            snprintf(msg, sizeof(msg),
+                     "Testing virtual dataset I/O with file version bounds: (%s, %s):", low_string,
+                     high_string);
+            puts(msg);
 
             for (test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS;
                  test_api_config++)
@@ -12387,7 +12387,7 @@ main(void)
 
             TESTING_2("Virtual dataset I/O");
 #ifdef VDS_TEST_VERBOSE
-            HDputs("");
+            puts("");
 #else  /* VDS_TEST_VERBOSE */
             tmp_nerrors = nerrors;
 #endif /* VDS_TEST_VERBOSE */

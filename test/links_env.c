@@ -61,9 +61,9 @@ external_link_env(hid_t fapl, bool new_format)
     else
         TESTING("external links via environment variable");
 
-    if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
+    if ((envval = getenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
+    if (strcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR;
 
     /* Set up name for main file:"extlinks_env0" */
@@ -109,7 +109,7 @@ external_link_env(hid_t fapl, bool new_format)
     /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
     if (gid < 0) {
         H5_FAILED();
-        HDputs("    Should have found the file in tmp_links_env directory.");
+        puts("    Should have found the file in tmp_links_env directory.");
         goto error;
     }
 
@@ -149,13 +149,13 @@ main(void)
     int         nerrors = 0; /* Error from tests */
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* Splitter VFD has issues with external links */
-    if (!HDstrcmp(env_h5_drvr, "splitter")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+    if (!strcmp(env_h5_drvr, "splitter")) {
+        puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }
 
@@ -189,6 +189,6 @@ main(void)
     exit(EXIT_SUCCESS);
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     exit(EXIT_FAILURE);
 } /* end main() */

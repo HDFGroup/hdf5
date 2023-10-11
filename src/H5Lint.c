@@ -925,8 +925,8 @@ H5L__get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
     if (H5L_TYPE_SOFT == lnk->type) {
         /* Copy to output buffer */
         if (size > 0 && buf) {
-            HDstrncpy((char *)buf, lnk->u.soft.name, size);
-            if (HDstrlen(lnk->u.soft.name) >= size)
+            strncpy((char *)buf, lnk->u.soft.name, size);
+            if (strlen(lnk->u.soft.name) >= size)
                 ((char *)buf)[size - 1] = '\0';
         } /* end if */
     }     /* end if */
@@ -1627,7 +1627,7 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
 
             /* Look for another separator */
             next = udata->sep;
-            if (NULL == (udata->sep = HDstrchr(udata->sep, '/')))
+            if (NULL == (udata->sep = strchr(udata->sep, '/')))
                 cb_func = H5L__exists_final_cb;
             else {
                 /* Chew through adjacent separators, if present */
@@ -1693,7 +1693,7 @@ H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, bool *exists)
     else {
         /* Set up user data & correct callback */
         udata.exists = exists;
-        if (NULL == (udata.sep = HDstrchr(name_trav, '/')))
+        if (NULL == (udata.sep = strchr(name_trav, '/')))
             cb_func = H5L__exists_final_cb;
         else {
             /* Chew through adjacent separators, if present */
@@ -1742,7 +1742,7 @@ H5L__exists(const H5G_loc_t *loc, const char *name, bool *exists)
     assert(exists);
 
     /* A path of "/" will always exist in a file */
-    if (0 == HDstrcmp(name, "/"))
+    if (0 == strcmp(name, "/"))
         *exists = true;
     else {
         /* Traverse the group hierarchy to locate the object to get info about */

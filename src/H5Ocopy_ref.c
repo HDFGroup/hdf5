@@ -122,8 +122,8 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
         new_oloc.addr = dst_oloc->addr;
 
         /* Pick a default name for the new object */
-        HDsnprintf(tmp_obj_name, sizeof(tmp_obj_name), "~obj_pointed_by_%llu",
-                   (unsigned long long)dst_oloc->addr);
+        snprintf(tmp_obj_name, sizeof(tmp_obj_name), "~obj_pointed_by_%llu",
+                 (unsigned long long)dst_oloc->addr);
 
         /* Create a link to the newly copied object */
         /* Note: since H5O_copy_header_map actually copied the target object, it

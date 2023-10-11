@@ -857,12 +857,12 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     TESTING("H5Pget_data_transform");
 
-    if (NULL == (ptrgetTest = (char *)malloc(HDstrlen(simple) + 1)))
+    if (NULL == (ptrgetTest = (char *)malloc(strlen(simple) + 1)))
         TEST_ERROR;
 
-    if (H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(c_to_f) + 1) < 0)
+    if (H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, strlen(c_to_f) + 1) < 0)
         TEST_ERROR;
-    if (HDstrcmp(c_to_f, ptrgetTest) != 0)
+    if (strcmp(c_to_f, ptrgetTest) != 0)
         FAIL_PUTS_ERROR("    ERROR: Data transform failed to match what was set\n");
 
     PASSED();
@@ -888,11 +888,11 @@ test_getset(const hid_t dxpl_id_c_to_f)
 
     TESTING("H5Pget_data_transform, after resetting transform property");
 
-    if (NULL == (ptrgetTest = (char *)calloc((size_t)1, HDstrlen(simple) + 1)))
+    if (NULL == (ptrgetTest = (char *)calloc((size_t)1, strlen(simple) + 1)))
         TEST_ERROR;
-    if (H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(simple) + 1) < 0)
+    if (H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, strlen(simple) + 1) < 0)
         TEST_ERROR;
-    if (HDstrcmp(simple, ptrgetTest) != 0)
+    if (strcmp(simple, ptrgetTest) != 0)
         FAIL_PUTS_ERROR("    ERROR: Data transform failed to match what was set\n");
 
     PASSED();
@@ -919,7 +919,7 @@ test_set(void)
 
     TESTING("H5Pget_data_transform (get before set)");
 
-    if (NULL == (ptrgetTest = (char *)malloc(HDstrlen(str) + 1)))
+    if (NULL == (ptrgetTest = (char *)malloc(strlen(str) + 1)))
         TEST_ERROR;
 
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -930,7 +930,7 @@ test_set(void)
 
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-    if (H5Pget_data_transform(dxpl_id, ptrgetTest, HDstrlen(str) + 1) < 0)
+    if (H5Pget_data_transform(dxpl_id, ptrgetTest, strlen(str) + 1) < 0)
         PASSED();
     else
         FAIL_PUTS_ERROR("    ERROR: Data transform get before set succeeded (it shouldn't have)\n");

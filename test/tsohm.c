@@ -604,7 +604,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_clo
             printf("Can't read data\n");                                                                     \
             goto error;                                                                                      \
         }                                                                                                    \
-        if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str) != 0) {       \
+        if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || strcmp(rdata.str, wdata.str) != 0) {         \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
             printf("incorrect read data\n");                                                                 \
@@ -621,7 +621,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_clo
     /* Initialize wdata */
     memset(&wdata, 0, sizeof(wdata));
     wdata.i1 = 11;
-    HDstrcpy(wdata.str, "string");
+    strcpy(wdata.str, "string");
     wdata.i2 = 22;
     wdata.i3 = 33;
     wdata.i4 = 44;
@@ -1486,7 +1486,7 @@ size2_verify_plist2(hid_t plist)
 static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
-    HDputs(name);
+    puts(name);
     printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
     printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
            (unsigned long long)(sizes->first_dset - sizes->empty_size));
@@ -1631,8 +1631,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Set up attribute data */
     memset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
     memset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
-    HDstrcpy(attr_string1, LONG_STRING);
-    HDstrcpy(attr_string2, LONG_STRING);
+    strcpy(attr_string1, LONG_STRING);
+    strcpy(attr_string2, LONG_STRING);
     attr_string2[1] = '1'; /* The second string starts "01 index..." */
 
     /* Set up attribute metadata */
@@ -1788,7 +1788,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
     CHECK_I(group_id, "H5Gopen2");
 
-    HDstrcpy(attr_name, "00 index");
+    strcpy(attr_name, "00 index");
 
     for (x = 0; x < NUM_ATTRIBUTES; ++x) {
         /* Create a unique name and value for each attribute */
@@ -2038,8 +2038,8 @@ size2_verify(void)
 
     memset(attr_string, 0, (size_t)NAME_BUF_SIZE);
     memset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
-    HDstrcpy(attr_correct_string, LONG_STRING);
-    HDstrcpy(attr_name, "00 index");
+    strcpy(attr_correct_string, LONG_STRING);
+    strcpy(attr_name, "00 index");
 
     for (x = 0; x < NUM_ATTRIBUTES; ++x) {
         /* Create the name and correct value for each attribute */
@@ -3716,7 +3716,7 @@ test_sohm(void)
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

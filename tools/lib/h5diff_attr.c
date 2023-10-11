@@ -112,7 +112,7 @@ table_attr_mark_exist(const unsigned *exist, char *name, table_attrs_t *table)
         table->attrs[curr_val].exist[0] = exist[0];
         table->attrs[curr_val].exist[1] = exist[1];
         if (name)
-            table->attrs[curr_val].name = (char *)HDstrdup(name);
+            table->attrs[curr_val].name = (char *)strdup(name);
         table->nattrs++;
     }
 }
@@ -186,7 +186,7 @@ build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t **table_out, 
             H5TOOLS_GOTO_ERROR(FAIL, "H5Aget_name second attribute failed");
 
         /* criteria is string compare */
-        cmp = HDstrcmp(name1, name2);
+        cmp = strcmp(name1, name2);
 
         if (cmp == 0) {
             infile[0] = 1;
@@ -384,19 +384,19 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
     H5TOOLS_DEBUG("attr_names: %s - %s", name1, name2);
     if (name1) {
-        sz = HDstrlen(name1);
+        sz = strlen(name1);
         H5TOOLS_DEBUG("attr1_name: %s - %d", name1, sz);
         if (sz > 0) {
             opts->obj_name[0] = (char *)malloc(sz + 1);
-            HDstrncpy(opts->obj_name[0], name1, sz + 1);
+            strncpy(opts->obj_name[0], name1, sz + 1);
         }
     }
     if (name2) {
-        sz = HDstrlen(name2);
+        sz = strlen(name2);
         H5TOOLS_DEBUG("attr2_name: %s - %d", name2, sz);
         if (sz > 0) {
             opts->obj_name[1] = (char *)malloc(sz + 1);
-            HDstrncpy(opts->obj_name[1], name2, sz + 1);
+            strncpy(opts->obj_name[1], name2, sz + 1);
         }
     }
     H5TOOLS_DEBUG("attr_names: %s - %s", opts->obj_name[0], opts->obj_name[1]);
@@ -464,17 +464,17 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
         H5TOOLS_DEBUG("attr_names: %s - %s : %s - %s", name1, name2, path1, path2);
         if (name1) {
-            sz = HDstrlen(name1) + HDstrlen(path1) + 7;
+            sz = strlen(name1) + strlen(path1) + 7;
             H5TOOLS_DEBUG("attr1_name: %s - %d", name1, sz);
             opts->obj_name[0] = (char *)calloc(sz + 1, sizeof(char));
-            HDsnprintf(opts->obj_name[0], sz, "%s of <%s>", name1, path1);
+            snprintf(opts->obj_name[0], sz, "%s of <%s>", name1, path1);
             opts->obj_name[0][sz] = '\0';
         }
         if (name2) {
-            sz = HDstrlen(name2) + HDstrlen(path2) + 7;
+            sz = strlen(name2) + strlen(path2) + 7;
             H5TOOLS_DEBUG("attr2_name: %s - %d", name2, sz);
             opts->obj_name[1] = (char *)calloc(sz + 1, sizeof(char));
-            HDsnprintf(opts->obj_name[1], sz, "%s of <%s>", name2, path2);
+            snprintf(opts->obj_name[1], sz, "%s of <%s>", name2, path2);
             opts->obj_name[1][sz] = '\0';
         }
 

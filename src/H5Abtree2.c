@@ -154,7 +154,7 @@ H5A__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute");
 
     /* Compare the string values */
-    udata->cmp = HDstrcmp(udata->name, attr->shared->name);
+    udata->cmp = strcmp(udata->name, attr->shared->name);
 
     /* Check for correct attribute & callback to make */
     if (udata->cmp == 0 && udata->found_op) {

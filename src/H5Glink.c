@@ -91,7 +91,7 @@ H5G__link_cmp_name_inc(const void *lnk1, const void *lnk2)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
+    FUNC_LEAVE_NOAPI(strcmp(((const H5O_link_t *)lnk1)->name, ((const H5O_link_t *)lnk2)->name))
 } /* end H5G__link_cmp_name_inc() */
 
 /*-------------------------------------------------------------------------
@@ -113,7 +113,7 @@ H5G__link_cmp_name_dec(const void *lnk1, const void *lnk2)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
+    FUNC_LEAVE_NOAPI(strcmp(((const H5O_link_t *)lnk2)->name, ((const H5O_link_t *)lnk1)->name))
 } /* end H5G__link_cmp_name_dec() */
 
 /*-------------------------------------------------------------------------
@@ -276,7 +276,7 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                 break;
 
             case H5L_TYPE_SOFT:
-                info->u.val_size = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
+                info->u.val_size = strlen(lnk->u.soft.name) + 1; /*count the null terminator*/
                 break;
 
             case H5L_TYPE_ERROR:

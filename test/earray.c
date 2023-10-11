@@ -753,7 +753,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     }
 #else  /* NDEBUG */
     SKIPPED();
-    HDputs("    Not tested when assertions are disabled");
+    puts("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -2349,12 +2349,12 @@ main(void)
         switch (curr_test) {
             /* "Normal" testing parameters */
             case EARRAY_TEST_NORMAL:
-                HDputs("Testing with normal parameters");
+                puts("Testing with normal parameters");
                 break;
 
             /* "Re-open array" testing parameters */
             case EARRAY_TEST_REOPEN:
-                HDputs("Testing with reopen array flag set");
+                puts("Testing with reopen array flag set");
                 tparam.reopen_array = EARRAY_TEST_REOPEN;
                 break;
 
@@ -2383,31 +2383,31 @@ main(void)
             switch (curr_iter) {
                 /* "Forward" testing parameters */
                 case EARRAY_ITER_FW:
-                    HDputs("Testing with forward iteration");
+                    puts("Testing with forward iteration");
                     tparam.eiter = &ea_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case EARRAY_ITER_RV:
-                    HDputs("Testing with reverse iteration");
+                    puts("Testing with reverse iteration");
                     tparam.eiter = &ea_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case EARRAY_ITER_RND:
-                    HDputs("Testing with random iteration");
+                    puts("Testing with random iteration");
                     tparam.eiter = &ea_iter_rnd;
                     break;
 
                 /* "Random #2" testing parameters */
                 case EARRAY_ITER_RND2:
-                    HDputs("Testing with random #2 iteration");
+                    puts("Testing with random #2 iteration");
                     tparam.eiter = &ea_iter_rnd2;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case EARRAY_ITER_CYC:
-                    HDputs("Testing with cyclic iteration");
+                    puts("Testing with cyclic iteration");
                     tparam.eiter = &ea_iter_cyc;
                     break;
 
@@ -2429,16 +2429,15 @@ main(void)
                     /* Test first element in data block */
                     nelmts = (hsize_t)((hsize_t)1 + cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * dblk));
-                    HDsnprintf(test_str, sizeof(test_str),
-                               "setting first element of array's data block #%llu",
-                               (unsigned long long)ndblks);
+                    snprintf(test_str, sizeof(test_str), "setting first element of array's data block #%llu",
+                             (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Test all elements in data block */
                     nelmts = (hsize_t)(cparam.idx_blk_elmts + tparam.sblk_info[sblk].start_idx +
                                        (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
-                    HDsnprintf(test_str, sizeof(test_str), "setting all elements of array's data block #%llu",
-                               (unsigned long long)ndblks);
+                    snprintf(test_str, sizeof(test_str), "setting all elements of array's data block #%llu",
+                             (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Increment data block being tested */
@@ -2481,7 +2480,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All extensible array tests passed.");
+    puts("All extensible array tests passed.");
 
     /* Clean up file used */
     h5_cleanup(FILENAME, fapl);
@@ -2489,7 +2488,7 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {

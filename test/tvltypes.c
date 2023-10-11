@@ -1241,9 +1241,9 @@ test_vltypes_compound_vlstr(void)
         wdata[i].v.p   = (s2 *)malloc((i + L3_INCM) * sizeof(s2));
         wdata[i].v.len = i + L3_INCM;
         for (t1 = (s2 *)((wdata[i].v).p), j = 0; j < (i + L3_INCM); j++, t1++) {
-            HDstrcat(str, "m");
-            t1->string = (char *)malloc(HDstrlen(str) * sizeof(char) + 1);
-            HDstrcpy(t1->string, str);
+            strcat(str, "m");
+            t1->string = (char *)malloc(strlen(str) * sizeof(char) + 1);
+            strcpy(t1->string, str);
             /*t1->color = red;*/
             t1->color = blue;
         }
@@ -1384,7 +1384,7 @@ test_vltypes_compound_vlstr(void)
 
         for (t1 = (s2 *)(wdata[i].v.p), t2 = (s2 *)(rdata[i].v.p), j = 0; j < rdata[i].v.len;
              j++, t1++, t2++) {
-            if (HDstrcmp(t1->string, t2->string) != 0) {
+            if (strcmp(t1->string, t2->string) != 0) {
                 TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n", t1->string,
                               t2->string);
                 continue;
@@ -1406,14 +1406,14 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Treclaim");
 
     /* Use this part for new data */
-    HDstrcpy(str, "bbbbbbbb\0");
+    strcpy(str, "bbbbbbbb\0");
     for (i = 0; i < SPACE1_DIM1; i++) {
         wdata2[i].v.p   = (s2 *)malloc((i + 1) * sizeof(s2));
         wdata2[i].v.len = i + 1;
         for (t1 = (s2 *)(wdata2[i].v).p, j = 0; j < i + 1; j++, t1++) {
-            HDstrcat(str, "pp");
-            t1->string = (char *)malloc(HDstrlen(str) * sizeof(char) + 1);
-            HDstrcpy(t1->string, str);
+            strcat(str, "pp");
+            t1->string = (char *)malloc(strlen(str) * sizeof(char) + 1);
+            strcpy(t1->string, str);
             t1->color = green;
         }
     } /* end for */
@@ -1445,7 +1445,7 @@ test_vltypes_compound_vlstr(void)
 
         for (t1 = (s2 *)(wdata2[i].v.p), t2 = (s2 *)(rdata2[i].v.p), j = 0; j < rdata2[i].v.len;
              j++, t1++, t2++) {
-            if (HDstrcmp(t1->string, t2->string) != 0) {
+            if (strcmp(t1->string, t2->string) != 0) {
                 TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n", t1->string,
                               t2->string);
                 continue;
@@ -2654,16 +2654,16 @@ test_vltypes_fill_value(void)
             /* Layout specific actions */
             switch (layout) {
                 case H5D_COMPACT:
-                    HDstrcpy(dset_name1, "dataset1-compact");
-                    HDstrcpy(dset_name2, "dataset2-compact");
+                    strcpy(dset_name1, "dataset1-compact");
+                    strcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id = small_dspace_id;
                     ret            = H5Pset_layout(tmp_dcpl_id, H5D_COMPACT);
                     CHECK(ret, FAIL, "H5Pset_layout");
                     break;
 
                 case H5D_CONTIGUOUS:
-                    HDstrcpy(dset_name1, "dataset1-contig");
-                    HDstrcpy(dset_name2, "dataset2-contig");
+                    strcpy(dset_name1, "dataset1-contig");
+                    strcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id = large_dspace_id;
                     break;
 
@@ -2675,15 +2675,15 @@ test_vltypes_fill_value(void)
                     CHECK(ret, FAIL, "H5Pset_chunk");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     if (test_loop == 1) {
-                        HDstrcpy(dset_name1, "dataset1-chunked-compressed");
-                        HDstrcpy(dset_name2, "dataset2-chunked-compressed");
+                        strcpy(dset_name1, "dataset1-chunked-compressed");
+                        strcpy(dset_name2, "dataset2-chunked-compressed");
                         ret = H5Pset_deflate(tmp_dcpl_id, 3);
                         CHECK(ret, FAIL, "H5Pset_deflate");
                     } /* end if */
                     else {
 #endif /* H5_HAVE_FILTER_DEFLATE */
-                        HDstrcpy(dset_name1, "dataset1-chunked");
-                        HDstrcpy(dset_name2, "dataset2-chunked");
+                        strcpy(dset_name1, "dataset1-chunked");
+                        strcpy(dset_name2, "dataset2-chunked");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     } /* end else */
 #endif                /* H5_HAVE_FILTER_DEFLATE */
@@ -2764,16 +2764,16 @@ test_vltypes_fill_value(void)
             /* Layout specific actions */
             switch (layout) {
                 case H5D_COMPACT:
-                    HDstrcpy(dset_name1, "dataset1-compact");
-                    HDstrcpy(dset_name2, "dataset2-compact");
+                    strcpy(dset_name1, "dataset1-compact");
+                    strcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id        = small_dspace_id;
                     dset_select_dspace_id = small_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_SMALL;
                     break;
 
                 case H5D_CONTIGUOUS:
-                    HDstrcpy(dset_name1, "dataset1-contig");
-                    HDstrcpy(dset_name2, "dataset2-contig");
+                    strcpy(dset_name1, "dataset1-contig");
+                    strcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id        = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_LARGE;
@@ -2782,13 +2782,13 @@ test_vltypes_fill_value(void)
                 case H5D_CHUNKED:
 #ifdef H5_HAVE_FILTER_DEFLATE
                     if (test_loop == 1) {
-                        HDstrcpy(dset_name1, "dataset1-chunked-compressed");
-                        HDstrcpy(dset_name2, "dataset2-chunked-compressed");
+                        strcpy(dset_name1, "dataset1-chunked-compressed");
+                        strcpy(dset_name2, "dataset2-chunked-compressed");
                     } /* end if */
                     else {
 #endif /* H5_HAVE_FILTER_DEFLATE */
-                        HDstrcpy(dset_name1, "dataset1-chunked");
-                        HDstrcpy(dset_name2, "dataset2-chunked");
+                        strcpy(dset_name1, "dataset1-chunked");
+                        strcpy(dset_name2, "dataset2-chunked");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     } /* end else */
 #endif                /* H5_HAVE_FILTER_DEFLATE */
@@ -2818,10 +2818,10 @@ test_vltypes_fill_value(void)
 
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
-                if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                    HDstrcmp(rbuf[i].str_stat, "dead") != 0 || HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                    HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                    rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                    strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                    strcmp(rbuf[i].str_unit, "meter") != 0) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                     continue;
                 } /* end if */
@@ -2841,11 +2841,10 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if ((i % 2) == select_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -2876,10 +2875,10 @@ test_vltypes_fill_value(void)
 
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
-                if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                    rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                    HDstrcmp(rbuf[i].str_stat, "dead") != 0 || HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                    HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                    rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                    strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                    strcmp(rbuf[i].str_unit, "meter") != 0) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                     continue;
                 } /* end if */
@@ -2899,11 +2898,10 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if ((i % 2) == select_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -2951,16 +2949,16 @@ test_vltypes_fill_value(void)
             /* Layout specific actions */
             switch (layout) {
                 case H5D_COMPACT:
-                    HDstrcpy(dset_name1, "dataset1-compact");
-                    HDstrcpy(dset_name2, "dataset2-compact");
+                    strcpy(dset_name1, "dataset1-compact");
+                    strcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id        = small_dspace_id;
                     dset_select_dspace_id = small_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_SMALL;
                     break;
 
                 case H5D_CONTIGUOUS:
-                    HDstrcpy(dset_name1, "dataset1-contig");
-                    HDstrcpy(dset_name2, "dataset2-contig");
+                    strcpy(dset_name1, "dataset1-contig");
+                    strcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id        = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts            = SPACE4_DIM_LARGE;
@@ -2969,13 +2967,13 @@ test_vltypes_fill_value(void)
                 case H5D_CHUNKED:
 #ifdef H5_HAVE_FILTER_DEFLATE
                     if (test_loop == 1) {
-                        HDstrcpy(dset_name1, "dataset1-chunked-compressed");
-                        HDstrcpy(dset_name2, "dataset2-chunked-compressed");
+                        strcpy(dset_name1, "dataset1-chunked-compressed");
+                        strcpy(dset_name2, "dataset2-chunked-compressed");
                     } /* end if */
                     else {
 #endif /* H5_HAVE_FILTER_DEFLATE */
-                        HDstrcpy(dset_name1, "dataset1-chunked");
-                        HDstrcpy(dset_name2, "dataset2-chunked");
+                        strcpy(dset_name1, "dataset1-chunked");
+                        strcpy(dset_name2, "dataset2-chunked");
 #ifdef H5_HAVE_FILTER_DEFLATE
                     } /* end else */
 #endif                /* H5_HAVE_FILTER_DEFLATE */
@@ -3018,22 +3016,21 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3054,23 +3051,23 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
                     if ((i % 2) == select_offset[0]) {
-                        if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                            HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                            HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                            HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                        if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                            rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                            strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                            strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                            strcmp(rbuf[i].str_unit, "meter") != 0) {
                             TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                             continue;
                         } /* end if */
@@ -3106,22 +3103,21 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
-                    if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                        rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                        HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                    if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                        rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                        strcmp(rbuf[i].str_stat, "dead") != 0 || strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                        strcmp(rbuf[i].str_unit, "meter") != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
@@ -3142,23 +3138,23 @@ test_vltypes_fill_value(void)
             /* Compare data read in */
             for (i = 0; i < dset_elmts; i++) {
                 if (i == single_offset[0]) {
-                    if (HDstrcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
-                        HDstrcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
-                        HDstrcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
-                        HDstrcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
-                        HDstrcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
-                        HDstrcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
+                    if (strcmp(rbuf[i].str_id, wdata.str_id) != 0 || rbuf[i].str_name ||
+                        strcmp(rbuf[i].str_desc, wdata.str_desc) != 0 ||
+                        strcmp(rbuf[i].str_orig, wdata.str_orig) != 0 ||
+                        strcmp(rbuf[i].str_stat, wdata.str_stat) != 0 ||
+                        strcmp(rbuf[i].str_form, wdata.str_form) != 0 ||
+                        strcmp(rbuf[i].str_unit, wdata.str_unit) != 0) {
                         TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n", __LINE__, (int)i);
                         continue;
                     } /* end if */
                 }     /* end if */
                 else {
                     if ((i % 2) == select_offset[0]) {
-                        if (HDstrcmp(rbuf[i].str_id, "foobar") != 0 || HDstrcmp(rbuf[i].str_name, "") != 0 ||
-                            rbuf[i].str_desc || HDstrcmp(rbuf[i].str_orig, "\0") != 0 ||
-                            HDstrcmp(rbuf[i].str_stat, "dead") != 0 ||
-                            HDstrcmp(rbuf[i].str_form, "liquid") != 0 ||
-                            HDstrcmp(rbuf[i].str_unit, "meter") != 0) {
+                        if (strcmp(rbuf[i].str_id, "foobar") != 0 || strcmp(rbuf[i].str_name, "") != 0 ||
+                            rbuf[i].str_desc || strcmp(rbuf[i].str_orig, "\0") != 0 ||
+                            strcmp(rbuf[i].str_stat, "dead") != 0 ||
+                            strcmp(rbuf[i].str_form, "liquid") != 0 ||
+                            strcmp(rbuf[i].str_unit, "meter") != 0) {
                             TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                             continue;
                         } /* end if */

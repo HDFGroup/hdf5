@@ -211,7 +211,7 @@ multiple_dset_write(void)
     VRFY((ret >= 0), "set fill-value succeeded");
 
     for (n = 0; n < ndatasets; n++) {
-        HDsnprintf(dname, sizeof(dname), "dataset %d", n);
+        snprintf(dname, sizeof(dname), "dataset %d", n);
         dataset = H5Dcreate2(iof, dname, H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         VRFY((dataset > 0), dname);
 
@@ -975,11 +975,11 @@ collective_group_write(void)
     /* creates ngroups groups under the root group, writes chunked
      * datasets in parallel. */
     for (m = 0; m < ngroups; m++) {
-        HDsnprintf(gname, sizeof(gname), "group%d", m);
+        snprintf(gname, sizeof(gname), "group%d", m);
         gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
-        HDsnprintf(dname, sizeof(dname), "dataset%d", m);
+        snprintf(dname, sizeof(dname), "dataset%d", m);
         did = H5Dcreate2(gid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         VRFY((did > 0), dname);
 
@@ -1093,12 +1093,12 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
     VRFY((outdata != NULL), "malloc succeeded for outdata");
 
     /* open every group under root group. */
-    HDsnprintf(gname, sizeof(gname), "group%d", m);
+    snprintf(gname, sizeof(gname), "group%d", m);
     gid = H5Gopen2(fid, gname, H5P_DEFAULT);
     VRFY((gid > 0), gname);
 
     /* check the data. */
-    HDsnprintf(dname, sizeof(dname), "dataset%d", m);
+    snprintf(dname, sizeof(dname), "dataset%d", m);
     did = H5Dopen2(gid, dname, H5P_DEFAULT);
     VRFY((did > 0), dname);
 
@@ -1211,7 +1211,7 @@ multiple_group_write(void)
     /* creates ngroups groups under the root group, writes datasets in
      * parallel. */
     for (m = 0; m < ngroups; m++) {
-        HDsnprintf(gname, sizeof(gname), "group%d", m);
+        snprintf(gname, sizeof(gname), "group%d", m);
         gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
@@ -1267,7 +1267,7 @@ write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
     VRFY((outme != NULL), "malloc succeeded for outme");
 
     for (n = 0; n < NDATASET; n++) {
-        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
+        snprintf(dname, sizeof(dname), "dataset%d", n);
         did = H5Dcreate2(gid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((did > 0), dname);
 
@@ -1305,7 +1305,7 @@ create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid, int counter)
     }
 #endif /* BARRIER_CHECKS */
 
-    HDsnprintf(gname, sizeof(gname), "%dth_child_group", counter + 1);
+    snprintf(gname, sizeof(gname), "%dth_child_group", counter + 1);
     child_gid = H5Gcreate2(gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((child_gid > 0), gname);
 
@@ -1376,7 +1376,7 @@ multiple_group_read(void)
 
     /* open every group under root group. */
     for (m = 0; m < ngroups; m++) {
-        HDsnprintf(gname, sizeof(gname), "group%d", m);
+        snprintf(gname, sizeof(gname), "group%d", m);
         gid = H5Gopen2(fid, gname, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
@@ -1433,7 +1433,7 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
     VRFY((outdata != NULL), "malloc succeeded for outdata");
 
     for (n = 0; n < NDATASET; n++) {
-        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
+        snprintf(dname, sizeof(dname), "dataset%d", n);
         did = H5Dopen2(gid, dname, H5P_DEFAULT);
         VRFY((did > 0), dname);
 
@@ -1484,7 +1484,7 @@ recursive_read_group(hid_t memspace, hid_t filespace, hid_t gid, int counter)
         nerrors += err_num;
 
     if (counter < GROUP_DEPTH) {
-        HDsnprintf(gname, sizeof(gname), "%dth_child_group", counter + 1);
+        snprintf(gname, sizeof(gname), "%dth_child_group", counter + 1);
         child_gid = H5Gopen2(gid, gname, H5P_DEFAULT);
         VRFY((child_gid > 0), gname);
         recursive_read_group(memspace, filespace, child_gid, counter + 1);
@@ -1506,7 +1506,7 @@ write_attribute(hid_t obj_id, int this_type, int num)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if (this_type == is_group) {
-        HDsnprintf(attr_name, sizeof(attr_name), "Group Attribute %d", num);
+        snprintf(attr_name, sizeof(attr_name), "Group Attribute %d", num);
         sid = H5Screate(H5S_SCALAR);
         aid = H5Acreate2(obj_id, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         H5Awrite(aid, H5T_NATIVE_INT, &num);
@@ -1514,7 +1514,7 @@ write_attribute(hid_t obj_id, int this_type, int num)
         H5Sclose(sid);
     } /* end if */
     else if (this_type == is_dset) {
-        HDsnprintf(attr_name, sizeof(attr_name), "Dataset Attribute %d", num);
+        snprintf(attr_name, sizeof(attr_name), "Dataset Attribute %d", num);
         for (i = 0; i < 8; i++)
             attr_data[i] = i;
         sid = H5Screate_simple(dspace_rank, dspace_dims, NULL);
@@ -1537,14 +1537,14 @@ read_attribute(hid_t obj_id, int this_type, int num)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if (this_type == is_group) {
-        HDsnprintf(attr_name, sizeof(attr_name), "Group Attribute %d", num);
+        snprintf(attr_name, sizeof(attr_name), "Group Attribute %d", num);
         aid = H5Aopen(obj_id, attr_name, H5P_DEFAULT);
         H5Aread(aid, H5T_NATIVE_INT, &in_num);
         vrfy_errors = dataset_vrfy(NULL, NULL, NULL, group_block, &in_num, &num);
         H5Aclose(aid);
     }
     else if (this_type == is_dset) {
-        HDsnprintf(attr_name, sizeof(attr_name), "Dataset Attribute %d", num);
+        snprintf(attr_name, sizeof(attr_name), "Dataset Attribute %d", num);
         for (i = 0; i < 8; i++)
             out_data[i] = i;
         aid = H5Aopen(obj_id, attr_name, H5P_DEFAULT);

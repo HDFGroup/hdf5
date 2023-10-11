@@ -32,6 +32,8 @@
 #include "H5MMprivate.h"  /* Memory management        */
 #include "H5Pprivate.h"   /* Property lists           */
 
+#define CANBE_UNUSED(X) (void)(X)
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_IOC_g = H5I_INVALID_HID;
 
@@ -223,8 +225,8 @@ H5FD_ioc_init(void)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register IOC VFD");
 
         /* Check if IOC VFD has been loaded dynamically */
-        env_var = HDgetenv(HDF5_DRIVER);
-        if (env_var && !HDstrcmp(env_var, H5FD_IOC_NAME)) {
+        env_var = getenv(HDF5_DRIVER);
+        if (env_var && !strcmp(env_var, H5FD_IOC_NAME)) {
             int mpi_initialized = 0;
             int provided        = 0;
 
@@ -528,7 +530,7 @@ H5FD__ioc_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
     /* Encode driver name */
-    HDstrncpy(name, "IOC", 9);
+    strncpy(name, "IOC", 9);
     name[8] = '\0';
 
     /* Encode configuration structure magic number */
@@ -573,7 +575,7 @@ H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
-    if (HDstrncmp(name, "IOC", 9))
+    if (strncmp(name, "IOC", 9))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
 
     /* Decode configuration structure magic number */
@@ -1223,6 +1225,7 @@ H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     H5FD_IOC_LOG_CALL(__func__);
 
     assert(file && file->pub.cls);
+    CANBE_UNUSED(file);
     assert(buf);
 
     /* Check for overflow conditions */
@@ -1491,12 +1494,12 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                     "can't allocate config file name buffer");
 
         /* Check if a prefix has been set for the configuration file name */
-        prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+        prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
 
         /* TODO: No support for subfile directory prefix currently */
         /* TODO: Possibly try loading config file prefix from file before deleting */
-        HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
-                   prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
+        snprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
+                 prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
         if (NULL == (config_file = fopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
@@ -1531,12 +1534,12 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                         "can't delete subfiling config file");
 
         /* Try to delete each of the subfiles */
-        num_digits = (int)(HDlog10(n_subfiles) + 1);
+        num_digits = (int)(log10(n_subfiles) + 1);
 
         for (int i = 0; i < n_subfiles; i++) {
             /* TODO: No support for subfile directory prefix currently */
-            HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
-                       base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_subfiles);
+            snprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
+                     base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_subfiles);
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG

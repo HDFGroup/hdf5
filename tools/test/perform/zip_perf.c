@@ -85,7 +85,7 @@ error(const char *fmt, ...)
     va_start(ap, fmt);
     fprintf(stderr, "%s: error: ", prog);
     H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-    HDvfprintf(stderr, fmt, ap);
+    vfprintf(stderr, fmt, ap);
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     fprintf(stderr, "\n");
     va_end(ap);
@@ -100,7 +100,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv(HDF5_NOCLEANUP))
+    if (!getenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     free(filename);
 }
@@ -140,7 +140,7 @@ write_file(Bytef *source, uLongf sourceLen)
         int rc = (int)HDwrite(output, d_ptr, (size_t)d_len);
 
         if (rc == -1)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         if (rc == (int)d_len)
             break;
@@ -197,7 +197,7 @@ static void
 get_unique_name(void)
 {
     const char *prefix = NULL;
-    const char *env    = HDgetenv("HDF5_PREFIX");
+    const char *env    = getenv("HDF5_PREFIX");
 
     if (env)
         prefix = env;
@@ -207,19 +207,19 @@ get_unique_name(void)
 
     if (prefix)
         /* 2 = 1 for '/' + 1 for null terminator */
-        filename = (char *)malloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
+        filename = (char *)malloc(strlen(prefix) + strlen(ZIP_PERF_FILE) + 2);
     else
-        filename = (char *)malloc(HDstrlen(ZIP_PERF_FILE) + 1);
+        filename = (char *)malloc(strlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
 
     filename[0] = 0;
     if (prefix) {
-        HDstrcpy(filename, prefix);
-        HDstrcat(filename, "/");
+        strcpy(filename, prefix);
+        strcat(filename, "/");
     }
-    HDstrcat(filename, ZIP_PERF_FILE);
+    strcat(filename, ZIP_PERF_FILE);
 }
 
 /*
@@ -316,13 +316,13 @@ fill_with_random_data(Bytef *src, uLongf src_len)
         fprintf(stdout, "Using /dev/urandom for random data\n");
 
         if (fd < 0)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         for (;;) {
             ssize_t rc = HDread(fd, buf, src_len);
 
             if (rc == -1)
-                error(HDstrerror(errno));
+                error(strerror(errno));
 
             if (rc == (ssize_t)len)
                 break;
@@ -391,7 +391,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         for (i = 0; i <= iters; ++i) {
             Bytef *s_ptr = src;
@@ -402,7 +402,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
                 ssize_t rc = HDwrite(output, s_ptr, s_len);
 
                 if (rc == -1)
-                    error(HDstrerror(errno));
+                    error(strerror(errno));
 
                 if (rc == (ssize_t)s_len)
                     break;
@@ -427,7 +427,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
-            error(HDstrerror(errno));
+            error(strerror(errno));
 
         report_once_flag = 1;
         HDgettimeofday(&timer_start, NULL);

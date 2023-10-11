@@ -149,12 +149,12 @@ parse_option(int argc, char *const argv[])
     /* set test file name if not given */
     if (!filename_g) {
         /* default data file name is <progname>.h5 */
-        if ((filename_g = (char *)malloc(HDstrlen(progname_g) + 4)) == NULL) {
+        if ((filename_g = (char *)malloc(strlen(progname_g) + 4)) == NULL) {
             fprintf(stderr, "malloc: failed\n");
             Hgoto_error(-1);
         }
-        HDstrcpy(filename_g, progname_g);
-        HDstrcat(filename_g, ".h5");
+        strcpy(filename_g, progname_g);
+        strcat(filename_g, ".h5");
     }
 
 done:

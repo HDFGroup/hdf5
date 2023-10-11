@@ -346,7 +346,7 @@ H5O__efl_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_m
  * Function:	H5O__efl_reset
  *
  * Purpose:	Frees internal pointers and resets the message to an
- *		initialial state.
+ *		initial state.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -450,7 +450,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     /* Determine size needed for destination heap */
     heap_size = H5HL_ALIGN(1); /* "empty" name */
     for (idx = 0; idx < efl_src->nused; idx++)
-        heap_size += H5HL_ALIGN(HDstrlen(efl_src->slot[idx].name) + 1);
+        heap_size += H5HL_ALIGN(strlen(efl_src->slot[idx].name) + 1);
 
     /* Create name heap */
     if (H5HL_create(file_dst, heap_size, &efl_dst->heap_addr /*out*/) < 0)
@@ -478,7 +478,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     /* copy the name from the source */
     for (idx = 0; idx < efl_src->nused; idx++) {
         efl_dst->slot[idx].name = H5MM_xstrdup(efl_src->slot[idx].name);
-        if (H5HL_insert(file_dst, heap, HDstrlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name,
+        if (H5HL_insert(file_dst, heap, strlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name,
                         &(efl_dst->slot[idx].name_offset)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap");
     }
@@ -529,7 +529,7 @@ H5O__efl_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int ind
     for (u = 0; u < mesg->nused; u++) {
         char buf[64];
 
-        HDsnprintf(buf, sizeof(buf), "File %zu", u);
+        snprintf(buf, sizeof(buf), "File %zu", u);
         fprintf(stream, "%*s%s:\n", indent, "", buf);
 
         fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(fwidth - 3, 0), "Name:", mesg->slot[u].name);

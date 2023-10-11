@@ -879,7 +879,7 @@ create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     const char *not_supported = "Deflate filter is not enabled. Can't create the dataset.";
 
-    HDputs(not_supported);
+    puts(not_supported);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     return 0;
@@ -1263,7 +1263,7 @@ main(void)
     if (create_szip_dsets_float(file, filespace, memspace) < 0)
         TEST_ERROR;
 #else  /* H5_HAVE_FILTER_SZIP */
-    HDputs("Szip filter is not enabled. Can't create the dataset.");
+    puts("Szip filter is not enabled. Can't create the dataset.");
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /* Create a dataset of FLOAT with shuffle filter */

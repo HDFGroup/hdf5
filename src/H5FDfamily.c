@@ -225,36 +225,36 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
 
     assert(old_filename);
 
-    old_filename_len = HDstrlen(old_filename);
+    old_filename_len = strlen(old_filename);
     if (0 == old_filename_len)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid filename");
 
-    new_filename_len = old_filename_len + HDstrlen(suffix) + 1;
+    new_filename_len = old_filename_len + strlen(suffix) + 1;
     if (NULL == (tmp_buffer = H5MM_malloc(new_filename_len)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate new filename buffer");
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = HDstrstr(old_filename, ".h5"))) {
+    if ((file_extension = strstr(old_filename, ".h5"))) {
         /* Insert the printf format between the filename and ".h5" extension. */
-        HDstrcpy(tmp_buffer, old_filename);
-        file_extension = HDstrstr(tmp_buffer, ".h5");
-        HDsprintf(file_extension, "%s%s", suffix, ".h5");
+        strcpy(tmp_buffer, old_filename);
+        file_extension = strstr(tmp_buffer, ".h5");
+        sprintf(file_extension, "%s%s", suffix, ".h5");
     }
-    else if ((file_extension = HDstrrchr(old_filename, '.'))) {
+    else if ((file_extension = strrchr(old_filename, '.'))) {
         char *new_extension_loc = NULL;
 
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the printf format before that extension.
          */
-        HDstrcpy(tmp_buffer, old_filename);
-        new_extension_loc = HDstrrchr(tmp_buffer, '.');
-        HDsprintf(new_extension_loc, "%s%s", suffix, file_extension);
+        strcpy(tmp_buffer, old_filename);
+        new_extension_loc = strrchr(tmp_buffer, '.');
+        sprintf(new_extension_loc, "%s%s", suffix, file_extension);
     }
     else {
         /* If the filename doesn't contain an extension at all, just insert
          * the printf format at the end of the filename.
          */
-        HDsnprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
     }
 
     ret_value = tmp_buffer;
@@ -564,7 +564,7 @@ H5FD__family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*o
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)9);
+    strncpy(name, "NCSAfami", (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -738,9 +738,9 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate temporary member name");
 
     /* Check that names are unique */
-    HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
-    if (!HDstrcmp(memb_name, temp)) {
+    snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
+    snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
+    if (!strcmp(memb_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
             if (NULL == (temp = H5FD__family_get_default_printf_filename(name)))
@@ -753,7 +753,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     /* Open all the family members */
     while (1) {
-        HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
+        snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
 
         /* Enlarge member array */
         if (file->nmembs >= file->amembs) {
@@ -1016,7 +1016,7 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if (u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u + 1);
-            HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
+            snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
             H5E_BEGIN_TRY
             {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
@@ -1458,11 +1458,11 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
 
     /* Sanity check to make sure that generated names are unique */
     H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-    HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
+    snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
+    snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
-    if (!HDstrcmp(member_name, temp)) {
+    if (!strcmp(member_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
             if (NULL == (temp = H5FD__family_get_default_printf_filename(filename)))
@@ -1479,7 +1479,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     while (1) {
         /* Fix up the filename with the current member's number */
         H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-        HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
+        snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
         H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         /* Attempt to delete the member files. If the first file throws an error

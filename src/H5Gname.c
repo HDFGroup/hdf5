@@ -116,7 +116,7 @@ H5G__component(const char *name, size_t *size_p)
     while ('/' == *name)
         name++;
     if (size_p)
-        *size_p = HDstrcspn(name, "/");
+        *size_p = strcspn(name, "/");
 
     FUNC_LEAVE_NOAPI(name)
 } /* end H5G__component() */
@@ -217,7 +217,7 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
         /* Check that the components we found are the same length */
         if (nchars1 == nchars2) {
             /* Check that the two components are equal */
-            if (HDstrncmp(fullpath, prefix, nchars1) == 0) {
+            if (strncmp(fullpath, prefix, nchars1) == 0) {
                 /* Advance the pointers in the names */
                 fullpath += nchars1;
                 prefix += nchars2;
@@ -266,7 +266,7 @@ H5G__build_fullpath(const char *prefix, const char *name)
     /* Create full path */
     if (NULL == (ret_value = H5RS_create(prefix)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "can't create ref-counted string");
-    if (prefix[HDstrlen(prefix) - 1] != '/')
+    if (prefix[strlen(prefix) - 1] != '/')
         H5RS_aputc(ret_value, '/'); /* Add separator, if the prefix doesn't end in one */
     H5RS_acat(ret_value, name);
 
@@ -455,7 +455,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name
         len = H5RS_len(loc->path->user_path_r);
 
         if (name) {
-            HDstrncpy(name, H5RS_get_str(loc->path->user_path_r), MIN((len + 1), size));
+            strncpy(name, H5RS_get_str(loc->path->user_path_r), MIN((len + 1), size));
             if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */
@@ -570,8 +570,8 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
     assert(path);
 
     /* Check if path needs to be updated */
-    full_suffix_len = HDstrlen(full_suffix);
-    path_len        = HDstrlen(path);
+    full_suffix_len = strlen(full_suffix);
+    path_len        = strlen(path);
     if (full_suffix_len < path_len) {
         const char *dst_suffix;        /* Destination suffix that changes */
         const char *src_suffix;        /* Source suffix that changes */
@@ -603,7 +603,7 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
 
         /* Compute path prefix before src suffix */
         path_prefix2     = path;
-        path_prefix2_len = path_prefix_len - HDstrlen(src_suffix);
+        path_prefix2_len = path_prefix_len - strlen(src_suffix);
 
         /* Allocate new ref-counted string */
         if (NULL == (rs = H5RS_create(NULL)))
@@ -781,7 +781,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 src_path  = H5RS_get_str(names->src_full_path_r);
 
                 /* Construct full path suffix */
-                full_suffix = full_path + HDstrlen(src_path);
+                full_suffix = full_path + strlen(src_path);
 
                 /* Create new full path suffix */
                 if (NULL == (rs = H5RS_create(full_suffix)))
@@ -848,7 +848,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 assert(*dst_path == '/');
 
                 /* Get pointer to "full suffix" */
-                full_suffix = full_path + HDstrlen(src_path);
+                full_suffix = full_path + strlen(src_path);
 
                 /* Update the user path, if one exists */
                 if (obj_path->user_path_r)
@@ -1141,16 +1141,16 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
     /* Check for finding the object */
     if (found_obj) {
         /* Set the length of the full path */
-        len = HDstrlen(udata.path) + 1; /* Length of path + 1 (for "/") */
+        len = strlen(udata.path) + 1; /* Length of path + 1 (for "/") */
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if (name) {
             /* Copy the initial path separator */
-            HDstrncpy(name, "/", (size_t)2);
+            strncpy(name, "/", (size_t)2);
 
             /* Append the rest of the path */
             /* (less one character, for the initial path separator) */
-            HDstrncat(name, udata.path, (size - 2));
+            strncat(name, udata.path, (size - 2));
             if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */

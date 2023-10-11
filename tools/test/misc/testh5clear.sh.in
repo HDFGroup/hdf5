@@ -40,9 +40,9 @@ verbose=yes
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5CLEAR_TESTFILES="$SRC_TOOLS/test/misc/testfiles"
+SRC_H5CLEAR_OUTFILES="$SRC_TOOLS/test/misc/expected"
 
 TESTDIR=./testh5clear
 test -d $TESTDIR || mkdir -p $TESTDIR
@@ -61,25 +61,25 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 # copy test files and expected output files from source dirs to test dir
 #
 COPY_TESTFILES="
-$SRC_H5CLEAR_TESTFILES/h5clear_open_fail.err
-$SRC_H5CLEAR_TESTFILES/h5clear_no_mdc_image.err
-$SRC_H5CLEAR_TESTFILES/h5clear_usage.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_missing_file.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_status_noclose_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_noclose_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_noclose_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_equal_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_equal_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_greater_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_greater_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_less_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_less_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_user_equal_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_user_equal_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_user_greater_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_user_greater_after_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_user_less_before_size.ddl
-$SRC_H5CLEAR_TESTFILES/h5clear_user_less_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_open_fail.err
+$SRC_H5CLEAR_OUTFILES/h5clear_no_mdc_image.err
+$SRC_H5CLEAR_OUTFILES/h5clear_usage.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_missing_file.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_status_noclose_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_noclose_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_noclose_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_equal_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_equal_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_greater_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_greater_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_less_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_less_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_user_equal_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_user_equal_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_user_greater_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_user_greater_after_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_user_less_before_size.ddl
+$SRC_H5CLEAR_OUTFILES/h5clear_user_less_after_size.ddl
 $SRC_H5CLEAR_TESTFILES/h5clear_sec2_v0.h5
 $SRC_H5CLEAR_TESTFILES/h5clear_sec2_v2.h5
 $SRC_H5CLEAR_TESTFILES/h5clear_sec2_v3.h5

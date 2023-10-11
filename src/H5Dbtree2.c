@@ -431,7 +431,7 @@ H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth, const void *_record,
     fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for (u = 0; u < ctx->ndims; u++)
         fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", record->scaled[u] * ctx->dim[u]);
-    HDfputs("}\n", stream);
+    fputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D__bt2_unfilt_debug() */
@@ -541,7 +541,7 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const void *_record, c
     fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for (u = 0; u < ctx->ndims; u++)
         fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", record->scaled[u] * ctx->dim[u]);
-    HDfputs("}\n", stream);
+    fputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D__bt2_filt_debug() */

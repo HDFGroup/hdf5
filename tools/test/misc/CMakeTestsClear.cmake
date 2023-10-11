@@ -63,11 +63,14 @@
       h5clear_open_fail.err
   )
 
-  foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES} ${HDF5_REFERENCE_TEST_FILES})
+  foreach (h5_file ${HDF5_TEST_FILES} ${HDF5_SEC2_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
   endforeach ()
+  foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
+  endforeach ()
   foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5clear_files")
   endforeach ()
   # make second copy of h5clear_sec2.h5
   foreach (h5_file ${HDF5_SEC2_TEST_FILES})
@@ -99,6 +102,10 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if (last_test)
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
   endmacro ()
 
@@ -117,6 +124,10 @@
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if (last_test)
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "H5CLEAR_CMP-${testname}")
     endif ()
   endmacro ()
 

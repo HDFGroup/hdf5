@@ -250,7 +250,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                 type = rest + 1;
             }
             else {
-                rest = (char *)HDstrchr(type, ']');
+                rest = (char *)strchr(type, ']');
                 assert(rest);
                 type      = rest + 1;
                 asize_idx = -1;
@@ -4025,8 +4025,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
-                HDsnprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
-                H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
+                snprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
+                H5RS_asprintf_cat(rs, " %*s ", (int)strlen(tmp), "");
             }
             for (i = 0; i < current_depth; i++)
                 H5RS_aputc(rs, '+');
@@ -4069,7 +4069,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         last_call_depth = current_depth++;
         H5RS_acat(rs, ")");
     }
-    HDfputs(H5RS_get_str(rs), out);
+    fputs(H5RS_get_str(rs), out);
     fflush(out);
     H5RS_decr(rs);
 

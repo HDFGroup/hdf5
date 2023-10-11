@@ -333,16 +333,16 @@ onion_filepaths_init(const char *basename)
     if (NULL == (paths = calloc(1, sizeof(struct onion_filepaths))))
         goto error;
 
-    if (NULL == (paths->canon = HDstrdup(basename)))
+    if (NULL == (paths->canon = strdup(basename)))
         goto error;
 
     if (NULL == (paths->onion = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
-    HDsnprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
+    snprintf(paths->onion, ONION_TEST_FIXNAME_SIZE, "%s.onion", paths->canon);
 
     if (NULL == (paths->recovery = malloc(sizeof(char) * ONION_TEST_FIXNAME_SIZE)))
         goto error;
-    HDsnprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
+    snprintf(paths->recovery, ONION_TEST_FIXNAME_SIZE, "%s.onion.recovery", paths->canon);
 
     return paths;
 
@@ -1139,15 +1139,15 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         float data15[6];
         float data16[6];
 
-        data15[0] = (float)HDsqrt(-1.0);
+        data15[0] = (float)sqrt(-1.0);
         data15[1] = 1.0;
-        data15[2] = (float)HDsqrt(-1.0);
+        data15[2] = (float)sqrt(-1.0);
         data15[3] = 1.0;
         data15[4] = 1.0;
         data15[5] = 1.0;
 
-        data16[0] = (float)HDsqrt(-1.0);
-        data16[1] = (float)HDsqrt(-1.0);
+        data16[0] = (float)sqrt(-1.0);
+        data16[1] = (float)sqrt(-1.0);
         data16[2] = 1.0;
         data16[3] = 1.0;
         data16[4] = 1.0;
@@ -1166,15 +1166,15 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         double data17[6];
         double data18[6];
 
-        data17[0] = HDsqrt(-1.0);
+        data17[0] = sqrt(-1.0);
         data17[1] = 1.0;
-        data17[2] = HDsqrt(-1.0);
+        data17[2] = sqrt(-1.0);
         data17[3] = 1.0;
         data17[4] = 1.0;
         data17[5] = 1.0;
 
-        data18[0] = HDsqrt(-1.0);
-        data18[1] = HDsqrt(-10000.0);
+        data18[0] = sqrt(-1.0);
+        data18[1] = sqrt(-10000.0);
         data18[2] = 1.0;
         data18[3] = 1.0;
         data18[4] = 1.0;
@@ -1193,11 +1193,11 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         float  data19[6];
         double data20[6];
 
-        data19[0] = data19[1] = data19[2] = (float)HDlog(0.0);
-        data19[3] = data19[4] = data19[5] = (float)-HDlog(0.0);
+        data19[0] = data19[1] = data19[2] = (float)log(0.0);
+        data19[3] = data19[4] = data19[5] = (float)-log(0.0);
 
-        data20[0] = data20[1] = data20[2] = HDlog(0.0);
-        data20[3] = data20[4] = data20[5] = -HDlog(0.0);
+        data20[0] = data20[1] = data20[2] = log(0.0);
+        data20[3] = data20[4] = data20[5] = -log(0.0);
 
         write_dset(gid1, 1, dims1, "fp19", H5T_NATIVE_FLOAT, data19);
         write_dset(gid1, 1, dims1, "fp19_COPY", H5T_NATIVE_FLOAT, data19);
@@ -1221,13 +1221,13 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         size_t  type_size;
         hid_t   tid;
 
-        buf1[0].d = HDsqrt(-1.0);
-        buf1[0].f = (float)HDsqrt(-1.0);
-        buf2[0].d = HDsqrt(-1.0);
-        buf2[0].f = (float)HDsqrt(-1.0);
+        buf1[0].d = sqrt(-1.0);
+        buf1[0].f = (float)sqrt(-1.0);
+        buf2[0].d = sqrt(-1.0);
+        buf2[0].f = (float)sqrt(-1.0);
 
-        buf1[1].d = HDsqrt(-1.0);
-        buf1[1].f = (float)HDsqrt(-1.0);
+        buf1[1].d = sqrt(-1.0);
+        buf1[1].f = (float)sqrt(-1.0);
         buf2[1].d = 0.0;
         buf2[1].f = 0.0;
 
@@ -4262,35 +4262,35 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
     comp9_buf.str_vlen = comp9_buf.str_vlen_repeat = vlen_str_buf;
 
     /* copy fixlen string data to compound buffers */
-    HDstrcpy(comp1_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp1_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp1_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp1_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp2_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp2_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp2_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp2_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp3_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp3_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp3_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp3_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp3_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp3_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp3_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp3_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp4_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp4_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp4_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp4_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp5_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp5_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp5_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp5_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp6_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp6_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp6_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp6_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp7_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp7_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp7_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp7_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp8_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp8_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp8_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp8_buf.str_fixlen_repeat, fixlen_str_buf);
 
-    HDstrcpy(comp9_buf.str_fixlen, fixlen_str_buf);
-    HDstrcpy(comp9_buf.str_fixlen_repeat, fixlen_str_buf);
+    strcpy(comp9_buf.str_fixlen, fixlen_str_buf);
+    strcpy(comp9_buf.str_fixlen_repeat, fixlen_str_buf);
 
     /* copy vlen string array data to compound buffers */
     for (i = 0; i < VLEN_STR_ARRY_DIM; i++) {
@@ -4307,32 +4307,32 @@ test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new
 
     /* copy fixlen string attay data to compound buffers */
     for (i = 0; i < FIXLEN_STR_ARRY_DIM; i++) {
-        HDstrcpy(comp1_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp1_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp1_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp1_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp2_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp2_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp2_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp2_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp3_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp3_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp3_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp3_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp4_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp4_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp4_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp4_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp5_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp5_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp5_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp5_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp6_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp6_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp6_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp6_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp7_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp7_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp7_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp7_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp8_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp8_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp8_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp8_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
 
-        HDstrcpy(comp9_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
-        HDstrcpy(comp9_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
+        strcpy(comp9_buf.str_array_fixlen[i], fixlen_str_array_buf[i]);
+        strcpy(comp9_buf.str_fixlen_array_again[i], fixlen_str_array_buf[i]);
     }
 
     /* int data */

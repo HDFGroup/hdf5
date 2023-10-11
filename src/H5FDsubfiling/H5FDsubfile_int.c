@@ -347,6 +347,7 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 
         assert(ioc_rank >= 0);
         assert(ioc_rank < n_io_concentrators);
+        CANBE_UNUSED(ioc_rank);
         assert(sf_eofs[i] == -1);
 
         sf_eofs[i] = recv_msg[(3 * i) + 1];

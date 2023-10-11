@@ -164,15 +164,15 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
     outputformat                = &string_dataformat;
 
     /* Build the object's path name */
-    obj_path = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    obj_path = (char *)malloc(strlen(prefix) + strlen(name) + 2);
     if (!obj_path) {
         ret = FAIL;
         goto done;
     }
 
-    HDstrcpy(obj_path, prefix);
-    HDstrcat(obj_path, "/");
-    HDstrcat(obj_path, name);
+    strcpy(obj_path, prefix);
+    strcat(obj_path, "/");
+    strcat(obj_path, name);
 
     if (linfo->type == H5L_TYPE_HARD) {
         H5O_info2_t oinfo;
@@ -196,7 +196,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                     char *old_prefix; /* Pointer to previous prefix */
 
                     /* Keep copy of prefix before iterating into group */
-                    if ((old_prefix = HDstrdup(prefix)) == NULL) {
+                    if ((old_prefix = strdup(prefix)) == NULL) {
                         error_msg("unable to allocate buffer\n");
                         h5tools_setstatus(EXIT_FAILURE);
                         ret = FAIL;
@@ -209,7 +209,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                         dump_function_table->dump_group_function(obj, name);
 
                         /* Restore old prefix name */
-                        HDstrcpy(prefix, old_prefix);
+                        strcpy(prefix, old_prefix);
                         free(old_prefix);
                     }
 
@@ -244,13 +244,13 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
 
                             /* Render the element */
                             h5tools_str_reset(&buffer);
-                            if (HDstrlen(h5tools_dump_header_format->datasetblockend)) {
+                            if (strlen(h5tools_dump_header_format->datasetblockend)) {
                                 h5tools_str_append(&buffer, "%s",
                                                    h5tools_dump_header_format->datasetblockend);
-                                if (HDstrlen(h5tools_dump_header_format->datasetend))
+                                if (strlen(h5tools_dump_header_format->datasetend))
                                     h5tools_str_append(&buffer, " ");
                             }
-                            if (HDstrlen(h5tools_dump_header_format->datasetend))
+                            if (strlen(h5tools_dump_header_format->datasetend))
                                 h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datasetend);
                             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -265,7 +265,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                         else if (found_obj->displayed) {
                             /* the XML version */
                             char *t_obj_path = xml_escape_the_name(obj_path);
-                            char *t_prefix   = xml_escape_the_name(HDstrcmp(prefix, "") ? prefix : "/");
+                            char *t_prefix   = xml_escape_the_name(strcmp(prefix, "") ? prefix : "/");
                             char *t_name     = xml_escape_the_name(name);
                             char *t_objname  = xml_escape_the_name(found_obj->objname);
                             char  dsetxid[100];
@@ -380,19 +380,19 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                         char  linkxid[100];
                         char  parentxid[100];
                         char  targetxid[100];
-                        char *t_prefix   = xml_escape_the_name(HDstrcmp(prefix, "") ? prefix : "/");
+                        char *t_prefix   = xml_escape_the_name(strcmp(prefix, "") ? prefix : "/");
                         char *t_name     = xml_escape_the_name(name);
                         char *t_targbuf  = xml_escape_the_name(targbuf);
                         char *t_obj_path = xml_escape_the_name(obj_path);
                         char *t_link_path;
                         int   res;
 
-                        t_link_path = (char *)malloc(HDstrlen(prefix) + linfo->u.val_size + 1);
+                        t_link_path = (char *)malloc(strlen(prefix) + linfo->u.val_size + 1);
                         if (targbuf[0] == '/')
-                            HDstrcpy(t_link_path, targbuf);
+                            strcpy(t_link_path, targbuf);
                         else {
-                            HDstrcpy(t_link_path, prefix);
-                            HDstrcat(HDstrcat(t_link_path, "/"), targbuf);
+                            strcpy(t_link_path, prefix);
+                            strcat(strcat(t_link_path, "/"), targbuf);
                         } /* end else */
 
                         /* Create OBJ-XIDs for the parent and object */
@@ -481,7 +481,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                             char  linkxid[100];
                             char  parentxid[100];
                             char *t_name     = xml_escape_the_name(name);
-                            char *t_prefix   = xml_escape_the_name(HDstrcmp(prefix, "") ? prefix : "/");
+                            char *t_prefix   = xml_escape_the_name(strcmp(prefix, "") ? prefix : "/");
                             char *t_obj_path = xml_escape_the_name(obj_path);
                             char *t_filename = xml_escape_the_name(filename);
                             char *t_targname = xml_escape_the_name(targname);
@@ -529,7 +529,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                 char  linkxid[100];
                 char  parentxid[100];
                 char *t_name     = xml_escape_the_name(name);
-                char *t_prefix   = xml_escape_the_name(HDstrcmp(prefix, "") ? prefix : "/");
+                char *t_prefix   = xml_escape_the_name(strcmp(prefix, "") ? prefix : "/");
                 char *t_obj_path = xml_escape_the_name(obj_path);
 
                 /* Create OBJ-XIDs for the parent and object */
@@ -593,14 +593,14 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
 
     lookup_ret = ref_path_table_lookup(str, &obj_token);
     if (lookup_ret < 0) {
-        if (HDstrlen(str) == 0) {
+        if (strlen(str) == 0) {
             lookup_ret = ref_path_table_lookup("/", &obj_token);
             if (lookup_ret < 0) {
                 if (gen) {
                     ref_path_table_gen_fake(str, &obj_token);
 
                     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                    HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
+                    snprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     return 0;
@@ -615,7 +615,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
                 ref_path_table_gen_fake(str, &obj_token);
 
                 H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-                HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
+                snprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
                 H5free_memory(obj_tok_str);
 
                 return 0;
@@ -627,7 +627,7 @@ xml_name_to_XID(hid_t loc_id, const char *str, char *outstr, int outlen, int gen
     }
 
     H5Otoken_to_str(loc_id, &obj_token, &obj_tok_str);
-    HDsnprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
+    snprintf(outstr, (size_t)outlen, "xid_%s", obj_tok_str);
     H5free_memory(obj_tok_str);
 
     return 0;
@@ -664,26 +664,26 @@ xml_escape_the_name(const char *str)
         return NULL;
 
     cp    = str;
-    len   = HDstrlen(str);
+    len   = strlen(str);
     extra = 0;
 
     for (i = 0; i < len; i++) {
         if (*cp == '\"')
-            extra += (HDstrlen(quote) - 1);
+            extra += (strlen(quote) - 1);
         else if (*cp == '\'')
-            extra += (HDstrlen(apos) - 1);
+            extra += (strlen(apos) - 1);
         else if (*cp == '<')
-            extra += (HDstrlen(lt) - 1);
+            extra += (strlen(lt) - 1);
         else if (*cp == '>')
-            extra += (HDstrlen(gt) - 1);
+            extra += (strlen(gt) - 1);
         else if (*cp == '&')
-            extra += (HDstrlen(amp) - 1);
+            extra += (strlen(amp) - 1);
 
         cp++;
     }
 
     if (extra == 0)
-        return HDstrdup(str);
+        return strdup(str);
 
     cp      = str;
     ncp_len = len + extra + 1;
@@ -696,24 +696,24 @@ xml_escape_the_name(const char *str)
         size_t esc_len;
 
         if (*cp == '\'') {
-            HDstrncpy(ncp, apos, ncp_len);
-            esc_len = HDstrlen(apos);
+            strncpy(ncp, apos, ncp_len);
+            esc_len = strlen(apos);
         }
         else if (*cp == '<') {
-            HDstrncpy(ncp, lt, ncp_len);
-            esc_len = HDstrlen(lt);
+            strncpy(ncp, lt, ncp_len);
+            esc_len = strlen(lt);
         }
         else if (*cp == '>') {
-            HDstrncpy(ncp, gt, ncp_len);
-            esc_len = HDstrlen(gt);
+            strncpy(ncp, gt, ncp_len);
+            esc_len = strlen(gt);
         }
         else if (*cp == '\"') {
-            HDstrncpy(ncp, quote, ncp_len);
-            esc_len = HDstrlen(quote);
+            strncpy(ncp, quote, ncp_len);
+            esc_len = strlen(quote);
         }
         else if (*cp == '&') {
-            HDstrncpy(ncp, amp, ncp_len);
-            esc_len = HDstrlen(amp);
+            strncpy(ncp, amp, ncp_len);
+            esc_len = strlen(amp);
         }
         else {
             *ncp    = *cp;
@@ -755,7 +755,7 @@ xml_escape_the_string(const char *str, int slen)
     cp = str;
 
     if (slen < 0)
-        len = HDstrlen(str);
+        len = strlen(str);
     else
         len = (size_t)slen;
 
@@ -767,13 +767,13 @@ xml_escape_the_string(const char *str, int slen)
         else if (*cp == '\"')
             extra++;
         else if (*cp == '\'')
-            extra += (HDstrlen(apos) - 1);
+            extra += (strlen(apos) - 1);
         else if (*cp == '<')
-            extra += (HDstrlen(lt) - 1);
+            extra += (strlen(lt) - 1);
         else if (*cp == '>')
-            extra += (HDstrlen(gt) - 1);
+            extra += (strlen(gt) - 1);
         else if (*cp == '&')
-            extra += (HDstrlen(amp) - 1);
+            extra += (strlen(amp) - 1);
         cp++;
     }
 
@@ -800,20 +800,20 @@ xml_escape_the_string(const char *str, int slen)
             esc_len = 1;
         }
         else if (*cp == '\'') {
-            HDstrncpy(ncp, apos, ncp_len);
-            esc_len = HDstrlen(apos);
+            strncpy(ncp, apos, ncp_len);
+            esc_len = strlen(apos);
         }
         else if (*cp == '<') {
-            HDstrncpy(ncp, lt, ncp_len);
-            esc_len = HDstrlen(lt);
+            strncpy(ncp, lt, ncp_len);
+            esc_len = strlen(lt);
         }
         else if (*cp == '>') {
-            HDstrncpy(ncp, gt, ncp_len);
-            esc_len = HDstrlen(gt);
+            strncpy(ncp, gt, ncp_len);
+            esc_len = strlen(gt);
         }
         else if (*cp == '&') {
-            HDstrncpy(ncp, amp, ncp_len);
-            esc_len = HDstrlen(amp);
+            strncpy(ncp, amp, ncp_len);
+            esc_len = strlen(amp);
         }
         else {
             *ncp    = *cp;
@@ -2362,7 +2362,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
     char             *t_prefix  = NULL;
     char             *t_name    = NULL;
 
-    tmp = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)malloc(strlen(prefix) + strlen(name) + 2);
     if (tmp == NULL) {
         indentation(dump_indent);
         error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -2370,9 +2370,9 @@ xml_dump_named_datatype(hid_t type, const char *name)
         goto done;
     }
 
-    HDstrcpy(tmp, prefix);
-    HDstrcat(tmp, "/");
-    HDstrcat(tmp, name);
+    strcpy(tmp, prefix);
+    strcat(tmp, "/");
+    strcat(tmp, name);
 
     /* setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2406,7 +2406,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
 
     xml_name_to_XID(type, tmp, dtxid, 100, 1);
     xml_name_to_XID(type, prefix, parentxid, 100, 1);
-    if (HDstrncmp(name, "#", (size_t)1) == 0) {
+    if (strncmp(name, "#", (size_t)1) == 0) {
         /*  Special:  this is an 'anonymous' NDT, deleted but
            still in use.
            We follow the dumper's undocumented practice, and
@@ -2423,7 +2423,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
         h5tools_str_append(&buffer,
                            "<%sNamedDataType Name=\"%s\" OBJ-XID=\"%s\" "
                            "Parents=\"%s\" H5ParentPaths=\"%s\">",
-                           xmlnsprefix, name, dtxid, parentxid, HDstrcmp(prefix, "") ? t_prefix : "/");
+                           xmlnsprefix, name, dtxid, parentxid, strcmp(prefix, "") ? t_prefix : "/");
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
     }
@@ -2438,7 +2438,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
                            "<%sNamedDataType Name=\"%s\" OBJ-XID=\"%s\" "
                            "H5Path=\"%s\" Parents=\"%s\" H5ParentPaths=\"%s\">",
                            xmlnsprefix, t_name, dtxid, t_tmp, parentxid,
-                           (HDstrcmp(prefix, "") ? t_prefix : "/"));
+                           (strcmp(prefix, "") ? t_prefix : "/"));
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
@@ -2617,12 +2617,12 @@ xml_dump_group(hid_t gid, const char *name)
     string_dataformat.do_escape = dump_opts.display_escape;
     outputformat                = &string_dataformat;
 
-    if (HDstrcmp(name, "/") == 0) {
+    if (strcmp(name, "/") == 0) {
         isRoot = 1;
-        tmp    = HDstrdup("/");
+        tmp    = strdup("/");
     }
     else {
-        tmp = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+        tmp = (char *)malloc(strlen(prefix) + strlen(name) + 2);
         if (tmp == NULL) {
             indentation(dump_indent);
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -2630,11 +2630,11 @@ xml_dump_group(hid_t gid, const char *name)
             return;
         }
 
-        HDstrcpy(tmp, prefix);
-        par = HDstrdup(tmp);
-        cp  = HDstrrchr(par, '/');
+        strcpy(tmp, prefix);
+        par = strdup(tmp);
+        cp  = strrchr(par, '/');
         if (cp) {
-            if ((cp == par) && HDstrlen(par) > 1)
+            if ((cp == par) && strlen(par) > 1)
                 *(cp + 1) = '\0';
             else
                 *cp = '\0';
@@ -2791,7 +2791,7 @@ xml_dump_group(hid_t gid, const char *name)
                             type = H5Dget_type(dset);
 
                             H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                            HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
+                            snprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                             H5free_memory(obj_tok_str);
 
                             dump_function_table->dump_named_datatype_function(type, type_name);
@@ -2884,7 +2884,7 @@ xml_dump_group(hid_t gid, const char *name)
                     type = H5Dget_type(dset);
 
                     H5Otoken_to_str(dset, &type_table->objs[u].obj_token, &obj_tok_str);
-                    HDsnprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
+                    snprintf(type_name, sizeof(type_name), "#%s", obj_tok_str);
                     H5free_memory(obj_tok_str);
 
                     dump_function_table->dump_named_datatype_function(type, type_name);
@@ -3181,10 +3181,10 @@ xml_print_strs(hid_t did, int source)
         if (is_vlstr) {
             onestring = *(char **)((void *)bp);
             if (onestring)
-                str_size = HDstrlen(onestring);
+                str_size = strlen(onestring);
         }
         else {
-            HDstrncpy(onestring, bp, tsiz);
+            strncpy(onestring, bp, tsiz);
             str_size = tsiz;
         }
 
@@ -3773,7 +3773,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     char *rstr = (char *)malloc((size_t)100);
     char *pstr = (char *)malloc((size_t)100);
 
-    tmp = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)malloc(strlen(prefix) + strlen(name) + 2);
     if (tmp == NULL) {
         error_msg("buffer allocation failed\n");
         h5tools_setstatus(EXIT_FAILURE);
@@ -3782,9 +3782,9 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
         return;
     }
 
-    HDstrcpy(tmp, prefix);
-    HDstrcat(tmp, "/");
-    HDstrcat(tmp, name);
+    strcpy(tmp, prefix);
+    strcat(tmp, "/");
+    strcat(tmp, name);
 
     /* setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));

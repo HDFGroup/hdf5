@@ -945,7 +945,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             }
             else {
                 if (typeSize > 0) {
-                    if (NULL == (this_str = HDstrdup(tmp_str)))
+                    if (NULL == (this_str = strdup(tmp_str)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
                 }
             }
@@ -3881,7 +3881,7 @@ obj_info_all(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_d
     datainfo->ltype[datainfo->count]     = -1;
     datainfo->obj_token[datainfo->count] = H5O_TOKEN_UNDEF;
 
-    if (NULL == (datainfo->objname[datainfo->count] = HDstrdup(name)))
+    if (NULL == (datainfo->objname[datainfo->count] = strdup(name)))
         goto done;
 
     if ((object_exists = H5Oexists_by_name(loc_id, name, H5P_DEFAULT)) < 0)
@@ -3916,7 +3916,7 @@ obj_info_max(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_d
     datainfo->obj_token[datainfo->count] = H5O_TOKEN_UNDEF;
 
     /* This will be freed by h5str_array_free(oName, n) */
-    if (NULL == (datainfo->objname[datainfo->count] = HDstrdup(name)))
+    if (NULL == (datainfo->objname[datainfo->count] = strdup(name)))
         goto done;
 
     if (H5Oget_info3(loc_id, &object_info, H5O_INFO_ALL) < 0)

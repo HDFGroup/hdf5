@@ -34,11 +34,11 @@ main(void)
 
     /* Set up data array */
     if (NULL == (buf_data = (int *)calloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int)))) {
-        HDperror("calloc");
+        perror("calloc");
         exit(EXIT_FAILURE);
     }
     if (NULL == (buf = (int **)calloc(FAMILY_NUMBER, sizeof(buf_data)))) {
-        HDperror("calloc");
+        perror("calloc");
         exit(EXIT_FAILURE);
     }
     for (i = 0; i < FAMILY_NUMBER; i++)
@@ -46,28 +46,28 @@ main(void)
 
     /* Set property list and file name for FAMILY driver */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        HDperror("H5Pcreate");
+        perror("H5Pcreate");
         exit(EXIT_FAILURE);
     }
 
     if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0) {
-        HDperror("H5Pset_fapl_family");
+        perror("H5Pset_fapl_family");
         exit(EXIT_FAILURE);
     }
 
     if ((file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
-        HDperror("H5Fcreate");
+        perror("H5Fcreate");
         exit(EXIT_FAILURE);
     }
 
     /* Create and write dataset */
     if ((space = H5Screate_simple(2, dims, NULL)) < 0) {
-        HDperror("H5Screate_simple");
+        perror("H5Screate_simple");
         exit(EXIT_FAILURE);
     }
 
     if ((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        HDperror("H5Dcreate2");
+        perror("H5Dcreate2");
         exit(EXIT_FAILURE);
     }
 
@@ -76,34 +76,34 @@ main(void)
             buf[i][j] = i * 10000 + j;
 
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_data) < 0) {
-        HDperror("H5Dwrite");
+        perror("H5Dwrite");
         exit(EXIT_FAILURE);
     }
 
     if (H5Sclose(space) < 0) {
-        HDperror("H5Sclose");
+        perror("H5Sclose");
         exit(EXIT_FAILURE);
     }
 
     if (H5Dclose(dset) < 0) {
-        HDperror("H5Dclose");
+        perror("H5Dclose");
         exit(EXIT_FAILURE);
     }
 
     if (H5Pclose(fapl) < 0) {
-        HDperror("H5Pclose");
+        perror("H5Pclose");
         exit(EXIT_FAILURE);
     }
 
     if (H5Fclose(file) < 0) {
-        HDperror("H5Fclose");
+        perror("H5Fclose");
         exit(EXIT_FAILURE);
     }
 
     free(buf);
     free(buf_data);
 
-    HDputs(" PASSED");
+    puts(" PASSED");
     fflush(stdout);
 
     return EXIT_SUCCESS;

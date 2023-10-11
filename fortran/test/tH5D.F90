@@ -1026,7 +1026,7 @@ CONTAINS
     INTEGER :: i, j, n
     INTEGER :: error
     TYPE(C_PTR) :: f_ptr
-    INTEGER(C_int32_t) :: filters
+    INTEGER :: filters
     INTEGER(SIZE_T) :: sizeINT
     INTEGER(HID_T) :: dxpl
 
@@ -1081,12 +1081,12 @@ CONTAINS
 
     f_ptr = C_LOC(wdata1)
     offset(1:2) = (/0, 0/)
-    CALL H5Dwrite_chunk_f(dset_id, 0_C_INT32_T, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error)
     CALL check("h5dwrite_f",error,total_error)
 
     f_ptr = C_LOC(wdata2)
     offset(1:2) = (/0, 16/)
-    CALL H5Dwrite_chunk_f(dset_id, 0_C_INT32_T, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error, dxpl)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error, dxpl)
     CALL check("h5dwrite_f",error,total_error)
 
     CALL h5dclose_f(dset_id, error)
@@ -1126,7 +1126,7 @@ CONTAINS
        ENDDO
     ENDDO
 
-    CALL VERIFY("H5Dread_chunk_f",filters, 0_C_INT32_T, total_error)
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
 
     f_ptr = C_LOC(rdata2)
     offset(1:2) = (/0, 16/)
@@ -1141,7 +1141,7 @@ CONTAINS
        ENDDO
     ENDDO
 
-    CALL VERIFY("H5Dread_chunk_f",filters, 0_C_INT32_T, total_error)
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
 
     CALL h5dclose_f(dset_id, error)
     CALL check("h5dclose_f",error,total_error)

@@ -199,7 +199,7 @@ my $TESTH5_JAVA = $file;
 $TESTH5_JAVA =~ s/[^\/]*$/..\/java\/test\/TestH5.java/;
 die "unable to read file: $TESTH5_JAVA\n" unless -r $file;
 my $REPACK_LAYOUT_PLUGIN_VERSION = $file;
-$REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/testfiles\/h5repack_layout.h5-plugin_version_test.ddl/;
+$REPACK_LAYOUT_PLUGIN_VERSION =~ s/[^\/]*$/..\/tools\/test\/h5repack\/expected\/h5repack_layout.h5-plugin_version_test.ddl/;
 die "unable to read file: $REPACK_LAYOUT_PLUGIN_VERSION\n" unless -r $file;
 
 # Get the current version number.
@@ -398,7 +398,7 @@ if ($TESTH5_JAVA) {
   write_file($TESTH5_JAVA, $data);
 }
 
-# Update the tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl file
+# Update the tools/test/h5repack/expected/h5repack_layout.h5-plugin_version_test.ddl file
 if ($REPACK_LAYOUT_PLUGIN_VERSION) {
   my $data = read_file($REPACK_LAYOUT_PLUGIN_VERSION);
   my $version_string = sprintf("%d %d %d", @newver[0,1,2]);

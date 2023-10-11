@@ -33,15 +33,15 @@ typedef struct ioc_data_t {
     hg_thread_pool_t *io_thread_pool;
     int64_t           sf_context_id;
 
-    /* sf_io_ops_pending is use to track the number of I/O operations pending so that we can wait
+    atomic_int sf_ioc_ready;
+    atomic_int sf_shutdown_flag;
+    /* sf_io_ops_pending tracks the number of I/O operations pending so that we can wait
      * until all I/O operations have been serviced before shutting down the worker thread pool.
      * The value of this variable must always be non-negative.
      *
      * Note that this is a convenience variable -- we could use io_queue.q_len instead.
      * However, accessing this field requires locking io_queue.q_mutex.
      */
-    atomic_int sf_ioc_ready;
-    atomic_int sf_shutdown_flag;
     atomic_int sf_io_ops_pending;
     atomic_int sf_work_pending;
 } ioc_data_t;
@@ -167,7 +167,7 @@ initialize_ioc_threads(void *_sf_context)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */
-    if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
+    if ((env_value = getenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
         int value_check = atoi(env_value);
         if (value_check > 0) {
             thread_pool_size = (unsigned int)value_check;

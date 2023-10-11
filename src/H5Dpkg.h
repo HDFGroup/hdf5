@@ -254,6 +254,7 @@ typedef struct H5D_piece_info_t {
     unsigned mspace_shared;  /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
     bool     in_place_tconv; /* Whether to perform type conversion in-place */
     size_t   buf_off;        /* Buffer offset for in-place type conversion */
+    bool     filtered_dset;  /* Whether the dataset this chunk is in has filters applied */
     struct H5D_dset_io_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
 
@@ -292,26 +293,28 @@ typedef struct H5D_io_info_t {
 #endif                                 /* H5_HAVE_PARALLEL */
     H5D_md_io_ops_t         md_io_ops; /* Multi dataset I/O operation function pointers */
     H5D_io_op_type_t        op_type;
-    size_t                  count;               /* Number of datasets in I/O request */
-    H5D_dset_io_info_t     *dsets_info;          /* dsets info where I/O is done to/from */
-    size_t                  piece_count;         /* Number of pieces in I/O request */
-    size_t                  pieces_added;        /* Number of pieces added so far to arrays */
-    H5D_piece_info_t      **sel_pieces;          /* Array of info struct for all pieces in I/O */
-    H5S_t                 **mem_spaces;          /* Array of chunk memory spaces */
-    H5S_t                 **file_spaces;         /* Array of chunk file spaces */
-    haddr_t                *addrs;               /* Array of chunk addresses */
-    size_t                 *element_sizes;       /* Array of element sizes */
-    void                  **rbufs;               /* Array of read buffers */
-    const void            **wbufs;               /* Array of write buffers */
-    haddr_t                 store_faddr;         /* lowest file addr for read/write */
-    H5_flexible_const_ptr_t base_maddr;          /* starting mem address */
-    H5D_selection_io_mode_t use_select_io;       /* Whether to use selection I/O */
-    uint8_t                *tconv_buf;           /* Datatype conv buffer */
-    bool                    tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    size_t                  tconv_buf_size;      /* Size of type conversion buffer */
-    uint8_t                *bkg_buf;             /* Background buffer */
-    bool                    bkg_buf_allocated;   /* Whether the background buffer was allocated */
-    size_t                  bkg_buf_size;        /* Size of background buffer */
+    size_t                  count;          /* Number of datasets in I/O request */
+    size_t                  filtered_count; /* Number of datasets with filters applied in I/O request */
+    H5D_dset_io_info_t     *dsets_info;     /* dsets info where I/O is done to/from */
+    size_t                  piece_count;    /* Number of pieces in I/O request */
+    size_t                  pieces_added;   /* Number of pieces added so far to arrays */
+    size_t                  filtered_pieces_added; /* Number of filtered pieces in I/O request */
+    H5D_piece_info_t      **sel_pieces;            /* Array of info struct for all pieces in I/O */
+    H5S_t                 **mem_spaces;            /* Array of chunk memory spaces */
+    H5S_t                 **file_spaces;           /* Array of chunk file spaces */
+    haddr_t                *addrs;                 /* Array of chunk addresses */
+    size_t                 *element_sizes;         /* Array of element sizes */
+    void                  **rbufs;                 /* Array of read buffers */
+    const void            **wbufs;                 /* Array of write buffers */
+    haddr_t                 store_faddr;           /* lowest file addr for read/write */
+    H5_flexible_const_ptr_t base_maddr;            /* starting mem address */
+    H5D_selection_io_mode_t use_select_io;         /* Whether to use selection I/O */
+    uint8_t                *tconv_buf;             /* Datatype conv buffer */
+    bool                    tconv_buf_allocated;   /* Whether the type conversion buffer was allocated */
+    size_t                  tconv_buf_size;        /* Size of type conversion buffer */
+    uint8_t                *bkg_buf;               /* Background buffer */
+    bool                    bkg_buf_allocated;     /* Whether the background buffer was allocated */
+    size_t                  bkg_buf_size;          /* Size of background buffer */
     size_t max_tconv_type_size; /* Largest of all source and destination type sizes involved in type
                                    conversion */
     bool must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
@@ -538,13 +541,12 @@ struct H5D_shared_t {
 
     /* Buffered/cached information for types of raw data storage*/
     struct {
-        H5D_rdcdc_t contig;    /* Information about contiguous data */
-                               /* (Note that the "contig" cache
-                                * information can be used by a chunked
-                                * dataset in certain circumstances)
-                                */
-        H5D_rdcc_t chunk;      /* Information about chunked data */
-        H5SL_t    *sel_pieces; /* Skip list containing information for each piece selected */
+        H5D_rdcdc_t contig; /* Information about contiguous data */
+                            /* (Note that the "contig" cache
+                             * information can be used by a chunked
+                             * dataset in certain circumstances)
+                             */
+        H5D_rdcc_t chunk;   /* Information about chunked data */
     } cache;
 
     H5D_append_flush_t append_flush;   /* Append flush property information */

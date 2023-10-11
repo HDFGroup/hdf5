@@ -2910,7 +2910,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDputs("All free-space tests passed.");
+    puts("All free-space tests passed.");
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(false) < 0)
@@ -2921,7 +2921,7 @@ main(void)
     exit(EXIT_SUCCESS);
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl);

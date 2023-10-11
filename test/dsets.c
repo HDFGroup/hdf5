@@ -416,7 +416,7 @@ test_create(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Library allowed overwrite of existing dataset.");
+        puts("    Library allowed overwrite of existing dataset.");
         goto error;
     }
 
@@ -443,7 +443,7 @@ test_create(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a non-existent dataset.");
+        puts("    Opened a non-existent dataset.");
         goto error;
     }
 
@@ -467,7 +467,7 @@ test_create(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a dataset with incorrect chunking parameters.");
+        puts("    Opened a dataset with incorrect chunking parameters.");
         goto error;
     }
 
@@ -544,8 +544,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     TESTING("simple I/O");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-        HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+        strcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -626,7 +626,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDlseek(f, (HDoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -653,7 +653,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     } /* end if */
     else {
         SKIPPED();
-        HDputs("    Current VFD doesn't support continuous address space");
+        puts("    Current VFD doesn't support continuous address space");
     } /* end else */
 
     return SUCCEED;
@@ -705,8 +705,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
     TESTING("dataset offset with user block");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-        HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+        strcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -763,7 +763,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDlseek(f, (HDoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -789,7 +789,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
     } /* end if */
     else {
         SKIPPED();
-        HDputs("    Current VFD doesn't support continuous address space");
+        puts("    Current VFD doesn't support continuous address space");
     } /* end else */
 
     return SUCCEED;
@@ -1470,7 +1470,7 @@ test_conv_buffer(hid_t fid)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Library shouldn't allow conversion buffer too small");
+        puts("    Library shouldn't allow conversion buffer too small");
         goto error;
     }
 
@@ -1505,7 +1505,7 @@ test_conv_buffer(hid_t fid)
 
     free(cf);
     free(cfrR);
-    HDputs(" PASSED");
+    puts(" PASSED");
     return SUCCEED;
 
 error:
@@ -1585,7 +1585,7 @@ test_tconv(hid_t file)
         if (in[4 * i + 0] != out[4 * i + 3] || in[4 * i + 1] != out[4 * i + 2] ||
             in[4 * i + 2] != out[4 * i + 1] || in[4 * i + 3] != out[4 * i + 0]) {
             H5_FAILED();
-            HDputs("    Read with byte order conversion failed.");
+            puts("    Read with byte order conversion failed.");
             goto error;
         }
     }
@@ -1597,7 +1597,7 @@ test_tconv(hid_t file)
     free(out);
     free(in);
 
-    HDputs(" PASSED");
+    puts(" PASSED");
     return SUCCEED;
 
 error:
@@ -2526,7 +2526,7 @@ test_filters(hid_t file)
      * STEP 0: Test null I/O filter by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing 'null' filter");
+    puts("Testing 'null' filter");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2548,7 +2548,7 @@ test_filters(hid_t file)
      * STEP 1: Test Fletcher32 Checksum by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing Fletcher32 checksum(enabled for read)");
+    puts("Testing Fletcher32 checksum(enabled for read)");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2562,23 +2562,23 @@ test_filters(hid_t file)
         goto error;
     if (fletcher32_size <= null_size) {
         H5_FAILED();
-        HDputs("    Size after checksumming is incorrect.");
+        puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
     /* Disable checksum during read */
-    HDputs("Testing Fletcher32 checksum(disabled for read)");
+    puts("Testing Fletcher32 checksum(disabled for read)");
     if (test_filter_internal(file, DSET_FLETCHER32_NAME_2, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
                              &fletcher32_size) < 0)
         goto error;
     if (fletcher32_size <= null_size) {
         H5_FAILED();
-        HDputs("    Size after checksumming is incorrect.");
+        puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
     /* Try to corrupt data and see if checksum fails */
-    HDputs("Testing Fletcher32 checksum(when data is corrupted)");
+    puts("Testing Fletcher32 checksum(when data is corrupted)");
     data_corrupt[0] = 52;
     data_corrupt[1] = 33;
     data_corrupt[2] = 27;
@@ -2592,7 +2592,7 @@ test_filters(hid_t file)
         goto error;
     if (fletcher32_size <= null_size) {
         H5_FAILED();
-        HDputs("    Size after checksumming is incorrect.");
+        puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
@@ -2605,7 +2605,7 @@ test_filters(hid_t file)
          *----------------------------------------------------------
          */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    HDputs("Testing deflate filter");
+    puts("Testing deflate filter");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2622,7 +2622,7 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     TESTING("deflate filter");
     SKIPPED();
-    HDputs("    Deflate filter not enabled");
+    puts("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /*----------------------------------------------------------
@@ -2637,7 +2637,7 @@ test_filters(hid_t file)
         if (H5Pset_chunk(dc, 2, chunk_size) < 0)
             goto error;
 
-        HDputs("");
+        puts("");
         if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0)
             goto error;
         if (test_filter_internal(file, DSET_SZIP_NAME, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
@@ -2653,7 +2653,7 @@ test_filters(hid_t file)
     TESTING("szip filter (without encoder)");
 
     if (h5_szip_can_encode() != 1) {
-        HDputs("");
+        puts("");
         if (test_filter_noencoder(NOENCODER_SZIP_DATASET) < 0)
             goto error;
     }
@@ -2664,14 +2664,14 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_SZIP */
     TESTING("szip filter");
     SKIPPED();
-    HDputs("    Szip filter not enabled");
+    puts("    Szip filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /*----------------------------------------------------------
      * STEP 4: Test shuffling by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing shuffle filter");
+    puts("Testing shuffle filter");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2684,7 +2684,7 @@ test_filters(hid_t file)
         goto error;
     if (shuffle_size != null_size) {
         H5_FAILED();
-        HDputs("    Shuffled size not the same as uncompressed size.");
+        puts("    Shuffled size not the same as uncompressed size.");
         goto error;
     } /* end if */
 
@@ -2697,7 +2697,7 @@ test_filters(hid_t file)
          *----------------------------------------------------------
          */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    HDputs("Testing shuffle+deflate+checksum filters(checksum first)");
+    puts("Testing shuffle+deflate+checksum filters(checksum first)");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2717,7 +2717,7 @@ test_filters(hid_t file)
     if (H5Pclose(dc) < 0)
         goto error;
 
-    HDputs("Testing shuffle+deflate+checksum filters(checksum last)");
+    puts("Testing shuffle+deflate+checksum filters(checksum last)");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2739,7 +2739,7 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     TESTING("shuffle+deflate+fletcher32 filters");
     SKIPPED();
-    HDputs("    Deflate filter not enabled");
+    puts("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /*----------------------------------------------------------
@@ -2760,7 +2760,7 @@ test_filters(hid_t file)
 
     /* Make sure encoding is enabled */
     if (h5_szip_can_encode() == 1) {
-        HDputs("");
+        puts("");
         if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0)
             goto error;
         if (test_filter_internal(file, DSET_SHUF_SZIP_FLET_NAME, dc, ENABLE_FLETCHER32, DATA_NOT_CORRUPTED,
@@ -2774,7 +2774,7 @@ test_filters(hid_t file)
     TESTING("shuffle+szip+checksum filters(checksum first, without encoder)");
 
     if (h5_szip_can_encode() != 1) {
-        HDputs("");
+        puts("");
         if (test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET) < 0)
             goto error;
     }
@@ -2790,7 +2790,7 @@ test_filters(hid_t file)
 
     /* Make sure encoding is enabled */
     if (h5_szip_can_encode() == 1) {
-        HDputs("");
+        puts("");
         if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
             goto error;
         if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2817,7 +2817,7 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_SZIP */
     TESTING("shuffle+szip+fletcher32 filters");
     SKIPPED();
-    HDputs("    szip filter not enabled");
+    puts("    szip filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
     return SUCCEED;
 
@@ -3196,7 +3196,7 @@ test_nbit_int(hid_t file)
     double       power;
     size_t       i, j;
 
-    HDputs("Testing nbit filter");
+    puts("Testing nbit filter");
     TESTING("    nbit int (setup)");
 
     /* Define dataset datatype (integer), and set precision, offset */
@@ -3234,7 +3234,7 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long long >= size of int */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power           = HDpow(2.0, (double)(precision - 1));
+            power           = pow(2.0, (double)(precision - 1));
             orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
             /* even-numbered values are negative */
@@ -3388,7 +3388,7 @@ test_nbit_float(hid_t file)
      */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDisnan(orig_data[i][j]))
+            if (isnan(orig_data[i][j]))
                 continue; /* skip if value is NaN */
             if (!H5_FLT_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3510,7 +3510,7 @@ test_nbit_double(hid_t file)
      */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDisnan(orig_data[i][j]))
+            if (isnan(orig_data[i][j]))
                 continue; /* skip if value is NaN */
             if (!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3611,7 +3611,7 @@ test_nbit_array(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++)
             for (m = 0; m < (size_t)adims[0]; m++)
                 for (n = 0; n < (size_t)adims[1]; n++) {
-                    power = HDpow(2.0, (double)precision);
+                    power = pow(2.0, (double)precision);
                     orig_data[i][j][m][n] =
                         (unsigned int)(((long long)HDrandom() % (long long)power) << offset);
                 } /* end for */
@@ -3804,11 +3804,11 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power             = HDpow(2.0, (double)(precision[0] - 1));
+            power             = pow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power             = HDpow(2.0, (double)(precision[1] - 1));
+            power             = pow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power             = HDpow(2.0, (double)(precision[2] - 1));
+            power             = pow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].f = float_val[i][j];
 
@@ -3853,7 +3853,7 @@ test_nbit_compound(hid_t file)
             if (((unsigned)new_data[i][j].i & i_mask) != ((unsigned)orig_data[i][j].i & i_mask) ||
                 ((unsigned)new_data[i][j].c & c_mask) != ((unsigned)orig_data[i][j].c & c_mask) ||
                 ((unsigned)new_data[i][j].s & s_mask) != ((unsigned)orig_data[i][j].s & s_mask) ||
-                (!HDisnan(orig_data[i][j].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f))) {
+                (!isnan(orig_data[i][j].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f))) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -4083,32 +4083,32 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power               = HDpow(2.0, (double)(precision[0] - 1));
+            power               = pow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power               = HDpow(2.0, (double)(precision[1] - 1));
+            power               = pow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power               = HDpow(2.0, (double)(precision[2] - 1));
+            power               = pow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
-            power             = HDpow(2.0, (double)precision[3]);
+            power             = pow(2.0, (double)precision[3]);
             orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power                   = HDpow(2.0, (double)(precision[4] - 1));
+                    power                   = pow(2.0, (double)(precision[4] - 1));
                     orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
                 } /* end for */
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power = HDpow(2.0, (double)(precision[0] - 1));
+                    power = pow(2.0, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
                         (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
-                    power = HDpow(2.0, (double)(precision[1] - 1));
+                    power = pow(2.0, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-                    power = HDpow(2.0, (double)(precision[2] - 1));
+                    power = pow(2.0, (double)(precision[2] - 1));
                     orig_data[i][j].d[m][n].s =
                         (short)(((long long)HDrandom() % (long long)power) << offset[2]);
                     orig_data[i][j].d[m][n].f = float_val[i][j];
@@ -4177,7 +4177,7 @@ test_nbit_compound_2(hid_t file)
                             ((unsigned)orig_data[i][j].d[m][n].c & c_mask) ||
                         ((unsigned)new_data[i][j].d[m][n].s & s_mask) !=
                             ((unsigned)orig_data[i][j].d[m][n].s & s_mask) ||
-                        (!HDisnan(new_data[i][j].d[m][n].f) &&
+                        (!isnan(new_data[i][j].d[m][n].f) &&
                          !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
                         d_failed = 1;
                         goto out;
@@ -4187,7 +4187,7 @@ out:
             if (((unsigned)new_data[i][j].a.i & i_mask) != ((unsigned)orig_data[i][j].a.i & i_mask) ||
                 ((unsigned)new_data[i][j].a.c & c_mask) != ((unsigned)orig_data[i][j].a.c & c_mask) ||
                 ((unsigned)new_data[i][j].a.s & s_mask) != ((unsigned)orig_data[i][j].a.s & s_mask) ||
-                (!HDisnan(new_data[i][j].a.f) && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
+                (!isnan(new_data[i][j].a.f) && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
                 new_data[i][j].v != orig_data[i][j].v || b_failed || d_failed) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -4336,11 +4336,11 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++) {
-        power = HDpow(2.0, 17.0 - 1.0);
+        power = pow(2.0, 17.0 - 1.0);
         memset(&orig_data[i], 0, sizeof(orig_data[i]));
         orig_data[i].i = (int)(HDrandom() % (long)power);
-        HDstrcpy(orig_data[i].str, "fixed-length C string");
-        orig_data[i].vl_str = HDstrdup("variable-length C string");
+        strcpy(orig_data[i].str, "fixed-length C string");
+        orig_data[i].vl_str = strdup("variable-length C string");
 
         orig_data[i].v.p   = malloc((size_t)(i + 1) * sizeof(unsigned int));
         orig_data[i].v.len = (size_t)i + 1;
@@ -4380,9 +4380,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
-        if (new_data[i].i != orig_data[i].i || HDstrcmp(new_data[i].str, orig_data[i].str) != 0 ||
-            HDstrcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 ||
-            new_data[i].v.len != orig_data[i].v.len || new_data[i].r != orig_data[i].r) {
+        if (new_data[i].i != orig_data[i].i || strcmp(new_data[i].str, orig_data[i].str) != 0 ||
+            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 || new_data[i].v.len != orig_data[i].v.len ||
+            new_data[i].r != orig_data[i].r) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu\n", (unsigned long)i);
@@ -4522,7 +4522,7 @@ test_nbit_int_size(hid_t file)
      */
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
-            power      = HDpow(2.0, (double)(precision - 1));
+            power      = pow(2.0, (double)(precision - 1));
             orig[i][j] = HDrandom() % (int)power << offset;
         }
 
@@ -4846,7 +4846,7 @@ test_scaleoffset_int(hid_t file)
     int           new_data[2][5];
     size_t        i, j;
 
-    HDputs("Testing scaleoffset filter");
+    puts("Testing scaleoffset filter");
     TESTING("    scaleoffset int without fill value (setup)");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -5174,7 +5174,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs((double)(new_data[i][j] - orig_data[i][j])) > HDpow(10.0, -3.0)) {
+            if (fabs((double)(new_data[i][j] - orig_data[i][j])) > pow(10.0, -3.0)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5317,7 +5317,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -3.0)) {
+        if (fabs((double)(new_data[0][j] - orig_data[0][j])) > pow(10.0, -3.0)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5435,7 +5435,7 @@ test_scaleoffset_double(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -7.0)) {
+            if (fabs(new_data[i][j] - orig_data[i][j]) > pow(10.0, -7.0)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5578,7 +5578,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -7.0)) {
+        if (fabs((double)(new_data[0][j] - orig_data[0][j])) > pow(10.0, -7.0)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -6415,11 +6415,11 @@ test_can_apply_szip(hid_t
     }
     else {
         SKIPPED();
-        HDputs("    Szip encoding is not enabled.");
+        puts("    Szip encoding is not enabled.");
     }
 #else  /* H5_HAVE_FILTER_SZIP */
     SKIPPED();
-    HDputs("    Szip filter is not enabled.");
+    puts("    Szip filter is not enabled.");
 #endif /* H5_HAVE_FILTER_SZIP */
     return SUCCEED;
 
@@ -7742,7 +7742,7 @@ gcd(long l0, long r0)
 {
     long magnitude, remainder;
     bool negative = ((l0 < 0) != (r0 < 0));
-    long l = HDlabs(l0), r = HDlabs(r0);
+    long l = labs(l0), r = labs(r0);
 
     do {
         if (l < r) {
@@ -8376,7 +8376,7 @@ test_deprec(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Library allowed overwrite of existing dataset.");
+        puts("    Library allowed overwrite of existing dataset.");
         goto error;
     }
 
@@ -8401,7 +8401,7 @@ test_deprec(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a non-existent dataset.");
+        puts("    Opened a non-existent dataset.");
         goto error;
     }
 
@@ -8454,7 +8454,7 @@ test_deprec(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a dataset with incorrect chunking parameters.");
+        puts("    Opened a dataset with incorrect chunking parameters.");
         goto error;
     }
 
@@ -8518,7 +8518,7 @@ test_deprec(hid_t file)
     if (H5Pset_filter(dcpl, H5Z_FILTER_DEPREC, 0, (size_t)0, NULL) < 0)
         goto error;
 
-    HDputs("");
+    puts("");
     if (test_filter_internal(file, DSET_DEPREC_NAME_FILTER, dcpl, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
                              &deprec_size) < 0)
         goto error;
@@ -10095,7 +10095,7 @@ test_chunk_expand(hid_t fapl)
 
     if (sizeof(size_t) <= 4 && low != H5F_LIBVER_LATEST) {
         SKIPPED();
-        HDputs("    Current machine can't test for error w/old file format");
+        puts("    Current machine can't test for error w/old file format");
     } /* end if */
     else {
         /* Register "expansion" filter */
@@ -11903,7 +11903,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12173,7 +12173,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12294,7 +12294,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12421,7 +12421,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -14385,10 +14385,10 @@ dls_01_main(void)
     if (NULL == buffer)
         TEST_ERROR;
 
-    HDstrcpy(buffer, strings[0]);
-    HDstrcpy(buffer + DLS_01_STR_SIZE, strings[1]);
-    HDstrcpy(buffer + DLS_01_STR_SIZE * 2, strings[2]);
-    HDstrcpy(buffer + DLS_01_STR_SIZE * 3, strings[3]);
+    strcpy(buffer, strings[0]);
+    strcpy(buffer + DLS_01_STR_SIZE, strings[1]);
+    strcpy(buffer + DLS_01_STR_SIZE * 2, strings[2]);
+    strcpy(buffer + DLS_01_STR_SIZE * 3, strings[3]);
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     if (fapl <= 0)
@@ -15283,8 +15283,8 @@ test_0sized_dset_metadata_alloc(hid_t fapl_id)
                     continue;
 
                 /* Compose dataset name */
-                HDsnprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time,
-                           (unsigned)layout);
+                snprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time,
+                         (unsigned)layout);
 
                 /* Set up DCPL */
                 if ((dcpl_id_copy = H5Pcopy(dcpl_id)) < 0)
@@ -15427,12 +15427,12 @@ main(void)
     int         i;
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -15523,22 +15523,22 @@ main(void)
                     my_fapl = fapl2;
                     if (paged) {
                         my_fcpl = fcpl2;
-                        HDputs("\nTesting with new file format and paged aggregation");
+                        puts("\nTesting with new file format and paged aggregation");
                     }
                     else {
                         my_fcpl = fcpl;
-                        HDputs("\nTesting with new file format and non-paged aggregation");
+                        puts("\nTesting with new file format and non-paged aggregation");
                     }
                 } /* end if */
                 else {
                     my_fapl = fapl;
                     if (paged) {
                         my_fcpl = fcpl2;
-                        HDputs("Testing with old file format and paged aggregation:");
+                        puts("Testing with old file format and paged aggregation:");
                     }
                     else {
                         my_fcpl = fcpl;
-                        HDputs("Testing with old file format and non-paged aggregation:");
+                        puts("Testing with old file format and non-paged aggregation:");
                     }
                 } /* end else */
 
@@ -15549,7 +15549,7 @@ main(void)
                 if (true == minimized_ohdr) {
                     if (0 > H5Fset_dset_no_attrs_hint(file, true))
                         goto error;
-                    HDputs("(minimized dataset object headers with file setting)");
+                    puts("(minimized dataset object headers with file setting)");
                 }
 
                 /* Cause the library to emit initial messages */
