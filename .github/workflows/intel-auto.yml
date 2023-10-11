@@ -1,4 +1,4 @@
-name: hdf5 dev autotools icx CI
+name: hdf5 1.14 autotools icx CI
 
 on:
   workflow_call:

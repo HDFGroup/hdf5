@@ -87,7 +87,7 @@
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE ""
+#define H5_VERS_SUBRELEASE "1"
 /**
  * Full version string
  */

@@ -53,9 +53,6 @@ main(void)
     /* Testing setup */
     h5_reset();
 
-    /* Testing setup */
-    h5_reset();
-
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */

@@ -1,4 +1,4 @@
-name: hdf5 dev CMake icx CI
+name: hdf5 1.14 CMake icx CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:

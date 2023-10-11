@@ -47,7 +47,6 @@ const unsigned H5O_layout_ver_bounds[] = {
     /* H5F_LIBVER_V18 */      /* H5O_LAYOUT_VERSION_DEFAULT */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V110 */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V112 */
-    H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V114 */
     H5O_LAYOUT_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 

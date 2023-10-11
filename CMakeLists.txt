@@ -788,9 +788,9 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
-#option (DEFAULT_API_VERSION "Enable v1.16 API (v16, v18, v110, v112, v114, v116)" "v116")
-set (DEFAULT_API_VERSION "v116" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116)
+#option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
+set (DEFAULT_API_VERSION "v114" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -826,20 +826,12 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.14.x API
 #-----------------------------------------------------------------------------
+if (NOT DEFAULT_API_VERSION)
+  set (DEFAULT_API_VERSION "v114")
+endif ()
 set (H5_USE_114_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v114")
   set (H5_USE_114_API_DEFAULT 1)
-endif ()
-
-#-----------------------------------------------------------------------------
-# Option to use 1.16.x API
-#-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v116")
-endif ()
-set (H5_USE_116_API_DEFAULT 0)
-if (DEFAULT_API_VERSION MATCHES "v116")
-  set (H5_USE_116_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------

@@ -119,13 +119,6 @@ static herr_t H5FD__selection_build_types(bool io_op_write, size_t num_pieces, H
                                           bool *final_ftype_is_derived, MPI_Datatype *final_mtype,
                                           bool *final_mtype_is_derived);
 
-static herr_t H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
-                                          H5S_t **file_spaces, H5S_t **mem_spaces, haddr_t offsets[],
-                                          H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
-                                          size_t dst_element_sizes[], MPI_Datatype *final_ftype,
-                                          hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
-                                          hbool_t *final_mtype_is_derived);
-
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
     H5FD_CLASS_VERSION,         /* struct version        */
