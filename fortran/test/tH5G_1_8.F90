@@ -192,48 +192,18 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
            IF(idx_type == H5_INDEX_CRT_ORDER_F)THEN
               IF(iorder == H5_ITER_INC_F)THEN
                  order = H5_ITER_INC_F
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in increasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in increasing order w/o creation order index"
-!!$                 ENDIF
               ELSE IF (iorder == H5_ITER_DEC_F) THEN
                  order = H5_ITER_DEC_F
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in decreasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in decreasing order w/o creation order index"
-!!$                 ENDIF
               ELSE
                  order = H5_ITER_NATIVE_F
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in native order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in native order w/o creation order index"
-!!$                 ENDIF
               ENDIF
            ELSE
               IF(iorder == H5_ITER_INC_F)THEN
                  order = H5_ITER_INC_F
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in increasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in increasing order w/o creation order index"
-!!$                 ENDIF
               ELSE IF (iorder == H5_ITER_DEC_F) THEN
                  order = H5_ITER_DEC_F
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in decreasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in decreasing order w/o creation order index"
-!!$                 ENDIF
               ELSE
                  order = H5_ITER_NATIVE_F
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in native order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"query group info by creation order index in native order w/o creation order index"
-!!$                 ENDIF
               ENDIF
            END IF
 
@@ -1263,19 +1233,9 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   CHARACTER(LEN=2) :: chr2
   INTEGER :: error
   INTEGER :: id_type
-  !
-  !
-  !
-  CHARACTER(LEN=80) :: fix_filename1
-  CHARACTER(LEN=80) :: fix_filename2
   INTEGER(HSIZE_T) :: htmp
 
   LOGICAL :: cleanup
-
-  DO i = 1, 80
-     fix_filename1(i:i) = " "
-     fix_filename2(i:i) = " "
-  ENDDO
 
   !  Loop over operating on different indices on link fields
   DO idx_type = H5_INDEX_NAME_F, H5_INDEX_CRT_ORDER_F
@@ -1283,36 +1243,6 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
      DO iorder = H5_ITER_INC_F,  H5_ITER_DEC_F
         !  Loop over using index for creation order value
         DO i = 1, 2
-           !  Print appropriate test message
-!!$           IF(idx_type == H5_INDEX_CRT_ORDER_F)THEN
-!!$              IF(iorder == H5_ITER_INC_F)THEN
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"deleting links by creation order index in increasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"deleting links by creation order index in increasing order w/o creation order index"
-!!$                 ENDIF
-!!$              ELSE
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"deleting links by creation order index in decreasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"deleting links by creation order index in decreasing order w/o creation order index"
-!!$                 ENDIF
-!!$              ENDIF
-!!$           ELSE
-!!$              IF(iorder == H5_ITER_INC_F)THEN
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"deleting links by name index in increasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"deleting links by name index in increasing order w/o creation order index"
-!!$                 ENDIF
-!!$              ELSE
-!!$                 IF(use_index(i))THEN
-!!$                    WRITE(*,'(5x,A)')"deleting links by name index in decreasing order w/creation order index"
-!!$                 ELSE
-!!$                    WRITE(*,'(5x,A)')"deleting links by name index in decreasing order w/o creation order index"
-!!$                 ENDIF
-!!$              ENDIF
-!!$           ENDIF
 
            !  Create file
            CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, access_prp=fapl)
