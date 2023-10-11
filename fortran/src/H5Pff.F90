@@ -6405,7 +6405,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !! \brief Gets the file space handling strategy and persisting free-space values for a file creation property list.
 !!
 !! \param plist_id  File creation property list identifier
-!! \param strategy  The file space handling strategy to be used.
+!! \param strategy  The file space handling strategy to be used
 !! \param persist   Indicate whether free space should be persistent or not
 !! \param threshold The free-space section size threshold value
 !! \param hdferr    \fortran_error
@@ -6507,15 +6507,26 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(h5pget_file_space_page_size(prp_id, fsp_size))
 
   END SUBROUTINE h5pget_file_space_page_size_f
-
-  SUBROUTINE h5pget_actual_selection_io_mode(plist_id, actual_selection_io_mode, hdferr)
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+!!        during the last I/O call.
+!!
+!! \param plist_id                 File creation property list identifier
+!! \param actual_selection_io_mode A bitwise set value indicating the type(s) of I/O performed
+!! \param hdferr                   \fortran_error
+!!
+!! See C API: @ref H5Pget_actual_selection_io_mode()
+!!
+  SUBROUTINE h5pget_actual_selection_io_mode_f(plist_id, actual_selection_io_mode, hdferr)
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: plist_id
     INTEGER       , INTENT(OUT) :: actual_selection_io_mode
     INTEGER       , INTENT(OUT) :: hdferr
 
-    INTEGER(C_INT32_T)    :: c_actual_selection_io_mode
+    INTEGER(C_INT32_T) :: c_actual_selection_io_mode
 
     INTERFACE
         INTEGER(C_INT) FUNCTION H5Pget_actual_selection_io_mode(plist_id, actual_selection_io_mode) &
@@ -6531,7 +6542,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 
      actual_selection_io_mode = INT(c_actual_selection_io_mode)
 
-   END SUBROUTINE h5pget_actual_selection_io_mode
+   END SUBROUTINE h5pget_actual_selection_io_mode_f
 
 END MODULE H5P
 
