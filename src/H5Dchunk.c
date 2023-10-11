@@ -1114,6 +1114,31 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         }
     }
 
+#ifdef H5_HAVE_PARALLEL
+    /*
+     * If collective metadata reads are enabled, ensure all ranks
+     * have the dataset's chunk index open (if it was created) to
+     * prevent possible metadata inconsistency issues or unintentional
+     * independent metadata reads later on.
+     */
+    if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_HAS_MPI) &&
+        H5F_shared_get_coll_metadata_reads(io_info->f_sh) &&
+        H5D__chunk_is_space_alloc(&dataset->shared->layout.storage)) {
+        H5D_chunk_ud_t udata;
+        hsize_t        scaled[H5O_LAYOUT_NDIMS] = {0};
+
+        /*
+         * TODO: Until the dataset chunk index callback structure has
+         * callbacks for checking if an index is opened and also for
+         * directly opening the index, the following fake chunk lookup
+         * serves the purpose of forcing a chunk index open operation
+         * on all ranks
+         */
+        if (H5D__chunk_lookup(dataset, scaled, &udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to collectively open dataset chunk index");
+    }
+#endif
+
 done:
     if (file_space_normalized == true)
         if (H5S_hyper_denormalize_offset(dinfo->file_space, old_offset) < 0)
@@ -1556,6 +1581,9 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     piece_info->in_place_tconv = false;
     piece_info->buf_off        = 0;
 
+    /* Check if chunk is in a dataset with filters applied */
+    piece_info->filtered_dset = di->dset->shared->dcpl_cache.pline.nused > 0;
+
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
 
@@ -1591,6 +1619,7 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     hsize_t  curr_partial_clip[H5S_MAX_RANK]; /* Current partial dimension sizes to clip against */
     hsize_t  partial_dim_size[H5S_MAX_RANK];  /* Size of a partial dimension */
     bool     is_partial_dim[H5S_MAX_RANK];    /* Whether a dimension is currently a partial chunk */
+    bool     filtered_dataset;                /* Whether the dataset in question has filters applied */
     unsigned num_partial_dims;                /* Current number of partial dimensions */
     unsigned u;                               /* Local index variable */
     herr_t   ret_value = SUCCEED;             /* Return value */
@@ -1640,6 +1669,9 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     /* Set the index of this chunk */
     chunk_index = 0;
 
+    /* Check whether dataset has filters applied */
+    filtered_dataset = di->dset->shared->dcpl_cache.pline.nused > 0;
+
     /* Create "temporary" chunk for selection operations (copy file space) */
     if (NULL == (tmp_fchunk = H5S_create_simple(fm->f_ndims, fm->chunk_dim, NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create dataspace for chunk");
@@ -1685,6 +1717,8 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
         /* Initialize in-place type conversion info. Start with it disabled. */
         new_piece_info->in_place_tconv = false;
         new_piece_info->buf_off        = 0;
+
+        new_piece_info->filtered_dset = filtered_dataset;
 
         /* Insert the new chunk into the skip list */
         if (H5SL_insert(fm->dset_sel_pieces, new_piece_info, &new_piece_info->index) < 0) {
@@ -1798,6 +1832,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
     hsize_t          chunk_index;                    /* Index of chunk */
     hsize_t          start_scaled[H5S_MAX_RANK];     /* Starting scaled coordinates of selection */
     hsize_t          scaled[H5S_MAX_RANK];           /* Scaled coordinates for this chunk */
+    bool             filtered_dataset;               /* Whether the dataset in question has filters applied */
     int              curr_dim;                       /* Current dimension to increment */
     unsigned         u;                              /* Local index variable */
     herr_t           ret_value = SUCCEED;            /* Return value */
@@ -1830,6 +1865,9 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
 
     /* Calculate the index of this chunk */
     chunk_index = H5VM_array_offset_pre(fm->f_ndims, dinfo->layout->u.chunk.down_chunks, scaled);
+
+    /* Check whether dataset has filters applied */
+    filtered_dataset = dinfo->dset->shared->dcpl_cache.pline.nused > 0;
 
     /* Iterate through each chunk in the dataset */
     while (sel_points) {
@@ -1884,6 +1922,8 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
             /* Initialize in-place type conversion info. Start with it disabled. */
             new_piece_info->in_place_tconv = false;
             new_piece_info->buf_off        = 0;
+
+            new_piece_info->filtered_dset = filtered_dataset;
 
             /* Add piece to global piece_count */
             io_info->piece_count++;
@@ -2257,6 +2297,8 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             piece_info->in_place_tconv = false;
             piece_info->buf_off        = 0;
 
+            piece_info->filtered_dset = dinfo->dset->shared->dcpl_cache.pline.nused > 0;
+
             /* Make connection to related dset info from this piece_info */
             piece_info->dset_info = dinfo;
 
@@ -2417,6 +2459,9 @@ H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
             /* Add to sel_pieces and update pieces_added */
             io_info->sel_pieces[io_info->pieces_added++] = piece_info;
+
+            if (piece_info->filtered_dset)
+                io_info->filtered_pieces_added++;
         }
 
         /* Advance to next skip list node */
@@ -2728,6 +2773,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if (io_info->sel_pieces)
                         io_info->sel_pieces[io_info->pieces_added] = chunk_info;
                     io_info->pieces_added++;
+
+                    if (io_info->sel_pieces && chunk_info->filtered_dset)
+                        io_info->filtered_pieces_added++;
                 }
             } /* end if */
             else if (!skip_missing_chunks) {
@@ -3142,6 +3190,9 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     if (io_info->sel_pieces)
                         io_info->sel_pieces[io_info->pieces_added] = chunk_info;
                     io_info->pieces_added++;
+
+                    if (io_info->sel_pieces && chunk_info->filtered_dset)
+                        io_info->filtered_pieces_added++;
                 }
             } /* end else */
 
