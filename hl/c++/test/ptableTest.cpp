@@ -303,7 +303,7 @@ TestCompress()
 
         char filter_name[8];
         dcpl.getFilterById(H5Z_FILTER_DEFLATE, flags, cd_nelemts, NULL, 8, filter_name, config);
-        if (HDstrncmp(filter_name, "deflate", 7) != 0)
+        if (strncmp(filter_name, "deflate", 7) != 0)
             H5_FAILED();
     }
     catch (Exception const &) {
@@ -313,7 +313,7 @@ TestCompress()
     PASSED();
 #else
     SKIPPED();
-    HDputs("    deflate filter not enabled");
+    puts("    deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
     return 0;
 }
@@ -621,7 +621,7 @@ TestHDFFV_9758()
         s1[i].a = static_cast<int>(i);
         s1[i].b = 1.0F * static_cast<float>(i * i);
         s1[i].c = 1.0 / static_cast<double>(i + 1);
-        HDsnprintf(s1[i].d, STRING_LENGTH, "string%" PRIuHSIZE "", i);
+        snprintf(s1[i].d, STRING_LENGTH, "string%" PRIuHSIZE "", i);
         s1[i].e = static_cast<int>(100 + i);
     }
 
@@ -692,7 +692,7 @@ TestHDFFV_9758()
 
             if (s2.a != s1[i].a || s2.e != s1[i].e)
                 goto error;
-            else if (HDstrcmp(s2.d, s1[i].d) != 0)
+            else if (strcmp(s2.d, s1[i].d) != 0)
                 goto error;
         }
     } // end of ptable block

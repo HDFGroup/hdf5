@@ -56,7 +56,7 @@ print_func(const char *format, ...)
     int     ret_value;
 
     va_start(arglist, format);
-    ret_value = HDvprintf(format, arglist);
+    ret_value = vprintf(format, arglist);
     va_end(arglist);
     return ret_value;
 }
@@ -76,7 +76,7 @@ TestErrPrintf(const char *format, ...)
 
     /* Print the requested information */
     va_start(arglist, format);
-    ret_value = HDvprintf(format, arglist);
+    ret_value = vprintf(format, arglist);
     va_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
@@ -121,9 +121,9 @@ getenv_all(MPI_Comm comm, int root, const char *name)
         /* The root task does the getenv call
          * and sends the result to the other tasks */
         if (mpi_rank == root) {
-            env = HDgetenv(name);
+            env = getenv(name);
             if (env) {
-                len = (int)HDstrlen(env);
+                len = (int)strlen(env);
                 MPI_Bcast(&len, 1, MPI_INT, root, comm);
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
             }
@@ -138,7 +138,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
             if (len >= 0) {
                 if (env == NULL)
                     env = (char *)malloc((size_t)len + 1);
-                else if (HDstrlen(env) < (size_t)len)
+                else if (strlen(env) < (size_t)len)
                     env = (char *)realloc(env, (size_t)len + 1);
 
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
@@ -158,7 +158,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
         /* use original getenv */
         if (env)
             free(env);
-        env = HDgetenv(name);
+        env = getenv(name);
     } /* end if */
 
     return env;
@@ -218,7 +218,7 @@ h5_get_libver_fapl(hid_t fapl)
     char        buf[1024];    /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
-    env = HDgetenv("HDF5_LIBVER_BOUNDS");
+    env = getenv("HDF5_LIBVER_BOUNDS");
 #ifdef HDF5_LIBVER_BOUNDS
     /* Use the environment variable, then the compile-time constant */
     if (!env)
@@ -235,12 +235,12 @@ h5_get_libver_fapl(hid_t fapl)
      * If it's nothing (environment variable was whitespace)
      * just return the default fapl.
      */
-    HDstrncpy(buf, env, sizeof(buf));
+    strncpy(buf, env, sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
     if (NULL == (tok = HDstrtok_r(buf, " \t\n\r", &lasts)))
         goto done;
 
-    if (!HDstrcmp(tok, "latest")) {
+    if (!strcmp(tok, "latest")) {
         /* use the latest format */
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             goto error;
@@ -262,7 +262,7 @@ error:
 #endif
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname, size_t size,
-                hbool_t nest_printf, hbool_t subst_for_superblock)
+                bool nest_printf, bool subst_for_superblock)
 {
     const char *prefix         = NULL;
     const char *driver_env_var = NULL; /* HDF5_DRIVER environment variable     */
@@ -280,7 +280,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     /* Determine if driver is set by environment variable. If it is,
      * only generate a suffix if fixing the filename for the superblock
      * file. */
-    driver_env_var = HDgetenv(HDF5_DRIVER);
+    driver_env_var = getenv(HDF5_DRIVER);
     if (driver_env_var && (H5P_DEFAULT == fapl) && subst_for_superblock)
         fapl = H5P_FILE_ACCESS_DEFAULT;
 
@@ -302,7 +302,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  * we are using the split driver since both of those
                  * use the multi VFD under the hood.
                  */
-                if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
+                if (driver_env_var && !strcmp(driver_env_var, "split")) {
                     /* split VFD */
                     if (subst_for_superblock)
                         suffix = ".h5.meta";
@@ -334,7 +334,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 #endif /* H5_HAVE_PARALLEL */
     }
     else {
-        if (HDgetenv(HDF5_NOCLEANUP))
+        if (getenv(HDF5_NOCLEANUP))
             SetTestNoCleanup();
     }
 #endif
@@ -370,7 +370,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                        "   export HDF5_PARAPREFIX\n"
                        "*** End of Hint ***\n");
 
-            explained = TRUE;
+            explained = true;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif /* HDF5_PARAPREFIX */
@@ -382,7 +382,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
          * For serial:
          *      First use the environment variable, then try the constant
          */
-        prefix = HDgetenv("HDF5_PREFIX");
+        prefix = getenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
         if (!prefix)
@@ -396,7 +396,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             /* This is a parallel system */
             char *subdir;
 
-            if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
+            if (!strcmp(prefix, HDF5_PARAPREFIX)) {
                 /*
                  * If the prefix specifies the HDF5_PARAPREFIX directory, then
                  * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
@@ -404,8 +404,8 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                  */
                 char *user, *login;
 
-                user   = HDgetenv("USER");
-                login  = HDgetenv("LOGIN");
+                user   = getenv("USER");
+                login  = getenv("LOGIN");
                 subdir = (user ? user : login);
 
                 if (subdir) {
@@ -421,11 +421,11 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 
             if (!fullname[0]) {
                 /* We didn't append the prefix yet */
-                HDstrncpy(fullname, prefix, size);
+                strncpy(fullname, prefix, size);
                 fullname[size - 1] = '\0';
             }
 
-            if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
+            if (strlen(fullname) + strlen(base_name) + 1 < size) {
                 /*
                  * Append the base_name with a slash first. Multiple
                  * slashes are handled below.
@@ -440,10 +440,10 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                          * subdirectory.  Default to PREFIX's original
                          * prefix value.
                          */
-                        HDstrcpy(fullname, prefix);
+                        strcpy(fullname, prefix);
 
-                HDstrcat(fullname, "/");
-                HDstrcat(fullname, base_name);
+                strcat(fullname, "/");
+                strcat(fullname, base_name);
             }
             else {
                 /* Buffer is too small */
@@ -451,25 +451,25 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             }
         }
         else {
-            if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
+            if (snprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
                 /* Buffer is too small */
                 return NULL;
         }
     }
-    else if (HDstrlen(base_name) >= size) {
+    else if (strlen(base_name) >= size) {
         /* Buffer is too small */
         return NULL;
     }
     else {
-        HDstrcpy(fullname, base_name);
+        strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (strlen(fullname) + strlen(suffix) >= size)
             return NULL;
 
-        HDstrcat(fullname, suffix);
+        strcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -486,33 +486,33 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE, FALSE));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, false, false));
 }
 
 char *
 h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
+    return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, false, true));
 }
 
-hbool_t
+bool
 h5_using_default_driver(const char *drv_name)
 {
-    hbool_t ret_val = TRUE;
+    bool ret_val = true;
 
     assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
     if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+        drv_name = getenv(HDF5_DRIVER);
 
     if (drv_name)
-        return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
+        return (!strcmp(drv_name, "sec2") || !strcmp(drv_name, "nomatch"));
 
     return ret_val;
 }
 
 herr_t
-h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible)
+h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible)
 {
     unsigned long feat_flags = 0;
     hid_t         driver_id  = H5I_INVALID_HID;

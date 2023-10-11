@@ -49,7 +49,7 @@
 
 /* Typedef for tagged entry iterator callback context - verify cork tag */
 typedef struct {
-    hbool_t status; /* Corked status */
+    bool status; /* Corked status */
 } H5C_tag_iter_vct_ctx_t;
 
 /********************/
@@ -81,7 +81,7 @@ static int
 H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
 {
     H5C_tag_iter_vct_ctx_t *ctx = (H5C_tag_iter_vct_ctx_t *)_ctx; /* Get pointer to iterator context */
-    hbool_t                 is_corked;                            /* Corked status for entry */
+    bool                    is_corked;                            /* Corked status for entry */
     int                     ret_value = H5_ITER_CONT;             /* Return value */
 
     /* Function enter macro */
@@ -92,7 +92,7 @@ H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
     assert(ctx);
 
     /* Retrieve corked status for entry */
-    is_corked = entry->tag_info ? entry->tag_info->corked : FALSE;
+    is_corked = entry->tag_info ? entry->tag_info->corked : false;
 
     /* Verify corked status for entry */
     if (is_corked != ctx->status)
@@ -113,7 +113,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status)
+H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, bool status)
 {
     H5F_t                 *f;                   /* File Pointer */
     H5C_t                 *cache;               /* Cache Pointer */
@@ -140,7 +140,7 @@ H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status)
     ctx.status = status;
 
     /* Iterate through tagged entries in the cache */
-    if (H5C__iter_tagged_entries(cache, tag, FALSE, H5C__verify_cork_tag_test_cb, &ctx) < 0)
+    if (H5C__iter_tagged_entries(cache, tag, false, H5C__verify_cork_tag_test_cb, &ctx) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "iteration of tagged entries failed");
 
 done:

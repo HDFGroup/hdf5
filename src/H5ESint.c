@@ -61,14 +61,14 @@ typedef struct H5ES_wait_ctx_t {
     H5ES_t  *es;              /* Event set being operated on */
     uint64_t timeout;         /* Timeout for wait operation (in ns) */
     size_t  *num_in_progress; /* Count of # of operations that have not completed */
-    hbool_t *op_failed;       /* Flag to indicate an operation failed */
+    bool    *op_failed;       /* Flag to indicate an operation failed */
 } H5ES_wait_ctx_t;
 
 /* Callback context for cancel operations */
 typedef struct H5ES_cancel_ctx_t {
-    H5ES_t  *es;               /* Event set being operated on */
-    size_t  *num_not_canceled; /* Count of # of operations were not canceled */
-    hbool_t *op_failed;        /* Flag to indicate an operation failed */
+    H5ES_t *es;               /* Event set being operated on */
+    size_t *num_not_canceled; /* Count of # of operations were not canceled */
+    bool   *op_failed;        /* Flag to indicate an operation failed */
 } H5ES_cancel_ctx_t;
 
 /* Callback context for get error info (gei) operations */
@@ -244,7 +244,7 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
              unsigned app_line, const char *caller, const char *api_args)
 {
     H5ES_event_t *ev          = NULL;    /* Event for request */
-    hbool_t       ev_inserted = FALSE;   /* Flag to indicate that event is in active list */
+    bool          ev_inserted = false;   /* Flag to indicate that event is in active list */
     herr_t        ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -283,7 +283,7 @@ H5ES__insert(H5ES_t *es, H5VL_t *connector, void *request_token, const char *app
 
     /* Append fully initialized event onto the event set's 'active' list */
     H5ES__list_append(&es->active, ev);
-    ev_inserted = TRUE;
+    ev_inserted = true;
 
     /* Invoke the event set's 'insert' callback, if present */
     if (es->ins_func)
@@ -322,7 +322,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
     H5RS_str_t *rs = NULL;             /* Ref-counted string to compose formatted argument string in */
     const char *api_args;              /* Pointer to api_args string from ref-counted string */
     va_list     ap;                    /* Varargs for caller */
-    hbool_t     arg_started = FALSE;   /* Whether the va_list has been started */
+    bool        arg_started = false;   /* Whether the va_list has been started */
     herr_t      ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -343,7 +343,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
 
     /* Start working on the API routines arguments */
     va_start(ap, caller_args);
-    arg_started = TRUE;
+    arg_started = true;
 
     /* Copy the app source information */
     (void)va_arg(ap, char *); /* Toss the 'app_file' parameter name */
@@ -359,7 +359,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
 
     /* Copy the string for the API routine's arguments */
     /* (skip the six characters from the app's file, function and line # arguments) */
-    assert(0 == HDstrncmp(caller_args, "*s*sIu", 6));
+    assert(0 == strncmp(caller_args, "*s*sIu", 6));
     if (H5_trace_args(rs, caller_args + 6, ap) < 0)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, FAIL, "can't create formatted API arguments");
     if (NULL == (api_args = H5RS_get_str(rs)))
@@ -502,7 +502,7 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
     assert(ev);
 
     /* Set error flag for event set */
-    es->err_occurred = TRUE;
+    es->err_occurred = true;
 
     /* Remove event from normal list */
     H5ES__list_remove(&es->active, ev);
@@ -643,7 +643,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTRELEASE, H5_ITER_ERROR, "unable to release completed event");
 
         /* Record the error */
-        *ctx->op_failed = TRUE;
+        *ctx->op_failed = true;
 
         /* Exit from the iteration */
         ret_value = H5_ITER_STOP;
@@ -690,7 +690,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_failed)
+H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, bool *op_failed)
 {
     H5ES_wait_ctx_t ctx;                 /* Iterator callback context info */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -704,7 +704,7 @@ H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_fa
 
     /* Set user's parameters to known values */
     *num_in_progress = 0;
-    *op_failed       = FALSE;
+    *op_failed       = false;
 
     /* Set up context for iterator callbacks */
     ctx.es              = es;
@@ -753,7 +753,7 @@ H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CANTSET, H5_ITER_ERROR, "unable to handle failed event");
 
         /* Record the error */
-        *ctx->op_failed = TRUE;
+        *ctx->op_failed = true;
 
         /* Exit from the iteration */
         ret_value = H5_ITER_STOP;
@@ -793,7 +793,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed)
+H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, bool *op_failed)
 {
     H5ES_cancel_ctx_t ctx;                 /* Iterator callback context info */
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -807,7 +807,7 @@ H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed)
 
     /* Set user's parameters to known values */
     *num_not_canceled = 0;
-    *op_failed        = FALSE;
+    *op_failed        = false;
 
     /* Set up context for iterator callbacks */
     ctx.es               = es;

@@ -792,7 +792,7 @@ H5TS_cancel_count_dec(void)
 H5_DLL BOOL CALLBACK
 H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 {
-    BOOL ret_value = TRUE;
+    BOOL ret_value = true;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -801,15 +801,15 @@ H5TS_win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 
     /* Set up thread local storage */
     if (TLS_OUT_OF_INDEXES == (H5TS_errstk_key_g = TlsAlloc()))
-        ret_value = FALSE;
+        ret_value = false;
 
 #ifdef H5_HAVE_CODESTACK
     if (TLS_OUT_OF_INDEXES == (H5TS_funcstk_key_g = TlsAlloc()))
-        ret_value = FALSE;
+        ret_value = false;
 #endif /* H5_HAVE_CODESTACK */
 
     if (TLS_OUT_OF_INDEXES == (H5TS_apictx_key_g = TlsAlloc()))
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_win32_process_enter() */

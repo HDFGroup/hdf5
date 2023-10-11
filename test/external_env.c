@@ -38,17 +38,17 @@ static const char *EXT_ENV_FNAME[] = {"extern_env_dir/env_file_1", NULL};
 static int
 test_path_env(hid_t fapl)
 {
-    hid_t   file  = -1;        /* file to write to                     */
-    hid_t   dcpl  = -1;        /* dataset creation properties          */
-    hid_t   space = -1;        /* data space                           */
-    hid_t   dapl  = -1;        /* dataset access property list         */
-    hid_t   dset  = -1;        /* dataset                              */
-    size_t  i;                 /* miscellaneous counters               */
-    char    filename[1024];    /* file name                            */
-    int     part[PART_SIZE];   /* raw data buffer (partial)            */
-    int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
-    hsize_t cur_size;          /* current data space size              */
-    char    buffer[1024];      /* buffer to read efile_prefix          */
+    hid_t   file  = H5I_INVALID_HID; /* file to write to                     */
+    hid_t   dcpl  = H5I_INVALID_HID; /* dataset creation properties          */
+    hid_t   space = H5I_INVALID_HID; /* data space                           */
+    hid_t   dapl  = H5I_INVALID_HID; /* dataset access property list         */
+    hid_t   dset  = H5I_INVALID_HID; /* dataset                              */
+    size_t  i;                       /* miscellaneous counters               */
+    char    filename[1024];          /* file name                            */
+    int     part[PART_SIZE];         /* raw data buffer (partial)            */
+    int     whole[TOTAL_SIZE];       /* raw data buffer (total)              */
+    hsize_t cur_size;                /* current data space size              */
+    char    buffer[1024];            /* buffer to read efile_prefix          */
 
     TESTING("prefix in HDF5_EXTFILE_PREFIX");
 
@@ -60,14 +60,14 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
-    if (reset_raw_data_files(TRUE) < 0)
+    if (reset_raw_data_files(true) < 0)
         TEST_ERROR;
 
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int)i + 1);
+        snprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -83,7 +83,7 @@ test_path_env(hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Pget_efile_prefix(dapl, buffer, sizeof(buffer)) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("efile prefix not set correctly");
 
     /* Create dataset */
@@ -137,12 +137,12 @@ error:
 int
 main(void)
 {
-    hid_t    fapl_id_old = -1; /* file access properties (old format)  */
-    hid_t    fapl_id_new = -1; /* file access properties (new format)  */
-    hid_t    fid         = -1; /* file for test_1* functions           */
-    hid_t    gid         = -1; /* group to emit diagnostics            */
-    unsigned latest_format;    /* default or latest file format        */
-    int      nerrors = 0;      /* number of errors                     */
+    hid_t    fapl_id_old = H5I_INVALID_HID; /* file access properties (old format)  */
+    hid_t    fapl_id_new = H5I_INVALID_HID; /* file access properties (new format)  */
+    hid_t    fid         = H5I_INVALID_HID; /* file for test_1* functions           */
+    hid_t    gid         = H5I_INVALID_HID; /* group to emit diagnostics            */
+    unsigned latest_format;                 /* default or latest file format        */
+    int      nerrors = 0;                   /* number of errors                     */
 
     h5_reset();
 
@@ -156,16 +156,16 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Test with old & new format groups */
-    for (latest_format = FALSE; latest_format <= TRUE; latest_format++) {
-        hid_t current_fapl_id = -1;
+    for (latest_format = false; latest_format <= true; latest_format++) {
+        hid_t current_fapl_id = H5I_INVALID_HID;
 
         /* Set the fapl for different file formats */
         if (latest_format) {
-            HDputs("\nTesting with the latest file format:");
+            puts("\nTesting with the latest file format:");
             current_fapl_id = fapl_id_new;
         } /* end if */
         else {
-            HDputs("Testing with the default file format:");
+            puts("Testing with the default file format:");
             current_fapl_id = fapl_id_old;
         } /* end else */
 
@@ -179,7 +179,7 @@ main(void)
     if (H5Pclose(fapl_id_new) < 0)
         FAIL_STACK_ERROR;
 
-    HDputs("All external storage tests passed.");
+    puts("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
     if (h5_cleanup(EXT_ENV_FNAME, fapl_id_old)) {

@@ -88,7 +88,7 @@ static int __k;
  *
  * Helper macro to track the sizes of entries in a vector
  * I/O call when stepping through the vector incrementally.
- * Assuming that bool_size_fixed is initialized to FALSE
+ * Assuming that bool_size_fixed is initialized to false
  * before the scan, this macro will detect the sizes array
  * optimization for the case in which all remaining entries
  * are of the same size, and set size_value accordingly.
@@ -102,20 +102,20 @@ static int __k;
             if ((sizes_array)[idx] == 0) {                                                                   \
                                                                                                              \
                 assert((idx) > 0);                                                                           \
-                (bool_size_fixed) = TRUE;                                                                    \
+                (bool_size_fixed) = true;                                                                    \
             }                                                                                                \
             else {                                                                                           \
                                                                                                              \
                 (size_value) = (sizes_array)[idx];                                                           \
             }                                                                                                \
         }                                                                                                    \
-    } while (FALSE)
+    } while (false)
 
 /* Macro SET_TYPE()
  *
  * Helper macro to track the types of entries in a vector
  * I/O call when stepping through the vector incrementally.
- * Assuming that bool_type_fixed is initialized to FALSE
+ * Assuming that bool_type_fixed is initialized to false
  * before the scan, this macro will detect the types array
  * optimization for the case in which all remaining entries
  * are of the same type, and set type_value accordingly.
@@ -129,14 +129,14 @@ static int __k;
             if ((types_array)[idx] == H5FD_MEM_NOLIST) {                                                     \
                                                                                                              \
                 assert((idx) > 0);                                                                           \
-                (bool_type_fixed) = TRUE;                                                                    \
+                (bool_type_fixed) = true;                                                                    \
             }                                                                                                \
             else {                                                                                           \
                                                                                                              \
                 (type_value) = (types_array)[idx];                                                           \
             }                                                                                                \
         }                                                                                                    \
-    } while (FALSE)
+    } while (false)
 
 /* Helper structure to pass around dataset information.
  */
@@ -159,8 +159,8 @@ static int splitter_prepare_file_paths(H5FD_splitter_vfd_config_t *vfd_config, c
 static int splitter_create_single_file_at(const char *filename, hid_t fapl_id,
                                           const struct splitter_dataset_def *data);
 static int splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def *data);
-static int run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                             hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2]);
+static int run_splitter_test(const struct splitter_dataset_def *data, bool ignore_wo_errors,
+                             bool provide_logfile_path, const hid_t sub_fapl_ids[2]);
 static int splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id);
 static int splitter_tentative_open_test(hid_t child_fapl_id);
 static int file_exists(const char *filename, hid_t fapl_id);
@@ -191,14 +191,14 @@ static herr_t  H5FD__ctl_test_vfd_ctl(H5FD_t *_file, uint64_t op_code, uint64_t 
 static herr_t
 test_sec2(void)
 {
-    hid_t         fid          = -1;     /* file ID                      */
-    hid_t         fapl_id      = -1;     /* file access property list ID */
-    hid_t         fapl_id_out  = -1;     /* from H5Fget_access_plist     */
-    hid_t         driver_id    = -1;     /* ID for this VFD              */
-    unsigned long driver_flags = 0;      /* VFD feature flags            */
-    char          filename[1024];        /* filename                     */
-    void         *os_file_handle = NULL; /* OS file handle               */
-    hsize_t       file_size;             /* file size                    */
+    hid_t         fid          = H5I_INVALID_HID; /* file ID                      */
+    hid_t         fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t         fapl_id_out  = H5I_INVALID_HID; /* from H5Fget_access_plist     */
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
+    char          filename[1024];                 /* filename                     */
+    void         *os_file_handle = NULL;          /* OS file handle               */
+    hsize_t       file_size;                      /* file size                    */
 
     TESTING("SEC2 file driver");
 
@@ -303,28 +303,28 @@ error:
 static herr_t
 test_core(void)
 {
-    hid_t         fid          = -1;        /* file ID                      */
-    hid_t         fapl_id      = -1;        /* file access property list ID */
-    hid_t         fapl_id_out  = -1;        /* from H5Fget_access_plist     */
-    hid_t         driver_id    = -1;        /* ID for this VFD              */
-    unsigned long driver_flags = 0;         /* VFD feature flags            */
-    hid_t         did          = -1;        /* dataset ID                   */
-    hid_t         sid          = -1;        /* dataspace ID                 */
-    char          filename[1024];           /* filename                     */
-    void         *os_file_handle = NULL;    /* OS file handle               */
-    hsize_t       file_size;                /* file size                    */
-    size_t        increment;                /* core VFD increment           */
-    hbool_t       backing_store;            /* use backing store?           */
-    hbool_t       use_write_tracking;       /* write tracking flag          */
-    size_t        write_tracking_page_size; /* write tracking page size     */
-    int          *data_w = NULL;            /* data written to the dataset  */
-    int          *data_r = NULL;            /* data read from the dataset   */
-    int           val;                      /* data value                   */
-    int          *pw = NULL, *pr = NULL;    /* pointers for iterating over
-                                               data arrays (write & read)   */
-    hsize_t dims[2];                        /* dataspace dimensions         */
-    int     i, j;                           /* iterators                    */
-    htri_t  status;                         /* return value from H5Lexists  */
+    hid_t         fid          = H5I_INVALID_HID; /* file ID                      */
+    hid_t         fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t         fapl_id_out  = H5I_INVALID_HID; /* from H5Fget_access_plist     */
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
+    hid_t         did          = H5I_INVALID_HID; /* dataset ID                   */
+    hid_t         sid          = H5I_INVALID_HID; /* dataspace ID                 */
+    char          filename[1024];                 /* filename                     */
+    void         *os_file_handle = NULL;          /* OS file handle               */
+    hsize_t       file_size;                      /* file size                    */
+    size_t        increment;                      /* core VFD increment           */
+    bool          backing_store;                  /* use backing store?           */
+    bool          use_write_tracking;             /* write tracking flag          */
+    size_t        write_tracking_page_size;       /* write tracking page size     */
+    int          *data_w = NULL;                  /* data written to the dataset  */
+    int          *data_r = NULL;                  /* data read from the dataset   */
+    int           val;                            /* data value                   */
+    int          *pw = NULL, *pr = NULL;          /* pointers for iterating over
+                                                     data arrays (write & read)   */
+    hsize_t dims[2];                              /* dataspace dimensions         */
+    int     i, j;                                 /* iterators                    */
+    htri_t  status;                               /* return value from H5Lexists  */
 
     TESTING("CORE file driver");
 
@@ -344,7 +344,7 @@ test_core(void)
             FAIL_PUTS_ERROR("unable to remove backing store file");
 
     /* Create and close file w/ backing store off */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
 
     /* Check that the VFD feature flags are correct.
@@ -379,7 +379,7 @@ test_core(void)
         TEST_ERROR;
     /* Check for the backing store file */
     if (HDaccess(filename, F_OK) != -1)
-        FAIL_PUTS_ERROR("file created when backing store set to FALSE");
+        FAIL_PUTS_ERROR("file created when backing store set to false");
 
     /************************************************************************
      * Check basic core VFD operation and properties. This is done with the
@@ -387,7 +387,7 @@ test_core(void)
      ************************************************************************/
 
     /* Turn the backing store on */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
 
     /* Check that write tracking is off by default and that the default
@@ -395,13 +395,13 @@ test_core(void)
      */
     if (H5Pget_core_write_tracking(fapl_id, &use_write_tracking, &write_tracking_page_size) < 0)
         TEST_ERROR;
-    if (FALSE != use_write_tracking)
+    if (false != use_write_tracking)
         FAIL_PUTS_ERROR("write tracking should be off by default");
     if (0 == write_tracking_page_size)
         FAIL_PUTS_ERROR("write tracking page size should never be zero");
 
     /* Set core VFD properties */
-    if (H5Pset_core_write_tracking(fapl_id, TRUE, CORE_PAGE_SIZE) < 0)
+    if (H5Pset_core_write_tracking(fapl_id, true, CORE_PAGE_SIZE) < 0)
         TEST_ERROR;
 
     /* Create the file */
@@ -423,7 +423,7 @@ test_core(void)
         TEST_ERROR;
     if (increment != (size_t)CORE_INCREMENT)
         FAIL_PUTS_ERROR("incorrect increment from file fapl");
-    if (backing_store != TRUE)
+    if (backing_store != true)
         FAIL_PUTS_ERROR("incorrect backing store flag from file fapl");
 
     /* Check that the backing store write tracking info was saved */
@@ -433,7 +433,7 @@ test_core(void)
      */
     if (H5Pget_core_write_tracking(fapl_id, &use_write_tracking, &write_tracking_page_size) < 0)
         TEST_ERROR;
-    if (TRUE != use_write_tracking)
+    if (true != use_write_tracking)
         FAIL_PUTS_ERROR("write tracking flag incorrect in fapl obtained from H5Fget_access_plist");
     if (CORE_PAGE_SIZE != write_tracking_page_size)
         FAIL_PUTS_ERROR("write tracking page size incorrect in fapl obtained from H5Fget_access_plist");
@@ -472,7 +472,7 @@ test_core(void)
     /* Open the file with backing store off for read and write.
      * Changes won't be saved in file.
      */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
@@ -555,7 +555,7 @@ test_core(void)
     /* Open the file with backing store on for read and write.
      * Changes will be saved in file.
      */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
@@ -626,7 +626,7 @@ test_core(void)
      ************************************************************************/
 
     /* Create and close a file */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -634,20 +634,20 @@ test_core(void)
         TEST_ERROR;
 
     /* Try to delete the file with the backing store off (shouldn't delete anything) */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, false) < 0)
         TEST_ERROR;
     if (H5Fdelete(filename, fapl_id) < 0)
         TEST_ERROR;
     if (-1 == HDaccess(filename, F_OK))
-        FAIL_PUTS_ERROR("file deleted when backing store set to FALSE");
+        FAIL_PUTS_ERROR("file deleted when backing store set to false");
 
     /* Try to delete the file with the backing store on (should work) */
-    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, true) < 0)
         TEST_ERROR;
     if (H5Fdelete(filename, fapl_id) < 0)
         TEST_ERROR;
     if (0 == HDaccess(filename, F_OK))
-        FAIL_PUTS_ERROR("file not deleted when backing store set to TRUE");
+        FAIL_PUTS_ERROR("file not deleted when backing store set to true");
 
     /************************************************************************
      * Clean up
@@ -693,8 +693,9 @@ static herr_t
 test_direct(void)
 {
 #ifdef H5_HAVE_DIRECT
-    hid_t   file = -1, fapl = -1, access_fapl = -1;
-    hid_t   dset1 = -1, dset2 = -1, space1 = -1, space2 = -1;
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, access_fapl = H5I_INVALID_HID;
+    hid_t dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID, space1 = H5I_INVALID_HID,
+          space2 = H5I_INVALID_HID;
     char    filename[1024];
     int    *fhandle = NULL;
     hsize_t file_size;
@@ -925,13 +926,13 @@ H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
-    hid_t file = -1;
+    hid_t file = H5I_INVALID_HID;
     char  first_name[1024];
     char  wrong_name[1024];
     int   i;
 
     /* Case 1: reopen file with 1st member file name and default property list */
-    HDsnprintf(first_name, sizeof(first_name), fname, 0);
+    snprintf(first_name, sizeof(first_name), fname, 0);
 
     H5E_BEGIN_TRY
     {
@@ -963,7 +964,7 @@ test_family_opens(char *fname, hid_t fa_pl)
         TEST_ERROR;
 
     /* Case 4: reopen file with wrong name template */
-    HDstrcpy(wrong_name, fname);
+    strcpy(wrong_name, fname);
     for (i = 0; i < 1024; i++)
         if (wrong_name[i] == '5') {
             wrong_name[i] = '4';
@@ -1000,10 +1001,11 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 static herr_t
 test_family(void)
 {
-    hid_t         file = -1, fapl = -1, fapl2 = -1, space = -1, dset = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID, space = H5I_INVALID_HID,
+          dset                 = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     char          dname[] = "dataset";
     unsigned int  i, j;
@@ -1210,8 +1212,8 @@ H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_family_compat(void)
 {
-    hid_t file = -1, fapl = -1;
-    hid_t dset    = -1;
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID;
+    hid_t dset    = H5I_INVALID_HID;
     char  dname[] = "dataset";
     char  filename[1024];
     char  pathname[1024], pathname_individual[1024];
@@ -1230,19 +1232,19 @@ test_family_compat(void)
     h5_fixname(FILENAME[3], fapl, newname, sizeof(newname));
 
     pathname[0] = '\0';
-    HDstrcat(pathname, filename);
+    strcat(pathname, filename);
 
     /* The following code makes the copies of the family files in the source directory.
      * Since we're going to open the files with write mode, this protects the original
      * files.
      */
-    HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
-    HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
+    snprintf(newname_individual, sizeof(newname_individual), newname, counter);
+    snprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
 
     while (h5_make_local_copy(pathname_individual, newname_individual) >= 0) {
         counter++;
-        HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
-        HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
+        snprintf(newname_individual, sizeof(newname_individual), newname, counter);
+        snprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
     } /* end while */
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
@@ -1435,8 +1437,8 @@ test_multi_opens(char *fname)
     char  sf_name[1024];    /*name string "multi_file-s.h5"*/
 
     /* Case: reopen with the name of super file and default property list */
-    HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
-    HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
+    snprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
+    snprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY
     {
@@ -1460,11 +1462,12 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 static herr_t
 test_multi(void)
 {
-    hid_t         file = -1, fapl = -1, fapl2 = -1, dset = -1, space = -1;
-    hid_t         root = -1, attr = -1, aspace = -1, atype = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, fapl2 = H5I_INVALID_HID, dset = H5I_INVALID_HID,
+          space = H5I_INVALID_HID;
+    hid_t root = H5I_INVALID_HID, attr = H5I_INVALID_HID, aspace = H5I_INVALID_HID, atype = H5I_INVALID_HID;
+    hid_t access_fapl          = H5I_INVALID_HID;
+    hid_t driver_id            = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     int          *fhandle2 = NULL, *fhandle = NULL;
     hsize_t       file_size;
@@ -1509,23 +1512,23 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
+    snprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    HDsnprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
+    snprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 4;
 
-    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
+    snprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    HDsnprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
+    snprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX / 4) * 3;
 
-    if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
+    if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, true) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
@@ -1638,7 +1641,7 @@ test_multi(void)
     if ((atype = H5Tcopy(H5T_C_S1)) < 0)
         TEST_ERROR;
 
-    if (H5Tset_size(atype, HDstrlen(meta) + 1) < 0)
+    if (H5Tset_size(atype, strlen(meta) + 1) < 0)
         TEST_ERROR;
 
     if (H5Tset_strpad(atype, H5T_STR_NULLTERM) < 0)
@@ -1716,10 +1719,10 @@ error:
 static herr_t
 test_multi_compat(void)
 {
-    hid_t       file = -1, fapl = -1, dset = -1, space = -1;
-    char        newname[1024];
-    char        filename_s[1024], newname_s[1024];
-    char        filename_r[1024], newname_r[1024];
+    hid_t file = H5I_INVALID_HID, fapl = H5I_INVALID_HID, dset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    char  newname[1024];
+    char  filename_s[1024], newname_s[1024];
+    char  filename_r[1024], newname_r[1024];
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
@@ -1755,16 +1758,16 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
+    snprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
+    snprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
+    if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, true) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[9], fapl, newname, sizeof newname);
@@ -1772,12 +1775,12 @@ test_multi_compat(void)
     /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory
      */
-    HDsnprintf(filename_s, sizeof(filename_s), "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    HDsnprintf(newname_s, sizeof(newname_s), "%s-%c.h5", FILENAME[9], 's');
+    snprintf(filename_s, sizeof(filename_s), "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    snprintf(newname_s, sizeof(newname_s), "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    HDsnprintf(filename_r, sizeof(filename_r), "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    HDsnprintf(newname_r, sizeof(newname_r), "%s-%c.h5", FILENAME[9], 'r');
+    snprintf(filename_r, sizeof(filename_r), "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    snprintf(newname_r, sizeof(newname_r), "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
@@ -1898,11 +1901,11 @@ error:
 static herr_t
 test_log(void)
 {
-    hid_t         file         = -1;
-    hid_t         fapl         = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t         file         = H5I_INVALID_HID;
+    hid_t         fapl         = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     int          *fhandle   = NULL;
     hsize_t       file_size = 0;
@@ -2021,11 +2024,11 @@ error:
 static herr_t
 test_stdio(void)
 {
-    hid_t         file         = -1;
-    hid_t         fapl         = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t         file         = H5I_INVALID_HID;
+    hid_t         fapl         = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     FILE         *fhandle   = NULL;
     hsize_t       file_size = 0;
@@ -2127,11 +2130,11 @@ test_windows(void)
 {
 #ifdef H5_HAVE_WINDOWS
 
-    hid_t         file         = -1;
-    hid_t         fapl         = -1;
-    hid_t         access_fapl  = -1;
-    hid_t         driver_id    = -1; /* ID for this VFD              */
-    unsigned long driver_flags = 0;  /* VFD feature flags            */
+    hid_t         file         = H5I_INVALID_HID;
+    hid_t         fapl         = H5I_INVALID_HID;
+    hid_t         access_fapl  = H5I_INVALID_HID;
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;               /* VFD feature flags            */
     char          filename[1024];
     int          *fhandle   = NULL;
     hsize_t       file_size = 0;
@@ -2255,16 +2258,16 @@ static herr_t
 test_ros3(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    hid_t            fid          = -1; /* file ID                      */
-    hid_t            fapl_id      = -1; /* file access property list ID */
-    hid_t            fapl_id_out  = -1; /* from H5Fget_access_plist     */
-    hid_t            driver_id    = -1; /* ID for this VFD              */
-    unsigned long    driver_flags = 0;  /* VFD feature flags            */
-    char             filename[1024];    /* filename                     */
+    hid_t            fid          = H5I_INVALID_HID; /* file ID                      */
+    hid_t            fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    hid_t            fapl_id_out  = H5I_INVALID_HID; /* from H5Fget_access_plist     */
+    hid_t            driver_id    = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long    driver_flags = 0;               /* VFD feature flags            */
+    char             filename[1024];                 /* filename                     */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
         /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
-        /* authenticate = */ FALSE,
+        /* authenticate = */ false,
         /* aws_region   = */ "",
         /* secret_id    = */ "",
         /* secret_key   = */ "plugh",
@@ -2292,9 +2295,9 @@ test_ros3(void)
     /* need a macro to compare instances of H5FD_ros3_fapl_t */
     if ((test_ros3_fa.version != ros3_fa_0.version) ||
         (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
-        (HDstrcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
-        (HDstrcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
-        (HDstrcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+        (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
         TEST_ERROR;
 
     h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
@@ -2396,8 +2399,8 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
             SPLITTER_TEST_FAULT("Write-Only driver mismatch\n");
         }
     }
-    if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
+    if ((strlen(info->wo_path) != strlen(fetched_info->wo_path)) ||
+        strncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
         fprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
@@ -2428,8 +2431,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                  hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2])
+run_splitter_test(const struct splitter_dataset_def *data, bool ignore_wo_errors, bool provide_logfile_path,
+                  const hid_t sub_fapl_ids[2])
 {
     hid_t                       file_id     = H5I_INVALID_HID;
     hid_t                       fapl_id     = H5I_INVALID_HID;
@@ -2457,7 +2460,7 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
         SPLITTER_TEST_FAULT("can't prepare file paths\n");
     }
 
-    if (provide_logfile_path == FALSE) {
+    if (provide_logfile_path == false) {
         vfd_config->log_file_path[0] = '\0'; /* reset as empty string */
     }
 
@@ -2556,8 +2559,8 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
 
     /* Verify existence of logfile if appropriate */
     logfile = fopen(vfd_config->log_file_path, "r");
-    if ((TRUE == provide_logfile_path && NULL == logfile) ||
-        (FALSE == provide_logfile_path && NULL != logfile)) {
+    if ((true == provide_logfile_path && NULL == logfile) ||
+        (false == provide_logfile_path && NULL != logfile)) {
         SPLITTER_TEST_FAULT("no logfile when one was expected\n");
     }
 
@@ -2616,10 +2619,10 @@ driver_is_splitter_compatible(hid_t fapl_id)
     }
     vfd_config->magic          = H5FD_SPLITTER_MAGIC;
     vfd_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
-    vfd_config->ignore_wo_errs = FALSE;
+    vfd_config->ignore_wo_errs = false;
     vfd_config->rw_fapl_id     = H5P_DEFAULT;
     vfd_config->wo_fapl_id     = fapl_id;
-    HDstrncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
+    strncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
     vfd_config->log_file_path[0] = '\0';
 
     H5E_BEGIN_TRY
@@ -2681,7 +2684,7 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
 
     vfd_config->magic          = H5FD_SPLITTER_MAGIC;
     vfd_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
-    vfd_config->ignore_wo_errs = FALSE;
+    vfd_config->ignore_wo_errs = false;
     vfd_config->rw_fapl_id     = child_fapl_id;
     vfd_config->wo_fapl_id     = child_fapl_id;
 
@@ -3044,7 +3047,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
 
     vfd_config->magic          = H5FD_SPLITTER_MAGIC;
     vfd_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
-    vfd_config->ignore_wo_errs = FALSE;
+    vfd_config->ignore_wo_errs = false;
     vfd_config->rw_fapl_id     = child_fapl_id;
     vfd_config->wo_fapl_id     = child_fapl_id;
 
@@ -3393,9 +3396,9 @@ test_splitter(void)
      * specified), logfile, and Write Channel error ignoring behavior.
      */
     for (i = 0; i < 4; i++) {
-        hbool_t ignore_wo_errors     = (i & 1) ? TRUE : FALSE;
-        hbool_t provide_logfile_path = (i & 2) ? TRUE : FALSE;
-        hid_t   child_fapl_ids[2]    = {H5P_DEFAULT, H5P_DEFAULT};
+        bool  ignore_wo_errors     = (i & 1) ? true : false;
+        bool  provide_logfile_path = (i & 2) ? true : false;
+        hid_t child_fapl_ids[2]    = {H5P_DEFAULT, H5P_DEFAULT};
 
         /* Test child driver definition/default combination */
         for (j = 0; j < 4; j++) {
@@ -3446,7 +3449,7 @@ error:
 static void
 setup_rand(void)
 {
-    hbool_t        use_predefined_seed = FALSE;
+    bool           use_predefined_seed = false;
     unsigned       predefined_seed     = 18669;
     unsigned       seed;
     struct timeval tv;
@@ -3604,10 +3607,10 @@ static const H5FD_class_t H5FD_ctl_test_vfd_g = {
 static herr_t
 run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t fapl_id)
 {
-    hbool_t fail_if_unknown    = FALSE;
-    hbool_t routing_flag_set   = FALSE;
-    hbool_t is_passthrough_vfd = FALSE;
-    hbool_t expect_fail        = FALSE;
+    bool    fail_if_unknown    = false;
+    bool    routing_flag_set   = false;
+    bool    is_passthrough_vfd = false;
+    bool    expect_fail        = false;
     H5FD_t *file_drv_ptr       = NULL;
     herr_t  ctl_result         = SUCCEED;
     hid_t   driver_id          = H5I_INVALID_HID;
@@ -3702,7 +3705,7 @@ test_ctl(void)
     hid_t                       sub_fapl_id = H5I_INVALID_HID;
 
     TESTING("VFD ctl callback");
-    HDputs("");
+    puts("");
 
     /* Register VFD for test */
     if ((driver_id = H5FDregister(&H5FD_ctl_test_vfd_g)) < 0)
@@ -3807,7 +3810,7 @@ test_ctl(void)
 
     splitter_config->magic          = H5FD_SPLITTER_MAGIC;
     splitter_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
-    splitter_config->ignore_wo_errs = TRUE;
+    splitter_config->ignore_wo_errs = true;
     splitter_config->rw_fapl_id     = H5P_DEFAULT;
     splitter_config->wo_fapl_id     = H5P_DEFAULT;
     h5_fixname(FILENAME[15], splitter_config->wo_fapl_id, splitter_config->wo_path, H5FD_SPLITTER_PATH_MAX);
@@ -3992,17 +3995,17 @@ error:
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if successful, and FALSE if any errors
+ * Return:      Return true if successful, and false if any errors
  *              are encountered.
  *
  *-------------------------------------------------------------------------
  */
 
-static hbool_t
+static bool
 test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                         const void *write_bufs[], void *read_bufs[], char base_fill_char)
 {
-    hbool_t    result    = TRUE; /* will set to FALSE on failure */
+    bool       result    = true; /* will set to false on failure */
     char       fill_char = base_fill_char;
     void      *temp_buf  = NULL;
     uint32_t   i;
@@ -4032,7 +4035,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
         if ((NULL == temp_buf) || (NULL == read_bufs[i])) {
 
             fprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
-            result = FALSE;
+            result = false;
             break;
         }
 
@@ -4091,17 +4094,17 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
  *              count. Count is presumed to be a power of 2, and at
  *              least 2.
  *
- * Return:      Return TRUE if successful, and FALSE if any errors
+ * Return:      Return true if successful, and false if any errors
  *              are encountered.
  *
  *-------------------------------------------------------------------------
  */
 
-static hbool_t
+static bool
 test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                                    const void *write_bufs[], void *read_bufs[], char base_fill_char)
 {
-    hbool_t    result    = TRUE; /* will set to FALSE on failure */
+    bool       result    = true; /* will set to false on failure */
     char       fill_char = base_fill_char;
     void      *temp_buf  = NULL;
     uint32_t   fix_point;
@@ -4166,7 +4169,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
         if ((NULL == temp_buf) || (NULL == read_bufs[i])) {
 
             fprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
-            result = FALSE;
+            result = false;
             break;
         }
 
@@ -4221,20 +4224,20 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if successful, and FALSE if any errors
+ * Return:      Return true if successful, and false if any errors
  *              are encountered.
  *
  *-------------------------------------------------------------------------
  */
 
-static hbool_t
+static bool
 test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                              void *read_bufs[])
 {
-    hbool_t    size_fixed = FALSE;
-    hbool_t    type_fixed = FALSE;
-    hbool_t    result     = TRUE; /* will set to FALSE on failure */
-    hbool_t    verbose    = FALSE;
+    bool       size_fixed = false;
+    bool       type_fixed = false;
+    bool       result     = true; /* will set to false on failure */
+    bool       verbose    = false;
     uint32_t   i;
     size_t     size = SIZE_MAX;
     H5FD_mem_t type = H5FD_MEM_NTYPES;
@@ -4251,7 +4254,7 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
 
                 fprintf(stdout, "%s: H5FDread() failed on entry %d.\n", __func__, i);
             }
-            result = FALSE;
+            result = false;
             break;
         }
     }
@@ -4269,20 +4272,20 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
  *              All arrays parameters are presumed to be of length
  *              count.
  *
- * Return:      Return TRUE if successful, and FALSE if any errors
+ * Return:      Return true if successful, and false if any errors
  *              are encountered.
  *
  *-------------------------------------------------------------------------
  */
 
-static hbool_t
+static bool
 test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                               const void *write_bufs[])
 {
-    hbool_t    size_fixed = FALSE;
-    hbool_t    type_fixed = FALSE;
-    hbool_t    result     = TRUE; /* will set to FALSE on failure */
-    hbool_t    verbose    = FALSE;
+    bool       size_fixed = false;
+    bool       type_fixed = false;
+    bool       result     = true; /* will set to false on failure */
+    bool       verbose    = false;
     uint32_t   i;
     size_t     size = SIZE_MAX;
     H5FD_mem_t type = H5FD_MEM_NTYPES;
@@ -4299,7 +4302,7 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
 
                 fprintf(stdout, "%s: HDwrite() failed on entry %d.\n", __func__, i);
             }
-            result = FALSE;
+            result = false;
             break;
         }
     }
@@ -4315,20 +4318,20 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
  * Purpose:     Verify that the read and write buffers of the supplied
  *              vectors are identical.
  *
- * Return:      TRUE if the read and write vectors are identical, and
- *              FALSE otherwise.
+ * Return:      true if the read and write vectors are identical, and
+ *              false otherwise.
  *
  *-------------------------------------------------------------------------
  */
 
-static hbool_t
+static bool
 test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], const void *write_bufs[],
                          void *read_bufs[], const char *name)
 {
-    hbool_t     size_fixed = FALSE;
-    hbool_t     type_fixed = FALSE;
-    hbool_t     identical  = TRUE;
-    hbool_t     verbose    = TRUE;
+    bool        size_fixed = false;
+    bool        type_fixed = false;
+    bool        identical  = true;
+    bool        verbose    = true;
     uint32_t    i;
     size_t      j;
     const char *w_buf;
@@ -4354,7 +4357,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], con
 
             if (w_buf[j] != r_buf[j]) {
 
-                identical = FALSE;
+                identical = false;
 
                 if (verbose) {
 
@@ -4391,8 +4394,8 @@ static void
 test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                                   const void *write_bufs[], void *read_bufs[], const char *name)
 {
-    hbool_t     size_fixed = FALSE;
-    hbool_t     type_fixed = FALSE;
+    bool        size_fixed = false;
+    bool        type_fixed = false;
     uint32_t    i;
     const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
                                      "H5FD_MEM_GHEAP",   "H5FD_MEM_LHEAP", "H5FD_MEM_OHDR"};
@@ -4463,60 +4466,60 @@ static herr_t
 test_vector_io(const char *vfd_name)
 {
     char        test_title[80];
-    hbool_t     size_fixed_0 = FALSE; /* whether remaining entry      */
-    hbool_t     size_fixed_1 = FALSE; /* sizes in vector are fixed.   */
-    hbool_t     size_fixed_2 = FALSE; /*                              */
-    hbool_t     type_fixed_0 = FALSE; /* whether remaining entry      */
-    hbool_t     type_fixed_1 = FALSE; /* types in vector are fixed.   */
-    hbool_t     type_fixed_2 = FALSE; /*                              */
-    hbool_t     verbose      = FALSE;
-    hid_t       fapl_id      = -1;          /* file access property list ID */
-    haddr_t     eoa;                        /* file eoa                     */
-    char        filename[1024];             /* filename                     */
-    char       *buf;                        /* tmp ptr to buf               */
-    unsigned    flags = 0;                  /* file open flags              */
-    H5FD_t     *lf    = NULL;               /* VFD struct ptr               */
-    uint32_t    i;                          /* index                        */
-    uint32_t    j;                          /* index                        */
-    uint32_t    count = VECTOR_LEN;         /* length of vectors            */
-    H5FD_mem_t  types_0[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t  types_1[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t  types_2[VECTOR_LEN];        /* types vector                 */
-    H5FD_mem_t  f_types_0[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t  f_types_1[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t  f_types_2[VECTOR_LEN];      /* fixed types vector           */
-    H5FD_mem_t  f_type_0 = H5FD_MEM_NTYPES; /* current type for f vector 0  */
-    H5FD_mem_t  f_type_1 = H5FD_MEM_NTYPES; /* current type for f vector 1  */
-    H5FD_mem_t  f_type_2 = H5FD_MEM_NTYPES; /* current type for f vector 2  */
-    haddr_t     addrs_0[VECTOR_LEN];        /* addresses vector             */
-    haddr_t     addrs_1[VECTOR_LEN];        /* addresses vector             */
-    haddr_t     addrs_2[VECTOR_LEN];        /* addresses vector             */
-    haddr_t     f_addrs_0[VECTOR_LEN];      /* fixed addresses vector       */
-    haddr_t     f_addrs_1[VECTOR_LEN];      /* fixed addresses vector       */
-    haddr_t     f_addrs_2[VECTOR_LEN];      /* fixed addresses vector       */
-    size_t      sizes_0[VECTOR_LEN];        /* sizes vector                 */
-    size_t      sizes_1[VECTOR_LEN];        /* sizes vector                 */
-    size_t      sizes_2[VECTOR_LEN];        /* sizes vector                 */
-    size_t      f_sizes_0[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t      f_sizes_1[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t      f_sizes_2[VECTOR_LEN];      /* fixed sizes vector           */
-    size_t      f_size_0 = 0;               /* current size for f vector 0  */
-    size_t      f_size_1 = 0;               /* current size for f vector 1  */
-    size_t      f_size_2 = 0;               /* current size for f vector 2  */
-    const void *write_bufs_0[VECTOR_LEN];   /* write bufs vector            */
-    const void *write_bufs_1[VECTOR_LEN];   /* write bufs vector            */
-    const void *write_bufs_2[VECTOR_LEN];   /* write bufs vector            */
-    const void *f_write_bufs_0[VECTOR_LEN]; /* fixed write bufs vector      */
-    const void *f_write_bufs_1[VECTOR_LEN]; /* fixed write bufs vector      */
-    const void *f_write_bufs_2[VECTOR_LEN]; /* fixed write bufs vector      */
-    void       *read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
-    void       *read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
-    void       *read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
-    void       *f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
-    void       *f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
-    void       *f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
+    bool        size_fixed_0 = false; /* whether remaining entry      */
+    bool        size_fixed_1 = false; /* sizes in vector are fixed.   */
+    bool        size_fixed_2 = false; /*                              */
+    bool        type_fixed_0 = false; /* whether remaining entry      */
+    bool        type_fixed_1 = false; /* types in vector are fixed.   */
+    bool        type_fixed_2 = false; /*                              */
+    bool        verbose      = false;
+    hid_t       fapl_id      = H5I_INVALID_HID; /* file access property list ID */
+    haddr_t     eoa;                            /* file eoa                     */
+    char        filename[1024];                 /* filename                     */
+    char       *buf;                            /* tmp ptr to buf               */
+    unsigned    flags = 0;                      /* file open flags              */
+    H5FD_t     *lf    = NULL;                   /* VFD struct ptr               */
+    uint32_t    i;                              /* index                        */
+    uint32_t    j;                              /* index                        */
+    uint32_t    count = VECTOR_LEN;             /* length of vectors            */
+    H5FD_mem_t  types_0[VECTOR_LEN];            /* types vector                 */
+    H5FD_mem_t  types_1[VECTOR_LEN];            /* types vector                 */
+    H5FD_mem_t  types_2[VECTOR_LEN];            /* types vector                 */
+    H5FD_mem_t  f_types_0[VECTOR_LEN];          /* fixed types vector           */
+    H5FD_mem_t  f_types_1[VECTOR_LEN];          /* fixed types vector           */
+    H5FD_mem_t  f_types_2[VECTOR_LEN];          /* fixed types vector           */
+    H5FD_mem_t  f_type_0 = H5FD_MEM_NTYPES;     /* current type for f vector 0  */
+    H5FD_mem_t  f_type_1 = H5FD_MEM_NTYPES;     /* current type for f vector 1  */
+    H5FD_mem_t  f_type_2 = H5FD_MEM_NTYPES;     /* current type for f vector 2  */
+    haddr_t     addrs_0[VECTOR_LEN];            /* addresses vector             */
+    haddr_t     addrs_1[VECTOR_LEN];            /* addresses vector             */
+    haddr_t     addrs_2[VECTOR_LEN];            /* addresses vector             */
+    haddr_t     f_addrs_0[VECTOR_LEN];          /* fixed addresses vector       */
+    haddr_t     f_addrs_1[VECTOR_LEN];          /* fixed addresses vector       */
+    haddr_t     f_addrs_2[VECTOR_LEN];          /* fixed addresses vector       */
+    size_t      sizes_0[VECTOR_LEN];            /* sizes vector                 */
+    size_t      sizes_1[VECTOR_LEN];            /* sizes vector                 */
+    size_t      sizes_2[VECTOR_LEN];            /* sizes vector                 */
+    size_t      f_sizes_0[VECTOR_LEN];          /* fixed sizes vector           */
+    size_t      f_sizes_1[VECTOR_LEN];          /* fixed sizes vector           */
+    size_t      f_sizes_2[VECTOR_LEN];          /* fixed sizes vector           */
+    size_t      f_size_0 = 0;                   /* current size for f vector 0  */
+    size_t      f_size_1 = 0;                   /* current size for f vector 1  */
+    size_t      f_size_2 = 0;                   /* current size for f vector 2  */
+    const void *write_bufs_0[VECTOR_LEN];       /* write bufs vector            */
+    const void *write_bufs_1[VECTOR_LEN];       /* write bufs vector            */
+    const void *write_bufs_2[VECTOR_LEN];       /* write bufs vector            */
+    const void *f_write_bufs_0[VECTOR_LEN];     /* fixed write bufs vector      */
+    const void *f_write_bufs_1[VECTOR_LEN];     /* fixed write bufs vector      */
+    const void *f_write_bufs_2[VECTOR_LEN];     /* fixed write bufs vector      */
+    void       *read_bufs_0[VECTOR_LEN];        /* read bufs vector             */
+    void       *read_bufs_1[VECTOR_LEN];        /* read bufs vector             */
+    void       *read_bufs_2[VECTOR_LEN];        /* read bufs vector             */
+    void       *f_read_bufs_0[VECTOR_LEN];      /* fixed read bufs vector       */
+    void       *f_read_bufs_1[VECTOR_LEN];      /* fixed read bufs vector       */
+    void       *f_read_bufs_2[VECTOR_LEN];      /* fixed read bufs vector       */
 
-    HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
+    snprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
     TESTING(test_title);
 
@@ -4525,14 +4528,14 @@ test_vector_io(const char *vfd_name)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    if (HDstrcmp(vfd_name, "sec2") == 0) {
+    if (strcmp(vfd_name, "sec2") == 0) {
 
         if (H5Pset_fapl_sec2(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     }
-    else if (HDstrcmp(vfd_name, "stdio") == 0) {
+    else if (strcmp(vfd_name, "stdio") == 0) {
 
         if (H5Pset_fapl_stdio(fapl_id) < 0)
             TEST_ERROR;
@@ -4741,9 +4744,9 @@ test_vector_io(const char *vfd_name)
 
     /* Null the read vectors */
 
-    size_fixed_0 = FALSE;
-    size_fixed_1 = FALSE;
-    size_fixed_2 = FALSE;
+    size_fixed_0 = false;
+    size_fixed_1 = false;
+    size_fixed_2 = false;
 
     for (i = 0; i < count; i++) {
 
@@ -4889,8 +4892,8 @@ error:
  * Purpose:     Updates write buffers to ensure a unique value is written
  *              to each element and issues a selection write call.
  *
- * Return:      Success:        TRUE
- *              Failure:        FALSE
+ * Return:      Success:        true
+ *              Failure:        false
  *-------------------------------------------------------------------------
  */
 /* Array dimensions, used for all selection I/O tests.  Currently both must be
@@ -4939,15 +4942,15 @@ error:
  *              count the last element in erbufs will be repeated to make
  *              up the difference.
  *
- * Return:      Success:        TRUE
- *              Failure:        FALSE
+ * Return:      Success:        true
+ *              Failure:        false
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
                               hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
-                              uint32_t rbufcount, int *erbufs[], hbool_t shorten_rbufs)
+                              uint32_t rbufcount, int *erbufs[], bool shorten_rbufs)
 {
     int  rbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];
     int  rbuf2[SEL_IO_DIM0 * SEL_IO_DIM1];
@@ -5019,7 +5022,7 @@ static herr_t
 test_selection_io(const char *vfd_name)
 {
     char       test_title[80];
-    hid_t      fapl_id = -1;                                        /* file access property list ID */
+    hid_t      fapl_id = H5I_INVALID_HID;                           /* file access property list ID */
     char       filename[1024];                                      /* filename                     */
     unsigned   flags = 0;                                           /* file open flags              */
     H5FD_t    *lf    = NULL;                                        /* VFD struct ptr               */
@@ -5049,7 +5052,7 @@ test_selection_io(const char *vfd_name)
     int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
     int        shorten_element_sizes; /* Whether to shorten the element sizes array */
 
-    HDsnprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
+    snprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
 
     TESTING(test_title);
 
@@ -5058,14 +5061,14 @@ test_selection_io(const char *vfd_name)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    if (HDstrcmp(vfd_name, "sec2") == 0) {
+    if (strcmp(vfd_name, "sec2") == 0) {
 
         if (H5Pset_fapl_sec2(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     }
-    else if (HDstrcmp(vfd_name, "stdio") == 0) {
+    else if (strcmp(vfd_name, "stdio") == 0) {
 
         if (H5Pset_fapl_stdio(fapl_id) < 0)
             TEST_ERROR;
@@ -5121,7 +5124,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5139,7 +5142,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[1], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5177,7 +5180,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[0], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5188,7 +5191,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5226,7 +5229,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[0], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5237,7 +5240,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5276,7 +5279,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[0], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5287,7 +5290,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5329,7 +5332,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[1], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5340,7 +5343,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[1], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5382,7 +5385,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[1], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5393,7 +5396,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[1], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5453,7 +5456,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[1], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5464,7 +5467,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[1], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5514,7 +5517,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[0], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5525,7 +5528,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
-                                          element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[1], false) < 0)
             TEST_ERROR;
 
         /*
@@ -5574,7 +5577,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
+                                          element_sizes, 1, (int **)&erbufs[1], false) < 0)
             TEST_ERROR;
 
         /* Reset selections */
@@ -5585,7 +5588,7 @@ test_selection_io(const char *vfd_name)
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
-                                          element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
+                                          element_sizes, 1, (int **)&fbufs[0], false) < 0)
             TEST_ERROR;
 
         /* Run tests with full and partial element sizes array */
@@ -5666,7 +5669,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                              (int **)erbufs, FALSE) < 0)
+                                              (int **)erbufs, false) < 0)
                 TEST_ERROR;
 
             /* Reset selections */
@@ -5681,7 +5684,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read entire file buffer and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                              (int **)fbufs, FALSE) < 0)
+                                              (int **)fbufs, false) < 0)
                 TEST_ERROR;
 
             /*
@@ -5784,7 +5787,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 1,
-                                              (int **)&erbufs[1], shorten_element_sizes ? TRUE : FALSE) < 0)
+                                              (int **)&erbufs[1], shorten_element_sizes ? true : false) < 0)
                 TEST_ERROR;
 
             /* Reset selections */
@@ -5799,7 +5802,7 @@ test_selection_io(const char *vfd_name)
 
             /* Read entire file buffer and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
-                                              (int **)fbufs, FALSE) < 0)
+                                              (int **)fbufs, false) < 0)
                 TEST_ERROR;
 
             /* Reset first spaces to 1D */
@@ -5877,7 +5880,7 @@ main(void)
      * specific VFD to be set and HDF5_DRIVER being set can interfere
      * with that.
      */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr) {
         printf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
         exit(EXIT_SUCCESS);

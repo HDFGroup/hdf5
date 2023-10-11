@@ -130,7 +130,7 @@
  *
  *     Format "S3 Credential" string from inputs, for AWS4.
  *
- *     Wrapper for HDsnprintf().
+ *     Wrapper for snprintf().
  *
  *     _HAS NO ERROR-CHECKING FACILITIES_
  *     It is left to programmer to ensure that return value confers success.
@@ -153,8 +153,8 @@
  *---------------------------------------------------------------------------
  */
 #define S3COMMS_FORMAT_CREDENTIAL(dest, access, iso8601_date, region, service)                               \
-    HDsnprintf((dest), S3COMMS_MAX_CREDENTIAL_SIZE, "%s/%s/%s/%s/aws4_request", (access), (iso8601_date),    \
-               (region), (service))
+    snprintf((dest), S3COMMS_MAX_CREDENTIAL_SIZE, "%s/%s/%s/%s/aws4_request", (access), (iso8601_date),      \
+             (region), (service))
 
 /*********************
  * PUBLIC STRUCTURES *
@@ -523,8 +523,7 @@ H5_DLL struct tm *gmnow(void);
 H5_DLL herr_t H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int cr_size,
                                                  char *signed_headers_dest, int sh_size, hrb_t *http_request);
 
-H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len,
-                                        hbool_t lowercase);
+H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase);
 
 H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
 
@@ -548,7 +547,7 @@ H5_DLL herr_t H5FD_s3comms_tostringtosign(char *dest, const char *req_str, const
 
 H5_DLL herr_t H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written);
 
-H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hbool_t encode_slash,
+H5_DLL herr_t H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, bool encode_slash,
                                      size_t *n_written);
 
 #ifdef __cplusplus

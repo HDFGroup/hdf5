@@ -104,7 +104,7 @@ H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */])
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to create datatype");
 
     /* Register the type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype");
 
 done:
@@ -163,8 +163,8 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
     ret_value->shared->size = ret_value->shared->parent->shared->size * ret_value->shared->u.array.nelem;
 
     /* Set the "force conversion" flag if the base datatype indicates */
-    if (base->shared->force_conv == TRUE)
-        ret_value->shared->force_conv = TRUE;
+    if (base->shared->force_conv == true)
+        ret_value->shared->force_conv = true;
 
     /* Array datatypes need a later version of the datatype object header message */
     ret_value->shared->version = MAX(base->shared->version, H5O_DTYPE_VERSION_2);
@@ -336,7 +336,7 @@ H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to create datatype");
 
     /* Register the type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype");
 
 done:

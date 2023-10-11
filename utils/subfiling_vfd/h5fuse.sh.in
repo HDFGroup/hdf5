@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 ############################################################
 # Usage                                                    #
 ############################################################
-function usage() {
+function usage {
    echo ""
    # Display usage
    echo "Purpose: Combine subfiles into a single HDF5 file. Requires the subfiling
@@ -37,7 +37,7 @@ function usage() {
    echo ""
 }
 
-function gen_mpi() {
+function gen_mpi {
 
 # Program to determine MPI rank and size if being run in parallel (-p).
 

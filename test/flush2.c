@@ -39,26 +39,26 @@ static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflu
 /* Number of sub-groups created in the containing group */
 #define NGROUPS 100
 
-static hbool_t dset_ok(hid_t fid, const char *dset_name);
-static hbool_t file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset);
+static bool dset_ok(hid_t fid, const char *dset_name);
+static bool file_ok(const char *filename, hid_t fapl_id, bool check_second_dset);
 
 /*-------------------------------------------------------------------------
  * Function:    dset_ok
  *
  * Purpose:     Checks if the data in a dataset is what it is supposed to be.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 dset_ok(hid_t fid, const char *dset_name)
 {
-    hid_t   sid     = -1;   /* dataspace ID                     */
-    hid_t   did     = -1;   /* dataset ID                       */
-    int    *data    = NULL; /* data buffer                      */
-    hsize_t dims[1] = {0};  /* size of dataset                  */
-    int     i;              /* iterator                         */
+    hid_t   sid     = H5I_INVALID_HID; /* dataspace ID                     */
+    hid_t   did     = H5I_INVALID_HID; /* dataset ID                       */
+    int    *data    = NULL;            /* data buffer                      */
+    hsize_t dims[1] = {0};             /* size of dataset                  */
+    int     i;                         /* iterator                         */
 
     /* Open the dataset and check size */
     if ((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
@@ -86,7 +86,7 @@ dset_ok(hid_t fid, const char *dset_name)
 
     free(data);
 
-    return TRUE;
+    return true;
 
 error:
     H5E_BEGIN_TRY
@@ -98,7 +98,7 @@ error:
 
     free(data);
 
-    return FALSE;
+    return false;
 } /* end dset_ok() */
 
 /*-------------------------------------------------------------------------
@@ -106,18 +106,18 @@ error:
  *
  * Purpose:     Checks that the contents of a file are what they should be.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
-file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
+static bool
+file_ok(const char *filename, hid_t fapl_id, bool check_second_dset)
 {
-    hid_t fid     = -1;   /* file ID                          */
-    hid_t top_gid = -1;   /* containing group ID              */
-    hid_t gid     = -1;   /* subgroup ID                      */
-    char  group_name[32]; /* group name                       */
-    int   i;              /* iterator                         */
+    hid_t fid     = H5I_INVALID_HID; /* file ID                          */
+    hid_t top_gid = H5I_INVALID_HID; /* containing group ID              */
+    hid_t gid     = H5I_INVALID_HID; /* subgroup ID                      */
+    char  group_name[32];            /* group name                       */
+    int   i;                         /* iterator                         */
 
     /* open file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id)) < 0)
@@ -134,7 +134,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     if ((top_gid = H5Gopen2(fid, "top_group", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < NGROUPS; i++) {
-        HDsnprintf(group_name, sizeof(group_name), "group%02d", i);
+        snprintf(group_name, sizeof(group_name), "group%02d", i);
         if ((gid = H5Gopen2(top_gid, group_name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -146,7 +146,7 @@ file_ok(const char *filename, hid_t fapl_id, hbool_t check_second_dset)
     if (H5Fclose(fid) < 0)
         goto error;
 
-    return TRUE;
+    return true;
 
 error:
     H5E_BEGIN_TRY
@@ -157,7 +157,7 @@ error:
     }
     H5E_END_TRY
 
-    return FALSE;
+    return false;
 } /* end file_ok() */
 
 /*-------------------------------------------------------------------------
@@ -173,9 +173,9 @@ error:
 static herr_t
 clear_status_flags(const char *filename, hid_t fapl_id)
 {
-    hid_t   new_fapl_id = -1; /* copy of the file access plist ID */
-    hid_t   fid         = -1; /* file ID                          */
-    hbool_t clear       = TRUE;
+    hid_t new_fapl_id = H5I_INVALID_HID; /* copy of the file access plist ID */
+    hid_t fid         = H5I_INVALID_HID; /* file ID                          */
+    bool  clear       = true;
 
     /* Get a copy of fapl */
     if ((new_fapl_id = H5Pcopy(fapl_id)) < 0)
@@ -223,20 +223,20 @@ error:
 int
 main(void)
 {
-    char       *driver = NULL;     /* name of current VFD (from env var)       */
-    hbool_t     vfd_supports_swmr; /* whether the current VFD supports SWMR    */
-    hid_t       fapl_id = -1;      /* file access proplist ID                  */
-    char        filename[1024];    /* filename                                 */
-    hbool_t     check_second_dset; /* whether or not to check the second dset  */
-    H5E_auto2_t func;              /* for shutting off error reporting         */
-    hbool_t     driver_is_default_vfd_compatible;
+    char       *driver = NULL;             /* name of current VFD (from env var)       */
+    bool        vfd_supports_swmr;         /* whether the current VFD supports SWMR    */
+    hid_t       fapl_id = H5I_INVALID_HID; /* file access proplist ID                  */
+    char        filename[1024];            /* filename                                 */
+    bool        check_second_dset;         /* whether or not to check the second dset  */
+    H5E_auto2_t func;                      /* for shutting off error reporting         */
+    bool        driver_is_default_vfd_compatible;
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
         PUTS_ERROR("bad vfd-dependent fapl");
 
     /* Check if the current VFD supports SWMR */
-    driver            = HDgetenv(HDF5_DRIVER);
+    driver            = getenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
@@ -253,7 +253,7 @@ main(void)
     /* Check the case where the file was flushed */
     TESTING("H5Fflush (part2 with flush)");
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
-    check_second_dset = FALSE;
+    check_second_dset = false;
     if (file_ok(filename, fapl_id, check_second_dset))
         PASSED();
     else
@@ -264,7 +264,7 @@ main(void)
     TESTING("H5Fflush (part2 with flush + SWMR)");
     if (vfd_supports_swmr) {
         h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
-        check_second_dset = FALSE;
+        check_second_dset = false;
         if (clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset))
@@ -284,11 +284,11 @@ main(void)
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
-    check_second_dset = FALSE;
+    check_second_dset = false;
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();
-        HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+        puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
         TEST_ERROR;
 #endif
@@ -309,13 +309,13 @@ main(void)
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
             FAIL_STACK_ERROR;
         h5_fixname(FILENAME[3], fapl_id, filename, sizeof(filename));
-        check_second_dset = FALSE;
+        check_second_dset = false;
         if (clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
-            HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+            puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
             TEST_ERROR;
 #endif
@@ -334,7 +334,7 @@ main(void)
      * added afterward and then flushed
      */
     TESTING("H5Fflush (part2 with flush and later addition and another flush)");
-    check_second_dset = TRUE;
+    check_second_dset = true;
     h5_fixname(FILENAME[4], fapl_id, filename, sizeof(filename));
     if (file_ok(filename, fapl_id, check_second_dset))
         PASSED();
@@ -347,7 +347,7 @@ main(void)
      */
     TESTING("H5Fflush (part2 with flush and later addition and another flush + SWMR)");
     if (vfd_supports_swmr) {
-        check_second_dset = TRUE;
+        check_second_dset = true;
         h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
         if (clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR;
@@ -370,11 +370,11 @@ main(void)
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
     h5_fixname(FILENAME[6], fapl_id, filename, sizeof(filename));
-    check_second_dset = TRUE;
+    check_second_dset = true;
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();
-        HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+        puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
         TEST_ERROR;
 #endif
@@ -397,13 +397,13 @@ main(void)
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
             FAIL_STACK_ERROR;
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof(filename));
-        check_second_dset = TRUE;
+        check_second_dset = true;
         if (clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
-            HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
+            puts("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
             TEST_ERROR;
 #endif

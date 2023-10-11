@@ -156,7 +156,7 @@ H5O__shared_read(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, const H5O_shared_t
         /* Build the object location for the shared message's object header */
         oloc.file         = f;
         oloc.addr         = shared->u.loc.oh_addr;
-        oloc.holding_file = FALSE;
+        oloc.holding_file = false;
 
         if (open_oh && oloc.addr == H5O_OH_GET_ADDR(open_oh)) {
             /* The shared message is in the already opened object header.  This
@@ -238,14 +238,14 @@ H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_
         /* Build the object location for the shared message's object header */
         oloc.file         = f;
         oloc.addr         = shared->u.loc.oh_addr;
-        oloc.holding_file = FALSE;
+        oloc.holding_file = false;
 
         if (open_oh && oloc.addr == H5O_OH_GET_ADDR(open_oh)) {
             /* The shared message is in the already opened object header.  This
              * is possible, for example, if an attribute's datatype is shared in
              * the same object header the attribute is in.  Adjust the link
              * count directly. */
-            hbool_t deleted = FALSE; /* This is used only to satisfy H5O__link_oh */
+            bool deleted = false; /* This is used only to satisfy H5O__link_oh */
 
             if (H5O__link_oh(f, adjust, open_oh, &deleted) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count");
@@ -540,7 +540,7 @@ done:
 herr_t
 H5O__shared_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, H5F_t *file_dst,
                       const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
-                      hbool_t H5_ATTR_UNUSED *recompute_size, unsigned *mesg_flags,
+                      bool H5_ATTR_UNUSED *recompute_size, unsigned *mesg_flags,
                       H5O_copy_t H5_ATTR_NDEBUG_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     const H5O_shared_t *shared_src =
@@ -629,7 +629,7 @@ H5O__shared_post_copy_file(H5F_t *f, const H5O_msg_class_t *mesg_type, const H5O
         dst_oloc.file = f;
         src_oloc.file = shared_src->file;
         src_oloc.addr = shared_src->u.loc.oh_addr;
-        if (H5O_copy_header_map(&src_oloc, &dst_oloc, cpy_info, FALSE, NULL, NULL) < 0)
+        if (H5O_copy_header_map(&src_oloc, &dst_oloc, cpy_info, false, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object");
 
         /* Set up destination message's shared info */

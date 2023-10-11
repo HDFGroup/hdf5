@@ -202,7 +202,7 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 0) {
         printf("Preserve status of dataset transfer property list should be"
-               " 0 (FALSE), got %d\n",
+               " 0 (false), got %d\n",
                ret_code);
         goto error;
     }
@@ -210,7 +210,7 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 1) {
         printf("Preserve status of dataset transfer property list should be"
-               " 1 (TRUE), got %d\n",
+               " 1 (true), got %d\n",
                ret_code);
         goto error;
     }
@@ -286,7 +286,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s2[i].c[1] || s1[i].c[2] != s2[i].c[2] || s1[i].c[3] != s2[i].c[3] ||
             s1[i].d != s2[i].d || s1[i].e != s2[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -323,7 +323,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s3[i].c[1] || s1[i].c[2] != s3[i].c[2] || s1[i].c[3] != s3[i].c[3] ||
             s1[i].d != s3[i].d || s1[i].e != s3[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -353,7 +353,7 @@ test_compound(char *filename, hid_t fapl)
     for (i = 0; i < NX * NY; i++) {
         if (s1[i].b != s4[i].b || s1[i].d != s4[i].d) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -397,7 +397,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s5[i].c[1] || s1[i].c[2] != s5[i].c[2] || s1[i].c[3] != s5[i].c[3] ||
             s1[i].d != s5[i].d || s1[i].e != s5[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -407,7 +407,7 @@ test_compound(char *filename, hid_t fapl)
         if (s5[i].pre != 1000 + 4 * i || s5[i].mid1 != 1001 + 4 * i || s5[i].mid2 != 1002 + 4 * i ||
             s5[i].post != 1003 + 4 * i) {
             H5_FAILED();
-            HDputs("    Memory values were clobbered");
+            puts("    Memory values were clobbered");
             goto error;
         }
     }
@@ -466,7 +466,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s6[i].c[1] || s1[i].c[2] != s6[i].c[2] || s1[i].c[3] != s6[i].c[3] ||
             s1[i].d != s6[i].d || s1[i].e != s6[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -476,7 +476,7 @@ test_compound(char *filename, hid_t fapl)
         if (s6[i].pre != 1000 + 4 * i || s6[i].mid1 != 1001 + 4 * i || s6[i].mid2 != 1002 + 4 * i ||
             s6[i].post != 1003 + 4 * i) {
             H5_FAILED();
-            HDputs("    Memory values were clobbered");
+            puts("    Memory values were clobbered");
             goto error;
         }
     }
@@ -545,7 +545,7 @@ test_compound(char *filename, hid_t fapl)
             s2[i].c[1] != s1[i].c[1] || s2[i].c[2] != s1[i].c[2] || s2[i].c[3] != s1[i].c[3] ||
             s2[i].d != s1[i].d || s2[i].e != s1[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from file");
+            puts("    Incorrect values read from file");
             goto error;
         }
     }
@@ -588,7 +588,7 @@ test_compound(char *filename, hid_t fapl)
             if (ps8->a != ps1->a || ps8->b != ps1->b || ps8->c[0] != ps1->c[0] || ps8->c[1] != ps1->c[1] ||
                 ps8->c[2] != ps1->c[2] || ps8->c[3] != ps1->c[3] || ps8->d != ps1->d || ps8->e != ps1->e) {
                 H5_FAILED();
-                HDputs("    Incorrect values read from file");
+                puts("    Incorrect values read from file");
                 goto error;
             }
         }
@@ -627,7 +627,7 @@ test_compound(char *filename, hid_t fapl)
                     ps2->c[1] != ps1->c[1] || ps2->c[2] != ps1->c[2] || ps2->c[3] != ps1->c[3] ||
                     ps2->d != ps1->d || ps2->e != ps1->e) {
                     H5_FAILED();
-                    HDputs("    Memory values clobbered");
+                    puts("    Memory values clobbered");
                     goto error;
                 }
             }
@@ -636,7 +636,7 @@ test_compound(char *filename, hid_t fapl)
                     ps2->c[1] != (unsigned)(-1) || ps2->c[2] != (unsigned)(-1) ||
                     ps2->c[3] != (unsigned)(-1) || ps2->d != (unsigned)(-1) || ps2->e != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Incorrect values read from file");
+                    puts("    Incorrect values read from file");
                     goto error;
                 }
             }
@@ -675,7 +675,7 @@ test_compound(char *filename, hid_t fapl)
                     ps5->c[2] != ps1->c[2] || ps5->c[3] != ps1->c[3] || ps5->mid2 != (unsigned)(-1) ||
                     ps5->d != ps1->d || ps5->e != ps1->e || ps5->post != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Memory values clobbered");
+                    puts("    Memory values clobbered");
                     goto error;
                 }
             }
@@ -686,7 +686,7 @@ test_compound(char *filename, hid_t fapl)
                     ps5->c[3] != (unsigned)(-1) || ps5->mid2 != (unsigned)(-1) || ps5->d != (unsigned)(-1) ||
                     ps5->e != (unsigned)(-1) || ps5->post != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Incorrect values read from file");
+                    puts("    Incorrect values read from file");
                     goto error;
                 }
             }
@@ -735,7 +735,7 @@ test_compound(char *filename, hid_t fapl)
                 ps1->c[1] != 8 * (i * NY + j) + 3 || ps1->c[2] != 8 * (i * NY + j) + 4 ||
                 ps1->c[3] != 8 * (i * NY + j) + 5 || ps1->e != 8 * (i * NY + j) + 7) {
                 H5_FAILED();
-                HDputs("    Write clobbered values");
+                puts("    Write clobbered values");
                 goto error;
             }
 
@@ -743,14 +743,14 @@ test_compound(char *filename, hid_t fapl)
                 j < f_offset[1] + h_size[1]) {
                 if (ps1->b != (unsigned)(-1) || ps1->d != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Wrong values written or read");
+                    puts("    Wrong values written or read");
                     goto error;
                 }
             }
             else {
                 if (ps1->b != 8 * (i * NY + j) + 1 || ps1->d != 8 * (i * NY + j) + 6) {
                     H5_FAILED();
-                    HDputs("    Write clobbered values");
+                    puts("    Write clobbered values");
                     goto error;
                 }
             }
@@ -776,7 +776,7 @@ test_compound(char *filename, hid_t fapl)
     return 0;
 
 error:
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
 
     /* Release resources */
     if (s1)
@@ -1159,7 +1159,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_data(void *src_data, void *dst_data, hbool_t src_subset)
+compare_data(void *src_data, void *dst_data, bool src_subset)
 {
     stype1 *s_ptr;
     stype2 *d_ptr;
@@ -1324,7 +1324,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_preserve(dxpl, TRUE) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Rewrite contiguous data set */
@@ -1364,7 +1364,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (compare_data(orig, rbuf, TRUE) < 0)
+    if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
@@ -1377,7 +1377,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (compare_data(orig, rbuf, TRUE) < 0)
+    if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
@@ -1414,7 +1414,7 @@ error:
     free(rbuf);
     free(rew_buf);
 
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1527,7 +1527,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
 
-    if (H5Pset_preserve(dxpl, TRUE) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         goto error;
 
     /* Rewrite contiguous data set */
@@ -1567,7 +1567,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if (compare_data(orig, rbuf, FALSE) < 0)
+    if (compare_data(orig, rbuf, false) < 0)
         goto error;
 
     if (H5Dclose(dataset) < 0)
@@ -1580,7 +1580,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if (compare_data(orig, rbuf, FALSE) < 0)
+    if (compare_data(orig, rbuf, false) < 0)
         goto error;
 
     if (H5Dclose(dataset) < 0)
@@ -1613,7 +1613,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     return 0;
 
 error:
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1686,9 +1686,9 @@ test_pack_ooo(void)
 
     for (extra_space = 0; extra_space < 2; extra_space++) {
         if (extra_space)
-            HDputs("With extra space at the end of compound...");
+            puts("With extra space at the end of compound...");
         else
-            HDputs("Without extra space at the end of compound...");
+            puts("Without extra space at the end of compound...");
 
         TESTING("random member insertion with empty compound subtype");
 
@@ -1702,7 +1702,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == sub_cmpd_order) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1735,7 +1735,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == sub_cmpd_order) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1770,7 +1770,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == PACK_NMEMBS - 1) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1803,7 +1803,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == PACK_NMEMBS - 1) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1838,7 +1838,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order, with compound first */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == 0) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1871,7 +1871,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == 0) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1898,7 +1898,7 @@ test_pack_ooo(void)
     return 0;
 
 error:
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1920,10 +1920,10 @@ error:
 static unsigned
 test_ooo_order(char *filename, hid_t fapl_id)
 {
-    hid_t  file      = -1;   /* File ID */
-    hid_t  dtype     = -1;   /* Datatype IDs */
-    hid_t  dtype_tmp = -1;   /* Temp Datatype ID */
-    H5T_t *dt        = NULL; /* Datatype pointer */
+    hid_t  file      = H5I_INVALID_HID; /* File ID */
+    hid_t  dtype     = H5I_INVALID_HID; /* Datatype IDs */
+    hid_t  dtype_tmp = H5I_INVALID_HID; /* Temp Datatype ID */
+    H5T_t *dt        = NULL;            /* Datatype pointer */
 
     TESTING("that compound member insertion order is preserved");
 
@@ -2138,7 +2138,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 } /* test_ooo_order */
 
@@ -2165,7 +2165,7 @@ main(int argc, char *argv[])
 
     /* Turn off optimized compound converter? */
     if (argc > 1) {
-        if (argc > 2 || HDstrcmp("--noopt", argv[1]) != 0) {
+        if (argc > 2 || strcmp("--noopt", argv[1]) != 0) {
             fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
@@ -2178,21 +2178,21 @@ main(int argc, char *argv[])
 
     h5_fixname(FILENAME[0], fapl_id, fname, sizeof(fname));
 
-    HDputs("Testing compound dataset:");
+    puts("Testing compound dataset:");
     nerrors += test_compound(fname, fapl_id);
 
-    HDputs("Testing the optimization of when the source type is a subset of the dest:");
+    puts("Testing the optimization of when the source type is a subset of the dest:");
     h5_fixname(FILENAME[1], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_src_subset(fname, fapl_id);
 
-    HDputs("Testing the optimization of when the dest type is a subset of the source:");
+    puts("Testing the optimization of when the dest type is a subset of the source:");
     h5_fixname(FILENAME[2], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_dst_subset(fname, fapl_id);
 
-    HDputs("Testing that compound types can be packed out of order:");
+    puts("Testing that compound types can be packed out of order:");
     nerrors += test_pack_ooo();
 
-    HDputs("Testing compound member ordering:");
+    puts("Testing compound member ordering:");
     nerrors += test_ooo_order(fname, fapl_id);
 
     /* Verify symbol table messages are cached */
@@ -2204,6 +2204,6 @@ main(int argc, char *argv[])
     }
 
     h5_cleanup(FILENAME, fapl_id);
-    HDputs("All compound dataset tests passed.");
+    puts("All compound dataset tests passed.");
     return 0;
 }

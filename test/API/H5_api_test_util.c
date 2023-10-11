@@ -76,15 +76,15 @@
 #define COMPACT_SPACE_MAX_DIM_SIZE 4
 #define COMPACT_SPACE_MAX_DIMS     3
 
-typedef hid_t (*generate_datatype_func)(H5T_class_t parent_class, hbool_t is_compact);
+typedef hid_t (*generate_datatype_func)(H5T_class_t parent_class, bool is_compact);
 
-static hid_t generate_random_datatype_integer(H5T_class_t parent_class, hbool_t is_compact);
-static hid_t generate_random_datatype_float(H5T_class_t parent_class, hbool_t is_compact);
-static hid_t generate_random_datatype_string(H5T_class_t parent_class, hbool_t is_compact);
-static hid_t generate_random_datatype_compound(H5T_class_t parent_class, hbool_t is_compact);
-static hid_t generate_random_datatype_reference(H5T_class_t parent_class, hbool_t is_compact);
-static hid_t generate_random_datatype_enum(H5T_class_t parent_class, hbool_t is_compact);
-static hid_t generate_random_datatype_array(H5T_class_t parent_class, hbool_t is_compact);
+static hid_t generate_random_datatype_integer(H5T_class_t parent_class, bool is_compact);
+static hid_t generate_random_datatype_float(H5T_class_t parent_class, bool is_compact);
+static hid_t generate_random_datatype_string(H5T_class_t parent_class, bool is_compact);
+static hid_t generate_random_datatype_compound(H5T_class_t parent_class, bool is_compact);
+static hid_t generate_random_datatype_reference(H5T_class_t parent_class, bool is_compact);
+static hid_t generate_random_datatype_enum(H5T_class_t parent_class, bool is_compact);
+static hid_t generate_random_datatype_array(H5T_class_t parent_class, bool is_compact);
 
 /*
  * Helper function to generate a random HDF5 datatype in order to thoroughly
@@ -93,7 +93,7 @@ static hid_t generate_random_datatype_array(H5T_class_t parent_class, hbool_t is
  * called with H5T_NO_CLASS for the parent_class parameter.
  */
 hid_t
-generate_random_datatype(H5T_class_t parent_class, hbool_t is_compact)
+generate_random_datatype(H5T_class_t parent_class, bool is_compact)
 {
     generate_datatype_func gen_func;
     static int             depth = 0;
@@ -211,7 +211,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_integer(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H5_ATTR_UNUSED is_compact)
+generate_random_datatype_integer(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_ATTR_UNUSED is_compact)
 {
     hid_t type_to_copy = H5I_INVALID_HID;
     hid_t datatype     = H5I_INVALID_HID;
@@ -288,7 +288,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_float(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H5_ATTR_UNUSED is_compact)
+generate_random_datatype_float(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_ATTR_UNUSED is_compact)
 {
     hid_t type_to_copy = H5I_INVALID_HID;
     hid_t datatype     = H5I_INVALID_HID;
@@ -330,7 +330,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_string(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H5_ATTR_UNUSED is_compact)
+generate_random_datatype_string(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_ATTR_UNUSED is_compact)
 {
     hid_t datatype  = H5I_INVALID_HID;
     hid_t ret_value = H5I_INVALID_HID;
@@ -387,7 +387,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_compound(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t is_compact)
+generate_random_datatype_compound(H5T_class_t H5_ATTR_UNUSED parent_class, bool is_compact)
 {
     size_t num_members   = 0;
     size_t next_offset   = 0;
@@ -410,7 +410,7 @@ generate_random_datatype_compound(H5T_class_t H5_ATTR_UNUSED parent_class, hbool
         size_t member_size;
         char   member_name[256];
 
-        HDsnprintf(member_name, 256, "compound_member%zu", i);
+        snprintf(member_name, 256, "compound_member%zu", i);
 
         if ((compound_members[i] = generate_random_datatype(H5T_COMPOUND, is_compact)) < 0) {
             printf("    couldn't create compound datatype member %zu\n", i);
@@ -455,7 +455,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_reference(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H5_ATTR_UNUSED is_compact)
+generate_random_datatype_reference(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_ATTR_UNUSED is_compact)
 {
     hid_t datatype  = H5I_INVALID_HID;
     hid_t ret_value = H5I_INVALID_HID;
@@ -490,7 +490,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_enum(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H5_ATTR_UNUSED is_compact)
+generate_random_datatype_enum(H5T_class_t H5_ATTR_UNUSED parent_class, bool H5_ATTR_UNUSED is_compact)
 {
     size_t num_members      = 0;
     hid_t  datatype         = H5I_INVALID_HID;
@@ -510,20 +510,20 @@ generate_random_datatype_enum(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H
     }
 
     for (size_t i = 0; i < num_members; i++) {
-        hbool_t unique;
-        char    name[ENUM_TYPE_MAX_MEMBER_NAME_LENGTH];
-        int     enum_val;
+        bool unique;
+        char name[ENUM_TYPE_MAX_MEMBER_NAME_LENGTH];
+        int  enum_val;
 
-        HDsnprintf(name, ENUM_TYPE_MAX_MEMBER_NAME_LENGTH, "enum_val%zu", i);
+        snprintf(name, ENUM_TYPE_MAX_MEMBER_NAME_LENGTH, "enum_val%zu", i);
 
         do {
             enum_val = rand();
 
             /* Check for uniqueness of enum member */
-            unique = TRUE;
+            unique = true;
             for (size_t j = 0; j < i; j++)
                 if (enum_val == enum_member_vals[j])
-                    unique = FALSE;
+                    unique = false;
         } while (!unique);
 
         enum_member_vals[i] = enum_val;
@@ -548,7 +548,7 @@ done:
 }
 
 static hid_t
-generate_random_datatype_array(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t is_compact)
+generate_random_datatype_array(H5T_class_t H5_ATTR_UNUSED parent_class, bool is_compact)
 {
     unsigned ndims         = 0;
     hsize_t *array_dims    = NULL;
@@ -599,7 +599,7 @@ done:
  * test support for dataspaces.
  */
 hid_t
-generate_random_dataspace(int rank, const hsize_t *max_dims, hsize_t *dims_out, hbool_t is_compact)
+generate_random_dataspace(int rank, const hsize_t *max_dims, hsize_t *dims_out, bool is_compact)
 {
     hsize_t dataspace_dims[H5S_MAX_RANK];
     size_t  i;
@@ -750,7 +750,7 @@ prefix_filename(const char *prefix, const char *filename, char **filename_out)
         goto done;
     }
 
-    HDsnprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", prefix, filename);
+    snprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", prefix, filename);
 
     *filename_out = out_buf;
 

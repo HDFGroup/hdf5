@@ -52,8 +52,8 @@ typedef struct {
 #define CORRUPTED_ATNAMELEN_FILE "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
-    char    message[256];
-    hbool_t found;
+    char message[256];
+    bool found;
 } searched_err_t;
 #if 0
 /* Call back function for test_corrupted_attnamelen */
@@ -74,7 +74,7 @@ herr_t        aiter_cb(hid_t group, const char *name, const H5A_info_t *ainfo, v
 H5_ATTR_PURE int
 iter_strcmp(const void *s1, const void *s2)
 {
-    return (HDstrcmp(*(const char *const *)s1, *(const char *const *)s2));
+    return (strcmp(*(const char *const *)s1, *(const char *const *)s2));
 }
 
 /****************************************************************
@@ -97,7 +97,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
         return 1;
     }
 
-    HDstrcpy(info->name, name);
+    strcpy(info->name, name);
 
     switch (info->command) {
         case RET_ZERO:
@@ -126,7 +126,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
 **
 ****************************************************************/
 static void
-test_iter_group(hid_t fapl, hbool_t new_format)
+test_iter_group(hid_t fapl, bool new_format)
 {
     hid_t      file;                  /* File ID */
     hid_t      dataset;               /* Dataset ID */
@@ -166,12 +166,12 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         CHECK(filespace, FAIL, "H5Screate");
 
         for (i = 0; i < NDATASETS; i++) {
-            HDsnprintf(name, sizeof(name), "Dataset %d", i);
+            snprintf(name, sizeof(name), "Dataset %d", i);
             dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(dataset, FAIL, "H5Dcreate2");
 
             /* Keep a copy of the dataset names around for later */
-            lnames[i] = HDstrdup(name);
+            lnames[i] = strdup(name);
             CHECK_PTR(lnames[i], "strdup");
 
             ret = H5Dclose(dataset);
@@ -182,13 +182,13 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         grp = H5Gcreate2(file, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Gcreate2");
 
-        lnames[NDATASETS] = HDstrdup("grp");
+        lnames[NDATASETS] = strdup("grp");
         CHECK_PTR(lnames[NDATASETS], "strdup");
 
         ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Tcommit2");
 
-        lnames[NDATASETS + 1] = HDstrdup("dtype");
+        lnames[NDATASETS + 1] = strdup("dtype");
         CHECK_PTR(lnames[NDATASETS], "strdup");
 
         /* Close everything up */
@@ -333,7 +333,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
                 TestErrPrintf("Group iteration function walked too far!\n");
 
             /* Verify that the correct name is retrieved */
-            if (HDstrncmp(info.name, lnames[(size_t)(idx - 1)], NAMELEN) != 0)
+            if (strncmp(info.name, lnames[(size_t)(idx - 1)], NAMELEN) != 0)
                 TestErrPrintf(
                     "Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n",
                     (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
@@ -365,7 +365,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
                 TestErrPrintf("Group iteration function walked too far!\n");
 
             /* Verify that the correct name is retrieved */
-            if (HDstrncmp(info.name, lnames[(size_t)(idx - 1)], NAMELEN) != 0)
+            if (strncmp(info.name, lnames[(size_t)(idx - 1)], NAMELEN) != 0)
                 TestErrPrintf(
                     "Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n",
                     (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
@@ -397,7 +397,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
     static int count  = 0;
     static int count2 = 0;
 
-    HDstrcpy(info->name, name);
+    strcpy(info->name, name);
 
     switch (info->command) {
         case RET_ZERO:
@@ -426,7 +426,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
 **
 ****************************************************************/
 static void
-test_iter_attr(hid_t fapl, hbool_t new_format)
+test_iter_attr(hid_t fapl, bool new_format)
 {
     hid_t     file;          /* File ID */
     hid_t     dataset;       /* Common Dataset ID */
@@ -458,12 +458,12 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
         CHECK(dataset, FAIL, "H5Dcreate2");
 
         for (i = 0; i < NATTR; i++) {
-            HDsnprintf(name, sizeof(name), "Attribute %02d", i);
+            snprintf(name, sizeof(name), "Attribute %02d", i);
             attribute = H5Acreate2(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attribute, FAIL, "H5Acreate2");
 
             /* Keep a copy of the attribute names around for later */
-            anames[i] = HDstrdup(name);
+            anames[i] = strdup(name);
             CHECK_PTR(anames[i], "strdup");
 
             ret = H5Aclose(attribute);
@@ -533,7 +533,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
             if (!new_format) {
                 /* Verify that the correct name is retrieved */
                 if (idx > 0) {
-                    if (HDstrcmp(info.name, anames[(size_t)idx - 1]) != 0)
+                    if (strcmp(info.name, anames[(size_t)idx - 1]) != 0)
                         TestErrPrintf(
                             "%u: Attribute iteration function didn't set names correctly, info.name = "
                             "'%s', anames[%u] = '%s'!\n",
@@ -567,7 +567,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
             if (!new_format) {
                 /* Verify that the correct name is retrieved */
                 if (idx > 0) {
-                    if (HDstrcmp(info.name, anames[(size_t)idx - 1]) != 0)
+                    if (strcmp(info.name, anames[(size_t)idx - 1]) != 0)
                         TestErrPrintf(
                             "%u: Attribute iteration function didn't set names correctly, info.name = "
                             "'%s', anames[%u] = '%s'!\n",
@@ -602,7 +602,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
 H5_ATTR_PURE int
 iter_strcmp2(const void *s1, const void *s2)
 {
-    return (HDstrcmp((const char *)s1, (const char *)s2));
+    return (strcmp((const char *)s1, (const char *)s2));
 } /* end iter_strcmp2() */
 
 /****************************************************************
@@ -624,7 +624,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
         return 1;
     }
 
-    if (HDstrcmp(name, test_info->name) != 0) {
+    if (strcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
         return (H5_ITER_ERROR);
     } /* end if */
@@ -691,10 +691,10 @@ test_iter_group_large(hid_t fapl)
 
         /* Create a bunch of groups */
         for (i = 0; i < ITER_NGROUPS; i++) {
-            HDsnprintf(gname, sizeof(gname), "Group_%d", i);
+            snprintf(gname, sizeof(gname), "Group_%d", i);
 
             /* Add the name to the list of objects in the root group */
-            HDstrcpy(names[i].name, gname);
+            strcpy(names[i].name, gname);
             names[i].type = H5O_TYPE_GROUP;
 
             /* Create a group */
@@ -711,7 +711,7 @@ test_iter_group_large(hid_t fapl)
         CHECK(dataset, FAIL, "H5Dcreate2");
 
         /* Add the name to the list of objects in the root group */
-        HDstrcpy(names[ITER_NGROUPS].name, "Dataset1");
+        strcpy(names[ITER_NGROUPS].name, "Dataset1");
         names[ITER_NGROUPS].type = H5O_TYPE_DATASET;
 
         /* Close Dataset */
@@ -741,7 +741,7 @@ test_iter_group_large(hid_t fapl)
         CHECK(ret, FAIL, "H5Tcommit2");
 
         /* Add the name to the list of objects in the root group */
-        HDstrcpy(names[ITER_NGROUPS + 1].name, "Datatype1");
+        strcpy(names[ITER_NGROUPS + 1].name, "Datatype1");
         names[ITER_NGROUPS + 1].type = H5O_TYPE_NAMED_DATATYPE;
 
         /* Close datatype */
@@ -809,12 +809,12 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsnprintf(name, sizeof(name), "Dataset %d", i);
+        snprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
         /* Keep a copy of the dataset names around for later */
-        dnames[i] = HDstrdup(name);
+        dnames[i] = strdup(name);
         CHECK_PTR(dnames[i], "strdup");
 
         ret = H5Dclose(dataset);
@@ -825,13 +825,13 @@ test_grp_memb_funcs(hid_t fapl)
     grp = H5Gcreate2(file, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Gcreate2");
 
-    dnames[NDATASETS] = HDstrdup("grp");
+    dnames[NDATASETS] = strdup("grp");
     CHECK_PTR(dnames[NDATASETS], "strdup");
 
     ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
 
-    dnames[NDATASETS + 1] = HDstrdup("dtype");
+    dnames[NDATASETS + 1] = strdup("dtype");
     CHECK_PTR(dnames[NDATASETS], "strdup");
 
     /* Close everything up */
@@ -880,18 +880,18 @@ test_grp_memb_funcs(hid_t fapl)
         VERIFY(ret, name_len, "H5Lget_name_by_idx");
 
         /* Keep a copy of the dataset names around for later */
-        obj_names[i] = HDstrdup(dataset_name);
+        obj_names[i] = strdup(dataset_name);
         CHECK_PTR(obj_names[i], "strdup");
 
         ret = H5Oget_info_by_idx3(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
                                   H5O_INFO_BASIC, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Oget_info_by_idx3");
 
-        if (!HDstrcmp(dataset_name, "grp"))
+        if (!strcmp(dataset_name, "grp"))
             VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
-        if (!HDstrcmp(dataset_name, "dtype"))
+        if (!strcmp(dataset_name, "dtype"))
             VERIFY(oinfo.type, H5O_TYPE_NAMED_DATATYPE, "H5Lget_name_by_idx");
-        if (!HDstrncmp(dataset_name, "Dataset", (size_t)7))
+        if (!strncmp(dataset_name, "Dataset", (size_t)7))
             VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Lget_name_by_idx");
     } /* end for */
 
@@ -909,8 +909,8 @@ test_grp_memb_funcs(hid_t fapl)
 
     /* Compare object names */
     for (i = 0; i < (int)ginfo.nlinks; i++) {
-        ret = HDstrcmp(dnames[i], obj_names[i]);
-        VERIFY(ret, 0, "HDstrcmp");
+        ret = strcmp(dnames[i], obj_names[i]);
+        VERIFY(ret, 0, "strcmp");
     } /* end for */
 
     ret = H5Gclose(root_group);
@@ -988,11 +988,11 @@ test_links(hid_t fapl)
             CHECK(ret, FAIL, "H5Oget_info_by_idx3");
         } /* end if */
 
-        if (!HDstrcmp(obj_name, "g1.1"))
+        if (!strcmp(obj_name, "g1.1"))
             VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
-        else if (!HDstrcmp(obj_name, "hardlink"))
+        else if (!strcmp(obj_name, "hardlink"))
             VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
-        else if (!HDstrcmp(obj_name, "softlink"))
+        else if (!strcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
             ERROR("unknown object name");
@@ -1030,8 +1030,8 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
         return H5_ITER_ERROR;
 
     /* If the searched error message is found, stop the iteration */
-    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
-        searched_err->found = TRUE;
+    if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0) {
+        searched_err->found = true;
         status              = H5_ITER_STOP;
     }
 
@@ -1055,7 +1055,7 @@ test_corrupted_attnamelen(void)
     searched_err_t err_caught; /* Data to be passed to callback func */
     int            err_status; /* Status returned by H5Aiterate2 */
     herr_t         ret;        /* Return value */
-    hbool_t        driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
     const char *err_message = "attribute name has different length than stored length";
@@ -1087,15 +1087,15 @@ test_corrupted_attnamelen(void)
     /* Make sure the intended error was caught */
     if (err_status == -1) {
         /* Initialize client data */
-        HDstrcpy(err_caught.message, err_message);
-        err_caught.found = FALSE;
+        strcpy(err_caught.message, err_message);
+        err_caught.found = false;
 
         /* Look for the correct error message */
         ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
         CHECK(ret, FAIL, "H5Ewalk2");
 
         /* Fail if the indicated message is not found */
-        CHECK(err_caught.found, FALSE, "test_corrupted_attnamelen: Expected error not found");
+        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
     }
 
     /* Close the dataset and file */
@@ -1172,11 +1172,11 @@ test_links_deprec(hid_t fapl)
             CHECK(ret, FAIL, "H5Oget_info_by_idx");
         } /* end if */
 
-        if (!HDstrcmp(obj_name, "g1.1"))
+        if (!strcmp(obj_name, "g1.1"))
             VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
-        else if (!HDstrcmp(obj_name, "hardlink"))
+        else if (!strcmp(obj_name, "hardlink"))
             VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
-        else if (!HDstrcmp(obj_name, "softlink"))
+        else if (!strcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
             ERROR("unknown object name");
@@ -1222,7 +1222,7 @@ test_iterate(void)
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* These next tests use the same file */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         test_iter_group(new_format ? fapl2 : fapl, new_format); /* Test group iteration */
         test_iter_group_large(new_format ? fapl2 : fapl); /* Test group iteration for large # of objects */
         test_iter_attr(new_format ? fapl2 : fapl, new_format); /* Test attribute iteration */

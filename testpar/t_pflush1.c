@@ -78,7 +78,7 @@ create_test_file(char *name, size_t name_length, hid_t fapl_id)
     if ((top_level_gid = H5Gcreate2(fid, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < N_GROUPS; i++) {
-        HDsnprintf(name, name_length, "grp%02u", (unsigned)i);
+        snprintf(name, name_length, "grp%02u", (unsigned)i);
         if ((gid = H5Gcreate2(top_level_gid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -121,14 +121,14 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part1)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
-    if (!HDstrcmp(envval, "split")) {
+    if (!strcmp(envval, "split")) {
         if (mpi_rank == 0) {
             SKIPPED();
-            HDputs("    Test not compatible with current Virtual File Driver");
+            puts("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
         exit(EXIT_FAILURE);

@@ -33,13 +33,13 @@ static int TEST_3   = 0x4; /* Test 3 */
 static const char *FILENAME[] = {"meta_perf_1", "meta_perf_2", "meta_perf_3", NULL};
 
 /* Default values for performance. Can be changed through command line options */
-static int     NUM_DSETS   = 16;
-static int     NUM_ATTRS   = 8;
-static int     BATCH_ATTRS = 2;
-static hbool_t flush_dset  = FALSE;
-static hbool_t flush_attr  = FALSE;
-static int     nerrors     = 0; /* errors count */
-static hid_t   fapl;
+static int   NUM_DSETS   = 16;
+static int   NUM_ATTRS   = 8;
+static int   BATCH_ATTRS = 2;
+static bool  flush_dset  = false;
+static bool  flush_attr  = false;
+static int   nerrors     = 0; /* errors count */
+static hid_t fapl;
 
 /* Data space IDs */
 static hid_t space;
@@ -117,9 +117,9 @@ parse_options(int argc, char **argv)
 
                 case 'f': /* Call H5Fflush for each dataset or attribute */
                     if (!strcmp("a", (*argv + 2)))
-                        flush_attr = TRUE;
+                        flush_attr = true;
                     else if (!strcmp("d", (*argv + 2)))
-                        flush_dset = TRUE;
+                        flush_dset = true;
                     else {
                         nerrors++;
                         return (1);
@@ -280,7 +280,7 @@ create_dsets(hid_t file)
      * Create a dataset using the default dataset creation properties.
      */
     for (i = 0; i < NUM_DSETS; i++) {
-        HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", i);
+        snprintf(dset_name, sizeof(dset_name), "dataset %d", i);
         if ((dataset = H5Dcreate2(file, dset_name, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
             goto error;
@@ -337,14 +337,14 @@ create_attrs_1(void)
      * Create all(user specifies the number) attributes for each dataset
      */
     for (i = 0; i < NUM_DSETS; i++) {
-        HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", i);
+        snprintf(dset_name, sizeof(dset_name), "dataset %d", i);
         open_t.start = retrieve_time();
         if ((dataset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
             goto error;
         perf(&open_t, open_t.start, retrieve_time());
 
         for (j = 0; j < NUM_ATTRS; j++) {
-            HDsnprintf(attr_name, sizeof(attr_name), "all attrs for each dset %d", j);
+            snprintf(attr_name, sizeof(attr_name), "all attrs for each dset %d", j);
             attr_t.start = retrieve_time();
             if ((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT,
                                    H5P_DEFAULT)) < 0)
@@ -433,7 +433,7 @@ create_attrs_2(void)
      * Create all(user specifies the number) attributes for each new dataset
      */
     for (i = 0; i < NUM_DSETS; i++) {
-        HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", i);
+        snprintf(dset_name, sizeof(dset_name), "dataset %d", i);
         create_t.start = retrieve_time();
         if ((dataset = H5Dcreate2(file, dset_name, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
@@ -441,7 +441,7 @@ create_attrs_2(void)
         perf(&create_t, create_t.start, retrieve_time());
 
         for (j = 0; j < NUM_ATTRS; j++) {
-            HDsnprintf(attr_name, sizeof(attr_name), "all attrs for each dset %d", j);
+            snprintf(attr_name, sizeof(attr_name), "all attrs for each dset %d", j);
             attr_t.start = retrieve_time();
             if ((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT,
                                    H5P_DEFAULT)) < 0)
@@ -539,14 +539,14 @@ create_attrs_3(void)
 
     for (i = 0; i < loop_num; i++) {
         for (j = 0; j < NUM_DSETS; j++) {
-            HDsnprintf(dset_name, sizeof(dset_name), "dataset %d", j);
+            snprintf(dset_name, sizeof(dset_name), "dataset %d", j);
             open_t.start = retrieve_time();
             if ((dataset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
                 goto error;
             perf(&open_t, open_t.start, retrieve_time());
 
             for (k = 0; k < BATCH_ATTRS; k++) {
-                HDsnprintf(attr_name, sizeof(attr_name), "some attrs for each dset %d %d", i, k);
+                snprintf(attr_name, sizeof(attr_name), "some attrs for each dset %d %d", i, k);
                 attr_t.start = retrieve_time();
                 if ((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT,
                                        H5P_DEFAULT)) < 0)

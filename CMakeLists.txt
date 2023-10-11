@@ -222,6 +222,7 @@ set (HDF5_HL_CPP_SRC_DIR       ${HDF5_SOURCE_DIR}/hl/c++)
 set (HDF5_HL_TOOLS_DIR         ${HDF5_SOURCE_DIR}/hl/tools)
 set (HDF5_TOOLS_DIR            ${HDF5_SOURCE_DIR}/tools)
 set (HDF5_TOOLS_SRC_DIR        ${HDF5_SOURCE_DIR}/tools/src)
+set (HDF5_TOOLS_TST_DIR        ${HDF5_SOURCE_DIR}/tools/test)
 set (HDF5_PERFORM_SRC_DIR      ${HDF5_SOURCE_DIR}/tools/src/perform)
 set (HDF5_UTILS_DIR            ${HDF5_SOURCE_DIR}/utils)
 set (HDF5_F90_SRC_DIR          ${HDF5_SOURCE_DIR}/fortran)
@@ -722,6 +723,9 @@ set (HDF5_SRC_INCLUDE_DIRS
 )
 option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
+  if (WIN32)
+    message (FATAL_ERROR " **** Subfiling is not supported on Windows **** ")
+  endif ()
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
   else ()
@@ -730,7 +734,7 @@ if (HDF5_ENABLE_SUBFILING_VFD)
     if (NOT H5_HAVE_MPI_Comm_split_type)
       message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
     endif ()
-  endif()
+  endif ()
 
   if (NOT DEFINED Threads_FOUND)
     set (THREADS_PREFER_PTHREAD_FLAG ON)
@@ -778,9 +782,9 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
-#option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
-set (DEFAULT_API_VERSION "v114" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114)")
-set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114)
+#option (DEFAULT_API_VERSION "Enable v1.16 API (v16, v18, v110, v112, v114, v116)" "v116")
+set (DEFAULT_API_VERSION "v116" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116)")
+set_property (CACHE DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -816,12 +820,20 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.14.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v114")
-endif ()
 set (H5_USE_114_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v114")
   set (H5_USE_114_API_DEFAULT 1)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.16.x API
+#-----------------------------------------------------------------------------
+if (NOT DEFAULT_API_VERSION)
+  set (DEFAULT_API_VERSION "v116")
+endif ()
+set (H5_USE_116_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v116")
+  set (H5_USE_116_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -846,13 +858,6 @@ option (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_PACKAGE_EXTLIBS)
     set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
-    if (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND AND NOT BUILD_ZLIB_WITH_FETCHCONTENT)
-      PACKAGE_ZLIB_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
-
-    if (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND AND NOT BUILD_SZIP_WITH_FETCHCONTENT)
-      PACKAGE_SZIP_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
   endif ()
 endif ()
 
@@ -947,100 +952,7 @@ endif ()
 #-----------------------------------------------------------------------------
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 if (BUILD_TESTING)
-  set (DART_TESTING_TIMEOUT 1200
-      CACHE STRING
-      "Timeout in seconds for each test (default 1200=20minutes)"
-  )
-
-  # Generate a list of timeouts based on DART_TESTING_TIMEOUT
-  math (EXPR CTEST_SHORT_TIMEOUT "${DART_TESTING_TIMEOUT} / 2")
-  math (EXPR CTEST_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 2")
-  math (EXPR CTEST_VERY_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 3")
-
-  option (HDF5_TEST_API "Execute HDF5 API tests" OFF)
-  mark_as_advanced (HDF5_TEST_API)
-  if (HDF5_TEST_API)
-    option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF)
-    mark_as_advanced (HDF5_TEST_API_INSTALL)
-
-    # Enable HDF5 Async API tests
-    option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF)
-    mark_as_advanced (HDF5_TEST_API_ENABLE_ASYNC)
-
-    # Build and use HDF5 test driver program for API tests
-    option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF)
-    mark_as_advanced (HDF5_TEST_API_ENABLE_DRIVER)
-    if (HDF5_TEST_API_ENABLE_DRIVER)
-      set (HDF5_TEST_API_SERVER "" CACHE STRING "Server executable for running API tests")
-      mark_as_advanced (HDF5_TEST_API_SERVER)
-    endif ()
-  endif ()
-
-  option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
-  mark_as_advanced (HDF5_TEST_VFD)
-  if (HDF5_TEST_VFD)
-    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
-
-    # Initialize the list of VFDs to be used for testing and create a test folder for each VFD
-    H5_SET_VFD_LIST()
-  endif ()
-
-  option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
-  mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
-  if (HDF5_TEST_PASSTHROUGH_VOL)
-    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
-  endif ()
-
-  set (H5_TEST_EXPRESS_LEVEL_DEFAULT "3")
-  set (HDF_TEST_EXPRESS "${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
-      CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)")
-  mark_as_advanced (HDF_TEST_EXPRESS)
-  if (NOT "${HDF_TEST_EXPRESS}" STREQUAL "")
-    set (H5_TEST_EXPRESS_LEVEL_DEFAULT "${HDF_TEST_EXPRESS}")
-  endif ()
-
-  enable_testing ()
-  include (CTest)
-
-  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
-
-  option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON)
-  mark_as_advanced (HDF5_TEST_SERIAL)
-
-  option (HDF5_TEST_TOOLS "Execute tools tests" ON)
-  mark_as_advanced (HDF5_TEST_TOOLS)
-
-  option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON)
-  mark_as_advanced (HDF5_TEST_EXAMPLES)
-
-  option (HDF5_TEST_SWMR "Execute SWMR tests" ON)
-  mark_as_advanced (HDF5_TEST_SWMR)
-
-  option (HDF5_TEST_PARALLEL "Execute parallel tests" ON)
-  mark_as_advanced (HDF5_TEST_PARALLEL)
-
-  option (HDF5_TEST_FORTRAN "Execute fortran tests" ON)
-  mark_as_advanced (HDF5_TEST_FORTRAN)
-
-  option (HDF5_TEST_CPP "Execute cpp tests" ON)
-  mark_as_advanced (HDF5_TEST_CPP)
-
-  option (HDF5_TEST_JAVA "Execute java tests" ON)
-  mark_as_advanced (HDF5_TEST_JAVA)
-
-  if (NOT HDF5_EXTERNALLY_CONFIGURED)
-    if (EXISTS "${HDF5_TEST_SRC_DIR}" AND IS_DIRECTORY "${HDF5_TEST_SRC_DIR}")
-      add_subdirectory (test)
-    endif ()
-    if (H5_HAVE_PARALLEL)
-      if (EXISTS "${HDF5_TEST_PAR_DIR}" AND IS_DIRECTORY "${HDF5_TEST_PAR_DIR}")
-        add_subdirectory (testpar)
-      endif ()
-    endif ()
-  endif ()
+  include (CMakeTests.cmake)
 endif ()
 
 #-----------------------------------------------------------------------------

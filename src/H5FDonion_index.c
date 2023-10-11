@@ -176,28 +176,28 @@ done:
  *                + Sorted by increasing logical address (no duplicates)
  *                + Logical addresses are multiples of page size.
  *
- * Return:      TRUE/FALSE
+ * Return:      true/false
  *-----------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 {
-    hbool_t ret_value = TRUE;
+    bool ret_value = true;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(aix);
 
     if (H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
     if (NULL == aix->list)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Ensure list is sorted on logical_page field */
     if (aix->n_entries > 1)
         for (uint64_t i = 1; i < aix->n_entries - 1; i++)
             if (aix->list[i + 1].logical_page <= aix->list[i].logical_page)
-                HGOTO_DONE(FALSE);
+                HGOTO_DONE(false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -483,7 +483,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
                 if (entry->phys_addr != node->entry_data.phys_addr) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "physical address mismatch");
                 }
-                memcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
+                H5MM_memcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
                 append_dest = NULL; /* Node updated, do not append */
                 break;
             }
@@ -496,7 +496,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node");
         node->version = H5FD_ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR;
         node->next    = NULL;
-        memcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
+        H5MM_memcpy(&node->entry_data, entry, sizeof(H5FD_onion_index_entry_t));
         *append_dest = node;
         rix->n_entries++;
     }
@@ -604,7 +604,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     assert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
     assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_REVISION_RECORD_VERSION_CURR != buf[4])
@@ -612,25 +612,25 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
 
     ptr = buf + 8;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, record->revision_num);
     ptr += 8;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, record->parent_revision_num);
     ptr += 8;
 
-    memcpy(record->time_of_creation, ptr, 16);
+    H5MM_memcpy(record->time_of_creation, ptr, 16);
     ptr += 16;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, record->logical_eof);
     ptr += 8;
 
-    memcpy(&ui32, ptr, 4);
+    H5MM_memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, page_size);
     ptr += 4;
@@ -645,12 +645,12 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
          record->archival_index.page_size_log2++)
         ;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT64DECODE(ui8p, n_entries);
     ptr += 8;
 
-    memcpy(&ui32, ptr, 4);
+    H5MM_memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, comment_size);
     ptr += 4;
@@ -671,7 +671,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
         for (size_t i = 0; i < n_entries; i++) {
             entry = &record->archival_index.list[i];
 
-            memcpy(&ui64, ptr, 8);
+            H5MM_memcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
             UINT64DECODE(ui8p, entry->logical_page);
             ptr += 8;
@@ -682,12 +682,12 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
 
             entry->logical_page = entry->logical_page >> record->archival_index.page_size_log2;
 
-            memcpy(&ui64, ptr, 8);
+            H5MM_memcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
             UINT64DECODE(ui8p, entry->phys_addr);
             ptr += 8;
 
-            memcpy(&ui32, ptr, 4);
+            H5MM_memcpy(&ui32, ptr, 4);
             ui8p = (uint8_t *)&ui32;
             UINT32DECODE(ui8p, sum);
             ptr += 4;
@@ -706,13 +706,13 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     else {
         if (record->comment == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "no comment pointer");
-        memcpy(record->comment, ptr, comment_size);
+        H5MM_memcpy(record->comment, ptr, comment_size);
     }
     ptr += comment_size;
 
     sum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
 
-    memcpy(&ui32, ptr, 4);
+    H5MM_memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, record->checksum);
     ptr += 4;
@@ -765,12 +765,12 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
 
     page_size = (uint32_t)(1 << record->archival_index.page_size_log2);
 
-    memcpy(ptr, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4);
+    H5MM_memcpy(ptr, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4);
     ptr += 4;
     UINT32ENCODE(ptr, vers_u32);
     UINT64ENCODE(ptr, record->revision_num);
     UINT64ENCODE(ptr, record->parent_revision_num);
-    memcpy(ptr, record->time_of_creation, 16);
+    H5MM_memcpy(ptr, record->time_of_creation, 16);
     ptr += 16;
     UINT64ENCODE(ptr, record->logical_eof);
     UINT32ENCODE(ptr, page_size);
@@ -798,7 +798,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
 
     if (record->comment_size > 0) {
         assert(record->comment != NULL && *record->comment != '\0');
-        memcpy(ptr, record->comment, record->comment_size);
+        H5MM_memcpy(ptr, record->comment, record->comment_size);
         ptr += record->comment_size;
     }
 
@@ -876,7 +876,8 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
         const H5FD_onion_revision_index_hash_chain_node_t *node = NULL;
 
         for (node = rix->_hash_table[i]; node != NULL; node = node->next) {
-            memcpy(&new_aix.list[new_aix.n_entries], &node->entry_data, sizeof(H5FD_onion_index_entry_t));
+            H5MM_memcpy(&new_aix.list[new_aix.n_entries], &node->entry_data,
+                        sizeof(H5FD_onion_index_entry_t));
             new_aix.n_entries++;
         }
     }
@@ -901,7 +902,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
 
         /* Add only if page not already added from revision index */
         if (H5FD__onion_archival_index_find(&new_aix, aix->list[i].logical_page, &entry) == 0) {
-            memcpy(&kept_list[n_kept], &aix->list[i], sizeof(H5FD_onion_index_entry_t));
+            H5MM_memcpy(&kept_list[n_kept], &aix->list[i], sizeof(H5FD_onion_index_entry_t));
             n_kept++;
         }
     }
@@ -914,12 +915,12 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list");
 
     /* Copy (new) revision list entries to replacement list */
-    memcpy(aix->list, new_aix.list, sizeof(H5FD_onion_index_entry_t) * new_aix.n_entries);
+    H5MM_memcpy(aix->list, new_aix.list, sizeof(H5FD_onion_index_entry_t) * new_aix.n_entries);
     aix->n_entries = new_aix.n_entries;
 
     /* Copy (old) kept archival list entries to replacement list */
     if (n_kept > 0) {
-        memcpy(&aix->list[aix->n_entries], kept_list, sizeof(H5FD_onion_index_entry_t) * n_kept);
+        H5MM_memcpy(&aix->list[aix->n_entries], kept_list, sizeof(H5FD_onion_index_entry_t) * n_kept);
         aix->n_entries += n_kept;
     }
 

@@ -135,8 +135,12 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Test basic generic property list callback functionality', total_error)
 
   ret_total_error = 0
-  CALL test_iter_group(ret_total_error)
+  CALL test_iter_group(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing group iteration functionality', total_error)
+
+  ret_total_error = 0
+  CALL test_visit(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing link visit functionality', total_error)
 
   ret_total_error = 0
   CALL test_nbit(ret_total_error)
@@ -170,10 +174,6 @@ PROGRAM fortranlibtest_F03
   ret_total_error = 0
   CALL test_obj_info(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing object info functions ', total_error)
-
-  ret_total_error = 0
-  CALL test_get_file_image(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing get file image ', total_error)
 
 !     write(*,*)
 !     write(*,*) '========================================='

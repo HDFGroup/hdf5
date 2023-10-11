@@ -31,17 +31,17 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    hbool_t     quiet = FALSE;
+    bool        quiet = false;
     const char *name  = NULL;
     int         ret   = 0;
 
     switch (argc) {
         case 3:
-            if (HDstrcmp(argv[1], "-f") != 0) {
+            if (strcmp(argv[1], "-f") != 0) {
                 usage();
                 return EXIT_FAILURE;
             }
-            quiet = TRUE;
+            quiet = true;
             name  = argv[2];
             break;
         case 2:

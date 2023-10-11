@@ -67,14 +67,14 @@
 static herr_t H5HL__cache_prefix_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, void *udata,
                                                      size_t *actual_len);
-static void  *H5HL__cache_prefix_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HL__cache_prefix_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HL__cache_prefix_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_prefix_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HL__cache_prefix_free_icr(void *thing);
 
 /* Local heap data block */
 static herr_t H5HL__cache_datablock_get_initial_load_size(void *udata, size_t *image_len);
-static void  *H5HL__cache_datablock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HL__cache_datablock_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5HL__cache_datablock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing);
@@ -394,7 +394,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5HL_t               *heap      = NULL;                           /* Local heap */
     H5HL_prfx_t          *prfx      = NULL;                           /* Heap prefix deserialized */
@@ -432,7 +432,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbo
         /* Check if heap data block is contiguous with header */
         if (H5_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
             /* Note that the heap should be a single object in the cache */
-            heap->single_cache_obj = TRUE;
+            heap->single_cache_obj = true;
 
             /* Allocate space for the heap data image */
             if (NULL == (heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, heap->dblk_size)))
@@ -456,7 +456,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbo
             /* Note that the heap should _NOT_ be a single
              * object in the cache
              */
-            heap->single_cache_obj = FALSE;
+            heap->single_cache_obj = false;
     }
 
     /* Set return value */
@@ -683,7 +683,7 @@ H5HL__cache_datablock_get_initial_load_size(void *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5HL_dblk_t *dblk      = NULL;             /* Local heap data block deserialized */
     H5HL_t      *heap      = (H5HL_t *)_udata; /* User data for callback */

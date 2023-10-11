@@ -345,7 +345,7 @@ H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_o
 {
     H5VL_object_t  *tmp_vol_obj = NULL;                                         /* Object for id */
     H5VL_object_t **vol_obj_ptr = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for id */
-    hbool_t         vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    bool            vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
     herr_t          ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -357,7 +357,7 @@ H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_o
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(*vol_obj_ptr) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
@@ -1018,15 +1018,15 @@ void *
 H5VL_attr_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                  hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__attr_create(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -1122,15 +1122,15 @@ void *
 H5VL_attr_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__attr_open(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -1221,15 +1221,15 @@ done:
 herr_t
 H5VL_attr_read(const H5VL_object_t *vol_obj, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_read(vol_obj->data, vol_obj->connector->cls, mem_type_id, buf, dxpl_id, req) < 0)
@@ -1319,15 +1319,15 @@ done:
 herr_t
 H5VL_attr_write(const H5VL_object_t *vol_obj, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_write(vol_obj->data, vol_obj->connector->cls, mem_type_id, buf, dxpl_id, req) < 0)
@@ -1417,15 +1417,15 @@ done:
 herr_t
 H5VL_attr_get(const H5VL_object_t *vol_obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -1519,15 +1519,15 @@ herr_t
 H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                    H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
@@ -1621,15 +1621,15 @@ done:
 herr_t
 H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
@@ -1859,15 +1859,15 @@ H5VL_dataset_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_p
                     hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id,
                     void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL ==
@@ -1964,15 +1964,15 @@ void *
 H5VL_dataset_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                   hid_t dapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__dataset_open(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -2069,7 +2069,7 @@ herr_t
 H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
                          hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
-    hbool_t       vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    bool          vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
     herr_t        ret_value = SUCCEED;     /* Return value */
 
@@ -2084,7 +2084,7 @@ H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem
     tmp_vol_obj.rc        = 1;
     if (H5VL_set_vol_wrapper(&tmp_vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_read(count, obj, connector->cls, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
@@ -2113,11 +2113,11 @@ herr_t
 H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[],
                   hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *obj_local;               /* Local buffer for obj */
-    void  **obj = &obj_local;        /* Array of object pointers */
-    size_t  i;                       /* Local index variable */
-    herr_t  ret_value = SUCCEED;     /* Return value */
+    bool   vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void  *obj_local;               /* Local buffer for obj */
+    void **obj = &obj_local;        /* Array of object pointers */
+    size_t i;                       /* Local index variable */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2127,7 +2127,7 @@ H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_i
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj[0]) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Allocate obj array if necessary */
     if (count > 1)
@@ -2259,7 +2259,7 @@ H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t me
                           hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, const void *buf[],
                           void **req)
 {
-    hbool_t       vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    bool          vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
     H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
     herr_t        ret_value = SUCCEED;     /* Return value */
 
@@ -2274,7 +2274,7 @@ H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t me
     tmp_vol_obj.rc        = 1;
     if (H5VL_set_vol_wrapper(&tmp_vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_write(count, obj, connector->cls, mem_type_id, mem_space_id, file_space_id, dxpl_id,
@@ -2303,11 +2303,11 @@ herr_t
 H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[],
                    hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *obj_local;               /* Local buffer for obj */
-    void  **obj = &obj_local;        /* Array of object pointers */
-    size_t  i;                       /* Local index variable */
-    herr_t  ret_value = SUCCEED;     /* Return value */
+    bool   vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void  *obj_local;               /* Local buffer for obj */
+    void **obj = &obj_local;        /* Array of object pointers */
+    size_t i;                       /* Local index variable */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2317,7 +2317,7 @@ H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj[0]) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Allocate obj array if necessary */
     if (count > 1)
@@ -2443,15 +2443,15 @@ done:
 herr_t
 H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -2543,15 +2543,15 @@ herr_t
 H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
                       void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -2642,15 +2642,15 @@ done:
 herr_t
 H5VL_dataset_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -2787,8 +2787,8 @@ done:
 herr_t
 H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2801,7 +2801,7 @@ H5VL_dataset_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_close(vol_obj->data, vol_obj->connector->cls, dxpl_id, req) < 0)
@@ -2894,15 +2894,15 @@ void *
 H5VL_datatype_commit(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__datatype_commit(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -2998,15 +2998,15 @@ void *
 H5VL_datatype_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                    hid_t tapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__datatype_open(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -3098,15 +3098,15 @@ done:
 herr_t
 H5VL_datatype_get(const H5VL_object_t *vol_obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -3198,15 +3198,15 @@ herr_t
 H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id,
                        void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -3297,15 +3297,15 @@ done:
 herr_t
 H5VL_datatype_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -3335,7 +3335,7 @@ H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
 {
     H5VL_object_t  *tmp_vol_obj = NULL;                                         /* Object for id */
     H5VL_object_t **vol_obj_ptr = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for id */
-    hbool_t         vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    bool            vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
     herr_t          ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3349,7 +3349,7 @@ H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(*vol_obj_ptr) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_optional((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, args, dxpl_id, req) < 0)
@@ -3486,15 +3486,15 @@ done:
 herr_t
 H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_close(vol_obj->data, vol_obj->connector->cls, dxpl_id, req) < 0)
@@ -3703,7 +3703,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     const H5VL_class_t              *cls = (const H5VL_class_t *)plugin_info;
     H5P_genplist_t                  *fapl_plist;
     H5P_genplist_t                  *fapl_plist_copy;
-    hbool_t                          is_accessible = FALSE; /* Whether file is accessible */
+    bool                             is_accessible = false; /* Whether file is accessible */
     ssize_t                          num_errors    = 0;
     herr_t                           status;
     hid_t                            connector_id = H5I_INVALID_HID;
@@ -3724,13 +3724,13 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     udata->cls = cls;
 
     /* Attempt to register plugin as a VOL connector */
-    if ((connector_id = H5VL__register_connector_by_class(cls, TRUE, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
+    if ((connector_id = H5VL__register_connector_by_class(cls, true, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5_ITER_ERROR, "unable to register VOL connector");
 
     /* Setup FAPL with registered VOL connector */
     if (NULL == (fapl_plist = (H5P_genplist_t *)H5I_object_verify(udata->fapl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a property list");
-    if ((fapl_id = H5P_copy_plist(fapl_plist, TRUE)) < 0)
+    if ((fapl_id = H5P_copy_plist(fapl_plist, true)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy fapl");
     if (NULL == (fapl_plist_copy = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a property list");
@@ -3821,7 +3821,7 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req))) {
-        hbool_t is_default_conn = TRUE;
+        bool is_default_conn = true;
 
         /* Opening the file failed - Determine whether we should search
          * the plugin path to see if any other VOL connectors are available
@@ -3951,15 +3951,15 @@ done:
 herr_t
 H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__file_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -4050,7 +4050,7 @@ herr_t
 H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     const H5VL_class_t *cls;                       /* VOL connector's class struct */
-    hbool_t             vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    bool                vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -4087,7 +4087,7 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args
 
         if (H5VL_set_vol_wrapper(vol_obj) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-        vol_wrapper_set = TRUE;
+        vol_wrapper_set = true;
 
         /* Set the VOL connector class pointer */
         cls = vol_obj->connector->cls;
@@ -4181,15 +4181,15 @@ done:
 herr_t
 H5VL_file_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__file_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -4326,15 +4326,15 @@ done:
 herr_t
 H5VL_file_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__file_close(vol_obj->data, vol_obj->connector->cls, dxpl_id, req) < 0)
@@ -4426,15 +4426,15 @@ void *
 H5VL_group_create(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                   hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__group_create(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -4529,15 +4529,15 @@ void *
 H5VL_group_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, const char *name,
                 hid_t gapl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__group_open(vol_obj->data, loc_params, vol_obj->connector->cls, name,
@@ -4628,15 +4628,15 @@ done:
 herr_t
 H5VL_group_get(const H5VL_object_t *vol_obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__group_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -4726,15 +4726,15 @@ done:
 herr_t
 H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__group_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -4826,15 +4826,15 @@ done:
 herr_t
 H5VL_group_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
@@ -4973,15 +4973,15 @@ done:
 herr_t
 H5VL_group_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__group_close(vol_obj->data, vol_obj->connector->cls, dxpl_id, req) < 0)
@@ -5075,7 +5075,7 @@ H5VL_link_create(H5VL_link_create_args_t *args, const H5VL_object_t *vol_obj,
                  const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_object_t tmp_vol_obj;               /* Temporary VOL object */
-    hbool_t       vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    bool          vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
     herr_t        ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -5092,7 +5092,7 @@ H5VL_link_create(H5VL_link_create_args_t *args, const H5VL_object_t *vol_obj,
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(&tmp_vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_create(args, vol_obj->data, loc_params, vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id,
@@ -5188,7 +5188,7 @@ H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
                hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     const H5VL_object_t *vol_obj;                   /* VOL object for object with data */
-    hbool_t              vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    bool                 vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
     herr_t               ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -5197,7 +5197,7 @@ H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
     vol_obj = (src_vol_obj->data ? src_vol_obj : dst_vol_obj);
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_copy(src_vol_obj->data, loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2,
@@ -5295,7 +5295,7 @@ H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
                hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     const H5VL_object_t *vol_obj;                   /* VOL object for object with data */
-    hbool_t              vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    bool                 vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
     herr_t               ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -5304,7 +5304,7 @@ H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
     vol_obj = (src_vol_obj->data ? src_vol_obj : dst_vol_obj);
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_move(src_vol_obj->data, loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2,
@@ -5399,15 +5399,15 @@ herr_t
 H5VL_link_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args,
               hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_get(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -5500,15 +5500,15 @@ herr_t
 H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                    H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
@@ -5603,15 +5603,15 @@ herr_t
 H5VL_link_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                    H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_optional(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -5677,7 +5677,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     void             *token     = NULL;            /* Request token for async operation        */
     void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hbool_t           vol_wrapper_set = FALSE;     /* Whether the VOL object wrapping context was set up */
+    bool              vol_wrapper_set = false;     /* Whether the VOL object wrapping context was set up */
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -5688,7 +5688,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* name is verified in H5VL_setup_name_args() */
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, &vol_obj, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, false, lapl_id, &vol_obj, &loc_params) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set link access arguments");
 
     /* Set up request token pointer for asynchronous operation */
@@ -5698,7 +5698,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_optional(vol_obj->data, &loc_params, vol_obj->connector->cls, args, dxpl_id, token_ptr) <
@@ -5764,15 +5764,15 @@ void *
 H5VL_object_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *params, H5I_type_t *opened_type,
                  hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    void   *ret_value       = NULL;  /* Return value */
+    bool  vol_wrapper_set = false; /* Whether the VOL object wrapping context was set up */
+    void *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__object_open(vol_obj->data, params, vol_obj->connector->cls, opened_type,
@@ -5868,8 +5868,8 @@ H5VL_object_copy(const H5VL_object_t *src_obj, const H5VL_loc_params_t *src_loc_
                  const H5VL_object_t *dst_obj, const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
                  hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -5881,7 +5881,7 @@ H5VL_object_copy(const H5VL_object_t *src_obj, const H5VL_loc_params_t *src_loc_
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(src_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__object_copy(src_obj->data, src_loc_params, src_name, dst_obj->data, dst_loc_params, dst_name,
@@ -5977,15 +5977,15 @@ herr_t
 H5VL_object_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                 H5VL_object_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__object_get(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -6078,15 +6078,15 @@ herr_t
 H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                      H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
@@ -6181,15 +6181,15 @@ herr_t
 H5VL_object_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                      H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__object_optional(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req) < 0)
@@ -6256,7 +6256,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     void             *token     = NULL;            /* Request token for async operation        */
     void            **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hbool_t           vol_wrapper_set = FALSE;     /* Whether the VOL object wrapping context was set up */
+    bool              vol_wrapper_set = false;     /* Whether the VOL object wrapping context was set up */
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -6267,7 +6267,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     /* name is verified in H5VL_setup_name_args() */
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, &vol_obj, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, false, lapl_id, &vol_obj, &loc_params) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set link access arguments");
 
     /* Set up request token pointer for asynchronous operation */
@@ -6277,7 +6277,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__object_optional(vol_obj->data, &loc_params, vol_obj->connector->cls, args, dxpl_id, token_ptr) <
@@ -6351,15 +6351,15 @@ herr_t
 H5VL_introspect_get_conn_cls(const H5VL_object_t *vol_obj, H5VL_get_conn_lvl_t lvl,
                              const H5VL_class_t **conn_cls)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__introspect_get_conn_cls(vol_obj->data, vol_obj->connector->cls, lvl, conn_cls) < 0)
@@ -6527,15 +6527,15 @@ done:
 herr_t
 H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__introspect_opt_query(vol_obj->data, vol_obj->connector->cls, subcls, opt_type, flags) < 0)
@@ -6629,8 +6629,8 @@ done:
 herr_t
 H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_status_t *status)
 {
-    hbool_t vol_wrapper_set = FALSE;
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -6640,7 +6640,7 @@ H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_s
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_wait(vol_obj->data, vol_obj->connector->cls, timeout, status) < 0)
@@ -6733,8 +6733,8 @@ done:
 herr_t
 H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -6744,7 +6744,7 @@ H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_notify(vol_obj->data, vol_obj->connector->cls, cb, ctx) < 0)
@@ -6836,8 +6836,8 @@ done:
 herr_t
 H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
 {
-    hbool_t vol_wrapper_set = FALSE;
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -6847,7 +6847,7 @@ H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_cancel(vol_obj->data, vol_obj->connector->cls, status) < 0)
@@ -6939,8 +6939,8 @@ done:
 herr_t
 H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t *args)
 {
-    hbool_t vol_wrapper_set = FALSE;
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -6950,7 +6950,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, args) < 0)
@@ -7044,8 +7044,8 @@ done:
 herr_t
 H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
 {
-    hbool_t vol_wrapper_set = FALSE;
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7055,7 +7055,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, args) < 0)
@@ -7185,8 +7185,8 @@ done:
 herr_t
 H5VL_request_free(const H5VL_object_t *vol_obj)
 {
-    hbool_t vol_wrapper_set = FALSE;
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7196,7 +7196,7 @@ H5VL_request_free(const H5VL_object_t *vol_obj)
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding VOL callback */
     if (H5VL__request_free(vol_obj->data, vol_obj->connector->cls) < 0)
@@ -7999,15 +7999,15 @@ done:
 herr_t
 H5VL_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    bool   vol_wrapper_set = false;   /* Whether the VOL object wrapping context was set up */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Set wrapper info in API context */
     if (H5VL_set_vol_wrapper(vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info");
-    vol_wrapper_set = TRUE;
+    vol_wrapper_set = true;
 
     /* Call the corresponding internal VOL routine */
     if ((ret_value = H5VL__optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req)) < 0)

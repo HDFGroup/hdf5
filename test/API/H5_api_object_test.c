@@ -150,10 +150,10 @@ test_open_object(void)
         goto error;
     }
 
-    if ((fspace_id = generate_random_dataspace(OBJECT_OPEN_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((fspace_id = generate_random_dataspace(OBJECT_OPEN_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -242,7 +242,7 @@ test_open_object(void)
         {
             TESTING_2("H5Oopen on a committed datatype");
 
-            if ((type_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+            if ((type_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
                 H5_FAILED();
                 printf("    couldn't create datatype '%s'\n", OBJECT_OPEN_TEST_TYPE_NAME);
                 PART_ERROR(H5Oopen_dtype);
@@ -836,10 +836,10 @@ test_object_exists(void)
         goto error;
     }
 
-    if ((fspace_id = generate_random_dataspace(OBJECT_EXISTS_TEST_DSET_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((fspace_id = generate_random_dataspace(OBJECT_EXISTS_TEST_DSET_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -921,7 +921,7 @@ test_object_exists(void)
         {
             TESTING_2("H5Oexists_by_name on a committed datatype");
 
-            if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+            if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
                 H5_FAILED();
                 printf("    couldn't create datatype '%s'\n", OBJECT_EXISTS_TEST_TYPE_NAME);
                 PART_ERROR(H5Oexists_by_name_dtype);
@@ -1287,10 +1287,10 @@ test_link_object(void)
         goto error;
     }
 
-    if ((fspace_id = generate_random_dataspace(OBJECT_LINK_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((fspace_id = generate_random_dataspace(OBJECT_LINK_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -1645,10 +1645,10 @@ test_incr_decr_object_refcount(void)
         goto error;
     }
 
-    if ((fspace_id = generate_random_dataspace(OBJECT_REF_COUNT_TEST_DSET_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((fspace_id = generate_random_dataspace(OBJECT_REF_COUNT_TEST_DSET_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -2022,12 +2022,12 @@ test_object_copy_basic(void)
         goto error;
     }
 
-    if ((space_id = generate_random_dataspace(OBJECT_COPY_BASIC_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((space_id = generate_random_dataspace(OBJECT_COPY_BASIC_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
-    if ((attr_space_id = generate_random_dataspace(OBJECT_COPY_BASIC_TEST_SPACE_RANK, NULL, NULL, TRUE)) < 0)
+    if ((attr_space_id = generate_random_dataspace(OBJECT_COPY_BASIC_TEST_SPACE_RANK, NULL, NULL, true)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     /* Create the test group object, along with its nested members and the attributes attached to it. */
@@ -2117,7 +2117,7 @@ test_object_copy_basic(void)
     }
 
     /* Create the test committed datatype object, along with the attributes attached to it. */
-    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
         H5_FAILED();
         printf("    couldn't create datatype\n");
         goto error;
@@ -2592,9 +2592,9 @@ test_object_copy_already_existing(void)
     }
 
     if ((space_id =
-             generate_random_dataspace(OBJECT_COPY_ALREADY_EXISTING_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+             generate_random_dataspace(OBJECT_COPY_ALREADY_EXISTING_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     /* Create the test group object */
@@ -2614,7 +2614,7 @@ test_object_copy_already_existing(void)
     }
 
     /* Create the test committed datatype object */
-    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
         H5_FAILED();
         printf("    couldn't create datatype\n");
         goto error;
@@ -3024,13 +3024,13 @@ test_object_copy_no_attributes(void)
         goto error;
     }
 
-    if ((space_id = generate_random_dataspace(OBJECT_COPY_NO_ATTRS_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((space_id = generate_random_dataspace(OBJECT_COPY_NO_ATTRS_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
-    if ((attr_space_id = generate_random_dataspace(OBJECT_COPY_NO_ATTRS_TEST_SPACE_RANK, NULL, NULL, TRUE)) <
+    if ((attr_space_id = generate_random_dataspace(OBJECT_COPY_NO_ATTRS_TEST_SPACE_RANK, NULL, NULL, true)) <
         0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     /* Create the test group object, along with the attributes attached to it. */
@@ -3090,7 +3090,7 @@ test_object_copy_no_attributes(void)
     }
 
     /* Create the test committed datatype object, along with the attributes attached to it. */
-    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
         H5_FAILED();
         printf("    couldn't create datatype\n");
         goto error;
@@ -3532,7 +3532,7 @@ test_object_copy_by_soft_link(void)
         goto error;
     }
 
-    if ((attr_space_id = generate_random_dataspace(OBJECT_COPY_SOFT_LINK_TEST_SPACE_RANK, NULL, NULL, TRUE)) <
+    if ((attr_space_id = generate_random_dataspace(OBJECT_COPY_SOFT_LINK_TEST_SPACE_RANK, NULL, NULL, true)) <
         0)
         TEST_ERROR;
 
@@ -4241,14 +4241,14 @@ test_object_copy_between_files(void)
         goto error;
     }
 
-    if ((space_id = generate_random_dataspace(OBJECT_COPY_BETWEEN_FILES_TEST_SPACE_RANK, NULL, NULL, FALSE)) <
+    if ((space_id = generate_random_dataspace(OBJECT_COPY_BETWEEN_FILES_TEST_SPACE_RANK, NULL, NULL, false)) <
         0)
         TEST_ERROR;
     if ((attr_space_id =
-             generate_random_dataspace(OBJECT_COPY_BETWEEN_FILES_TEST_SPACE_RANK, NULL, NULL, TRUE)) < 0)
+             generate_random_dataspace(OBJECT_COPY_BETWEEN_FILES_TEST_SPACE_RANK, NULL, NULL, true)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     /* Create the test group object, along with its nested members and the attributes attached to it. */
@@ -4338,7 +4338,7 @@ test_object_copy_between_files(void)
     }
 
     /* Create the test committed datatype object, along with the attributes attached to it. */
-    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+    if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
         H5_FAILED();
         printf("    couldn't create datatype\n");
         goto error;
@@ -5106,13 +5106,13 @@ test_object_visit(void)
         goto error;
     }
 
-    if ((fspace_id = generate_random_dataspace(OBJECT_VISIT_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((fspace_id = generate_random_dataspace(OBJECT_VISIT_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
-    if ((type_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+    if ((type_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
         H5_FAILED();
         printf("    couldn't create datatype '%s'\n", OBJECT_VISIT_TEST_TYPE_NAME);
         goto error;
@@ -6420,10 +6420,10 @@ test_close_object(void)
         goto error;
     }
 
-    if ((fspace_id = generate_random_dataspace(OBJECT_CLOSE_TEST_SPACE_RANK, NULL, NULL, FALSE)) < 0)
+    if ((fspace_id = generate_random_dataspace(OBJECT_CLOSE_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -6500,7 +6500,7 @@ test_close_object(void)
         {
             TESTING_2("H5Oclose on a committed datatype");
 
-            if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+            if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
                 H5_FAILED();
                 printf("    couldn't create datatype '%s'\n", OBJECT_CLOSE_TEST_TYPE_NAME);
                 PART_ERROR(H5Oclose_dtype);
@@ -6675,11 +6675,11 @@ test_close_invalid_objects(void)
         goto error;
     }
 
-    if ((attr_space_id = generate_random_dataspace(OBJECT_CLOSE_INVALID_TEST_SPACE_RANK, NULL, NULL, TRUE)) <
+    if ((attr_space_id = generate_random_dataspace(OBJECT_CLOSE_INVALID_TEST_SPACE_RANK, NULL, NULL, true)) <
         0)
         TEST_ERROR;
 
-    if ((attr_dtype = generate_random_datatype(H5T_NO_CLASS, TRUE)) < 0)
+    if ((attr_dtype = generate_random_datatype(H5T_NO_CLASS, true)) < 0)
         TEST_ERROR;
 
     if ((attr_id = H5Acreate2(group_id, OBJECT_CLOSE_INVALID_TEST_ATTRIBUTE_NAME, attr_dtype, attr_space_id,
@@ -6883,7 +6883,7 @@ object_copy_attribute_iter_callback(hid_t location_id, const char *attr_name, co
 
     snprintf(expected_name, 256, "attr%d", (int)(*counter));
 
-    if (HDstrncmp(attr_name, expected_name, 256)) {
+    if (strncmp(attr_name, expected_name, 256)) {
         printf("    attribute name '%s' did not match expected name '%s'\n", attr_name, expected_name);
         ret_value = H5_ITER_ERROR;
         goto done;
@@ -7028,28 +7028,28 @@ object_visit_callback(hid_t o_id, const char *name, const H5O_info2_t *object_in
 
     UNUSED(o_id);
 
-    if (!HDstrncmp(name, ".", strlen(".") + 1) &&
+    if (!strncmp(name, ".", strlen(".") + 1) &&
         (counter_val == 0 || counter_val == 4 || counter_val == 8 || counter_val == 12)) {
         if (H5O_TYPE_GROUP == object_info->type)
             goto done;
         else
             printf("    type for object '%s' was not H5O_TYPE_GROUP\n", name);
     }
-    else if (!HDstrncmp(name, OBJECT_VISIT_TEST_GROUP_NAME, strlen(OBJECT_VISIT_TEST_GROUP_NAME) + 1) &&
+    else if (!strncmp(name, OBJECT_VISIT_TEST_GROUP_NAME, strlen(OBJECT_VISIT_TEST_GROUP_NAME) + 1) &&
              (counter_val == 2 || counter_val == 6 || counter_val == 9 || counter_val == 15)) {
         if (H5O_TYPE_GROUP == object_info->type)
             goto done;
         else
             printf("    type for object '%s' was not H5O_TYPE_GROUP\n", name);
     }
-    else if (!HDstrncmp(name, OBJECT_VISIT_TEST_DSET_NAME, strlen(OBJECT_VISIT_TEST_DSET_NAME) + 1) &&
+    else if (!strncmp(name, OBJECT_VISIT_TEST_DSET_NAME, strlen(OBJECT_VISIT_TEST_DSET_NAME) + 1) &&
              (counter_val == 1 || counter_val == 7 || counter_val == 10 || counter_val == 14)) {
         if (H5O_TYPE_DATASET == object_info->type)
             goto done;
         else
             printf("    type for object '%s' was not H5O_TYPE_DATASET\n", name);
     }
-    else if (!HDstrncmp(name, OBJECT_VISIT_TEST_TYPE_NAME, strlen(OBJECT_VISIT_TEST_TYPE_NAME) + 1) &&
+    else if (!strncmp(name, OBJECT_VISIT_TEST_TYPE_NAME, strlen(OBJECT_VISIT_TEST_TYPE_NAME) + 1) &&
              (counter_val == 3 || counter_val == 5 || counter_val == 11 || counter_val == 13)) {
         if (H5O_TYPE_NAMED_DATATYPE == object_info->type)
             goto done;
@@ -7078,7 +7078,7 @@ object_visit_dset_callback(hid_t o_id, const char *name, const H5O_info2_t *obje
     UNUSED(o_id);
     UNUSED(op_data);
 
-    if (HDstrncmp(name, ".", strlen(".") + 1)) {
+    if (strncmp(name, ".", strlen(".") + 1)) {
         printf("    object '%s' didn't match known names\n", name);
         return -1;
     }
@@ -7102,7 +7102,7 @@ object_visit_dtype_callback(hid_t o_id, const char *name, const H5O_info2_t *obj
     UNUSED(o_id);
     UNUSED(op_data);
 
-    if (HDstrncmp(name, ".", strlen(".") + 1)) {
+    if (strncmp(name, ".", strlen(".") + 1)) {
         printf("    object '%s' didn't match known names\n", name);
         return -1;
     }
@@ -7128,7 +7128,7 @@ object_visit_soft_link_callback(hid_t o_id, const char *name, const H5O_info2_t 
 
     UNUSED(o_id);
 
-    if (!HDstrncmp(name, ".", strlen(".") + 1) && (counter_val <= 5)) {
+    if (!strncmp(name, ".", strlen(".") + 1) && (counter_val <= 5)) {
         if (H5O_TYPE_GROUP == object_info->type)
             goto done;
         else

@@ -415,7 +415,7 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to one-chunk filtered dataset");
+        puts("Testing write to one-chunk filtered dataset");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -567,7 +567,7 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks");
+        puts("Testing write to unshared filtered chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -716,7 +716,7 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing partial write to unshared filtered chunks");
+        puts("Testing partial write to unshared filtered chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -874,7 +874,7 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to shared filtered chunks");
+        puts("Testing write to shared filtered chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1027,7 +1027,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks w/ single unlimited dimension");
+        puts("Testing write to unshared filtered chunks w/ single unlimited dimension");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1181,7 +1181,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to shared filtered chunks w/ single unlimited dimension");
+        puts("Testing write to shared filtered chunks w/ single unlimited dimension");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1336,7 +1336,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks w/ two unlimited dimensions");
+        puts("Testing write to unshared filtered chunks w/ two unlimited dimensions");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1503,7 +1503,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to shared filtered chunks w/ two unlimited dimensions");
+        puts("Testing write to shared filtered chunks w/ two unlimited dimensions");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1669,7 +1669,7 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to filtered chunks with a single process having no selection");
+        puts("Testing write to filtered chunks with a single process having no selection");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1833,7 +1833,7 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to filtered chunks with all processes having no selection");
+        puts("Testing write to filtered chunks with all processes having no selection");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -1952,7 +1952,7 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to filtered chunks with point selection");
+        puts("Testing write to filtered chunks with point selection");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -2100,7 +2100,7 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing interleaved write to filtered chunks");
+        puts("Testing interleaved write to filtered chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -2269,7 +2269,7 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared transformed and filtered chunks");
+        puts("Testing write to unshared transformed and filtered chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -2431,7 +2431,7 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks on separate pages in 3D dataset");
+        puts("Testing write to unshared filtered chunks on separate pages in 3D dataset");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -2591,7 +2591,7 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks on the same pages in 3D dataset");
+        puts("Testing write to unshared filtered chunks on the same pages in 3D dataset");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -2752,7 +2752,7 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to shared filtered chunks in 3D dataset");
+        puts("Testing write to shared filtered chunks in 3D dataset");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -2925,8 +2925,8 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+        puts("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype "
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -3104,8 +3104,8 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+        puts("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype "
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -3295,8 +3295,8 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype "
-               "conversion");
+        puts("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype "
+             "conversion");
 
     /* Skip for MPI communicator size of 1 */
     if (mpi_size == 1) {
@@ -3492,8 +3492,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs(
-            "Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
+        puts("Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
 
     /* Skip for MPI communicator size of 1 */
     if (mpi_size == 1) {
@@ -3690,7 +3689,7 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from one-chunk filtered dataset");
+        puts("Testing read from one-chunk filtered dataset");
 
     dataset_dims[0] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_NROWS;
     dataset_dims[1] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_NCOLS;
@@ -3889,7 +3888,7 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from unshared filtered chunks");
+        puts("Testing read from unshared filtered chunks");
 
     dataset_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NCOLS;
@@ -4088,7 +4087,7 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from shared filtered chunks");
+        puts("Testing read from shared filtered chunks");
 
     dataset_dims[0] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_NCOLS;
@@ -4305,7 +4304,7 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from filtered chunks with a single process having no selection");
+        puts("Testing read from filtered chunks with a single process having no selection");
 
     dataset_dims[0] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
@@ -4523,7 +4522,7 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing read from filtered chunks with all processes having no selection");
+        puts("Testing read from filtered chunks with all processes having no selection");
 
     dataset_dims[0] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
@@ -4663,7 +4662,7 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from filtered chunks with point selection");
+        puts("Testing read from filtered chunks with point selection");
 
     dataset_dims[0] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS;
@@ -4877,7 +4876,7 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing interleaved read from filtered chunks");
+        puts("Testing interleaved read from filtered chunks");
 
     dataset_dims[0] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NROWS;
     dataset_dims[1] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS;
@@ -5103,7 +5102,7 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     hid_t        filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing read from unshared filtered chunks on separate pages in 3D dataset");
+        puts("Testing read from unshared filtered chunks on separate pages in 3D dataset");
 
     dataset_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_NROWS;
     dataset_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_NCOLS;
@@ -5320,7 +5319,7 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from unshared transformed and filtered chunks");
+        puts("Testing read from unshared transformed and filtered chunks");
 
     dataset_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS;
     dataset_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
@@ -5543,7 +5542,7 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from unshared filtered chunks on the same pages in 3D dataset");
+        puts("Testing read from unshared filtered chunks on the same pages in 3D dataset");
 
     dataset_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_NROWS;
     dataset_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_NCOLS;
@@ -5752,7 +5751,7 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     hid_t        filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing read from shared filtered chunks in 3D dataset");
+        puts("Testing read from shared filtered chunks in 3D dataset");
 
     dataset_dims[0] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_NROWS;
     dataset_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_NCOLS;
@@ -5983,8 +5982,8 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     int  *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+        puts("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype "
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -6208,8 +6207,8 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     int  *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype "
-               "conversion");
+        puts("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype "
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -6439,8 +6438,8 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     int                 *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype "
-               "conversion");
+        puts("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype "
+             "conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
     if (filter_id == H5Z_FILTER_SZIP || filter_id == H5Z_FILTER_SCALEOFFSET) {
@@ -6673,7 +6672,7 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     int                 *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs(
+        puts(
             "Testing read from shared filtered chunks in Compound Datatype dataset with Datatype conversion");
 
     /* SZIP and ScaleOffset filters don't support compound types */
@@ -6900,7 +6899,7 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write file serially; read file in parallel");
+        puts("Testing write file serially; read file in parallel");
 
     dataset_dims[0] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_NROWS;
     dataset_dims[1] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_NCOLS;
@@ -7040,7 +7039,7 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write file in parallel; read serially");
+        puts("Testing write file in parallel; read serially");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7214,7 +7213,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     hid_t   filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing continually shrinking/growing chunks");
+        puts("Testing continually shrinking/growing chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7364,7 +7363,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to unshared filtered edge chunks");
+        puts("Testing write to unshared filtered edge chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7463,7 +7462,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
 
     /* Repeat the previous, but set option to not filter partial edge chunks */
     if (MAINPROCESS)
-        HDputs("Testing write to unshared unfiltered edge chunks");
+        puts("Testing write to unshared unfiltered edge chunks");
 
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
@@ -7566,7 +7565,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing write to shared filtered edge chunks");
+        puts("Testing write to shared filtered edge chunks");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -7666,7 +7665,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
 
     /* Repeat the previous, but set option to not filter partial edge chunks */
     if (MAINPROCESS)
-        HDputs("Testing write to shared unfiltered edge chunks");
+        puts("Testing write to shared unfiltered edge chunks");
 
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
@@ -7788,7 +7787,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing fill values");
+        puts("Testing fill values");
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -8150,7 +8149,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     hid_t            filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        HDputs("Testing undefined fill value");
+        puts("Testing undefined fill value");
 
     VRFY((H5Pget_alloc_time(dcpl_id, &alloc_time) >= 0), "H5Pget_alloc_time succeeded");
 
@@ -8353,7 +8352,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     int        *displs     = NULL;
 
     if (MAINPROCESS)
-        HDputs("Testing fill time H5D_FILL_TIME_NEVER");
+        puts("Testing fill time H5D_FILL_TIME_NEVER");
 
     /*
      * Only run this test when incremental file space allocation is
@@ -8641,8 +8640,8 @@ main(int argc, char **argv)
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     VRFY((H5Pset_fapl_mpio(fapl_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
-    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, TRUE) >= 0), "H5Pset_all_coll_metadata_ops succeeded");
-    VRFY((H5Pset_coll_metadata_write(fapl_id, TRUE) >= 0), "H5Pset_coll_metadata_write succeeded");
+    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0), "H5Pset_all_coll_metadata_ops succeeded");
+    VRFY((H5Pset_coll_metadata_write(fapl_id, true) >= 0), "H5Pset_coll_metadata_write succeeded");
 
     VRFY((H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
          "Set libver bounds succeeded");
@@ -8653,7 +8652,7 @@ main(int argc, char **argv)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     VRFY((fcpl_id >= 0), "FCPL creation succeeded");
 
-    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, 1) >= 0),
+    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, true, 1) >= 0),
          "H5Pset_file_space_strategy succeeded");
 
     VRFY((h5_fixname(FILENAME[0], fapl_id, filenames[0], sizeof(filenames[0])) != NULL),
@@ -8751,9 +8750,9 @@ main(int argc, char **argv)
                 file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
                 VRFY((file_id >= 0), "H5Fopen succeeded");
 
-                HDsnprintf(group_name, sizeof(group_name), "%s_%s_%s", filterNames[cur_filter_idx],
-                           H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
-                           alloc_time);
+                snprintf(group_name, sizeof(group_name), "%s_%s_%s", filterNames[cur_filter_idx],
+                         H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
+                         alloc_time);
 
                 group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                 VRFY((group_id >= 0), "H5Gcreate2 succeeded");
@@ -8778,7 +8777,7 @@ main(int argc, char **argv)
                 }
 
                 if (MAINPROCESS)
-                    HDputs("");
+                    puts("");
             }
         }
     }
@@ -8793,7 +8792,7 @@ main(int argc, char **argv)
         goto exit;
 
     if (MAINPROCESS)
-        HDputs("All Parallel Filters tests passed\n");
+        puts("All Parallel Filters tests passed\n");
 
 exit:
     if (nerrors)

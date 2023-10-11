@@ -111,6 +111,7 @@ set (HDF5_HL_F90_F_BASE_SOURCES
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DOff.F90
 )
 
 if (BUILD_STATIC_LIBS)
@@ -242,6 +243,7 @@ set (mod_export_files
     h5lt.mod
     h5lt_const.mod
     h5im.mod
+    h5do.mod
 )
 
 if (BUILD_STATIC_LIBS)

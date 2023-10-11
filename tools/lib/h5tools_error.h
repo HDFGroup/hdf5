@@ -36,7 +36,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
         char lib_str[256];                                                                                   \
                                                                                                              \
         /* Initialize library version string for error class */                                              \
-        HDsnprintf(lib_str, sizeof(lib_str), "%d.%d.%d", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);     \
+        snprintf(lib_str, sizeof(lib_str), "%d.%d.%d", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);       \
                                                                                                              \
         /* Create new HDF5 error stack for the tools to use */                                               \
         if ((H5tools_ERR_STACK_g = H5Ecreate_stack()) < 0)                                                   \
@@ -213,7 +213,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
  */
 #define CATCH                                                                                                \
 catch_except:;                                                                                               \
-    past_catch = TRUE;
+    past_catch = true;
 
 /*
  * H5_LEAVE macro, used to facilitate control flow in a function. The argument

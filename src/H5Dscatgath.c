@@ -118,7 +118,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    H5MM_memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_WRITE;
     tmp_dset_info.buf.cvp  = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -219,7 +219,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    H5MM_memcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_READ;
     tmp_dset_info.buf.vp   = _buf;
     tmp_io_info.dsets_info = &tmp_dset_info;
@@ -448,14 +448,14 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
     void           *buf;                    /* Local pointer to application buffer */
     void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
-    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init  = false; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
-    hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
+    bool            bkg_iter_init  = false; /* Background iteration info has been initialized */
     H5S_sel_iter_t *file_iter      = NULL;  /* File selection iteration info*/
-    hbool_t         file_iter_init = FALSE; /* File selection iteration info has been initialized */
+    bool            file_iter_init = false; /* File selection iteration info has been initialized */
     hsize_t         smine_start;            /* Strip mine start loc	*/
     size_t          smine_nelmts;           /* Elements per strip	*/
-    hbool_t         in_place_tconv;         /* Whether to perform in-place type_conversion */
+    bool            in_place_tconv;         /* Whether to perform in-place type_conversion */
     herr_t          ret_value = SUCCEED;    /* Return value		*/
 
     FUNC_ENTER_PACKAGE
@@ -483,10 +483,10 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
      * buffers), and the either entire I/O operation can fit in the type conversion buffer or we need to use a
      * background buffer (and therefore could not do the I/O in one operation with in-place conversion
      * anyways). */
-    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, FALSE) &&
+    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, false) &&
         (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) &&
         (dset_info->type_info.need_bkg || (dset_info->nelmts <= dset_info->type_info.request_nelmts)))
-        in_place_tconv = FALSE;
+        in_place_tconv = false;
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -500,13 +500,13 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
     if (H5S_select_iter_init(file_iter, dset_info->file_space, dset_info->type_info.src_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
-    file_iter_init = TRUE; /*file selection iteration info has been initialized */
+    file_iter_init = true; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(mem_iter, dset_info->mem_space, dset_info->type_info.dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
-    mem_iter_init = TRUE; /*file selection iteration info has been initialized */
+    mem_iter_init = true; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(bkg_iter, dset_info->mem_space, dset_info->type_info.dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
-    bkg_iter_init = TRUE; /*file selection iteration info has been initialized */
+    bkg_iter_init = true; /*file selection iteration info has been initialized */
 
     /* Start strip mining... */
     for (smine_start = 0; smine_start < dset_info->nelmts; smine_start += smine_nelmts) {
@@ -633,14 +633,14 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     const void     *buf;                    /* Local pointer to application buffer */
     void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
-    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init  = false; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
-    hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
+    bool            bkg_iter_init  = false; /* Background iteration info has been initialized */
     H5S_sel_iter_t *file_iter      = NULL;  /* File selection iteration info*/
-    hbool_t         file_iter_init = FALSE; /* File selection iteration info has been initialized */
+    bool            file_iter_init = false; /* File selection iteration info has been initialized */
     hsize_t         smine_start;            /* Strip mine start loc	*/
     size_t          smine_nelmts;           /* Elements per strip	*/
-    hbool_t         in_place_tconv;         /* Whether to perform in-place type_conversion */
+    bool            in_place_tconv;         /* Whether to perform in-place type_conversion */
     herr_t          ret_value = SUCCEED;    /* Return value		*/
 
     FUNC_ENTER_PACKAGE
@@ -668,10 +668,10 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
      * buffers), and the either entire I/O operation can fit in the type conversion buffer or we need to use a
      * background buffer (and therefore could not do the I/O in one operation with in-place conversion
      * anyways). */
-    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, FALSE) &&
+    if (in_place_tconv && H5D__SCATGATH_USE_CMPD_OPT_WRITE(dset_info, false) &&
         (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) &&
         (dset_info->type_info.need_bkg || (dset_info->nelmts <= dset_info->type_info.request_nelmts)))
-        in_place_tconv = FALSE;
+        in_place_tconv = false;
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -685,14 +685,14 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     if (H5S_select_iter_init(file_iter, dset_info->file_space, dset_info->type_info.dst_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information");
-    file_iter_init = TRUE; /*file selection iteration info has been initialized */
+    file_iter_init = true; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(mem_iter, dset_info->mem_space, dset_info->type_info.src_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information");
-    mem_iter_init = TRUE; /*file selection iteration info has been initialized */
+    mem_iter_init = true; /*file selection iteration info has been initialized */
     if (H5S_select_iter_init(bkg_iter, dset_info->file_space, dset_info->type_info.dst_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
-    bkg_iter_init = TRUE; /*file selection iteration info has been initialized */
+    bkg_iter_init = true; /*file selection iteration info has been initialized */
 
     /* Start strip mining... */
     for (smine_start = 0; smine_start < dset_info->nelmts; smine_start += smine_nelmts) {
@@ -817,7 +817,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
 {
     H5S_t         **tmp_mem_spaces   = NULL;  /* Memory spaces to use for read from disk */
     H5S_sel_iter_t *mem_iter         = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init    = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init    = false; /* Memory selection iteration info has been initialized */
     void          **tmp_bufs         = NULL;  /* Buffers to use for read from disk */
     void           *tmp_bkg_buf      = NULL;  /* Temporary background buffer pointer */
     size_t          tconv_bytes_used = 0;     /* Number of bytes used so far in conversion buffer */
@@ -905,7 +905,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                                                  dset_info->type_info.dst_type_size, 0) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                         "unable to initialize memory selection information");
-                        mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+                        mem_iter_init = true; /* Memory selection iteration info has been initialized */
 
                         if ((size_t)io_info->sel_pieces[i]->piece_points !=
                             H5D__gather_mem(io_info->rbufs[i], mem_iter,
@@ -917,7 +917,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                         assert(mem_iter_init);
                         if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
-                        mem_iter_init = FALSE;
+                        mem_iter_init = false;
                     }
                 }
             }
@@ -949,7 +949,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                             "unable to initialize memory selection information");
-            mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+            mem_iter_init = true; /* Memory selection iteration info has been initialized */
 
             /* If the source and destination are compound types and subset of each other
              * and no conversion is needed, copy the data directly into user's buffer and
@@ -1006,7 +1006,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             assert(mem_iter_init);
             if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
-            mem_iter_init = FALSE;
+            mem_iter_init = false;
         }
     }
 
@@ -1049,7 +1049,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     H5S_t         **write_mem_spaces  = NULL;  /* Memory spaces to use for write to disk */
     size_t          spaces_added      = 0;     /* Number of spaces added to write_mem_spaces */
     H5S_sel_iter_t *mem_iter          = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init     = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init     = false; /* Memory selection iteration info has been initialized */
     const void    **write_bufs        = NULL;  /* Buffers to use for write to disk */
     size_t          tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
     size_t          bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
@@ -1113,7 +1113,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                                      0) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                             "unable to initialize memory selection information");
-            mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+            mem_iter_init = true; /* Memory selection iteration info has been initialized */
 
             /* Create block memory space */
             if (NULL ==
@@ -1244,7 +1244,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             assert(mem_iter_init);
             if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator");
-            mem_iter_init = FALSE;
+            mem_iter_init = false;
         }
     }
 

@@ -97,15 +97,15 @@ H5HF__tiny_init(H5HF_hdr_t *hdr)
      */
     if ((hdr->id_len - 1) <= H5HF_TINY_LEN_SHORT) {
         hdr->tiny_max_len      = hdr->id_len - 1;
-        hdr->tiny_len_extended = FALSE;
+        hdr->tiny_len_extended = false;
     } /* end if */
     else if ((hdr->id_len - 1) == (H5HF_TINY_LEN_SHORT + 1)) {
         hdr->tiny_max_len      = H5HF_TINY_LEN_SHORT;
-        hdr->tiny_len_extended = FALSE;
+        hdr->tiny_len_extended = false;
     } /* end if */
     else {
         hdr->tiny_max_len      = hdr->id_len - 2;
-        hdr->tiny_len_extended = TRUE;
+        hdr->tiny_len_extended = true;
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

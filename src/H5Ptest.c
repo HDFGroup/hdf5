@@ -107,7 +107,7 @@ H5P__open_class_path_test(const char *path)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5I_INVALID_HID, "unable to find class with full path");
 
     /* Get an ID for the class */
-    if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, true)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register property list class");
 
 done:

@@ -138,7 +138,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     fprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
         fprintf(stream, "  Back trace follows.");
-    HDfputc('\n', stream);
+    fputc('\n', stream);
 
     for (i = fstack->nused - 1; i >= 0; --i)
         fprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);
@@ -228,10 +228,9 @@ H5CS_pop(void)
 H5CS_t *
 H5CS_copy_stack(void)
 {
-    H5CS_t  *old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
-    H5CS_t  *new_stack;                       /* New function stack, for copy */
-    unsigned u;                               /* Local index variable */
-    H5CS_t  *ret_value = NULL;                /* Return value */
+    H5CS_t *old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
+    H5CS_t *new_stack;                       /* New function stack, for copy */
+    H5CS_t *ret_value = NULL;                /* Return value */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFS
@@ -248,7 +247,7 @@ H5CS_copy_stack(void)
 
     /* Copy pointers on old stack to new one */
     /* (Strings don't need to be duplicated, they are statically allocated) */
-    memcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
+    H5MM_memcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
     new_stack->nused = new_stack->nalloc = old_stack->nused;
 
     /* Set the return value */
@@ -270,8 +269,6 @@ done:
 herr_t
 H5CS_close_stack(H5CS_t *stack)
 {
-    unsigned u; /* Local index variable */
-
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
 

@@ -112,7 +112,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
     hsize_t          curr_offset;          /* Current offset, as adjusted */
     unsigned         row;                  /* Current row we are on */
     unsigned         col;                  /* Column in row */
-    hbool_t          root_block = TRUE;    /* Flag to indicate the current block is the root indirect block */
+    bool             root_block = true;    /* Flag to indicate the current block is the root indirect block */
     herr_t           ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -145,7 +145,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
 
     */
     do {
-        hbool_t did_protect; /* Whether we protected the indirect block or not */
+        bool did_protect; /* Whether we protected the indirect block or not */
 
         /* Walk down the rows in the doubling table until we've found the correct row for the next block */
         for (row = 0; row < hdr->man_dtable.max_root_rows; row++)
@@ -177,7 +177,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
             biter->curr->up = NULL;
 
             /* Next time through the loop will not be with the root indirect block */
-            root_block = FALSE;
+            root_block = false;
         } /* end if */
         else {
             hsize_t child_size; /* Size of new indirect block to create */
@@ -197,7 +197,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
         /* Load indirect block for this context location */
         if (NULL ==
             (iblock = H5HF__man_iblock_protect(hdr, iblock_addr, iblock_nrows, iblock_parent,
-                                               iblock_par_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
+                                               iblock_par_entry, false, H5AC__NO_FLAGS_SET, &did_protect)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block");
 
         /* Make indirect block the context for the current location */
@@ -241,7 +241,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
     } while (1); /* Breaks out in middle */
 
     /* Set flag to indicate block iterator finished initializing */
-    biter->ready = TRUE;
+    biter->ready = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -321,7 +321,7 @@ H5HF__man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, H5HF_indir
     biter->curr = new_loc;
 
     /* Set flag to indicate block iterator finished initializing */
-    biter->ready = TRUE;
+    biter->ready = true;
 
 done:
     if (ret_value < 0 && new_loc)
@@ -381,7 +381,7 @@ H5HF__man_iter_reset(H5HF_block_iter_t *biter)
     } /* end if */
 
     /* Reset block iterator flags */
-    biter->ready = FALSE;
+    biter->ready = false;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -555,7 +555,7 @@ H5HF__man_iter_curr(H5HF_block_iter_t *biter, unsigned *row, unsigned *col, unsi
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5HF__man_iter_ready(H5HF_block_iter_t *biter)
 {
     FUNC_ENTER_PACKAGE_NOERR

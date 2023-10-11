@@ -120,7 +120,7 @@ test_split_comm_access(void)
 void
 test_page_buffer_access(void)
 {
-    hid_t       file_id = -1; /* File ID */
+    hid_t       file_id = H5I_INVALID_HID; /* File ID */
     hid_t       fcpl, fapl;
     size_t      page_count = 0;
     int         i, num_elements = 200;
@@ -129,7 +129,7 @@ test_page_buffer_access(void)
     H5F_t      *f = NULL;
     herr_t      ret; /* generic return value */
     const char *filename;
-    hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool        api_ctx_pushed = false; /* Whether API context pushed */
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -160,7 +160,7 @@ test_page_buffer_access(void)
     VRFY((file_id < 0), "H5Fcreate failed");
 
     /* disable collective metadata writes for page buffering to work */
-    ret = H5Pset_coll_metadata_write(fapl, FALSE);
+    ret = H5Pset_coll_metadata_write(fapl, false);
     VRFY((ret >= 0), "");
 
     ret = create_file(filename, fcpl, fapl, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -190,7 +190,7 @@ test_page_buffer_access(void)
         ret = H5Pset_page_buffer_size(fapl_self, sizeof(int) * 1000, 0, 0);
         VRFY((ret == 0), "");
         /* collective metadata writes do not work with page buffering */
-        ret = H5Pset_coll_metadata_write(fapl_self, FALSE);
+        ret = H5Pset_coll_metadata_write(fapl_self, false);
         VRFY((ret >= 0), "");
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl_self);
@@ -199,7 +199,7 @@ test_page_buffer_access(void)
         /* Push API context */
         ret = H5CX_push();
         VRFY((ret == 0), "H5CX_push()");
-        api_ctx_pushed = TRUE;
+        api_ctx_pushed = true;
 
         /* Get a pointer to the internal file object */
         f = (H5F_t *)H5I_object(file_id);
@@ -288,9 +288,9 @@ test_page_buffer_access(void)
 
         /* Pop API context */
         if (api_ctx_pushed) {
-            ret = H5CX_pop(FALSE);
+            ret = H5CX_pop(false);
             VRFY((ret == 0), "H5CX_pop()");
-            api_ctx_pushed = FALSE;
+            api_ctx_pushed = false;
         }
     }
 
@@ -300,7 +300,7 @@ test_page_buffer_access(void)
         ret = H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 0, 0);
         VRFY((ret == 0), "");
         /* collective metadata writes do not work with page buffering */
-        ret = H5Pset_coll_metadata_write(fapl, FALSE);
+        ret = H5Pset_coll_metadata_write(fapl, false);
         VRFY((ret >= 0), "");
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -309,7 +309,7 @@ test_page_buffer_access(void)
         /* Push API context */
         ret = H5CX_push();
         VRFY((ret == 0), "H5CX_push()");
-        api_ctx_pushed = TRUE;
+        api_ctx_pushed = true;
 
         /* Get a pointer to the internal file object */
         f = (H5F_t *)H5I_object(file_id);
@@ -422,9 +422,9 @@ test_page_buffer_access(void)
 
     /* Pop API context */
     if (api_ctx_pushed) {
-        ret = H5CX_pop(FALSE);
+        ret = H5CX_pop(false);
         VRFY((ret == 0), "H5CX_pop()");
-        api_ctx_pushed = FALSE;
+        api_ctx_pushed = false;
     }
 
     free(data);
@@ -449,7 +449,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    hbool_t             api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool                api_ctx_pushed = false; /* Whether API context pushed */
     herr_t              ret;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -461,14 +461,14 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     /* Push API context */
     ret = H5CX_push();
     VRFY((ret == 0), "H5CX_push()");
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     f = (H5F_t *)H5I_object(file_id);
     VRFY((f != NULL), "");
 
     cache_ptr = f->shared->cache;
 
-    cache_ptr->ignore_tags = TRUE;
+    cache_ptr->ignore_tags = true;
     H5C_stats__reset(cache_ptr);
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
@@ -514,25 +514,25 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((mem_dataspace >= 0), "");
 
     for (k = 0; k < NUM_DSETS; k++) {
-        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "D1dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "D2dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "D3dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "dset%d", k);
         dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
 
@@ -555,13 +555,13 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
         for (i = 0; i < num_elements; i++)
             VRFY((data_array[i] == mpi_rank + 1), "Dataset Verify failed");
 
-        HDsnprintf(dset_name, sizeof(dset_name), "D1dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "D1dset%d", k);
         ret = H5Ldelete(grp_id, dset_name, H5P_DEFAULT);
         VRFY((ret == 0), "");
-        HDsnprintf(dset_name, sizeof(dset_name), "D2dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "D2dset%d", k);
         ret = H5Ldelete(grp_id, dset_name, H5P_DEFAULT);
         VRFY((ret == 0), "");
-        HDsnprintf(dset_name, sizeof(dset_name), "D3dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "D3dset%d", k);
         ret = H5Ldelete(grp_id, dset_name, H5P_DEFAULT);
         VRFY((ret == 0), "");
     }
@@ -577,9 +577,9 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
 
     /* Pop API context */
     if (api_ctx_pushed) {
-        ret = H5CX_pop(FALSE);
+        ret = H5CX_pop(false);
         VRFY((ret == 0), "H5CX_pop()");
-        api_ctx_pushed = FALSE;
+        api_ctx_pushed = false;
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -605,7 +605,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    hbool_t             api_ctx_pushed = FALSE; /* Whether API context pushed */
+    bool                api_ctx_pushed = false; /* Whether API context pushed */
     herr_t              ret;
 
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -624,7 +624,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     /* Push API context */
     ret = H5CX_push();
     VRFY((ret == 0), "H5CX_push()");
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
     VRFY((ret == 0), "");
@@ -666,7 +666,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     VRFY((mem_dataspace >= 0), "");
 
     for (k = 0; k < NUM_DSETS; k++) {
-        HDsnprintf(dset_name, sizeof(dset_name), "dset%d", k);
+        snprintf(dset_name, sizeof(dset_name), "dset%d", k);
         dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
 
@@ -711,7 +711,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
         entry_ptr = cache_ptr->index[i];
 
         while (entry_ptr != NULL) {
-            assert(entry_ptr->is_dirty == FALSE);
+            assert(entry_ptr->is_dirty == false);
 
             if (!entry_ptr->is_pinned && !entry_ptr->is_protected) {
                 ret = H5AC_expunge_entry(f, entry_ptr->type, entry_ptr->addr, 0);
@@ -739,9 +739,9 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     /* Pop API context */
     if (api_ctx_pushed) {
-        ret = H5CX_pop(FALSE);
+        ret = H5CX_pop(false);
         VRFY((ret == 0), "H5CX_pop()");
-        api_ctx_pushed = FALSE;
+        api_ctx_pushed = false;
     }
 
     free(data_array);
@@ -760,7 +760,7 @@ test_file_properties(void)
     hid_t       fid          = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t       fapl_id      = H5I_INVALID_HID; /* File access plist */
     hid_t       fapl_copy_id = H5I_INVALID_HID; /* File access plist */
-    hbool_t     is_coll;
+    bool        is_coll;
     htri_t      are_equal;
     const char *filename;
     MPI_Comm    comm     = MPI_COMM_WORLD;
@@ -781,7 +781,7 @@ test_file_properties(void)
     mpi_ret = MPI_Info_create(&info);
     VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
     mpi_ret = MPI_Info_set(info, "hdf_info_prop1", "xyz");
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set");
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set succeeded");
 
     /* setup file access plist */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -817,7 +817,7 @@ test_file_properties(void)
     fapl_copy_id = H5Pcopy(fapl_id);
     VRFY((fapl_copy_id != H5I_INVALID_HID), "H5Pcopy");
     are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((TRUE == are_equal), "H5Pequal");
+    VRFY((true == are_equal), "H5Pequal");
 
     /* Add a property to the copy and ensure it's different now */
     mpi_ret = MPI_Info_set(info, "hdf_info_prop2", "abc");
@@ -825,7 +825,7 @@ test_file_properties(void)
     ret = H5Pset_mpi_params(fapl_copy_id, comm, info);
     VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
     are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((FALSE == are_equal), "H5Pequal");
+    VRFY((false == are_equal), "H5Pequal");
 
     /* Add a property with the same key but a different value to the original
      * and ensure they are still different.
@@ -835,7 +835,7 @@ test_file_properties(void)
     ret = H5Pset_mpi_params(fapl_id, comm, info);
     VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
     are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((FALSE == are_equal), "H5Pequal");
+    VRFY((false == are_equal), "H5Pequal");
 
     /* Set the second property in the original to the same
      * value as the copy and ensure they are the same now.
@@ -845,7 +845,7 @@ test_file_properties(void)
     ret = H5Pset_mpi_params(fapl_id, comm, info);
     VRFY((ret >= 0), "H5Pset_mpi_params succeeded");
     are_equal = H5Pequal(fapl_id, fapl_copy_id);
-    VRFY((TRUE == are_equal), "H5Pequal");
+    VRFY((true == are_equal), "H5Pequal");
 
     /* create the file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -856,12 +856,12 @@ test_file_properties(void)
     /* Collective metadata writes */
     ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata writes");
+    VRFY((is_coll == false), "Incorrect property setting for coll metadata writes");
 
     /* Collective metadata read API calling requirement */
     ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata API calls requirement");
+    VRFY((is_coll == false), "Incorrect property setting for coll metadata API calls requirement");
 
     ret = H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded");
@@ -870,19 +870,19 @@ test_file_properties(void)
     ret = H5Pset_fapl_mpio(fapl_id, comm, info);
     VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
     fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+    VRFY((fid != H5I_INVALID_HID), "H5Fopen succeeded");
 
     /* verify settings for file access properties */
 
     /* Collective metadata writes */
     ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata writes");
+    VRFY((is_coll == false), "Incorrect property setting for coll metadata writes");
 
     /* Collective metadata read API calling requirement */
     ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata API calls requirement");
+    VRFY((is_coll == false), "Incorrect property setting for coll metadata API calls requirement");
 
     ret = H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded");
@@ -891,25 +891,25 @@ test_file_properties(void)
     ret = H5Pset_fapl_mpio(fapl_id, comm, info);
     VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
     /* Collective metadata writes */
-    ret = H5Pset_coll_metadata_write(fapl_id, TRUE);
+    ret = H5Pset_coll_metadata_write(fapl_id, true);
     VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
     /* Collective metadata read API calling requirement */
-    ret = H5Pset_all_coll_metadata_ops(fapl_id, TRUE);
+    ret = H5Pset_all_coll_metadata_ops(fapl_id, true);
     VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
     fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+    VRFY((fid != H5I_INVALID_HID), "H5Fopen succeeded");
 
     /* verify settings for file access properties */
 
     /* Collective metadata writes */
     ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata writes");
+    VRFY((is_coll == true), "Incorrect property setting for coll metadata writes");
 
     /* Collective metadata read API calling requirement */
     ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata API calls requirement");
+    VRFY((is_coll == true), "Incorrect property setting for coll metadata API calls requirement");
 
     /* close fapl and retrieve it from file */
     ret = H5Pclose(fapl_id);
@@ -924,12 +924,12 @@ test_file_properties(void)
     /* Collective metadata writes */
     ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata writes");
+    VRFY((is_coll == true), "Incorrect property setting for coll metadata writes");
 
     /* Collective metadata read API calling requirement */
     ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
     VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
-    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata API calls requirement");
+    VRFY((is_coll == true), "Incorrect property setting for coll metadata API calls requirement");
 
     /* close file */
     ret = H5Fclose(fid);
@@ -980,7 +980,7 @@ test_delete(void)
 
     /* Verify that the file is an HDF5 file */
     is_accessible = H5Fis_accessible(filename, fapl_id);
-    VRFY((TRUE == is_accessible), "H5Fis_accessible");
+    VRFY((true == is_accessible), "H5Fis_accessible");
 
     /* Delete the file */
     ret = H5Fdelete(filename, fapl_id);
@@ -1044,7 +1044,7 @@ test_invalid_libver_bounds_file_close_assert(void)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     VRFY((fcpl_id != H5I_INVALID_HID), "H5Pcreate");
 
-    ret = H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, TRUE, 1);
+    ret = H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, true, 1);
     VRFY((SUCCEED == ret), "H5Pset_file_space_strategy");
 
     /* create the file */

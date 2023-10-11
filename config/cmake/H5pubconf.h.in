@@ -158,9 +158,6 @@
 /* Define to 1 if you have the `gethostname' function. */
 #cmakedefine H5_HAVE_GETHOSTNAME @H5_HAVE_GETHOSTNAME@
 
-/* Define to 1 if you have the `getpwuid' function. */
-#cmakedefine H5_HAVE_GETPWUID @H5_HAVE_GETPWUID@
-
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine H5_HAVE_GETRUSAGE @H5_HAVE_GETRUSAGE@
 
@@ -613,6 +610,9 @@
 
 /* Define using v1.14 public API symbols by default */
 #cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
+
+/* Define using v1.16 public API symbols by default */
+#cmakedefine H5_USE_116_API_DEFAULT @H5_USE_116_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@

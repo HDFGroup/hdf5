@@ -55,7 +55,7 @@
 
 /* Metadata cache (H5AC) callbacks */
 static herr_t H5G__cache_node_get_initial_load_size(void *udata, size_t *image_len);
-static void  *H5G__cache_node_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5G__cache_node_deserialize(const void *image, size_t len, void *udata, bool *dirty);
 static herr_t H5G__cache_node_image_len(const void *thing, size_t *image_len);
 static herr_t H5G__cache_node_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5G__cache_node_free_icr(void *thing);
@@ -139,7 +139,7 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static void *
-H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
+H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATTR_UNUSED *dirty)
 {
     H5F_t         *f         = (H5F_t *)_udata;         /* User data for callback */
     H5G_node_t    *sym       = NULL;                    /* Symbol table node created */

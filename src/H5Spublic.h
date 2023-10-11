@@ -1194,8 +1194,9 @@ H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_el
  *          2x2 blocks of array elements starting with location (1,1) with the
  *          selected blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.;
  *          in Fortran, they will specify a hyperslab consisting of 21 2x2
- *          blocks of array elements starting with location (2,2) with the
- *          selected blocks at locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
+ *          blocks of array elements starting with location (2,2), since \p start
+ *          is 0-based indexed, with the selected blocks at
+ *          locations (2,2), (6,2), (10,2), (2,6), (6,6), etc.
  *
  *          Regions selected with this function call default to C order
  *          iteration when I/O is performed.

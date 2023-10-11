@@ -274,21 +274,21 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
     H5TOOLS_DEBUG("obj_names: %s - %s", obj1_name, obj2_name);
     opts->obj_name[0] = NULL;
     if (obj1_name) {
-        j = (int)HDstrlen(obj1_name);
+        j = (int)strlen(obj1_name);
         H5TOOLS_DEBUG("obj1_name: %s - %d", obj1_name, j);
         if (j > 0) {
             opts->obj_name[0] = (char *)malloc((size_t)j + 1);
-            HDstrncpy(opts->obj_name[0], obj1_name, (size_t)j + 1);
+            strncpy(opts->obj_name[0], obj1_name, (size_t)j + 1);
         }
     }
 
     opts->obj_name[1] = NULL;
     if (obj2_name) {
-        j = (int)HDstrlen(obj2_name);
+        j = (int)strlen(obj2_name);
         H5TOOLS_DEBUG("obj2_name: %s - %d", obj2_name, j);
         if (j > 0) {
             opts->obj_name[1] = (char *)malloc((size_t)j + 1);
-            HDstrncpy(opts->obj_name[1], obj2_name, (size_t)j + 1);
+            strncpy(opts->obj_name[1], obj2_name, (size_t)j + 1);
         }
     }
 
@@ -351,10 +351,10 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
     /* Check if type is either VLEN-data or VLEN-string to reclaim any
      * VLEN memory buffer later
      */
-    if (TRUE == h5tools_detect_vlen(m_tid1))
-        vl_data1 = TRUE;
-    if (TRUE == h5tools_detect_vlen(m_tid2))
-        vl_data2 = TRUE;
+    if (true == h5tools_detect_vlen(m_tid1))
+        vl_data1 = true;
+    if (true == h5tools_detect_vlen(m_tid2))
+        vl_data2 = true;
     H5TOOLS_DEBUG("h5tools_detect_vlen %d:%d - errstat:%d", vl_data1, vl_data2, opts->err_stat);
 
     /*------------------------------------------------------------------------
@@ -431,9 +431,9 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
         opts->obj_name[1] = NULL;
 
         if (obj1_name)
-            opts->obj_name[0] = HDstrdup(diff_basename(obj1_name));
+            opts->obj_name[0] = strdup(diff_basename(obj1_name));
         if (obj2_name)
-            opts->obj_name[1] = HDstrdup(diff_basename(obj2_name));
+            opts->obj_name[1] = strdup(diff_basename(obj2_name));
         H5TOOLS_DEBUG("obj_names: %s - %s", opts->obj_name[0], opts->obj_name[1]);
 
         H5TOOLS_DEBUG("read/compare");

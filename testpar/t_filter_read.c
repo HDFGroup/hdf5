@@ -145,7 +145,7 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
                         (unsigned long)(hs_offset[1] + j));
                 fprintf(stderr, "    At original: %d\n", (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
                 fprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
-                VRFY(FALSE, "");
+                VRFY(false, "");
             }
         }
     }

@@ -176,8 +176,8 @@
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE sizeof(uint32_t)
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
 /* Definitions for modify write buffer property */
-#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
-#define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE
+#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(bool)
+#define H5D_XFER_MODIFY_WRITE_BUF_DEF  false
 #define H5D_XFER_MODIFY_WRITE_BUF_ENC  H5P__dxfr_modify_write_buf_enc
 #define H5D_XFER_MODIFY_WRITE_BUF_DEC  H5P__dxfr_modify_write_buf_dec
 
@@ -295,7 +295,7 @@ static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
-static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
+static const bool                    H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -725,7 +725,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression");
 
         /* Get the transform string expression size */
-        len = HDstrlen(pexp) + 1;
+        len = strlen(pexp) + 1;
     } /* end if */
 
     if (NULL != *pp) {
@@ -909,7 +909,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
 
         if (pexp1) {
             assert(pexp2);
-            ret_value = HDstrcmp(pexp1, pexp2);
+            ret_value = strcmp(pexp1, pexp2);
         } /* end if */
     }     /* end if */
 
@@ -1039,9 +1039,9 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression");
 
     /* Copy into application buffer */
-    len = HDstrlen(pexp);
+    len = strlen(pexp);
     if (expression) {
-        HDstrncpy(expression, pexp, size);
+        strncpy(expression, pexp, size);
         if (len >= size)
             expression[size - 1] = '\0';
     } /* end if */
@@ -1149,7 +1149,7 @@ done:
  * Purpose:	When reading or writing compound data types and the
  *		destination is partially initialized and the read/write is
  *		intended to initialize the other members, one must set this
- *		property to TRUE.  Otherwise the I/O pipeline treats the
+ *		property to true.  Otherwise the I/O pipeline treats the
  *		destination datapoints as completely uninitialized.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1184,7 +1184,7 @@ done:
  *
  * Purpose:	The inverse of H5Pset_preserve()
  *
- * Return:	Success:	TRUE or FALSE
+ * Return:	Success:	true or false
  *
  *		Failure:	Negative
  *
@@ -1209,7 +1209,7 @@ H5Pget_preserve(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     /* Set return value */
-    ret_value = need_bkg ? TRUE : FALSE;
+    ret_value = need_bkg ? true : false;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2062,7 +2062,7 @@ H5P__dxfr_dset_io_hyp_sel_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
     /* If there's a dataspace I/O selection set, copy it */
     if (orig_space) {
         /* Make copy of dataspace */
-        if (NULL == (new_space = H5S_copy(orig_space, FALSE, TRUE)))
+        if (NULL == (new_space = H5S_copy(orig_space, false, true)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the dataset I/O selection");
 
         /* Set new value for property */
@@ -2113,7 +2113,7 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
 
         /* Compare the extents of the dataspaces */
         /* (Error & not-equal count the same) */
-        if (TRUE != H5S_extent_equal(*space1, *space2))
+        if (true != H5S_extent_equal(*space1, *space2))
             HGOTO_DONE(-1);
 
         /* Compare the selection "shape" of the dataspaces
@@ -2125,7 +2125,7 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
          * we quiet the const warning.
          */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        if (TRUE != H5S_select_shape_same((H5S_t *)*space1, (H5S_t *)*space2))
+        if (true != H5S_select_shape_same((H5S_t *)*space1, (H5S_t *)*space2))
             HGOTO_DONE(-1);
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     } /* end if */
@@ -2254,8 +2254,8 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 {
     H5P_genplist_t *plist               = NULL;    /* Property list pointer */
     H5S_t          *space               = NULL;    /* Dataspace to hold selection */
-    hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
-    hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
+    bool            space_created       = false;   /* Whether a new dataspace has been created */
+    bool            reset_prop_on_error = false;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2308,7 +2308,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
                 space = NULL;
 
                 /* Set flag to reset property list on error */
-                reset_prop_on_error = TRUE;
+                reset_prop_on_error = true;
             } /* end if */
             else
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "different rank for previous and new selections");
@@ -2327,7 +2327,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
         /* Create dataspace of the correct dimensionality, with maximum dimensions */
         if (NULL == (space = H5S_create_simple(rank, dims, NULL)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create dataspace for selection");
-        space_created = TRUE;
+        space_created = true;
     } /* end if */
 
     /* Set selection for dataspace */
@@ -2337,7 +2337,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
     /* Update property list (takes ownership of dataspace, if new) */
     if (H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection");
-    space_created = FALSE; /* Reset now that property owns the dataspace */
+    space_created = false; /* Reset now that property owns the dataspace */
 
 done:
     /* Cleanup on failure */
@@ -2471,8 +2471,8 @@ done:
 static herr_t
 H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *size /*out*/)
 {
-    const hbool_t *modify_write_buf = (const hbool_t *)value; /* Create local alias for values */
-    uint8_t      **pp               = (uint8_t **)_pp;
+    const bool *modify_write_buf = (const bool *)value; /* Create local alias for values */
+    uint8_t   **pp               = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2505,7 +2505,7 @@ H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *si
 static herr_t
 H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
 {
-    hbool_t        *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
+    bool           *modify_write_buf = (bool *)_value; /* Modify write buffer */
     const uint8_t **pp               = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -2516,7 +2516,7 @@ H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
     assert(modify_write_buf);
 
     /* Decode selection I/O mode property */
-    *modify_write_buf = (hbool_t) * (*pp)++;
+    *modify_write_buf = (bool)*(*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__dxfr_modify_write_buf_dec() */

@@ -58,7 +58,7 @@ static herr_t H5C__prefetched_entry_get_final_load_size(const void *image_ptr, s
                                                         void *udata_ptr, size_t *actual_len_ptr);
 static htri_t H5C__prefetched_entry_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void  *H5C__prefetched_entry_deserialize(const void *image_ptr, size_t len, void *udata,
-                                                hbool_t *dirty_ptr);
+                                                bool *dirty_ptr);
 static herr_t H5C__prefetched_entry_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5C__prefetched_entry_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len,
                                                   haddr_t *new_addr_ptr, size_t *new_len_ptr,
@@ -147,7 +147,7 @@ H5C__prefetched_entry_verify_chksum(const void H5_ATTR_UNUSED *image_ptr, size_t
 
 static void *
 H5C__prefetched_entry_deserialize(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED len,
-                                  void H5_ATTR_UNUSED *udata, hbool_t H5_ATTR_UNUSED *dirty_ptr)
+                                  void H5_ATTR_UNUSED *udata, bool H5_ATTR_UNUSED *dirty_ptr)
 {
     FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 

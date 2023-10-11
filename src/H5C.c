@@ -120,7 +120,7 @@ H5FL_DEFINE_STATIC(H5C_t);
 H5C_t *
 H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
            const H5C_class_t *const *class_table_ptr, H5C_write_permitted_func_t check_write_permitted,
-           hbool_t write_permitted, H5C_log_flush_func_t log_flush, void *aux_ptr)
+           bool write_permitted, H5C_log_flush_func_t log_flush, void *aux_ptr)
 {
     int    i;
     H5C_t *cache_ptr = NULL;
@@ -138,7 +138,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     for (i = 0; i <= max_type_id; i++) {
         assert((class_table_ptr)[i]);
-        assert(HDstrlen((class_table_ptr)[i]->name) > 0);
+        assert(strlen((class_table_ptr)[i]->name) > 0);
     } /* end for */
 
     if (NULL == (cache_ptr = H5FL_CALLOC(H5C_t)))
@@ -153,7 +153,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
      * the fields.
      */
 
-    cache_ptr->flush_in_progress = FALSE;
+    cache_ptr->flush_in_progress = false;
 
     if (NULL == (cache_ptr->log_info = (H5C_log_info_t *)H5MM_calloc(sizeof(H5C_log_info_t))))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed");
@@ -172,8 +172,8 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     cache_ptr->log_flush = log_flush;
 
-    cache_ptr->evictions_enabled      = TRUE;
-    cache_ptr->close_warning_received = FALSE;
+    cache_ptr->evictions_enabled      = true;
+    cache_ptr->close_warning_received = false;
 
     cache_ptr->index_len        = 0;
     cache_ptr->index_size       = (size_t)0;
@@ -199,12 +199,12 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->il_tail = NULL;
 
     /* Tagging Field Initializations */
-    cache_ptr->ignore_tags     = FALSE;
+    cache_ptr->ignore_tags     = false;
     cache_ptr->num_objs_corked = 0;
 
     /* slist field initializations */
-    cache_ptr->slist_enabled = FALSE;
-    cache_ptr->slist_changed = FALSE;
+    cache_ptr->slist_enabled = false;
+    cache_ptr->slist_changed = false;
     cache_ptr->slist_len     = 0;
     cache_ptr->slist_size    = (size_t)0;
 
@@ -256,19 +256,19 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->dLRU_tail_ptr  = NULL;
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-    cache_ptr->size_increase_possible        = FALSE;
-    cache_ptr->flash_size_increase_possible  = FALSE;
+    cache_ptr->size_increase_possible        = false;
+    cache_ptr->flash_size_increase_possible  = false;
     cache_ptr->flash_size_increase_threshold = 0;
-    cache_ptr->size_decrease_possible        = FALSE;
-    cache_ptr->resize_enabled                = FALSE;
-    cache_ptr->cache_full                    = FALSE;
-    cache_ptr->size_decreased                = FALSE;
-    cache_ptr->resize_in_progress            = FALSE;
-    cache_ptr->msic_in_progress              = FALSE;
+    cache_ptr->size_decrease_possible        = false;
+    cache_ptr->resize_enabled                = false;
+    cache_ptr->cache_full                    = false;
+    cache_ptr->size_decreased                = false;
+    cache_ptr->resize_in_progress            = false;
+    cache_ptr->msic_in_progress              = false;
 
     cache_ptr->resize_ctl.version            = H5C__CURR_AUTO_SIZE_CTL_VER;
     cache_ptr->resize_ctl.rpt_fcn            = NULL;
-    cache_ptr->resize_ctl.set_initial_size   = FALSE;
+    cache_ptr->resize_ctl.set_initial_size   = false;
     cache_ptr->resize_ctl.initial_size       = H5C__DEF_AR_INIT_SIZE;
     cache_ptr->resize_ctl.min_clean_fraction = H5C__DEF_AR_MIN_CLEAN_FRAC;
     cache_ptr->resize_ctl.max_size           = H5C__DEF_AR_MAX_SIZE;
@@ -278,7 +278,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->resize_ctl.incr_mode           = H5C_incr__off;
     cache_ptr->resize_ctl.lower_hr_threshold  = H5C__DEF_AR_LOWER_THRESHHOLD;
     cache_ptr->resize_ctl.increment           = H5C__DEF_AR_INCREMENT;
-    cache_ptr->resize_ctl.apply_max_increment = TRUE;
+    cache_ptr->resize_ctl.apply_max_increment = true;
     cache_ptr->resize_ctl.max_increment       = H5C__DEF_AR_MAX_INCREMENT;
 
     cache_ptr->resize_ctl.flash_incr_mode = H5C_flash_incr__off;
@@ -288,10 +288,10 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->resize_ctl.decr_mode              = H5C_decr__off;
     cache_ptr->resize_ctl.upper_hr_threshold     = H5C__DEF_AR_UPPER_THRESHHOLD;
     cache_ptr->resize_ctl.decrement              = H5C__DEF_AR_DECREMENT;
-    cache_ptr->resize_ctl.apply_max_decrement    = TRUE;
+    cache_ptr->resize_ctl.apply_max_decrement    = true;
     cache_ptr->resize_ctl.max_decrement          = H5C__DEF_AR_MAX_DECREMENT;
     cache_ptr->resize_ctl.epochs_before_eviction = H5C__DEF_AR_EPCHS_B4_EVICT;
-    cache_ptr->resize_ctl.apply_empty_reserve    = TRUE;
+    cache_ptr->resize_ctl.apply_empty_reserve    = true;
     cache_ptr->resize_ctl.empty_reserve          = H5C__DEF_AR_EMPTY_RESERVE;
 
     cache_ptr->epoch_markers_active = 0;
@@ -301,10 +301,10 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->epoch_marker_ringbuf_last  = 0;
     cache_ptr->epoch_marker_ringbuf_size  = 0;
 
-    /* Initialize all epoch marker entries' fields to zero/FALSE/NULL */
+    /* Initialize all epoch marker entries' fields to zero/false/NULL */
     memset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
 
-    /* Set non-zero/FALSE/NULL fields for epoch markers */
+    /* Set non-zero/false/NULL fields for epoch markers */
     for (i = 0; i < H5C__MAX_EPOCH_MARKERS; i++) {
         ((cache_ptr->epoch_markers)[i]).addr = (haddr_t)i;
         ((cache_ptr->epoch_markers)[i]).type = H5AC_EPOCH_MARKER;
@@ -315,15 +315,15 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
      * in H5Cprivate.h.
      */
     cache_ptr->image_ctl.version            = H5C__CURR_CACHE_IMAGE_CTL_VER;
-    cache_ptr->image_ctl.generate_image     = FALSE;
-    cache_ptr->image_ctl.save_resize_status = FALSE;
+    cache_ptr->image_ctl.generate_image     = false;
+    cache_ptr->image_ctl.save_resize_status = false;
     cache_ptr->image_ctl.entry_ageout       = -1;
     cache_ptr->image_ctl.flags              = H5C_CI__ALL_FLAGS;
 
-    cache_ptr->serialization_in_progress = FALSE;
-    cache_ptr->load_image                = FALSE;
-    cache_ptr->image_loaded              = FALSE;
-    cache_ptr->delete_image              = FALSE;
+    cache_ptr->serialization_in_progress = false;
+    cache_ptr->load_image                = false;
+    cache_ptr->image_loaded              = false;
+    cache_ptr->delete_image              = false;
     cache_ptr->image_addr                = HADDR_UNDEF;
     cache_ptr->image_len                 = 0;
     cache_ptr->image_data_len            = 0;
@@ -338,8 +338,8 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->image_buffer         = NULL;
 
     /* initialize free space manager related fields: */
-    cache_ptr->rdfsm_settled = FALSE;
-    cache_ptr->mdfsm_settled = FALSE;
+    cache_ptr->rdfsm_settled = false;
+    cache_ptr->mdfsm_settled = false;
 
     if (H5C_reset_cache_hit_rate_stats(cache_ptr) < 0)
         /* this should be impossible... */
@@ -389,9 +389,9 @@ done:
 herr_t
 H5C_prep_for_file_close(H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t image_generated = FALSE;   /* Whether a cache image was generated */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    H5C_t *cache_ptr;
+    bool   image_generated = false;   /* Whether a cache image was generated */
+    herr_t ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -405,7 +405,7 @@ H5C_prep_for_file_close(H5F_t *f)
     /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
         HGOTO_DONE(SUCCEED);
-    cache_ptr->close_warning_received = TRUE;
+    cache_ptr->close_warning_received = true;
 
     /* Make certain there aren't any protected entries */
     assert(cache_ptr->pl_len == 0);
@@ -488,12 +488,12 @@ H5C_dest(H5F_t *f)
     assert(cache_ptr->close_warning_received);
 
 #if H5AC_DUMP_IMAGE_STATS_ON_CLOSE
-    if (H5C__image_stats(cache_ptr, TRUE) < 0)
+    if (H5C__image_stats(cache_ptr, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't display cache image stats");
 #endif /* H5AC_DUMP_IMAGE_STATS_ON_CLOSE */
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries */
@@ -541,7 +541,7 @@ done:
          * calls to H5C_dest().  Thus we re-enable the slist on failure if it
          * and the cache still exist.  JRM -- 5/15/20
          */
-        if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+        if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -567,7 +567,7 @@ H5C_evict(H5F_t *f)
     assert(f);
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries except the pinned entries */
@@ -575,7 +575,7 @@ H5C_evict(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache");
 
     /* Disable the slist */
-    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, false, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed");
 
 done:
@@ -612,7 +612,7 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 #endif /* H5C_DO_SANITY_CHECKS */
     H5C_ring_t ring;
     H5C_t     *cache_ptr;
-    hbool_t    destroy;
+    bool       destroy;
     herr_t     ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -659,7 +659,7 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
     assert(!(destroy && ((flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0)));
     assert(!(cache_ptr->flush_in_progress));
 
-    cache_ptr->flush_in_progress = TRUE;
+    cache_ptr->flush_in_progress = true;
 
     if (destroy) {
         if (H5C__flush_invalidate_cache(f, flags) < 0)
@@ -710,7 +710,7 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
     }     /* end else */
 
 done:
-    cache_ptr->flush_in_progress = FALSE;
+    cache_ptr->flush_in_progress = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_flush_cache() */
@@ -739,9 +739,9 @@ done:
 herr_t
 H5C_flush_to_min_clean(H5F_t *f)
 {
-    H5C_t  *cache_ptr;
-    hbool_t write_permitted;
-    herr_t  ret_value = SUCCEED;
+    H5C_t *cache_ptr;
+    bool   write_permitted;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -841,20 +841,20 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
     if (H5C_validate_resize_config(config_ptr, H5C_RESIZE_CFG__VALIDATE_INTERACTIONS) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "conflicting threshold fields in new config");
 
-    /* will set the increase possible fields to FALSE later if needed */
-    cache_ptr->size_increase_possible       = TRUE;
-    cache_ptr->flash_size_increase_possible = TRUE;
-    cache_ptr->size_decrease_possible       = TRUE;
+    /* will set the increase possible fields to false later if needed */
+    cache_ptr->size_increase_possible       = true;
+    cache_ptr->flash_size_increase_possible = true;
+    cache_ptr->size_decrease_possible       = true;
 
     switch (config_ptr->incr_mode) {
         case H5C_incr__off:
-            cache_ptr->size_increase_possible = FALSE;
+            cache_ptr->size_increase_possible = false;
             break;
 
         case H5C_incr__threshold:
             if ((config_ptr->lower_hr_threshold <= 0.0) || (config_ptr->increment <= 1.0) ||
                 ((config_ptr->apply_max_increment) && (config_ptr->max_increment <= 0)))
-                cache_ptr->size_increase_possible = FALSE;
+                cache_ptr->size_increase_possible = false;
             break;
 
         default: /* should be unreachable */
@@ -868,26 +868,26 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
 
     switch (config_ptr->decr_mode) {
         case H5C_decr__off:
-            cache_ptr->size_decrease_possible = FALSE;
+            cache_ptr->size_decrease_possible = false;
             break;
 
         case H5C_decr__threshold:
             if (config_ptr->upper_hr_threshold >= 1.0 || config_ptr->decrement >= 1.0 ||
                 (config_ptr->apply_max_decrement && config_ptr->max_decrement <= 0))
-                cache_ptr->size_decrease_possible = FALSE;
+                cache_ptr->size_decrease_possible = false;
             break;
 
         case H5C_decr__age_out:
             if ((config_ptr->apply_empty_reserve && config_ptr->empty_reserve >= 1.0) ||
                 (config_ptr->apply_max_decrement && config_ptr->max_decrement <= 0))
-                cache_ptr->size_decrease_possible = FALSE;
+                cache_ptr->size_decrease_possible = false;
             break;
 
         case H5C_decr__age_out_with_threshold:
             if ((config_ptr->apply_empty_reserve && config_ptr->empty_reserve >= 1.0) ||
                 (config_ptr->apply_max_decrement && config_ptr->max_decrement <= 0) ||
                 config_ptr->upper_hr_threshold >= 1.0)
-                cache_ptr->size_decrease_possible = FALSE;
+                cache_ptr->size_decrease_possible = false;
             break;
 
         default: /* should be unreachable */
@@ -895,9 +895,9 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
     } /* end switch */
 
     if (config_ptr->max_size == config_ptr->min_size) {
-        cache_ptr->size_increase_possible       = FALSE;
-        cache_ptr->flash_size_increase_possible = FALSE;
-        cache_ptr->size_decrease_possible       = FALSE;
+        cache_ptr->size_increase_possible       = false;
+        cache_ptr->flash_size_increase_possible = false;
+        cache_ptr->size_decrease_possible       = false;
     } /* end if */
 
     /* flash_size_increase_possible is intentionally omitted from the
@@ -936,7 +936,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
     assert(new_max_cache_size <= cache_ptr->resize_ctl.max_size);
 
     if (new_max_cache_size < cache_ptr->max_cache_size)
-        cache_ptr->size_decreased = TRUE;
+        cache_ptr->size_decreased = true;
 
     cache_ptr->max_cache_size = new_max_cache_size;
     cache_ptr->min_clean_size = new_min_clean_size;
@@ -967,11 +967,11 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
     if (cache_ptr->flash_size_increase_possible) {
         switch (config_ptr->flash_incr_mode) {
             case H5C_flash_incr__off:
-                cache_ptr->flash_size_increase_possible = FALSE;
+                cache_ptr->flash_size_increase_possible = false;
                 break;
 
             case H5C_flash_incr__add_space:
-                cache_ptr->flash_size_increase_possible = TRUE;
+                cache_ptr->flash_size_increase_possible = true;
                 cache_ptr->flash_size_increase_threshold =
                     (size_t)(((double)(cache_ptr->max_cache_size)) * (cache_ptr->resize_ctl.flash_threshold));
                 break;
@@ -997,7 +997,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
+H5C_set_evictions_enabled(H5C_t *cache_ptr, bool evictions_enabled)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1011,7 +1011,7 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
      * However, allowing it would greatly complicate testing
      * the feature.  Hence the following:
      */
-    if ((evictions_enabled != TRUE) && ((cache_ptr->resize_ctl.incr_mode != H5C_incr__off) ||
+    if ((evictions_enabled != true) && ((cache_ptr->resize_ctl.incr_mode != H5C_incr__off) ||
                                         (cache_ptr->resize_ctl.decr_mode != H5C_decr__off)))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't disable evictions when auto resize enabled");
 
@@ -1038,20 +1038,20 @@ done:
  *              slist when it is not needed.
  *
  *
- *              If the slist_enabled parameter is TRUE, the function
+ *              If the slist_enabled parameter is true, the function
  *
  *              1) Verifies that the slist is empty.
  *
  *              2) Scans the index list, and inserts all dirty entries
  *                 into the slist.
  *
- *              3) Sets cache_ptr->slist_enabled = TRUE.
+ *              3) Sets cache_ptr->slist_enabled = true.
  *
  *              Note that the clear_slist parameter is ignored if
- *              the slist_enabed parameter is TRUE.
+ *              the slist_enabed parameter is true.
  *
  *
- *              If the slist_enabled_parameter is FALSE, the function
+ *              If the slist_enabled_parameter is false, the function
  *              shuts down the slist.
  *
  *              Normally the slist will be empty at this point, however
@@ -1063,20 +1063,20 @@ done:
  *              1) Test to see if the slist is empty.  If it is, proceed
  *                 to step 3.
  *
- *              2) Test to see if the clear_slist parameter is TRUE.
+ *              2) Test to see if the clear_slist parameter is true.
  *
  *                 If it is, remove all entries from the slist.
  *
  *                 If it isn't, throw an error.
  *
- *              3) set cache_ptr->slist_enabled = FALSE.
+ *              3) set cache_ptr->slist_enabled = false.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_slist)
+H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist)
 {
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -1092,10 +1092,10 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
         if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?");
 
-        /* set cache_ptr->slist_enabled to TRUE so that the slist
+        /* set cache_ptr->slist_enabled to true so that the slist
          * maintenance macros will be enabled.
          */
-        cache_ptr->slist_enabled = TRUE;
+        cache_ptr->slist_enabled = true;
 
         /* scan the index list and insert all dirty entries in the slist */
         entry_ptr = cache_ptr->il_head;
@@ -1124,7 +1124,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
                 node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 while (node_ptr != NULL) {
                     entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL);
+                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, false, FAIL);
                     node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 }
             }
@@ -1132,7 +1132,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?");
         }
 
-        cache_ptr->slist_enabled = FALSE;
+        cache_ptr->slist_enabled = false;
 
         assert(0 == cache_ptr->slist_len);
         assert(0 == cache_ptr->slist_size);
@@ -1183,7 +1183,7 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
             if (cache_ptr->rdfsm_settled) {
                 if (cache_ptr->close_warning_received)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle");
-                cache_ptr->rdfsm_settled = FALSE;
+                cache_ptr->rdfsm_settled = false;
             } /* end if */
             break;
 
@@ -1191,12 +1191,12 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
             if (cache_ptr->mdfsm_settled) {
                 if (cache_ptr->close_warning_received)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle");
-                cache_ptr->mdfsm_settled = FALSE;
+                cache_ptr->mdfsm_settled = false;
             } /* end if */
             break;
 
         default:
-            assert(FALSE); /* this should be un-reachable */
+            assert(false); /* this should be un-reachable */
             break;
     } /* end switch */
 
@@ -1356,7 +1356,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
+H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, bool *corked)
 {
     H5C_tag_info_t *tag_info  = NULL;
     herr_t          ret_value = SUCCEED;
@@ -1374,9 +1374,9 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
     if (H5C__GET_CORKED == action) {
         assert(corked);
         if (tag_info != NULL && tag_info->corked)
-            *corked = TRUE;
+            *corked = true;
         else
-            *corked = FALSE;
+            *corked = false;
     }
     else {
         /* Sanity check */
@@ -1404,7 +1404,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             }
 
             /* Set the corked status for the entire object */
-            tag_info->corked = TRUE;
+            tag_info->corked = true;
             cache_ptr->num_objs_corked++;
         }
         else {
@@ -1417,7 +1417,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "object already uncorked");
 
             /* Set the corked status for the entire object */
-            tag_info->corked = FALSE;
+            tag_info->corked = false;
             cache_ptr->num_objs_corked--;
 
             /* Remove the tag info from the tag list, if there's no more entries with this tag */

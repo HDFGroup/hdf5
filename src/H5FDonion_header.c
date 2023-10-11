@@ -134,7 +134,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     assert(header != NULL);
     assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature");
 
     if (buf[4] != H5FD_ONION_HEADER_VERSION_CURR)
@@ -142,34 +142,34 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
 
     ptr  = buf + 5;
     ui32 = 0;
-    memcpy(&ui32, ptr, 3);
+    H5MM_memcpy(&ui32, ptr, 3);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, header->flags);
     ptr += 3;
 
-    memcpy(&ui32, ptr, 4);
+    H5MM_memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, header->page_size);
     ptr += 4;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT32DECODE(ui8p, header->origin_eof);
     ptr += 8;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT32DECODE(ui8p, header->history_addr);
     ptr += 8;
 
-    memcpy(&ui64, ptr, 8);
+    H5MM_memcpy(&ui64, ptr, 8);
     ui8p = (uint8_t *)&ui64;
     UINT32DECODE(ui8p, header->history_size);
     ptr += 8;
 
     sum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
 
-    memcpy(&ui32, ptr, 4);
+    H5MM_memcpy(&ui32, ptr, 4);
     ui8p = (uint8_t *)&ui32;
     UINT32DECODE(ui8p, header->checksum);
     ptr += 4;
@@ -214,9 +214,9 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
     assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
     assert(0 == (header->flags & 0xFF000000)); /* max three bits long */
 
-    memcpy(ptr, H5FD_ONION_HEADER_SIGNATURE, 4);
+    H5MM_memcpy(ptr, H5FD_ONION_HEADER_SIGNATURE, 4);
     ptr += 4;
-    memcpy(ptr, (unsigned char *)&header->version, 1);
+    H5MM_memcpy(ptr, (unsigned char *)&header->version, 1);
     ptr += 1;
     UINT32ENCODE(ptr, header->flags);
     ptr -= 1; /* truncate to three bytes */

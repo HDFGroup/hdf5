@@ -713,8 +713,8 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  *          \p corder specifies the link's creation order position, while
  *          \p corder_valid indicates whether the value in corder is valid.
  *
- *          If \p corder_valid is \c TRUE, the value in \p corder is known to
- *          be valid; if \p corder_valid is \c FALSE, the value in \p corder is
+ *          If \p corder_valid is \c true, the value in \p corder is known to
+ *          be valid; if \p corder_valid is \c false, the value in \p corder is
  *          presumed to be invalid; \p corder starts at zero (0) and is
  *          incremented by one (1) as new links are created. But
  *          higher-numbered entries are not adjusted when a lower-numbered link
@@ -1510,8 +1510,8 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *          \c corder specifies the link's creation order position while
  *          \c corder_valid indicates whether the value in \c corder is valid.
  *
- *          If \c corder_valid is \c TRUE, the value in \c corder is known to
- *          be valid; if \c corder_valid is \c FALSE, the value in \c corder is
+ *          If \c corder_valid is \c true, the value in \c corder is known to
+ *          be valid; if \c corder_valid is \c false, the value in \c corder is
  *          presumed to be invalid;
  *
  *          \c corder starts at zero (0) and is incremented by one (1) as new

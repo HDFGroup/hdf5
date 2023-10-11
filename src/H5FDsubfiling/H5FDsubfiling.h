@@ -61,32 +61,42 @@
 
 /**
  * \def H5FD_SUBFILING_FILENAME_TEMPLATE
- * The basic template for a subfile filename. The format specifiers
- * correspond to:
+ * The basic printf-style template for a #H5FD_SUBFILING driver
+ * subfile filename. The format specifiers correspond to:
  *
- * %s      -> base filename, e.g. "file.h5"
- * %PRIu64 -> file inode, e.g. 11273556
- * %0*d    -> number (starting at 1) signifying the Nth (out of total
- *            number of subfiles) subfile. Zero-padded according
- *            to the number of digits in the number of subfiles
- *            (calculated by log10(num_subfiles) + 1)
- * %d      -> number of subfiles
+ * \par \%s
+ *   base filename, e.g. "file.h5"
+ *
+ * \par \%PRIu64
+ *   file inode, e.g. 11273556
+ *
+ * \par \%0*d
+ *   number (starting at 1) signifying the Nth (out of
+ *   total number of subfiles) subfile. Zero-padded
+ *   according to the number of digits in the number of
+ *   subfiles (calculated by <tt>log10(num_subfiles) + 1)</tt>
+ *
+ * \par \%d
+ *   number of subfiles
  *
  * yielding filenames such as:
  *
- * file.h5.subfile_11273556_01_of_10
- * file.h5.subfile_11273556_02_of_10
- * file.h5.subfile_11273556_10_of_10
+ * file.h5.subfile_11273556_01_of_10 \n
+ * file.h5.subfile_11273556_02_of_10 \n
+ * file.h5.subfile_11273556_10_of_10 \n
  */
 #define H5FD_SUBFILING_FILENAME_TEMPLATE "%s.subfile_%" PRIu64 "_%0*d_of_%d"
 
 /**
  * \def H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE
- * The basic template for a #H5FD_SUBFILING driver configuration filename.
- * The format specifiers correspond to:
+ * The basic printf-style template for a #H5FD_SUBFILING driver
+ * configuration filename. The format specifiers correspond to:
  *
- * %s      -> base filename, e.g. "file.h5"
- * %PRIu64 -> file inode, e.g. 11273556
+ * \par \%s
+ *   base filename, e.g. "file.h5"
+ *
+ * \par \%PRIu64
+ *   file inode, e.g. 11273556
  *
  * yielding a filename such as:
  *
@@ -285,10 +295,10 @@ typedef struct H5FD_subfiling_params_t {
  *      the #H5FD_IOC driver by calling H5Pset_fapl_ioc(), but future development
  *      may allow other file drivers to be used.
  *
- * \var hbool_t H5FD_subfiling_config_t::require_ioc
+ * \var bool H5FD_subfiling_config_t::require_ioc
  *      A boolean flag which indicates whether the #H5FD_SUBFILING driver should
  *      use the #H5FD_IOC driver for its I/O operations. This field should currently
- *      always be set to TRUE.
+ *      always be set to true.
  *
  * \var H5FD_subfiling_params_t H5FD_subfiling_config_t::shared_cfg
  *      A structure which contains the subfiling parameters that are shared between
@@ -300,7 +310,7 @@ typedef struct H5FD_subfiling_config_t {
     uint32_t magic;                     /* Must be set to H5FD_SUBFILING_FAPL_MAGIC                         */
     uint32_t version;                   /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION                  */
     hid_t    ioc_fapl_id;               /* The FAPL setup with the stacked VFD to use for I/O concentrators */
-    hbool_t  require_ioc;               /* Whether to use the IOC VFD (currently must always be TRUE)       */
+    bool     require_ioc;               /* Whether to use the IOC VFD (currently must always be true)       */
     H5FD_subfiling_params_t shared_cfg; /* Subfiling/IOC parameters (stripe size, stripe count, etc.)       */
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->

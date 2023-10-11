@@ -58,7 +58,7 @@
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE, VAR, INFO)                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         TYPE          _v1, _v2, _v3;                                                                         \
         unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];                                              \
         unsigned char _pad_mask[sizeof(TYPE)];                                                               \
@@ -79,11 +79,11 @@
          * and interfere with detection of the various properties below unless we                            \
          * know to ignore them. */                                                                           \
         _v1 = (TYPE)4.0L;                                                                                    \
-        memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                     \
+        H5MM_memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                \
         for (_i = 0; _i < (int)sizeof(TYPE); _i++)                                                           \
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
-                memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                     \
+                H5MM_memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                \
                 H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
@@ -96,8 +96,8 @@
             _v3 = _v1;                                                                                       \
             _v1 += _v2;                                                                                      \
             _v2 /= (TYPE)256.0L;                                                                             \
-            memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                                 \
-            memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                                 \
+            H5MM_memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                                            \
+            H5MM_memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                                            \
             _j = H5T__byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                                       \
             if (_j >= 0) {                                                                                   \
                 INFO.perm[_i] = _j;                                                                          \
@@ -138,7 +138,7 @@
         INFO.ebias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                 \
         H5T__set_precision(&(INFO));                                                                         \
         COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
-    }
+    } while (0)
 
 /* Detect alignment for C structure */
 #define COMP_ALIGNMENT(TYPE, COMP_ALIGN)                                                                     \
@@ -489,7 +489,7 @@ H5T__init_native_float_types(void)
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
-    if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+    if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_FLOAT_ALIGN_g = det.comp_align;
 
@@ -520,7 +520,7 @@ H5T__init_native_float_types(void)
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
-    if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+    if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_DOUBLE_ALIGN_g = det.comp_align;
 
@@ -551,7 +551,7 @@ H5T__init_native_float_types(void)
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
-    if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+    if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype");
     H5T_NATIVE_LDOUBLE_ALIGN_g = det.comp_align;
 

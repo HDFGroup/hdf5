@@ -54,7 +54,7 @@ static herr_t H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_
 static herr_t H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                             H5_iter_order_t order, hsize_t n, hid_t lapl_id, void **token_ptr,
                                             H5VL_object_t **_vol_obj_ptr);
-static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id,
+static herr_t H5L__exists_api_common(hid_t loc_id, const char *name, bool *exists, hid_t lapl_id,
                                      void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static herr_t H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
                                       hsize_t *idx_p, H5L_iterate2_t op, void *op_data, void **token_ptr,
@@ -107,7 +107,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified");
     if (!dst_name || !*dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified");
-    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (lcpl_id != H5P_DEFAULT && (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list");
 
     /* Check the link create property list */
@@ -118,7 +118,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) <
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), true) <
         0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
@@ -209,7 +209,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified");
     if (!dst_name || !*dst_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified");
-    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (lcpl_id != H5P_DEFAULT && (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list");
 
     /* Check the link create property list */
@@ -220,7 +220,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), TRUE) <
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id), true) <
         0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
@@ -308,7 +308,7 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be NULL");
     if (!*link_target)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "link_target parameter cannot be an empty string");
-    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (lcpl_id != H5P_DEFAULT && (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list");
     /* link_name is verified in H5VL_setup_name_args() */
 
@@ -320,11 +320,11 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(link_loc_id, link_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(link_loc_id, link_name, true, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments");
 
     /* Set up VOL callback arguments */
@@ -451,7 +451,7 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new_name parameter cannot be NULL");
     if (!*link_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new_name parameter cannot be an empty string");
-    if (lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+    if (lcpl_id != H5P_DEFAULT && (true != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list");
 
     /* Check the link create property list */
@@ -462,7 +462,7 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, cur_loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, cur_loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up new location struct */
@@ -657,7 +657,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get normalized copy of the link target */
@@ -665,8 +665,8 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
         HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "can't normalize object name");
 
     /* Combine the filename and link name into a single buffer to give to the UD link */
-    file_name_len     = HDstrlen(file_name) + 1;
-    norm_obj_name_len = HDstrlen(norm_obj_name) + 1;
+    file_name_len     = strlen(file_name) + 1;
+    norm_obj_name_len = strlen(norm_obj_name) + 1;
     buf_size          = 1 + file_name_len + norm_obj_name_len;
     if (NULL == (ext_link_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate udata buffer");
@@ -674,9 +674,9 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
     /* Encode the external link information */
     p    = (uint8_t *)ext_link_buf;
     *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL; /* External link version & flags */
-    HDstrncpy((char *)p, file_name, buf_size - 1);     /* Name of file containing external link's object */
+    strncpy((char *)p, file_name, buf_size - 1);       /* Name of file containing external link's object */
     p += file_name_len;
-    HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1)); /* External link's object */
+    strncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1)); /* External link's object */
 
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name    = link_name;
@@ -754,7 +754,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, con
     H5CX_set_lcpl(lcpl_id);
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -807,7 +807,7 @@ H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
     /* name is verified in H5VL_setup_name_args() */
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, true, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments");
 
     /* Set up VOL callback arguments */
@@ -925,7 +925,7 @@ H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t i
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, TRUE, lapl_id, vol_obj_ptr, &loc_params) <
+    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, true, lapl_id, vol_obj_ptr, &loc_params) <
         0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments");
 
@@ -1049,7 +1049,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up location struct */
@@ -1111,7 +1111,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up location struct */
@@ -1150,7 +1150,7 @@ done:
  *
  *--------------------------------------------------------------------------*/
 static herr_t
-H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, void **token_ptr,
+H5L__exists_api_common(hid_t loc_id, const char *name, bool *exists, hid_t lapl_id, void **token_ptr,
                        H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
@@ -1168,7 +1168,7 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t la
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for link existence");
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, false, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments");
 
     /* Set up VOL callback arguments */
@@ -1188,21 +1188,21 @@ done:
  *
  * Purpose:     Checks if a link of a given name exists in a group
  *
- * Return:      Success:    TRUE/FALSE/FAIL
+ * Return:      Success:    true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    hbool_t exists;           /* Flag to indicate if link exists */
-    htri_t  ret_value = FAIL; /* Return value */
+    bool   exists;           /* Flag to indicate if link exists */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Synchronously check if a link exists */
-    exists = FALSE;
+    exists = false;
     if (H5L__exists_api_common(loc_id, name, &exists, lapl_id, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to synchronously check link existence");
 
@@ -1218,7 +1218,7 @@ done:
  *
  * Purpose:     Asynchronous version of H5Lexists
  *
- * Return:      Success:    TRUE/FALSE/FAIL
+ * Return:      Success:    true/false/FAIL
  *
  *--------------------------------------------------------------------------*/
 herr_t
@@ -1279,7 +1279,7 @@ H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t l
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up location struct */
@@ -1336,7 +1336,7 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Set up location struct */
@@ -1460,8 +1460,8 @@ done:
  * Purpose:     Tests whether a user-defined link class has been registered
  *              or not.
  *
- * Return:      TRUE if the link class has been registered
- *              FALSE if it is unregistered
+ * Return:      true if the link class has been registered
+ *              false if it is unregistered
  *              FAIL on error (if the class is not a valid UD class ID)
  *
  *-------------------------------------------------------------------------
@@ -1469,8 +1469,8 @@ done:
 htri_t
 H5Lis_registered(H5L_type_t id)
 {
-    hbool_t is_registered = FALSE;
-    htri_t  ret_value     = FALSE; /* Return value */
+    bool   is_registered = false;
+    htri_t ret_value     = false; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "Ll", id);
@@ -1483,7 +1483,7 @@ H5Lis_registered(H5L_type_t id)
     if (H5L_is_registered(id, &is_registered) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "could not determine registration status of UD link type");
 
-    ret_value = is_registered ? TRUE : FALSE;
+    ret_value = is_registered ? true : false;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1526,7 +1526,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, (-1), "can't set access property list info");
 
     /* Set up location struct */
@@ -1599,7 +1599,7 @@ H5L__iterate_api_common(hid_t group_id, H5_index_t idx_type, H5_iter_order_t ord
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_LINK_ITER;
-    vol_cb_args.args.iterate.recursive = FALSE;
+    vol_cb_args.args.iterate.recursive = false;
     vol_cb_args.args.iterate.idx_type  = idx_type;
     vol_cb_args.args.iterate.order     = order;
     vol_cb_args.args.iterate.idx_p     = idx_p;
@@ -1745,7 +1745,7 @@ H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the location object */
@@ -1760,7 +1760,7 @@ H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_LINK_ITER;
-    vol_cb_args.args.iterate.recursive = FALSE;
+    vol_cb_args.args.iterate.recursive = false;
     vol_cb_args.args.iterate.idx_type  = idx_type;
     vol_cb_args.args.iterate.order     = order;
     vol_cb_args.args.iterate.idx_p     = idx_p;
@@ -1834,7 +1834,7 @@ H5Lvisit2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_LINK_ITER;
-    vol_cb_args.args.iterate.recursive = TRUE;
+    vol_cb_args.args.iterate.recursive = true;
     vol_cb_args.args.iterate.idx_type  = idx_type;
     vol_cb_args.args.iterate.order     = order;
     vol_cb_args.args.iterate.idx_p     = NULL;
@@ -1900,7 +1900,7 @@ H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* get the location object */
@@ -1915,7 +1915,7 @@ H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_LINK_ITER;
-    vol_cb_args.args.iterate.recursive = TRUE;
+    vol_cb_args.args.iterate.recursive = true;
     vol_cb_args.args.iterate.idx_type  = idx_type;
     vol_cb_args.args.iterate.order     = order;
     vol_cb_args.args.iterate.idx_p     = NULL;
@@ -1982,10 +1982,10 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size, unsigned *flags,
     if (ext_linkval[link_size - 1] != '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer is not NULL-terminated");
 
-    /* We're now guaranteed that HDstrlen won't segfault, since the buffer has
+    /* We're now guaranteed that strlen won't segfault, since the buffer has
      * at least one NULL in it.
      */
-    len = HDstrlen((const char *)ext_linkval + 1);
+    len = strlen((const char *)ext_linkval + 1);
 
     /* If the first NULL we found was at the very end of the buffer, then
      * this external link value has no object name and is invalid.

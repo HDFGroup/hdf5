@@ -91,7 +91,8 @@ usage: h5repack [OPTIONS] file1 file2
         2: This is H5F_LIBVER_V110 in H5F_libver_t struct
         3: This is H5F_LIBVER_V112 in H5F_libver_t struct
         4: This is H5F_LIBVER_V114 in H5F_libver_t struct
-           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V114 for this release
+        5: This is H5F_LIBVER_V116 in H5F_libver_t struct
+           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V116 for this release
 
     FS_STRATEGY is a string indicating the file space strategy used:
         FSM_AGGR:

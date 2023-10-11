@@ -27,12 +27,12 @@ enum H5TEST_COLL_CHUNK_API {
     API_MULTI_IND
 };
 
-#ifndef FALSE
-#define FALSE 0
+#ifndef false
+#define false 0
 #endif
 
-#ifndef TRUE
-#define TRUE 1
+#ifndef true
+#define true 1
 #endif
 
 /* Constants definitions */
@@ -82,8 +82,8 @@ enum H5TEST_COLL_CHUNK_API {
 #define LINK_TRUE_NUM_CHUNK   2
 #define LINK_FALSE_NUM_CHUNK  6
 #define MULTI_TRUE_PERCENT    50
-#define LINK_TRUE_CHUNK_NAME  "h5_link_chunk_true"
-#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_false"
+#define LINK_TRUE_CHUNK_NAME  "h5_link_chunk_TRUE"
+#define LINK_FALSE_CHUNK_NAME "h5_link_chunk_FALSE"
 #define LINK_HARD_CHUNK_NAME  "h5_link_chunk_hard"
 #define MULTI_HARD_CHUNK_NAME "h5_multi_chunk_hard"
 #define MULTI_COLL_CHUNK_NAME "h5_multi_chunk_coll"

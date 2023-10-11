@@ -50,8 +50,8 @@ static const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
 char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
 
 /* Whether these filters are available */
-htri_t deflate_avail    = FALSE;
-htri_t fletcher32_avail = FALSE;
+htri_t deflate_avail    = false;
+htri_t fletcher32_avail = false;
 
 static int
 test_mdset_location(hid_t fapl_id)
@@ -183,7 +183,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     size_t      max_dsets;
     size_t      buf_size;
     size_t      ndsets;
-    hid_t       file_id = -1;
+    hid_t       file_id = H5I_INVALID_HID;
     hid_t       dcpl_id[MAX_DSETS];
     hsize_t     dset_dims[MAX_DSETS][3];
     hsize_t     chunk_dims[2];
@@ -196,7 +196,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     unsigned   *wbufi[MAX_DSETS][MAX_DSET_X];
     unsigned   *efbuf = NULL;
     unsigned   *efbufi[MAX_DSETS][MAX_DSET_X];
-    hbool_t     do_read;
+    bool        do_read;
     hsize_t     start[3];
     hsize_t     count[3];
     hsize_t     points[3 * MAX_POINTS];
@@ -321,7 +321,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         for (j = 0; j < ndsets; j++) {
             hid_t source_dset;
 
-            hbool_t use_chunk =
+            bool use_chunk =
                 (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
@@ -388,7 +388,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         for (j = 0; j < OPS_PER_FILE; j++) {
             /* Decide whether to read or write.  Can't read on the first iteration with external
              * layout because the write is needed to create the external file. */
-            do_read = (j == 0 && flags & MDSET_FLAG_MLAYOUT) ? FALSE : (hbool_t)(HDrandom() % 2);
+            do_read = (j == 0 && flags & MDSET_FLAG_MLAYOUT) ? false : (bool)(HDrandom() % 2);
 
             /* Loop over datasets */
             for (k = 0; k < ndsets; k++) {

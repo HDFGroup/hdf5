@@ -7,7 +7,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted
 The C, FORTRAN and Java examples below point to the examples in the hdf5-examples github repository. Examples for older versions of HDF5
 are handled by setting the appropriate USE_API_xxx definition. HDF5-1.6 examples are in a "16"-named subdirectory.
 
-The Java examples are in the HDF5-1.10 source code, and the Java Object package examples are in the HDFView source.
+The Java examples are in the HDF5-1.14 source code, and the Java Object package examples are in the HDFView source.
 <em>Please note that you must comment out the "package" statement at the top when downloading a Java Object example individually.</em>
 
 The MATLAB and Python examples were generously provided by a user and are not tested.

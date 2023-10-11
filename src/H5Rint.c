@@ -102,14 +102,13 @@ H5R__print_token(const H5O_token_t token)
     static char string[64];
 
     /* Print the raw token. */
-    HDsnprintf(string, 64, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
-               (unsigned char)token.__data[15], (unsigned char)token.__data[14],
-               (unsigned char)token.__data[13], (unsigned char)token.__data[12],
-               (unsigned char)token.__data[11], (unsigned char)token.__data[10],
-               (unsigned char)token.__data[9], (unsigned char)token.__data[8], (unsigned char)token.__data[7],
-               (unsigned char)token.__data[6], (unsigned char)token.__data[5], (unsigned char)token.__data[4],
-               (unsigned char)token.__data[3], (unsigned char)token.__data[2], (unsigned char)token.__data[1],
-               (unsigned char)token.__data[0]);
+    snprintf(string, 64, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+             (unsigned char)token.__data[15], (unsigned char)token.__data[14],
+             (unsigned char)token.__data[13], (unsigned char)token.__data[12],
+             (unsigned char)token.__data[11], (unsigned char)token.__data[10], (unsigned char)token.__data[9],
+             (unsigned char)token.__data[8], (unsigned char)token.__data[7], (unsigned char)token.__data[6],
+             (unsigned char)token.__data[5], (unsigned char)token.__data[4], (unsigned char)token.__data[3],
+             (unsigned char)token.__data[2], (unsigned char)token.__data[1], (unsigned char)token.__data[0]);
 
     return string;
 }
@@ -231,7 +230,7 @@ H5R__create_region(const H5O_token_t *obj_token, size_t token_size, H5S_t *space
 
     /* Create new reference */
     ref->info.obj.filename = NULL;
-    if (NULL == (ref->info.reg.space = H5S_copy(space, FALSE, TRUE)))
+    if (NULL == (ref->info.reg.space = H5S_copy(space, false, true)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "unable to copy dataspace");
 
     ref->loc_id = H5I_INVALID_HID;
@@ -279,13 +278,13 @@ H5R__create_attr(const H5O_token_t *obj_token, size_t token_size, const char *at
     assert(ref);
 
     /* Make sure that attribute name is not longer than supported encode size */
-    if (HDstrlen(attr_name) > H5R_MAX_STRING_LEN)
+    if (strlen(attr_name) > H5R_MAX_STRING_LEN)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, FAIL, "attribute name too long (%d > %d)",
-                    (int)HDstrlen(attr_name), H5R_MAX_STRING_LEN);
+                    (int)strlen(attr_name), H5R_MAX_STRING_LEN);
 
     /* Create new reference */
     ref->info.obj.filename = NULL;
-    if (NULL == (ref->info.attr.name = HDstrdup(attr_name)))
+    if (NULL == (ref->info.attr.name = strdup(attr_name)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy attribute name");
 
     ref->loc_id = H5I_INVALID_HID;
@@ -389,7 +388,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, hbool_t inc_ref, hbool_t app_ref)
+H5R__set_loc_id(H5R_ref_priv_t *ref, hid_t id, bool inc_ref, bool app_ref)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -471,7 +470,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     /* TODO add search path */
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
+    if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, true) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info");
 
     /* Get the VOL info from the fapl */
@@ -494,7 +493,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file");
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle");
 
     /* Get the file object */
@@ -519,7 +518,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     } /* end if */
 
     /* Attach loc_id to reference */
-    if (H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, FALSE, TRUE) < 0)
+    if (H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, false, true) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "unable to attach location id to reference");
 
 done:
@@ -554,14 +553,14 @@ H5R__get_type(const H5R_ref_priv_t *ref)
  *
  * Purpose:     Compare two references
  *
- * Return:      TRUE if equal, FALSE if unequal, FAIL if error
+ * Return:      true if equal, false if unequal, FAIL if error
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
 {
-    htri_t ret_value = TRUE;
+    htri_t ret_value = true;
 
     FUNC_ENTER_PACKAGE
 
@@ -570,21 +569,21 @@ H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
 
     /* Compare reference types */
     if (ref1->type != ref2->type)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Compare object addresses */
     if (ref1->token_size != ref2->token_size)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
     if (0 != memcmp(&ref1->info.obj.token, &ref2->info.obj.token, ref1->token_size))
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
 
     /* Compare filenames */
     if ((ref1->info.obj.filename && (NULL == ref2->info.obj.filename)) ||
         ((NULL == ref1->info.obj.filename) && ref2->info.obj.filename))
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(false);
     if (ref1->info.obj.filename && ref1->info.obj.filename &&
-        (0 != HDstrcmp(ref1->info.obj.filename, ref2->info.obj.filename)))
-        HGOTO_DONE(FALSE);
+        (0 != strcmp(ref1->info.obj.filename, ref2->info.obj.filename)))
+        HGOTO_DONE(false);
 
     switch (ref1->type) {
         case H5R_OBJECT2:
@@ -595,8 +594,8 @@ H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
             break;
         case H5R_ATTR:
             assert(ref1->info.attr.name && ref2->info.attr.name);
-            if (0 != HDstrcmp(ref1->info.attr.name, ref2->info.attr.name))
-                HGOTO_DONE(FALSE);
+            if (0 != strcmp(ref1->info.attr.name, ref2->info.attr.name))
+                HGOTO_DONE(false);
             break;
         case H5R_OBJECT1:
         case H5R_DATASET_REGION1:
@@ -640,11 +639,11 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
         case H5R_OBJECT2:
             break;
         case H5R_DATASET_REGION2:
-            if (NULL == (dst_ref->info.reg.space = H5S_copy(src_ref->info.reg.space, FALSE, TRUE)))
+            if (NULL == (dst_ref->info.reg.space = H5S_copy(src_ref->info.reg.space, false, true)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "unable to copy dataspace");
             break;
         case H5R_ATTR:
-            if (NULL == (dst_ref->info.attr.name = HDstrdup(src_ref->info.attr.name)))
+            if (NULL == (dst_ref->info.attr.name = strdup(src_ref->info.attr.name)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy attribute name");
             break;
         case H5R_OBJECT1:
@@ -662,7 +661,7 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
     if (src_ref->loc_id == H5I_INVALID_HID) {
         assert(src_ref->info.obj.filename);
 
-        if (NULL == (dst_ref->info.obj.filename = HDstrdup(src_ref->info.obj.filename)))
+        if (NULL == (dst_ref->info.obj.filename = strdup(src_ref->info.obj.filename)))
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy filename");
         dst_ref->loc_id = H5I_INVALID_HID;
     }
@@ -671,9 +670,9 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
 
         /* Set location ID and hold reference to it */
         dst_ref->loc_id = src_ref->loc_id;
-        if (H5I_inc_ref(dst_ref->loc_id, TRUE) < 0)
+        if (H5I_inc_ref(dst_ref->loc_id, true) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINC, FAIL, "incrementing location ID failed");
-        dst_ref->app_ref = TRUE;
+        dst_ref->app_ref = true;
     }
 
 done:
@@ -762,7 +761,7 @@ H5R__get_region(const H5R_ref_priv_t *ref, H5S_t *space)
     assert(space);
 
     /* Copy reference selection to destination */
-    if (H5S_select_copy(space, ref->info.reg.space, FALSE) < 0)
+    if (H5S_select_copy(space, ref->info.reg.space, false) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "unable to copy selection");
 
 done:
@@ -795,7 +794,7 @@ H5R__get_file_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, (-1), "no filename available for that reference");
 
     /* Get the file name length */
-    copy_len = HDstrlen(ref->info.obj.filename);
+    copy_len = strlen(ref->info.obj.filename);
     assert(copy_len <= H5R_MAX_STRING_LEN);
 
     /* Copy the file name */
@@ -832,7 +831,7 @@ H5R__get_attr_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
     assert(ref->type == H5R_ATTR);
 
     /* Get the attribute name length */
-    attr_name_len = HDstrlen(ref->info.attr.name);
+    attr_name_len = strlen(ref->info.attr.name);
     assert(attr_name_len <= H5R_MAX_STRING_LEN);
 
     /* Get the attribute name */
@@ -1245,7 +1244,7 @@ H5R__encode_string(const char *string, unsigned char *buf, size_t *nalloc)
     assert(nalloc);
 
     /* Get the amount of space required to serialize the string */
-    string_len = HDstrlen(string);
+    string_len = strlen(string);
     if (string_len > H5R_MAX_STRING_LEN)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, FAIL, "string too long");
 

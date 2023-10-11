@@ -26,10 +26,6 @@
 /* Compression level */
 #define COMPRESSION_LEVEL 7
 
-/* Booleans */
-#define TRUE  1
-#define FALSE 0
-
 /* Testing macros */
 #define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define UC_ERROR                                                                                             \

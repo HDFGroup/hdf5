@@ -86,7 +86,7 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "cannot retrieve native type");
 
     /* Get an ID for the new type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type");
 
 done:
@@ -137,7 +137,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
     assert(dtype);
 
-    if (H5T_NO_CLASS == (h5_class = H5T_get_class(dtype, FALSE)))
+    if (H5T_NO_CLASS == (h5_class = H5T_get_class(dtype, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
 
     if (0 == (size = H5T_get_size(dtype)))
@@ -219,7 +219,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
             /* Update size, offset and compound alignment for parent. */
-            if (0 == H5T_cmp(ret_value, dt, FALSE)) {
+            if (0 == H5T_cmp(ret_value, dt, false)) {
                 align    = H5T_HOBJREF_ALIGN_g;
                 ref_size = sizeof(hobj_ref_t);
             } /* end if */
@@ -228,7 +228,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 if (NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_DSETREG_g)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
-                if (0 == H5T_cmp(ret_value, dt, FALSE)) {
+                if (0 == H5T_cmp(ret_value, dt, false)) {
                     align    = H5T_HDSETREGREF_ALIGN_g;
                     ref_size = sizeof(hdset_reg_ref_t);
                 } /* end if */
@@ -344,9 +344,9 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                              H5T__get_native_type(super_type, direction, struct_align, offset, comp_size)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
 
-            if ((super_type_id = H5I_register(H5I_DATATYPE, super_type, FALSE)) < 0)
+            if ((super_type_id = H5I_register(H5I_DATATYPE, super_type, false)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype");
-            if ((nat_super_type_id = H5I_register(H5I_DATATYPE, nat_super_type, FALSE)) < 0)
+            if ((nat_super_type_id = H5I_register(H5I_DATATYPE, nat_super_type, false)) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype");
 
             /* Allocate room for the enum values */
@@ -1240,7 +1240,7 @@ H5T__init_native_internal(void)
             dt->shared->u.atomic.order = byte_order;
             *table[j].alignmentp       = table[j].alignment;
 
-            if ((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            if ((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, false)) < 0)
                 return FAIL;
         }
     }

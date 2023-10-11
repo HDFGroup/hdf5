@@ -22,11 +22,11 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__efl_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__efl_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__efl_copy(const void *_mesg, void *_dest);
-static size_t H5O__efl_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__efl_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__efl_reset(void *_mesg);
-static void  *H5O__efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O__efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, bool *recompute_size,
                                  unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__efl_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -118,7 +118,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
-    if (H5_addr_defined(mesg->heap_addr) == FALSE)
+    if (H5_addr_defined(mesg->heap_addr) == false)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad local heap address when parsing efl msg");
 
     /* Decode the file list */
@@ -197,7 +197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__efl_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     size_t           u; /* Local index variable */
@@ -260,7 +260,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
     H5O_efl_t       *dest = (H5O_efl_t *)_dest;
     size_t           u;                      /* Local index variable */
-    hbool_t          slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
+    bool             slot_allocated = false; /* Flag to indicate that dynamic allocation has begun */
     void            *ret_value      = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -279,7 +279,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
     if (dest->nalloc > 0) {
         if (NULL == (dest->slot = (H5O_efl_entry_t *)H5MM_calloc(dest->nalloc * sizeof(H5O_efl_entry_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slots");
-        slot_allocated = TRUE;
+        slot_allocated = true;
         for (u = 0; u < mesg->nused; u++) {
             dest->slot[u] = mesg->slot[u];
             if (NULL == (dest->slot[u].name = H5MM_xstrdup(mesg->slot[u].name)))
@@ -320,7 +320,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__efl_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_efl_t *mesg      = (const H5O_efl_t *)_mesg;
     size_t           ret_value = 0;
@@ -425,7 +425,7 @@ done:
  */
 static void *
 H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
-                   hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
+                   bool H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
                    H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *_udata)
 {
     H5O_efl_t *efl_src = (H5O_efl_t *)mesg_src;
@@ -450,7 +450,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     /* Determine size needed for destination heap */
     heap_size = H5HL_ALIGN(1); /* "empty" name */
     for (idx = 0; idx < efl_src->nused; idx++)
-        heap_size += H5HL_ALIGN(HDstrlen(efl_src->slot[idx].name) + 1);
+        heap_size += H5HL_ALIGN(strlen(efl_src->slot[idx].name) + 1);
 
     /* Create name heap */
     if (H5HL_create(file_dst, heap_size, &efl_dst->heap_addr /*out*/) < 0)
@@ -478,7 +478,7 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
     /* copy the name from the source */
     for (idx = 0; idx < efl_src->nused; idx++) {
         efl_dst->slot[idx].name = H5MM_xstrdup(efl_src->slot[idx].name);
-        if (H5HL_insert(file_dst, heap, HDstrlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name,
+        if (H5HL_insert(file_dst, heap, strlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name,
                         &(efl_dst->slot[idx].name_offset)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap");
     }
@@ -529,7 +529,7 @@ H5O__efl_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int ind
     for (u = 0; u < mesg->nused; u++) {
         char buf[64];
 
-        HDsnprintf(buf, sizeof(buf), "File %zu", u);
+        snprintf(buf, sizeof(buf), "File %zu", u);
         fprintf(stream, "%*s%s:\n", indent, "", buf);
 
         fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(fwidth - 3, 0), "Name:", mesg->slot[u].name);

@@ -24,14 +24,14 @@
 
 static void  *H5O__mtime_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                     size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static size_t H5O__mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__mtime_new_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static size_t H5O__mtime_new_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 
 static void  *H5O__mtime_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__mtime_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__mtime_copy(const void *_mesg, void *_dest);
-static size_t H5O__mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__mtime_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__mtime_free(void *_mesg);
 static herr_t H5O__mtime_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -221,7 +221,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p,
                       const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
@@ -257,8 +257,7 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                  const void *_mesg)
+H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
     struct tm    *tm;
@@ -272,8 +271,8 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
 
     /* encode */
     tm = HDgmtime(mesg);
-    HDsprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
-              tm->tm_hour, tm->tm_min, tm->tm_sec);
+    sprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
+            tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_encode() */
@@ -329,7 +328,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
+H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared,
                     const void H5_ATTR_UNUSED *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -356,7 +355,7 @@ H5O__mtime_new_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disabl
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
+H5O__mtime_size(const H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared,
                 const void H5_ATTR_UNUSED *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -417,7 +416,7 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     /* debug */
     tm = HDlocaltime(mesg);
 
-    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

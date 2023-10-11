@@ -416,7 +416,7 @@ test_create(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Library allowed overwrite of existing dataset.");
+        puts("    Library allowed overwrite of existing dataset.");
         goto error;
     }
 
@@ -443,7 +443,7 @@ test_create(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a non-existent dataset.");
+        puts("    Opened a non-existent dataset.");
         goto error;
     }
 
@@ -467,7 +467,7 @@ test_create(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a dataset with incorrect chunking parameters.");
+        puts("    Opened a dataset with incorrect chunking parameters.");
         goto error;
     }
 
@@ -531,9 +531,9 @@ error:
 static herr_t
 test_simple_io(const char *env_h5_drvr, hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE];
-    hid_t   file = -1, dataset = -1, space = -1, xfer = -1;
-    int     i, j, n;
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t file = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID, xfer = H5I_INVALID_HID;
+    int   i, j, n;
     hsize_t dims[2];
     void   *tconv_buf = NULL;
     int     f         = -1;
@@ -544,8 +544,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     TESTING("simple I/O");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-        HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+        strcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -626,7 +626,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDlseek(f, (HDoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -653,7 +653,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     } /* end if */
     else {
         SKIPPED();
-        HDputs("    Current VFD doesn't support continuous address space");
+        puts("    Current VFD doesn't support continuous address space");
     } /* end else */
 
     return SUCCEED;
@@ -691,11 +691,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+test_userblock_offset(const char *env_h5_drvr, hid_t fapl, bool new_format)
 {
-    char    filename[FILENAME_BUF_SIZE];
-    hid_t   file = -1, fcpl = -1, dataset = -1, space = -1;
-    int     i, j;
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t file = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, dataset = H5I_INVALID_HID, space = H5I_INVALID_HID;
+    int   i, j;
     hsize_t dims[2];
     int     f = -1;
     haddr_t offset;
@@ -705,8 +705,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     TESTING("dataset offset with user block");
 
     /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-        HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0 &&
+        strcmp(env_h5_drvr, "family") != 0) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
         /* Set up data array */
@@ -763,7 +763,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDlseek(f, (HDoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -789,7 +789,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     } /* end if */
     else {
         SKIPPED();
-        HDputs("    Current VFD doesn't support continuous address space");
+        puts("    Current VFD doesn't support continuous address space");
     } /* end else */
 
     return SUCCEED;
@@ -836,7 +836,7 @@ test_compact_io(hid_t fapl)
     hid_t space   = H5I_INVALID_HID;
     hid_t plist   = H5I_INVALID_HID;
 
-    hid_t        verfile = -1, new_fapl = -1;
+    hid_t        verfile = H5I_INVALID_HID, new_fapl = H5I_INVALID_HID;
     hsize_t      dims[2];
     int          wbuf[16][8], rbuf[16][8];
     char         filename[FILENAME_BUF_SIZE];
@@ -1053,10 +1053,10 @@ error:
 static herr_t
 test_max_compact(hid_t fapl)
 {
-    hid_t   file    = -1;
-    hid_t   dataset = -1;
-    hid_t   space   = -1;
-    hid_t   plist   = -1;
+    hid_t   file    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   plist   = H5I_INVALID_HID;
     hsize_t dims[1];
     size_t  compact_size;
     int    *wbuf = NULL;
@@ -1215,12 +1215,13 @@ error:
 static herr_t
 test_layout_extend(hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE];                            /* File name */
-    hid_t   fid     = -1;                                           /* File id */
-    hid_t   sid_fix = -1, sid_unlim = -1;                           /* Dataspace id */
-    hid_t   dcpl_compact = -1, dcpl_contig = -1, dcpl_chunked = -1; /* Dataset creation property list id */
-    hid_t   did_fixed = -1, did_unlim = -1;                         /* Dataset id */
-    hsize_t cur_size[1]  = {10};                                    /* Current size of dataspace */
+    char  filename[FILENAME_BUF_SIZE];                            /* File name */
+    hid_t fid     = H5I_INVALID_HID;                              /* File id */
+    hid_t sid_fix = H5I_INVALID_HID, sid_unlim = H5I_INVALID_HID; /* Dataspace id */
+    hid_t dcpl_compact = H5I_INVALID_HID, dcpl_contig = H5I_INVALID_HID,
+          dcpl_chunked = H5I_INVALID_HID;                             /* Dataset creation property list id */
+    hid_t   did_fixed = H5I_INVALID_HID, did_unlim = H5I_INVALID_HID; /* Dataset id */
+    hsize_t cur_size[1]  = {10};                                      /* Current size of dataspace */
     hsize_t max_unlim[1] = {H5S_UNLIMITED}; /* Maximum size of dataspace (unlimited) */
     hsize_t max_fix[1]   = {100};           /* Maximum size of dataspace (fixed) */
     hsize_t chunk_dim[1] = {10};            /* Chunk size */
@@ -1469,7 +1470,7 @@ test_conv_buffer(hid_t fid)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Library shouldn't allow conversion buffer too small");
+        puts("    Library shouldn't allow conversion buffer too small");
         goto error;
     }
 
@@ -1504,7 +1505,7 @@ test_conv_buffer(hid_t fid)
 
     free(cf);
     free(cfrR);
-    HDputs(" PASSED");
+    puts(" PASSED");
     return SUCCEED;
 
 error:
@@ -1543,7 +1544,7 @@ test_tconv(hid_t file)
 {
     char   *out = NULL, *in = NULL;
     hsize_t dims[1];
-    hid_t   space = -1, dataset = -1;
+    hid_t   space = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
     int     i;
 
     if ((out = (char *)malloc((size_t)(4 * 1000 * 1000))) == NULL)
@@ -1584,7 +1585,7 @@ test_tconv(hid_t file)
         if (in[4 * i + 0] != out[4 * i + 3] || in[4 * i + 1] != out[4 * i + 2] ||
             in[4 * i + 2] != out[4 * i + 1] || in[4 * i + 3] != out[4 * i + 0]) {
             H5_FAILED();
-            HDputs("    Read with byte order conversion failed.");
+            puts("    Read with byte order conversion failed.");
             goto error;
         }
     }
@@ -1596,7 +1597,7 @@ test_tconv(hid_t file)
     free(out);
     free(in);
 
-    HDputs(" PASSED");
+    puts(" PASSED");
     return SUCCEED;
 
 error:
@@ -1935,7 +1936,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     TESTING("    filters (setup)");
 
     /* Check if all the filters are available */
-    if (H5Pall_filters_avail(dcpl) != TRUE) {
+    if (H5Pall_filters_avail(dcpl) != true) {
         H5_FAILED();
         printf("    Line %d: Incorrect filter availability\n", __LINE__);
         goto error;
@@ -2286,11 +2287,11 @@ error:
 static herr_t
 test_filter_noencoder(const char *dset_name)
 {
-    hid_t   file_id      = -1;
-    hid_t   dset_id      = -1;
-    hid_t   test_dset_id = -1;
-    hid_t   dcpl_id      = -1;
-    hid_t   space_id     = -1;
+    hid_t   file_id      = H5I_INVALID_HID;
+    hid_t   dset_id      = H5I_INVALID_HID;
+    hid_t   test_dset_id = H5I_INVALID_HID;
+    hid_t   dcpl_id      = H5I_INVALID_HID;
+    hid_t   space_id     = H5I_INVALID_HID;
     hsize_t dims         = 10;
     herr_t  err;
     int     test_ints[10] = {12};
@@ -2525,7 +2526,7 @@ test_filters(hid_t file)
      * STEP 0: Test null I/O filter by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing 'null' filter");
+    puts("Testing 'null' filter");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2547,7 +2548,7 @@ test_filters(hid_t file)
      * STEP 1: Test Fletcher32 Checksum by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing Fletcher32 checksum(enabled for read)");
+    puts("Testing Fletcher32 checksum(enabled for read)");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2561,23 +2562,23 @@ test_filters(hid_t file)
         goto error;
     if (fletcher32_size <= null_size) {
         H5_FAILED();
-        HDputs("    Size after checksumming is incorrect.");
+        puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
     /* Disable checksum during read */
-    HDputs("Testing Fletcher32 checksum(disabled for read)");
+    puts("Testing Fletcher32 checksum(disabled for read)");
     if (test_filter_internal(file, DSET_FLETCHER32_NAME_2, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
                              &fletcher32_size) < 0)
         goto error;
     if (fletcher32_size <= null_size) {
         H5_FAILED();
-        HDputs("    Size after checksumming is incorrect.");
+        puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
     /* Try to corrupt data and see if checksum fails */
-    HDputs("Testing Fletcher32 checksum(when data is corrupted)");
+    puts("Testing Fletcher32 checksum(when data is corrupted)");
     data_corrupt[0] = 52;
     data_corrupt[1] = 33;
     data_corrupt[2] = 27;
@@ -2591,7 +2592,7 @@ test_filters(hid_t file)
         goto error;
     if (fletcher32_size <= null_size) {
         H5_FAILED();
-        HDputs("    Size after checksumming is incorrect.");
+        puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
@@ -2604,7 +2605,7 @@ test_filters(hid_t file)
          *----------------------------------------------------------
          */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    HDputs("Testing deflate filter");
+    puts("Testing deflate filter");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2621,7 +2622,7 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     TESTING("deflate filter");
     SKIPPED();
-    HDputs("    Deflate filter not enabled");
+    puts("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /*----------------------------------------------------------
@@ -2636,7 +2637,7 @@ test_filters(hid_t file)
         if (H5Pset_chunk(dc, 2, chunk_size) < 0)
             goto error;
 
-        HDputs("");
+        puts("");
         if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0)
             goto error;
         if (test_filter_internal(file, DSET_SZIP_NAME, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
@@ -2652,7 +2653,7 @@ test_filters(hid_t file)
     TESTING("szip filter (without encoder)");
 
     if (h5_szip_can_encode() != 1) {
-        HDputs("");
+        puts("");
         if (test_filter_noencoder(NOENCODER_SZIP_DATASET) < 0)
             goto error;
     }
@@ -2663,14 +2664,14 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_SZIP */
     TESTING("szip filter");
     SKIPPED();
-    HDputs("    Szip filter not enabled");
+    puts("    Szip filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
 
     /*----------------------------------------------------------
      * STEP 4: Test shuffling by itself.
      *----------------------------------------------------------
      */
-    HDputs("Testing shuffle filter");
+    puts("Testing shuffle filter");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2683,7 +2684,7 @@ test_filters(hid_t file)
         goto error;
     if (shuffle_size != null_size) {
         H5_FAILED();
-        HDputs("    Shuffled size not the same as uncompressed size.");
+        puts("    Shuffled size not the same as uncompressed size.");
         goto error;
     } /* end if */
 
@@ -2696,7 +2697,7 @@ test_filters(hid_t file)
          *----------------------------------------------------------
          */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    HDputs("Testing shuffle+deflate+checksum filters(checksum first)");
+    puts("Testing shuffle+deflate+checksum filters(checksum first)");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2716,7 +2717,7 @@ test_filters(hid_t file)
     if (H5Pclose(dc) < 0)
         goto error;
 
-    HDputs("Testing shuffle+deflate+checksum filters(checksum last)");
+    puts("Testing shuffle+deflate+checksum filters(checksum last)");
     if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2738,7 +2739,7 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     TESTING("shuffle+deflate+fletcher32 filters");
     SKIPPED();
-    HDputs("    Deflate filter not enabled");
+    puts("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /*----------------------------------------------------------
@@ -2759,7 +2760,7 @@ test_filters(hid_t file)
 
     /* Make sure encoding is enabled */
     if (h5_szip_can_encode() == 1) {
-        HDputs("");
+        puts("");
         if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0)
             goto error;
         if (test_filter_internal(file, DSET_SHUF_SZIP_FLET_NAME, dc, ENABLE_FLETCHER32, DATA_NOT_CORRUPTED,
@@ -2773,7 +2774,7 @@ test_filters(hid_t file)
     TESTING("shuffle+szip+checksum filters(checksum first, without encoder)");
 
     if (h5_szip_can_encode() != 1) {
-        HDputs("");
+        puts("");
         if (test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET) < 0)
             goto error;
     }
@@ -2789,7 +2790,7 @@ test_filters(hid_t file)
 
     /* Make sure encoding is enabled */
     if (h5_szip_can_encode() == 1) {
-        HDputs("");
+        puts("");
         if ((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
             goto error;
         if (H5Pset_chunk(dc, 2, chunk_size) < 0)
@@ -2816,7 +2817,7 @@ test_filters(hid_t file)
 #else  /* H5_HAVE_FILTER_SZIP */
     TESTING("shuffle+szip+fletcher32 filters");
     SKIPPED();
-    HDputs("    szip filter not enabled");
+    puts("    szip filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
     return SUCCEED;
 
@@ -2845,14 +2846,14 @@ test_missing_filter(hid_t file)
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
     const char   *testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
-    hbool_t       api_ctx_pushed = FALSE;                                     /* Whether API context pushed */
+    bool          api_ctx_pushed = false;                                     /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
 
     /* Unregister the deflate filter */
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Verify deflate filter is registered currently */
-    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != TRUE) {
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true) {
         H5_FAILED();
         printf("    Line %d: Deflate filter not available\n", __LINE__);
         goto error;
@@ -2861,7 +2862,7 @@ test_missing_filter(hid_t file)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Unregister deflate filter */
     /* (Use private routine, to avoid range checking on filter ID) */
@@ -2872,7 +2873,7 @@ test_missing_filter(hid_t file)
     }  /* end if */
 #endif /* H5_HAVE_FILTER_DEFLATE */
     /* Verify deflate filter is not registered currently */
-    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != FALSE) {
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != false) {
         H5_FAILED();
         printf("    Line %d: Deflate filter available\n", __LINE__);
         goto error;
@@ -2902,7 +2903,7 @@ test_missing_filter(hid_t file)
         printf("    Line %d: Can't check filter availability\n", __LINE__);
         goto error;
     } /* end if */
-    if (ret != FALSE) {
+    if (ret != false) {
         H5_FAILED();
         printf("    Line %d: Filter shouldn't be available\n", __LINE__);
         goto error;
@@ -3040,7 +3041,7 @@ test_missing_filter(hid_t file)
 
     /* Re-register the deflate filter */
     /* Verify deflate filter is not registered currently */
-    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != FALSE) {
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != false) {
         H5_FAILED();
         printf("    Line %d: Deflate filter available\n", __LINE__);
         goto error;
@@ -3054,7 +3055,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Verify deflate filter is registered currently */
-    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != TRUE) {
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true) {
         H5_FAILED();
         printf("    Line %d: Deflate filter not available\n", __LINE__);
         goto error;
@@ -3062,16 +3063,16 @@ test_missing_filter(hid_t file)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     PASSED();
     return SUCCEED;
 
 error:
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     return FAIL;
 } /* end test_missing_filter() */
@@ -3195,7 +3196,7 @@ test_nbit_int(hid_t file)
     double       power;
     size_t       i, j;
 
-    HDputs("Testing nbit filter");
+    puts("Testing nbit filter");
     TESTING("    nbit int (setup)");
 
     /* Define dataset datatype (integer), and set precision, offset */
@@ -3233,7 +3234,7 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long long >= size of int */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power           = HDpow(2.0, (double)(precision - 1));
+            power           = pow(2.0, (double)(precision - 1));
             orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
             /* even-numbered values are negative */
@@ -3387,7 +3388,7 @@ test_nbit_float(hid_t file)
      */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDisnan(orig_data[i][j]))
+            if (isnan(orig_data[i][j]))
                 continue; /* skip if value is NaN */
             if (!H5_FLT_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3509,7 +3510,7 @@ test_nbit_double(hid_t file)
      */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDisnan(orig_data[i][j]))
+            if (isnan(orig_data[i][j]))
                 continue; /* skip if value is NaN */
             if (!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
@@ -3610,7 +3611,7 @@ test_nbit_array(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++)
             for (m = 0; m < (size_t)adims[0]; m++)
                 for (n = 0; n < (size_t)adims[1]; n++) {
-                    power = HDpow(2.0, (double)precision);
+                    power = pow(2.0, (double)precision);
                     orig_data[i][j][m][n] =
                         (unsigned int)(((long long)HDrandom() % (long long)power) << offset);
                 } /* end for */
@@ -3803,11 +3804,11 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power             = HDpow(2.0, (double)(precision[0] - 1));
+            power             = pow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power             = HDpow(2.0, (double)(precision[1] - 1));
+            power             = pow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power             = HDpow(2.0, (double)(precision[2] - 1));
+            power             = pow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].f = float_val[i][j];
 
@@ -3852,7 +3853,7 @@ test_nbit_compound(hid_t file)
             if (((unsigned)new_data[i][j].i & i_mask) != ((unsigned)orig_data[i][j].i & i_mask) ||
                 ((unsigned)new_data[i][j].c & c_mask) != ((unsigned)orig_data[i][j].c & c_mask) ||
                 ((unsigned)new_data[i][j].s & s_mask) != ((unsigned)orig_data[i][j].s & s_mask) ||
-                (!HDisnan(orig_data[i][j].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f))) {
+                (!isnan(orig_data[i][j].f) && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f))) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -4082,32 +4083,32 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            power               = HDpow(2.0, (double)(precision[0] - 1));
+            power               = pow(2.0, (double)(precision[0] - 1));
             orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-            power               = HDpow(2.0, (double)(precision[1] - 1));
+            power               = pow(2.0, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-            power               = HDpow(2.0, (double)(precision[2] - 1));
+            power               = pow(2.0, (double)(precision[2] - 1));
             orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
-            power             = HDpow(2.0, (double)precision[3]);
+            power             = pow(2.0, (double)precision[3]);
             orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power                   = HDpow(2.0, (double)(precision[4] - 1));
+                    power                   = pow(2.0, (double)(precision[4] - 1));
                     orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
                 } /* end for */
 
             for (m = 0; m < (size_t)array_dims[0]; m++)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
-                    power = HDpow(2.0, (double)(precision[0] - 1));
+                    power = pow(2.0, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
                         (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
-                    power = HDpow(2.0, (double)(precision[1] - 1));
+                    power = pow(2.0, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-                    power = HDpow(2.0, (double)(precision[2] - 1));
+                    power = pow(2.0, (double)(precision[2] - 1));
                     orig_data[i][j].d[m][n].s =
                         (short)(((long long)HDrandom() % (long long)power) << offset[2]);
                     orig_data[i][j].d[m][n].f = float_val[i][j];
@@ -4176,7 +4177,7 @@ test_nbit_compound_2(hid_t file)
                             ((unsigned)orig_data[i][j].d[m][n].c & c_mask) ||
                         ((unsigned)new_data[i][j].d[m][n].s & s_mask) !=
                             ((unsigned)orig_data[i][j].d[m][n].s & s_mask) ||
-                        (!HDisnan(new_data[i][j].d[m][n].f) &&
+                        (!isnan(new_data[i][j].d[m][n].f) &&
                          !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
                         d_failed = 1;
                         goto out;
@@ -4186,7 +4187,7 @@ out:
             if (((unsigned)new_data[i][j].a.i & i_mask) != ((unsigned)orig_data[i][j].a.i & i_mask) ||
                 ((unsigned)new_data[i][j].a.c & c_mask) != ((unsigned)orig_data[i][j].a.c & c_mask) ||
                 ((unsigned)new_data[i][j].a.s & s_mask) != ((unsigned)orig_data[i][j].a.s & s_mask) ||
-                (!HDisnan(new_data[i][j].a.f) && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
+                (!isnan(new_data[i][j].a.f) && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
                 new_data[i][j].v != orig_data[i][j].v || b_failed || d_failed) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -4265,7 +4266,7 @@ test_nbit_compound_3(hid_t file)
     } atomic;
     hid_t         i_tid, str_tid, vl_str_tid, v_tid, o_tid;
     hid_t         cmpd_tid; /* atomic compound datatype */
-    hid_t         dataset, space, dc, obj_ref_dataset = -1;
+    hid_t         dataset, space, dc, obj_ref_dataset = H5I_INVALID_HID;
     const hsize_t size[1]       = {5};
     const hsize_t chunk_size[1] = {5};
     atomic        orig_data[5];
@@ -4335,11 +4336,11 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++) {
-        power = HDpow(2.0, 17.0 - 1.0);
+        power = pow(2.0, 17.0 - 1.0);
         memset(&orig_data[i], 0, sizeof(orig_data[i]));
         orig_data[i].i = (int)(HDrandom() % (long)power);
-        HDstrcpy(orig_data[i].str, "fixed-length C string");
-        orig_data[i].vl_str = HDstrdup("variable-length C string");
+        strcpy(orig_data[i].str, "fixed-length C string");
+        orig_data[i].vl_str = strdup("variable-length C string");
 
         orig_data[i].v.p   = malloc((size_t)(i + 1) * sizeof(unsigned int));
         orig_data[i].v.len = (size_t)i + 1;
@@ -4379,9 +4380,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
-        if (new_data[i].i != orig_data[i].i || HDstrcmp(new_data[i].str, orig_data[i].str) != 0 ||
-            HDstrcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 ||
-            new_data[i].v.len != orig_data[i].v.len || new_data[i].r != orig_data[i].r) {
+        if (new_data[i].i != orig_data[i].i || strcmp(new_data[i].str, orig_data[i].str) != 0 ||
+            strcmp(new_data[i].vl_str, orig_data[i].vl_str) != 0 || new_data[i].v.len != orig_data[i].v.len ||
+            new_data[i].r != orig_data[i].r) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu\n", (unsigned long)i);
@@ -4521,7 +4522,7 @@ test_nbit_int_size(hid_t file)
      */
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
-            power      = HDpow(2.0, (double)(precision - 1));
+            power      = pow(2.0, (double)(precision - 1));
             orig[i][j] = HDrandom() % (int)power << offset;
         }
 
@@ -4845,7 +4846,7 @@ test_scaleoffset_int(hid_t file)
     int           new_data[2][5];
     size_t        i, j;
 
-    HDputs("Testing scaleoffset filter");
+    puts("Testing scaleoffset filter");
     TESTING("    scaleoffset int without fill value (setup)");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -5173,7 +5174,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs((double)(new_data[i][j] - orig_data[i][j])) > HDpow(10.0, -3.0)) {
+            if (fabs((double)(new_data[i][j] - orig_data[i][j])) > pow(10.0, -3.0)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5316,7 +5317,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -3.0)) {
+        if (fabs((double)(new_data[0][j] - orig_data[0][j])) > pow(10.0, -3.0)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5434,7 +5435,7 @@ test_scaleoffset_double(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -7.0)) {
+            if (fabs(new_data[i][j] - orig_data[i][j]) > pow(10.0, -7.0)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5577,7 +5578,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -7.0)) {
+        if (fabs((double)(new_data[0][j] - orig_data[0][j])) > pow(10.0, -7.0)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5622,9 +5623,9 @@ error:
 static herr_t
 test_multiopen(hid_t file)
 {
-    hid_t          dcpl = -1, space = -1, dset1 = -1, dset2 = -1;
-    hsize_t        cur_size[1] = {10};
-    hsize_t        tmp_size[1];
+    hid_t   dcpl = H5I_INVALID_HID, space = H5I_INVALID_HID, dset1 = H5I_INVALID_HID, dset2 = H5I_INVALID_HID;
+    hsize_t cur_size[1] = {10};
+    hsize_t tmp_size[1];
     static hsize_t max_size[1] = {H5S_UNLIMITED};
 
     TESTING("multi-open with extending");
@@ -5697,9 +5698,9 @@ error:
 static herr_t
 test_types(hid_t file)
 {
-    hid_t         grp = -1, type = -1, space = -1, dset = -1;
-    size_t        i;
-    hsize_t       nelmts;
+    hid_t   grp = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID;
+    size_t  i;
+    hsize_t nelmts;
     unsigned char buf[32];
 
     TESTING("various datatypes");
@@ -6414,11 +6415,11 @@ test_can_apply_szip(hid_t
     }
     else {
         SKIPPED();
-        HDputs("    Szip encoding is not enabled.");
+        puts("    Szip encoding is not enabled.");
     }
 #else  /* H5_HAVE_FILTER_SZIP */
     SKIPPED();
-    HDputs("    Szip filter is not enabled.");
+    puts("    Szip filter is not enabled.");
 #endif /* H5_HAVE_FILTER_SZIP */
     return SUCCEED;
 
@@ -6714,12 +6715,13 @@ error:
 static herr_t
 test_compare_dcpl(hid_t file)
 {
-    hid_t         dsid  = (-1);                /* Dataset ID */
-    hid_t         sid   = (-1);                /* Dataspace ID */
-    hid_t         dcpl  = (-1);                /* Dataspace creation property list ID */
-    hid_t         dcpl1 = (-1), dcpl2 = (-1);  /* Dataspace creation property list IDs from datasets */
-    const hsize_t dims[2]       = {500, 4096}; /* Dataspace dimensions */
-    const hsize_t chunk_dims[2] = {250, 2048}; /* Chunk dimensions */
+    hid_t dsid                  = (H5I_INVALID_HID); /* Dataset ID */
+    hid_t sid                   = (H5I_INVALID_HID); /* Dataspace ID */
+    hid_t dcpl                  = (H5I_INVALID_HID); /* Dataspace creation property list ID */
+    hid_t dcpl1                 = (H5I_INVALID_HID),
+          dcpl2                 = (H5I_INVALID_HID); /* Dataspace creation property list IDs from datasets */
+    const hsize_t dims[2]       = {500, 4096};       /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};       /* Chunk dimensions */
 
     TESTING("comparing dataset creation property lists");
 
@@ -6814,16 +6816,17 @@ error:
 static herr_t
 test_copy_dcpl(hid_t file, hid_t fapl)
 {
-    hid_t         dsid1 = (-1), dsid2 = (-1);           /* Dataset ID */
-    hid_t         new_dsid1 = (-1), new_dsid2 = (-1);   /* Dataset ID */
-    hid_t         sid   = (-1);                         /* Dataspace ID */
-    hid_t         dcpl  = (-1);                         /* Dataset creation property list ID */
-    hid_t         dcpl1 = (-1), dcpl2 = (-1);           /* Copies of creation property list IDs */
-    hid_t         dcpl1_copy = (-1), dcpl2_copy = (-1); /* Copies of creation property list IDs */
-    const hsize_t dims[2]       = {500, 4096};          /* Dataspace dimensions */
-    const hsize_t chunk_dims[2] = {250, 2048};          /* Chunk dimensions */
+    hid_t dsid1 = (H5I_INVALID_HID), dsid2 = (H5I_INVALID_HID);         /* Dataset ID */
+    hid_t new_dsid1 = (H5I_INVALID_HID), new_dsid2 = (H5I_INVALID_HID); /* Dataset ID */
+    hid_t sid   = (H5I_INVALID_HID);                                    /* Dataspace ID */
+    hid_t dcpl  = (H5I_INVALID_HID);                            /* Dataset creation property list ID */
+    hid_t dcpl1 = (H5I_INVALID_HID), dcpl2 = (H5I_INVALID_HID); /* Copies of creation property list IDs */
+    hid_t dcpl1_copy            = (H5I_INVALID_HID),
+          dcpl2_copy            = (H5I_INVALID_HID); /* Copies of creation property list IDs */
+    const hsize_t dims[2]       = {500, 4096};       /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};       /* Chunk dimensions */
     char          filename[FILENAME_BUF_SIZE];
-    hid_t         new_file = (-1);
+    hid_t         new_file = (H5I_INVALID_HID);
 
     TESTING("copying dataset creation property lists");
 
@@ -6972,16 +6975,16 @@ static herr_t
 test_filter_delete(hid_t file)
 {
 #ifdef H5_HAVE_FILTER_DEFLATE
-    H5Z_filter_t filtn;                    /* filter identification number */
-    hid_t        dsid          = -1;       /* dataset ID */
-    hid_t        sid           = -1;       /* dataspace ID */
-    hid_t        dcpl          = -1;       /* dataset creation property list ID */
-    hid_t        dcpl1         = -1;       /* dataset creation property list ID */
-    hsize_t      dims[2]       = {20, 20}; /* dataspace dimensions */
-    hsize_t      chunk_dims[2] = {10, 10}; /* chunk dimensions */
-    int          nfilters;                 /* number of filters in DCPL */
-    unsigned     flags;                    /* flags for filter */
-    herr_t       ret;                      /* generic return value */
+    H5Z_filter_t filtn;                           /* filter identification number */
+    hid_t        dsid          = H5I_INVALID_HID; /* dataset ID */
+    hid_t        sid           = H5I_INVALID_HID; /* dataspace ID */
+    hid_t        dcpl          = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t        dcpl1         = H5I_INVALID_HID; /* dataset creation property list ID */
+    hsize_t      dims[2]       = {20, 20};        /* dataspace dimensions */
+    hsize_t      chunk_dims[2] = {10, 10};        /* chunk dimensions */
+    int          nfilters;                        /* number of filters in DCPL */
+    unsigned     flags;                           /* flags for filter */
+    herr_t       ret;                             /* generic return value */
     int          i;
 #endif
 
@@ -7121,16 +7124,16 @@ error:
 static herr_t
 auxread_fdata(hid_t fid, const char *name)
 {
-    hid_t   dset_id  = -1;      /* dataset ID */
-    hid_t   dcpl_id  = -1;      /* dataset creation property list ID */
-    hid_t   space_id = -1;      /* space ID */
-    hid_t   ftype_id = -1;      /* file data type ID */
-    hid_t   mtype_id = -1;      /* memory data type ID */
-    size_t  msize;              /* memory size of memory type */
-    void   *buf = NULL;         /* data buffer */
-    hsize_t nelmts;             /* number of elements in dataset */
-    int     rank;               /* rank of dataset */
-    hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
+    hid_t   dset_id  = H5I_INVALID_HID; /* dataset ID */
+    hid_t   dcpl_id  = H5I_INVALID_HID; /* dataset creation property list ID */
+    hid_t   space_id = H5I_INVALID_HID; /* space ID */
+    hid_t   ftype_id = H5I_INVALID_HID; /* file data type ID */
+    hid_t   mtype_id = H5I_INVALID_HID; /* memory data type ID */
+    size_t  msize;                      /* memory size of memory type */
+    void   *buf = NULL;                 /* data buffer */
+    hsize_t nelmts;                     /* number of elements in dataset */
+    int     rank;                       /* rank of dataset */
+    hsize_t dims[H5S_MAX_RANK];         /* dimensions of dataset */
     int     i;
 
     if ((dset_id = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
@@ -7203,10 +7206,10 @@ error:
 static herr_t
 test_filters_endianess(void)
 {
-    hid_t       fid       = -1; /* file ID */
-    hid_t       dsid      = -1; /* dataset ID */
-    hid_t       sid       = -1; /* dataspace ID */
-    hid_t       dcpl      = -1; /* dataset creation property list ID */
+    hid_t       fid       = H5I_INVALID_HID; /* file ID */
+    hid_t       dsid      = H5I_INVALID_HID; /* dataset ID */
+    hid_t       sid       = H5I_INVALID_HID; /* dataspace ID */
+    hid_t       dcpl      = H5I_INVALID_HID; /* dataset creation property list ID */
     const char *data_file = H5_get_srcdir_filename("test_filters_le.h5"); /* Corrected test file name */
 
     TESTING("filters with big-endian/little-endian data");
@@ -7277,8 +7280,8 @@ error:
 static herr_t
 test_zero_dims(hid_t file)
 {
-    hid_t             s = -1, d = -1, dcpl = -1;
-    hid_t             s2 = -1, d2 = -1, dcpl2 = -1;
+    hid_t             s = H5I_INVALID_HID, d = H5I_INVALID_HID, dcpl = H5I_INVALID_HID;
+    hid_t             s2 = H5I_INVALID_HID, d2 = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID;
     hsize_t           dzero = 0, dmax = H5S_UNLIMITED, csize = 5;
     hsize_t           dzero2[2] = {0, 0};
     hsize_t           dmax2[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -7485,9 +7488,9 @@ error:
 static herr_t
 test_missing_chunk(hid_t file)
 {
-    hid_t   d = -1, did2 = -1;                                       /* Dataset IDs */
-    hid_t   dcpl = -1, dcpl2 = -1;                                   /* Dataset creation property IDs */
-    hid_t   s = -1, sid2 = -1;                                       /* Dataspace ID */
+    hid_t   d = H5I_INVALID_HID, did2 = H5I_INVALID_HID;             /* Dataset IDs */
+    hid_t   dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID;         /* Dataset creation property IDs */
+    hid_t   s = H5I_INVALID_HID, sid2 = H5I_INVALID_HID;             /* Dataspace ID */
     hsize_t hs_start[1], hs_stride[1], hs_count[1], hs_block[1];     /* Hyperslab setting */
     hsize_t hs_start2[2], hs_stride2[2], hs_count2[2], hs_block2[2]; /* Hyperslab setting */
 
@@ -7737,9 +7740,9 @@ error:
 static H5_ATTR_CONST long
 gcd(long l0, long r0)
 {
-    long    magnitude, remainder;
-    hbool_t negative = ((l0 < 0) != (r0 < 0));
-    long    l = HDlabs(l0), r = HDlabs(r0);
+    long magnitude, remainder;
+    bool negative = ((l0 < 0) != (r0 < 0));
+    long l = labs(l0), r = labs(r0);
 
     do {
         if (l < r) {
@@ -7805,10 +7808,11 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
+test_random_chunks_real(const char *testname, bool early_alloc, hid_t fapl)
 {
-    char          filename[FILENAME_BUF_SIZE];
-    hid_t         s = -1, m = -1, d = -1, dcpl = -1, file = -1;
+    char  filename[FILENAME_BUF_SIZE];
+    hid_t s = H5I_INVALID_HID, m = H5I_INVALID_HID, d = H5I_INVALID_HID, dcpl = H5I_INVALID_HID,
+          file = H5I_INVALID_HID;
     int           wbuf[NPOINTS], rbuf[NPOINTS], check2[20][20];
     hsize_t       coord[NPOINTS][2];
     const hsize_t dsize[2] = {100, 100}, dmax[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, csize[2] = {10, 10},
@@ -8287,8 +8291,8 @@ test_random_chunks(hid_t fapl)
     int nerrors = 0; /* Errors in sub-tests */
 
     nerrors +=
-        test_random_chunks_real("Write/read on randomly selected chunks w/non-implicit index", FALSE, fapl);
-    nerrors += test_random_chunks_real("Write/read on randomly selected chunks w/implicit index", TRUE, fapl);
+        test_random_chunks_real("Write/read on randomly selected chunks w/non-implicit index", false, fapl);
+    nerrors += test_random_chunks_real("Write/read on randomly selected chunks w/implicit index", true, fapl);
 
     return nerrors;
 } /* end test_random_chunks() */
@@ -8372,7 +8376,7 @@ test_deprec(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Library allowed overwrite of existing dataset.");
+        puts("    Library allowed overwrite of existing dataset.");
         goto error;
     }
 
@@ -8397,7 +8401,7 @@ test_deprec(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a non-existent dataset.");
+        puts("    Opened a non-existent dataset.");
         goto error;
     }
 
@@ -8450,7 +8454,7 @@ test_deprec(hid_t file)
     H5E_END_TRY
     if (dataset >= 0) {
         H5_FAILED();
-        HDputs("    Opened a dataset with incorrect chunking parameters.");
+        puts("    Opened a dataset with incorrect chunking parameters.");
         goto error;
     }
 
@@ -8514,7 +8518,7 @@ test_deprec(hid_t file)
     if (H5Pset_filter(dcpl, H5Z_FILTER_DEPREC, 0, (size_t)0, NULL) < 0)
         goto error;
 
-    HDputs("");
+    puts("");
     if (test_filter_internal(file, DSET_DEPREC_NAME_FILTER, dcpl, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED,
                              &deprec_size) < 0)
         goto error;
@@ -8543,10 +8547,10 @@ static herr_t
 test_huge_chunks(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = -1;              /* File ID */
-    hid_t   dcpl = -1;              /* Dataset creation property list ID */
-    hid_t   sid  = -1;              /* Dataspace ID */
-    hid_t   dsid = -1;              /* Dataset ID */
+    hid_t   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   dsid = H5I_INVALID_HID; /* Dataset ID */
     hsize_t dim, chunk_dim;         /* Dataset and chunk dimensions */
     hsize_t dim2[3], chunk_dim2[3]; /* Dataset and chunk dimensions */
     herr_t  ret;                    /* Generic return value */
@@ -8671,14 +8675,14 @@ static herr_t
 test_chunk_cache(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid        = -1;                        /* File ID */
-    hid_t   fapl_local = -1;                        /* Local fapl */
-    hid_t   fapl_def   = -1;                        /* Default fapl */
-    hid_t   dcpl       = -1;                        /* Dataset creation property list ID */
-    hid_t   dapl1      = -1;                        /* Dataset access property list ID */
-    hid_t   dapl2      = -1;                        /* Dataset access property list ID */
-    hid_t   sid        = -1;                        /* Dataspace ID */
-    hid_t   dsid       = -1;                        /* Dataset ID */
+    hid_t   fid        = H5I_INVALID_HID;           /* File ID */
+    hid_t   fapl_local = H5I_INVALID_HID;           /* Local fapl */
+    hid_t   fapl_def   = H5I_INVALID_HID;           /* Default fapl */
+    hid_t   dcpl       = H5I_INVALID_HID;           /* Dataset creation property list ID */
+    hid_t   dapl1      = H5I_INVALID_HID;           /* Dataset access property list ID */
+    hid_t   dapl2      = H5I_INVALID_HID;           /* Dataset access property list ID */
+    hid_t   sid        = H5I_INVALID_HID;           /* Dataspace ID */
+    hid_t   dsid       = H5I_INVALID_HID;           /* Dataset ID */
     hsize_t dim, chunk_dim;                         /* Dataset and chunk dimensions */
     size_t  nslots_1, nslots_2, nslots_3, nslots_4; /* rdcc number of elements */
     size_t  nbytes_1, nbytes_2, nbytes_3, nbytes_4; /* rdcc number of bytes */
@@ -8940,12 +8944,12 @@ static herr_t
 test_big_chunks_bypass_cache(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid        = -1;                                  /* File ID */
-    hid_t   fapl_local = -1;                                  /* File access property list ID */
-    hid_t   dcpl = -1, t_dcpl = -1;                           /* Dataset creation property list ID */
-    hid_t   sid = -1, t_sid = -1;                             /* Dataspace ID */
+    hid_t   fid        = H5I_INVALID_HID;                     /* File ID */
+    hid_t   fapl_local = H5I_INVALID_HID;                     /* File access property list ID */
+    hid_t   dcpl = H5I_INVALID_HID, t_dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t   sid = H5I_INVALID_HID, t_sid = H5I_INVALID_HID;   /* Dataspace ID */
     hid_t   mid;                                              /* Memory space ID */
-    hid_t   dsid = -1, t_dsid = -1;                           /* Dataset ID */
+    hid_t   dsid = H5I_INVALID_HID, t_dsid = H5I_INVALID_HID; /* Dataset ID */
     hsize_t dim, chunk_dim;                                   /* Dataset and chunk dimensions */
     hsize_t t_dim[2], t_max[2], t_chunk_dim[2];               /* Dataset and chunk dimensions */
     size_t  rdcc_nelmts, rdcc_nbytes;                         /* Chunk cache parameters */
@@ -9309,17 +9313,17 @@ static herr_t
 test_chunk_fast(const char *env_h5_driver, hid_t fapl)
 {
     char         filename[FILENAME_BUF_SIZE];
-    hid_t        fid        = -1;            /* File ID */
-    hid_t        my_fapl    = -1;            /* File access property list ID */
-    hid_t        dcpl       = -1;            /* Dataset creation property list ID */
-    hid_t        sid        = -1;            /* Dataspace ID */
-    hid_t        scalar_sid = -1;            /* Scalar dataspace ID */
-    hid_t        dsid       = -1;            /* Dataset ID */
-    hsize_t      fill;                       /* Temporary value, for filling arrays */
-    hsize_t      hs_size[EARRAY_MAX_RANK];   /* Hyperslab size */
-    hsize_t      chunk_dim[EARRAY_MAX_RANK]; /* Chunk dimensions */
-    H5F_libver_t low;                        /* File format low bound */
-    unsigned     swmr;                       /* Whether file should be written with SWMR access enabled */
+    hid_t        fid        = H5I_INVALID_HID; /* File ID */
+    hid_t        my_fapl    = H5I_INVALID_HID; /* File access property list ID */
+    hid_t        dcpl       = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t        sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
+    hid_t        dsid       = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t      fill;                         /* Temporary value, for filling arrays */
+    hsize_t      hs_size[EARRAY_MAX_RANK];     /* Hyperslab size */
+    hsize_t      chunk_dim[EARRAY_MAX_RANK];   /* Chunk dimensions */
+    H5F_libver_t low;                          /* File format low bound */
+    unsigned     swmr;                         /* Whether file should be written with SWMR access enabled */
 
     TESTING("datasets w/extensible array as chunk index");
 
@@ -9726,17 +9730,17 @@ static herr_t
 test_reopen_chunk_fast(hid_t fapl)
 {
     char             filename[FILENAME_BUF_SIZE];
-    hid_t            fid        = -1;         /* File ID */
-    hid_t            dcpl       = -1;         /* Dataset creation property list ID */
-    hid_t            sid        = -1;         /* Dataspace ID */
-    hid_t            scalar_sid = -1;         /* Scalar dataspace ID */
-    hid_t            dsid       = -1;         /* Dataset ID */
-    hsize_t          dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
-    hsize_t          hs_offset;               /* Hyperslab offset */
-    hsize_t          hs_size;                 /* Hyperslab size */
-    H5D_alloc_time_t alloc_time;              /* Storage allocation time */
-    unsigned         write_elem, read_elem;   /* Element written/read */
-    unsigned         u;                       /* Local index variable */
+    hid_t            fid        = H5I_INVALID_HID; /* File ID */
+    hid_t            dcpl       = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t            sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t            scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
+    hid_t            dsid       = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t          dim, max_dim, chunk_dim;      /* Dataset and chunk dimensions */
+    hsize_t          hs_offset;                    /* Hyperslab offset */
+    hsize_t          hs_size;                      /* Hyperslab size */
+    H5D_alloc_time_t alloc_time;                   /* Storage allocation time */
+    unsigned         write_elem, read_elem;        /* Element written/read */
+    unsigned         u;                            /* Local index variable */
 
     TESTING("datasets w/extensible array open/reopen with read/write");
 
@@ -9860,10 +9864,10 @@ static herr_t
 test_chunk_fast_bug1(hid_t fapl)
 {
     char             filename[FILENAME_BUF_SIZE];
-    hid_t            fid  = -1;                        /* File ID */
-    hid_t            dcpl = -1;                        /* Dataset creation property list ID */
-    hid_t            sid  = -1;                        /* Dataspace ID */
-    hid_t            dsid = -1;                        /* Dataset ID */
+    hid_t            fid  = H5I_INVALID_HID;           /* File ID */
+    hid_t            dcpl = H5I_INVALID_HID;           /* Dataset creation property list ID */
+    hid_t            sid  = H5I_INVALID_HID;           /* Dataspace ID */
+    hid_t            dsid = H5I_INVALID_HID;           /* Dataset ID */
     hsize_t          dim[2], max_dim[2], chunk_dim[2]; /* Dataset and chunk dimensions */
     H5D_alloc_time_t alloc_time;                       /* Storage allocation time */
 
@@ -10064,22 +10068,22 @@ static herr_t
 test_chunk_expand(hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;                           /* File ID */
-    hid_t             dcpl = -1, dcpl2 = -1;               /* Dataset creation property list ID */
-    hid_t             sid = -1, sid2 = -1;                 /* Dataspace ID */
-    hid_t             scalar_sid = -1;                     /* Scalar dataspace ID */
-    hid_t             dsid = -1, dsid2 = -1;               /* Dataset ID */
-    hsize_t           dim, max_dim, chunk_dim;             /* Dataset and chunk dimensions */
-    hsize_t           dim2[2], max_dim2[2], chunk_dim2[2]; /* Dataset and chunk dimensions */
-    H5D_chunk_index_t idx_type, idx_type2;                 /* Dataset chunk index type */
-    H5F_libver_t      low, high;                           /* File format bounds */
-    hsize_t           hs_offset, hs_offset2[2];            /* Hyperslab offset */
-    hsize_t           hs_size, hs_size2[2];                /* Hyperslab size */
-    H5D_alloc_time_t  alloc_time;                          /* Storage allocation time */
-    unsigned          write_elem, read_elem;               /* Element written/read */
-    unsigned          write_elem2, read_elem2;             /* Element written/read */
-    unsigned          u;                                   /* Local index variable */
-    herr_t            status;                              /* Generic return value */
+    hid_t             fid  = H5I_INVALID_HID;                          /* File ID */
+    hid_t             dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t             sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID;   /* Dataspace ID */
+    hid_t             scalar_sid = H5I_INVALID_HID;                    /* Scalar dataspace ID */
+    hid_t             dsid = H5I_INVALID_HID, dsid2 = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t           dim, max_dim, chunk_dim;                         /* Dataset and chunk dimensions */
+    hsize_t           dim2[2], max_dim2[2], chunk_dim2[2];             /* Dataset and chunk dimensions */
+    H5D_chunk_index_t idx_type, idx_type2;                             /* Dataset chunk index type */
+    H5F_libver_t      low, high;                                       /* File format bounds */
+    hsize_t           hs_offset, hs_offset2[2];                        /* Hyperslab offset */
+    hsize_t           hs_size, hs_size2[2];                            /* Hyperslab size */
+    H5D_alloc_time_t  alloc_time;                                      /* Storage allocation time */
+    unsigned          write_elem, read_elem;                           /* Element written/read */
+    unsigned          write_elem2, read_elem2;                         /* Element written/read */
+    unsigned          u;                                               /* Local index variable */
+    herr_t            status;                                          /* Generic return value */
 
     TESTING("filter expanding chunks too much");
 
@@ -10091,7 +10095,7 @@ test_chunk_expand(hid_t fapl)
 
     if (sizeof(size_t) <= 4 && low != H5F_LIBVER_LATEST) {
         SKIPPED();
-        HDputs("    Current machine can't test for error w/old file format");
+        puts("    Current machine can't test for error w/old file format");
     } /* end if */
     else {
         /* Register "expansion" filter */
@@ -10099,7 +10103,7 @@ test_chunk_expand(hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Check that the filter was registered */
-        if (TRUE != H5Zfilter_avail(H5Z_FILTER_EXPAND))
+        if (true != H5Zfilter_avail(H5Z_FILTER_EXPAND))
             FAIL_STACK_ERROR;
 
         /* Loop over storage allocation time */
@@ -10550,7 +10554,7 @@ test_chunk_expand(hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Check that the filter was unregistered */
-        if (FALSE != H5Zfilter_avail(H5Z_FILTER_EXPAND))
+        if (false != H5Zfilter_avail(H5Z_FILTER_EXPAND))
             FAIL_STACK_ERROR;
 
         PASSED();
@@ -10606,16 +10610,16 @@ static herr_t
 test_fixed_array(hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE]; /* File name */
-    hid_t fid  = -1;                   /* File ID */
-    hid_t dcpl = -1;                   /* Dataset creation property list ID */
+    hid_t fid  = H5I_INVALID_HID;      /* File ID */
+    hid_t dcpl = H5I_INVALID_HID;      /* Dataset creation property list ID */
 
-    hid_t sid     = -1; /* Dataspace ID for dataset with fixed dimensions */
-    hid_t sid_big = -1; /* Dataspate ID for big dataset */
-    hid_t sid_max = -1; /* Dataspace ID for dataset with maximum dimensions set */
+    hid_t sid     = H5I_INVALID_HID; /* Dataspace ID for dataset with fixed dimensions */
+    hid_t sid_big = H5I_INVALID_HID; /* Dataspate ID for big dataset */
+    hid_t sid_max = H5I_INVALID_HID; /* Dataspace ID for dataset with maximum dimensions set */
 
-    hid_t dsid     = -1; /* Dataset ID for dataset with fixed dimensions */
-    hid_t dsid_big = -1; /* Dataset ID for big dataset with fixed dimensions */
-    hid_t dsid_max = -1; /* Dataset ID for dataset with maximum dimensions set */
+    hid_t dsid     = H5I_INVALID_HID; /* Dataset ID for dataset with fixed dimensions */
+    hid_t dsid_big = H5I_INVALID_HID; /* Dataset ID for big dataset with fixed dimensions */
+    hid_t dsid_max = H5I_INVALID_HID; /* Dataset ID for dataset with maximum dimensions set */
 
     hsize_t       dim2[2]     = {48, 18};  /* Dataset dimensions */
     const hsize_t dim2_big[2] = {500, 60}; /* Big dataset dimensions */
@@ -10719,7 +10723,7 @@ test_fixed_array(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Loop over compressing chunks */
-    for (compress = FALSE; compress <= TRUE; compress++) {
+    for (compress = false; compress <= true; compress++) {
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
@@ -11143,18 +11147,19 @@ static herr_t
 test_single_chunk(hid_t fapl)
 {
     char  filename[FILENAME_BUF_SIZE]; /* File name */
-    hid_t fid    = -1;                 /* File ID */
-    hid_t dcpl   = -1;                 /* Dataset creation property list ID */
-    hid_t t_dcpl = -1;                 /* Dataset creation property list ID */
+    hid_t fid    = H5I_INVALID_HID;    /* File ID */
+    hid_t dcpl   = H5I_INVALID_HID;    /* Dataset creation property list ID */
+    hid_t t_dcpl = H5I_INVALID_HID;    /* Dataset creation property list ID */
 
-    hid_t   sid = -1, sid_max = -1;                     /* Dataspace ID for dataset with fixed dimensions */
-    hid_t   did = -1, did_max = -1;                     /* Dataset ID for dataset with fixed dimensions */
-    hsize_t dim2[2]   = {DSET_DIM1, DSET_DIM2};         /* Dataset dimensions */
-    hsize_t t_dim2[2] = {DSET_TMP_DIM1, DSET_TMP_DIM2}; /* Dataset dimensions */
-    int    *wbuf      = NULL;                           /* write buffer */
-    int    *t_wbuf    = NULL;                           /* write buffer */
-    int    *rbuf      = NULL;                           /* read buffer */
-    int    *t_rbuf    = NULL;                           /* read buffer */
+    hid_t sid     = H5I_INVALID_HID,
+          sid_max = H5I_INVALID_HID; /* Dataspace ID for dataset with fixed dimensions */
+    hid_t did = H5I_INVALID_HID, did_max = H5I_INVALID_HID; /* Dataset ID for dataset with fixed dimensions */
+    hsize_t dim2[2]   = {DSET_DIM1, DSET_DIM2};             /* Dataset dimensions */
+    hsize_t t_dim2[2] = {DSET_TMP_DIM1, DSET_TMP_DIM2};     /* Dataset dimensions */
+    int    *wbuf      = NULL;                               /* write buffer */
+    int    *t_wbuf    = NULL;                               /* write buffer */
+    int    *rbuf      = NULL;                               /* read buffer */
+    int    *t_rbuf    = NULL;                               /* read buffer */
 
     H5D_chunk_index_t idx_type;   /* Dataset chunk index type */
     H5F_libver_t      low, high;  /* File format bounds */
@@ -11205,7 +11210,7 @@ test_single_chunk(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Loop over compressing chunks */
-    for (compress = FALSE; compress <= TRUE; compress++) {
+    for (compress = false; compress <= true; compress++) {
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
@@ -11420,11 +11425,11 @@ error:
 static herr_t
 test_idx_compatible(void)
 {
-    hid_t             fid      = -1;   /* File id */
-    hid_t             did      = -1;   /* Dataset id */
-    const char       *filename = NULL; /* old test file name */
-    unsigned          j;               /* Local index variable */
-    H5D_chunk_index_t idx_type;        /* Chunked dataset index type */
+    hid_t             fid      = H5I_INVALID_HID; /* File id */
+    hid_t             did      = H5I_INVALID_HID; /* Dataset id */
+    const char       *filename = NULL;            /* old test file name */
+    unsigned          j;                          /* Local index variable */
+    H5D_chunk_index_t idx_type;                   /* Chunked dataset index type */
 
     /* Output message about test being performed */
     TESTING("compatibility for 1.6/1.8 datasets that use B-tree indexing");
@@ -11497,10 +11502,10 @@ error:
 static herr_t
 test_unfiltered_edge_chunks(hid_t fapl)
 {
-    hid_t    fid     = -1;                     /* File id */
-    hid_t    did     = -1;                     /* Dataset id */
-    hid_t    sid     = -1;                     /* Dataspace id */
-    hid_t    dcpl    = -1;                     /* DCPL id */
+    hid_t    fid     = H5I_INVALID_HID;        /* File id */
+    hid_t    did     = H5I_INVALID_HID;        /* Dataset id */
+    hid_t    sid     = H5I_INVALID_HID;        /* Dataspace id */
+    hid_t    dcpl    = H5I_INVALID_HID;        /* DCPL id */
     hsize_t  dim[2]  = {4, 3};                 /* Dataset dimensions */
     hsize_t  cdim[2] = {2, 2};                 /* Chunk dimension */
     char     wbuf[4][3];                       /* Write buffer */
@@ -11640,15 +11645,15 @@ static herr_t
 test_large_chunk_shrink(hid_t fapl)
 {
     char     filename[FILENAME_BUF_SIZE];
-    hid_t    fid        = -1;         /* File ID */
-    hid_t    dcpl       = -1;         /* Dataset creation property list ID */
-    hid_t    sid        = -1;         /* Dataspace ID */
-    hid_t    scalar_sid = -1;         /* Scalar dataspace ID */
-    hid_t    dsid       = -1;         /* Dataset ID */
-    hsize_t  dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
-    hsize_t  hs_offset;               /* Hyperslab offset */
-    hsize_t  hs_size;                 /* Hyperslab size */
-    unsigned write_elem, read_elem;   /* Element written/read */
+    hid_t    fid        = H5I_INVALID_HID; /* File ID */
+    hid_t    dcpl       = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t    sid        = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t    scalar_sid = H5I_INVALID_HID; /* Scalar dataspace ID */
+    hid_t    dsid       = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t  dim, max_dim, chunk_dim;      /* Dataset and chunk dimensions */
+    hsize_t  hs_offset;                    /* Hyperslab offset */
+    hsize_t  hs_size;                      /* Hyperslab size */
+    unsigned write_elem, read_elem;        /* Element written/read */
 
     TESTING("shrinking large chunk");
 
@@ -11773,11 +11778,11 @@ static herr_t
 test_zero_dim_dset(hid_t fapl)
 {
     char         filename[FILENAME_BUF_SIZE];
-    hid_t        fid  = -1;      /* File ID */
-    hid_t        dcpl = -1;      /* Dataset creation property list ID */
-    hid_t        sid  = -1;      /* Dataspace ID */
-    hid_t        dsid = -1;      /* Dataset ID */
-    hsize_t      dim, chunk_dim; /* Dataset and chunk dimensions */
+    hid_t        fid  = H5I_INVALID_HID; /* File ID */
+    hid_t        dcpl = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t        sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dsid = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t      dim, chunk_dim;         /* Dataset and chunk dimensions */
     int          data[1];
     H5F_libver_t low, high; /* File format bounds */
     herr_t       ret;       /* Generic return value */
@@ -11878,11 +11883,11 @@ static herr_t
 test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;                    /* File ID */
-    hid_t             gid  = -1;                    /* Group ID */
-    hid_t             dcpl = -1;                    /* Dataset creation property list ID */
-    hid_t             sid  = -1;                    /* Dataspace ID */
-    hid_t             did  = -1;                    /* Dataset ID */
+    hid_t             fid  = H5I_INVALID_HID;       /* File ID */
+    hid_t             gid  = H5I_INVALID_HID;       /* Group ID */
+    hid_t             dcpl = H5I_INVALID_HID;       /* Dataset creation property list ID */
+    hid_t             sid  = H5I_INVALID_HID;       /* Dataspace ID */
+    hid_t             did  = H5I_INVALID_HID;       /* Dataset ID */
     hsize_t           dim[1], dims2[2];             /* Size of dataset */
     hsize_t           max_dim[1], max_dims2[2];     /* Maximum size of dataset */
     hsize_t           chunk_dim[1], chunk_dims2[2]; /* Chunk dimensions */
@@ -11898,7 +11903,7 @@ test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12148,12 +12153,12 @@ static herr_t
 test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;
-    hid_t             sid  = -1;
-    hid_t             did  = -1;
-    hid_t             tid  = -1;
-    hid_t             dcpl = -1;
-    hid_t             msid = -1;
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             sid  = H5I_INVALID_HID;
+    hid_t             did  = H5I_INVALID_HID;
+    hid_t             tid  = H5I_INVALID_HID;
+    hid_t             dcpl = H5I_INVALID_HID;
+    hid_t             msid = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
     const hsize_t     shape[1]    = {8};
     const hsize_t     maxshape[1] = {H5S_UNLIMITED};
@@ -12168,7 +12173,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12269,12 +12274,12 @@ static herr_t
 test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;
-    hid_t             sid  = -1;
-    hid_t             did  = -1;
-    hid_t             tid  = -1;
-    hid_t             dcpl = -1;
-    hid_t             msid = -1;
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             sid  = H5I_INVALID_HID;
+    hid_t             did  = H5I_INVALID_HID;
+    hid_t             tid  = H5I_INVALID_HID;
+    hid_t             dcpl = H5I_INVALID_HID;
+    hid_t             msid = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
     const hsize_t     shape[1]    = {8};
     const hsize_t     maxshape[1] = {64};
@@ -12289,7 +12294,7 @@ test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12390,12 +12395,12 @@ static herr_t
 test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
 {
     char              filename[FILENAME_BUF_SIZE];
-    hid_t             fid  = -1;
-    hid_t             sid  = -1;
-    hid_t             did  = -1;
-    hid_t             tid  = -1;
-    hid_t             dcpl = -1;
-    hid_t             msid = -1;
+    hid_t             fid  = H5I_INVALID_HID;
+    hid_t             sid  = H5I_INVALID_HID;
+    hid_t             did  = H5I_INVALID_HID;
+    hid_t             tid  = H5I_INVALID_HID;
+    hid_t             dcpl = H5I_INVALID_HID;
+    hid_t             msid = H5I_INVALID_HID;
     H5D_chunk_index_t idx_type;
     const hsize_t     shape[2]     = {8, 8};
     const hsize_t     maxshape[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -12416,7 +12421,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
      */
     if (!H5FD__supports_swmr_test(env_h5_driver)) {
         SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        puts("    Test skipped due to VFD not supporting SWMR I/O.");
         return SUCCEED;
     }
 
@@ -12516,13 +12521,13 @@ static herr_t
 test_storage_size(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = -1;             /* File ID */
-    hid_t   dcpl = -1, dcpl2 = -1; /* Dataset creation property list IDs */
-    hid_t   sid  = -1;             /* Dataspace ID */
-    hid_t   dsid = -1;             /* Dataset ID */
-    hsize_t dims[2], max_dims[2];  /* Dataset dimensions */
-    hsize_t new_dims[2];           /* New dataset dimensions */
-    hsize_t chunk_dims[2];         /* Chunk dimensions */
+    hid_t   fid  = H5I_INVALID_HID;                          /* File ID */
+    hid_t   dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID; /* Dataset creation property list IDs */
+    hid_t   sid  = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t   dsid = H5I_INVALID_HID;                          /* Dataset ID */
+    hsize_t dims[2], max_dims[2];                            /* Dataset dimensions */
+    hsize_t new_dims[2];                                     /* New dataset dimensions */
+    hsize_t chunk_dims[2];                                   /* Chunk dimensions */
     int     wdata[STORAGE_SIZE_DIM1][STORAGE_SIZE_DIM2];
     hsize_t ssize; /* Dataset storage size */
 
@@ -13005,15 +13010,15 @@ static herr_t
 test_power2up(hid_t fapl)
 {
     char    filename[FILENAME_BUF_SIZE];
-    hid_t   fid  = -1;     /* File ID */
-    hid_t   dcpl = -1;     /* Dataset creation property list */
-    hid_t   sid  = -1;     /* Dataspace ID */
-    hid_t   did  = -1;     /* Dataset ID */
-    hsize_t dims[2];       /* Dataset dimension sizes */
-    hsize_t max_dims[2];   /* Maximum dimension sizes */
-    hsize_t chunk_dims[2]; /* Chunk dimensions */
-    hsize_t ext_dims[2];   /* Extended dimension sizes */
-    herr_t  status;        /* Error status */
+    hid_t   fid  = H5I_INVALID_HID; /* File ID */
+    hid_t   dcpl = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t   did  = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t dims[2];                /* Dataset dimension sizes */
+    hsize_t max_dims[2];            /* Maximum dimension sizes */
+    hsize_t chunk_dims[2];          /* Chunk dimensions */
+    hsize_t ext_dims[2];            /* Extended dimension sizes */
+    herr_t  status;                 /* Error status */
 
     TESTING("the next power of 2");
 
@@ -13134,8 +13139,8 @@ scatter_cb(void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/, void *_sc
 static herr_t
 test_scatter(void)
 {
-    hid_t          sid         = -1;        /* Dataspace ID */
-    hsize_t        dim[3]      = {8, 5, 8}; /* Dataspace dimensions */
+    hid_t          sid         = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t        dim[3]      = {8, 5, 8};       /* Dataspace dimensions */
     hsize_t        start[3]    = {0, 0, 0};
     hsize_t        stride[3]   = {0, 0, 0};
     hsize_t        count[3]    = {0, 0, 0};
@@ -13402,9 +13407,9 @@ error:
  *-------------------------------------------------------------------------
  */
 typedef struct gather_info_t {
-    int    *expect_dst_buf; /* Expected destination data buffer */
-    size_t  max_nelmts;     /* Maximum number of elements passed to callback */
-    hbool_t last_call;      /* Whether this should be the last time the callback is called */
+    int   *expect_dst_buf; /* Expected destination data buffer */
+    size_t max_nelmts;     /* Maximum number of elements passed to callback */
+    bool   last_call;      /* Whether this should be the last time the callback is called */
 } gather_info_t;
 
 static herr_t
@@ -13433,7 +13438,7 @@ gather_cb(const void *dst_buf, size_t dst_buf_bytes_used, void *_gather_info)
     if (gather_info->last_call)
         TEST_ERROR;
     if (nelmts < gather_info->max_nelmts)
-        gather_info->last_call = TRUE;
+        gather_info->last_call = true;
 
     /* Compare data and expected data */
     for (i = 0; i < (int)nelmts; i++)
@@ -13449,8 +13454,8 @@ error:
 static herr_t
 test_gather(void)
 {
-    hid_t         sid         = -1;        /* Dataspace ID */
-    hsize_t       dim[3]      = {8, 5, 8}; /* Dataspace dimensions */
+    hid_t         sid         = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t       dim[3]      = {8, 5, 8};       /* Dataspace dimensions */
     hsize_t       start[3]    = {0, 0, 0};
     hsize_t       stride[3]   = {0, 0, 0};
     hsize_t       count[3]    = {0, 0, 0};
@@ -13501,7 +13506,7 @@ test_gather(void)
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
         gather_info.max_nelmts     = dst_buf_size;
-        gather_info.last_call      = FALSE;
+        gather_info.last_call      = false;
 
         /* Gather data */
         if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb,
@@ -13538,7 +13543,7 @@ test_gather(void)
     /* Initialize gather_info */
     gather_info.expect_dst_buf = expect_dst_buf;
     gather_info.max_nelmts     = dst_buf_size - 1;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
 
     /* Gather data */
     if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]) - 1, dst_buf, gather_cb,
@@ -13578,7 +13583,7 @@ test_gather(void)
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
         gather_info.max_nelmts     = dst_buf_size;
-        gather_info.last_call      = FALSE;
+        gather_info.last_call      = false;
 
         /* Gather data */
         if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb,
@@ -13634,7 +13639,7 @@ test_gather(void)
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
         gather_info.max_nelmts     = dst_buf_size;
-        gather_info.last_call      = FALSE;
+        gather_info.last_call      = false;
 
         /* Gather data */
         if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb,
@@ -13691,7 +13696,7 @@ test_gather(void)
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
         gather_info.max_nelmts     = dst_buf_size;
-        gather_info.last_call      = FALSE;
+        gather_info.last_call      = false;
 
         /* Gather data */
         if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb,
@@ -13725,7 +13730,7 @@ test_gather(void)
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
         gather_info.max_nelmts     = dst_buf_size;
-        gather_info.last_call      = FALSE;
+        gather_info.last_call      = false;
 
         /* Gather data */
         if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, gather_cb,
@@ -13813,8 +13818,8 @@ scatter_error_cb_unalign(void **src_buf /*out*/, size_t *src_buf_bytes_used /*ou
 static herr_t
 test_scatter_error(void)
 {
-    hid_t          sid      = -1;   /* Dataspace ID */
-    hsize_t        dim[1]   = {10}; /* Dataspace dimensions */
+    hid_t          sid      = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t        dim[1]   = {10};            /* Dataspace dimensions */
     hsize_t        start[3] = {2};
     hsize_t        count[3] = {6};
     int            src_buf[7];        /* Source data buffer */
@@ -14005,8 +14010,8 @@ gather_error_cb_fail(const void H5_ATTR_UNUSED *dst_buf, size_t H5_ATTR_UNUSED d
 static herr_t
 test_gather_error(void)
 {
-    hid_t         sid      = -1;   /* Dataspace ID */
-    hsize_t       dim[1]   = {10}; /* Dataspace dimensions */
+    hid_t         sid      = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t       dim[1]   = {10};            /* Dataspace dimensions */
     hsize_t       start[1] = {2};
     hsize_t       count[1] = {6};
     int           src_buf[10];       /* Source data buffer */
@@ -14038,7 +14043,7 @@ test_gather_error(void)
     /* Verify that base configuration passes */
     gather_info.expect_dst_buf = expect_dst_buf;
     gather_info.max_nelmts     = 6;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info) < 0)
         TEST_ERROR;
 
@@ -14046,7 +14051,7 @@ test_gather_error(void)
      * Test invalid parameters
      */
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(H5T_NATIVE_INT, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb,
@@ -14057,7 +14062,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, NULL, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info);
@@ -14067,7 +14072,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, src_buf, sid, 6 * sizeof(dst_buf[0]), dst_buf, gather_cb, &gather_info);
@@ -14077,7 +14082,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 0, dst_buf, gather_cb, &gather_info);
@@ -14087,7 +14092,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 1, dst_buf, gather_cb, &gather_info);
@@ -14097,7 +14102,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), NULL, gather_cb, &gather_info);
@@ -14107,7 +14112,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 5 * sizeof(dst_buf[0]), dst_buf, NULL, &gather_info);
@@ -14120,7 +14125,7 @@ test_gather_error(void)
      * Test callback returns failure
      */
     gather_info.expect_dst_buf = expect_dst_buf;
-    gather_info.last_call      = FALSE;
+    gather_info.last_call      = false;
     H5E_BEGIN_TRY
     {
         ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, gather_error_cb_fail,
@@ -14380,10 +14385,10 @@ dls_01_main(void)
     if (NULL == buffer)
         TEST_ERROR;
 
-    HDstrcpy(buffer, strings[0]);
-    HDstrcpy(buffer + DLS_01_STR_SIZE, strings[1]);
-    HDstrcpy(buffer + DLS_01_STR_SIZE * 2, strings[2]);
-    HDstrcpy(buffer + DLS_01_STR_SIZE * 3, strings[3]);
+    strcpy(buffer, strings[0]);
+    strcpy(buffer + DLS_01_STR_SIZE, strings[1]);
+    strcpy(buffer + DLS_01_STR_SIZE * 2, strings[2]);
+    strcpy(buffer + DLS_01_STR_SIZE * 3, strings[3]);
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     if (fapl <= 0)
@@ -14453,15 +14458,15 @@ error:
 static herr_t
 test_compact_open_close_dirty(hid_t fapl)
 {
-    hid_t   fid     = -1;                /* File ID */
-    hid_t   did     = -1;                /* Dataset ID */
-    hid_t   sid     = -1;                /* Dataspace ID */
-    hid_t   dcpl    = -1;                /* Dataset creation property list */
+    hid_t   fid     = H5I_INVALID_HID;   /* File ID */
+    hid_t   did     = H5I_INVALID_HID;   /* Dataset ID */
+    hid_t   sid     = H5I_INVALID_HID;   /* Dataspace ID */
+    hid_t   dcpl    = H5I_INVALID_HID;   /* Dataset creation property list */
     hsize_t dims[1] = {10};              /* Dimension */
     int     wbuf[10];                    /* Data buffer */
     char    filename[FILENAME_BUF_SIZE]; /* Filename */
     int     i;                           /* Local index variable */
-    hbool_t dirty;                       /* The dirty flag */
+    bool    dirty;                       /* The dirty flag */
 
     TESTING("compact dataset repeated open/close and dirty flag");
 
@@ -14579,15 +14584,15 @@ error:
 static herr_t
 test_versionbounds(void)
 {
-    hid_t        fapl     = -1;
-    hid_t        srcfile  = -1;  /* Files with source dsets */
-    hid_t        vfile    = -1;  /* File with virtual dset */
-    hid_t        dcpl     = -1;  /* Dataset creation property list */
-    hid_t        srcspace = -1;  /* Source dataspaces */
-    hid_t        vspace   = -1;  /* Virtual dset dataspaces */
-    hid_t        srcdset  = -1;  /* Source dataset */
-    hid_t        vdset    = -1;  /* Virtual dataset */
-    hsize_t      dims[1]  = {3}; /* Data space current size */
+    hid_t        fapl     = H5I_INVALID_HID;
+    hid_t        srcfile  = H5I_INVALID_HID; /* Files with source dsets */
+    hid_t        vfile    = H5I_INVALID_HID; /* File with virtual dset */
+    hid_t        dcpl     = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t        srcspace = H5I_INVALID_HID; /* Source dataspaces */
+    hid_t        vspace   = H5I_INVALID_HID; /* Virtual dset dataspaces */
+    hid_t        srcdset  = H5I_INVALID_HID; /* Source dataset */
+    hid_t        vdset    = H5I_INVALID_HID; /* Virtual dataset */
+    hsize_t      dims[1]  = {3};             /* Data space current size */
     char         srcfilename[FILENAME_BUF_SIZE];
     char         vfilename1[FILENAME_BUF_SIZE];
     char         vfilename2[FILENAME_BUF_SIZE];
@@ -14662,7 +14667,7 @@ test_versionbounds(void)
             if (vdset > 0) /* dataset created successfully */
             {
                 /* Virtual dataset is only available starting in V110 */
-                VERIFY(high >= H5F_LIBVER_V110, TRUE, "virtual dataset");
+                VERIFY(high >= H5F_LIBVER_V110, true, "virtual dataset");
 
                 if (H5Dclose(vdset) < 0)
                     TEST_ERROR;
@@ -14732,11 +14737,11 @@ error:
 static herr_t
 test_object_header_minimization_dcpl(void)
 {
-    hid_t   dcpl_id                     = -1;
-    hid_t   file_id                     = -1;
-    char    filename[FILENAME_BUF_SIZE] = "";
-    hbool_t minimize                    = FALSE;
-    herr_t  ret;
+    hid_t  dcpl_id                     = H5I_INVALID_HID;
+    hid_t  file_id                     = H5I_INVALID_HID;
+    char   filename[FILENAME_BUF_SIZE] = "";
+    bool   minimize                    = false;
+    herr_t ret;
 
     TESTING("dcpl flags to minimize dataset object header");
 
@@ -14762,23 +14767,23 @@ test_object_header_minimization_dcpl(void)
     /* Default value (not set explicitly) */
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
         TEST_ERROR;
-    if (FALSE != minimize)
+    if (false != minimize)
         TEST_ERROR;
 
-    /* FALSE-set value */
-    if (H5Pset_dset_no_attrs_hint(dcpl_id, FALSE) == FAIL)
+    /* false-set value */
+    if (H5Pset_dset_no_attrs_hint(dcpl_id, false) == FAIL)
         TEST_ERROR;
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
         TEST_ERROR;
-    if (FALSE != minimize)
+    if (false != minimize)
         TEST_ERROR;
 
-    /* TRUE-set value */
-    if (H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) == FAIL)
+    /* true-set value */
+    if (H5Pset_dset_no_attrs_hint(dcpl_id, true) == FAIL)
         TEST_ERROR;
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
         TEST_ERROR;
-    if (TRUE != minimize)
+    if (true != minimize)
         TEST_ERROR;
 
     /***************/
@@ -14797,7 +14802,7 @@ test_object_header_minimization_dcpl(void)
     /* Invalid DCPL ID should fail */
     H5E_BEGIN_TRY
     {
-        ret = H5Pset_dset_no_attrs_hint(H5I_INVALID_HID, FALSE);
+        ret = H5Pset_dset_no_attrs_hint(H5I_INVALID_HID, false);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -14806,7 +14811,7 @@ test_object_header_minimization_dcpl(void)
     /* Invalid DCPL ID should fail */
     H5E_BEGIN_TRY
     {
-        ret = H5Pset_dset_no_attrs_hint(H5I_INVALID_HID, TRUE);
+        ret = H5Pset_dset_no_attrs_hint(H5I_INVALID_HID, true);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -15243,7 +15248,7 @@ test_0sized_dset_metadata_alloc(hid_t fapl_id)
     /*************/
 
     /* Iterate over file format versions */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         H5D_layout_t     layout;     /* Dataset layout type */
         H5D_alloc_time_t alloc_time; /* Storage allocation time */
 
@@ -15278,8 +15283,8 @@ test_0sized_dset_metadata_alloc(hid_t fapl_id)
                     continue;
 
                 /* Compose dataset name */
-                HDsnprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time,
-                           (unsigned)layout);
+                snprintf(dset_name, sizeof(dset_name), "/Dataset-%u-%u", (unsigned)alloc_time,
+                         (unsigned)layout);
 
                 /* Set up DCPL */
                 if ((dcpl_id_copy = H5Pcopy(dcpl_id)) < 0)
@@ -15407,7 +15412,7 @@ main(void)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       file, grp, fapl, fapl2;
-    hid_t       fcpl = -1, fcpl2 = -1;
+    hid_t       fcpl = H5I_INVALID_HID, fcpl2 = H5I_INVALID_HID;
     unsigned    new_format;
     unsigned    paged;
     unsigned    minimized_ohdr;
@@ -15417,17 +15422,17 @@ main(void)
     double      rdcc_w0;
     int         nerrors = 0;
     const char *envval;
-    hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
-    hbool_t     driver_is_default_compatible;
+    bool        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool        driver_is_default_compatible;
     int         i;
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = getenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
     /* Current VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(envval, "split") != 0 && strcmp(envval, "multi") != 0);
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -15494,23 +15499,23 @@ main(void)
         TEST_ERROR;
 
     /* Set file space strategy to paged aggregation and persisting free-space */
-    if (H5Pset_file_space_strategy(fcpl2, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
+    if (H5Pset_file_space_strategy(fcpl2, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Test with paged aggregation enabled or not */
-    for (paged = FALSE; paged <= TRUE; paged++) {
+    for (paged = false; paged <= true; paged++) {
 
         /* Temporary: skip testing for multi/split drivers:
              fail file create when persisting free-space or using paged aggregation strategy */
         if (!contig_addr_vfd && paged)
             continue;
 
-        for (minimized_ohdr = FALSE; minimized_ohdr <= TRUE; minimized_ohdr++) {
+        for (minimized_ohdr = false; minimized_ohdr <= true; minimized_ohdr++) {
 
             /* Test with old & new format groups */
-            for (new_format = FALSE; new_format <= TRUE; new_format++) {
+            for (new_format = false; new_format <= true; new_format++) {
                 hid_t my_fapl, my_fcpl;
 
                 /* Set the FAPL for the type of format */
@@ -15518,22 +15523,22 @@ main(void)
                     my_fapl = fapl2;
                     if (paged) {
                         my_fcpl = fcpl2;
-                        HDputs("\nTesting with new file format and paged aggregation");
+                        puts("\nTesting with new file format and paged aggregation");
                     }
                     else {
                         my_fcpl = fcpl;
-                        HDputs("\nTesting with new file format and non-paged aggregation");
+                        puts("\nTesting with new file format and non-paged aggregation");
                     }
                 } /* end if */
                 else {
                     my_fapl = fapl;
                     if (paged) {
                         my_fcpl = fcpl2;
-                        HDputs("Testing with old file format and paged aggregation:");
+                        puts("Testing with old file format and paged aggregation:");
                     }
                     else {
                         my_fcpl = fcpl;
-                        HDputs("Testing with old file format and non-paged aggregation:");
+                        puts("Testing with old file format and non-paged aggregation:");
                     }
                 } /* end else */
 
@@ -15541,10 +15546,10 @@ main(void)
                 if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, my_fcpl, my_fapl)) < 0)
                     goto error;
 
-                if (TRUE == minimized_ohdr) {
-                    if (0 > H5Fset_dset_no_attrs_hint(file, TRUE))
+                if (true == minimized_ohdr) {
+                    if (0 > H5Fset_dset_no_attrs_hint(file, true))
                         goto error;
-                    HDputs("(minimized dataset object headers with file setting)");
+                    puts("(minimized dataset object headers with file setting)");
                 }
 
                 /* Cause the library to emit initial messages */

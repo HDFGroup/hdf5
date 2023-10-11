@@ -158,7 +158,7 @@ test_vlstring_dataset()
 
         // Read and verify the dataset string as a string of chars.
         dset1.read(&string_ds_check, vlst);
-        if (HDstrcmp(string_ds_check, DSET1_DATA.c_str()) != 0)
+        if (strcmp(string_ds_check, DSET1_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: DSET1_DATA=%s,string_ds_check=%s\n", __LINE__,
                           DSET1_DATA.c_str(), string_ds_check);
 
@@ -186,7 +186,7 @@ test_vlstring_dataset()
         dset1.read(&string_ds_check, vlst);
 
         // Verify data read.
-        if (HDstrcmp(string_ds_check, dynstring_ds_write) != 0)
+        if (strcmp(string_ds_check, dynstring_ds_write) != 0)
             TestErrPrintf("VL string datasets don't match!, dynstring_ds_write=%s, string_ds_check=%s\n",
                           dynstring_ds_write, string_ds_check);
         free(string_ds_check);
@@ -256,7 +256,7 @@ test_vlstring_array_dataset()
 
         hsize_t ii;
         for (ii = 0; ii < SPACE1_DIM1; ii++) {
-            if (HDstrcmp(string_ds_check[ii], string_ds_array[ii]) != 0)
+            if (strcmp(string_ds_check[ii], string_ds_array[ii]) != 0)
                 TestErrPrintf("Line %d: Dataset data different: written=%s,read=%s\n", __LINE__,
                               string_ds_array[ii], string_ds_check[ii]);
 
@@ -282,7 +282,7 @@ test_vlstring_array_dataset()
 
         char *rdata2;
         dataset2.read(&rdata2, vlst);
-        if (HDstrcmp(wdata2, rdata2) != 0)
+        if (strcmp(wdata2, rdata2) != 0)
             TestErrPrintf("Line %d: Dataset data different: written=%s,read=%s\n", __LINE__, wdata2, rdata2);
 
         // Release resources from second dataset operation.
@@ -355,15 +355,15 @@ test_vlstrings_special()
 
         // Compare data read in.
         for (ii = 0; ii < SPACE1_DIM1; ii++) {
-            size_t wlen = HDstrlen(wdata[ii]);
-            size_t rlen = HDstrlen(rdata[ii]);
+            size_t wlen = strlen(wdata[ii]);
+            size_t rlen = strlen(rdata[ii]);
             if (wlen != rlen) {
                 TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n",
                               static_cast<int>(ii), static_cast<unsigned>(wlen), static_cast<int>(ii),
                               static_cast<unsigned>(rlen));
                 continue;
             }
-            if (HDstrcmp(wdata[ii], rdata[ii]) != 0) {
+            if (strcmp(wdata[ii], rdata[ii]) != 0) {
                 TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
                               static_cast<int>(ii), wdata[ii], static_cast<int>(ii), rdata[ii]);
                 continue;
@@ -562,13 +562,13 @@ test_compact_vlstring()
         // Compare data read in
         hsize_t i;
         for (i = 0; i < SPACE1_DIM1; i++) {
-            if (HDstrlen(wdata[i]) != strlen(rdata[i])) {
+            if (strlen(wdata[i]) != strlen(rdata[i])) {
                 TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                              static_cast<int>(i), static_cast<int>(HDstrlen(wdata[i])), static_cast<int>(i),
-                              static_cast<int>(HDstrlen(rdata[i])));
+                              static_cast<int>(i), static_cast<int>(strlen(wdata[i])), static_cast<int>(i),
+                              static_cast<int>(strlen(rdata[i])));
                 continue;
             } // end if
-            if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+            if (strcmp(wdata[i], rdata[i]) != 0) {
                 TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
                               static_cast<int>(i), wdata[i], static_cast<int>(i), rdata[i]);
                 continue;
@@ -634,7 +634,7 @@ test_vlstring_attribute()
         // Read and verify the attribute string as a string of chars.
         char *string_att_check;
         gr_attr.read(vlst, &string_att_check);
-        if (HDstrcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
+        if (strcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
 
@@ -661,7 +661,7 @@ test_vlstring_attribute()
         gr_attr.read(vlst, &string_att_check);
 
         // Verify data read.
-        if (HDstrcmp(string_att_check, string_att_write) != 0)
+        if (strcmp(string_att_check, string_att_write) != 0)
             TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",
                           string_att_write, string_att_check);
 
@@ -709,7 +709,7 @@ static void test_read_vl_string_attribute()
         // Test reading "normal" sized string attribute
         char *string_att_check;
         att.read(vlst, &string_att_check);
-        if(HDstrcmp(string_att_check,ATTRSTR_DATA.c_str())!=0)
+        if(strcmp(string_att_check,ATTRSTR_DATA.c_str())!=0)
             TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",ATTRSTR_DATA.c_str(),string_att_check);
         free(string_att_check);
         att.close();
@@ -717,7 +717,7 @@ static void test_read_vl_string_attribute()
         // Test reading "large" sized string attribute
         att = root.openAttribute("test_scalar_large");
         att.read(vlst, &string_att_check);
-        if(HDstrcmp(string_att_check,string_att_write)!=0)
+        if(strcmp(string_att_check,string_att_write)!=0)
             TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
         free(string_att_check);
         free(string_att_write);   // Free string allocated in test_write_vl_string_attribute
@@ -785,7 +785,7 @@ test_vlstring_array_attribute()
 
         hsize_t ii;
         for (ii = 0; ii < SPACE1_DIM1; ii++) {
-            if (HDstrcmp(string_att_check[ii], string_att_array[ii]) != 0)
+            if (strcmp(string_att_check[ii], string_att_array[ii]) != 0)
                 TestErrPrintf("Line %d: Attribute data different: written=%s,read=%s\n", __LINE__,
                               string_att_check[ii], string_att_check[ii]);
 
@@ -834,7 +834,7 @@ read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, cha
         dset.read(&data_read, type, space, space);
         dset.close();
 
-        if (HDstrcmp(data, data_read) != 0)
+        if (strcmp(data, data_read) != 0)
             TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
         free(data_read);

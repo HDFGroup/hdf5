@@ -91,12 +91,12 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
+test_filter_write(char *file_name, hid_t my_fapl, bool cache_enabled)
 {
-    hid_t   file          = -1;
-    hid_t   dataset       = -1;                 /* dataset ID */
-    hid_t   sid           = -1;                 /* dataspace ID */
-    hid_t   dcpl          = -1;                 /* dataset creation property list ID */
+    hid_t   file          = H5I_INVALID_HID;
+    hid_t   dataset       = H5I_INVALID_HID;    /* dataset ID */
+    hid_t   sid           = H5I_INVALID_HID;    /* dataspace ID */
+    hid_t   dcpl          = H5I_INVALID_HID;    /* dataset creation property list ID */
     hsize_t dims[1]       = {DIM};              /* dataspace dimension - 10*/
     hsize_t chunk_dims[1] = {FILTER_CHUNK_DIM}; /* chunk dimension - 2*/
     int     points[DIM];                        /* Data */
@@ -129,7 +129,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         TEST_ERROR;
 
     /* Check that the filter was registered */
-    if (TRUE != H5Zfilter_avail(H5Z_FILTER_FAIL_TEST))
+    if (true != H5Zfilter_avail(H5Z_FILTER_FAIL_TEST))
         FAIL_STACK_ERROR;
 
     /* Enable the filter as mandatory */
@@ -159,7 +159,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
-            HDputs("    Data writing is supposed to fail because the chunk can't be written to file.");
+            puts("    Data writing is supposed to fail because the chunk can't be written to file.");
             TEST_ERROR;
         }
     }
@@ -180,7 +180,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
-            HDputs("    Dataset is supposed to fail because the chunk can't be flushed to file.");
+            puts("    Dataset is supposed to fail because the chunk can't be flushed to file.");
             TEST_ERROR;
         }
     }
@@ -225,10 +225,10 @@ error:
 static herr_t
 test_filter_read(char *file_name, hid_t my_fapl)
 {
-    hid_t   file    = -1;
-    hid_t   dataset = -1; /* dataset ID */
-    hid_t   sid     = -1;
-    hid_t   mspace  = -1;
+    hid_t   file    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID; /* dataset ID */
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   mspace  = H5I_INVALID_HID;
     hsize_t dims[1] = {DIM}; /* dataspace dimension - 10*/
     int     rbuf[DIM];       /* Data */
     hsize_t dset_size = 0;   /* Dataset storage size */
@@ -375,7 +375,7 @@ main(void)
 
     /* The chunk cache is used so that the flushing of data chunks happens
      * during H5Dclose.  All values are default. */
-    nerrors += (test_filter_write(filename, fapl, TRUE) < 0 ? 1 : 0);
+    nerrors += (test_filter_write(filename, fapl, true) < 0 ? 1 : 0);
     nerrors += (test_filter_read(filename, fapl) < 0 ? 1 : 0);
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -386,7 +386,7 @@ main(void)
         TEST_ERROR;
 
     /* Run the test again. */
-    nerrors += (test_filter_write(filename, fapl, FALSE) < 0 ? 1 : 0);
+    nerrors += (test_filter_write(filename, fapl, false) < 0 ? 1 : 0);
     nerrors += (test_filter_read(filename, fapl) < 0 ? 1 : 0);
 
     /* Verify symbol table messages are cached */

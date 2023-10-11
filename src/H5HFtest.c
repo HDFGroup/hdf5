@@ -178,7 +178,7 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
             else if(cparam1->pline.filter[u].name && !cparam2->pline.filter[u].name)
                 HGOTO_DONE(1);
             else if(cparam1->pline.filter[u].name && cparam2->pline.filter[u].name) {
-                if((ret_value = HDstrcmp(cparam1->pline.filter[u].name, cparam2->pline.filter[u].name)))
+                if((ret_value = strcmp(cparam1->pline.filter[u].name, cparam2->pline.filter[u].name)))
                     HGOTO_DONE(ret_value);
             } /* end if */
 #endif
@@ -441,7 +441,7 @@ H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool_t *len_extended)
+H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, bool *len_extended)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -469,7 +469,7 @@ H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool_t *len_extended
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id, hbool_t *ids_direct)
+H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id, bool *ids_direct)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

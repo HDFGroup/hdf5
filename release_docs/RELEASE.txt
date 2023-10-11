@@ -47,6 +47,39 @@ New Features
 
     Configuration:
     -------------
+    - Converted the build of libaec and zlib to use FETCH_CONTENT with CMake.
+
+      Using the CMake FetchContent module, the external filters can populate
+      content at configure time via any method supported by the ExternalProject
+      module. Whereas ExternalProject_Add() downloads at build time, the
+      FetchContent module makes content available immediately, allowing the
+      configure step to use the content in commands like add_subdirectory(),
+      include() or file() operations.
+
+      Removed HDF options for using FETCH_CONTENT explicitly:
+          BUILD_SZIP_WITH_FETCHCONTENT:BOOL
+          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+
+    - Thread-safety + static library disabled on Windows w/ CMake
+
+      The thread-safety feature requires hooks in DllMain(), which is only
+      present in the shared library.
+
+      We previously just warned about this, but now any CMake configuration
+      that tries to build thread-safety and the static library will fail.
+      This cannot be overridden with ALLOW_UNSUPPORTED.
+
+      Fixes GitHub issue #3613
+
+    - Autotools builds now build the szip filter by default when an appropriate
+      library is found
+
+      Since libaec is prevalent and BSD-licensed for both encoding and
+      decoding, we build the szip filter by default now.
+
+      Both autotools and CMake build systems will process the szip filter the same as
+      the zlib filter is processed.
+
     - Removed CMake cross-compiling variables
 
       * HDF5_USE_PREGEN
@@ -65,17 +98,6 @@ New Features
       The functionality of H5detect is now exercised at library startup,
       so H5detect has been removed.
 
-    - Thread-safety + static library disabled on Windows w/ CMake
-
-      The thread-safety feature requires hooks in DllMain(), which is only
-      present in the shared library.
-
-      We previously just warned about this, but now any CMake configuration
-      that tries to build thread-safety and the static library will fail.
-      This cannot be overridden with ALLOW_UNSUPPORTED.
-
-      Fixes GitHub issue #3613
-
 
     Library:
     --------
@@ -89,6 +111,26 @@ New Features
 
     Fortran Library:
     ----------------
+    - Fixed an uninitialized error return value for hdferr
+      to return the error state of the h5aopen_by_idx_f API.
+
+    - Added h5pget_vol_cap_flags_f and related Fortran VOL
+      capability definitions.
+
+    - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
+
+    - Added Fortran APIs:
+      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
+
+    - Added Fortran APIs:
+      h5get_free_list_sizes_f, h5dwrite_chunk_f, h5dread_chunk_f,
+      h5fget_info_f, h5lvisit_f, h5lvisit_by_name_f,
+      h5pget_no_selection_io_cause_f, h5pget_mpio_no_collective_cause_f,
+      h5sselect_shape_same_f, h5sselect_intersect_block_f,
+      h5pget_file_space_page_size_f, h5pset_file_space_page_size_f,
+      h5pget_file_space_strategy_f, h5pset_file_space_strategy_f
+
     - Removed "-commons" linking option on Darwin, as COMMON and EQUIVALENCE
       are no longer used in the Fortran source.
 
@@ -111,7 +153,7 @@ New Features
 
     High-Level APIs:
     ----------------
-    -
+    - Added Fortran HL API: h5doappend_f
 
 
     C Packet Table API:
@@ -195,6 +237,17 @@ Bug Fixes since HDF5-1.14.2 release
       this optimized conversion and there is no benefit in terms of the I/O
       size.
 
+    - Reading a H5std_string (std::string) via a C++ DataSet previously
+      truncated the string at the first null byte as if reading a C string.
+      Fixed length datasets are now read into H5std_string as a fixed length
+      string of the appropriate size. Variable length datasets will still be
+      truncated at the first null byte.
+
+      Fixes Github issue #3034
+
+    - Fixed write buffer overflow in H5O__alloc_chunk
+
+      The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
 
     Java Library
     ------------
@@ -203,7 +256,29 @@ Bug Fixes since HDF5-1.14.2 release
 
     Configuration
     -------------
-    -
+    - The accum test now passes on macOS 12+ (Monterey) w/ CMake
+
+      Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
+      started failing on macOS 12+ when building with CMake. CMake has been
+      updated to set DYLD_LIBRARY_PATH on macOS and the test now passes.
+
+      Fixes GitHub #2994, #2261, and #1289
+
+    - Changed the default settings used by CMake for the GZIP filter
+
+      The default for the option HDF5_ENABLE_Z_LIB_SUPPORT was OFF. Now the default is ON.
+      This was done to match the defaults used by the autotools configure.ac.
+      In addition, the CMake message level for not finding a suitable filter library was
+      changed from FATAL_ERROR (which would halt the build process) to WARNING (which
+      will print a message to stderr). Associated files and documentation were changed to match.
+
+      In addition, the default settings in the config/cmake/cacheinit.cmake file were changed to
+      allow CMake to disable building the filters if the tgz file could not be found. The option
+      to allow CMake to download the file from the original Github location requires setting
+      the ZLIB_USE_LOCALCONTENT option to OFF for gzip. And setting the LIBAEC_USE_LOCALCONTENT
+      option to OFF for libaec (szip).
+
+      Fixes GitHub issue #2926
 
 
     Tools
@@ -311,6 +386,8 @@ Platforms Tested
     Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+                                     IBM XL C for Linux, V13.1
+                                     IBM XL Fortran for Linux, V15.1
 
     Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
@@ -362,10 +439,13 @@ Platforms Tested
     Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
     (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
 
+    macOS High Sierra 10.13.6        Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                           gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
+
     Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
     64-bit                           gfortran GNU Fortran (GCC) 5.2.0
     (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
-
 
     Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:

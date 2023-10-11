@@ -40,8 +40,8 @@
 
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
-#define H5F_MNT_SYM_LOCAL_SIZE sizeof(hbool_t)
-#define H5F_MNT_SYM_LOCAL_DEF  FALSE
+#define H5F_MNT_SYM_LOCAL_SIZE sizeof(bool)
+#define H5F_MNT_SYM_LOCAL_DEF  false
 
 /******************/
 /* Local Typedefs */
@@ -90,7 +90,7 @@ const H5P_libclass_t H5P_CLS_FMNT[1] = {{
 /*******************/
 
 /* Property value defaults */
-static const hbool_t H5F_def_local_g = H5F_MNT_SYM_LOCAL_DEF; /* Whether symlinks are local to file */
+static const bool H5F_def_local_g = H5F_MNT_SYM_LOCAL_DEF; /* Whether symlinks are local to file */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__fmnt_reg_prop

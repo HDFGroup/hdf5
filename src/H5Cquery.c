@@ -84,7 +84,7 @@ H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr, H5C_auto_size_ctl_t *co
 
     *config_ptr = cache_ptr->resize_ctl;
 
-    config_ptr->set_initial_size = FALSE;
+    config_ptr->set_initial_size = false;
     config_ptr->initial_size     = cache_ptr->max_cache_size;
 
 done:
@@ -142,7 +142,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, hbool_t *flush_in_progress_ptr)
+H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, bool *flush_in_progress_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -214,10 +214,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in_cache_ptr,
-                     hbool_t *is_dirty_ptr, hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
-                     hbool_t *is_corked_ptr, hbool_t *is_flush_dep_parent_ptr,
-                     hbool_t *is_flush_dep_child_ptr, hbool_t *image_up_to_date_ptr)
+H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, bool *in_cache_ptr, bool *is_dirty_ptr,
+                     bool *is_protected_ptr, bool *is_pinned_ptr, bool *is_corked_ptr,
+                     bool *is_flush_dep_parent_ptr, bool *is_flush_dep_child_ptr, bool *image_up_to_date_ptr)
 {
     H5C_t             *cache_ptr;
     H5C_cache_entry_t *entry_ptr = NULL;
@@ -242,10 +241,10 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
         /* the entry doesn't exist in the cache -- report this
          * and quit.
          */
-        *in_cache_ptr = FALSE;
+        *in_cache_ptr = false;
     } /* end if */
     else {
-        *in_cache_ptr = TRUE;
+        *in_cache_ptr = true;
         if (size_ptr != NULL)
             *size_ptr = entry_ptr->size;
         if (is_dirty_ptr != NULL)
@@ -255,7 +254,7 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
         if (is_pinned_ptr != NULL)
             *is_pinned_ptr = entry_ptr->is_pinned;
         if (is_corked_ptr != NULL)
-            *is_corked_ptr = entry_ptr->tag_info ? entry_ptr->tag_info->corked : FALSE;
+            *is_corked_ptr = entry_ptr->tag_info ? entry_ptr->tag_info->corked : false;
         if (is_flush_dep_parent_ptr != NULL)
             *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_nchildren > 0);
         if (is_flush_dep_child_ptr != NULL)
@@ -279,7 +278,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr)
+H5C_get_evictions_enabled(const H5C_t *cache_ptr, bool *evictions_enabled_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

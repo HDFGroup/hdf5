@@ -38,10 +38,10 @@ static hid_t H5FD_MPIO_g = 0;
 
 /* Whether to allow collective I/O operations */
 /* (Can be changed by setting "HDF5_MPI_OPT_TYPES" environment variable to '0' or '1') */
-hbool_t H5FD_mpi_opt_types_g = TRUE;
+hbool_t H5FD_mpi_opt_types_g = true;
 
 /* Whether the driver initialized MPI on its own */
-static hbool_t H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = false;
 
 /*
  * The view is set to this value
@@ -65,7 +65,7 @@ typedef struct H5FD_mpio_t {
     haddr_t  eoa;                    /* End-of-address marker                        */
     haddr_t  last_eoa;               /* Last known end-of-address marker             */
     haddr_t  local_eof;              /* Local end-of-file address for each process   */
-    hbool_t  mpi_file_sync_required; /* Whether the ROMIO driver requires MPI_File_sync after write */
+    bool     mpi_file_sync_required; /* Whether the ROMIO driver requires MPI_File_sync after write */
 } H5FD_mpio_t;
 
 /* Private Prototypes */
@@ -97,18 +97,27 @@ static herr_t H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H
                                          size_t count, hid_t mem_space_ids[], hid_t file_space_ids[],
                                          haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
-static herr_t H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 static herr_t H5FD__mpio_delete(const char *filename, hid_t fapl_id);
 static herr_t H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                              void **output);
 
 /* Other functions */
-static herr_t H5FD__mpio_vector_build_types(
-    uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[], H5_flexible_const_ptr_t bufs[],
-    haddr_t *s_addrs[], size_t *s_sizes[], H5_flexible_const_ptr_t *s_bufs[], hbool_t *vector_was_sorted,
-    MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
-    hbool_t *buf_type_created, MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
+static herr_t H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                            size_t sizes[], H5_flexible_const_ptr_t bufs[],
+                                            haddr_t *s_addrs[], size_t *s_sizes[],
+                                            H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted,
+                                            MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base,
+                                            int *size_i, MPI_Datatype *buf_type, bool *buf_type_created,
+                                            MPI_Datatype *file_type, bool *file_type_created, char *unused);
+
+static herr_t H5FD__selection_build_types(bool io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
+                                          H5S_t **file_spaces, H5S_t **mem_spaces, haddr_t offsets[],
+                                          H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
+                                          size_t dst_element_sizes[], MPI_Datatype *final_ftype,
+                                          bool *final_ftype_is_derived, MPI_Datatype *final_mtype,
+                                          bool *final_mtype_is_derived);
 
 static herr_t H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
                                           H5S_t **file_spaces, H5S_t **mem_spaces, haddr_t offsets[],
@@ -275,11 +284,11 @@ H5FD_mpio_init(void)
 
     /* Register the MPI-IO VFD, if it isn't already */
     if (H5I_VFL != H5I_get_type(H5FD_MPIO_g)) {
-        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), false);
 
         /* Check if MPI driver has been loaded dynamically */
-        env = HDgetenv(HDF5_DRIVER);
-        if (env && !HDstrcmp(env, "mpio")) {
+        env = getenv(HDF5_DRIVER);
+        if (env && !strcmp(env, "mpio")) {
             int mpi_initialized = 0;
 
             /* Initialize MPI if not already initialized */
@@ -288,7 +297,7 @@ H5FD_mpio_init(void)
             if (!mpi_initialized) {
                 if (MPI_SUCCESS != MPI_Init(NULL, NULL))
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI");
-                H5FD_mpi_self_initialized = TRUE;
+                H5FD_mpi_self_initialized = true;
             }
         }
     }
@@ -297,16 +306,16 @@ H5FD_mpio_init(void)
         const char *s; /* String for environment variables */
 
         /* Allow MPI buf-and-file-type optimizations? */
-        s = HDgetenv("HDF5_MPI_OPT_TYPES");
+        s = getenv("HDF5_MPI_OPT_TYPES");
         if (s && isdigit(*s))
-            H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? FALSE : TRUE;
+            H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? false : true;
 
 #ifdef H5FDmpio_DEBUG
         /* Clear the flag buffer */
         memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
 
         /* Retrieve MPI-IO debugging environment variable */
-        s = HDgetenv("H5FD_mpio_Debug");
+        s = getenv("H5FD_mpio_Debug");
         if (s)
             H5FD__mpio_parse_debug_str(s);
 #endif /* H5FDmpio_DEBUG */
@@ -343,7 +352,7 @@ H5FD__mpio_term(void)
         if (!mpi_finalized)
             MPI_Finalize();
 
-        H5FD_mpi_self_initialized = FALSE;
+        H5FD_mpi_self_initialized = false;
     }
 
     /* Reset VFL ID */
@@ -557,13 +566,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_dxpl_mpio_collective_opt
  *
- * Purpose:     To set a flag to choose linked chunk I/O or multi-chunk I/O
- *              without involving decision-making inside HDF5
- *
- * Note:        The library will do linked chunk I/O or multi-chunk I/O without
- *              involving communications for decision-making process.
- *              The library won't behave as it asks for only when we find
- *              that the low-level MPI-IO package doesn't support this.
+ * Purpose:     Set the data transfer property list DXPL_ID to use transfer
+ *              mode OPT_MODE during I/O. This allows the application to
+ *              specify collective I/O at the HDF5 interface level (with
+ *              the H5Pset_dxpl_mpio routine), while controlling whether
+ *              the actual I/O is performed collectively (e.g., via
+ *              MPI_File_write_at_all) or independently (e.g., via
+ *              MPI_File_write_at).
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -719,11 +728,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
+H5FD_set_mpio_atomicity(H5FD_t *_file, bool flag)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
@@ -736,7 +745,7 @@ H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 #endif
 
     /* set atomicity value */
-    if (MPI_SUCCESS != (mpi_code = MPI_File_set_atomicity(file->f, (int)(flag != FALSE))))
+    if (MPI_SUCCESS != (mpi_code = MPI_File_set_atomicity(file->f, (int)(flag != false))))
         HMPI_GOTO_ERROR(FAIL, "MPI_File_set_atomicity", mpi_code)
 
 done:
@@ -758,12 +767,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
+H5FD_get_mpio_atomicity(H5FD_t *_file, bool *flag)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
     int          temp_flag;
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
@@ -780,9 +789,9 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
         HMPI_GOTO_ERROR(FAIL, "MPI_File_get_atomicity", mpi_code)
 
     if (0 != temp_flag)
-        *flag = TRUE;
+        *flag = true;
     else
-        *flag = FALSE;
+        *flag = false;
 
 done:
 #ifdef H5FDmpio_DEBUG
@@ -817,13 +826,13 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     MPI_Info        info = MPI_INFO_NULL; /* MPI Info, from plist */
     MPI_Info        info_used;            /* MPI Info returned from MPI_File_open */
     MPI_File        fh;                   /* MPI file handle */
-    hbool_t         file_opened = FALSE;  /* Flag to indicate that the file was successfully opened */
+    bool            file_opened = false;  /* Flag to indicate that the file was successfully opened */
     int             mpi_amode;            /* MPI file access flags */
     int             mpi_rank = INT_MAX;   /* MPI rank of this process */
     int             mpi_size;             /* Total number of MPI processes */
     MPI_Offset      file_size;            /* File size (of existing files) */
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = FALSE;
+    bool H5FD_mpio_debug_t_flag = false;
 #endif
     int     mpi_code;         /* MPI return code */
     H5FD_t *ret_value = NULL; /* Return value */
@@ -881,7 +890,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
     if (MPI_SUCCESS != (mpi_code = MPI_File_open(comm, name, mpi_amode, info, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
-    file_opened = TRUE;
+    file_opened = true;
 
     /* Get the MPI-IO hints that actually used by MPI-IO underneath. */
     if (MPI_SUCCESS != (mpi_code = MPI_File_get_info(fh, &info_used)))
@@ -944,7 +953,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint");
 
-    /* Only processor p0 will get the filesize and broadcast it. */
+    /* Only processor p0 will get the file size and broadcast it. */
     if (mpi_rank == 0) {
         /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
         if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(fh, &file_size)))
@@ -1013,8 +1022,8 @@ H5FD__mpio_close(H5FD_t *_file)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    int     mpi_rank               = file->mpi_rank;
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    int  mpi_rank               = file->mpi_rank;
 #endif
     int    mpi_code;            /* MPI return code */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1231,12 +1240,12 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     int io_size;        /* Actual number of bytes requested */
     int n;
 #endif
-    hbool_t use_view_this_time = FALSE;
-    hbool_t derived_type       = FALSE;
-    hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
+    bool use_view_this_time = false;
+    bool derived_type       = false;
+    bool rank0_bcast        = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
@@ -1279,9 +1288,9 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             MPI_Datatype file_type;
 
             /* Remember that views are used */
-            use_view_this_time = TRUE;
+            use_view_this_time = true;
 
-            /* Prepare for a full-blown xfer using btype, ftype, and disp */
+            /* Prepare for a full-blown xfer using btype, ftype, and displacement */
             if (H5CX_get_mpi_coll_datatypes(&buf_type, &file_type) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
 
@@ -1323,7 +1332,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                     fprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
 #endif
                 /* Indicate path we've taken */
-                rank0_bcast = TRUE;
+                rank0_bcast = true;
 
                 /* Read on rank 0 Bcast to other ranks */
                 if (file->mpi_rank == 0) {
@@ -1374,7 +1383,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
-            derived_type = TRUE;
+            derived_type = true;
             size_i       = 1;
         }
 
@@ -1402,7 +1411,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                  * MPI_Bcast.
                  */
                 bytes_read = -1;
-                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed for rank 0", mpi_code)
             }
             else
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
@@ -1498,12 +1507,12 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     int io_size;   /* Actual number of bytes requested */
 #endif
     int              size_i;
-    hbool_t          use_view_this_time = FALSE;
-    hbool_t          derived_type       = FALSE;
+    bool             use_view_this_time = false;
+    bool             derived_type       = false;
     H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
@@ -1545,7 +1554,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         MPI_Datatype file_type;
 
         /* Remember that views are used */
-        use_view_this_time = TRUE;
+        use_view_this_time = true;
 
         /* Prepare for a full-blown xfer using btype, ftype, and disp */
         if (H5CX_get_mpi_coll_datatypes(&buf_type, &file_type) < 0)
@@ -1625,7 +1634,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
-            derived_type = TRUE;
+            derived_type = true;
             size_i       = 1;
         }
 
@@ -1706,13 +1715,13 @@ done:
 static herr_t
 H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                               H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[],
-                              H5_flexible_const_ptr_t *s_bufs[], hbool_t *vector_was_sorted,
-                              MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i,
-                              MPI_Datatype *buf_type, hbool_t *buf_type_created, MPI_Datatype *file_type,
-                              hbool_t *file_type_created, char *unused)
+                              H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted, MPI_Offset *mpi_off,
+                              H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
+                              bool *buf_type_created, MPI_Datatype *file_type, bool *file_type_created,
+                              char *unused)
 {
     hsize_t       bigio_count; /* Transition point to create derived type */
-    hbool_t       fixed_size = FALSE;
+    bool          fixed_size = false;
     size_t        size;
     H5FD_mem_t   *s_types           = NULL;
     int          *mpi_block_lengths = NULL;
@@ -1774,11 +1783,11 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
             if (H5_mpio_create_large_type(sizes[0], 0, MPI_BYTE, buf_type) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
-            *buf_type_created = TRUE;
+            *buf_type_created = true;
 
             if (H5_mpio_create_large_type(sizes[0], 0, MPI_BYTE, file_type) < 0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
-            *file_type_created = TRUE;
+            *file_type_created = true;
 
             *size_i = 1;
         }
@@ -1831,7 +1840,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         *size_i = 1;
 
-        fixed_size = FALSE;
+        fixed_size = false;
 
         /* load the mpi_block_lengths and mpi_displacements arrays */
         for (i = 0; i < (int)count; i++) {
@@ -1839,7 +1848,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
                     assert(vector_was_sorted);
-                    fixed_size = TRUE;
+                    fixed_size = true;
                     size       = sizes[i - 1];
                 }
                 else {
@@ -1891,7 +1900,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 /* Create type for large block */
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &sub_types[i]) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
-                sub_types_created[i] = TRUE;
+                sub_types_created[i] = true;
 
                 /* Only one of these large types for this vector element */
                 mpi_block_lengths[i] = 1;
@@ -1910,7 +1919,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                                                                      MPI_BYTE, buf_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for buf_type failed", mpi_code)
 
-        *buf_type_created = TRUE;
+        *buf_type_created = true;
 
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(buf_type)))
 
@@ -1926,7 +1935,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                                                                      mpi_displacements, MPI_BYTE, file_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed for file_type failed", mpi_code)
 
-        *file_type_created = TRUE;
+        *file_type_created = true;
 
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(file_type)))
 
@@ -2030,7 +2039,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_vector()
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2066,16 +2075,16 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                        haddr_t addrs[], size_t sizes[], void *bufs[])
 {
     H5FD_mpio_t               *file              = (H5FD_mpio_t *)_file;
-    hbool_t                    vector_was_sorted = TRUE;
+    bool                       vector_was_sorted = true;
     haddr_t                   *s_addrs           = NULL;
     size_t                    *s_sizes           = NULL;
     void                     **s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
     void                      *mpi_bufs_base     = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
-    hbool_t                    buf_type_created  = FALSE;
+    bool                       buf_type_created  = false;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
-    hbool_t                    file_type_created = FALSE;
+    bool                       file_type_created = false;
     int                        i;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
@@ -2094,10 +2103,10 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     int io_size;        /* Actual number of bytes requested */
     int n;
 #endif
-    hbool_t rank0_bcast = FALSE; /* If read-with-rank0-and-bcast flag was used */
+    bool rank0_bcast = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     herr_t ret_value = SUCCEED;
 
@@ -2189,7 +2198,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                     fprintf(stdout, "%s: doing read-rank0-and-MPI_Bcast\n", __func__);
 #endif
                 /* Indicate path we've taken */
-                rank0_bcast = TRUE;
+                rank0_bcast = true;
 
                 /* Read on rank 0 Bcast to other ranks */
                 if (file->mpi_rank == 0)
@@ -2291,7 +2300,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     }
     else if (count > 0) {
         haddr_t max_addr   = HADDR_MAX;
-        hbool_t fixed_size = FALSE;
+        bool    fixed_size = false;
         size_t  size;
 
         /* The read is part of an independent operation. As a result,
@@ -2322,7 +2331,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             /* Calculate I/O size */
             if (!fixed_size) {
                 if (sizes[i] == 0) {
-                    fixed_size = TRUE;
+                    fixed_size = true;
                     size       = sizes[i - 1];
                 }
                 else {
@@ -2342,7 +2351,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
-                buf_type_created = TRUE;
+                buf_type_created = true;
                 size_i           = 1;
             }
 
@@ -2430,7 +2439,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_vector
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2466,16 +2475,16 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                         haddr_t addrs[], size_t sizes[], const void *bufs[])
 {
     H5FD_mpio_t               *file              = (H5FD_mpio_t *)_file;
-    hbool_t                    vector_was_sorted = TRUE;
+    bool                       vector_was_sorted = true;
     haddr_t                   *s_addrs           = NULL;
     size_t                    *s_sizes           = NULL;
     const void               **s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
     const void                *mpi_bufs_base     = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
-    hbool_t                    buf_type_created  = FALSE;
+    bool                       buf_type_created  = false;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
-    hbool_t                    file_type_created = FALSE;
+    bool                       file_type_created = false;
     int                        i;
     int                        mpi_code; /* MPI return code */
     MPI_Offset                 mpi_off = 0;
@@ -2484,8 +2493,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     H5FD_mpio_collective_opt_t coll_opt_mode; /* whether we are doing collective or independent I/O */
     int                        size_i;
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     haddr_t max_addr  = 0;
     herr_t  ret_value = SUCCEED;
@@ -2535,7 +2544,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
-        /* Compute max addr writted to */
+        /* Compute max address written to */
         if (count > 0)
             max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
 
@@ -2616,8 +2625,8 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     }
     else if (count > 0) {
-        hbool_t fixed_size = FALSE;
-        size_t  size;
+        bool   fixed_size = false;
+        size_t size;
 
         /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
@@ -2647,7 +2656,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             /* Calculate I/O size */
             if (!fixed_size) {
                 if (sizes[i] == 0) {
-                    fixed_size = TRUE;
+                    fixed_size = true;
                     size       = sizes[i - 1];
                 }
                 else {
@@ -2667,7 +2676,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &buf_type) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't create MPI-I/O datatype");
 
-                buf_type_created = TRUE;
+                buf_type_created = true;
                 size_i           = 1;
             }
 
@@ -2692,7 +2701,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      */
     file->eof = HADDR_UNDEF;
 
-    /* check to see if the local eof has changed been extended, and update if so */
+    /* check to see if the local eof has been extended, and update if so */
     if (max_addr > file->local_eof)
         file->local_eof = max_addr;
 
@@ -2746,22 +2755,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
+H5FD__selection_build_types(bool io_op_write, size_t num_pieces, H5_flexible_const_ptr_t mbb,
                             H5S_t **file_spaces, H5S_t **mem_spaces, haddr_t offsets[],
                             H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
                             size_t dst_element_sizes[], MPI_Datatype *final_ftype,
-                            hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
-                            hbool_t *final_mtype_is_derived)
+                            bool *final_ftype_is_derived, MPI_Datatype *final_mtype,
+                            bool *final_mtype_is_derived)
 {
 
     MPI_Datatype *piece_mtype           = NULL;
     MPI_Datatype *piece_ftype           = NULL;
     MPI_Aint     *piece_file_disp_array = NULL;
     MPI_Aint     *piece_mem_disp_array  = NULL;
-    hbool_t      *piece_mft_is_derived_array =
-        NULL; /* Flags to indicate each piece's MPI file datatype is derived */
+    bool *piece_mft_is_derived_array = NULL; /* Flags to indicate each piece's MPI file datatype is derived */
     ;
-    hbool_t *piece_mmt_is_derived_array =
+    bool *piece_mmt_is_derived_array =
         NULL;                          /* Flags to indicate each piece's MPI memory datatype is derived */
     int *piece_mpi_file_counts = NULL; /* Count of MPI file datatype for each piece */
     int *piece_mpi_mem_counts  = NULL; /* Count of MPI memory datatype for each piece */
@@ -2770,9 +2778,9 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
     size_t  i;        /* Local index variable */
     int     mpi_code; /* MPI return code */
 
-    hbool_t                 extend_src_sizes = FALSE;
-    hbool_t                 extend_dst_sizes = FALSE;
-    hbool_t                 extend_bufs      = FALSE;
+    bool                    extend_src_sizes = false;
+    bool                    extend_dst_sizes = false;
+    bool                    extend_bufs      = false;
     H5_flexible_const_ptr_t buf;
     size_t                  src_element_size, dst_element_size;
 
@@ -2793,10 +2801,10 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory counts buffer");
     if (NULL == (piece_mpi_file_counts = (int *)H5MM_calloc(num_pieces * sizeof(int))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file counts buffer");
-    if (NULL == (piece_mmt_is_derived_array = (hbool_t *)H5MM_calloc(num_pieces * sizeof(hbool_t))))
+    if (NULL == (piece_mmt_is_derived_array = (bool *)H5MM_calloc(num_pieces * sizeof(bool))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
                     "couldn't allocate piece memory is derived datatype flags buffer");
-    if (NULL == (piece_mft_is_derived_array = (hbool_t *)H5MM_calloc(num_pieces * sizeof(hbool_t))))
+    if (NULL == (piece_mft_is_derived_array = (bool *)H5MM_calloc(num_pieces * sizeof(bool))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
                     "couldn't allocate piece file is derived datatype flags buffer");
 
@@ -2810,11 +2818,11 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
                                             out-of-order displacements to the in-order
                                             displacements of the MPI datatypes of the
                                             point selection of the file space */
-        hbool_t is_permuted = FALSE;
+        bool is_permuted = false;
 
         if (!extend_src_sizes) {
             if (src_element_sizes[i] == 0) {
-                extend_src_sizes = TRUE;
+                extend_src_sizes = true;
                 src_element_size = src_element_sizes[i - 1];
             }
             else
@@ -2823,7 +2831,7 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
 
         if (!extend_dst_sizes) {
             if (dst_element_sizes[i] == 0) {
-                extend_dst_sizes = TRUE;
+                extend_dst_sizes = true;
                 dst_element_size = dst_element_sizes[i - 1];
             }
             else
@@ -2832,7 +2840,7 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
 
         if (!extend_bufs) {
             if (bufs[i].cvp == NULL) {
-                extend_bufs = TRUE;
+                extend_bufs = true;
                 buf         = bufs[i - 1];
             }
             else
@@ -2847,7 +2855,7 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
         if (H5S_mpio_space_type(file_spaces[i], src_element_size, &piece_ftype[i], /* OUT: datatype created */
                                 &piece_mpi_file_counts[i],                         /* OUT */
                                 &(piece_mft_is_derived_array[i]),                  /* OUT */
-                                TRUE,                                              /* this is a file space,
+                                true,                                              /* this is a file space,
                                                                                       so permute the
                                                                                       datatype if the point
                                                                                       selections are out of
@@ -2864,7 +2872,7 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
             assert(permute_map);
 
         if (H5S_mpio_space_type(mem_spaces[i], dst_element_size, &piece_mtype[i], &piece_mpi_mem_counts[i],
-                                &(piece_mmt_is_derived_array[i]), FALSE, /* this is a memory
+                                &(piece_mmt_is_derived_array[i]), false, /* this is a memory
                                                                             space, so if the file
                                                                             space is not
                                                                             permuted, there is no
@@ -2904,7 +2912,7 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
 
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(final_ftype)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
-    *final_ftype_is_derived = TRUE;
+    *final_ftype_is_derived = true;
 
     /* Create final MPI derived datatype for memory */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_pieces, piece_mpi_mem_counts,
@@ -2913,7 +2921,7 @@ H5FD__selection_build_types(hbool_t io_op_write, size_t num_pieces, H5_flexible_
 
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(final_mtype)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
-    *final_mtype_is_derived = TRUE;
+    *final_mtype_is_derived = true;
 
     /* Free the file & memory MPI datatypes for each piece */
     for (i = 0; i < num_pieces; i++) {
@@ -2953,7 +2961,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -2988,17 +2996,17 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     H5FD_mpio_collective_opt_t coll_opt_mode;
 
     MPI_Datatype final_mtype; /* Final memory MPI datatype for all pieces with selection */
-    hbool_t      final_mtype_is_derived = FALSE;
+    bool         final_mtype_is_derived = false;
 
     MPI_Datatype final_ftype; /* Final file MPI datatype for all pieces with selection */
-    hbool_t      final_ftype_is_derived = FALSE;
+    bool         final_ftype_is_derived = false;
 
     hid_t                   *s_mem_space_ids      = NULL;
     hid_t                   *s_file_space_ids     = NULL;
     haddr_t                 *s_offsets            = NULL;
     size_t                  *s_element_sizes      = NULL;
     H5_flexible_const_ptr_t *s_bufs               = NULL;
-    hbool_t                  selection_was_sorted = TRUE;
+    bool                     selection_was_sorted = true;
 
     uint32_t i, j;
     H5S_t  **s_mem_spaces  = NULL;
@@ -3018,10 +3026,10 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     int io_size;        /* Actual number of bytes requested */
     int n;
 #endif
-    hbool_t rank0_bcast = FALSE; /* If read-with-rank0-and-bcast flag was used */
+    bool rank0_bcast = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int                     mpi_code; /* MPI return code */
     H5_flexible_const_ptr_t mbb;
@@ -3107,7 +3115,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
             mpi_bufs_base = s_bufs[j].vp;
             mbb.vp        = mpi_bufs_base;
 
-            if (H5FD__selection_build_types(FALSE, count, mbb, s_file_spaces, s_mem_spaces, s_offsets, s_bufs,
+            if (H5FD__selection_build_types(false, count, mbb, s_file_spaces, s_mem_spaces, s_offsets, s_bufs,
                                             s_element_sizes, s_element_sizes, &final_ftype,
                                             &final_ftype_is_derived, &final_mtype,
                                             &final_mtype_is_derived) < 0)
@@ -3166,7 +3174,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
                     fprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
 #endif
                 /* Indicate path we've taken */
-                rank0_bcast = TRUE;
+                rank0_bcast = true;
 
                 /* Read on rank 0 Bcast to other ranks */
                 if (file->mpi_rank == 0) {
@@ -3324,7 +3332,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3361,17 +3369,17 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
     H5FD_mpio_collective_opt_t coll_opt_mode;
 
     MPI_Datatype final_mtype; /* Final memory MPI datatype for all pieces with selection */
-    hbool_t      final_mtype_is_derived = FALSE;
+    bool         final_mtype_is_derived = false;
 
     MPI_Datatype final_ftype; /* Final file MPI datatype for all pieces with selection */
-    hbool_t      final_ftype_is_derived = FALSE;
+    bool         final_ftype_is_derived = false;
 
     hid_t                   *s_mem_space_ids      = NULL;
     hid_t                   *s_file_space_ids     = NULL;
     haddr_t                 *s_offsets            = NULL;
     size_t                  *s_element_sizes      = NULL;
     H5_flexible_const_ptr_t *s_bufs               = NULL;
-    hbool_t                  selection_was_sorted = TRUE;
+    bool                     selection_was_sorted = true;
     const void              *mpi_bufs_base        = NULL;
 
     uint32_t                i, j;
@@ -3392,8 +3400,8 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 #endif
 
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
-    hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int    mpi_code; /* MPI return code */
     herr_t ret_value = SUCCEED;
@@ -3475,7 +3483,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
             mpi_bufs_base = s_bufs[j].cvp;
             mbb.cvp       = mpi_bufs_base;
 
-            if (H5FD__selection_build_types(TRUE, count, mbb, s_file_spaces, s_mem_spaces, s_offsets, s_bufs,
+            if (H5FD__selection_build_types(true, count, mbb, s_file_spaces, s_mem_spaces, s_offsets, s_bufs,
                                             s_element_sizes, s_element_sizes, &final_ftype,
                                             &final_ftype_is_derived, &final_mtype,
                                             &final_mtype_is_derived) < 0)
@@ -3662,11 +3670,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     int    mpi_code; /* mpi return code */
     herr_t ret_value = SUCCEED;
@@ -3717,11 +3725,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
 #ifdef H5FDmpio_DEBUG
-    hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
+    bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
     herr_t ret_value = SUCCEED;
 
@@ -3939,7 +3947,7 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
         case H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE:
             assert(output);
             assert(*output);
-            **((hbool_t **)output) = file->mpi_file_sync_required;
+            **((bool **)output) = file->mpi_file_sync_required;
             break;
 
         default: /* unknown op code */

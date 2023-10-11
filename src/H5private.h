@@ -334,7 +334,7 @@
  * the entire library.
  */
 #define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
-    (skip ? FALSE : ((ptr) + (size)-1) > (buffer_end))
+    (skip ? false : ((ptr) + (size)-1) > (buffer_end))
 
 /*
  * HDF Boolean type.
@@ -454,13 +454,13 @@
  *       It's the developer's responsibility not to pass in the value 0, which
  *       may cause the equation to fail.
  */
-#define H5_FLT_ABS_EQUAL(X, Y)  (HDfabsf((X) - (Y)) < FLT_EPSILON)
-#define H5_DBL_ABS_EQUAL(X, Y)  (HDfabs((X) - (Y)) < DBL_EPSILON)
-#define H5_LDBL_ABS_EQUAL(X, Y) (HDfabsl((X) - (Y)) < LDBL_EPSILON)
+#define H5_FLT_ABS_EQUAL(X, Y)  (fabsf((X) - (Y)) < FLT_EPSILON)
+#define H5_DBL_ABS_EQUAL(X, Y)  (fabs((X) - (Y)) < DBL_EPSILON)
+#define H5_LDBL_ABS_EQUAL(X, Y) (fabsl((X) - (Y)) < LDBL_EPSILON)
 
-#define H5_FLT_REL_EQUAL(X, Y, M)  (HDfabsf(((Y) - (X)) / (X)) < (M))
-#define H5_DBL_REL_EQUAL(X, Y, M)  (HDfabs(((Y) - (X)) / (X)) < (M))
-#define H5_LDBL_REL_EQUAL(X, Y, M) (HDfabsl(((Y) - (X)) / (X)) < (M))
+#define H5_FLT_REL_EQUAL(X, Y, M)  (fabsf(((Y) - (X)) / (X)) < (M))
+#define H5_DBL_REL_EQUAL(X, Y, M)  (fabs(((Y) - (X)) / (X)) < (M))
+#define H5_LDBL_REL_EQUAL(X, Y, M) (fabsl(((Y) - (X)) / (X)) < (M))
 
 /* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
 #define H5_KB (1024.0F)
@@ -550,7 +550,7 @@ typedef struct {
     H5_timevals_t initial;        /* Current interval start time */
     H5_timevals_t final_interval; /* Last interval elapsed time */
     H5_timevals_t total;          /* Total elapsed time for all intervals */
-    hbool_t       is_running;     /* Whether timer is running */
+    bool          is_running;     /* Whether timer is running */
 } H5_timer_t;
 
 /* Returns library bandwidth as a pretty string */
@@ -617,9 +617,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
 #endif
-#ifndef HDceil
-#define HDceil(X) ceil(X)
-#endif
 #ifndef HDchdir
 #define HDchdir(S) chdir(S)
 #endif
@@ -641,23 +638,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
 #endif
-#ifndef HDfabs
-#define HDfabs(X) fabs(X)
-#endif
-#ifndef HDfabsf
-#define HDfabsf(X) fabsf(X)
-#endif
-#ifndef HDfabsl
-#define HDfabsl(X) fabsl(X)
-#endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
-#endif
-#ifndef HDfgetc
-#define HDfgetc(F) fgetc(F)
-#endif
-#ifndef HDfgets
-#define HDfgets(S, N, F) fgets(S, N, F)
 #endif
 #ifndef HDfileno
 #define HDfileno(F) fileno(F)
@@ -688,27 +670,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 
 #endif /* HDflock */
 
-#ifndef HDfloor
-#define HDfloor(X) floor(X)
-#endif
-#ifndef HDfputc
-#define HDfputc(C, F) fputc(C, F)
-#endif
-#ifndef HDfputs
-#define HDfputs(S, F) fputs(S, F)
-#endif
-#ifndef HDfrexp
-#define HDfrexp(X, N) frexp(X, N)
-#endif
-#ifndef HDfrexpf
-#define HDfrexpf(X, N) frexpf(X, N)
-#endif
-#ifndef HDfrexpl
-#define HDfrexpl(X, N) frexpl(X, N)
-#endif
-#ifndef HDfscanf
-#define HDfscanf fscanf
-#endif
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
@@ -720,9 +681,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
-#endif
-#ifndef HDgetc
-#define HDgetc(F) getc(F)
 #endif
 #ifndef HDgetcwd
 #define HDgetcwd(S, Z) getcwd(S, Z)
@@ -736,18 +694,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDgetdrive() 0
 #endif
 
-#ifndef HDgetenv
-#define HDgetenv(S) getenv(S)
-#endif
 #ifndef HDgetpid
 #define HDgetpid() getpid()
 #endif
-
-/* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
-#ifdef HDgets
-#undef HDgets
-#endif
-
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif
@@ -757,44 +706,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
 #endif
-#ifndef HDisnan
-#define HDisnan(X) isnan(X)
-#endif
-#ifndef HDlabs
-#define HDlabs(X) labs(X)
-#endif
-#ifndef HDldexp
-#define HDldexp(X, N) ldexp(X, N)
-#endif
-#ifndef HDllround
-#define HDllround(V) llround(V)
-#endif
-#ifndef HDllroundf
-#define HDllroundf(V) llroundf(V)
-#endif
-#ifndef HDllroundl
-#define HDllroundl(V) llroundl(V)
-#endif
 #ifndef HDlocaltime
 #define HDlocaltime(T) localtime(T)
-#endif
-#ifndef HDlog
-#define HDlog(X) log(X)
-#endif
-#ifndef HDlog2
-#define HDlog2(X) log2(X)
-#endif
-#ifndef HDlog10
-#define HDlog10(X) log10(X)
-#endif
-#ifndef HDlround
-#define HDlround(V) lround(V)
-#endif
-#ifndef HDlroundf
-#define HDlroundf(V) lroundf(V)
-#endif
-#ifndef HDlroundl
-#define HDlroundl(V) lroundl(V)
 #endif
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
@@ -817,26 +730,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDopendir
 #define HDopendir(S) opendir(S)
 #endif
-#ifndef HDperror
-#define HDperror(S) perror(S)
-#endif
-#ifndef HDpow
-#define HDpow(X, Y) pow(X, Y)
-#endif
-#ifndef HDpowf
-#define HDpowf(X, Y) powf(X, Y)
-#endif
 #ifndef HDpread
 #define HDpread(F, B, C, O) pread(F, B, C, O)
-#endif
-#ifndef HDputc
-#define HDputc(C, F) putc(C, F)
-#endif
-#ifndef HDputchar
-#define HDputchar(C) putchar(C)
-#endif
-#ifndef HDputs
-#define HDputs(S) puts(S)
 #endif
 #ifndef HDpwrite
 #define HDpwrite(F, B, C, O) pwrite(F, B, C, O)
@@ -899,20 +794,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDrewind
 #define HDrewind(F) rewind(F)
 #endif
-#ifndef HDround
-#define HDround(V) round(V)
-#endif
-#ifndef HDroundf
-#define HDroundf(V) roundf(V)
-#endif
-#ifndef HDroundl
-#define HDroundl(V) roundl(V)
-#endif
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
-#endif
-#ifndef HDscanf
-#define HDscanf scanf /*varargs*/
 #endif
 #ifndef HDsetbuf
 #define HDsetbuf(F, S) setbuf(F, S)
@@ -938,23 +821,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsleep
 #define HDsleep(N) sleep(N)
 #endif
-#ifndef HDsnprintf
-#define HDsnprintf snprintf /*varargs*/
-#endif
-#ifndef HDsprintf
-#define HDsprintf sprintf /*varargs*/
-#endif
-#ifndef HDsqrt
-#define HDsqrt(X) sqrt(X)
-#endif
-#ifndef HDsscanf
-#define HDsscanf sscanf /*varargs*/
-#endif
 #ifndef HDstat
 #define HDstat(S, B) stat(S, B)
-#endif
-#ifndef HDstrcat
-#define HDstrcat(X, Y) strcat(X, Y)
 #endif
 #ifndef HDstrcasestr
 #if defined(H5_HAVE_STRCASESTR)
@@ -963,56 +831,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
 #endif
 #endif
-#ifndef HDstrchr
-#define HDstrchr(S, C) strchr(S, C)
-#endif
-#ifndef HDstrcmp
-#define HDstrcmp(X, Y) strcmp(X, Y)
-#endif
 #ifndef HDstrcasecmp
 #define HDstrcasecmp(X, Y) strcasecmp(X, Y)
 #endif
-#ifndef HDstrcpy
-#define HDstrcpy(X, Y) strcpy(X, Y)
-#endif
-#ifndef HDstrcspn
-#define HDstrcspn(X, Y) strcspn(X, Y)
-#endif
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif
-#ifndef HDstrerror
-#define HDstrerror(N) strerror(N)
-#endif
-#ifndef HDstrftime
-#define HDstrftime(S, Z, F, T) strftime(S, Z, F, T)
-#endif
-#ifndef HDstrlen
-#define HDstrlen(S) strlen(S)
-#endif
-#ifndef HDstrnlen
-#define HDstrnlen(S, L) strnlen(S, L)
-#endif
-#ifndef HDstrncat
-#define HDstrncat(X, Y, Z) strncat(X, Y, Z)
-#endif
-#ifndef HDstrncmp
-#define HDstrncmp(X, Y, Z) strncmp(X, Y, Z)
-#endif
-#ifndef HDstrncpy
-#define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
-#endif
 #ifndef HDstrndup
 #define HDstrndup(S, N) strndup(S, N)
-#endif
-#ifndef HDstrrchr
-#define HDstrrchr(S, C) strrchr(S, C)
-#endif
-#ifndef HDstrstr
-#define HDstrstr(X, Y) strstr(X, Y)
-#endif
-#ifndef HDstrtok
-#define HDstrtok(X, Y) strtok(X, Y)
 #endif
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
@@ -1047,18 +870,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
-#ifndef HDvfprintf
-#define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
-#endif
-#ifndef HDvprintf
-#define HDvprintf(FMT, A) vprintf(FMT, A)
-#endif
-#ifndef HDvsprintf
-#define HDvsprintf(S, FMT, A) vsprintf(S, FMT, A)
-#endif
-#ifndef HDvsnprintf
-#define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif
@@ -1173,8 +984,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         char *slash, *backslash;                                                                             \
                                                                                                              \
-        slash     = HDstrrchr(NAME, H5_DIR_SLASH_SEPC);                                                      \
-        backslash = HDstrrchr(NAME, H5_DIR_SEPC);                                                            \
+        slash     = strrchr(NAME, H5_DIR_SLASH_SEPC);                                                        \
+        backslash = strrchr(NAME, H5_DIR_SEPC);                                                              \
         if (backslash > slash)                                                                               \
             (ptr = backslash);                                                                               \
         else                                                                                                 \
@@ -1189,7 +1000,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_CHECK_ABSOLUTE(NAME)          (H5_CHECK_DELIMITER(*NAME))
 #define H5_CHECK_ABS_DRIVE(NAME)         (0)
 #define H5_CHECK_ABS_PATH(NAME)          (0)
-#define H5_GET_LAST_DELIMITER(NAME, ptr) ptr = HDstrrchr(NAME, H5_DIR_SEPC);
+#define H5_GET_LAST_DELIMITER(NAME, ptr) ptr = strrchr(NAME, H5_DIR_SEPC);
 
 #endif /* H5_HAVE_WINDOW_PATH */
 
@@ -1235,9 +1046,9 @@ typedef struct H5_debug_open_stream_t {
 } H5_debug_open_stream_t;
 
 typedef struct H5_debug_t {
-    FILE   *trace;  /*API trace output stream  */
-    hbool_t ttop;   /*Show only top-level calls?    */
-    hbool_t ttimes; /*Show trace event times?       */
+    FILE *trace;  /*API trace output stream  */
+    bool  ttop;   /*Show only top-level calls?    */
+    bool  ttimes; /*Show trace event times?       */
     struct {
         const char *name;   /*package name      */
         FILE       *stream; /*output stream  or NULL    */
@@ -1255,7 +1066,7 @@ typedef struct H5_debug_t {
     ((MPI_VERSION > (mpi_version)) ||                                                                        \
      ((MPI_VERSION == (mpi_version)) && (MPI_SUBVERSION >= (mpi_subversion))))
 
-extern hbool_t H5_coll_api_sanity_check_g;
+extern bool H5_coll_api_sanity_check_g;
 #endif /* H5_HAVE_PARALLEL */
 
 extern H5_debug_t H5_debug_g;
@@ -1382,8 +1193,8 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *    profiling.
  *
  * Notes:  Every file must have a file-scope variable called
- *    `initialize_interface_g' of type hbool_t which is initialized
- *    to FALSE.
+ *    `initialize_interface_g' of type bool which is initialized
+ *    to false.
  *
  *    Don't use local variable initializers which contain
  *    calls to other library functions since the initializer
@@ -1444,8 +1255,8 @@ extern char H5_lib_vers_info_g[];
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
     H5TS_mutex_t init_lock;    /* API entrance mutex */
-    hbool_t      H5_libinit_g; /* Has the library been initialized? */
-    hbool_t      H5_libterm_g; /* Is the library being shutdown? */
+    bool         H5_libinit_g; /* Has the library been initialized? */
+    bool         H5_libterm_g; /* Is the library being shutdown? */
 } H5_api_t;
 
 /* Macros for accessing the global variables */
@@ -1484,8 +1295,8 @@ extern H5_api_t H5_g;
 #define H5_API_SET_CANCEL
 
 /* extern global variables */
-extern hbool_t H5_libinit_g; /* Has the library been initialized? */
-extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
+extern bool H5_libinit_g; /* Has the library been initialized? */
+extern bool H5_libterm_g; /* Is the library being shutdown? */
 
 /* Macros for accessing the global variables */
 #define H5_INIT_GLOBAL (H5_libinit_g)
@@ -1508,12 +1319,12 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
-H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
+H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
 
 #ifndef NDEBUG
 #define FUNC_ENTER_CHECK_NAME(asrt)                                                                          \
     {                                                                                                        \
-        static hbool_t func_check = FALSE;                                                                   \
+        static bool func_check = false;                                                                      \
                                                                                                              \
         if (!func_check) {                                                                                   \
             /* Check function naming status */                                                               \
@@ -1522,7 +1333,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                    "H5private.h (this is usually due to an incorrect number of underscores)");               \
                                                                                                              \
             /* Don't check again */                                                                          \
-            func_check = TRUE;                                                                               \
+            func_check = true;                                                                               \
         } /* end if */                                                                                       \
     }     /* end scope */
 #else     /* NDEBUG */
@@ -1530,7 +1341,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #endif /* NDEBUG */
 
 #define FUNC_ENTER_COMMON(asrt)                                                                              \
-    hbool_t err_occurred = FALSE;                                                                            \
+    bool err_occurred = false;                                                                               \
                                                                                                              \
     FUNC_ENTER_CHECK_NAME(asrt);
 
@@ -1568,13 +1379,13 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     if (H5CX_push() < 0)                                                                                     \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
-        api_ctx_pushed = TRUE;
+        api_ctx_pushed = true;
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err)                                                                                  \
     {                                                                                                        \
         {                                                                                                    \
-            hbool_t api_ctx_pushed = FALSE;                                                                  \
+            bool api_ctx_pushed = false;                                                                     \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
@@ -1590,7 +1401,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API_NOCLEAR(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
-            hbool_t api_ctx_pushed = FALSE;                                                                  \
+            bool api_ctx_pushed = false;                                                                     \
                                                                                                              \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
@@ -1824,12 +1635,12 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (api_ctx_pushed) {                                                                                    \
-        (void)H5CX_pop(TRUE);                                                                                \
-        api_ctx_pushed = FALSE;                                                                              \
+        (void)H5CX_pop(true);                                                                                \
+        api_ctx_pushed = false;                                                                              \
     }                                                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(TRUE);                                                                      \
+        (void)H5E_dump_api_stack(true);                                                                      \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1842,7 +1653,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(TRUE);                                                                      \
+        (void)H5E_dump_api_stack(true);                                                                      \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -1866,7 +1677,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     if (err_occurred)                                                                                        \
-        (void)H5E_dump_api_stack(TRUE);                                                                      \
+        (void)H5E_dump_api_stack(true);                                                                      \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
     }                                                                                                        \
@@ -2081,13 +1892,13 @@ H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_b
                                          MPI_Datatype *new_type);
 H5_DLL herr_t  H5_mpio_gatherv_alloc(void *send_buf, int send_count, MPI_Datatype send_type,
                                      const int recv_counts[], const int displacements[],
-                                     MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                     MPI_Datatype recv_type, bool allgather, int root, MPI_Comm comm,
                                      int mpi_rank, int mpi_size, void **out_buf, size_t *out_buf_num_entries);
 H5_DLL herr_t  H5_mpio_gatherv_alloc_simple(void *send_buf, int send_count, MPI_Datatype send_type,
-                                            MPI_Datatype recv_type, hbool_t allgather, int root, MPI_Comm comm,
+                                            MPI_Datatype recv_type, bool allgather, int root, MPI_Comm comm,
                                             int mpi_rank, int mpi_size, void **out_buf,
                                             size_t *out_buf_num_entries);
-H5_DLL herr_t  H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required);
+H5_DLL herr_t  H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_required);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Functions for debugging */

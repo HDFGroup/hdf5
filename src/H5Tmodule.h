@@ -763,7 +763,7 @@
  * #H5T_NATIVE_HBOOL
  *       </td>
  *       <td span='3'>
- * hbool_t
+ * bool
  *       </td>
  *     </tr>
  *     <tr>

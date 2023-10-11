@@ -448,8 +448,8 @@ test_misc2_write_attribute(void)
     hid_t        type;
     herr_t       ret;
     misc2_struct data, data_check;
-    char        *string_att1 = HDstrdup("string attribute in file one");
-    char        *string_att2 = HDstrdup("string attribute in file two");
+    char        *string_att1 = strdup("string attribute in file one");
+    char        *string_att2 = strdup("string attribute in file two");
 
     type = misc2_create_type();
 
@@ -1088,7 +1088,7 @@ test_misc6(void)
     /* Loop through adding attributes to each dataset */
     for (u = 0; u < MISC6_NUMATTR; u++) {
         /* Create name for attribute */
-        HDsnprintf(attr_name, sizeof(attr_name), "Attr#%u", u);
+        snprintf(attr_name, sizeof(attr_name), "Attr#%u", u);
 
         /* Open the file */
         loc_id = H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1800,7 +1800,7 @@ test_misc10(void)
     hid_t       dcpl;                                               /* Dataset creation property list */
     hid_t       space, type;                                        /* Old dataset's dataspace & datatype */
     const char *testfile = H5_get_srcdir_filename(MISC10_FILE_OLD); /* Corrected test file name */
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret;
 
     /* Output message about test being performed */
@@ -1883,7 +1883,7 @@ test_misc11(void)
     H5F_info2_t           finfo;     /* global information about file */
     H5F_fspace_strategy_t strategy;  /* File space strategy */
     hsize_t               threshold; /* Free-space section threshold */
-    hbool_t               persist;   /* To persist free-space or not */
+    bool                  persist;   /* To persist free-space or not */
     herr_t                ret;       /* Generic return value */
 
     /* Output message about test being performed */
@@ -1944,7 +1944,7 @@ test_misc11(void)
     ret = H5Pset_shared_mesg_nindexes(fcpl, MISC11_NINDEXES);
     CHECK(ret, FAIL, "H5Pset_shared_mesg");
 
-    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_NONE, FALSE, (hsize_t)1);
+    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_NONE, false, (hsize_t)1);
     CHECK(ret, FAIL, "H5Pset_file_space");
 
     /* Creating a file with the non-default file creation property list should
@@ -2011,7 +2011,7 @@ test_misc11(void)
     ret = H5Pget_file_space_strategy(fcpl, &strategy, &persist, &threshold);
     CHECK(ret, FAIL, "H5Pget_file_space_strategy");
     VERIFY(strategy, 3, "H5Pget_file_space_strategy");
-    VERIFY(persist, FALSE, "H5Pget_file_space_strategy");
+    VERIFY(persist, false, "H5Pget_file_space_strategy");
     VERIFY(threshold, 1, "H5Pget_file_space_strategy");
 
     /* Close file */
@@ -2115,11 +2115,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for (i = 0; i < MISC12_SPACE1_DIM1; i++)
-        if (HDstrcmp(wdata[i], rdata[i]) != 0)
+        if (strcmp(wdata[i], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n", __LINE__, i, wdata[i], i,
                           rdata[i]);
     for (; i < (MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE); i++)
-        if (HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
+        if (strcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]) != 0)
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n", __LINE__, i - MISC12_SPACE1_DIM1,
                           wdata1[i - MISC12_SPACE1_DIM1], i, rdata[i]);
 
@@ -2157,25 +2157,25 @@ misc13_init_data(unsigned *original_data)
         original_data[u] = u;
 }
 
-static hbool_t
+static bool
 misc13_verify_data_match(const unsigned *original_data, const unsigned *read_data)
 {
     unsigned u;
 
     for (u = 0; u < MISC13_DIM1; u++)
         if (original_data[u] != read_data[u])
-            return FALSE;
+            return false;
 
-    return TRUE;
+    return true;
 }
 
 static void
 misc13_create_dataset(hid_t loc_id, const char *name, hid_t dcpl, const unsigned *data)
 {
-    hid_t   dsid = -1;         /* Dataset ID */
-    hid_t   sid  = -1;         /* Dataspace ID */
-    hsize_t dims[MISC13_RANK]; /* Dataset dimensions */
-    herr_t  ret;               /* Generic return value */
+    hid_t   dsid = H5I_INVALID_HID; /* Dataset ID */
+    hid_t   sid  = H5I_INVALID_HID; /* Dataspace ID */
+    hsize_t dims[MISC13_RANK];      /* Dataset dimensions */
+    herr_t  ret;                    /* Generic return value */
 
     /* Create dataspace for use with dataset */
     dims[0] = MISC13_DIM1;
@@ -2203,9 +2203,9 @@ misc13_create_dataset(hid_t loc_id, const char *name, hid_t dcpl, const unsigned
 static void
 misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
 {
-    unsigned *read_data = NULL; /* Data to write to dataset */
-    hid_t     dsid      = -1;   /* Dataset ID */
-    herr_t    ret;              /* Generic return value */
+    unsigned *read_data = NULL;            /* Data to write to dataset */
+    hid_t     dsid      = H5I_INVALID_HID; /* Dataset ID */
+    herr_t    ret;                         /* Generic return value */
 
     /* Create a data buffer for the dataset read */
     read_data = (unsigned *)calloc(MISC13_DIM1, sizeof(unsigned));
@@ -2235,13 +2235,13 @@ misc13_verify_dataset(hid_t loc_id, const char *name, const unsigned *data)
 static void
 misc13_create_hdf_file(const char *name, const unsigned *data)
 {
-    hid_t   fid    = -1;             /* File ID */
-    hid_t   gid1   = -1;             /* Group ID (level 1) */
-    hid_t   gid2   = -1;             /* Group ID (level 2) */
-    hid_t   tid    = -1;             /* Datatype ID */
-    hid_t   dcplid = -1;             /* Dataset creation property list ID */
-    hsize_t chunk_dims[MISC13_RANK]; /* Chunk dimensions */
-    herr_t  ret;                     /* Generic return value */
+    hid_t   fid    = H5I_INVALID_HID; /* File ID */
+    hid_t   gid1   = H5I_INVALID_HID; /* Group ID (level 1) */
+    hid_t   gid2   = H5I_INVALID_HID; /* Group ID (level 2) */
+    hid_t   tid    = H5I_INVALID_HID; /* Datatype ID */
+    hid_t   dcplid = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hsize_t chunk_dims[MISC13_RANK];  /* Chunk dimensions */
+    herr_t  ret;                      /* Generic return value */
 
     /* Create file */
     fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2338,7 +2338,7 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(user_block, "calloc");
 
     /* Copy in the user block data */
-    memcpy(user_block, str, HDstrlen(str));
+    memcpy(user_block, str, strlen(str));
 
     /* Open the new file */
     new_fp = fopen(new_name, "wb");
@@ -2380,16 +2380,15 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
 } /* end misc13_insert_user_block() */
 
 static void
-misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_size,
-                   hbool_t check_for_new_dataset)
+misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_size, bool check_for_new_dataset)
 {
-    hid_t   fid    = -1; /* File ID */
-    hid_t   gid1   = -1; /* Group IDs */
-    hid_t   gid2   = -1; /* Group IDs */
-    hid_t   tid    = -1; /* Datatype ID */
-    hid_t   fcplid = -1; /* File creation property list ID */
-    hsize_t ub_size_out; /* Userblock size retrieved from FCPL */
-    herr_t  ret;         /* Generic return value */
+    hid_t   fid    = H5I_INVALID_HID; /* File ID */
+    hid_t   gid1   = H5I_INVALID_HID; /* Group IDs */
+    hid_t   gid2   = H5I_INVALID_HID; /* Group IDs */
+    hid_t   tid    = H5I_INVALID_HID; /* Datatype ID */
+    hid_t   fcplid = H5I_INVALID_HID; /* File creation property list ID */
+    hsize_t ub_size_out;              /* Userblock size retrieved from FCPL */
+    herr_t  ret;                      /* Generic return value */
 
     /* Open the file */
     fid = H5Fopen(name, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -2425,7 +2424,7 @@ misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_siz
     CHECK(tid, FAIL, "H5Topen2");
 
     /* Verify the type is correct */
-    VERIFY(H5Tequal(tid, H5T_NATIVE_INT), TRUE, "H5Tequal");
+    VERIFY(H5Tequal(tid, H5T_NATIVE_INT), true, "H5Tequal");
 
     /* Close named datatype */
     ret = H5Tclose(tid);
@@ -2446,7 +2445,7 @@ misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_siz
     CHECK(tid, FAIL, "H5Topen2");
 
     /* Verify the type is correct */
-    VERIFY(H5Tequal(tid, H5T_NATIVE_INT), TRUE, "H5Tequal");
+    VERIFY(H5Tequal(tid, H5T_NATIVE_INT), true, "H5Tequal");
 
     /* Close named datatype */
     ret = H5Tclose(tid);
@@ -2473,8 +2472,8 @@ misc13_verify_file(const char *name, const unsigned *data, hsize_t userblock_siz
 static void
 misc13_add_to_new_file(const char *name, const unsigned *data)
 {
-    hid_t  fid = -1; /* File ID */
-    herr_t ret;      /* Generic return value */
+    hid_t  fid = H5I_INVALID_HID; /* File ID */
+    herr_t ret;                   /* Generic return value */
 
     /* Open the file */
     fid = H5Fopen(name, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -2500,7 +2499,7 @@ test_misc13(void)
 {
     unsigned *data = NULL;           /* Data to write to dataset */
     hsize_t   userblock_size;        /* Correct size of userblock */
-    hbool_t   check_for_new_dataset; /* Whether to check for the post-userblock-creation dataset */
+    bool      check_for_new_dataset; /* Whether to check for the post-userblock-creation dataset */
 
     /* Create a data buffer for the datasets */
     data = (unsigned *)calloc(MISC13_DIM1, sizeof(unsigned));
@@ -2514,7 +2513,7 @@ test_misc13(void)
 
     /* Verify file contents are correct */
     userblock_size        = 0;
-    check_for_new_dataset = FALSE;
+    check_for_new_dataset = false;
     misc13_verify_file(MISC13_FILE_1, data, userblock_size, check_for_new_dataset);
 
     /* Create a new file by inserting a user block in front of the first file */
@@ -2522,7 +2521,7 @@ test_misc13(void)
 
     /* Verify file contents are still correct */
     userblock_size        = MISC13_USERBLOCK_SIZE;
-    check_for_new_dataset = FALSE;
+    check_for_new_dataset = false;
     misc13_verify_file(MISC13_FILE_2, data, userblock_size, check_for_new_dataset);
 
     /* Make certain we can modify the new file */
@@ -2530,7 +2529,7 @@ test_misc13(void)
 
     /* Verify file contents are still correct */
     userblock_size        = MISC13_USERBLOCK_SIZE;
-    check_for_new_dataset = TRUE;
+    check_for_new_dataset = true;
     misc13_verify_file(MISC13_FILE_2, data, userblock_size, check_for_new_dataset);
 
     /* Free the dataset buffer */
@@ -2870,13 +2869,13 @@ test_misc16(void)
 
     /* Compare data read in */
     for (i = 0; i < MISC16_SPACE_DIM; i++) {
-        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+        if (strlen(wdata[i]) != strlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+        if (strcmp(wdata[i], rdata[i]) != 0) {
             TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
                           (unsigned)__LINE__, (int)i, wdata[i], (int)i, rdata[i]);
             continue;
@@ -2955,13 +2954,13 @@ test_misc17(void)
 
     /* Compare data in the way of strings. */
     for (i = 0; i < MISC17_SPACE_DIM1; i++) {
-        if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
+        if (strlen(wdata[i]) != strlen(rdata[i])) {
             TestErrPrintf(
                 "Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                (unsigned)__LINE__, (int)i, (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                (unsigned)__LINE__, (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if (HDstrcmp(wdata[i], rdata[i]) != 0) {
+        if (strcmp(wdata[i], rdata[i]) != 0) {
             TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
                           (unsigned)__LINE__, (int)i, wdata[i], (int)i, rdata[i]);
             continue;
@@ -3067,7 +3066,7 @@ test_misc18(void)
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for (u = 0; u < 10; u++) {
         /* Set up attribute name */
-        HDsnprintf(attr_name, sizeof(attr_name), "Attr %u", u);
+        snprintf(attr_name, sizeof(attr_name), "Attr %u", u);
 
         /* Create & close attribute on first dataset */
         aid = H5Acreate2(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
@@ -3154,23 +3153,23 @@ test_misc18(void)
 static void
 test_misc19(void)
 {
-    hid_t         fid     = -1;   /* File ID                  */
-    hid_t         sid     = -1;   /* Dataspace ID             */
-    hid_t         did     = -1;   /* Dataset ID               */
-    hid_t         tid     = -1;   /* Datatype ID              */
-    hid_t         aid     = -1;   /* Attribute ID             */
-    hid_t         plid    = -1;   /* Property List ID         */
-    hid_t         pcid    = -1;   /* Property Class ID        */
-    hid_t         gid     = -1;   /* Group ID                 */
-    hid_t         ecid    = -1;   /* Error Class ID           */
-    hid_t         emid    = -1;   /* Error Message ID         */
-    hid_t         esid    = -1;   /* Error Stack ID           */
-    hid_t         vfdid   = -1;   /* Virtual File Driver ID   */
-    hid_t         volid   = -1;   /* Virtual Object Layer ID  */
-    H5FD_class_t *vfd_cls = NULL; /* VFD class                */
-    H5VL_class_t *vol_cls = NULL; /* VOL class                */
-    int           rc;             /* Reference count          */
-    herr_t        ret;            /* Generic return value     */
+    hid_t         fid     = H5I_INVALID_HID; /* File ID                  */
+    hid_t         sid     = H5I_INVALID_HID; /* Dataspace ID             */
+    hid_t         did     = H5I_INVALID_HID; /* Dataset ID               */
+    hid_t         tid     = H5I_INVALID_HID; /* Datatype ID              */
+    hid_t         aid     = H5I_INVALID_HID; /* Attribute ID             */
+    hid_t         plid    = H5I_INVALID_HID; /* Property List ID         */
+    hid_t         pcid    = H5I_INVALID_HID; /* Property Class ID        */
+    hid_t         gid     = H5I_INVALID_HID; /* Group ID                 */
+    hid_t         ecid    = H5I_INVALID_HID; /* Error Class ID           */
+    hid_t         emid    = H5I_INVALID_HID; /* Error Message ID         */
+    hid_t         esid    = H5I_INVALID_HID; /* Error Stack ID           */
+    hid_t         vfdid   = H5I_INVALID_HID; /* Virtual File Driver ID   */
+    hid_t         volid   = H5I_INVALID_HID; /* Virtual Object Layer ID  */
+    H5FD_class_t *vfd_cls = NULL;            /* VFD class                */
+    H5VL_class_t *vol_cls = NULL;            /* VOL class                */
+    int           rc;                        /* Reference count          */
+    herr_t        ret;                       /* Generic return value     */
 
     /* Check H5I operations on files */
 
@@ -3703,7 +3702,7 @@ test_misc20(void)
     unsigned version;     /* Version of storage layout info */
     hsize_t  contig_size; /* Size of contiguous storage size from layout into */
     const char *testfile = H5_get_srcdir_filename(MISC20_FILE_OLD); /* Corrected test file name */
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -4180,7 +4179,7 @@ test_misc23(void)
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
-    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    status = H5Pset_create_intermediate_group(create_id, true);
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
     tmp_id = H5Gcreate2(file_id, "/A/B01/grp", create_id, H5P_DEFAULT, access_id);
@@ -4241,7 +4240,7 @@ test_misc23(void)
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
-    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    status = H5Pset_create_intermediate_group(create_id, true);
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
     tmp_id = H5Dcreate2(file_id, "/A/B06/dset", type_id, space_id, create_id, H5P_DEFAULT, H5P_DEFAULT);
@@ -4292,7 +4291,7 @@ test_misc23(void)
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
-    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    status = H5Pset_create_intermediate_group(create_id, true);
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
     tmp_id = H5Tcopy(H5T_NATIVE_INT16);
@@ -4352,17 +4351,17 @@ test_misc23(void)
     CHECK(create_id, FAIL, "H5Pcreate");
 
     /* Set flag for intermediate group creation */
-    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    status = H5Pset_create_intermediate_group(create_id, true);
     CHECK(status, FAIL, "H5Pset_create_intermediate_group");
 
     status = H5Lcopy(file_id, "/A/B01/grp", file_id, "/A/B16/grp", create_id, access_id);
     CHECK(status, FAIL, "H5Lcopy");
 
     tri_status = H5Lexists(file_id, "/A/B16/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     tri_status = H5Lexists(file_id, "/A/B01/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     /**********************************************************************
      * test H5Lmove()
@@ -4372,10 +4371,10 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Lmove");
 
     tri_status = H5Lexists(file_id, "/A/B17/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     tri_status = H5Lexists(file_id, "/A/B16/grp", access_id);
-    VERIFY(tri_status, FALSE, "H5Lexists");
+    VERIFY(tri_status, false, "H5Lexists");
 
     /**********************************************************************
      * test H5Lcreate_hard()
@@ -4385,7 +4384,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Lcreate_hard");
 
     tri_status = H5Lexists(file_id, "/A/B18/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     /**********************************************************************
      * test H5Lcreate_soft()
@@ -4395,7 +4394,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Lcreate_soft");
 
     tri_status = H5Lexists(file_id, "/A/B19/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     /**********************************************************************
      * test H5Lcreate_external()
@@ -4405,7 +4404,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Lcreate_external");
 
     tri_status = H5Lexists(file_id, "/A/B20/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     /**********************************************************************
      * test H5Lcreate_ud()
@@ -4416,7 +4415,7 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Lcreate_ud");
 
     tri_status = H5Lexists(file_id, "/A/B21/grp", access_id);
-    VERIFY(tri_status, TRUE, "H5Lexists");
+    VERIFY(tri_status, true, "H5Lexists");
 
     /**********************************************************************
      * close
@@ -4999,7 +4998,7 @@ test_misc25b(void)
     hid_t       fid;                                             /* File ID */
     hid_t       gid;                                             /* Group ID */
     const char *testfile = H5_get_srcdir_filename(MISC25B_FILE); /* Corrected test file name */
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -5260,7 +5259,7 @@ test_misc27(void)
     hid_t       fid;                                            /* File ID */
     hid_t       gid;                                            /* Group ID */
     const char *testfile = H5_get_srcdir_filename(MISC27_FILE); /* Corrected test file name */
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -5483,9 +5482,9 @@ test_misc28(void)
 static void
 test_misc29(void)
 {
-    hbool_t driver_is_default_compatible;
-    hid_t   fid; /* File ID */
-    herr_t  ret; /* Generic return value */
+    bool   driver_is_default_compatible;
+    hid_t  fid; /* File ID */
+    herr_t ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Speculative metadata reads\n"));
@@ -5546,7 +5545,7 @@ test_misc30(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Local heap dropping free block info\n"));
 
-    for (get_info = FALSE; get_info <= TRUE; get_info++) {
+    for (get_info = false; get_info <= true; get_info++) {
         hid_t  fid; /* File ID */
         hid_t  gid; /* Group ID */
         int    i;   /* Local index counter */
@@ -5573,7 +5572,7 @@ test_misc30(void)
                 CHECK(ret, FAIL, "test_misc30_get_info");
             }
 
-            HDsnprintf(gname, sizeof(gname), "/g0/group%d", i);
+            snprintf(gname, sizeof(gname), "/g0/group%d", i);
             gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(gid, FAIL, "H5Gcreate2");
 
@@ -5726,15 +5725,15 @@ test_misc32(void)
 
     /* Size zero returns NULL.
      * Also checks that a size of zero and setting the buffer clear flag
-     * to TRUE can be used together.
+     * to true can be used together.
      *
      * Note that we have asserts in the code, so only check when NDEBUG
      * is defined.
      */
 #ifdef NDEBUG
-    buffer = H5allocate_memory(0, FALSE);
+    buffer = H5allocate_memory(0, false);
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
-    buffer = H5allocate_memory(0, TRUE);
+    buffer = H5allocate_memory(0, true);
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
 #endif                                           /* NDEBUG */
 
@@ -5742,7 +5741,7 @@ test_misc32(void)
 
     /* Size zero returns NULL. Valgrind will confirm buffer is freed. */
     size    = 1024;
-    buffer  = H5allocate_memory(size, TRUE);
+    buffer  = H5allocate_memory(size, true);
     resized = H5resize_memory(buffer, 0);
     CHECK_PTR_NULL(resized, "H5resize_memory");
 
@@ -5772,10 +5771,10 @@ test_misc32(void)
 static void
 test_misc33(void)
 {
-    hid_t       fid      = -1;                                  /* File ID */
+    hid_t       fid      = H5I_INVALID_HID;                     /* File ID */
     const char *testfile = H5_get_srcdir_filename(MISC33_FILE); /* Corrected test file name */
     H5O_info2_t oinfo; /* Structure for object metadata information */
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -5955,15 +5954,15 @@ static int test_misc36_context;
 static void
 test_misc36_cb1(void *_ctx)
 {
-    int    *ctx = (int *)_ctx; /* Set up context pointer */
-    hbool_t is_terminating;    /* Flag indicating the library is terminating */
-    herr_t  ret;               /* Return value */
+    int   *ctx = (int *)_ctx; /* Set up context pointer */
+    bool   is_terminating;    /* Flag indicating the library is terminating */
+    herr_t ret;               /* Return value */
 
     /* Check whether the library thinks it's terminating */
-    is_terminating = FALSE;
+    is_terminating = false;
     ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
-    VERIFY(is_terminating, TRUE, "H5is_library_terminating");
+    VERIFY(is_terminating, true, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
     if (0 != *ctx)
@@ -5976,15 +5975,15 @@ test_misc36_cb1(void *_ctx)
 static void
 test_misc36_cb2(void *_ctx)
 {
-    int    *ctx = (int *)_ctx; /* Set up context pointer */
-    hbool_t is_terminating;    /* Flag indicating the library is terminating */
-    herr_t  ret;               /* Return value */
+    int   *ctx = (int *)_ctx; /* Set up context pointer */
+    bool   is_terminating;    /* Flag indicating the library is terminating */
+    herr_t ret;               /* Return value */
 
     /* Check whether the library thinks it's terminating */
-    is_terminating = FALSE;
+    is_terminating = false;
     ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
-    VERIFY(is_terminating, TRUE, "H5is_library_terminating");
+    VERIFY(is_terminating, true, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
     if (1 != *ctx)
@@ -6002,27 +6001,27 @@ test_misc36_cb2(void *_ctx)
 static void
 test_misc36(void)
 {
-    hbool_t is_terminating; /* Flag indicating the library is terminating */
-    herr_t  ret;            /* Return value */
+    bool   is_terminating; /* Flag indicating the library is terminating */
+    herr_t ret;            /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("H5atclose and H5is_library_terminating API calls"));
 
     /* Check whether the library thinks it's terminating */
-    is_terminating = TRUE;
+    is_terminating = true;
     ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
-    VERIFY(is_terminating, FALSE, "H5is_library_terminating");
+    VERIFY(is_terminating, false, "H5is_library_terminating");
 
     /* Shut the library down */
     test_misc36_context = 0;
     H5close();
 
     /* Check whether the library thinks it's terminating */
-    is_terminating = TRUE;
+    is_terminating = true;
     ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
-    VERIFY(is_terminating, FALSE, "H5is_library_terminating");
+    VERIFY(is_terminating, false, "H5is_library_terminating");
 
     /* Check the close context was not changed */
     VERIFY(test_misc36_context, 0, "H5atclose");
@@ -6031,10 +6030,10 @@ test_misc36(void)
     H5open();
 
     /* Check whether the library thinks it's terminating */
-    is_terminating = TRUE;
+    is_terminating = true;
     ret            = H5is_library_terminating(&is_terminating);
     CHECK(ret, FAIL, "H5is_library_terminating");
-    VERIFY(is_terminating, FALSE, "H5is_library_terminating");
+    VERIFY(is_terminating, false, "H5is_library_terminating");
 
     /* Register the 'atclose' callbacks */
     /* (Note that these will be called in reverse order, which is checked) */
@@ -6073,7 +6072,7 @@ static void
 test_misc37(void)
 {
     const char *testfile = H5_get_srcdir_filename(CVE_2020_10812_FILENAME);
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     hid_t       fid;
     herr_t      ret;
 
@@ -6110,7 +6109,7 @@ test_misc37(void)
 void
 test_misc(void)
 {
-    hbool_t default_driver = h5_using_default_driver(NULL);
+    bool default_driver = h5_using_default_driver(NULL);
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Miscellaneous Routines\n"));

@@ -310,7 +310,7 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *
  * \details H5Eappend_stack() appends the messages from error stack
  *          \p src_stack_id to the error stack \p dst_stack_id.
- *          If \p close_source_stack is \c TRUE, the source error stack
+ *          If \p close_source_stack is \c true, the source error stack
  *          will be closed.
  *
  * \since 1.14.0

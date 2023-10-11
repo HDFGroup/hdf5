@@ -68,8 +68,8 @@ unsigned seed;
 int nerrors = 0;
 
 /* Whether these filters are available */
-htri_t deflate_avail    = FALSE;
-htri_t fletcher32_avail = FALSE;
+htri_t deflate_avail    = false;
+htri_t fletcher32_avail = false;
 
 /*-------------------------------------------------------------------------
  * Function:    test_pmdset
@@ -102,10 +102,10 @@ test_pmdset(size_t niter, unsigned flags)
     size_t         max_dsets;
     size_t         buf_size;
     size_t         ndsets;
-    hid_t          file_id = -1;
-    hid_t          fapl_id = -1;
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          fapl_id = H5I_INVALID_HID;
     hid_t          dcpl_id[MAX_DSETS];
-    hid_t          dxpl_id = -1;
+    hid_t          dxpl_id = H5I_INVALID_HID;
     hsize_t        dset_dims[MAX_DSETS][3];
     hsize_t        chunk_dims[2];
     hsize_t        max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
@@ -119,9 +119,9 @@ test_pmdset(size_t niter, unsigned flags)
     unsigned      *efbufi[MAX_DSETS][MAX_DSET_X];
     unsigned char *dset_usage;
     unsigned char *dset_usagei[MAX_DSETS][MAX_DSET_X];
-    hbool_t        do_read;
-    hbool_t        last_read;
-    hbool_t        overlap;
+    bool           do_read;
+    bool           last_read;
+    bool           overlap;
     hsize_t        start[MAX_HS][3];
     hsize_t        count[MAX_HS][3];
     hsize_t        points[3 * MAX_POINTS];
@@ -276,7 +276,7 @@ test_pmdset(size_t niter, unsigned flags)
 
         /* Create datasets */
         for (j = 0; j < ndsets; j++) {
-            hbool_t use_chunk =
+            bool use_chunk =
                 (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
@@ -318,14 +318,14 @@ test_pmdset(size_t niter, unsigned flags)
         /* Initialize expected file buffer */
         (void)memset(efbuf, 0, buf_size);
 
-        /* Set last_read to TRUE so we don't reopen the file on the first
+        /* Set last_read to true so we don't reopen the file on the first
          * iteration */
-        last_read = TRUE;
+        last_read = true;
 
         /* Perform read/write operations */
         for (j = 0; j < OPS_PER_FILE; j++) {
             /* Decide whether to read or write */
-            do_read = (hbool_t)(HDrandom() % 2);
+            do_read = (bool)(HDrandom() % 2);
 
             /* Barrier to ensure processes have finished the previous operation
              */
@@ -398,7 +398,7 @@ test_pmdset(size_t niter, unsigned flags)
                                               : dset_dims[k][1]; /* Determine maximum hyperslab size in Y */
 
                         for (m = 0; m < nhs; m++) {
-                            overlap = TRUE;
+                            overlap = true;
                             for (n = 0; overlap && (n < MAX_SEL_RETRIES); n++) {
                                 /* Generate hyperslab */
                                 count[m][0] = (hsize_t)(((hsize_t)HDrandom() % max_hs_x) + 1);
@@ -411,13 +411,13 @@ test_pmdset(size_t niter, unsigned flags)
                                                   : (hsize_t)HDrandom() % (dset_dims[k][1] - count[m][1] + 1);
 
                                 /* If writing, check for overlap with other processes */
-                                overlap = FALSE;
+                                overlap = false;
                                 if (!do_read)
                                     for (o = start[m][0]; (o < (start[m][0] + count[m][0])) && !overlap; o++)
                                         for (p = start[m][1]; (p < (start[m][1] + count[m][1])) && !overlap;
                                              p++)
                                             if (dset_usagei[k][o][p])
-                                                overlap = TRUE;
+                                                overlap = true;
                             } /* end for */
 
                             /* If we did not find a non-overlapping hyperslab
@@ -470,7 +470,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                         /* Generate points */
                         for (m = 0; m < npoints; m++) {
-                            overlap = TRUE;
+                            overlap = true;
                             for (n = 0; overlap && (n < MAX_SEL_RETRIES); n++) {
                                 /* Generate point */
                                 points[2 * m]       = (unsigned)((hsize_t)HDrandom() % dset_dims[k][0]);
@@ -478,9 +478,9 @@ test_pmdset(size_t niter, unsigned flags)
 
                                 /* Check for overlap with other processes (write) or this process
                                  * (always) */
-                                overlap = FALSE;
+                                overlap = false;
                                 if (dset_usagei[k][points[2 * m]][points[(2 * m) + 1]])
-                                    overlap = TRUE;
+                                    overlap = true;
                             } /* end for */
 
                             /* If we did not find a non-overlapping point quit

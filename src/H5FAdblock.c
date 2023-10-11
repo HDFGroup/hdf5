@@ -167,11 +167,11 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
+H5FA__dblock_create(H5FA_hdr_t *hdr, bool *hdr_dirty)
 {
     H5FA_dblock_t *dblock = NULL;     /* Fixed array data block */
     haddr_t        dblock_addr;       /* Fixed array data block address */
-    hbool_t        inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool           inserted  = false; /* Whether the header was inserted into cache */
     haddr_t        ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
@@ -204,7 +204,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
     /* Cache the new fixed array data block */
     if (H5AC_insert_entry(hdr->f, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add fixed array data block to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add data block as child of 'top' proxy */
     if (hdr->top_proxy) {
@@ -215,7 +215,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
     } /* end if */
 
     /* Mark the header dirty (for updating statistics) */
-    *hdr_dirty = TRUE;
+    *hdr_dirty = true;
 
     /* Set address of data block to return */
     ret_value = dblock_addr;

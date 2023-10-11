@@ -58,6 +58,40 @@ MODULE H5F
   END INTERFACE
 #endif
 
+!> @brief H5F_info_t_super derived type.
+  TYPE, BIND(C) :: H5F_info_super_t
+     INTEGER(C_INT)   :: version        !< Superblock version number
+     INTEGER(HSIZE_T) :: super_size     !< Superblock size
+     INTEGER(HSIZE_T) :: super_ext_size !< Superblock extension size
+  END TYPE  H5F_info_super_t
+
+!> @brief H5F_info_t_free derived type.
+  TYPE, BIND(C) :: H5F_info_free_t
+     INTEGER(C_INT)   :: version   !< Version # of file free space management
+     INTEGER(HSIZE_T) :: meta_size !< Free space manager metadata size
+     INTEGER(HSIZE_T) :: tot_space !< Amount of free space in the file
+  END TYPE H5F_info_free_t
+
+!> @brief H5_ih_info_t derived type.
+  TYPE, BIND(C) :: H5_ih_info_t
+     INTEGER(HSIZE_T) :: index_size !< btree and/or list
+     INTEGER(HSIZE_T) :: heap_size  !< Heap size
+  END TYPE H5_ih_info_t
+
+!> @brief H5F_info_t_sohm derived type.
+  TYPE, BIND(C) :: H5F_info_sohm_t
+        INTEGER(C_INT)     :: version  !< Version # of shared object header info
+        INTEGER(HSIZE_T)   :: hdr_size  !< Shared object header message header size
+        TYPE(H5_ih_info_t) :: msgs_info !< Shared object header message index & heap size
+  END TYPE H5F_info_sohm_t
+
+!> @brief h5f_info_t derived type.
+  TYPE, BIND(C) :: h5f_info_t
+     TYPE(H5F_info_super_t) :: super
+     TYPE(H5F_info_free_t)  :: free
+     TYPE(H5F_info_sohm_t)  :: sohm
+  END TYPE h5f_info_t
+
 CONTAINS
 !>
 !! \ingroup FH5F
@@ -1092,6 +1126,40 @@ CONTAINS
     hdferr = INT(h5fset_dset_no_attrs_hint_c(file_id, c_minimize))
 
   END SUBROUTINE h5fset_dset_no_attrs_hint_f
+
+!>
+!! \ingroup FH5F
+!!
+!! \brief Retrieves global file information
+!!
+!! \param obj_id    Object identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
+!! \param file_info Buffer for global file information
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Fget_info2()
+!!
+  SUBROUTINE H5Fget_info_f(obj_id, file_info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)          :: obj_id
+    TYPE(H5F_INFO_T), INTENT(OUT), TARGET :: file_info
+    INTEGER         , INTENT(OUT)         :: hdferr
+
+    TYPE(C_PTR) :: f_ptr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION  H5Fget_info(obj_id, file_info) BIND(C, NAME='H5Fget_info2')
+         IMPORT :: HID_T, C_PTR, C_INT, H5F_INFO_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: obj_id
+         TYPE(C_PTR),   VALUE  :: file_info
+       END FUNCTION H5Fget_info
+    END INTERFACE
+
+    f_ptr = C_LOC(file_info)
+
+    hdferr = INT(H5Fget_info(obj_id, f_ptr))
+
+  END SUBROUTINE H5Fget_info_f
 
 END MODULE H5F
 

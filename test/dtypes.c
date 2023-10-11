@@ -309,7 +309,7 @@ test_copy(void)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Should not be able to close a predefined type!");
+        puts("    Should not be able to close a predefined type!");
         goto error;
     }
 
@@ -364,15 +364,15 @@ test_detect(void)
      *  Test class of some atomic types.
      *------------------------------------------------------------------------------*/
     /* Native integers should be in the integer class */
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_INTEGER) != true)
         TEST_ERROR;
 
     /* Native integers should _not_ be in other classes */
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_FLOAT) != FALSE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_FLOAT) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ARRAY) != FALSE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ARRAY) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ENUM) != FALSE)
+    if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ENUM) != false)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -393,15 +393,15 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_cmpd_id, H5T_COMPOUND) != TRUE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_COMPOUND) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_cmpd_id, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_INTEGER) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_cmpd_id, H5T_FLOAT) != TRUE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_FLOAT) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_cmpd_id, H5T_VLEN) != FALSE)
+    if (H5Tdetect_class(atom_cmpd_id, H5T_VLEN) != false)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -412,17 +412,17 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_arr_id, H5T_ARRAY) != TRUE)
+    if (H5Tdetect_class(atom_arr_id, H5T_ARRAY) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_arr_id, H5T_REFERENCE) != TRUE)
+    if (H5Tdetect_class(atom_arr_id, H5T_REFERENCE) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_arr_id, H5T_VLEN) != FALSE)
+    if (H5Tdetect_class(atom_arr_id, H5T_VLEN) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_arr_id, H5T_FLOAT) != FALSE)
+    if (H5Tdetect_class(atom_arr_id, H5T_FLOAT) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_arr_id, H5T_INTEGER) != FALSE)
+    if (H5Tdetect_class(atom_arr_id, H5T_INTEGER) != false)
         TEST_ERROR;
 
     /* Create a VL datatype with an atomic base type of float*/
@@ -430,15 +430,15 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_vlf_id, H5T_VLEN) != TRUE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_VLEN) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_vlf_id, H5T_FLOAT) != TRUE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_FLOAT) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_vlf_id, H5T_COMPOUND) != FALSE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_COMPOUND) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_vlf_id, H5T_INTEGER) != FALSE)
+    if (H5Tdetect_class(atom_vlf_id, H5T_INTEGER) != false)
         TEST_ERROR;
 
     /* Create a VL datatype with an atomic base type of char.  It should be a VL
@@ -447,13 +447,13 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_vlc_id, H5T_VLEN) != TRUE)
+    if (H5Tdetect_class(atom_vlc_id, H5T_VLEN) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(atom_vlc_id, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(atom_vlc_id, H5T_INTEGER) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_vlc_id, H5T_STRING) != FALSE)
+    if (H5Tdetect_class(atom_vlc_id, H5T_STRING) != false)
         TEST_ERROR;
 
     /* Create a VL string.  It should be a string, not a VL class. */
@@ -463,11 +463,11 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(atom_vls_id, H5T_STRING) != TRUE)
+    if (H5Tdetect_class(atom_vls_id, H5T_STRING) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(atom_vls_id, H5T_VLEN) != FALSE)
+    if (H5Tdetect_class(atom_vls_id, H5T_VLEN) != false)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -490,25 +490,25 @@ test_detect(void)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_COMPOUND) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_COMPOUND) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_ARRAY) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_ARRAY) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_REFERENCE) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_REFERENCE) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_INTEGER) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_FLOAT) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_FLOAT) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_STRING) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_STRING) != true)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_VLEN) != TRUE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_VLEN) != true)
         TEST_ERROR;
 
     /* Make certain that an incorrect class is not detected */
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_TIME) != FALSE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_TIME) != false)
         TEST_ERROR;
-    if (H5Tdetect_class(cplx_cmpd_id, H5T_ENUM) != FALSE)
+    if (H5Tdetect_class(cplx_cmpd_id, H5T_ENUM) != false)
         TEST_ERROR;
 
     /* Close complex compound datatype */
@@ -750,7 +750,7 @@ test_compound_2(void)
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t          array_dt;
     int64_t        nmembs;
     int            i;
@@ -875,7 +875,7 @@ test_compound_3(void)
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t          array_dt;
     int64_t        nmembs;
     int            i;
@@ -1000,7 +1000,7 @@ test_compound_4(void)
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t          array_dt;
     int64_t        nmembs;
     int            i;
@@ -1225,7 +1225,7 @@ test_compound_6(void)
 
     const size_t   nelmts = NTESTELEM;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
-    hid_t          st = -1, dt = -1;
+    hid_t          st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     int64_t        nmembs;
     int            i;
 
@@ -1850,7 +1850,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str) != 0) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || strcmp(rdata.str, wdata.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
@@ -1924,7 +1924,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str) != 0) {
+    if (rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || strcmp(rdata.str, wdata.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
@@ -1998,12 +1998,12 @@ test_compound_10(void)
 
     for (i = 0; i < ARRAY_DIM; i++) {
         wdata[i].i1     = i * 10 + i;
-        wdata[i].str    = HDstrdup("C string A");
+        wdata[i].str    = strdup("C string A");
         wdata[i].str[9] = (char)(wdata[i].str[9] + i);
         wdata[i].i2     = i * 1000 + i * 10;
 
-        wdata[i].text.p = (void *)HDstrdup("variable-length text A\0");
-        len = wdata[i].text.len              = HDstrlen((char *)wdata[i].text.p) + 1;
+        wdata[i].text.p = (void *)strdup("variable-length text A\0");
+        len = wdata[i].text.len              = strlen((char *)wdata[i].text.p) + 1;
         ((char *)(wdata[i].text.p))[len - 2] = (char)(((char *)(wdata[i].text.p))[len - 2] + i);
         ((char *)(wdata[i].text.p))[len - 1] = '\0';
     }
@@ -2109,7 +2109,7 @@ test_compound_10(void)
 
     for (i = 0; i < ARRAY_DIM; i++) {
         if (rdata[i].i1 != wdata[i].i1 || rdata[i].i2 != wdata[i].i2 ||
-            HDstrcmp(rdata[i].str, wdata[i].str) != 0) {
+            strcmp(rdata[i].str, wdata[i].str) != 0) {
             H5_FAILED();
             AT();
             printf("incorrect read data\n");
@@ -2125,7 +2125,7 @@ test_compound_10(void)
 
         t1 = rdata[i].text.p;
         t2 = wdata[i].text.p;
-        if (HDstrcmp((char *)t1, (char *)t2) != 0) {
+        if (strcmp((char *)t1, (char *)t2) != 0) {
             H5_FAILED();
             AT();
             printf("incorrect VL read data\n");
@@ -2264,7 +2264,7 @@ test_compound_11(void)
         ((big_t *)buf)[u].s1 = (char *)malloc((size_t)32);
         if (!((big_t *)buf)[u].s1)
             TEST_ERROR;
-        HDsnprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
+        snprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
     } /* end for */
 
     /* Make copy of buffer before conversion */
@@ -2307,7 +2307,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
+        else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
@@ -2358,7 +2358,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
+        else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
@@ -2399,7 +2399,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-        else if (HDstrcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
+        else if (strcmp(((big_t *)buf_orig)[u].s1, ((little_t *)buf)[u].s1) != 0) {
             printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
@@ -2525,7 +2525,7 @@ test_compound_12(void)
     H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
-        HDputs("  Tries to cut off the last member. Should have failed.");
+        puts("  Tries to cut off the last member. Should have failed.");
         goto error;
     }
 
@@ -2971,14 +2971,14 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str) != 0) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || strcmp(rdata1.str, wdata1.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
         goto error;
     } /* end if */
 
-    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) != 0 ||
+    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || strcmp(rdata2.str, wdata2.str) != 0 ||
         rdata2.l1 != wdata2.l1 || rdata2.l2 != wdata2.l2 || rdata2.l3 != wdata2.l3 ||
         rdata2.l4 != wdata2.l4) {
         H5_FAILED();
@@ -3069,14 +3069,14 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || HDstrcmp(rdata1.str, wdata1.str) != 0) {
+    if (rdata1.c1 != wdata1.c1 || rdata1.c2 != wdata1.c2 || strcmp(rdata1.str, wdata1.str) != 0) {
         H5_FAILED();
         AT();
         printf("incorrect read data\n");
         goto error;
     } /* end if */
 
-    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || HDstrcmp(rdata2.str, wdata2.str) != 0 ||
+    if (rdata2.c1 != wdata2.c1 || rdata2.c2 != wdata2.c2 || strcmp(rdata2.str, wdata2.str) != 0 ||
         rdata2.l1 != wdata2.l1 || rdata2.l2 != wdata2.l2 || rdata2.l3 != wdata2.l3 ||
         rdata2.l4 != wdata2.l4) {
         H5_FAILED();
@@ -3688,16 +3688,16 @@ error:
 static int
 test_compound_18(void)
 {
-    hid_t       file     = -1;
-    hid_t       gid      = -1;
-    hid_t       did      = -1;
-    hid_t       aid      = -1;
-    hid_t       tid      = -1;
-    hid_t       sid      = -1;
+    hid_t       file     = H5I_INVALID_HID;
+    hid_t       gid      = H5I_INVALID_HID;
+    hid_t       did      = H5I_INVALID_HID;
+    hid_t       aid      = H5I_INVALID_HID;
+    hid_t       tid      = H5I_INVALID_HID;
+    hid_t       sid      = H5I_INVALID_HID;
     hsize_t     dim      = 1;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     char        filename[1024];
-    hbool_t     driver_is_default_compatible;
+    bool        driver_is_default_compatible;
     herr_t      ret;
 
     TESTING("accessing objects with compound datatypes that have no fields");
@@ -3842,7 +3842,7 @@ test_query(void)
         long   c;
         double d;
     };
-    hid_t file = -1, tid1 = -1, tid2 = -1;
+    hid_t file = H5I_INVALID_HID, tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;
     char  filename[1024];
     char  compnd_type[] = "Compound_type", enum_type[] = "Enum_type";
     short enum_val;
@@ -4028,7 +4028,7 @@ test_query(void)
         printf("Can't get name for enum member\n");
         goto error;
     } /* end if */
-    if (HDstrcmp("YELLOW", enum_name) != 0) {
+    if (strcmp("YELLOW", enum_name) != 0) {
         H5_FAILED();
         printf("Incorrect name for enum member\n");
         goto error;
@@ -4081,10 +4081,11 @@ static int
 test_transient(hid_t fapl)
 {
     static hsize_t ds_size[2] = {10, 20};
-    hid_t          file = -1, type = -1, space = -1, dset = -1, t2 = -1;
-    char           filename[1024];
-    hid_t          ret_id; /* Generic hid_t return value    */
-    herr_t         status;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID,
+          t2 = H5I_INVALID_HID;
+    char   filename[1024];
+    hid_t  ret_id; /* Generic hid_t return value    */
+    herr_t status;
 
     TESTING("transient datatypes");
 
@@ -4103,7 +4104,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Predefined types should not be modifiable!");
+        puts("    Predefined types should not be modifiable!");
         goto error;
     }
     H5E_BEGIN_TRY
@@ -4113,7 +4114,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Predefined types should not be closable!");
+        puts("    Predefined types should not be closable!");
         goto error;
     }
 
@@ -4131,7 +4132,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (ret_id >= 0) {
         H5_FAILED();
-        HDputs("    Attributes should not be allowed for transient types!");
+        puts("    Attributes should not be allowed for transient types!");
         goto error;
     }
 
@@ -4153,7 +4154,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Dataset datatypes should not be modifiable!");
+        puts("    Dataset datatypes should not be modifiable!");
         goto error;
     }
     if (H5Tclose(t2) < 0)
@@ -4176,7 +4177,7 @@ test_transient(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Dataset datatypes should not be modifiable!");
+        puts("    Dataset datatypes should not be modifiable!");
         goto error;
     }
     if (H5Tclose(t2) < 0)
@@ -4232,7 +4233,8 @@ error:
 static int
 test_named(hid_t fapl)
 {
-    hid_t          file = -1, type = -1, space = -1, dset = -1, t2 = -1, t3 = -1, attr1 = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID, dset = H5I_INVALID_HID,
+          t2 = H5I_INVALID_HID, t3 = H5I_INVALID_HID, attr1 = H5I_INVALID_HID;
     herr_t         status;
     static hsize_t ds_size[2] = {10, 20};
     size_t         i, j;
@@ -4257,7 +4259,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Predefined types should not be committable!");
+        puts("    Predefined types should not be committable!");
         goto error;
     }
 
@@ -4270,7 +4272,7 @@ test_named(hid_t fapl)
         goto error;
     if (0 == status) {
         H5_FAILED();
-        HDputs("    H5Tcommitted() returned false!");
+        puts("    H5Tcommitted() returned false!");
         goto error;
     }
 
@@ -4282,7 +4284,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Committed type is not constant!");
+        puts("    Committed type is not constant!");
         goto error;
     }
 
@@ -4295,7 +4297,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Committed types should not be recommitted!");
+        puts("    Committed types should not be recommitted!");
         goto error;
     }
 
@@ -4320,7 +4322,7 @@ test_named(hid_t fapl)
         goto error;
     if (status) {
         H5_FAILED();
-        HDputs("    Copying a named type should result in a transient type!");
+        puts("    Copying a named type should result in a transient type!");
         goto error;
     }
     if (H5Tset_precision(t2, (size_t)256) < 0)
@@ -4339,7 +4341,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Opened named types should be named types!");
+        puts("    Opened named types should be named types!");
         goto error;
     }
 
@@ -4354,7 +4356,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Dataset type should be a named type!");
+        puts("    Dataset type should be a named type!");
         goto error;
     }
 
@@ -4373,7 +4375,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Dataset type should be a named type!");
+        puts("    Dataset type should be a named type!");
         goto error;
     }
 
@@ -4399,7 +4401,7 @@ test_named(hid_t fapl)
         goto error;
     if (!status) {
         H5_FAILED();
-        HDputs("    Dataset type should be a named type!");
+        puts("    Dataset type should be a named type!");
         goto error;
     }
     if (H5Tclose(t2) < 0)
@@ -4427,7 +4429,7 @@ test_named(hid_t fapl)
         goto error;
     if (status) {
         H5_FAILED();
-        HDputs("    Copied type should not be a named type!");
+        puts("    Copied type should not be a named type!");
         goto error;
     }
     if ((dset = H5Dcreate2(file, "dset3", t2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -4438,7 +4440,7 @@ test_named(hid_t fapl)
         goto error;
     if (status) {
         H5_FAILED();
-        HDputs("    Datatype from dataset using copied type should not be a named type!");
+        puts("    Datatype from dataset using copied type should not be a named type!");
         goto error;
     }
     if (H5Tclose(t3) < 0)
@@ -4469,7 +4471,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Types should not be committable to a read-only file!");
+        puts("    Types should not be committable to a read-only file!");
         goto error;
     }
 
@@ -4483,7 +4485,7 @@ test_named(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Types should not be committable to a read-only file!");
+        puts("    Types should not be committable to a read-only file!");
         goto error;
     }
 
@@ -4550,7 +4552,7 @@ test_str_create(void)
 {
     hid_t  fixed_str1, fixed_str2;
     hid_t  vlen_str1, vlen_str2;
-    htri_t is_vl_str = FALSE;
+    htri_t is_vl_str = false;
     size_t query_size, str_size = 10;
 
     TESTING("string type creation using H5Tcreate");
@@ -4631,8 +4633,8 @@ static int
 test_conv_str_1(void)
 {
     char *buf      = NULL;
-    hid_t src_type = -1;
-    hid_t dst_type = -1;
+    hid_t src_type = H5I_INVALID_HID;
+    hid_t dst_type = H5I_INVALID_HID;
 
     TESTING("string conversions");
 
@@ -4651,14 +4653,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Truncated C-string test failed");
+        puts("    Truncated C-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Extended C-string test failed");
+        puts("    Extended C-string test failed");
         goto error;
     }
     free(buf);
@@ -4682,14 +4684,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Truncated C buffer test failed");
+        puts("    Truncated C buffer test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Extended C buffer test failed");
+        puts("    Extended C buffer test failed");
         goto error;
     }
     free(buf);
@@ -4713,14 +4715,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Truncated Fortran-string test failed");
+        puts("    Truncated Fortran-string test failed");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde     abcde     ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Extended Fortran-string test failed");
+        puts("    Extended Fortran-string test failed");
         goto error;
     }
     free(buf);
@@ -4747,7 +4749,7 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Non-terminated string test 1");
+        puts("    Non-terminated string test 1");
         goto error;
     }
     H5Tclose(dst_type);
@@ -4758,7 +4760,7 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Non-terminated string test 2");
+        puts("    Non-terminated string test 2");
         goto error;
     }
     memcpy(buf, "abcdeabcdexxxxxxxxxx", (size_t)20);
@@ -4766,7 +4768,7 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Non-terminated string test 2");
+        puts("    Non-terminated string test 2");
         goto error;
     }
     free(buf);
@@ -4790,14 +4792,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdefghi abcdefghi ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C string to Fortran test 1");
+        puts("    C string to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcdefghi\0abcdefghi\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C string test 1");
+        puts("    Fortran to C string test 1");
         goto error;
     }
     if (H5Tclose(dst_type) < 0)
@@ -4809,14 +4811,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C string to Fortran test 2");
+        puts("    C string to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C string test 2");
+        puts("    Fortran to C string test 2");
         goto error;
     }
     if (H5Tclose(src_type) < 0)
@@ -4832,14 +4834,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C string to Fortran test 3");
+        puts("    C string to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C string test 3");
+        puts("    Fortran to C string test 3");
         goto error;
     }
     free(buf);
@@ -4863,14 +4865,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C buffer to Fortran test 1");
+        puts("    C buffer to Fortran test 1");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C buffer test 1");
+        puts("    Fortran to C buffer test 1");
         goto error;
     }
     if (H5Tclose(dst_type) < 0)
@@ -4882,14 +4884,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C buffer to Fortran test 2");
+        puts("    C buffer to Fortran test 2");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C buffer test 2");
+        puts("    Fortran to C buffer test 2");
         goto error;
     }
     if (H5Tclose(src_type) < 0)
@@ -4905,14 +4907,14 @@ test_conv_str_1(void)
         goto error;
     if (memcmp(buf, "abcd      abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    C buffer to Fortran test 3");
+        puts("    C buffer to Fortran test 3");
         goto error;
     }
     if (H5Tconvert(dst_type, src_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", (size_t)20) != 0) {
         H5_FAILED();
-        HDputs("    Fortran to C buffer test 3");
+        puts("    Fortran to C buffer test 3");
         goto error;
     }
     if (H5Tclose(src_type) < 0)
@@ -4962,8 +4964,8 @@ static int
 test_conv_str_2(void)
 {
     char        *buf    = NULL, s[80];
-    hid_t        c_type = -1;
-    hid_t        f_type = -1;
+    hid_t        c_type = H5I_INVALID_HID;
+    hid_t        f_type = H5I_INVALID_HID;
     const size_t nelmts = NTESTELEM;
     size_t       i, j, nchars;
     int          ret_value = 1;
@@ -4986,7 +4988,7 @@ test_conv_str_2(void)
     } /* end for */
 
     /* Do the conversions */
-    HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
+    snprintf(s, sizeof(s), "Testing random string conversion speed");
     printf("%-70s", s);
     fflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5031,8 +5033,8 @@ static int
 test_conv_str_3(void)
 {
     char        *buf    = NULL;
-    hid_t        type   = -1;
-    hid_t        super  = -1;
+    hid_t        type   = H5I_INVALID_HID;
+    hid_t        super  = H5I_INVALID_HID;
     const size_t nelmts = NTESTELEM;
     size_t       i, j, nchars;
     int          ret_value = 1;
@@ -5168,8 +5170,8 @@ test_conv_enum_1(void)
 {
     const size_t nelmts = NTESTELEM;
     int          i, val, *buf = NULL;
-    hid_t        t1 = -1;
-    hid_t        t2 = -1;
+    hid_t        t1 = H5I_INVALID_HID;
+    hid_t        t2 = H5I_INVALID_HID;
     char         s[80];
     int          ret_value = 1;
     size_t       u;
@@ -5194,14 +5196,14 @@ test_conv_enum_1(void)
         buf[u] = HDrand() % 26;
 
     /* Conversions */
-    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
+    snprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     printf("%-70s", s);
     fflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
-    HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
+    snprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     printf("%-70s", s);
     fflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5243,7 +5245,7 @@ error:
 static int
 test_conv_enum_2(void)
 {
-    hid_t       srctype = -1, dsttype = -1, oddsize = -1;
+    hid_t       srctype = H5I_INVALID_HID, dsttype = H5I_INVALID_HID, oddsize = H5I_INVALID_HID;
     int        *data = NULL, i, nerrors = 0;
     const char *mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
 
@@ -5317,7 +5319,7 @@ static int
 test_conv_bitfield(void)
 {
     unsigned char buf[4];
-    hid_t         st = -1, dt = -1;
+    hid_t         st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
 
     TESTING("bitfield conversions");
 
@@ -5411,7 +5413,7 @@ error:
 static int
 test_bitfield_funcs(void)
 {
-    hid_t      type = -1, ntype = -1, super = -1;
+    hid_t      type = H5I_INVALID_HID, ntype = H5I_INVALID_HID, super = H5I_INVALID_HID;
     size_t     size;
     char      *tag = 0;
     H5T_pad_t  inpad;
@@ -5613,7 +5615,7 @@ static int
 opaque_check(int tag_it)
 {
 #define OPAQUE_NELMTS 1000
-    hid_t  st = -1, dt = -1;
+    hid_t  st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     herr_t status;
     char   buf[1]; /*not really used*/
     int    saved;
@@ -5689,7 +5691,7 @@ static int
 opaque_long(void)
 {
     char  *long_tag = NULL;
-    hid_t  dt       = -1;
+    hid_t  dt       = H5I_INVALID_HID;
     herr_t ret;
 
     /* Build opaque type */
@@ -5743,7 +5745,7 @@ error:
 static int
 opaque_funcs(void)
 {
-    hid_t      type = -1, super = -1;
+    hid_t      type = H5I_INVALID_HID, super = H5I_INVALID_HID;
     size_t     size;
     H5T_pad_t  inpad;
     H5T_cset_t cset;
@@ -6455,9 +6457,9 @@ test_latest(void)
         long   c;
         double d;
     };
-    hid_t             file = (-1);                     /* File ID */
-    hid_t             tid1 = (-1), tid2 = (-1);        /* Datatype ID */
-    hid_t             fapl = (-1);                     /* File access property list */
+    hid_t             file = (H5I_INVALID_HID);                           /* File ID */
+    hid_t             tid1 = (H5I_INVALID_HID), tid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t             fapl = (H5I_INVALID_HID);                           /* File access property list */
     H5O_native_info_t oi;                              /* Stat buffer for committed datatype */
     hsize_t           old_dtype_oh_size;               /* Size of object header with "old" format */
     hsize_t           new_dtype_oh_size;               /* Size of object header with "new" format */
@@ -6800,7 +6802,7 @@ test_int_float_except(void)
     PASSED();
 #else  /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
     SKIPPED();
-    HDputs("    Test skipped due to int or float not 4 bytes.");
+    puts("    Test skipped due to int or float not 4 bytes.");
 #endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
     return 0;
 
@@ -7073,9 +7075,10 @@ test_set_order_compound(hid_t fapl)
         atomic_cmpd d[3][4];
     } complex_cmpd;
 
-    hid_t   file = -1;
-    hid_t   cmpd = -1, memb_cmpd = -1, memb_array1 = -1, memb_array2 = -1, cmpd_array = -1;
-    hid_t   vl_id   = -1;
+    hid_t file = H5I_INVALID_HID;
+    hid_t cmpd = H5I_INVALID_HID, memb_cmpd = H5I_INVALID_HID, memb_array1 = H5I_INVALID_HID,
+          memb_array2 = H5I_INVALID_HID, cmpd_array = H5I_INVALID_HID;
+    hid_t   vl_id   = H5I_INVALID_HID;
     hsize_t dims[2] = {3, 4}; /* Array dimensions */
     char    filename[1024];
     herr_t  ret; /* Generic return value */
@@ -7224,7 +7227,8 @@ error:
 static int
 test_named_indirect_reopen(hid_t fapl)
 {
-    hid_t          file = -1, type = -1, reopened_type = -1, strtype = -1, dset = -1, space = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID, reopened_type = H5I_INVALID_HID,
+          strtype = H5I_INVALID_HID, dset = H5I_INVALID_HID, space = H5I_INVALID_HID;
     static hsize_t dims[1] = {3};
     size_t         dt_size;
     int            enum_value;
@@ -7384,7 +7388,7 @@ test_named_indirect_reopen(hid_t fapl)
         TEST_ERROR;
     if (NULL == (tag_ret = H5Tget_tag(type)))
         TEST_ERROR;
-    if (HDstrcmp(tag, tag_ret) != 0)
+    if (strcmp(tag, tag_ret) != 0)
         TEST_ERROR;
     H5free_memory(tag_ret);
     tag_ret = NULL;
@@ -7400,7 +7404,7 @@ test_named_indirect_reopen(hid_t fapl)
         TEST_ERROR;
     if (NULL == (tag_ret = H5Tget_tag(type)))
         TEST_ERROR;
-    if (HDstrcmp(tag, tag_ret) != 0)
+    if (strcmp(tag, tag_ret) != 0)
         TEST_ERROR;
     H5free_memory(tag_ret);
     tag_ret = NULL;
@@ -7592,11 +7596,11 @@ create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t lo
 static int
 test_delete_obj_named(hid_t fapl)
 {
-    hid_t        filea1 = -1, filea2 = -1, fileb = -1; /* File IDs */
-    hid_t        attr  = -1;                           /* Attribute ID */
-    hid_t        dset  = -1;                           /* Dataset ID */
-    hid_t        fapl2 = -1;                           /* File access property list ID */
-    H5F_libver_t low, high;                            /* File format bounds */
+    hid_t        filea1 = H5I_INVALID_HID, filea2 = H5I_INVALID_HID, fileb = H5I_INVALID_HID; /* File IDs */
+    hid_t        attr  = H5I_INVALID_HID; /* Attribute ID */
+    hid_t        dset  = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl2 = H5I_INVALID_HID; /* File access property list ID */
+    H5F_libver_t low, high;               /* File format bounds */
     char         filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -7709,15 +7713,15 @@ error:
 static int
 test_delete_obj_named_fileid(hid_t fapl)
 {
-    hid_t        filea1 = -1, filea2 = -1, fileb = -1; /* File IDs */
-    hid_t        dset_fid = -1;                        /* File ID from dataset */
-    hid_t        type_fid = -1;                        /* File ID from datatype */
-    hid_t        attr_fid = -1;                        /* File ID from attribute */
-    hid_t        type     = -1;                        /* Datatype ID */
-    hid_t        attr     = -1;                        /* Attribute ID */
-    hid_t        dset     = -1;                        /* Dataset ID */
-    hid_t        fapl2    = -1;                        /* File access property list ID */
-    H5F_libver_t low, high;                            /* File format bounds */
+    hid_t        filea1 = H5I_INVALID_HID, filea2 = H5I_INVALID_HID, fileb = H5I_INVALID_HID; /* File IDs */
+    hid_t        dset_fid = H5I_INVALID_HID; /* File ID from dataset */
+    hid_t        type_fid = H5I_INVALID_HID; /* File ID from datatype */
+    hid_t        attr_fid = H5I_INVALID_HID; /* File ID from attribute */
+    hid_t        type     = H5I_INVALID_HID; /* Datatype ID */
+    hid_t        attr     = H5I_INVALID_HID; /* Attribute ID */
+    hid_t        dset     = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl2    = H5I_INVALID_HID; /* File access property list ID */
+    H5F_libver_t low, high;                  /* File format bounds */
     char         filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -7908,14 +7912,14 @@ error:
 static int
 test_deprec(hid_t fapl)
 {
-    hid_t    file     = -1;       /* File ID */
-    hid_t    type     = -1;       /* Datatype ID */
-    unsigned rank     = 2;        /* Rank for array datatype */
-    hsize_t  dims[2]  = {3, 3};   /* Dimensions for array datatype */
-    int      perm[2]  = {0, 1};   /* Dimensions permutations for array datatype */
-    hsize_t  rdims[2] = {0, 0};   /* Dimensions for querying array datatype */
-    int      rperm[2] = {-2, -2}; /* Dimensions permutations for array datatype */
-    hbool_t  dim_mismatch;        /* Whether any dimensions didn't match */
+    hid_t    file     = H5I_INVALID_HID; /* File ID */
+    hid_t    type     = H5I_INVALID_HID; /* Datatype ID */
+    unsigned rank     = 2;               /* Rank for array datatype */
+    hsize_t  dims[2]  = {3, 3};          /* Dimensions for array datatype */
+    int      perm[2]  = {0, 1};          /* Dimensions permutations for array datatype */
+    hsize_t  rdims[2] = {0, 0};          /* Dimensions for querying array datatype */
+    int      rperm[2] = {-2, -2};        /* Dimensions permutations for array datatype */
+    bool     dim_mismatch;               /* Whether any dimensions didn't match */
     char     filename[1024];
     unsigned u;      /* Local index variable */
     herr_t   status; /* Generic routine value */
@@ -7928,9 +7932,9 @@ test_deprec(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if (H5Tdetect_class(type, H5T_ARRAY) != TRUE)
+    if (H5Tdetect_class(type, H5T_ARRAY) != true)
         FAIL_STACK_ERROR;
-    if (H5Tdetect_class(type, H5T_INTEGER) != TRUE)
+    if (H5Tdetect_class(type, H5T_INTEGER) != true)
         FAIL_STACK_ERROR;
 
     /* Get the array dimensions */
@@ -7939,24 +7943,24 @@ test_deprec(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Check the array dimensions */
-    dim_mismatch = FALSE;
+    dim_mismatch = false;
     for (u = 0; u < rank; u++)
         if (rdims[u] != dims[u]) {
             TestErrPrintf("Array dimension information doesn't match!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
                           (int)rdims[u], u, (int)dims[u]);
-            dim_mismatch = TRUE;
+            dim_mismatch = true;
         } /* end if */
     if (dim_mismatch)
         FAIL_PUTS_ERROR("    Dimensions didn't match!");
 
     /* Check the array dimension permutations */
-    dim_mismatch = FALSE;
+    dim_mismatch = false;
     for (u = 0; u < rank; u++)
         if (rperm[u] != -2) {
             TestErrPrintf(
                 "Array dimension permutation information was modified!, rdims1[%u]=%d, tdims1[%u]=%d\n", u,
                 rperm[u], u, perm[u]);
-            dim_mismatch = TRUE;
+            dim_mismatch = true;
         } /* end if */
     if (dim_mismatch)
         FAIL_PUTS_ERROR("    Dimension permutations modified!");
@@ -8038,7 +8042,7 @@ test_deprec(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Types should not be committable to a read-only file!");
+        puts("    Types should not be committable to a read-only file!");
         goto error;
     }
 
@@ -8076,13 +8080,13 @@ error:
 static int
 test_utf_ascii_conv(void)
 {
-    hid_t       fid        = -1;
-    hid_t       did        = -1;
-    hid_t       utf8_vtid  = -1;
-    hid_t       ascii_vtid = -1;
-    hid_t       utf8_tid   = -1;
-    hid_t       ascii_tid  = -1;
-    hid_t       sid        = -1;
+    hid_t       fid        = H5I_INVALID_HID;
+    hid_t       did        = H5I_INVALID_HID;
+    hid_t       utf8_vtid  = H5I_INVALID_HID;
+    hid_t       ascii_vtid = H5I_INVALID_HID;
+    hid_t       utf8_tid   = H5I_INVALID_HID;
+    hid_t       ascii_tid  = H5I_INVALID_HID;
+    hid_t       sid        = H5I_INVALID_HID;
     const char *utf8_w     = "foo!";
     char       *ascii_r    = NULL;
     const char *ascii_w    = "bar!";
@@ -8340,8 +8344,8 @@ error:
 static herr_t
 verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
 {
-    hid_t       base_dtype = -1;
-    hid_t       mem_dtype  = -1;
+    hid_t       base_dtype = H5I_INVALID_HID;
+    hid_t       mem_dtype  = H5I_INVALID_HID;
     H5T_t      *dtypep     = NULL;         /* Internal structure of a datatype */
     H5T_class_t type_cls   = H5T_NO_CLASS; /* Temporary var for datatype class */
     int         nmembers   = 0;
@@ -8509,25 +8513,25 @@ test_versionbounds(void)
         color_t     enum_color;
     } outer_cmp_t;
 
-    hid_t        file            = -1;          /* File ID */
-    hid_t        space           = -1;          /* Dataspace ID */
-    hid_t        dset            = -1;          /* Dataset ID */
-    hid_t        fcpl            = -1;          /* File creation property list ID */
-    hid_t        fapl            = -1;          /* Copy of file access property list ID */
-    hid_t        dcpl            = -1;          /* Dataset creation property list ID */
-    hid_t        dset_dtype      = -1;          /* Dataset's datatype */
-    hid_t        arr_chartype    = -1;          /* Array of characters datatype */
-    hid_t        vlen_floattype  = -1;          /* Vlen of float datatype */
-    hid_t        enum_type       = -1;          /* Enumeration datatype */
-    hid_t        outer_cmp_type  = -1;          /* Outer compound datatype */
-    hid_t        inner_cmp_type  = -1;          /* Inner compound datatype */
-    hid_t        simple_cmp_type = -1;          /* Simple cmpd dtype, contains no other cmpd */
-    hid_t        outer_arr_type  = -1;          /* Outermost array datatype */
-    hid_t        inner_arr_type  = -1;          /* Inner array datatype */
-    H5F_t       *filep           = NULL;        /* Pointer to internal structure of a file */
-    H5T_t       *dtypep          = NULL;        /* Pointer to internal structure of a datatype */
-    hsize_t      arr_dim[]       = {ARRAY_LEN}; /* Length of the array */
-    int          low, high;                     /* Indices for iterating over versions */
+    hid_t        file            = H5I_INVALID_HID; /* File ID */
+    hid_t        space           = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dset            = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fcpl            = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t        fapl            = H5I_INVALID_HID; /* Copy of file access property list ID */
+    hid_t        dcpl            = H5I_INVALID_HID; /* Dataset creation property list ID */
+    hid_t        dset_dtype      = H5I_INVALID_HID; /* Dataset's datatype */
+    hid_t        arr_chartype    = H5I_INVALID_HID; /* Array of characters datatype */
+    hid_t        vlen_floattype  = H5I_INVALID_HID; /* Vlen of float datatype */
+    hid_t        enum_type       = H5I_INVALID_HID; /* Enumeration datatype */
+    hid_t        outer_cmp_type  = H5I_INVALID_HID; /* Outer compound datatype */
+    hid_t        inner_cmp_type  = H5I_INVALID_HID; /* Inner compound datatype */
+    hid_t        simple_cmp_type = H5I_INVALID_HID; /* Simple cmpd dtype, contains no other cmpd */
+    hid_t        outer_arr_type  = H5I_INVALID_HID; /* Outermost array datatype */
+    hid_t        inner_arr_type  = H5I_INVALID_HID; /* Inner array datatype */
+    H5F_t       *filep           = NULL;            /* Pointer to internal structure of a file */
+    H5T_t       *dtypep          = NULL;            /* Pointer to internal structure of a datatype */
+    hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
+    int          low, high;                         /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
                                H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
     int          versions_count = 6; /* Number of version bounds in the array */
@@ -8746,9 +8750,9 @@ error:
 int
 main(void)
 {
-    hbool_t driver_is_parallel;
-    long    nerrors = 0;
-    hid_t   fapl    = H5I_INVALID_HID;
+    bool  driver_is_parallel;
+    long  nerrors = 0;
+    hid_t fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));

@@ -41,7 +41,7 @@ typedef struct H5E_t H5E_t;
 #define HCOMMON_ERROR(maj, min, ...)                                                                         \
     do {                                                                                                     \
         HERROR(maj, min, __VA_ARGS__);                                                                       \
-        err_occurred = TRUE;                                                                                 \
+        err_occurred = true;                                                                                 \
         err_occurred = err_occurred; /* Shut GCC warnings up! */                                             \
     } while (0)
 
@@ -122,7 +122,7 @@ typedef struct H5E_t H5E_t;
          * considered as an API change                                                                       \
          */                                                                                                  \
         HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
-                    HDstrerror(myerrno));                                                                    \
+                    strerror(myerrno));                                                                      \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
@@ -131,7 +131,7 @@ typedef struct H5E_t H5E_t;
          * considered as an API change                                                                       \
          */                                                                                                  \
         HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
-                    HDstrerror(myerrno));                                                                    \
+                    strerror(myerrno));                                                                      \
     }
 #else /* H5_HAVE_WIN32_API */
 /* On Windows we also emit the result of GetLastError(). This call returns a DWORD, which is always a
@@ -148,7 +148,7 @@ typedef struct H5E_t H5E_t;
          */                                                                                                  \
         HDONE_ERROR(majorcode, minorcode, retcode,                                                           \
                     "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
-                    myerrno, HDstrerror(myerrno), win_error);                                                \
+                    myerrno, strerror(myerrno), win_error);                                                  \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
@@ -159,7 +159,7 @@ typedef struct H5E_t H5E_t;
          */                                                                                                  \
         HGOTO_ERROR(majorcode, minorcode, retcode,                                                           \
                     "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
-                    myerrno, HDstrerror(myerrno), win_error);                                                \
+                    myerrno, strerror(myerrno), win_error);                                                  \
     }
 #endif /* H5_HAVE_WIN32_API */
 
@@ -188,6 +188,6 @@ H5_DLL herr_t H5E_init(void);
 H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
                                hid_t maj_id, hid_t min_id, const char *fmt, ...) H5_ATTR_FORMAT(printf, 8, 9);
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
-H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
+H5_DLL herr_t H5E_dump_api_stack(bool is_api);
 
 #endif /* H5Eprivate_H */

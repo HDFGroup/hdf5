@@ -103,6 +103,12 @@ PROGRAM fortranlibtest
        ' Testing basic generic property list class creation functionality', &
        total_error)
 
+  ret_total_error = 0
+  CALL test_freelist(ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing free list', &
+       total_error)
+
   WRITE(*,*)
 
   WRITE(*,*) '                  ============================================  '

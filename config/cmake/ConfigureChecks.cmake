@@ -425,13 +425,6 @@ if (MINGW OR NOT WINDOWS)
   endif ()
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGETD)
-
-  # ----------------------------------------------------------------------
-  # cygwin user credentials are different then on linux
-  #
-  if (NOT CYGWIN AND NOT MINGW)
-    CHECK_FUNCTION_EXISTS (getpwuid        ${HDF_PREFIX}_HAVE_GETPWUID)
-  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -916,7 +909,7 @@ endmacro ()
 #-----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine is using a special algorithm to convert
+# Set the flag to indicate that the machine is using a special algorithm toconvert
 # 'long double' to '(unsigned) long' values.  (This flag should only be set for
 # the IBM Power Linux.  When the bit sequence of long double is
 # 0x4351ccf385ebc8a0bfcc2a3c3d855620, the converted value of (unsigned)long

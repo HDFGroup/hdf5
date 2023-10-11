@@ -60,7 +60,7 @@ static herr_t H5HF__huge_bt2_create(H5HF_hdr_t *hdr);
 
 /* Local 'huge' object support routines */
 static hsize_t H5HF__huge_new_id(H5HF_hdr_t *hdr);
-static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_operator_t op,
+static herr_t  H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operator_t op,
                                   void *op_data);
 
 /*********************/
@@ -182,26 +182,26 @@ H5HF__huge_init(H5HF_hdr_t *hdr)
     if (hdr->filter_len > 0) {
         if ((hdr->id_len - 1) >= (unsigned)(hdr->sizeof_addr + hdr->sizeof_size + 4 + hdr->sizeof_size)) {
             /* Indicate that v2 B-tree doesn't have to be used to locate object */
-            hdr->huge_ids_direct = TRUE;
+            hdr->huge_ids_direct = true;
 
             /* Set the size of 'huge' object IDs */
             hdr->huge_id_size = (uint8_t)(hdr->sizeof_addr + hdr->sizeof_size + hdr->sizeof_size);
         } /* end if */
         else
             /* Indicate that v2 B-tree must be used to access object */
-            hdr->huge_ids_direct = FALSE;
+            hdr->huge_ids_direct = false;
     } /* end if */
     else {
         if ((hdr->sizeof_addr + hdr->sizeof_size) <= (hdr->id_len - 1)) {
             /* Indicate that v2 B-tree doesn't have to be used to locate object */
-            hdr->huge_ids_direct = TRUE;
+            hdr->huge_ids_direct = true;
 
             /* Set the size of 'huge' object IDs */
             hdr->huge_id_size = (uint8_t)(hdr->sizeof_addr + hdr->sizeof_size);
         } /* end if */
         else
             /* Indicate that v2 B-tree must be used to locate object */
-            hdr->huge_ids_direct = FALSE;
+            hdr->huge_ids_direct = false;
     } /* end else */
     if (!hdr->huge_ids_direct) {
         /* Set the size and maximum value of 'huge' object ID */
@@ -253,7 +253,7 @@ H5HF__huge_new_id(H5HF_hdr_t *hdr)
 
         /* Check for wrapping 'huge' object IDs around */
         if (hdr->huge_next_id == hdr->huge_max_id)
-            hdr->huge_ids_wrapped = TRUE;
+            hdr->huge_ids_wrapped = true;
     } /* end else */
 
     /* Set return value */
@@ -492,7 +492,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
         } /* end else */
     }     /* end if */
     else {
-        hbool_t found = FALSE; /* Whether entry was found */
+        bool found = false; /* Whether entry was found */
 
         /* Check if v2 B-tree is open yet */
         if (NULL == hdr->huge_bt2) {
@@ -575,7 +575,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
         H5F_addr_decode(hdr->f, &id, &obj_addr);
     } /* end if */
     else {
-        hbool_t found = FALSE; /* Whether entry was found */
+        bool found = false; /* Whether entry was found */
 
         /* Sanity check */
         assert(H5_addr_defined(hdr->huge_bt2_addr));
@@ -640,7 +640,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_operator_t op, void *op_data)
+H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, bool is_read, H5HF_operator_t op, void *op_data)
 {
     void    *read_buf = NULL;       /* Pointer to buffer for reading */
     haddr_t  obj_addr;              /* Object's address in the file */
@@ -671,7 +671,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             UINT32DECODE(id, filter_mask);
     } /* end if */
     else {
-        hbool_t found = FALSE; /* Whether entry was found */
+        bool found = false; /* Whether entry was found */
 
         /* Sanity check */
         assert(H5_addr_defined(hdr->huge_bt2_addr));
@@ -823,7 +823,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
     else {
         H5HF_huge_bt2_indir_rec_t found_rec;     /* Record found from tracking object */
         H5HF_huge_bt2_indir_rec_t search_rec;    /* Record for searching for object */
-        hbool_t                   found = FALSE; /* Whether entry was found */
+        bool                      found = false; /* Whether entry was found */
 
         /* Sanity check */
         assert(H5_addr_defined(hdr->huge_bt2_addr));
@@ -883,7 +883,7 @@ H5HF__huge_read(H5HF_hdr_t *hdr, const uint8_t *id, void *obj)
     assert(obj);
 
     /* Call the internal 'op' routine */
-    if (H5HF__huge_op_real(hdr, id, TRUE, NULL, obj) < 0)
+    if (H5HF__huge_op_real(hdr, id, true, NULL, obj) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object");
 
 done:
@@ -914,7 +914,7 @@ H5HF__huge_op(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void *op_d
     assert(op);
 
     /* Call the internal 'op' routine routine */
-    if (H5HF__huge_op_real(hdr, id, FALSE, op, op_data) < 0)
+    if (H5HF__huge_op_real(hdr, id, false, op, op_data) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "unable to operate on heap object");
 
 done:
@@ -1072,7 +1072,7 @@ H5HF__huge_term(H5HF_hdr_t *hdr)
         /* Reset the information about 'huge' objects in the file */
         hdr->huge_bt2_addr    = HADDR_UNDEF;
         hdr->huge_next_id     = 0;
-        hdr->huge_ids_wrapped = FALSE;
+        hdr->huge_ids_wrapped = false;
 
         /* Mark heap header as modified */
         if (H5HF__hdr_dirty(hdr) < 0)

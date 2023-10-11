@@ -201,7 +201,7 @@ H5VL_native_register(void)
     /* Register the native VOL connector, if it isn't already */
     if (H5I_INVALID_HID == H5VL_NATIVE_ID_g)
         if ((H5VL_NATIVE_ID_g =
-                 H5VL__register_connector(&H5VL_native_cls_g, TRUE, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
+                 H5VL__register_connector(&H5VL_native_cls_g, true, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, H5I_INVALID_HID, "can't create ID for native VOL connector");
 
     /* Set return value */
@@ -391,7 +391,7 @@ H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
 #ifndef NDEBUG
     {
         H5VL_object_t *vol_obj_container;
-        hbool_t        is_native_vol_obj;
+        bool           is_native_vol_obj;
 
         /* Get the location object */
         if (NULL == (vol_obj_container = (H5VL_object_t *)H5I_object(loc_id)))
@@ -485,7 +485,7 @@ H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
 #ifndef NDEBUG
     {
         H5VL_object_t *vol_obj_container;
-        hbool_t        is_native_vol_obj;
+        bool           is_native_vol_obj;
 
         /* Get the location object */
         if (NULL == (vol_obj_container = (H5VL_object_t *)H5I_object(loc_id)))

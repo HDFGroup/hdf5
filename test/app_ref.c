@@ -94,15 +94,15 @@ main(void)
     TESTING("library shutdown with reference count > 1");
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* Don't run this test with the multi/split VFD. A bug in library shutdown
      * ordering causes problems with the multi VFD when IDs are left dangling.
      */
-    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
-        HDputs("\n -- SKIPPED for incompatible VFD --");
+    if (!strcmp(env_h5_drvr, "multi") || !strcmp(env_h5_drvr, "split")) {
+        puts("\n -- SKIPPED for incompatible VFD --");
         return 0;
     }
 
@@ -193,7 +193,7 @@ main(void)
 
 error:
 
-    HDputs("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
+    puts("***** APPLICATION REFERENCE COUNT TESTS FAILED *****");
 
     return EXIT_FAILURE;
 }

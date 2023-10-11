@@ -63,11 +63,11 @@ typedef struct H5FD_family_t {
     unsigned flags;        /*flags for opening additional members    */
 
     /* Information from properties set by 'h5repart' tool */
-    hsize_t mem_newsize;    /*new member size passed in as private
-                             * property. It's used only by h5repart */
-    hbool_t repart_members; /* Whether to mark the superblock dirty
-                             * when it is loaded, so that the family
-                             * member sizes can be re-encoded       */
+    hsize_t mem_newsize; /*new member size passed in as private
+                          * property. It's used only by h5repart */
+    bool repart_members; /* Whether to mark the superblock dirty
+                          * when it is loaded, so that the family
+                          * member sizes can be re-encoded       */
 } H5FD_family_t;
 
 /* Driver-specific file access properties */
@@ -100,9 +100,9 @@ static herr_t  H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, 
                                  void *_buf /*out*/);
 static herr_t  H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
                                   const void *_buf);
-static herr_t  H5FD__family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__family_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__family_flush(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__family_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__family_unlock(H5FD_t *_file);
 static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
 
@@ -180,11 +180,11 @@ H5FD__family_get_default_config(H5FD_family_fapl_t *fa_out)
      */
     if (NULL == (def_plist = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if ((fa_out->memb_fapl_id = H5P_copy_plist(def_plist, FALSE)) < 0)
+    if ((fa_out->memb_fapl_id = H5P_copy_plist(def_plist, false)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "can't copy property list");
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa_out->memb_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if (H5P_set_driver_by_value(plist, H5_VFD_SEC2, NULL, TRUE) < 0)
+    if (H5P_set_driver_by_value(plist, H5_VFD_SEC2, NULL, true) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set default driver on member FAPL");
 
 done:
@@ -225,36 +225,36 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
 
     assert(old_filename);
 
-    old_filename_len = HDstrlen(old_filename);
+    old_filename_len = strlen(old_filename);
     if (0 == old_filename_len)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid filename");
 
-    new_filename_len = old_filename_len + HDstrlen(suffix) + 1;
+    new_filename_len = old_filename_len + strlen(suffix) + 1;
     if (NULL == (tmp_buffer = H5MM_malloc(new_filename_len)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate new filename buffer");
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = HDstrstr(old_filename, ".h5"))) {
+    if ((file_extension = strstr(old_filename, ".h5"))) {
         /* Insert the printf format between the filename and ".h5" extension. */
-        HDstrcpy(tmp_buffer, old_filename);
-        file_extension = HDstrstr(tmp_buffer, ".h5");
-        HDsprintf(file_extension, "%s%s", suffix, ".h5");
+        strcpy(tmp_buffer, old_filename);
+        file_extension = strstr(tmp_buffer, ".h5");
+        sprintf(file_extension, "%s%s", suffix, ".h5");
     }
-    else if ((file_extension = HDstrrchr(old_filename, '.'))) {
+    else if ((file_extension = strrchr(old_filename, '.'))) {
         char *new_extension_loc = NULL;
 
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the printf format before that extension.
          */
-        HDstrcpy(tmp_buffer, old_filename);
-        new_extension_loc = HDstrrchr(tmp_buffer, '.');
-        HDsprintf(new_extension_loc, "%s%s", suffix, file_extension);
+        strcpy(tmp_buffer, old_filename);
+        new_extension_loc = strrchr(tmp_buffer, '.');
+        sprintf(new_extension_loc, "%s%s", suffix, file_extension);
     }
     else {
         /* If the filename doesn't contain an extension at all, just insert
          * the printf format at the end of the filename.
          */
-        HDsnprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
     }
 
     ret_value = tmp_buffer;
@@ -285,7 +285,7 @@ H5FD_family_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
-        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), false);
 
     /* Set return value */
     ret_value = H5FD_FAMILY_g;
@@ -339,14 +339,14 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
     H5TRACE3("e", "ihi", fapl_id, msize, memb_fapl_id);
 
     /* Check arguments */
-    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5P_DEFAULT == memb_fapl_id) {
         /* Get default configuration for member FAPL */
         if (H5FD__family_get_default_config(&fa) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get default driver configuration info");
     }
-    else if (TRUE != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
+    else if (true != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
 
     /* Initialize driver specific information. */
@@ -395,7 +395,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*
     if (memb_fapl_id) {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa->memb_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
-        *memb_fapl_id = H5P_copy_plist(plist, TRUE);
+        *memb_fapl_id = H5P_copy_plist(plist, true);
     } /* end if */
 
 done:
@@ -430,7 +430,7 @@ H5FD__family_fapl_get(H5FD_t *_file)
     fa->memb_size = file->memb_size;
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(file->memb_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    fa->memb_fapl_id = H5P_copy_plist(plist, FALSE);
+    fa->memb_fapl_id = H5P_copy_plist(plist, false);
 
     /* Set return value */
     ret_value = fa;
@@ -472,13 +472,13 @@ H5FD__family_fapl_copy(const void *_old_fa)
 
     /* Deep copy the property list objects in the structure */
     if (old_fa->memb_fapl_id == H5P_FILE_ACCESS_DEFAULT) {
-        if (H5I_inc_ref(new_fa->memb_fapl_id, FALSE) < 0)
+        if (H5I_inc_ref(new_fa->memb_fapl_id, false) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver");
     } /* end if */
     else {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(old_fa->memb_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-        new_fa->memb_fapl_id = H5P_copy_plist(plist, FALSE);
+        new_fa->memb_fapl_id = H5P_copy_plist(plist, false);
     } /* end else */
 
     /* Set return value */
@@ -564,7 +564,7 @@ H5FD__family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*o
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)9);
+    strncpy(name, "NCSAfami", (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -659,7 +659,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     H5FD_family_t *file      = NULL;
     char          *memb_name = NULL, *temp = NULL;
     hsize_t        eof            = HADDR_UNDEF;
-    hbool_t        default_config = FALSE;
+    bool           default_config = false;
     unsigned       t_flags        = flags & ~H5F_ACC_CREAT;
     H5FD_t        *ret_value      = NULL;
 
@@ -686,7 +686,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         file->pmem_size    = H5FD_FAM_DEF_MEM_SIZE; /* Member size passed in through property */
         file->mem_newsize  = 0;                     /*New member size used by h5repart only       */
 
-        default_config = TRUE;
+        default_config = true;
     } /* end if */
     else {
         H5P_genplist_t           *plist; /* Property list pointer */
@@ -699,7 +699,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             if (H5FD__family_get_default_config(&default_fa) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get default family VFD configuration");
             fa             = &default_fa;
-            default_config = TRUE;
+            default_config = true;
         }
 
         /* Check for new family file size. It's used by h5repart only. */
@@ -709,18 +709,18 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get new family member size");
 
             /* Set flag for later */
-            file->repart_members = TRUE;
+            file->repart_members = true;
         } /* end if */
 
         if (fa->memb_fapl_id == H5P_FILE_ACCESS_DEFAULT) {
-            if (H5I_inc_ref(fa->memb_fapl_id, FALSE) < 0)
+            if (H5I_inc_ref(fa->memb_fapl_id, false) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver");
             file->memb_fapl_id = fa->memb_fapl_id;
         } /* end if */
         else {
             if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa->memb_fapl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-            file->memb_fapl_id = H5P_copy_plist(plist, FALSE);
+            file->memb_fapl_id = H5P_copy_plist(plist, false);
         }                                /* end else */
         file->memb_size = fa->memb_size; /* Actual member size to be updated later */
         file->pmem_size = fa->memb_size; /* Member size passed in through property */
@@ -738,9 +738,9 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate temporary member name");
 
     /* Check that names are unique */
-    HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
-    if (!HDstrcmp(memb_name, temp)) {
+    snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
+    snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
+    if (!strcmp(memb_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
             if (NULL == (temp = H5FD__family_get_default_printf_filename(name)))
@@ -753,7 +753,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     /* Open all the family members */
     while (1) {
-        HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
+        snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
 
         /* Enlarge member array */
         if (file->nmembs >= file->amembs) {
@@ -1016,7 +1016,7 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if (u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u + 1);
-            HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
+            snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
             H5E_BEGIN_TRY
             {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
@@ -1279,7 +1279,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__family_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file;
     unsigned       u, nerrors = 0;
@@ -1310,7 +1310,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__family_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file;
     unsigned       u, nerrors = 0;
@@ -1334,15 +1334,15 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *              The lock type to apply depends on the parameter "rw":
- *                      TRUE--opens for write: an exclusive lock
- *                      FALSE--opens for read: a shared lock
+ *                      true--opens for write: an exclusive lock
+ *                      false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__family_lock(H5FD_t *_file, hbool_t rw)
+H5FD__family_lock(H5FD_t *_file, bool rw)
 {
     H5FD_family_t *file = (H5FD_family_t *)_file; /* VFD file struct */
     unsigned       u;                             /* Local index variable */
@@ -1417,7 +1417,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     H5P_genplist_t           *plist;
     const H5FD_family_fapl_t *fa;
     H5FD_family_fapl_t        default_fa     = {0, H5I_INVALID_HID};
-    hbool_t                   default_config = FALSE;
+    bool                      default_config = false;
     hid_t                     memb_fapl_id   = H5I_INVALID_HID;
     unsigned                  current_member;
     char                     *member_name  = NULL;
@@ -1436,7 +1436,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
         if (H5FD__family_get_default_config(&default_fa) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get default family VFD configuration");
         memb_fapl_id   = default_fa.memb_fapl_id;
-        default_config = TRUE;
+        default_config = true;
     }
     else {
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1445,7 +1445,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
             if (H5FD__family_get_default_config(&default_fa) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get default family VFD configuration");
             fa             = &default_fa;
-            default_config = TRUE;
+            default_config = true;
         }
         memb_fapl_id = fa->memb_fapl_id;
     }
@@ -1458,11 +1458,11 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
 
     /* Sanity check to make sure that generated names are unique */
     H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-    HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
-    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
+    snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
+    snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
-    if (!HDstrcmp(member_name, temp)) {
+    if (!strcmp(member_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
             if (NULL == (temp = H5FD__family_get_default_printf_filename(filename)))
@@ -1479,7 +1479,7 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     while (1) {
         /* Fix up the filename with the current member's number */
         H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-        HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
+        snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
         H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         /* Attempt to delete the member files. If the first file throws an error

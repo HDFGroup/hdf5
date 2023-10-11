@@ -32,11 +32,13 @@
 #include "H5MMprivate.h"  /* Memory management        */
 #include "H5Pprivate.h"   /* Property lists           */
 
+#define CANBE_UNUSED(X) (void)(X)
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_IOC_g = H5I_INVALID_HID;
 
 /* Whether the driver initialized MPI on its own */
-static hbool_t H5FD_mpi_self_initialized = FALSE;
+static bool H5FD_mpi_self_initialized = false;
 
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
@@ -126,9 +128,9 @@ static herr_t  H5FD__ioc_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count
                                      haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
 static herr_t  H5FD__ioc_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                       haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
-static herr_t  H5FD__ioc_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__ioc_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__ioc_flush(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__ioc_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__ioc_unlock(H5FD_t *_file);
 static herr_t  H5FD__ioc_del(const char *name, hid_t fapl);
 /*
@@ -219,12 +221,12 @@ H5FD_ioc_init(void)
         int   key_val_retrieved = 0;
         int   mpi_code;
 
-        if ((H5FD_IOC_g = H5FD_register(&H5FD_ioc_g, sizeof(H5FD_class_t), FALSE)) < 0)
+        if ((H5FD_IOC_g = H5FD_register(&H5FD_ioc_g, sizeof(H5FD_class_t), false)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register IOC VFD");
 
         /* Check if IOC VFD has been loaded dynamically */
-        env_var = HDgetenv(HDF5_DRIVER);
-        if (env_var && !HDstrcmp(env_var, H5FD_IOC_NAME)) {
+        env_var = getenv(HDF5_DRIVER);
+        if (env_var && !strcmp(env_var, H5FD_IOC_NAME)) {
             int mpi_initialized = 0;
             int provided        = 0;
 
@@ -247,7 +249,7 @@ H5FD_ioc_init(void)
                 if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
                     H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
 
-                H5FD_mpi_self_initialized = TRUE;
+                H5FD_mpi_self_initialized = true;
 
                 if (provided != required)
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
@@ -299,7 +301,7 @@ H5FD__ioc_term(void)
                     H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalize failed", mpi_code);
             }
 
-            H5FD_mpi_self_initialized = FALSE;
+            H5FD_mpi_self_initialized = false;
         }
     }
 
@@ -373,7 +375,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
     const H5FD_ioc_config_t *config_ptr         = NULL;
     H5P_genplist_t          *plist_ptr          = NULL;
-    hbool_t                  use_default_config = FALSE;
+    bool                     use_default_config = false;
     herr_t                   ret_value          = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
@@ -386,11 +388,11 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (H5FD_IOC != H5P_peek_driver(plist_ptr))
-        use_default_config = TRUE;
+        use_default_config = true;
     else {
         config_ptr = H5P_peek_driver_info(plist_ptr);
         if (NULL == config_ptr)
-            use_default_config = TRUE;
+            use_default_config = true;
     }
 
     if (use_default_config) {
@@ -399,7 +401,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     }
     else {
         /* Copy the IOC fapl data out */
-        memcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
+        H5MM_memcpy(config_out, config_ptr, sizeof(H5FD_ioc_config_t));
     }
 
 done:
@@ -528,7 +530,7 @@ H5FD__ioc_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
     /* Encode driver name */
-    HDstrncpy(name, "IOC", 9);
+    strncpy(name, "IOC", 9);
     name[8] = '\0';
 
     /* Encode configuration structure magic number */
@@ -573,7 +575,7 @@ H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
-    if (HDstrncmp(name, "IOC", 9))
+    if (strncmp(name, "IOC", 9))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
 
     /* Decode configuration structure magic number */
@@ -666,7 +668,7 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
     if (NULL == new_fa_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL");
 
-    memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
+    H5MM_memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
 
     ret_value = (void *)new_fa_ptr;
 
@@ -790,7 +792,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
 
     /* Fill in the file config values */
-    memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
+    H5MM_memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
 
     /* Fully resolve the given filepath and get its dirname */
     if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
@@ -1223,6 +1225,7 @@ H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     H5FD_IOC_LOG_CALL(__func__);
 
     assert(file && file->pub.cls);
+    CANBE_UNUSED(file);
     assert(buf);
 
     /* Check for overflow conditions */
@@ -1293,7 +1296,7 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
@@ -1336,7 +1339,7 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
     else {
-        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
@@ -1355,7 +1358,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1375,7 +1378,7 @@ H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, hboo
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
     herr_t      ret_value = SUCCEED;
@@ -1401,7 +1404,7 @@ H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
+H5FD__ioc_lock(H5FD_t H5_ATTR_UNUSED *_file, bool H5_ATTR_UNUSED rw)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1491,12 +1494,12 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                     "can't allocate config file name buffer");
 
         /* Check if a prefix has been set for the configuration file name */
-        prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+        prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
 
         /* TODO: No support for subfile directory prefix currently */
         /* TODO: Possibly try loading config file prefix from file before deleting */
-        HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
-                   prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
+        snprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
+                 prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
         if (NULL == (config_file = fopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
@@ -1531,12 +1534,12 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                         "can't delete subfiling config file");
 
         /* Try to delete each of the subfiles */
-        num_digits = (int)(HDlog10(n_subfiles) + 1);
+        num_digits = (int)(log10(n_subfiles) + 1);
 
         for (int i = 0; i < n_subfiles; i++) {
             /* TODO: No support for subfile directory prefix currently */
-            HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
-                       base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_subfiles);
+            snprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
+                     base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_subfiles);
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG

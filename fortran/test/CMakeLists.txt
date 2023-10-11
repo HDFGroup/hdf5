@@ -285,7 +285,6 @@ endif ()
 add_executable (fortranlib_test_F03
     fortranlib_test_F03.F90
     tH5E_F03.F90
-    tH5F_F03.F90
     tH5L_F03.F90
     tH5O_F03.F90
     tH5P_F03.F90
