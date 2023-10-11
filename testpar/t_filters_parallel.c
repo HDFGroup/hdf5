@@ -576,7 +576,7 @@ create_datasets(hid_t parent_obj_id, const char *dset_name, hid_t type_id, hid_t
             dset_name_ptr = dset_name_multi_buf;
             n_dsets       = (rand() % (MAX_NUM_DSETS_MULTI - 1)) + 2;
 
-            /* Select between 1 and (n_dsets - 1) datasets to NOT be filtered */
+            /* Select between 1 and (n_dsets - 1) datasets to unfiltered */
             if (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
                 n_unfiltered = (rand() % (n_dsets - 1)) + 1;
 
