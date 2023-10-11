@@ -71,7 +71,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER, INTENT(IN) :: rank
          INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
-         INTEGER(HSIZE_T), DIMENSION(:),INTENT(IN) :: maxdims(rank)
+         INTEGER(HSIZE_T), INTENT(IN) :: maxdims(rank)
          INTEGER(HID_T), INTENT(OUT) :: space_id
        END FUNCTION h5screate_simple_c
     END INTERFACE
