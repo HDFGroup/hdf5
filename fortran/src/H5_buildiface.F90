@@ -43,7 +43,6 @@
 #include <H5config_f.inc>
 
 PROGRAM H5_buildiface
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_LOC
   IMPLICIT NONE
 
 ! These values are valid REAL KINDs (with corresponding C float) found during configure

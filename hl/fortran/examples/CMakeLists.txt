@@ -10,6 +10,7 @@ foreach (example ${examples})
   add_executable (hl_f90_ex_${example} ${HDF5_HL_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
   target_compile_options(hl_f90_ex_${example}
       PRIVATE
+          "${HDF5_CMAKE_Fortran_FLAGS}"
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
 #  set_property(TARGET hl_f90_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)

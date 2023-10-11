@@ -56,6 +56,11 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
     list (APPEND HDF5_CMAKE_Fortran_FLAGS "-ieee=full")
 endif ()
 
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+    message (STATUS "... Select IEEE floating-point mode full")
+    list (APPEND HDF5_CMAKE_Fortran_FLAGS "-ieee=full")
+endif ()
+
 if (NOT MSVC AND NOT MINGW)
   # General flags
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
