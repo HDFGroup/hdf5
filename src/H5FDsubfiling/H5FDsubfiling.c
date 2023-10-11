@@ -1556,7 +1556,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                                "addr overflow, addr = %" PRIuHADDR ", size = %lu", addr, size);
+                                "addr overflow, addr = %" PRIuHADDR ", size = %zu", addr, size);
 
     /* Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE) */
     {
@@ -1789,7 +1789,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                                "addr overflow, addr = %" PRIuHADDR ", size = %lu", addr, size);
+                                "addr overflow, addr = %" PRIuHADDR ", size = %zu", addr, size);
 
     /* Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE) */
     {
