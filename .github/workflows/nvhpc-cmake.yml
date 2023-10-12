@@ -34,7 +34,6 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y nvhpc-23-7          
 
-
       - name: CMake Configure with nvc
         shell: bash
         run: |
@@ -46,12 +45,15 @@ jobs:
           echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin/nvfortran" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/cuda/12.2/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
-          echo "PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:$PATH" >> $GITHUB_ENV
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+          -DLIBAEC_USE_LOCALCONTENT=OFF \
+          -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_BUILD_FORTRAN:BOOL=ON \
           $GITHUB_WORKSPACE
           #cat build/CMakeCache.txt
