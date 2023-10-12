@@ -1,0 +1,39 @@
+name: windows ninja icx
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Install CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "3.27.7"
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "15"
+      - name: Install Intel OneAPI
+        uses: awvwgk/setup-fortran@main
+        with:
+          compiler: intel
+          version: '2023.2'
+      - name: Checkout HDF5
+        uses: actions/checkout@v4
+      - name: Set oneAPI
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+      - name: Configure & Build & Test
+        shell: cmd
+        run: |
+          cd hdf5
+          mkdir build
+          cd build
+          cmake -G Ninja -DCMAKE_C_COMPILER="C:/Program Files (x86)/Intel/oneAPI/compiler/2023.2.0/windows/bin/icx.exe" -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF ..
+          ninja
+          ninja test
