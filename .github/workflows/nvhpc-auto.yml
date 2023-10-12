@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -31,7 +32,6 @@ jobs:
           sudo apt-get install -y nvhpc-23-7          
 
       - name: Autotools Configure
-      - name: Test HDF5
         run: |
           echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin/mpicc" >> $GITHUB_ENV
           echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin/mpifort" >> $GITHUB_ENV
