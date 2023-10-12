@@ -26,6 +26,8 @@ static MPI_Info info     = MPI_INFO_NULL;
 static int      mpi_rank = 0;
 static int      mpi_size = 0;
 
+static int test_express_level_g;
+
 int nerrors = 0;
 
 /* Arrays of filter ID values and filter names (should match each other) */
@@ -9705,14 +9707,15 @@ int
 main(int argc, char **argv)
 {
     unsigned seed;
-    size_t   cur_filter_idx = 0;
-    size_t   num_filters    = 0;
-    hid_t    file_id        = H5I_INVALID_HID;
-    hid_t    fcpl_id        = H5I_INVALID_HID;
-    hid_t    group_id       = H5I_INVALID_HID;
-    hid_t    fapl_id        = H5I_INVALID_HID;
-    hid_t    dxpl_id        = H5I_INVALID_HID;
-    hid_t    dcpl_id        = H5I_INVALID_HID;
+    size_t   cur_filter_idx   = 0;
+    size_t   num_filters      = 0;
+    hid_t    file_id          = H5I_INVALID_HID;
+    hid_t    fcpl_id          = H5I_INVALID_HID;
+    hid_t    group_id         = H5I_INVALID_HID;
+    hid_t    fapl_id          = H5I_INVALID_HID;
+    hid_t    dxpl_id          = H5I_INVALID_HID;
+    hid_t    dcpl_id          = H5I_INVALID_HID;
+    bool     expedite_testing = false;
     int      mpi_code;
 
     /* Initialize MPI */
@@ -9762,6 +9765,17 @@ main(int argc, char **argv)
         h5_show_hostname();
 
     TestAlarmOn();
+
+    /*
+     * Get the TestExpress level setting
+     */
+    test_express_level_g = GetTestExpress();
+    if ((test_express_level_g >= 1) && MAINPROCESS) {
+        printf("** Some tests will be skipped due to TestExpress setting.\n");
+        printf("** Exhaustive tests will only be performed for the first available filter.\n");
+        printf("** Set the HDF5TestExpress environment variable to 0 to perform exhaustive testing for all "
+               "available filters.\n\n");
+    }
 
     /*
      * Obtain and broadcast seed value since ranks
@@ -9829,9 +9843,26 @@ main(int argc, char **argv)
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dcpl_id >= 0), "DCPL creation succeeded");
 
+    /* Add a space after the HDF5_PARAPREFIX notice from h5_fixname */
+    if (MAINPROCESS)
+        puts("");
+
     /* Run tests with all available filters */
     for (cur_filter_idx = 0; cur_filter_idx < num_filters; cur_filter_idx++) {
         H5D_selection_io_mode_t sel_io_mode;
+        H5Z_filter_t            cur_filter = filterIDs[cur_filter_idx];
+        htri_t                  filter_avail;
+
+        /* Make sure current filter is available before testing with it */
+        filter_avail = H5Zfilter_avail(cur_filter);
+        VRFY((filter_avail >= 0), "H5Zfilter_avail succeeded");
+
+        if (!filter_avail) {
+            if (MAINPROCESS)
+                printf("== SKIPPED tests with filter '%s' - filter unavailable ==\n\n",
+                       filterNames[cur_filter_idx]);
+            continue;
+        }
 
         /* Run tests with different selection I/O modes */
         for (sel_io_mode = H5D_SELECTION_IO_MODE_DEFAULT; sel_io_mode <= H5D_SELECTION_IO_MODE_ON;
@@ -9849,13 +9880,11 @@ main(int argc, char **argv)
 
                     /* Run with each of the test modes (single dataset, multiple datasets, etc.) */
                     for (test_mode = USE_SINGLE_DATASET; test_mode < TEST_MODE_SENTINEL; test_mode++) {
-                        H5Z_filter_t cur_filter = filterIDs[cur_filter_idx];
-                        const char  *sel_io_str;
-                        const char  *alloc_time;
-                        const char  *mode;
-                        unsigned     filter_config;
-                        htri_t       filter_avail;
-                        char         group_name[512];
+                        const char *sel_io_str;
+                        const char *alloc_time;
+                        const char *mode;
+                        unsigned    filter_config;
+                        char        group_name[512];
 
                         switch (sel_io_mode) {
                             case H5D_SELECTION_IO_MODE_DEFAULT:
@@ -9902,6 +9931,23 @@ main(int argc, char **argv)
                                 mode = "unknown";
                         }
 
+                        /*
+                         * If expediting the remaining tests, just run with a single
+                         * configuration that is interesting enough. In this case,
+                         * run with:
+                         *
+                         *   - A single dataset
+                         *   - Incremental file space allocation timing
+                         *   - Linked-chunk (single) I/O
+                         *   - The default setting for selection I/O
+                         */
+                        if (expedite_testing) {
+                            if (test_mode != USE_SINGLE_DATASET || space_alloc_time != H5D_ALLOC_TIME_INCR ||
+                                chunk_opt != H5FD_MPIO_CHUNK_ONE_IO ||
+                                sel_io_mode != H5D_SELECTION_IO_MODE_DEFAULT)
+                                continue;
+                        }
+
                         if (MAINPROCESS)
                             printf("== Running tests in mode '%s' with filter '%s' using selection I/O mode "
                                    "'%s', '%s' and '%s' allocation time ==\n\n",
@@ -9909,17 +9955,6 @@ main(int argc, char **argv)
                                    H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O"
                                                                        : "Multi-Chunk I/O",
                                    alloc_time);
-
-                        /* Make sure current filter is available before testing with it */
-                        filter_avail = H5Zfilter_avail(cur_filter);
-                        VRFY((filter_avail >= 0), "H5Zfilter_avail succeeded");
-
-                        if (!filter_avail) {
-                            if (MAINPROCESS)
-                                printf(" ** SKIPPED tests with filter '%s' - filter unavailable **\n\n",
-                                       filterNames[cur_filter_idx]);
-                            continue;
-                        }
 
                         /* Get the current filter's info */
                         VRFY((H5Zget_filter_info(cur_filter, &filter_config) >= 0),
@@ -9987,6 +10022,13 @@ main(int argc, char **argv)
                 }
             }
         }
+
+        /*
+         * If the TestExpress level setting isn't set for exhaustive
+         * testing, run smoke checks for the other filters
+         */
+        if (!expedite_testing && (test_express_level_g >= 1))
+            expedite_testing = true;
     }
 
     VRFY((H5Pclose(dcpl_id) >= 0), "DCPL close succeeded");
