@@ -7,7 +7,7 @@
 !  displaying the file size of each.  Both files have one
 !  empty group in the root group.
 !
-!  This file is intended for use with HDF5 Library verion 1.8
+!  This file is intended for use with HDF5 Library version 1.8
 !
 !************************************************************
 

@@ -3,7 +3,7 @@
 !  This example shows how to set the conditions for
 !  conversion between compact and dense (indexed) groups.
 !
-!  This file is intended for use with HDF5 Library verion 1.8
+!  This file is intended for use with HDF5 Library version 1.8
 !
 !************************************************************
 PROGRAM main

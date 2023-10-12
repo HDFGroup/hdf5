@@ -37,7 +37,7 @@ main(void)
     int wdata[DIM0][DIM1],    /* Write buffer */
         rdata[DIM0][DIM1],    /* Read buffer */
         rdata2[EDIM0][EDIM1], /* Read buffer for
-                                 extenstion */
+                                 extension */
         fillval, i, j;
 
     /*

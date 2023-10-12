@@ -8,7 +8,7 @@
 !  to the datasets, and again displays whether each has been
 !  allocated and their allocation size.
 !
-!  this file is intended for use with hdf5 library verion 1.8
+!  this file is intended for use with hdf5 library version 1.8
 !
 ! ***********************************************************
 

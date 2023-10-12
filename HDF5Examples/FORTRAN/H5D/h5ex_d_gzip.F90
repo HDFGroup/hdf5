@@ -8,7 +8,7 @@
 !  back the data, and outputs the type of compression and the
 !  maximum value in the dataset to the screen.
 !
-!  This file is intended for use with HDF5 Library verion 1.8
+!  This file is intended for use with HDF5 Library version 1.8
 !
 ! ************************************************************
 PROGRAM main

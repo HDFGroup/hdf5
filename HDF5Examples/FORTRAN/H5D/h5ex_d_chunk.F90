@@ -9,7 +9,7 @@
 !  using a different hyperslab selection, and outputs
 !  the result to the screen.
 !
-!  This file is intended for use with HDF5 Library verion 1.8
+!  This file is intended for use with HDF5 Library version 1.8
 !
 ! ************************************************************
 

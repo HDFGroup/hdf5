@@ -8,7 +8,7 @@
 !  dereferences the references, and outputs the referenced
 !  regions to the screen.
 !
-!  This file is intended for use with HDF5 Library verion 1.8
+!  This file is intended for use with HDF5 Library version 1.8
 !  with --enable-fortran2003 
 !
 !************************************************************
