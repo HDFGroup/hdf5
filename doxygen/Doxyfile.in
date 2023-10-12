@@ -733,6 +733,7 @@ EXCLUDE_PATTERNS      += */hl/fortran/examples/*
 EXCLUDE_PATTERNS      += */hl/fortran/test/*
 EXCLUDE_PATTERNS      += */hl/fortran/src/*.c
 EXCLUDE_PATTERNS      += */hl/fortran/src/*.h
+EXCLUDE_PATTERNS      += */HDF5Examples/FORTRAN/H5T/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
