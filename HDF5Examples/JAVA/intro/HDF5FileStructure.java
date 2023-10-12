@@ -40,9 +40,9 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * </p>
  */
 public class HDF5FileStructure {
-    private static String fname  = "HDF5FileStructure.h5";
-    private long[] dims2D = {20, 10};
-    private long[] dims3D = {20, 10, 5};
+    private static String fname = "HDF5FileStructure.h5";
+    private long[] dims2D       = {20, 10};
+    private long[] dims3D       = {20, 10, 5};
 
     private static void FileStructure()
     {
