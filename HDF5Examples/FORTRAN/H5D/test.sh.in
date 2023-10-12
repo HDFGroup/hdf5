@@ -127,7 +127,7 @@ do
                 echo "  FAILED!"
 	        return_val=`expr $status + $return_val`
              else
-                echo "  *Inconsequential differance* ... Passed"
+                echo "  *Inconsequential difference* ... Passed"
 		return_val=`expr $return_val`
              fi
           else

@@ -14,7 +14,7 @@
 #
 
 # A script to reconfigure autotools for HDF5, and to recreate other
-# generated files specifc to HDF5.
+# generated files specific to HDF5.
 # If the paths of the autotools are not specified by the user, they
 # are hardcoded to point to their locations on HDF5 Linux machines.
 # Users can specify the locations of the autotools with the following
