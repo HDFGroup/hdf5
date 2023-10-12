@@ -78,7 +78,7 @@ setup_parameters(int argc, char *const argv[], options_t *opts)
     /* use case defaults */
     memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
-    opts->use_swmr    = TRUE; /* use swmr open */
+    opts->use_swmr    = true; /* use swmr open */
     opts->iterations  = 1;
     opts->chunkplanes = 1;
     opts->progname    = USE_APPEND_CHUNK_PROGNAME;
@@ -110,15 +110,15 @@ setup_parameters(int argc, char *const argv[], options_t *opts)
 int
 main(int argc, char *argv[])
 {
-    pid_t   childpid = 0;
-    pid_t   mypid, tmppid;
-    int     child_status;
-    int     child_wait_option = 0;
-    int     ret_value         = 0;
-    int     child_ret_value;
-    hbool_t send_wait = FALSE;
-    hid_t   fapl      = -1; /* File access property list */
-    hid_t   fid       = -1; /* File ID */
+    pid_t childpid = 0;
+    pid_t mypid, tmppid;
+    int   child_status;
+    int   child_wait_option = 0;
+    int   ret_value         = 0;
+    int   child_ret_value;
+    bool  send_wait = false;
+    hid_t fapl      = H5I_INVALID_HID; /* File access property list */
+    hid_t fid       = H5I_INVALID_HID; /* File ID */
 
     if (setup_parameters(argc, argv, &UC_opts) < 0) {
         Hgoto_error(1);
@@ -127,7 +127,7 @@ main(int argc, char *argv[])
     /* Determine the need to send/wait message file*/
     if (UC_opts.launch == UC_READWRITE) {
         HDunlink(WRITER_MESSAGE);
-        send_wait = TRUE;
+        send_wait = true;
     }
 
     /* ==============================================================*/
@@ -168,7 +168,7 @@ main(int argc, char *argv[])
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((childpid = fork()) < 0) {
-            HDperror("fork");
+            perror("fork");
             Hgoto_error(1);
         }
     }
@@ -241,7 +241,7 @@ main(int argc, char *argv[])
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
-            HDperror("waitpid");
+            perror("waitpid");
             Hgoto_error(1);
         }
 

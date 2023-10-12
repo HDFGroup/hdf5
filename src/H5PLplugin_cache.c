@@ -133,7 +133,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PL__close_plugin_cache(hbool_t *already_closed /*out*/)
+H5PL__close_plugin_cache(bool *already_closed /*out*/)
 {
     unsigned int u; /* iterator */
     herr_t       ret_value = SUCCEED;
@@ -153,10 +153,10 @@ H5PL__close_plugin_cache(hbool_t *already_closed /*out*/)
         H5PL_cache_capacity_g = 0;
 
         /* Note that actually closed the table (needed by package close call) */
-        *already_closed = FALSE;
+        *already_closed = false;
     }
     else
-        *already_closed = TRUE;
+        *already_closed = true;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__close_plugin_cache() */
@@ -244,8 +244,7 @@ done:
  */
 H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
-H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *found,
-                           const void **plugin_info)
+H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *found, const void **plugin_info)
 {
     unsigned int u; /* iterator */
     herr_t       ret_value = SUCCEED;
@@ -258,12 +257,12 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     assert(plugin_info);
 
     /* Initialize output parameters */
-    *found       = FALSE;
+    *found       = false;
     *plugin_info = NULL;
 
     /* Loop over all the plugins, looking for one that matches */
     for (u = 0; u < H5PL_num_plugins_g; u++) {
-        hbool_t matched = FALSE; /* Whether cached plugin info matches */
+        bool matched = false; /* Whether cached plugin info matches */
 
         /* Determine if the plugin types match */
         if (search_params->type != H5PL_cache_g[u].type)
@@ -274,7 +273,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
             case H5PL_TYPE_FILTER:
                 /* Check if specified filter plugin ID matches cache entry's ID */
                 if (search_params->key->id == H5PL_cache_g[u].key.id)
-                    matched = TRUE;
+                    matched = true;
 
                 break;
 
@@ -285,8 +284,8 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                         continue;
 
                     /* Check if specified VOL connector name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
-                        matched = TRUE;
+                    if (!strcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
+                        matched = true;
                 }
                 else {
                     assert(search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
@@ -297,7 +296,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 
                     /* Check if specified VOL connector ID matches cache entry's ID */
                     if (search_params->key->vol.u.value == H5PL_cache_g[u].key.vol.u.value)
-                        matched = TRUE;
+                        matched = true;
                 }
 
                 break;
@@ -309,8 +308,8 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                         continue;
 
                     /* Check if specified VFD name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
-                        matched = TRUE;
+                    if (!strcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
+                        matched = true;
                 }
                 else {
                     assert(search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
@@ -321,7 +320,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 
                     /* Check if specified VFD ID matches cache entry's ID */
                     if (search_params->key->vfd.u.value == H5PL_cache_g[u].key.vfd.u.value)
-                        matched = TRUE;
+                        matched = true;
                 }
 
                 break;
@@ -349,7 +348,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info");
 
             /* Set output parameters */
-            *found       = TRUE;
+            *found       = true;
             *plugin_info = info;
 
             /* No need to continue processing */

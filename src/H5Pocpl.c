@@ -443,7 +443,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times /*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
         /* Set track times flag to return */
-        *track_times = (hbool_t)((ohdr_flags & H5O_HDR_STORE_TIMES) ? TRUE : FALSE);
+        *track_times = (bool)((ohdr_flags & H5O_HDR_STORE_TIMES) ? true : false);
     } /* end if */
 
 done:
@@ -933,7 +933,7 @@ done:
  * Purpose:    This is a query routine to verify that all the filters set
  *              in the dataset creation property list are available currently.
  *
- * Return:    Success:    TRUE if all filters available, FALSE if one or
+ * Return:    Success:    true if all filters available, false if one or
  *                              more filters not currently available.
  *        Failure:    FAIL on error
  *
@@ -971,8 +971,8 @@ done:
  * Purpose:    Check whether the filter is in the pipeline of the object
  *              creation property list.
  *
- * Return:    TRUE:        found
- *        FALSE:        not found
+ * Return:    true:        found
+ *        false:        not found
  *              FAIL:         error
  *
  *-------------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ done:
  * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;
- *  deletes all filters if FILTER is H5Z_FILTER_NONE
+ *  deletes all filters if FILTER is H5Z_FILTER_ALL
  *
  * Return: Non-negative on success/Negative on failure
  *
@@ -1178,14 +1178,14 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* Check for actual name */
         if (s) {
-            HDstrncpy(name, s, namelen);
+            strncpy(name, s, namelen);
             name[namelen - 1] = '\0';
         } /* end if */
         else {
             /* Check for unknown library filter */
             /* (probably from a future version of the library) */
             if (filter->id < 256) {
-                HDstrncpy(name, "Unknown library filter", namelen);
+                strncpy(name, "Unknown library filter", namelen);
                 name[namelen - 1] = '\0';
             } /* end if */
             else
@@ -1319,16 +1319,16 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
-                /* encode TRUE indicating that it exits */
-                *(*pp)++ = (uint8_t)TRUE;
+                /* encode true indicating that it exits */
+                *(*pp)++ = (uint8_t) true;
 
                 /* encode filter name */
                 H5MM_memcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
                 *pp += H5Z_COMMON_NAME_LEN;
             } /* end if */
             else
-                /* encode FALSE indicating that it does not exist */
-                *(*pp)++ = (uint8_t)FALSE;
+                /* encode false indicating that it does not exist */
+                *(*pp)++ = (uint8_t) false;
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
@@ -1572,7 +1572,7 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
             if (pline1->filter[u].name != NULL && pline2->filter[u].name == NULL)
                 HGOTO_DONE(1);
             if (pline1->filter[u].name != NULL)
-                if ((cmp_value = HDstrcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
+                if ((cmp_value = strcmp(pline1->filter[u].name, pline2->filter[u].name)) != 0)
                     HGOTO_DONE(cmp_value);
 
             /* Check the number of parameters for the filter */

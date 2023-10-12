@@ -845,8 +845,8 @@
  *
  * <em>Managing file access for in-memory files</em>
  * \code
- *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t block_size, hbool_t backing_store)
- *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size), hbool_t *backing_store)
+ *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t block_size, bool backing_store)
+ *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size), bool *backing_store)
  * \endcode
  *
  * #H5Pset_fapl_core sets the file access property list to use the Memory driver; any previously
@@ -856,9 +856,9 @@
  *
  * The backing_store Boolean flag is set when the in-memory file is created.
  * backing_store indicates whether to write the file contents to disk when the file is closed. If
- * backing_store is set to 1 (TRUE), the file contents are flushed to a file with the same name as the
+ * backing_store is set to 1 (true), the file contents are flushed to a file with the same name as the
  * in-memory file when the file is closed or access to the file is terminated in memory. If
- * backing_store is set to 0 (FALSE), the file is not saved.
+ * backing_store is set to 0 (false), the file is not saved.
  *
  * The application is allowed to open an existing file with the #H5FD_CORE driver. While using
  * #H5Fopen to open an existing file, if backing_store is set to 1 and the flag for #H5Fopen is set to
@@ -981,9 +981,9 @@
  * \code
  *   herr_t H5Pset_fapl_multi (hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
  *                             const char * const *memb_name, const haddr_t *memb_addr,
- *                             hbool_t relax)
+ *                             bool relax)
  *  herr_t H5Pget_fapl_multi (hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl,
- *                             const char **memb_name, const haddr_t *memb_addr, hbool_t *relax)
+ *                             const char **memb_name, const haddr_t *memb_addr, bool *relax)
  * \endcode
  *
  * #H5Pset_fapl_multi sets the file access properties to use the Multi driver; any previously defined
@@ -998,7 +998,7 @@
  * Additional parameters may be added to these functions in the future.
  *
  * \subsubsection subsubsec_file_alternate_drivers_split The Split Driver
- * The Split driver, H5FD_SPLIT, is a limited case of the Multi driver where only two files are
+ * The Split driver is a limited case of the Multi driver where only two files are
  * created. One file holds metadata, and the other file holds raw data.
  * The function #H5Pset_fapl_split is used to manage Split file access properties. See the example
  * below.

@@ -33,13 +33,13 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__linfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__linfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__linfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__linfo_copy(const void *_mesg, void *_dest);
-static size_t H5O__linfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__linfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__linfo_free(void *_mesg);
 static herr_t H5O__linfo_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
-static void *H5O__linfo_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
-                                  unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
+static void  *H5O__linfo_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, bool *recompute_size,
+                                   unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__linfo_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src,
                                         H5O_loc_t *dst_oloc, void *mesg_dst, unsigned *mesg_flags,
                                         H5O_copy_t *cpy_info);
@@ -128,8 +128,8 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     index_flags = *p++;
     if (index_flags & ~H5O_LINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message");
-    linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? TRUE : FALSE;
-    linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
+    linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? true : false;
+    linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? true : false;
 
     /* Set the number of links in the group to an invalid value, so we query it later */
     linfo->nlinks = HSIZET_MAX;
@@ -183,7 +183,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__linfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_linfo_t *linfo = (const H5O_linfo_t *)_mesg;
     unsigned char      index_flags; /* Flags for encoding link index info */
@@ -270,7 +270,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__linfo_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_linfo_t *linfo     = (const H5O_linfo_t *)_mesg;
     size_t             ret_value = 0; /* Return value */
@@ -334,7 +334,7 @@ H5O__linfo_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 
     /* If the group is using "dense" link storage, delete it */
     if (H5_addr_defined(linfo->fheap_addr))
-        if (H5G__dense_delete(f, linfo, TRUE) < 0)
+        if (H5G__dense_delete(f, linfo, true) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage");
 
 done:
@@ -354,7 +354,7 @@ done:
  */
 static void *
 H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *file_dst,
-                     hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
+                     bool H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
                      H5O_copy_t *cpy_info, void *_udata)
 {
     H5O_linfo_t        *linfo_src = (H5O_linfo_t *)native_src;
@@ -422,7 +422,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
 {
     H5O_linfo_postcopy_ud_t *udata = (H5O_linfo_postcopy_ud_t *)_udata; /* 'User data' passed in */
     H5O_link_t               dst_lnk;                                   /* Destination link to insert */
-    hbool_t                  dst_lnk_init = FALSE;        /* Whether the destination link is initialized */
+    bool                     dst_lnk_init = false;        /* Whether the destination link is initialized */
     herr_t                   ret_value    = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -434,7 +434,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     /* Copy the link (and the object it points to) */
     if (H5L__link_copy_file(udata->dst_oloc->file, src_lnk, udata->src_oloc, &dst_lnk, udata->cpy_info) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy link");
-    dst_lnk_init = TRUE;
+    dst_lnk_init = true;
 
     /* Set metadata tag in API context */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)

@@ -25,8 +25,8 @@
 
 static char *fname_g   = NULL;
 static char *dname_g   = NULL;
-static int   dset_g    = FALSE;
-static int   noop_g    = FALSE;
+static int   dset_g    = false;
+static int   noop_g    = false;
 static int   verbose_g = 0;
 
 /*
@@ -114,23 +114,23 @@ parse_command_line(int argc, const char *const *argv)
                 goto error;
 
             case 'v':
-                verbose_g = TRUE;
+                verbose_g = true;
                 break;
 
             case 'd': /* -d dname */
                 if (H5_optarg != NULL && *H5_optarg)
-                    dname_g = HDstrdup(H5_optarg);
+                    dname_g = strdup(H5_optarg);
                 if (dname_g == NULL) {
                     h5tools_setstatus(EXIT_FAILURE);
                     error_msg("No dataset name `%s`\n", H5_optarg);
                     usage(h5tools_getprogname());
                     goto error;
                 }
-                dset_g = TRUE;
+                dset_g = true;
                 break;
 
             case 'n': /* -n */
-                noop_g = TRUE;
+                noop_g = true;
                 break;
 
             case 'E':
@@ -152,7 +152,7 @@ parse_command_line(int argc, const char *const *argv)
         goto error;
     }
 
-    fname_g = HDstrdup(argv[H5_optind]);
+    fname_g = strdup(argv[H5_optind]);
 
     return 0;
 
@@ -399,7 +399,7 @@ main(int argc, char *argv[])
     h5tools_error_report();
 
     /* Open the HDF5 file */
-    if ((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0)) < 0) {
+    if ((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, false, NULL, 0)) < 0) {
         error_msg("unable to open file \"%s\"\n", fname_g);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -416,7 +416,7 @@ main(int argc, char *argv[])
     else { /* Convert all datasets in the file */
         if (verbose_g)
             fprintf(stdout, "Processing all datasets in the file...\n");
-        if (h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid, H5O_INFO_BASIC) < 0)
+        if (h5trav_visit(fid, "/", true, true, convert_dsets_cb, NULL, &fid, H5O_INFO_BASIC) < 0)
             goto done;
     } /* end else */
 

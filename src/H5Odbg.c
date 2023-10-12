@@ -148,8 +148,8 @@ H5O__assert(const H5O_t *oh)
         if (H5O_NULL_ID == curr_msg->type->id)
             free_space += curr_tot_size;
         else if (H5O_CONT_ID == curr_msg->type->id) {
-            H5O_cont_t                   *cont        = (H5O_cont_t *)curr_msg->native;
-            hbool_t H5_ATTR_NDEBUG_UNUSED found_chunk = FALSE; /* Found a chunk that matches */
+            H5O_cont_t                *cont        = (H5O_cont_t *)curr_msg->native;
+            bool H5_ATTR_NDEBUG_UNUSED found_chunk = false; /* Found a chunk that matches */
 
             assert(cont);
 
@@ -162,7 +162,7 @@ H5O__assert(const H5O_t *oh)
                 if (H5_addr_eq(cont->addr, oh->chunk[v].addr) && cont->size == oh->chunk[v].size) {
                     assert(cont->chunkno == v);
                     assert(!found_chunk);
-                    found_chunk = TRUE;
+                    found_chunk = true;
                 } /* end if */
             }     /* end for */
             assert(found_chunk);
@@ -309,16 +309,16 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
             /* Time fields */
             tm = HDlocaltime(&oh->atime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
             tm = HDlocaltime(&oh->mtime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
             tm = HDlocaltime(&oh->ctime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
             tm = HDlocaltime(&oh->btime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
         } /* end if */
 
@@ -393,7 +393,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
                 "Dirty:", oh->mesg[i].dirty ? "TRUE" : "FALSE");
         fprintf(stream, "%*s%-*s ", indent + 3, "", MAX(0, fwidth - 3), "Message flags:");
         if (oh->mesg[i].flags) {
-            hbool_t flag_printed = FALSE;
+            bool flag_printed = false;
 
             /* Sanity check that all flags in format are covered below */
             HDcompile_assert(H5O_MSG_FLAG_BITS ==
@@ -404,36 +404,36 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
             if (oh->mesg[i].flags & H5O_MSG_FLAG_CONSTANT) {
                 fprintf(stream, "%sC", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
                 fprintf(stream, "%sS", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_DONTSHARE) {
                 fprintf(stream, "%sDS", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE) {
                 fprintf(stream, "%sFIUW", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) {
                 fprintf(stream, "%sMIU", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_WAS_UNKNOWN) {
                 assert(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN);
                 fprintf(stream, "%sWU", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_SHAREABLE) {
                 fprintf(stream, "%sSA", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) {
                 fprintf(stream, "%sFIUA", (flag_printed ? ", " : "<"));
-                flag_printed = TRUE;
+                flag_printed = true;
             } /* end if */
             if (!flag_printed)
                 fprintf(stream, "-");
@@ -511,9 +511,9 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     /* Set up the object location */
     loc.file         = f;
     loc.addr         = addr;
-    loc.holding_file = FALSE;
+    loc.holding_file = false;
 
-    if (NULL == (oh = H5O_protect(&loc, H5AC__READ_ONLY_FLAG, FALSE)))
+    if (NULL == (oh = H5O_protect(&loc, H5AC__READ_ONLY_FLAG, false)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header");
 
     /* debug */

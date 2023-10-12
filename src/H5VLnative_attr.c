@@ -79,7 +79,7 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
     H5P_genplist_t *plist;
     H5G_loc_t       loc;     /* Object location */
     H5G_loc_t       obj_loc; /* Location used to open group */
-    hbool_t         loc_found = FALSE;
+    bool            loc_found = false;
     H5T_t          *type, *dt; /* Datatype to use for attribute */
     H5S_t          *space;     /* Dataspace to use for attribute */
     H5A_t          *attr      = NULL;
@@ -314,12 +314,12 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute");
 
                 /* Get the length of the name */
-                *get_name_args->attr_name_len = HDstrlen(attr->shared->name);
+                *get_name_args->attr_name_len = strlen(attr->shared->name);
 
                 /* Copy the name into the user's buffer, if given */
                 if (get_name_args->buf) {
-                    HDstrncpy(get_name_args->buf, attr->shared->name,
-                              MIN((*get_name_args->attr_name_len + 1), get_name_args->buf_size));
+                    strncpy(get_name_args->buf, attr->shared->name,
+                            MIN((*get_name_args->attr_name_len + 1), get_name_args->buf_size));
                     if (*get_name_args->attr_name_len >= get_name_args->buf_size)
                         get_name_args->buf[get_name_args->buf_size - 1] = '\0';
                 } /* end if */

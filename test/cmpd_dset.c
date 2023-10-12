@@ -19,7 +19,7 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
+static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", "select_cmpd_dset", NULL};
 
 const char *DSET_NAME[] = {"contig_src_subset", "chunk_src_subset", "contig_dst_subset", "chunk_dst_subset",
                            NULL};
@@ -78,6 +78,17 @@ typedef struct s6_t {
     unsigned int post;
 } s6_t;
 
+typedef struct s7_t {
+    int32_t a;
+    int32_t d;
+} s7_t;
+
+typedef struct s8_t {
+    int64_t a;
+    int64_t b;
+    int64_t c;
+} s8_t;
+
 /* Structures for testing the optimization for the Chicago company. */
 typedef struct {
     int    a, b, c[8], d, e;
@@ -107,6 +118,1164 @@ typedef struct {
 #define NX          100U
 #define NY          2000U
 #define PACK_NMEMBS 100
+
+static void  initialize_stype1(unsigned char *buf, size_t num);
+static void  initialize_stype2(unsigned char *buf, size_t num);
+static void  initialize_stype3(unsigned char *buf, size_t num);
+static void  initialize_stype4(unsigned char *buf, size_t num);
+static hid_t create_stype1(void);
+static hid_t create_stype2(void);
+static hid_t create_stype3(void);
+static hid_t create_stype4(void);
+static int   compare_data(void *src_data, void *dst_data, hbool_t src_subset);
+static int   compare_stype4_data(void *expect_buf, void *rbuf);
+static int   compare_s1_data(void *expect_buf, void *rbuf);
+static int   compare_s1_s3_data(void *expect_buf, void *rbuf);
+static int   compare_s7_data(void *expect_buf, void *rbuf);
+static int   compare_a_d_data(void *exp1_buf, void *exp2_buf, void *rbuf);
+static int   compare_a_b_c_data(void *exp1_buf, void *exp2_buf, void *rbuf);
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_stype4_data
+ *
+ * Purpose:     Compare data (the common fields in stype4/stype2) read in rbuf with expected data
+ *              in expect_buf.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_stype4_data(void *expect_buf, void *rbuf)
+{
+    int i;
+
+    for (i = 0; i < (int)(NX * NY); i++) {
+        stype4 *s1_ptr;
+        stype4 *s2_ptr;
+        s1_ptr = ((stype4 *)expect_buf) + i;
+        s2_ptr = ((stype4 *)rbuf) + i;
+
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
+            s1_ptr->c[1] != s2_ptr->c[1] || s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
+            s1_ptr->c[4] != s2_ptr->c[4] || s1_ptr->c[5] != s2_ptr->c[5] || s1_ptr->c[6] != s2_ptr->c[6] ||
+            s1_ptr->c[7] != s2_ptr->c[7] || s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->f, s2_ptr->f) || !H5_FLT_ABS_EQUAL(s1_ptr->g, s2_ptr->g) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[0], s2_ptr->h[0]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[1], s2_ptr->h[1]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[2], s2_ptr->h[2]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[3], s2_ptr->h[3]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[4], s2_ptr->h[4]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[5], s2_ptr->h[5]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[6], s2_ptr->h[6]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[7], s2_ptr->h[7]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[8], s2_ptr->h[8]) || !H5_FLT_ABS_EQUAL(s1_ptr->h[9], s2_ptr->h[9]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[10], s2_ptr->h[10]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[11], s2_ptr->h[11]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[12], s2_ptr->h[12]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[13], s2_ptr->h[13]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[14], s2_ptr->h[14]) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->h[15], s2_ptr->h[15]) || !H5_FLT_ABS_EQUAL(s1_ptr->i, s2_ptr->i) ||
+            !H5_FLT_ABS_EQUAL(s1_ptr->j, s2_ptr->j) || !H5_DBL_ABS_EQUAL(s1_ptr->k, s2_ptr->k) ||
+            !H5_DBL_ABS_EQUAL(s1_ptr->l, s2_ptr->l) || !H5_DBL_ABS_EQUAL(s1_ptr->m, s2_ptr->m) ||
+            !H5_DBL_ABS_EQUAL(s1_ptr->n, s2_ptr->n) || s1_ptr->o != s2_ptr->o || s1_ptr->p != s2_ptr->p ||
+            s1_ptr->q != s2_ptr->q) {
+            H5_FAILED();
+            printf("    i=%d\n", i);
+            printf("    exp_buf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
+                   "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
+                   "o=%ld, p=%ld, q=%ld}\n",
+                   s1_ptr->a, s1_ptr->b, s1_ptr->c[0], s1_ptr->c[1], s1_ptr->c[2], s1_ptr->c[3], s1_ptr->c[4],
+                   s1_ptr->c[5], s1_ptr->c[6], s1_ptr->c[7], s1_ptr->d, s1_ptr->e, (double)s1_ptr->f,
+                   (double)s1_ptr->g, (double)s1_ptr->h[0], (double)s1_ptr->h[1], (double)s1_ptr->h[2],
+                   (double)s1_ptr->h[3], (double)s1_ptr->h[4], (double)s1_ptr->h[5], (double)s1_ptr->h[6],
+                   (double)s1_ptr->h[7], (double)s1_ptr->h[8], (double)s1_ptr->h[9], (double)s1_ptr->h[10],
+                   (double)s1_ptr->h[11], (double)s1_ptr->h[12], (double)s1_ptr->h[13], (double)s1_ptr->h[14],
+                   (double)s1_ptr->h[15], (double)s1_ptr->i, (double)s1_ptr->j, s1_ptr->k, s1_ptr->l,
+                   s1_ptr->m, s1_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
+            printf("    rbuf={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
+                   "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, "
+                   "o=%ld, p=%ld, q=%ld}\n",
+                   s2_ptr->a, s2_ptr->b, s2_ptr->c[0], s2_ptr->c[1], s2_ptr->c[2], s2_ptr->c[3], s2_ptr->c[4],
+                   s2_ptr->c[5], s2_ptr->c[6], s2_ptr->c[7], s2_ptr->d, s2_ptr->e, (double)s2_ptr->f,
+                   (double)s2_ptr->g, (double)s2_ptr->h[0], (double)s2_ptr->h[1], (double)s2_ptr->h[2],
+                   (double)s2_ptr->h[3], (double)s2_ptr->h[4], (double)s2_ptr->h[5], (double)s2_ptr->h[6],
+                   (double)s2_ptr->h[7], (double)s2_ptr->h[8], (double)s2_ptr->h[9], (double)s2_ptr->h[10],
+                   (double)s2_ptr->h[11], (double)s2_ptr->h[12], (double)s2_ptr->h[13], (double)s2_ptr->h[14],
+                   (double)s2_ptr->h[15], (double)s2_ptr->i, (double)s2_ptr->j, s2_ptr->k, s2_ptr->l,
+                   s2_ptr->m, s2_ptr->n, s1_ptr->o, s1_ptr->p, s1_ptr->q);
+
+            goto error;
+        }
+    } /* end for */
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* compare_stype4_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_s1_data
+ *
+ * Purpose:     Compare data (s1_t) read in rbuf with expected data in expect_buf.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_s1_data(void *expect_buf, void *rbuf)
+{
+    int   i;
+    s1_t *s1_ptr;
+    s1_t *s2_ptr;
+
+    /* Compare save_s1 with rbuf1.  They should be the same */
+    for (i = 0; i < (int)(NX * NY); i++) {
+        s1_ptr = ((s1_t *)expect_buf) + i;
+        s2_ptr = ((s1_t *)rbuf) + i;
+
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
+            s1_ptr->c[1] != s2_ptr->c[1] || s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
+            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e) {
+            H5_FAILED();
+            printf("    i=%d\n", i);
+            puts("    Incorrect values read from the file");
+            goto error;
+        }
+    }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* compare_s1_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_s1_s3_data
+ *
+ * Purpose:     Compare data (s1_t/s3_t) read in rbuf with expected data in expect_buf.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_s1_s3_data(void *expect_buf, void *rbuf)
+{
+    int   i;
+    s1_t *s1_ptr;
+    s3_t *s2_ptr;
+
+    for (i = 0; i < (int)(NX * NY); i++) {
+        s1_ptr = ((s1_t *)expect_buf) + i;
+        s2_ptr = ((s3_t *)rbuf) + i;
+
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->b != s2_ptr->b || s1_ptr->c[0] != s2_ptr->c[0] ||
+            s1_ptr->c[1] != s2_ptr->c[1] || s1_ptr->c[2] != s2_ptr->c[2] || s1_ptr->c[3] != s2_ptr->c[3] ||
+            s1_ptr->d != s2_ptr->d || s1_ptr->e != s2_ptr->e) {
+            H5_FAILED();
+            printf("    i=%d\n", i);
+            puts("    Incorrect values read from the file");
+            goto error;
+        }
+    }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* compare_s1_s3_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_s7_data
+ *
+ * Purpose:     Compare data (s7_t) read in rbuf with expected data in expect_buf.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_s7_data(void *expect_buf, void *rbuf)
+{
+    int   i;
+    s7_t *s1_ptr;
+    s7_t *s2_ptr;
+
+    for (i = 0; i < (int)(NX * NY); i++) {
+        s1_ptr = ((s7_t *)expect_buf) + i;
+        s2_ptr = ((s7_t *)rbuf) + i;
+
+        /* Compare only the data */
+        if (s1_ptr->a != s2_ptr->a || s1_ptr->d != s2_ptr->d) {
+            H5_FAILED();
+            printf("    i=%d\n", i);
+            printf("    expect_buf:a=%d, d=%d\n", s1_ptr->a, s1_ptr->d);
+            printf("    rbuf:a=%d, d=%d", s2_ptr->a, s2_ptr->d);
+            goto error;
+        }
+    } /* end for */
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* compare_s7_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_s7_s8_data
+ *
+ * Purpose:     Compare data read in rbuf with expected data
+ *              in expect_buf: save_s7, save_s8.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_a_d_data(void *exp1_buf, void *exp2_buf, void *rbuf)
+{
+    int   i;
+    s7_t *s1_ptr;
+    s8_t *s2_ptr;
+    s7_t *rbuf_ptr;
+
+    for (i = 0; i < (int)(NX * NY); i++) {
+        s1_ptr   = ((s7_t *)exp1_buf) + i;
+        s2_ptr   = ((s8_t *)exp2_buf) + i;
+        rbuf_ptr = ((s7_t *)rbuf) + i;
+
+        if (s2_ptr->a != rbuf_ptr->a || s1_ptr->d != rbuf_ptr->d) {
+            H5_FAILED();
+            printf("    i=%d\n", i);
+            printf("    expect_buf:a=%d, d=%d\n", (int32_t)s2_ptr->a, s1_ptr->d);
+            printf("    rbuf: a=%d, d=%d", rbuf_ptr->a, rbuf_ptr->d);
+            goto error;
+        }
+    } /* end for */
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* compare_a_d_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_a_b_c_data
+ *
+ * Purpose:     Compare data read in rbuf with expected data
+ *              in expect_buf: save_s8, save_rbuf8.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_a_b_c_data(void *exp1_buf, void *exp2_buf, void *rbuf)
+{
+    int   i;
+    s8_t *s1_ptr;
+    s8_t *s2_ptr;
+    s8_t *rbuf_ptr;
+
+    for (i = 0; i < (int)(NX * NY); i++) {
+        s1_ptr   = ((s8_t *)exp1_buf) + i;
+        s2_ptr   = ((s8_t *)exp2_buf) + i;
+        rbuf_ptr = ((s8_t *)rbuf) + i;
+
+        if (s1_ptr->a != rbuf_ptr->a || s2_ptr->b != rbuf_ptr->b || s2_ptr->c != rbuf_ptr->c) {
+            H5_FAILED();
+            printf("    i=%d\n", i);
+            printf("    expect_buf:a=%ld, b=%ld, c=%ld\n", s1_ptr->a, s2_ptr->b, s2_ptr->c);
+            printf("    rbuf: a=%ld, b=%ld, c=%ld", rbuf_ptr->a, rbuf_ptr->b, rbuf_ptr->c);
+            goto error;
+        }
+    } /* end for */
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+
+} /* compare_a_b_c_data() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_select_src_subset
+ *
+ * Purpose:     This is derived from test_hdf5_src_subset() for selection
+ *              I/O testing:
+ *
+ *              Test the optimization of compound data writing, rewriting,
+ *              and reading when the source type is a subset of the destination
+ *              type.  For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *
+ * Return:    Success:    0
+ *            Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillvalue, unsigned set_buf)
+{
+    hid_t          fid     = H5I_INVALID_HID;
+    hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID;
+    hid_t          did           = H5I_INVALID_HID;
+    hid_t          sid           = H5I_INVALID_HID;
+    hid_t          dcpl          = H5I_INVALID_HID;
+    hid_t          dxpl          = H5I_INVALID_HID;
+    hsize_t        dims[2]       = {NX, NY};
+    hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
+    unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
+    int            fillvalue = (-1);
+    size_t         ss, ss1, ss2;
+
+    /* Create the file for this test */
+    if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid = create_stype1()) < 0)
+        goto error;
+
+    if ((rew_tid = create_stype3()) < 0)
+        goto error;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+
+    /* Allocate space and initialize data */
+    rbuf = (unsigned char *)calloc(NX * NY, sizeof(stype3));
+
+    rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype3));
+    initialize_stype3(rew_buf, (size_t)NX * NY);
+
+    /* Save a copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
+    save_rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype3));
+    initialize_stype3(save_rew_buf, (size_t)NX * NY);
+
+    /* Create dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    /*
+     * Create contiguous and chunked datasets.
+     * Write to the datasets in a different compound subset order
+     */
+    printf("    test_select_src_subset(): writing data to contiguous and chunked datasets");
+
+    if (set_fillvalue) {
+        if (H5Pset_fill_value(dcpl, src_tid, &fillvalue) < 0)
+            goto error;
+    }
+
+    dxpl = H5Pcopy(in_dxpl);
+    if (set_buf) {
+        ss1 = H5Tget_size(rew_tid);
+        ss2 = H5Tget_size(src_tid);
+        ss  = MAX(ss1, ss2) * NX * NY;
+
+        if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
+            goto error;
+    }
+
+    /* Create contiguous data set */
+    if ((did = H5Dcreate2(fid, DSET_NAME[0], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Write to the dataset with rew_tid */
+    if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
+        goto error;
+
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
+
+    if (memcmp(save_rew_buf, rbuf, sizeof(stype3) * NX * NY) != 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    /* Set chunking */
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        goto error;
+
+    /* Create chunked data set */
+    if ((did = H5Dcreate2(fid, DSET_NAME[1], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Write to the dataset with rew_tid */
+    if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
+
+    if (memcmp(save_rew_buf, rbuf, sizeof(stype3) * NX * NY) != 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Tclose(src_tid) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Tclose(rew_tid) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    free(rbuf);
+    free(rew_buf);
+    free(save_rew_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Tclose(src_tid);
+        H5Tclose(rew_tid);
+    }
+    H5E_END_TRY
+
+    if (rbuf)
+        free(rbuf);
+    if (rew_buf)
+        free(rew_buf);
+    if (save_rew_buf)
+        free(save_rew_buf);
+
+    printf("\n*** SELECT SRC SUBSET TEST FAILED ***\n");
+    return 1;
+} /* test_select_src_subset() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_select_dst_subset
+ *
+ * Purpose:     This is derived from test_hdf5_dst_subset() for selection
+ *              I/O testing:
+
+ *              Test the optimization of compound data writing, rewriting,
+ *              and reading when the destination type is a subset of the
+ *              source type.  For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                      TYPE4 D;               }
+ *                      TYPE5 E;
+ *                  };
+ *
+ * Return:    Success:    0
+ *            Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillvalue, unsigned set_buf)
+{
+    hid_t          fid     = H5I_INVALID_HID;
+    hid_t          rew_tid = H5I_INVALID_HID, src_tid = H5I_INVALID_HID;
+    hid_t          did           = H5I_INVALID_HID;
+    hid_t          sid           = H5I_INVALID_HID;
+    hid_t          dcpl          = H5I_INVALID_HID;
+    hid_t          dxpl          = H5I_INVALID_HID;
+    hsize_t        dims[2]       = {NX, NY};
+    hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
+    unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
+    int            fillvalue = (-1);
+    size_t         ss, ss1, ss2;
+
+    /* Create the file for this test */
+    if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid = create_stype2()) < 0)
+        goto error;
+
+    if ((rew_tid = create_stype4()) < 0)
+        goto error;
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+
+    rbuf = (unsigned char *)calloc(NX * NY, sizeof(stype4));
+
+    rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype4));
+    initialize_stype4(rew_buf, (size_t)NX * NY);
+
+    /* Save a copy as the buffer may be clobbered due to H5Pset_modify_write_buf() */
+    save_rew_buf = (unsigned char *)calloc(NX * NY, sizeof(stype4));
+    initialize_stype4(save_rew_buf, (size_t)NX * NY);
+
+    /* Create dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    /*
+     * Write data to contiguous and chunked datasets.
+     */
+    printf("    test_select_dst_subset(): writing data to contiguous and chunked datasets");
+
+    if (set_fillvalue) {
+        if (H5Pset_fill_value(dcpl, src_tid, &fillvalue) < 0)
+            goto error;
+    }
+
+    dxpl = H5Pcopy(in_dxpl);
+    if (set_buf) {
+        ss1 = H5Tget_size(rew_tid);
+        ss2 = H5Tget_size(src_tid);
+        ss  = MAX(ss1, ss2) * NX * NY;
+
+        if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
+            goto error;
+    }
+
+    /* Create contiguous data set */
+    if ((did = H5Dcreate2(fid, DSET_NAME[2], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Write to the dataset with rew_tid */
+    if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
+        goto error;
+
+    /* Read from the dataset with rew_tid */
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
+
+    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    /* Set chunking */
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        goto error;
+
+    /* Create chunked data set */
+    if ((did = H5Dcreate2(fid, DSET_NAME[3], src_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    initialize_stype4(rew_buf, (size_t)NX * NY);
+
+    /* Write data to the dataset with rew_tid */
+    if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
+        goto error;
+
+    /* Read frm the dataset with rew_tid */
+    if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
+        goto error;
+
+    if (compare_stype4_data(save_rew_buf, rbuf) < 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if (H5Sclose(sid) < 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Tclose(src_tid) < 0)
+        goto error;
+
+    if (H5Tclose(rew_tid) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    free(rbuf);
+    free(rew_buf);
+    free(save_rew_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Tclose(src_tid);
+        H5Tclose(rew_tid);
+    }
+    H5E_END_TRY
+
+    if (rbuf)
+        free(rbuf);
+    if (rew_buf)
+        free(rew_buf);
+    if (save_rew_buf)
+        free(save_rew_buf);
+
+    printf("\n*** SELECT DST SUBSET TEST FAILED ***\n");
+    return 1;
+} /* test_select_dst_subset */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_select_compound
+ *
+ * Purpose:     This is derived from test_comppound() for selection I/O
+ *              testing:
+ *
+ *              --Creates a simple dataset of a compound type and then
+ *              writes it in original and reverse order.
+ *              --Creates another dataset to verify the CI window
+ *              is fixed.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillvalue, unsigned set_buf)
+{
+    hid_t s1_tid = H5I_INVALID_HID;
+    hid_t s3_tid = H5I_INVALID_HID;
+    hid_t s7_tid = H5I_INVALID_HID;
+    hid_t s8_tid = H5I_INVALID_HID;
+
+    /* Buffers */
+    s1_t *s1      = NULL;
+    s1_t *save_s1 = NULL;
+    s3_t *s3      = NULL;
+    s3_t *save_s3 = NULL;
+    s1_t *rbuf1   = NULL;
+    s3_t *rbuf3   = NULL;
+
+    s7_t *s7      = NULL;
+    s7_t *save_s7 = NULL;
+    s7_t *rbuf7   = NULL;
+
+    s8_t *s8         = NULL;
+    s8_t *save_s8    = NULL;
+    s8_t *rbuf8      = NULL;
+    s8_t *save_rbuf8 = NULL;
+
+    /* Other variables */
+    unsigned int   i;
+    hid_t          fid       = H5I_INVALID_HID;
+    hid_t          did       = H5I_INVALID_HID;
+    hid_t          sid       = H5I_INVALID_HID;
+    hid_t          dcpl      = H5I_INVALID_HID;
+    hid_t          dxpl      = H5I_INVALID_HID;
+    hid_t          array_dt  = H5I_INVALID_HID;
+    static hsize_t dim[]     = {NX, NY};
+    int            fillvalue = (-1);
+    size_t         ss = 0, ss1 = 0, ss2 = 0;
+    hsize_t        memb_size[1] = {4};
+
+    /* Allocate buffers */
+    if (NULL == (s1 = (s1_t *)calloc(NX * NY, sizeof(s1_t))))
+        goto error;
+    if (NULL == (save_s1 = (s1_t *)calloc(NX * NY, sizeof(s1_t))))
+        goto error;
+    if (NULL == (rbuf1 = (s1_t *)calloc(NX * NY, sizeof(s1_t))))
+        goto error;
+    if (NULL == (s3 = (s3_t *)calloc(NX * NY, sizeof(s3_t))))
+        goto error;
+    if (NULL == (save_s3 = (s3_t *)calloc(NX * NY, sizeof(s3_t))))
+        goto error;
+    if (NULL == (rbuf3 = (s3_t *)calloc(NX * NY, sizeof(s3_t))))
+        goto error;
+
+    if (NULL == (s7 = (s7_t *)calloc(NX * NY, sizeof(s7_t))))
+        goto error;
+    if (NULL == (save_s7 = (s7_t *)calloc(NX * NY, sizeof(s7_t))))
+        goto error;
+    if (NULL == (rbuf7 = (s7_t *)calloc(NX * NY, sizeof(s7_t))))
+        goto error;
+
+    if (NULL == (s8 = (s8_t *)calloc(NX * NY, sizeof(s8_t))))
+        goto error;
+    if (NULL == (save_s8 = (s8_t *)calloc(NX * NY, sizeof(s8_t))))
+        goto error;
+    if (NULL == (rbuf8 = (s8_t *)calloc(NX * NY, sizeof(s8_t))))
+        goto error;
+    if (NULL == (save_rbuf8 = (s8_t *)calloc(NX * NY, sizeof(s8_t))))
+        goto error;
+
+    /* Create the file */
+    if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
+        goto error;
+    }
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(2, dim, NULL)) < 0)
+        goto error;
+
+    /* Create dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+
+    /* Create a copy of the incoming dataset transfer property list */
+    if ((dxpl = H5Pcopy(in_dxpl)) < 0)
+        goto error;
+
+    /*
+     * Create and write to the dataset in original compound struct members order
+     */
+    printf("    test_select_compound(): basic compound write");
+
+    /* Initialize buffer with s1_t */
+    for (i = 0; i < NX * NY; i++) {
+        s1[i].a    = 8 * i + 0;
+        s1[i].b    = 2000 + 2 * i;
+        s1[i].c[0] = 8 * i + 2;
+        s1[i].c[1] = 8 * i + 3;
+        s1[i].c[2] = 8 * i + 4;
+        s1[i].c[3] = 8 * i + 5;
+        s1[i].d    = 2001 + 2 * i;
+        s1[i].e    = 8 * i + 7;
+    }
+    memcpy(save_s1, s1, sizeof(s1_t) * NX * NY);
+
+    /* Create file type s1_t */
+    if ((s1_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0)
+        goto error;
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
+    if (H5Tinsert(s1_tid, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0 ||
+        H5Tinsert(s1_tid, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0 ||
+        H5Tinsert(s1_tid, "c", HOFFSET(s1_t, c), array_dt) < 0 ||
+        H5Tinsert(s1_tid, "d", HOFFSET(s1_t, d), H5T_NATIVE_INT) < 0 ||
+        H5Tinsert(s1_tid, "e", HOFFSET(s1_t, e), H5T_NATIVE_INT) < 0)
+        goto error;
+    H5Tclose(array_dt);
+
+    /* Set fill value accordingly */
+    if (set_fillvalue) {
+        if (H5Pset_fill_value(dcpl, s1_tid, &fillvalue) < 0)
+            goto error;
+    }
+
+    /* Create the dataset with file type s1_tid */
+    if ((did = H5Dcreate2(fid, "s1", s1_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Set buffer size accordingly */
+    if (set_buf) {
+        ss1 = H5Tget_size(s1_tid);
+
+        if (H5Pset_buffer(dxpl, ss1, NULL, NULL) < 0)
+            goto error;
+    }
+
+    /* Write to the dataset with file type s1_tid */
+    if (H5Dwrite(did, s1_tid, H5S_ALL, H5S_ALL, dxpl, s1) < 0)
+        goto error;
+
+    /* Read from the dataset with file type s1_tid */
+    if (H5Dread(did, s1_tid, H5S_ALL, H5S_ALL, dxpl, rbuf1) < 0)
+        goto error;
+
+    /* Verify data is correct */
+    if (compare_s1_data(save_s1, rbuf1) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     * Write to the dataset with s3 memory buffer. This buffer
+     * has the same data space but the data type is different: the
+     * data type is a struct whose members are in the opposite order.
+     */
+    printf("    test_select_compound(): reversal of struct members");
+
+    /* Create mem type s3_tid */
+    if ((s3_tid = H5Tcreate(H5T_COMPOUND, sizeof(s3_t))) < 0)
+        goto error;
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
+    if (H5Tinsert(s3_tid, "a", HOFFSET(s3_t, a), H5T_NATIVE_INT) < 0 ||
+        H5Tinsert(s3_tid, "b", HOFFSET(s3_t, b), H5T_NATIVE_INT) < 0 ||
+        H5Tinsert(s3_tid, "c", HOFFSET(s3_t, c), array_dt) < 0 ||
+        H5Tinsert(s3_tid, "d", HOFFSET(s3_t, d), H5T_NATIVE_INT) < 0 ||
+        H5Tinsert(s3_tid, "e", HOFFSET(s3_t, e), H5T_NATIVE_INT) < 0)
+        goto error;
+    H5Tclose(array_dt);
+
+    /* Initialize buffer with s3_t */
+    for (i = 0; i < NX * NY; i++) {
+        s3[i].a    = 8 * i + 0;
+        s3[i].b    = 2000 + 2 * i;
+        s3[i].c[0] = 8 * i + 2;
+        s3[i].c[1] = 8 * i + 3;
+        s3[i].c[2] = 8 * i + 4;
+        s3[i].c[3] = 8 * i + 5;
+        s3[i].d    = 2001 + 2 * i;
+        s3[i].e    = 8 * i + 7;
+    }
+
+    memcpy(save_s3, s3, sizeof(s3_t) * NX * NY);
+
+    /* Set buffer size accordingly */
+    if (set_buf) {
+        /* ss1 is set already previously */
+        ss2 = H5Tget_size(s3_tid);
+        ss  = MAX(ss1, ss2) * NX * NY;
+
+        if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
+            goto error;
+    }
+
+    /* Read from the dataset with mem type s3_tid */
+    if (H5Dread(did, s3_tid, H5S_ALL, H5S_ALL, dxpl, rbuf3) < 0)
+        goto error;
+
+    if (compare_s1_s3_data(save_s1, rbuf3) < 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    PASSED();
+
+    printf("    test_select_compound(): verify fix for non-optimized compound conversions with memory type "
+           "larger than file ");
+
+    /* Create file type s7_tid */
+    if ((s7_tid = H5Tcreate(H5T_COMPOUND, sizeof(s7_t))) < 0)
+        goto error;
+
+    if (H5Tinsert(s7_tid, "a", HOFFSET(s7_t, a), H5T_NATIVE_INT32) < 0 ||
+        H5Tinsert(s7_tid, "d", HOFFSET(s7_t, d), H5T_NATIVE_INT32) < 0)
+        goto error;
+
+    /* Initialize buffer with s7_t */
+    for (i = 0; i < NX * NY; i++) {
+        s7[i].a = (int32_t)(2 * i);
+        s7[i].d = (int32_t)(2 * i + 1);
+    }
+    memcpy(save_s7, s7, sizeof(s7_t) * NX * NY);
+
+    /* Create mem type s8_tid */
+    if ((s8_tid = H5Tcreate(H5T_COMPOUND, sizeof(s8_t))) < 0)
+        goto error;
+
+    if (H5Tinsert(s8_tid, "a", HOFFSET(s8_t, a), H5T_NATIVE_INT64) < 0 ||
+        H5Tinsert(s8_tid, "b", HOFFSET(s8_t, b), H5T_NATIVE_INT64) < 0 ||
+        H5Tinsert(s8_tid, "c", HOFFSET(s8_t, c), H5T_NATIVE_INT64) < 0)
+        goto error;
+
+    /* Initialize buffer with s8_t */
+    for (i = 0; i < NX * NY; i++) {
+        s8[i].a = (int64_t)(2 * NX * NY + 3 * i);
+        s8[i].b = (int64_t)(2 * NX * NY + 3 * i + 1);
+        s8[i].c = (int64_t)(2 * NX * NY + 3 * i + 2);
+    }
+    memcpy(save_s8, s8, sizeof(s8_t) * NX * NY);
+
+    /* Set fill value accordingly */
+    if (set_fillvalue) {
+        if (H5Pset_fill_value(dcpl, s7_tid, &fillvalue) < 0)
+            goto error;
+    }
+
+    /* Set buffer size accordingly */
+    if (set_buf) {
+        ss1 = H5Tget_size(s7_tid);
+        ss2 = H5Tget_size(s8_tid);
+        ss  = MAX(ss1, ss2) * NX * NY;
+
+        if (H5Pset_buffer(dxpl, ss, NULL, NULL) < 0)
+            goto error;
+    }
+
+    /* Create dataset with file type s7_tid */
+    if ((did = H5Dcreate2(fid, "ss", s7_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Write to the dataset with mem type s7_tid */
+    if (H5Dwrite(did, s7_tid, H5S_ALL, H5S_ALL, dxpl, s7) < 0)
+        goto error;
+
+    /* Read from the dataset with mem type s7_tid */
+    if (H5Dread(did, s7_tid, H5S_ALL, H5S_ALL, dxpl, rbuf7) < 0)
+        goto error;
+
+    /* Verify data read is correct */
+    if (compare_s7_data(save_s7, rbuf7) < 0)
+        goto error;
+
+    /* Write to the dataset with mem type s8_tid */
+    if (H5Dwrite(did, s8_tid, H5S_ALL, H5S_ALL, dxpl, s8) < 0)
+        goto error;
+
+    /* Read from the dataset with mem type s7_tid */
+    memset(rbuf7, 0, NX * NY * sizeof(s7_t));
+    if (H5Dread(did, s7_tid, H5S_ALL, H5S_ALL, dxpl, rbuf7) < 0)
+        goto error;
+
+    /* Verify a: save_s8, d: save_s7 */
+    if (compare_a_d_data(save_s7, save_s8, rbuf7) < 0)
+        goto error;
+
+    /* Initialize read buffer of s8_t with unique values */
+    for (i = 0; i < NX * NY; i++) {
+        rbuf8[i].a = (int64_t)(5 * NX * NY + 3 * i);
+        rbuf8[i].b = (int64_t)(5 * NX * NY + 3 * i + 1);
+        rbuf8[i].c = (int64_t)(5 * NX * NY + 3 * i + 2);
+    }
+    memcpy(save_rbuf8, rbuf8, sizeof(s8_t) * NX * NY);
+
+    /* Read from the dataset with mem type s8_tid */
+    if (H5Dread(did, s8_tid, H5S_ALL, H5S_ALL, dxpl, rbuf8) < 0)
+        goto error;
+
+    /* Verify a: save_s8; b, c: save_rbuf8 */
+    if (compare_a_b_c_data(save_s8, save_rbuf8, rbuf8) < 0)
+        goto error;
+
+    if (H5Dclose(did) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     * Release resources.
+     */
+    if (H5Sclose(sid) < 0)
+        goto error;
+
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+
+    if (H5Pclose(dxpl) < 0)
+        goto error;
+
+    if (H5Tclose(s1_tid) < 0)
+        goto error;
+
+    if (H5Tclose(s3_tid) < 0)
+        goto error;
+
+    if (H5Tclose(s7_tid) < 0)
+        goto error;
+
+    if (H5Tclose(s8_tid) < 0)
+        goto error;
+
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    /* Release buffers */
+    free(s1);
+    free(s3);
+    free(save_s3);
+    free(rbuf1);
+    free(rbuf3);
+    free(s7);
+    free(save_s7);
+    free(s8);
+    free(save_s8);
+    free(rbuf7);
+    free(rbuf8);
+    free(save_rbuf8);
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Tclose(s1_tid);
+        H5Tclose(s3_tid);
+        H5Tclose(s7_tid);
+        H5Tclose(s8_tid);
+    }
+    H5E_END_TRY
+
+    /* Release resources */
+    if (s1)
+        free(s1);
+    if (s3)
+        free(s3);
+    if (save_s3)
+        free(save_s3);
+    if (rbuf1)
+        free(rbuf1);
+    if (rbuf3)
+        free(rbuf3);
+    if (s7)
+        free(s7);
+    if (save_s7)
+        free(save_s7);
+    if (s8)
+        free(s8);
+    if (save_s8)
+        free(save_s8);
+    if (rbuf7)
+        free(rbuf7);
+    if (rbuf8)
+        free(rbuf8);
+    if (save_rbuf8)
+        free(save_rbuf8);
+
+    printf("\n*** SELECT COMPOUND DATASET TESTS FAILED ***\n");
+    return 1;
+} /* test_select_compound() */
+
+/*
+ * Purpose:     Tests for selection I/O with compound types:
+ *              --set_cache: set chunk cache to 0 or not
+ *                via H5Pset_cache(fapl...)
+ *              --set_fillvalue: set fill value or not
+ *                via H5Pset_fill_value(dcpl...)
+ *              --select_io: enable selection I/O or not
+ *                via H5Pset_selection_io(dxpl...)
+ *              --mwbuf: with or without modifying write buffers
+ *                via H5Pset_modify_write_buf(dxpl...)
+ *              --set_buf: with or without setting the maximum size
+ *                for the type conversion buffer and background buffer
+ *                via H5Pset_buffer(dxpl...)
+ *
+ *              These tests will test the selection I/O pipeline in particular
+ *              triggering H5D__scatgath_read()/write(),
+ *              H5D__scatgath_write_select_read()/write(),
+ *              and with/without the optimized compound read/write.
+ */
+static unsigned
+test_compounds_selection_io(void)
+{
+    unsigned nerrs = 0;
+    unsigned set_cache;     /* Set cache to 0 or not */
+    unsigned set_fillvalue; /* Set fill value or not */
+    unsigned select_io;     /* Enable selection I/O or not */
+    unsigned mwbuf;         /* With or without modifying write buffers */
+    unsigned set_buf;       /* With or without H5Pset_buffer */
+    hid_t    fapl = -1;
+    hid_t    dxpl = -1;
+    char     fname[256];
+
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[3], fapl, fname, sizeof(fname));
+
+    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
+        for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
+            for (select_io = FALSE; select_io <= TRUE; select_io++) {
+                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
+                    for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
+
+                        if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                            goto error;
+
+                        if (set_cache) {
+                            printf("  With chunk cache set 0, ");
+                            if (H5Pset_cache(fapl, 0, (size_t)0, (size_t)0, 0.0) < 0)
+                                goto error;
+                        }
+                        else
+                            printf("  With default chunk cache, ");
+
+                        if (set_fillvalue)
+                            printf("set fill value, ");
+                        else
+                            printf("not set fill value, ");
+
+                        if (select_io) {
+                            printf("selection I/O ON, ");
+                            if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+                                goto error;
+                        }
+                        else
+                            printf("selection I/O OFF, ");
+
+                        if (mwbuf) {
+                            printf("with modify write buf, ");
+                            if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                                goto error;
+                        }
+                        else
+                            printf("without modify write buf, ");
+
+                        if (set_buf)
+                            printf("with H5Pset_buffer:\n");
+                        else
+                            printf("without H5Pset_buffer:\n");
+
+                        nerrs += test_select_compound(fname, fapl, dxpl, set_fillvalue, set_buf);
+                        nerrs += test_select_src_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
+                        nerrs += test_select_dst_subset(fname, fapl, dxpl, set_fillvalue, set_buf);
+
+                        if (H5Pclose(dxpl) < 0)
+                            goto error;
+
+                    } /* set_buf */
+                }     /* mwbuf */
+            }         /* select_io */
+        }             /* set_fillvalue */
+    }                 /* set_cache */
+
+    if (H5Pclose(fapl) < 0)
+        goto error;
+
+    if (nerrs)
+        goto error;
+
+    return 0;
+
+error:
+    printf("*** COMPOUNDS TESTS FOR SELECTION I/O FAILED ***");
+
+    return 1;
+} /* test_compounds_selection_io() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_compound
@@ -202,7 +1371,7 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 0) {
         printf("Preserve status of dataset transfer property list should be"
-               " 0 (FALSE), got %d\n",
+               " 0 (false), got %d\n",
                ret_code);
         goto error;
     }
@@ -210,7 +1379,7 @@ test_compound(char *filename, hid_t fapl)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 1) {
         printf("Preserve status of dataset transfer property list should be"
-               " 1 (TRUE), got %d\n",
+               " 1 (true), got %d\n",
                ret_code);
         goto error;
     }
@@ -286,7 +1455,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s2[i].c[1] || s1[i].c[2] != s2[i].c[2] || s1[i].c[3] != s2[i].c[3] ||
             s1[i].d != s2[i].d || s1[i].e != s2[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -323,7 +1492,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s3[i].c[1] || s1[i].c[2] != s3[i].c[2] || s1[i].c[3] != s3[i].c[3] ||
             s1[i].d != s3[i].d || s1[i].e != s3[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -353,7 +1522,7 @@ test_compound(char *filename, hid_t fapl)
     for (i = 0; i < NX * NY; i++) {
         if (s1[i].b != s4[i].b || s1[i].d != s4[i].d) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -397,7 +1566,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s5[i].c[1] || s1[i].c[2] != s5[i].c[2] || s1[i].c[3] != s5[i].c[3] ||
             s1[i].d != s5[i].d || s1[i].e != s5[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -407,7 +1576,7 @@ test_compound(char *filename, hid_t fapl)
         if (s5[i].pre != 1000 + 4 * i || s5[i].mid1 != 1001 + 4 * i || s5[i].mid2 != 1002 + 4 * i ||
             s5[i].post != 1003 + 4 * i) {
             H5_FAILED();
-            HDputs("    Memory values were clobbered");
+            puts("    Memory values were clobbered");
             goto error;
         }
     }
@@ -466,7 +1635,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s6[i].c[1] || s1[i].c[2] != s6[i].c[2] || s1[i].c[3] != s6[i].c[3] ||
             s1[i].d != s6[i].d || s1[i].e != s6[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from the file");
+            puts("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -476,7 +1645,7 @@ test_compound(char *filename, hid_t fapl)
         if (s6[i].pre != 1000 + 4 * i || s6[i].mid1 != 1001 + 4 * i || s6[i].mid2 != 1002 + 4 * i ||
             s6[i].post != 1003 + 4 * i) {
             H5_FAILED();
-            HDputs("    Memory values were clobbered");
+            puts("    Memory values were clobbered");
             goto error;
         }
     }
@@ -545,7 +1714,7 @@ test_compound(char *filename, hid_t fapl)
             s2[i].c[1] != s1[i].c[1] || s2[i].c[2] != s1[i].c[2] || s2[i].c[3] != s1[i].c[3] ||
             s2[i].d != s1[i].d || s2[i].e != s1[i].e) {
             H5_FAILED();
-            HDputs("    Incorrect values read from file");
+            puts("    Incorrect values read from file");
             goto error;
         }
     }
@@ -588,7 +1757,7 @@ test_compound(char *filename, hid_t fapl)
             if (ps8->a != ps1->a || ps8->b != ps1->b || ps8->c[0] != ps1->c[0] || ps8->c[1] != ps1->c[1] ||
                 ps8->c[2] != ps1->c[2] || ps8->c[3] != ps1->c[3] || ps8->d != ps1->d || ps8->e != ps1->e) {
                 H5_FAILED();
-                HDputs("    Incorrect values read from file");
+                puts("    Incorrect values read from file");
                 goto error;
             }
         }
@@ -627,7 +1796,7 @@ test_compound(char *filename, hid_t fapl)
                     ps2->c[1] != ps1->c[1] || ps2->c[2] != ps1->c[2] || ps2->c[3] != ps1->c[3] ||
                     ps2->d != ps1->d || ps2->e != ps1->e) {
                     H5_FAILED();
-                    HDputs("    Memory values clobbered");
+                    puts("    Memory values clobbered");
                     goto error;
                 }
             }
@@ -636,7 +1805,7 @@ test_compound(char *filename, hid_t fapl)
                     ps2->c[1] != (unsigned)(-1) || ps2->c[2] != (unsigned)(-1) ||
                     ps2->c[3] != (unsigned)(-1) || ps2->d != (unsigned)(-1) || ps2->e != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Incorrect values read from file");
+                    puts("    Incorrect values read from file");
                     goto error;
                 }
             }
@@ -675,7 +1844,7 @@ test_compound(char *filename, hid_t fapl)
                     ps5->c[2] != ps1->c[2] || ps5->c[3] != ps1->c[3] || ps5->mid2 != (unsigned)(-1) ||
                     ps5->d != ps1->d || ps5->e != ps1->e || ps5->post != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Memory values clobbered");
+                    puts("    Memory values clobbered");
                     goto error;
                 }
             }
@@ -686,7 +1855,7 @@ test_compound(char *filename, hid_t fapl)
                     ps5->c[3] != (unsigned)(-1) || ps5->mid2 != (unsigned)(-1) || ps5->d != (unsigned)(-1) ||
                     ps5->e != (unsigned)(-1) || ps5->post != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Incorrect values read from file");
+                    puts("    Incorrect values read from file");
                     goto error;
                 }
             }
@@ -735,7 +1904,7 @@ test_compound(char *filename, hid_t fapl)
                 ps1->c[1] != 8 * (i * NY + j) + 3 || ps1->c[2] != 8 * (i * NY + j) + 4 ||
                 ps1->c[3] != 8 * (i * NY + j) + 5 || ps1->e != 8 * (i * NY + j) + 7) {
                 H5_FAILED();
-                HDputs("    Write clobbered values");
+                puts("    Write clobbered values");
                 goto error;
             }
 
@@ -743,14 +1912,14 @@ test_compound(char *filename, hid_t fapl)
                 j < f_offset[1] + h_size[1]) {
                 if (ps1->b != (unsigned)(-1) || ps1->d != (unsigned)(-1)) {
                     H5_FAILED();
-                    HDputs("    Wrong values written or read");
+                    puts("    Wrong values written or read");
                     goto error;
                 }
             }
             else {
                 if (ps1->b != 8 * (i * NY + j) + 1 || ps1->d != 8 * (i * NY + j) + 6) {
                     H5_FAILED();
-                    HDputs("    Write clobbered values");
+                    puts("    Write clobbered values");
                     goto error;
                 }
             }
@@ -776,7 +1945,7 @@ test_compound(char *filename, hid_t fapl)
     return 0;
 
 error:
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
 
     /* Release resources */
     if (s1)
@@ -1159,7 +2328,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_data(void *src_data, void *dst_data, hbool_t src_subset)
+compare_data(void *src_data, void *dst_data, bool src_subset)
 {
     stype1 *s_ptr;
     stype2 *d_ptr;
@@ -1220,7 +2389,7 @@ error:
  * Function:    test_hdf5_src_subset
  *
  * Purpose:    Test the optimization of compound data writing, rewriting,
- *              and reading when the source type is a subset of destination
+ *              and reading when the source type is a subset of the destination
  *              type.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -1324,7 +2493,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_preserve(dxpl, TRUE) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Rewrite contiguous data set */
@@ -1364,7 +2533,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (compare_data(orig, rbuf, TRUE) < 0)
+    if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
@@ -1377,7 +2546,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (compare_data(orig, rbuf, TRUE) < 0)
+    if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
@@ -1414,7 +2583,7 @@ error:
     free(rbuf);
     free(rew_buf);
 
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1432,7 +2601,7 @@ error:
  *                      TYPE5 E;
  *                  };
  *              This optimization is for the Chicago company.  This test
- *              is in opposite of test_hdf5_src_subset.
+ *              is the opposite of test_hdf5_src_subset.
  *
  * Return:    Success:    0
  *
@@ -1527,7 +2696,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
 
-    if (H5Pset_preserve(dxpl, TRUE) < 0)
+    if (H5Pset_preserve(dxpl, true) < 0)
         goto error;
 
     /* Rewrite contiguous data set */
@@ -1567,7 +2736,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if (compare_data(orig, rbuf, FALSE) < 0)
+    if (compare_data(orig, rbuf, false) < 0)
         goto error;
 
     if (H5Dclose(dataset) < 0)
@@ -1580,7 +2749,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if (compare_data(orig, rbuf, FALSE) < 0)
+    if (compare_data(orig, rbuf, false) < 0)
         goto error;
 
     if (H5Dclose(dataset) < 0)
@@ -1613,7 +2782,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     return 0;
 
 error:
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1686,9 +2855,9 @@ test_pack_ooo(void)
 
     for (extra_space = 0; extra_space < 2; extra_space++) {
         if (extra_space)
-            HDputs("With extra space at the end of compound...");
+            puts("With extra space at the end of compound...");
         else
-            HDputs("Without extra space at the end of compound...");
+            puts("Without extra space at the end of compound...");
 
         TESTING("random member insertion with empty compound subtype");
 
@@ -1702,7 +2871,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == sub_cmpd_order) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1735,7 +2904,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in the random order previously generated */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == sub_cmpd_order) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * order[i]), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1770,7 +2939,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == PACK_NMEMBS - 1) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1803,7 +2972,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in reverse order, with compound last */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == PACK_NMEMBS - 1) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * (PACK_NMEMBS - i - 1)), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1838,7 +3007,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order, with compound first */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == 0) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1871,7 +3040,7 @@ test_pack_ooo(void)
 
         /* Insert the compound members in forward order */
         for (i = 0; i < PACK_NMEMBS; i++) {
-            HDsnprintf(name, sizeof(name), "%05d", i);
+            snprintf(name, sizeof(name), "%05d", i);
             if (i == 0) {
                 if (H5Tinsert(cmpd, name, (size_t)(4 * i), sub_cmpd) < 0)
                     PACK_OOO_ERROR
@@ -1898,7 +3067,7 @@ test_pack_ooo(void)
     return 0;
 
 error:
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1920,10 +3089,10 @@ error:
 static unsigned
 test_ooo_order(char *filename, hid_t fapl_id)
 {
-    hid_t  file      = -1;   /* File ID */
-    hid_t  dtype     = -1;   /* Datatype IDs */
-    hid_t  dtype_tmp = -1;   /* Temp Datatype ID */
-    H5T_t *dt        = NULL; /* Datatype pointer */
+    hid_t  file      = H5I_INVALID_HID; /* File ID */
+    hid_t  dtype     = H5I_INVALID_HID; /* Datatype IDs */
+    hid_t  dtype_tmp = H5I_INVALID_HID; /* Temp Datatype ID */
+    H5T_t *dt        = NULL;            /* Datatype pointer */
 
     TESTING("that compound member insertion order is preserved");
 
@@ -2138,7 +3307,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY
-    HDputs("*** DATASET TESTS FAILED ***");
+    puts("*** DATASET TESTS FAILED ***");
     return 1;
 } /* test_ooo_order */
 
@@ -2165,7 +3334,7 @@ main(int argc, char *argv[])
 
     /* Turn off optimized compound converter? */
     if (argc > 1) {
-        if (argc > 2 || HDstrcmp("--noopt", argv[1]) != 0) {
+        if (argc > 2 || strcmp("--noopt", argv[1]) != 0) {
             fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
@@ -2173,26 +3342,29 @@ main(int argc, char *argv[])
                       (H5T_conv_t)((void (*)(void))H5T__conv_struct_opt));
     }
 
+    printf("Testing compound dataset for selection I/O cases----\n");
+    nerrors += test_compounds_selection_io();
+
     /* Create the file */
     fapl_id = h5_fileaccess();
 
     h5_fixname(FILENAME[0], fapl_id, fname, sizeof(fname));
 
-    HDputs("Testing compound dataset:");
+    puts("Testing compound dataset:");
     nerrors += test_compound(fname, fapl_id);
 
-    HDputs("Testing the optimization of when the source type is a subset of the dest:");
+    puts("Testing the optimization of when the source type is a subset of the dest:");
     h5_fixname(FILENAME[1], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_src_subset(fname, fapl_id);
 
-    HDputs("Testing the optimization of when the dest type is a subset of the source:");
+    puts("Testing the optimization of when the dest type is a subset of the source:");
     h5_fixname(FILENAME[2], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_dst_subset(fname, fapl_id);
 
-    HDputs("Testing that compound types can be packed out of order:");
+    puts("Testing that compound types can be packed out of order:");
     nerrors += test_pack_ooo();
 
-    HDputs("Testing compound member ordering:");
+    puts("Testing compound member ordering:");
     nerrors += test_ooo_order(fname, fapl_id);
 
     /* Verify symbol table messages are cached */
@@ -2204,6 +3376,6 @@ main(int argc, char *argv[])
     }
 
     h5_cleanup(FILENAME, fapl_id);
-    HDputs("All compound dataset tests passed.");
+    puts("All compound dataset tests passed.");
     return 0;
 }

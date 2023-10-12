@@ -42,12 +42,12 @@
 /********************/
 
 /* Selection callbacks */
-static herr_t   H5S__none_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
+static herr_t   H5S__none_copy(H5S_t *dst, const H5S_t *src, bool share_selection);
 static herr_t   H5S__none_release(H5S_t *space);
 static htri_t   H5S__none_is_valid(const H5S_t *space);
 static hssize_t H5S__none_serial_size(H5S_t *space);
 static herr_t   H5S__none_serialize(H5S_t *space, uint8_t **p);
-static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip);
+static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip);
 static herr_t   H5S__none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__none_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__none_unlim_dim(const H5S_t *space);
@@ -226,7 +226,7 @@ H5S__none_iter_nelmts(const H5S_sel_iter_t H5_ATTR_UNUSED *iter)
     htri_t H5S__none_iter_has_next_block(iter)
         const H5S_sel_iter_t *iter;       IN: Pointer to selection iterator
  RETURNS
-    Non-negative (TRUE/FALSE) on success/Negative on failure
+    Non-negative (true/false) on success/Negative on failure
  DESCRIPTION
     Check if there is another block available in the selection iterator.
  GLOBAL VARIABLES
@@ -422,7 +422,7 @@ H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
     herr_t H5S__none_copy(dst, src, share_selection)
         H5S_t *dst;  OUT: Pointer to the destination dataspace
         H5S_t *src;  IN: Pointer to the source dataspace
-        hbool_t;     IN: Whether to share the selection between the dataspaces
+        bool;     IN: Whether to share the selection between the dataspaces
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -434,7 +434,7 @@ H5S__none_release(H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED share_selection)
+H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, bool H5_ATTR_UNUSED share_selection)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -457,7 +457,7 @@ H5S__none_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUS
     htri_t H5S__none_is_valid(space);
         H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
-    TRUE if the selection fits within the extent, FALSE if it does not and
+    true if the selection fits within the extent, false if it does not and
         Negative on an error.
  DESCRIPTION
     Determines if the current selection at the current offset fits within the
@@ -474,7 +474,7 @@ H5S__none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
 
     assert(space);
 
-    FUNC_LEAVE_NOAPI(TRUE)
+    FUNC_LEAVE_NOAPI(true)
 } /* end H5S__none_is_valid() */
 
 /*--------------------------------------------------------------------------
@@ -578,7 +578,7 @@ H5S__none_serialize(H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
+H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, bool skip)
 {
     H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
                                                    either *space or a newly allocated one */
@@ -738,7 +738,7 @@ H5S__none_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
     htri_t H5S__none_is_contiguous(space)
         H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
-    TRUE/FALSE/FAIL
+    true/false/FAIL
  DESCRIPTION
     Checks to see if the current selection in the dataspace is contiguous.
     This is primarily used for reading the entire selection in one swoop.
@@ -754,7 +754,7 @@ H5S__none_is_contiguous(const H5S_t H5_ATTR_UNUSED *space)
 
     assert(space);
 
-    FUNC_LEAVE_NOAPI(FALSE)
+    FUNC_LEAVE_NOAPI(false)
 } /* end H5S__none_is_contiguous() */
 
 /*--------------------------------------------------------------------------
@@ -766,7 +766,7 @@ H5S__none_is_contiguous(const H5S_t H5_ATTR_UNUSED *space)
     htri_t H5S__none_is_single(space)
         H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
-    TRUE/FALSE/FAIL
+    true/false/FAIL
  DESCRIPTION
     Checks to see if the current selection in the dataspace is a single block.
     This is primarily used for reading the entire selection in one swoop.
@@ -782,7 +782,7 @@ H5S__none_is_single(const H5S_t H5_ATTR_UNUSED *space)
 
     assert(space);
 
-    FUNC_LEAVE_NOAPI(FALSE)
+    FUNC_LEAVE_NOAPI(false)
 } /* end H5S__none_is_single() */
 
 /*--------------------------------------------------------------------------
@@ -794,7 +794,7 @@ H5S__none_is_single(const H5S_t H5_ATTR_UNUSED *space)
     htri_t H5S__none_is_regular(space)
         H5S_t *space;     IN: Dataspace pointer to check
  RETURNS
-    TRUE/FALSE/FAIL
+    true/false/FAIL
  DESCRIPTION
     Checks to see if the current selection in a dataspace is the a regular
     pattern.
@@ -812,7 +812,7 @@ H5S__none_is_regular(H5S_t H5_ATTR_UNUSED *space)
     /* Check args */
     assert(space);
 
-    FUNC_LEAVE_NOAPI(TRUE)
+    FUNC_LEAVE_NOAPI(true)
 } /* end H5S__none_is_regular() */
 
 /*--------------------------------------------------------------------------
@@ -825,7 +825,7 @@ H5S__none_is_regular(H5S_t H5_ATTR_UNUSED *space)
         H5S_t *space1;           IN: First dataspace to check
         H5S_t *space2;           IN: Second dataspace to check
  RETURNS
-    TRUE / FALSE / FAIL
+    true / false / FAIL
  DESCRIPTION
     Checks to see if the current selection in each dataspace are the same
     shape.
@@ -843,7 +843,7 @@ H5S__none_shape_same(H5S_t H5_ATTR_UNUSED *space1, H5S_t H5_ATTR_UNUSED *space2)
     assert(space1);
     assert(space2);
 
-    FUNC_LEAVE_NOAPI(TRUE)
+    FUNC_LEAVE_NOAPI(true)
 } /* end H5S__none_shape_same() */
 
 /*--------------------------------------------------------------------------
@@ -857,7 +857,7 @@ H5S__none_shape_same(H5S_t H5_ATTR_UNUSED *space1, H5S_t H5_ATTR_UNUSED *space2)
         const hsize_t *start;   IN: Starting coordinate for block
         const hsize_t *end;     IN: Ending coordinate for block
  RETURNS
-    Non-negative TRUE / FALSE on success, negative on failure
+    Non-negative true / false on success, negative on failure
  DESCRIPTION
     Quickly detect intersections with a block
  GLOBAL VARIABLES
@@ -877,7 +877,7 @@ H5S__none_intersect_block(H5S_t H5_ATTR_UNUSED *space, const hsize_t H5_ATTR_UNU
     assert(start);
     assert(end);
 
-    FUNC_LEAVE_NOAPI(FALSE)
+    FUNC_LEAVE_NOAPI(false)
 } /* end H5S__none_intersect_block() */
 
 /*--------------------------------------------------------------------------

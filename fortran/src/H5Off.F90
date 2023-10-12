@@ -1345,7 +1345,7 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5Ovisit_by_name3(loc_id, object_name, index_type, order, &
             op, op_data, fields, lapl_id) BIND(C, NAME='H5Ovisit_by_name3')
          IMPORT :: C_CHAR, C_PTR, C_FUNPTR, C_INT
-         IMPORT :: HID_T, SIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: object_name

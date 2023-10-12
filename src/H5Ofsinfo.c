@@ -30,9 +30,9 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__fsinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                  size_t p_size, const uint8_t *p);
-static herr_t H5O__fsinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__fsinfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O__fsinfo_copy(const void *_mesg, void *_dest);
-static size_t H5O__fsinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static size_t H5O__fsinfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__fsinfo_free(void *mesg);
 static herr_t H5O__fsinfo_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -130,7 +130,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         switch (strategy) {
             case H5F_FILE_SPACE_ALL_PERSIST:
                 fsinfo->strategy  = H5F_FSPACE_STRATEGY_FSM_AGGR;
-                fsinfo->persist   = TRUE;
+                fsinfo->persist   = true;
                 fsinfo->threshold = threshold;
                 if (HADDR_UNDEF == (fsinfo->eoa_pre_fsm_fsalloc = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size");
@@ -162,7 +162,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         }
 
         fsinfo->version = H5O_FSINFO_VERSION_1;
-        fsinfo->mapped  = TRUE;
+        fsinfo->mapped  = true;
     }
     else {
         if (vers < H5O_FSINFO_VERSION_1)
@@ -198,7 +198,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
             }
-        fsinfo->mapped = FALSE;
+        fsinfo->mapped = false;
     }
 
     /* Set return value */
@@ -221,7 +221,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__fsinfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo = (const H5O_fsinfo_t *)_mesg;
     H5F_mem_page_t      ptype; /* Memory type for iteration */
@@ -299,7 +299,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__fsinfo_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo    = (const H5O_fsinfo_t *)_mesg;
     size_t              ret_value = 0; /* Return value */

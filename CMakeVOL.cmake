@@ -107,7 +107,6 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
       option ("HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL" "Whether to test VOL connector '${hdf5_vol_name}' against the parallel API tests" OFF)
 
       mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_NAME")
-      mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_BRANCH")
       mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL")
 
       if (HDF5_TEST_API)

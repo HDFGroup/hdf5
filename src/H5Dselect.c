@@ -75,9 +75,9 @@ static herr_t
 H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t elmt_size)
 {
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
+    bool            mem_iter_init  = false; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *file_iter      = NULL;  /* File selection iteration info */
-    hbool_t         file_iter_init = FALSE; /* File selection iteration info has been initialized */
+    bool            file_iter_init = false; /* File selection iteration info has been initialized */
     hsize_t        *mem_off        = NULL;  /* Pointer to sequence offsets in memory */
     hsize_t        *file_off       = NULL;  /* Pointer to sequence offsets in the file */
     size_t         *mem_len        = NULL;  /* Pointer to sequence lengths in memory */
@@ -278,8 +278,8 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
 {
     H5S_sel_iter_t *dst_sel_iter      = NULL;  /* Destination dataspace iteration info */
     H5S_sel_iter_t *src_sel_iter      = NULL;  /* Source dataspace iteration info */
-    hbool_t         dst_sel_iter_init = FALSE; /* Destination dataspace selection iterator initialized? */
-    hbool_t         src_sel_iter_init = FALSE; /* Source dataspace selection iterator initialized? */
+    bool            dst_sel_iter_init = false; /* Destination dataspace selection iterator initialized? */
+    bool            src_sel_iter_init = false; /* Source dataspace selection iterator initialized? */
     hsize_t        *dst_off           = NULL;  /* Pointer to sequence offsets in destination buffer */
     hsize_t        *src_off           = NULL;  /* Pointer to sequence offsets in source buffer */
     size_t         *dst_len           = NULL;  /* Pointer to sequence lengths in destination buffer */
@@ -364,12 +364,12 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
         /* Initialize destination selection iterator */
         if (H5S_select_iter_init(dst_sel_iter, dst_space, elmt_size, sel_iter_flags) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-        dst_sel_iter_init = TRUE; /* Destination selection iteration info has been initialized */
+        dst_sel_iter_init = true; /* Destination selection iteration info has been initialized */
 
         /* Initialize source selection iterator */
         if (H5S_select_iter_init(src_sel_iter, src_space, elmt_size, H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-        src_sel_iter_init = TRUE; /* Source selection iteration info has been initialized */
+        src_sel_iter_init = true; /* Source selection iteration info has been initialized */
 
         /* Initialize sequence counts */
         curr_dst_seq = curr_src_seq = 0;

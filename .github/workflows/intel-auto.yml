@@ -1,0 +1,97 @@
+name: hdf5 1.14 autotools icx CI
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  Intel_build_and_test:
+    name: "Intel ${{ inputs.build_mode }} -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run:  |
+          sudo apt-get update
+          sudo apt-get install autoconf automake libtool libtool-bin libaec-dev
+      - name: Add oneAPI to apt
+        shell: bash
+        run: |
+          cd /tmp
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+          sudo add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
+      
+      - name: Install oneAPI dpcpp and fortran compiler
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y intel-oneapi-compiler-dpcpp-cpp
+          sudo apt install -y intel-oneapi-compiler-fortran
+          sudo apt install -y intel-oneapi-mpi-devel
+          sudo apt-get install doxygen graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           echo "CC=icx" >> $GITHUB_ENV
+           echo "CXX=icpx" >> $GITHUB_ENV
+           echo "FC=ifx" >> $GITHUB_ENV
+
+      - name: Install oneAPI MKL library
+        shell: bash
+        run: |
+          sudo apt install -y intel-oneapi-mkl-devel
+
+      - name: Autotools Configure
+        shell: bash
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=${{ inputs.build_mode }} \
+            --enable-shared \
+            --disable-fortran
+
+      # BUILD
+      - name: Autotools Build
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      # NORMAL
+      - name: Autotools Run Tests
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export SYCL_DEVICE_FILTER=opencl.cpu
+          make check -j2
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export SYCL_DEVICE_FILTER=opencl.cpu
+          make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export SYCL_DEVICE_FILTER=opencl.cpu
+          make check-install
+        working-directory: ${{ runner.workspace }}/build

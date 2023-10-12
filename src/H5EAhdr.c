@@ -333,7 +333,7 @@ haddr_t
 H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
 {
     H5EA_hdr_t *hdr       = NULL;  /* Extensible array header */
-    hbool_t     inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool        inserted  = false; /* Whether the header was inserted into cache */
     haddr_t     ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_PACKAGE
@@ -415,7 +415,7 @@ H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata)
     /* Cache the new extensible array header */
     if (H5AC_insert_entry(f, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, HADDR_UNDEF, "can't add extensible array header to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add header as child of 'top' proxy */
     if (hdr->top_proxy)

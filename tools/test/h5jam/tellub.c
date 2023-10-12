@@ -124,7 +124,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    ifname = HDstrdup(argv[H5_optind]);
+    ifname = strdup(argv[H5_optind]);
 
     testval = H5Fis_accessible(ifname, H5P_DEFAULT);
 

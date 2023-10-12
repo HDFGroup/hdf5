@@ -382,7 +382,7 @@ reply_error(struct mirror_session *session, const char *msg)
     mirror_log(session->loginfo, V_ALL, "reply_error(%s)", msg);
 
     reply->status = H5FD_MIRROR_STATUS_ERROR;
-    HDsnprintf(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX - 1, "%s", msg);
+    snprintf(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX - 1, "%s", msg);
     return _xmit_reply(session);
 } /* end reply_error() */
 
@@ -838,7 +838,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
     } /* end if hexdump transmissions received */
 
     /* old-fashioned manual kill (for debugging) */
-    if (!HDstrncmp("GOODBYE", comm->raw, 7)) {
+    if (!strncmp("GOODBYE", comm->raw, 7)) {
         mirror_log(session->loginfo, V_INFO, "received GOODBYE");
         comm->recd_die = 1;
         goto done;

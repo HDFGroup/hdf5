@@ -18,11 +18,11 @@ main(int argc, char *argv[])
 {
     int file_number = -1; /* Source file number               */
 
-    hid_t fid    = -1; /* HDF5 file ID                     */
-    hid_t faplid = -1; /* file access property list ID                */
-    hid_t did    = -1; /* dataset ID                       */
-    hid_t msid   = -1; /* memory dataspace ID              */
-    hid_t fsid   = -1; /* file dataspace ID                */
+    hid_t fid    = H5I_INVALID_HID; /* HDF5 file ID                     */
+    hid_t faplid = H5I_INVALID_HID; /* file access property list ID                */
+    hid_t did    = H5I_INVALID_HID; /* dataset ID                       */
+    hid_t msid   = H5I_INVALID_HID; /* memory dataspace ID              */
+    hid_t fsid   = H5I_INVALID_HID; /* file dataspace ID                */
 
     hsize_t extent[RANK]; /* dataset extents                  */
     hsize_t start[RANK];  /* hyperslab start point            */

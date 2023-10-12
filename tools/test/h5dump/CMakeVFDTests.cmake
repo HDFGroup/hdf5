@@ -26,8 +26,8 @@ set (HDF5_VFD_H5DUMP_FILES
 
 foreach (vfdtest ${VFD_LIST})
   foreach (h5_tfile ${HDF5_VFD_H5DUMP_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}.h5" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.h5" "HDF5_VFD_H5DUMP_files")
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}.ddl" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.ddl" "HDF5_VFD_H5DUMP_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}.h5" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.h5" "HDF5_VFD_H5DUMP_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_tfile}.ddl" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.ddl" "HDF5_VFD_H5DUMP_files")
   endforeach ()
 endforeach ()
 

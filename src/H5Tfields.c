@@ -215,12 +215,12 @@ H5Tget_member_index(hid_t type_id, const char *name)
     switch (dt->shared->type) {
         case H5T_COMPOUND:
             for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
-                if (!HDstrcmp(dt->shared->u.compnd.memb[i].name, name))
+                if (!strcmp(dt->shared->u.compnd.memb[i].name, name))
                     HGOTO_DONE((int)i);
             break;
         case H5T_ENUM:
             for (i = 0; i < dt->shared->u.enumer.nmembs; i++)
-                if (!HDstrcmp(dt->shared->u.enumer.name[i], name))
+                if (!strcmp(dt->shared->u.enumer.name[i], name))
                     HGOTO_DONE((int)i);
             break;
 
@@ -261,7 +261,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
 {
     unsigned nmembs; /* Number of members for datatype */
     size_t   size;
-    hbool_t  swapped; /* Whether we've swapped fields */
+    bool     swapped; /* Whether we've swapped fields */
     uint8_t  tbuf[32];
     unsigned i, j;                /* Local index variables */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -277,8 +277,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
         if (H5T_SORT_VALUE != dt->shared->u.compnd.sorted) {
             dt->shared->u.compnd.sorted = H5T_SORT_VALUE;
             nmembs                      = dt->shared->u.compnd.nmembs;
-            for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
-                for (j = 0, swapped = FALSE; j < i; j++) {
+            for (i = nmembs - 1, swapped = true; i > 0 && swapped; --i) {
+                for (j = 0, swapped = false; j < i; j++) {
                     if (dt->shared->u.compnd.memb[j].offset > dt->shared->u.compnd.memb[j + 1].offset) {
                         H5T_cmemb_t tmp                  = dt->shared->u.compnd.memb[j];
                         dt->shared->u.compnd.memb[j]     = dt->shared->u.compnd.memb[j + 1];
@@ -289,7 +289,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
                             map[j]     = map[j + 1];
                             map[j + 1] = x;
                         } /* end if */
-                        swapped = TRUE;
+                        swapped = true;
                     } /* end if */
                 }     /* end for */
             }         /* end for */
@@ -306,8 +306,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
             nmembs                      = dt->shared->u.enumer.nmembs;
             size                        = dt->shared->size;
             assert(size <= sizeof(tbuf));
-            for (i = (nmembs - 1), swapped = TRUE; i > 0 && swapped; --i) {
-                for (j = 0, swapped = FALSE; j < i; j++) {
+            for (i = (nmembs - 1), swapped = true; i > 0 && swapped; --i) {
+                for (j = 0, swapped = false; j < i; j++) {
                     if (memcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
                                (uint8_t *)dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
                         /* Swap names */
@@ -329,7 +329,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
                             map[j + 1] = x;
                         } /* end if */
 
-                        swapped = TRUE;
+                        swapped = true;
                     } /* end if */
                 }     /* end for */
             }         /* end for */
@@ -363,7 +363,7 @@ H5T__sort_name(const H5T_t *dt, int *map)
 {
     unsigned i, j, nmembs;
     size_t   size;
-    hbool_t  swapped;
+    bool     swapped;
     uint8_t  tbuf[32];
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -377,14 +377,14 @@ H5T__sort_name(const H5T_t *dt, int *map)
         if (H5T_SORT_NAME != dt->shared->u.compnd.sorted) {
             dt->shared->u.compnd.sorted = H5T_SORT_NAME;
             nmembs                      = dt->shared->u.compnd.nmembs;
-            for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
-                for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDstrcmp(dt->shared->u.compnd.memb[j].name, dt->shared->u.compnd.memb[j + 1].name) >
+            for (i = nmembs - 1, swapped = true; i > 0 && swapped; --i) {
+                for (j = 0, swapped = false; j < i; j++) {
+                    if (strcmp(dt->shared->u.compnd.memb[j].name, dt->shared->u.compnd.memb[j + 1].name) >
                         0) {
                         H5T_cmemb_t tmp                  = dt->shared->u.compnd.memb[j];
                         dt->shared->u.compnd.memb[j]     = dt->shared->u.compnd.memb[j + 1];
                         dt->shared->u.compnd.memb[j + 1] = tmp;
-                        swapped                          = TRUE;
+                        swapped                          = true;
                         if (map) {
                             int x      = map[j];
                             map[j]     = map[j + 1];
@@ -396,8 +396,7 @@ H5T__sort_name(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < nmembs - 1; i++) {
-                assert(HDstrcmp(dt->shared->u.compnd.memb[i].name, dt->shared->u.compnd.memb[i + 1].name) <
-                       0);
+                assert(strcmp(dt->shared->u.compnd.memb[i].name, dt->shared->u.compnd.memb[i + 1].name) < 0);
             }
 #endif
         }
@@ -408,9 +407,9 @@ H5T__sort_name(const H5T_t *dt, int *map)
             nmembs                      = dt->shared->u.enumer.nmembs;
             size                        = dt->shared->size;
             assert(size <= sizeof(tbuf));
-            for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
-                for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDstrcmp(dt->shared->u.enumer.name[j], dt->shared->u.enumer.name[j + 1]) > 0) {
+            for (i = nmembs - 1, swapped = true; i > 0 && swapped; --i) {
+                for (j = 0, swapped = false; j < i; j++) {
+                    if (strcmp(dt->shared->u.enumer.name[j], dt->shared->u.enumer.name[j + 1]) > 0) {
                         /* Swap names */
                         char *tmp                        = dt->shared->u.enumer.name[j];
                         dt->shared->u.enumer.name[j]     = dt->shared->u.enumer.name[j + 1];
@@ -429,14 +428,14 @@ H5T__sort_name(const H5T_t *dt, int *map)
                             map[j + 1] = x;
                         }
 
-                        swapped = TRUE;
+                        swapped = true;
                     }
                 }
             }
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < nmembs - 1; i++)
-                assert(HDstrcmp(dt->shared->u.enumer.name[i], dt->shared->u.enumer.name[i + 1]) < 0);
+                assert(strcmp(dt->shared->u.enumer.name[i], dt->shared->u.enumer.name[i + 1]) < 0);
 #endif
         }
     }

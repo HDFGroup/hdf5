@@ -59,7 +59,7 @@ H5Tenum_create(hid_t parent_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_INVALID_HID, "cannot create enum type");
 
     /* Register the type */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type ID");
 
 done:
@@ -171,7 +171,7 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 
     /* The name and value had better not already exist */
     for (i = 0; i < dt->shared->u.enumer.nmembs; i++) {
-        if (!HDstrcmp(dt->shared->u.enumer.name[i], name))
+        if (!strcmp(dt->shared->u.enumer.name[i], name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "name redefinition");
         if (!memcmp((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value, dt->shared->size))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "value redefinition");
@@ -334,7 +334,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     H5T_t   *copied_dt = NULL;   /* Do sorting in copied datatype */
     unsigned lt, md = 0, rt;     /* Indices for binary search	*/
     int      cmp        = (-1);  /* Comparison result		*/
-    hbool_t  alloc_name = FALSE; /* Whether name has been allocated */
+    bool     alloc_name = false; /* Whether name has been allocated */
     char    *ret_value  = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -378,12 +378,12 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
 
     /* Save result name */
     if (!name) {
-        if (NULL == (name = (char *)H5MM_malloc(HDstrlen(copied_dt->shared->u.enumer.name[md]) + 1)))
+        if (NULL == (name = (char *)H5MM_malloc(strlen(copied_dt->shared->u.enumer.name[md]) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        alloc_name = TRUE;
+        alloc_name = true;
     } /* end if */
-    HDstrncpy(name, copied_dt->shared->u.enumer.name[md], size);
-    if (HDstrlen(copied_dt->shared->u.enumer.name[md]) >= size)
+    strncpy(name, copied_dt->shared->u.enumer.name[md], size);
+    if (strlen(copied_dt->shared->u.enumer.name[md]) >= size)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, NULL, "name has been truncated");
 
     /* Set return value */
@@ -484,7 +484,7 @@ H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
 
     while (lt < rt) {
         md  = (lt + rt) / 2;
-        cmp = HDstrcmp(name, copied_dt->shared->u.enumer.name[md]);
+        cmp = strcmp(name, copied_dt->shared->u.enumer.name[md]);
         if (cmp < 0) {
             rt = md;
         }

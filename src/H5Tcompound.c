@@ -159,7 +159,7 @@ H5Tget_member_class(hid_t type_id, unsigned membno)
     /* Get the type's class.  We have to use this function to get type class
      *  because of the concern of variable-length string.
      */
-    ret_value = H5T_GET_CLASS(dt->shared->u.compnd.memb[membno].type->shared, FALSE);
+    ret_value = H5T_GET_CLASS(dt->shared->u.compnd.memb[membno].type->shared, false);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -201,7 +201,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to retrieve member type");
 
     /* Get an ID for the datatype */
-    if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt, TRUE)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt, true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable register datatype ID");
 
 done:
@@ -369,7 +369,7 @@ H5Tpack(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
-        H5T_detect_class(dt, H5T_COMPOUND, TRUE) <= 0)
+        H5T_detect_class(dt, H5T_COMPOUND, true) <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype");
 
     /* Pack */
@@ -410,7 +410,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Does NAME already exist in PARENT? */
     for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
+        if (!strcmp(parent->shared->u.compnd.memb[i].name, name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique");
 
     /* Does the new member overlap any existing member ? */
@@ -458,8 +458,8 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     H5T__update_packed(parent);
 
     /* Set the "force conversion" flag if the field's datatype indicates */
-    if (member->shared->force_conv == TRUE)
-        parent->shared->force_conv = TRUE;
+    if (member->shared->force_conv == true)
+        parent->shared->force_conv = true;
 
     /* Check for member having a later version than the parent */
     if (parent->shared->version < member->shared->version)
@@ -493,9 +493,9 @@ H5T__pack(const H5T_t *dt)
 
     assert(dt);
 
-    if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
+    if (H5T_detect_class(dt, H5T_COMPOUND, false) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
-        if (TRUE == H5T__is_packed(dt))
+        if (true == H5T__is_packed(dt))
             HGOTO_DONE(SUCCEED);
 
         /* Check for packing unmodifiable datatype */
@@ -538,7 +538,7 @@ H5T__pack(const H5T_t *dt)
             dt->shared->size = MAX(1, offset);
 
             /* Mark the type as packed now */
-            dt->shared->u.compnd.packed = TRUE;
+            dt->shared->u.compnd.packed = true;
         } /* end if */
     }     /* end if */
 
@@ -559,7 +559,7 @@ done:
 static htri_t
 H5T__is_packed(const H5T_t *dt)
 {
-    htri_t ret_value = TRUE; /* Return value */
+    htri_t ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -600,18 +600,18 @@ H5T__update_packed(const H5T_t *dt)
 
     /* First check if all space is used in the "top level" type */
     if (dt->shared->size == dt->shared->u.compnd.memb_size) {
-        /* Set the packed flag to TRUE */
-        dt->shared->u.compnd.packed = TRUE;
+        /* Set the packed flag to true */
+        dt->shared->u.compnd.packed = true;
 
         /* Now check if all members are packed */
         for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
             if (!H5T__is_packed(dt->shared->u.compnd.memb[i].type)) {
-                dt->shared->u.compnd.packed = FALSE;
+                dt->shared->u.compnd.packed = false;
                 break;
             } /* end if */
     }         /* end if */
     else
-        dt->shared->u.compnd.packed = FALSE;
+        dt->shared->u.compnd.packed = false;
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5T__update_packed() */

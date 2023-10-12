@@ -16,7 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfilters.h5" "${PROJECT_BINARY_DIR}/tfilters.h5" "zip_perf_files")
+HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/tfilters.h5" "${PROJECT_BINARY_DIR}/tfilters.h5" "zip_perf_files")
 add_custom_target(zip_perf_files ALL COMMENT "Copying files needed by zip_perf tests" DEPENDS ${zip_perf_list})
 
 #-----------------------------------------------------------------------------

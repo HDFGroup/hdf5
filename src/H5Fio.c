@@ -423,11 +423,11 @@ H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata");
 
     /* Flush and reset the accumulator */
-    if (H5F__accum_reset(f->shared, TRUE) < 0)
+    if (H5F__accum_reset(f->shared, true) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
 
     /* Flush file buffers to disk. */
-    if (H5FD_flush(f->shared->lf, FALSE) < 0)
+    if (H5FD_flush(f->shared->lf, false) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
 done:

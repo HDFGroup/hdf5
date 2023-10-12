@@ -723,7 +723,7 @@ Test_Obj_Copy(void)
     }
 
     /* Test with old & new format groups */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
 
         /* Set the FAPL for the type of format */
         /* Create source file */

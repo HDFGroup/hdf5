@@ -80,11 +80,11 @@ static herr_t H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name,
                                              const char *new_attr_name, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
 static herr_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
-                                 hbool_t *attr_exists, void **token_ptr);
-static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists,
-                                     void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+                                 bool *attr_exists, void **token_ptr);
+static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, bool *attr_exists, void **token_ptr,
+                                     H5VL_object_t **_vol_obj_ptr);
 static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name,
-                                             hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
+                                             bool *attr_exists, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
@@ -104,7 +104,7 @@ static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name,
  *
  * Purpose:     This is the common function for creating HDF5 datasets.
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -129,7 +129,7 @@ H5A__create_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to create attribute");
 
     /* Register the new attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID");
 
 done:
@@ -146,7 +146,7 @@ done:
  *
  * Purpose:     This is the common function for creating HDF5 attributes
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -172,7 +172,7 @@ H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "attr_name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_AACC, TRUE, &aapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_AACC, true, &aapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Get correct property list */
@@ -197,11 +197,11 @@ done:
  *              hid_t H5Acreate2(loc_id, attr_name, type_id, space_id, acpl_id,
  *                  aapl_id)
  *
- * Description: This function creates an attribute which is attached to the
+ * Description: This function creates an attribute that is attached to the
  *              object specified with 'loc_id'. The name specified with
  *              'attr_name' for each attribute for an object must be unique
  *              for that object. The 'type_id' and 'space_id' are created
- *              with the H5T and H5S interfaces respectively. The 'aapl_id'
+ *              with the H5T and H5S interfaces, respectively. The 'aapl_id'
  *              property list is currently unused, but will be used in the
  *              future for optional attribute access properties. The
  *              attribute ID returned from this function must be released
@@ -212,8 +212,8 @@ done:
  *              const char *attr_name;  IN: Name of attribute to locate and open
  *              hid_t type_id;          IN: ID of datatype for attribute
  *              hid_t space_id;         IN: ID of dataspace for attribute
- *              hid_t acpl_id;          IN: ID of creation property list (currently not used)
- *              hid_t aapl_id;          IN: Attribute access property list
+ *              hid_t acpl_id;          IN: ID of creation property list
+ *              hid_t aapl_id;          IN: ID of Attribute access property list (currently not used)
  *
  * Return:      Success:    An ID for the created attribute
  *
@@ -243,7 +243,7 @@ done:
  *
  * Purpose:     Asynchronous version of H5Acreate
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -291,7 +291,7 @@ done:
  *
  * Purpose:     This is the common function for creating HDF5 attributes by name
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -319,11 +319,11 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, true, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info");
 
     /* Get correct property list */
@@ -352,14 +352,14 @@ done:
         const char *attr_name;  IN: Name of attribute to locate and open
         hid_t type_id;          IN: ID of datatype for attribute
         hid_t space_id;         IN: ID of dataspace for attribute
-        hid_t acpl_id;          IN: ID of creation property list (currently not used)
-        hid_t aapl_id;          IN: Attribute access property list
+        hid_t acpl_id;          IN: ID of creation property list
+        hid_t aapl_id;          IN: ID of Attribute access property list (currently not used)
         hid_t lapl_id;          IN: Link access property list
  RETURNS
     Non-negative on success/H5I_INVALID_HID on failure
 
  DESCRIPTION
-        This function creates an attribute which is attached to the object
+        This function creates an attribute that is attached to the object
     specified with 'loc_id/obj_name'.  The name specified with 'attr_name' for
     each attribute for an object must be unique for that object.  The 'type_id'
     and 'space_id' are created with the H5T and H5S interfaces respectively.
@@ -392,7 +392,7 @@ done:
  *
  * Purpose:     Asynchronous version of H5Acreate_by_name
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -464,7 +464,7 @@ H5A__open_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const ch
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open attribute: '%s'", attr_name);
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, true)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID");
 
 done:
@@ -507,7 +507,7 @@ H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, void **
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string");
 
     /* Set up object access arguments */
-    if (H5VL_setup_acc_args(loc_id, H5P_CLS_AACC, FALSE, &aapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_AACC, false, &aapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Open the attribute */
@@ -629,11 +629,11 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, false, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info");
 
     /* Open the attribute */
@@ -652,7 +652,7 @@ done:
  USAGE
     hid_t H5Aopen_by_name(loc_id, obj_name, attr_name, aapl_id, lapl_id)
         hid_t loc_id;           IN: Object that attribute is attached to
-        const char *obj_name;   IN: Name of object relative to location
+        const char *obj_name;   IN: Name of the object relative to location
         const char *attr_name;  IN: Name of attribute to locate and open
         hid_t aapl_id;          IN: Attribute access property list
         hid_t lapl_id;          IN: Link access property list
@@ -763,12 +763,12 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid iteration order specified");
 
     /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, obj_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr, &loc_params) <
+    if (H5VL_setup_idx_args(loc_id, obj_name, idx_type, order, n, false, lapl_id, vol_obj_ptr, &loc_params) <
         0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&aapl_id, H5P_CLS_AACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set attribute access property list info");
 
     /* Open the attribute */
@@ -788,7 +788,7 @@ done:
  USAGE
     hid_t H5Aopen_by_idx(loc_id, obj_ame, idx_type, order, n, aapl_id, lapl_id)
         hid_t loc_id;           IN: Object that attribute is attached to
-        const char *obj_name;   IN: Name of object relative to location
+        const char *obj_name;   IN: Name of the object relative to location
         H5_index_t idx_type;    IN: Type of index to use
         H5_iter_order_t order;  IN: Order to iterate over index
         hsize_t n;              IN: Index (0-based) attribute to open
@@ -1183,7 +1183,7 @@ done:
     Gets a copy of the creation property list for an attribute
  USAGE
     hssize_t H5Aget_create_plist (attr_id, buf_size, buf)
-        hid_t attr_id;      IN: Attribute to get name of
+        hid_t attr_id;      IN: Attribute to get the name of
  RETURNS
     This function returns the ID of a copy of the attribute's creation
     property list, or H5I_INVALID_HID on failure.
@@ -1234,7 +1234,7 @@ done:
     Gets a copy of the name for an attribute
  USAGE
     hssize_t H5Aget_name (attr_id, buf_size, buf)
-        hid_t attr_id;      IN: Attribute to get name of
+        hid_t attr_id;      IN: Attribute to get the name of
         size_t buf_size;    IN: The size of the buffer to store the string in.
         char *buf;          IN: Buffer to store name in
  RETURNS
@@ -1287,7 +1287,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Aget_name_by_idx
  *
- * Purpose:	Retrieve name of an attribute, according to the
+ * Purpose:	Retrieve the name of an attribute, according to the
  *		order within an index.
  *
  *              Same pattern of behavior as H5Iget_name.
@@ -1323,7 +1323,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the object */
@@ -1471,7 +1471,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info pointer");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the object */
@@ -1530,7 +1530,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info pointer");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the object */
@@ -1580,7 +1580,7 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     assert(new_name);
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_name, new_name) != 0) {
+    if (strcmp(old_name, new_name) != 0) {
         H5VL_attr_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up VOL callback arguments */
@@ -1743,7 +1743,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, true, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments");
 
     /* Rename the attribute */
@@ -1855,7 +1855,7 @@ done:
         The operation receives the ID for the group or dataset being iterated
     over ('loc_id'), the name of the current attribute about the object
     ('attr_name'), the attribute's "info" struct ('ainfo') and the pointer to
-    the operator data passed in to H5Aiterate2 ('op_data').  The return values
+    the operator data passed into H5Aiterate2 ('op_data').  The return values
     from an operator are:
         A. Zero causes the iterator to continue, returning zero when all
             attributes have been processed.
@@ -1943,7 +1943,7 @@ done:
         The operation receives the ID for the group or dataset being iterated
     over ('loc_id'), the name of the current attribute about the object
     ('attr_name'), the attribute's "info" struct ('ainfo') and the pointer to
-    the operator data passed in to H5Aiterate_by_name ('op_data').  The return values
+    the operator data passed into H5Aiterate_by_name ('op_data').  The return values
     from an operator are:
         A. Zero causes the iterator to continue, returning zero when all
             attributes have been processed.
@@ -1977,7 +1977,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, false) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* get the loc object */
@@ -2100,7 +2100,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* Get the object */
@@ -2172,7 +2172,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_ite
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified");
 
     /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, TRUE) < 0)
+    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, true) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info");
 
     /* get the object */
@@ -2303,7 +2303,7 @@ done:
  *--------------------------------------------------------------------------*/
 static herr_t
 H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
-                   hbool_t *attr_exists, void **token_ptr)
+                   bool *attr_exists, void **token_ptr)
 {
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
@@ -2340,7 +2340,7 @@ done:
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
+H5A__exists_api_common(hid_t obj_id, const char *attr_name, bool *attr_exists, void **token_ptr,
                        H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
@@ -2377,7 +2377,7 @@ done:
  * Purpose:	Checks if an attribute with a given name exists on an opened
  *              object.
  *
- * Return:	Success:	TRUE/FALSE
+ * Return:	Success:	true/false
  * 		Failure:	Negative
  *
  *-------------------------------------------------------------------------
@@ -2385,14 +2385,14 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    hbool_t exists;           /* Flag for attribute existence */
-    htri_t  ret_value = FAIL; /* Return value */
+    bool   exists;           /* Flag for attribute existence */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "i*s", obj_id, attr_name);
 
     /* Synchronously check if an attribute exists */
-    exists = FALSE;
+    exists = false;
     if (H5A__exists_api_common(obj_id, attr_name, &exists, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't synchronously check if attribute exists");
 
@@ -2452,9 +2452,8 @@ done:
  *      Non-negative on success/Negative on failure
  *--------------------------------------------------------------------------*/
 static herr_t
-H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
-                               hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
-                               H5VL_object_t **_vol_obj_ptr)
+H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, bool *attr_exists,
+                               hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
@@ -2474,7 +2473,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, false, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments");
 
     /* Check if the attribute exists */
@@ -2490,7 +2489,7 @@ done:
  *
  * Purpose:	Checks if an attribute with a given name exists on an object.
  *
- * Return:	Success:	TRUE/FALSE
+ * Return:	Success:	true/false
  * 		    Failure:	Negative
  *
  *-------------------------------------------------------------------------
@@ -2498,14 +2497,14 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    hbool_t exists;           /* Flag for attribute existence */
-    htri_t  ret_value = FAIL; /* Return value */
+    bool   exists;           /* Flag for attribute existence */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* Synchronously check if an attribute exists */
-    exists = FALSE;
+    exists = false;
     if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, &exists, lapl_id, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't synchronously determine if attribute exists by name");
 

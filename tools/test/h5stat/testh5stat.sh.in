@@ -39,17 +39,17 @@ verbose=yes
 
 # source dirs
 SRC_TOOLS="$srcdir/../.."
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
 SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+SRC_H5STAT_OUTFILES="$SRC_TOOLS/test/h5stat/expected"
 
 TESTDIR=./testfiles
 test -d $TESTDIR || mkdir $TESTDIR
@@ -75,49 +75,49 @@ $SRC_H5STAT_TESTFILES/h5stat_threshold.h5
 "
 
 LIST_ERR_TEST_FILES="
-$SRC_H5STAT_TESTFILES/h5stat_err_refcount.err
-$SRC_H5STAT_TESTFILES/h5stat_err_old_layout.err
-$SRC_H5STAT_TESTFILES/h5stat_err_old_fill.err
-$SRC_H5STAT_TESTFILES/h5stat_err1_links.err
-$SRC_H5STAT_TESTFILES/h5stat_err1_dims.err
-$SRC_H5STAT_TESTFILES/h5stat_err1_numattrs.err
-$SRC_H5STAT_TESTFILES/h5stat_err2_numattrs.err
-$SRC_H5STAT_TESTFILES/h5stat_notexist.err
-$SRC_H5STAT_TESTFILES/h5stat_nofile.err
+$SRC_H5STAT_OUTFILES/h5stat_err_refcount.err
+$SRC_H5STAT_OUTFILES/h5stat_err_old_layout.err
+$SRC_H5STAT_OUTFILES/h5stat_err_old_fill.err
+$SRC_H5STAT_OUTFILES/h5stat_err1_links.err
+$SRC_H5STAT_OUTFILES/h5stat_err1_dims.err
+$SRC_H5STAT_OUTFILES/h5stat_err1_numattrs.err
+$SRC_H5STAT_OUTFILES/h5stat_err2_numattrs.err
+$SRC_H5STAT_OUTFILES/h5stat_notexist.err
+$SRC_H5STAT_OUTFILES/h5stat_nofile.err
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5STAT_TESTFILES/h5stat_err_refcount.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err_old_layout.ddl
-$SRC_H5STAT_TESTFILES/h5stat_err_old_fill.ddl
-$SRC_H5STAT_TESTFILES/h5stat_help1.ddl
-$SRC_H5STAT_TESTFILES/h5stat_help2.ddl
-$SRC_H5STAT_TESTFILES/h5stat_notexist.ddl
-$SRC_H5STAT_TESTFILES/h5stat_nofile.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-file.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-F.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-d.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-g.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-dT.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-UD.ddl
-$SRC_H5STAT_TESTFILES/h5stat_filters-UT.ddl
-$SRC_H5STAT_TESTFILES/h5stat_tsohm.ddl
-$SRC_H5STAT_TESTFILES/h5stat_newgrat.ddl
-$SRC_H5STAT_TESTFILES/h5stat_newgrat-UG.ddl
-$SRC_H5STAT_TESTFILES/h5stat_newgrat-UA.ddl
-$SRC_H5STAT_TESTFILES/h5stat_idx.ddl
-$SRC_H5STAT_TESTFILES/h5stat_links1.ddl
-$SRC_H5STAT_TESTFILES/h5stat_links2.ddl
-$SRC_H5STAT_TESTFILES/h5stat_links3.ddl
-$SRC_H5STAT_TESTFILES/h5stat_links4.ddl
-$SRC_H5STAT_TESTFILES/h5stat_links5.ddl
-$SRC_H5STAT_TESTFILES/h5stat_dims1.ddl
-$SRC_H5STAT_TESTFILES/h5stat_dims2.ddl
-$SRC_H5STAT_TESTFILES/h5stat_numattrs1.ddl
-$SRC_H5STAT_TESTFILES/h5stat_numattrs2.ddl
-$SRC_H5STAT_TESTFILES/h5stat_numattrs3.ddl
-$SRC_H5STAT_TESTFILES/h5stat_numattrs4.ddl
+$SRC_H5STAT_OUTFILES/h5stat_err_refcount.ddl
+$SRC_H5STAT_OUTFILES/h5stat_err_old_layout.ddl
+$SRC_H5STAT_OUTFILES/h5stat_err_old_fill.ddl
+$SRC_H5STAT_OUTFILES/h5stat_help1.ddl
+$SRC_H5STAT_OUTFILES/h5stat_help2.ddl
+$SRC_H5STAT_OUTFILES/h5stat_notexist.ddl
+$SRC_H5STAT_OUTFILES/h5stat_nofile.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-file.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-F.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-d.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-g.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-dT.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-UD.ddl
+$SRC_H5STAT_OUTFILES/h5stat_filters-UT.ddl
+$SRC_H5STAT_OUTFILES/h5stat_tsohm.ddl
+$SRC_H5STAT_OUTFILES/h5stat_newgrat.ddl
+$SRC_H5STAT_OUTFILES/h5stat_newgrat-UG.ddl
+$SRC_H5STAT_OUTFILES/h5stat_newgrat-UA.ddl
+$SRC_H5STAT_OUTFILES/h5stat_idx.ddl
+$SRC_H5STAT_OUTFILES/h5stat_links1.ddl
+$SRC_H5STAT_OUTFILES/h5stat_links2.ddl
+$SRC_H5STAT_OUTFILES/h5stat_links3.ddl
+$SRC_H5STAT_OUTFILES/h5stat_links4.ddl
+$SRC_H5STAT_OUTFILES/h5stat_links5.ddl
+$SRC_H5STAT_OUTFILES/h5stat_dims1.ddl
+$SRC_H5STAT_OUTFILES/h5stat_dims2.ddl
+$SRC_H5STAT_OUTFILES/h5stat_numattrs1.ddl
+$SRC_H5STAT_OUTFILES/h5stat_numattrs2.ddl
+$SRC_H5STAT_OUTFILES/h5stat_numattrs3.ddl
+$SRC_H5STAT_OUTFILES/h5stat_numattrs4.ddl
 "
 
 #

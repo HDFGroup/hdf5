@@ -158,9 +158,6 @@
 /* Define to 1 if you have the `gethostname' function. */
 #cmakedefine H5_HAVE_GETHOSTNAME @H5_HAVE_GETHOSTNAME@
 
-/* Define to 1 if you have the `getpwuid' function. */
-#cmakedefine H5_HAVE_GETPWUID @H5_HAVE_GETPWUID@
-
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine H5_HAVE_GETRUSAGE @H5_HAVE_GETRUSAGE@
 

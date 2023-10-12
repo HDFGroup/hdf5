@@ -425,13 +425,6 @@ if (MINGW OR NOT WINDOWS)
   endif ()
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGETD)
-
-  # ----------------------------------------------------------------------
-  # cygwin user credentials are different then on linux
-  #
-  if (NOT CYGWIN AND NOT MINGW)
-    CHECK_FUNCTION_EXISTS (getpwuid        ${HDF_PREFIX}_HAVE_GETPWUID)
-  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

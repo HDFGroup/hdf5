@@ -47,7 +47,7 @@
 #define CHUNK_NY 4
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-#define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12.0)
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s)) * 1.001) + 12.0)
 #endif
 
 /* Temporary filter IDs used for testing */
@@ -120,9 +120,9 @@ static const H5Z_class2_t H5Z_BOGUS2[1] = {{
 static int
 test_direct_chunk_write(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -131,7 +131,7 @@ test_direct_chunk_write(hid_t file)
     int     data[NX][NY];
     int     i, j, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2] = {0, 0};
@@ -389,9 +389,9 @@ test_direct_chunk_overwrite_data(hid_t fid)
     int16_t  overwrite_buf[OVERWRITE_CHUNK_NY][OVERWRITE_CHUNK_NX];
     uint32_t filter_mask     = 0;
     hid_t    tid             = H5T_NATIVE_UINT16;
-    hid_t    dcpl_id         = -1;
-    hid_t    sid             = -1;
-    hid_t    did             = -1;
+    hid_t    dcpl_id         = H5I_INVALID_HID;
+    hid_t    sid             = H5I_INVALID_HID;
+    hid_t    did             = H5I_INVALID_HID;
     uint16_t fill_value      = 0;
     hsize_t  dset_dims[]     = {1, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_2NX};
     hsize_t  dset_max_dims[] = {H5S_UNLIMITED, OVERWRITE_CHUNK_NY, OVERWRITE_CHUNK_2NX};
@@ -490,23 +490,23 @@ error:
 static int
 test_skip_compress_write1(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     herr_t  status;
     int     i, j, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2]  = {0, 0};
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
     int      aggression = 9; /* Compression aggression setting */
 
-    unsigned read_filter_mask = 0; /* filter mask after direct read */
+    uint32_t read_filter_mask = 0; /* filter mask after direct read */
     int      read_direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  read_buf_size = 0; /* buf size */
 
@@ -738,16 +738,16 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static int
 test_skip_compress_write2(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     herr_t  status;
     int     i, j, n;
 
-    unsigned filter_mask = 0; /* orig filter mask */
+    uint32_t filter_mask = 0; /* orig filter mask */
     int      origin_direct_buf[CHUNK_NX][CHUNK_NY];
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY];
@@ -755,7 +755,7 @@ test_skip_compress_write2(hid_t file)
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
     int      aggression = 9; /* Compression aggression setting */
 
-    unsigned read_filter_mask = 0; /* filter mask after direct read */
+    uint32_t read_filter_mask = 0; /* filter mask after direct read */
     int      read_direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  read_buf_size = 0; /* buf size */
 
@@ -944,19 +944,19 @@ test_data_conv(hid_t file)
         int a, c[4], e;
     } dst_type_t;
 
-    hid_t         dataspace = -1, dataset = -1;
-    hid_t         mem_space = -1;
-    hid_t         cparms = -1, dxpl = -1;
+    hid_t         dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t         mem_space = H5I_INVALID_HID;
+    hid_t         cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t       dims[2]       = {NX, NY};
     hsize_t       maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t       chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     herr_t        status;
     int           i, j, n;
     const hsize_t four = 4;
-    hid_t         st = -1, dt = -1;
+    hid_t         st = H5I_INVALID_HID, dt = H5I_INVALID_HID;
     hid_t         array_dt;
 
-    unsigned   filter_mask = 0;
+    uint32_t   filter_mask = 0;
     src_type_t direct_buf[CHUNK_NX][CHUNK_NY];
     dst_type_t check_chunk[CHUNK_NX][CHUNK_NY];
     src_type_t read_chunk[CHUNK_NX][CHUNK_NY]; /* For H5Dread_chunk */
@@ -1170,15 +1170,15 @@ error:
 static int
 test_invalid_parameters(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
     herr_t  status;
     int     i, j, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2]  = {0, 0};
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
@@ -1267,14 +1267,15 @@ test_invalid_parameters(hid_t file)
     /* Check invalid dataset ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if ((status = H5Dwrite_chunk((hid_t)H5I_INVALID_HID, dxpl, filter_mask, offset, buf_size,
+                                     direct_buf)) != FAIL)
             goto error;
     }
     H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dread_chunk((hid_t)-1, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
+        if ((status = H5Dread_chunk((hid_t)H5I_INVALID_HID, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
     H5E_END_TRY
@@ -1282,14 +1283,16 @@ test_invalid_parameters(hid_t file)
     /* Check invalid DXPL ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if ((status = H5Dwrite_chunk(dataset, (hid_t)H5I_INVALID_HID, filter_mask, offset, buf_size,
+                                     direct_buf)) != FAIL)
             goto error;
     }
     H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
-        if ((status = H5Dread_chunk(dataset, (hid_t)-1, offset, &filter_mask, direct_buf)) != FAIL)
+        if ((status = H5Dread_chunk(dataset, (hid_t)H5I_INVALID_HID, offset, &filter_mask, direct_buf)) !=
+            FAIL)
             goto error;
     }
     H5E_END_TRY
@@ -1414,9 +1417,9 @@ error:
 static int
 test_direct_chunk_read_no_cache(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1, dapl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID, dapl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -1425,7 +1428,7 @@ test_direct_chunk_read_no_cache(hid_t file)
     int     data[NX][NY];
     int     i, j, k, l, n; /* local index variables */
 
-    unsigned filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
+    uint32_t filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
     int      direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5Dread and manually decompressed */
     int      check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t  offset[2];                       /* chunk offset used for H5Dread_chunk */
@@ -1590,11 +1593,11 @@ error:
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 static int
-test_direct_chunk_read_cache(hid_t file, hbool_t flush)
+test_direct_chunk_read_cache(hid_t file, bool flush)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -1603,7 +1606,7 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
     int     data[NX][NY];
     int     i, j, k, l, n; /* local index variables */
 
-    unsigned filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
+    uint32_t filter_mask = 0;                 /* filter mask returned from H5Dread_chunk */
     int      direct_buf[CHUNK_NX][CHUNK_NY];  /* chunk read with H5Dread and manually decompressed */
     int      check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t  offset[2];                       /* chunk offset used for H5Dread_chunk */
@@ -1791,9 +1794,9 @@ error:
 static int
 test_read_unfiltered_dset(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]       = {NX, NY};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {CHUNK_NX, CHUNK_NY};
@@ -1801,7 +1804,7 @@ test_read_unfiltered_dset(hid_t file)
     int     data[NX][NY];
     int     i, j, k, l, n;
 
-    unsigned filter_mask = 0;
+    uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     int      check_chunk[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread */
     hsize_t  offset[2]     = {0, 0};
@@ -1944,9 +1947,9 @@ error:
 static int
 test_read_unallocated_chunk(hid_t file)
 {
-    hid_t   dataspace = -1, dataset = -1;
-    hid_t   mem_space = -1;
-    hid_t   cparms = -1, dxpl = -1;
+    hid_t   dataspace = H5I_INVALID_HID, dataset = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   cparms = H5I_INVALID_HID, dxpl = H5I_INVALID_HID;
     hsize_t dims[2]             = {NX, NY};
     hsize_t maxdims[2]          = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2]       = {CHUNK_NX, CHUNK_NY};
@@ -1955,7 +1958,7 @@ test_read_unallocated_chunk(hid_t file)
     herr_t  status;                  /* status from H5 function calls */
     hsize_t i, j;                    /* local index variables */
 
-    unsigned filter_mask = 0;                /* filter mask returned from H5Dread_chunk */
+    uint32_t filter_mask = 0;                /* filter mask returned from H5Dread_chunk */
     int      direct_buf[CHUNK_NX][CHUNK_NY]; /* chunk read with H5Dread and manually decompressed */
     hsize_t  offset[2];                      /* chunk offset used for H5Dread_chunk */
 
@@ -2249,15 +2252,15 @@ main(void)
     /* Test direct chunk read */
 #ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += test_direct_chunk_read_no_cache(file_id);
-    nerrors += test_direct_chunk_read_cache(file_id, TRUE);
-    nerrors += test_direct_chunk_read_cache(file_id, FALSE);
+    nerrors += test_direct_chunk_read_cache(file_id, true);
+    nerrors += test_direct_chunk_read_cache(file_id, false);
 #endif /* H5_HAVE_FILTER_DEFLATE */
     nerrors += test_read_unfiltered_dset(file_id);
     nerrors += test_read_unallocated_chunk(file_id);
 
     /* Loop over test configurations */
     for (config = 0; config < CONFIG_END; config++) {
-        hbool_t need_comma = FALSE;
+        bool need_comma = false;
 
         /* Check for invalid combinations */
         if ((config & CONFIG_REOPEN_FILE) && !(config & CONFIG_REOPEN_DSET))
@@ -2271,31 +2274,31 @@ main(void)
             if (need_comma)
                 printf(", ");
             printf("latest format");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         if (config & CONFIG_REOPEN_FILE) {
             if (need_comma)
                 printf(", ");
             printf("reopen file");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         else if (config & CONFIG_REOPEN_DSET) {
             if (need_comma)
                 printf(", ");
             printf("reopen dataset");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         if (config & CONFIG_DIRECT_WRITE) {
             if (need_comma)
                 printf(", ");
             printf("direct write");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         if (config & CONFIG_DIRECT_READ) {
             if (need_comma)
                 printf(", ");
             printf("direct read");
-            need_comma = TRUE;
+            need_comma = true;
         } /* end if */
         printf(":\n");
         fflush(stdout);
@@ -2310,10 +2313,10 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All direct chunk read/write tests passed.");
+    puts("All direct chunk read/write tests passed.");
     return EXIT_SUCCESS;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return EXIT_FAILURE;
 }

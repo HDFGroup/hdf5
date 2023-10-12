@@ -83,10 +83,10 @@ static const char *FILENAME[] = {"stab", NULL};
  *-------------------------------------------------------------------------
  */
 static int
-test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
+test_misc(hid_t fcpl, hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t g1 = (-1), g2 = (-1), g3 = (-1);
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t g1 = (H5I_INVALID_HID), g2 = (H5I_INVALID_HID), g3 = (H5I_INVALID_HID);
     char  filename[NAME_BUF_SIZE];
     char  comment[64];
 
@@ -125,9 +125,9 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR;
     if (H5Oget_comment_by_name(g3, "././.", comment, sizeof comment, H5P_DEFAULT) < 0)
         TEST_ERROR;
-    if (HDstrcmp(comment, "hello world") != 0) {
+    if (strcmp(comment, "hello world") != 0) {
         H5_FAILED();
-        HDputs("    Read the wrong comment string from the group.");
+        puts("    Read the wrong comment string from the group.");
         printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR;
     }
@@ -184,10 +184,10 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
+test_long(hid_t fcpl, hid_t fapl, bool new_format)
 {
-    hid_t  fid = (-1); /* File ID */
-    hid_t  g1 = (-1), g2 = (-1);
+    hid_t  fid = (H5I_INVALID_HID); /* File ID */
+    hid_t  g1 = (H5I_INVALID_HID), g2 = (H5I_INVALID_HID);
     size_t name2Len;
     char  *name1 = NULL, *name2 = NULL;
     char   filename[NAME_BUF_SIZE];
@@ -210,7 +210,7 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
     name1[LONG_NAME_LEN - 1] = '\0';
     name2Len                 = (2 * LONG_NAME_LEN) + 2;
     name2                    = (char *)malloc(name2Len);
-    HDsnprintf(name2, name2Len, "%s/%s", name1, name1);
+    snprintf(name2, name2Len, "%s/%s", name1, name1);
 
     /* Create groups */
     if ((g1 = H5Gcreate2(fid, name1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -268,10 +268,10 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_large(hid_t fcpl, hid_t fapl, hbool_t new_format)
+test_large(hid_t fcpl, hid_t fapl, bool new_format)
 {
-    hid_t fid = (-1);             /* File ID */
-    hid_t cwg = (-1), dir = (-1); /* Group IDs */
+    hid_t fid = (H5I_INVALID_HID);                          /* File ID */
+    hid_t cwg = (H5I_INVALID_HID), dir = (H5I_INVALID_HID); /* Group IDs */
     char  filename[NAME_BUF_SIZE];
     char  name[NAME_BUF_SIZE];
     int   i;
@@ -293,17 +293,17 @@ test_large(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if ((cwg = H5Gcreate2(fid, "/big", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (new_format)
-        if (H5G__has_stab_test(cwg) != FALSE)
+        if (H5G__has_stab_test(cwg) != false)
             TEST_ERROR;
     for (i = 0; i < LARGE_NOBJS; i++) {
-        HDsnprintf(name, sizeof(name), "%05d%05d", (HDrandom() % 100000), i);
+        snprintf(name, sizeof(name), "%05d%05d", (HDrandom() % 100000), i);
         if ((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Gclose(dir) < 0)
             TEST_ERROR;
     }
     if (new_format)
-        if (H5G__is_new_dense_test(cwg) != TRUE)
+        if (H5G__is_new_dense_test(cwg) != true)
             TEST_ERROR;
     if (H5Gclose(cwg) < 0)
         TEST_ERROR;
@@ -342,18 +342,18 @@ error:
 static int
 lifecycle(hid_t fcpl, hid_t fapl2)
 {
-    hid_t             fid  = (-1);            /* File ID */
-    hid_t             gid  = (-1);            /* Group ID */
-    hid_t             gid2 = (-1);            /* Datatype ID */
-    hid_t             gcpl = (-1);            /* Group creation property list ID */
-    size_t            lheap_size_hint;        /* Local heap size hint */
-    unsigned          max_compact;            /* Maximum # of links to store in group compactly */
-    unsigned          min_dense;              /* Minimum # of links to store in group "densely" */
-    unsigned          est_num_entries;        /* Estimated # of entries in group */
-    unsigned          est_name_len;           /* Estimated length of entry name */
-    unsigned          nmsgs;                  /* Number of messages in group's header */
-    H5O_native_info_t ninfo;                  /* Object info */
-    char              objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t             fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t             gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t             gid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t             gcpl = (H5I_INVALID_HID); /* Group creation property list ID */
+    size_t            lheap_size_hint;          /* Local heap size hint */
+    unsigned          max_compact;              /* Maximum # of links to store in group compactly */
+    unsigned          min_dense;                /* Minimum # of links to store in group "densely" */
+    unsigned          est_num_entries;          /* Estimated # of entries in group */
+    unsigned          est_name_len;             /* Estimated length of entry name */
+    unsigned          nmsgs;                    /* Number of messages in group's header */
+    H5O_native_info_t ninfo;                    /* Object info */
+    char              objname[NAME_BUF_SIZE];   /* Object name */
     char              filename[NAME_BUF_SIZE];
     h5_stat_size_t    empty_size; /* Size of an empty file */
     unsigned          u;          /* Local index variable */
@@ -431,16 +431,16 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Use internal testing routine to check that the group has no links or symbol table */
-    if (H5G__is_empty_test(gid) != TRUE)
+    if (H5G__is_empty_test(gid) != true)
         TEST_ERROR;
 
     /* Create first "bottom" group */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Check on bottom group's status */
-    if (H5G__is_empty_test(gid2) != TRUE)
+    if (H5G__is_empty_test(gid2) != true)
         TEST_ERROR;
 
     /* Close bottom group */
@@ -448,9 +448,9 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, &nmsgs) != TRUE)
+    if (H5G__has_links_test(gid, &nmsgs) != true)
         TEST_ERROR;
     if (nmsgs != 1)
         TEST_ERROR;
@@ -458,12 +458,12 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     /* Create several more bottom groups, to push the top group almost to a symbol table */
     /* (Start counting at '1', since we've already created one bottom group */
     for (u = 1; u < LIFECYCLE_MAX_COMPACT; u++) {
-        HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+        snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         /* Check on bottom group's status */
-        if (H5G__is_empty_test(gid2) != TRUE)
+        if (H5G__is_empty_test(gid2) != true)
             TEST_ERROR;
 
         /* Close bottom group */
@@ -472,13 +472,13 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     } /* end for */
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, &nmsgs) != TRUE)
+    if (H5G__has_links_test(gid, &nmsgs) != true)
         TEST_ERROR;
     if (nmsgs != LIFECYCLE_MAX_COMPACT)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != FALSE)
+    if (H5G__is_new_dense_test(gid) != false)
         TEST_ERROR;
 
     /* Check that the object header is only one chunk and the space has been allocated correctly */
@@ -494,12 +494,12 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Check on bottom group's status */
-    if (H5G__is_empty_test(gid2) != TRUE)
+    if (H5G__is_empty_test(gid2) != true)
         TEST_ERROR;
 
     /* Close bottom group */
@@ -507,11 +507,11 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Check that the object header is still one chunk and the space has been allocated correctly */
@@ -528,7 +528,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Unlink objects from top group */
     while (u >= LIFECYCLE_MIN_DENSE) {
-        HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+        snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
 
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
@@ -537,38 +537,38 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     } /* end while */
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Unlink one more object from the group, which should transform back to using links */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
     u--;
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, &nmsgs) != TRUE)
+    if (H5G__has_links_test(gid, &nmsgs) != true)
         TEST_ERROR;
     if (nmsgs != (LIFECYCLE_MIN_DENSE - 1))
         TEST_ERROR;
 
     /* Unlink last two objects from top group */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
     u--;
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) != TRUE)
+    if (H5G__is_empty_test(gid) != true)
         TEST_ERROR;
 
     /* Close top group */
@@ -625,10 +625,10 @@ error:
 static int
 long_compact(hid_t fcpl, hid_t fapl2)
 {
-    hid_t          fid     = (-1); /* File ID */
-    hid_t          gid     = (-1); /* Group ID */
-    hid_t          gid2    = (-1); /* Group ID */
-    char          *objname = NULL; /* Object name */
+    hid_t          fid     = (H5I_INVALID_HID); /* File ID */
+    hid_t          gid     = (H5I_INVALID_HID); /* Group ID */
+    hid_t          gid2    = (H5I_INVALID_HID); /* Group ID */
+    char          *objname = NULL;              /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
     h5_stat_size_t file_size;  /* Size of each file created */
@@ -663,7 +663,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Use internal testing routine to check that the group has no links or dense storage */
-    if (H5G__is_empty_test(gid) != TRUE)
+    if (H5G__is_empty_test(gid) != true)
         TEST_ERROR;
 
     /* Create first group with "long" name */
@@ -671,7 +671,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Check on bottom group's status */
-    if (H5G__is_empty_test(gid2) != TRUE)
+    if (H5G__is_empty_test(gid2) != true)
         TEST_ERROR;
 
     /* Close bottom group */
@@ -680,11 +680,11 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on top group's status */
     /* (Should have dense storage to hold links, since name is too long for object header message) */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Create second group with "long" name */
@@ -693,7 +693,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Check on bottom group's status */
-    if (H5G__is_empty_test(gid2) != TRUE)
+    if (H5G__is_empty_test(gid2) != true)
         TEST_ERROR;
 
     /* Close bottom group */
@@ -702,11 +702,11 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on top group's status */
     /* (Should have dense storage to hold links, since name is too long for object header message) */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Unlink second object from top group */
@@ -715,11 +715,11 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on top group's status */
     /* (Should still be dense storage to hold links, since name is too long for object header message) */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Unlink first object from top group */
@@ -729,7 +729,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on top group's status */
     /* (Should have deleted the dense storage now) */
-    if (H5G__is_empty_test(gid) != TRUE)
+    if (H5G__is_empty_test(gid) != true)
         TEST_ERROR;
 
     /* Free object name */
@@ -788,11 +788,11 @@ error:
 static int
 read_old(void)
 {
-    hid_t    fid  = (-1);            /* File ID */
-    hid_t    gid  = (-1);            /* Group ID */
-    hid_t    gid2 = (-1);            /* Group ID */
-    char     objname[NAME_BUF_SIZE]; /* Object name */
-    unsigned u;                      /* Local index variable */
+    hid_t    fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t    gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t    gid2 = (H5I_INVALID_HID); /* Group ID */
+    char     objname[NAME_BUF_SIZE];   /* Object name */
+    unsigned u;                        /* Local index variable */
 
     TESTING("reading old groups");
 
@@ -809,21 +809,21 @@ read_old(void)
         TEST_ERROR;
 
     /* Check on old group's status */
-    if (H5G__is_empty_test(gid) == FALSE)
+    if (H5G__is_empty_test(gid) == false)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__has_stab_test(gid) != TRUE)
+    if (H5G__has_stab_test(gid) != true)
         TEST_ERROR;
 
     /* Create a bunch of objects in the group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsnprintf(objname, sizeof(objname), "Group %u", u);
+        snprintf(objname, sizeof(objname), "Group %u", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         /* Check on bottom group's status */
-        if (H5G__is_empty_test(gid2) != TRUE)
+        if (H5G__is_empty_test(gid2) != true)
             TEST_ERROR;
 
         /* Close bottom group */
@@ -833,27 +833,27 @@ read_old(void)
 
     /* Check on old group's status */
     /* (Should stay in old "symbol table" form) */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__has_stab_test(gid) != TRUE)
+    if (H5G__has_stab_test(gid) != true)
         TEST_ERROR;
 
     /* Delete new objects from old group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsnprintf(objname, sizeof(objname), "Group %u", u);
+        snprintf(objname, sizeof(objname), "Group %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
 
     /* Check on old group's status */
     /* (Should stay in old "symbol table" form, but have no links) */
-    if (H5G__is_empty_test(gid) == FALSE)
+    if (H5G__is_empty_test(gid) == false)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__has_stab_test(gid) != TRUE)
+    if (H5G__has_stab_test(gid) != true)
         TEST_ERROR;
 
     /* Close old group */
@@ -892,11 +892,11 @@ error:
 static int
 no_compact(hid_t fcpl, hid_t fapl2)
 {
-    hid_t          fid  = (-1);            /* File ID */
-    hid_t          gid  = (-1);            /* Group ID */
-    hid_t          gid2 = (-1);            /* Datatype ID */
-    hid_t          gcpl = (-1);            /* Group creation property list ID */
-    char           objname[NAME_BUF_SIZE]; /* Object name */
+    hid_t          fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t          gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t          gid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t          gcpl = (H5I_INVALID_HID); /* Group creation property list ID */
+    char           objname[NAME_BUF_SIZE];   /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size;      /* Size of an empty file */
     h5_stat_size_t file_size;       /* Size of each file created */
@@ -947,16 +947,16 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Use internal testing routine to check that the group has no links or dense storage */
-    if (H5G__is_empty_test(gid) != TRUE)
+    if (H5G__is_empty_test(gid) != true)
         TEST_ERROR;
 
     /* Create first "bottom" group */
-    HDsnprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    snprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Check on bottom group's status */
-    if (H5G__is_empty_test(gid2) != TRUE)
+    if (H5G__is_empty_test(gid2) != true)
         TEST_ERROR;
 
     /* Close bottom group */
@@ -964,20 +964,20 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Unlink object from top group */
-    HDsnprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    snprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
     /* Check on top group's status */
-    if (H5G__is_empty_test(gid) != TRUE)
+    if (H5G__is_empty_test(gid) != true)
         TEST_ERROR;
 
     /* Close top group */
@@ -1029,14 +1029,14 @@ error:
 static int
 gcpl_on_root(hid_t fapl2)
 {
-    hid_t    fid  = (-1); /* File ID */
-    hid_t    gid  = (-1); /* Group ID */
-    hid_t    gid2 = (-1); /* Datatype ID */
-    hid_t    fcpl = (-1); /* File creation property list ID */
-    hid_t    gcpl = (-1); /* Group creation property list ID */
-    hid_t    lcpl = (-1); /* Link creation property list ID */
-    unsigned max_compact; /* Maximum # of links to store in group compactly */
-    unsigned min_dense;   /* Minimum # of links to store in group "densely" */
+    hid_t    fid  = (H5I_INVALID_HID); /* File ID */
+    hid_t    gid  = (H5I_INVALID_HID); /* Group ID */
+    hid_t    gid2 = (H5I_INVALID_HID); /* Datatype ID */
+    hid_t    fcpl = (H5I_INVALID_HID); /* File creation property list ID */
+    hid_t    gcpl = (H5I_INVALID_HID); /* Group creation property list ID */
+    hid_t    lcpl = (H5I_INVALID_HID); /* Link creation property list ID */
+    unsigned max_compact;              /* Maximum # of links to store in group compactly */
+    unsigned min_dense;                /* Minimum # of links to store in group "densely" */
     char     filename[NAME_BUF_SIZE];
 
     TESTING("setting root group creation properties");
@@ -1089,7 +1089,7 @@ gcpl_on_root(hid_t fapl2)
     /* Create a link creation property list, with intermediate group creation set */
     if ((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0)
         TEST_ERROR;
-    if (H5Pset_create_intermediate_group(lcpl, TRUE) < 0)
+    if (H5Pset_create_intermediate_group(lcpl, true) < 0)
         TEST_ERROR;
 
     /* Create a group and intermediate groups, to check if root group settings are inherited */
@@ -1179,10 +1179,10 @@ static int
 old_api(hid_t fapl)
 {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    hid_t          fid = (-1);      /* File ID */
-    hid_t          gid = (-1);      /* Group ID */
-    h5_stat_size_t small_file_size; /* Size of small group file */
-    h5_stat_size_t large_file_size; /* Size of large group file */
+    hid_t          fid = (H5I_INVALID_HID); /* File ID */
+    hid_t          gid = (H5I_INVALID_HID); /* Group ID */
+    h5_stat_size_t small_file_size;         /* Size of small group file */
+    h5_stat_size_t large_file_size;         /* Size of large group file */
     char           filename[NAME_BUF_SIZE];
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1250,7 +1250,7 @@ old_api(hid_t fapl)
     (void)fapl;
 
     SKIPPED();
-    HDputs("    Deprecated API symbols not enabled");
+    puts("    Deprecated API symbols not enabled");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     return 0;
@@ -1281,8 +1281,8 @@ error:
 static int
 corrupt_stab_msg(void)
 {
-    hid_t fid = (-1); /* File ID */
-    hid_t did = (-1); /* Dataset ID */
+    hid_t fid = (H5I_INVALID_HID); /* File ID */
+    hid_t did = (H5I_INVALID_HID); /* Dataset ID */
 
     TESTING("corrupt symbol table message");
 
@@ -1376,17 +1376,17 @@ main(void)
     hid_t       fcpl, fcpl2;     /* File creation property list ID */
     unsigned    new_format;      /* Whether to use the new format or not */
     const char *env_h5_drvr;     /* File Driver value from environment */
-    hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
-    hbool_t     driver_is_default_compatible;
+    bool        contig_addr_vfd; /* Whether VFD used has a contiguous address space */
+    bool        driver_is_default_compatible;
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* VFD that does not support contiguous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1415,7 +1415,7 @@ main(void)
         TEST_ERROR;
 
     /* Loop over using new group format */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t my_fapl = fapl;
         hid_t my_fcpl = fcpl;
 
@@ -1465,7 +1465,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All symbol table tests passed.");
+    puts("All symbol table tests passed.");
 
     /* Cleanup */
     if (GetTestCleanup()) {
@@ -1477,6 +1477,6 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return 1;
 }

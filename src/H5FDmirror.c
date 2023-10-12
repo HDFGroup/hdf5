@@ -153,8 +153,8 @@ static herr_t  H5FD__mirror_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
                                   const void *buf);
 static herr_t  H5FD__mirror_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                  void *buf);
-static herr_t  H5FD__mirror_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD__mirror_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__mirror_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
+static herr_t  H5FD__mirror_lock(H5FD_t *_file, bool rw);
 static herr_t  H5FD__mirror_unlock(H5FD_t *_file);
 
 static herr_t H5FD__mirror_verify_reply(H5FD_mirror_t *file);
@@ -231,7 +231,7 @@ H5FD_mirror_init(void)
     LOG_OP_CALL(__func__);
 
     if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g)) {
-        H5FD_MIRROR_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_MIRROR_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), false);
         if (H5I_INVALID_HID == H5FD_MIRROR_g)
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register mirror");
     }
@@ -330,7 +330,7 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
  *
  * ---------------------------------------------------------------------------
  */
-static hbool_t
+static bool
 is_host_little_endian(void)
 {
     union {
@@ -340,9 +340,9 @@ is_host_little_endian(void)
     echeck.u32 = 0xA1B2C3D4;
 
     if (echeck.u8[0] == 0xD4)
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 } /* end is_host_little_endian() */
 
 /* ---------------------------------------------------------------------------
@@ -370,7 +370,7 @@ H5FD__mirror_xmit_decode_uint64(uint64_t *out, const unsigned char *_buf)
     assert(_buf && out);
 
     H5MM_memcpy(&n, _buf, sizeof(n));
-    if (TRUE == is_host_little_endian())
+    if (true == is_host_little_endian())
         *out = BSWAP_64(n);
     else
         *out = n;
@@ -476,7 +476,7 @@ H5FD__mirror_xmit_encode_uint64(unsigned char *_dest, uint64_t v)
 
     assert(_dest);
 
-    if (TRUE == is_host_little_endian())
+    if (true == is_host_little_endian())
         n = BSWAP_64(v);
     H5MM_memcpy(_dest, &n, sizeof(n));
 
@@ -615,7 +615,7 @@ H5FD_mirror_xmit_decode_open(H5FD_mirror_xmit_open_t *out, const unsigned char *
     n_eaten += H5FD__mirror_xmit_decode_uint64(&(out->maxaddr), &buf[n_eaten]);
     n_eaten += H5FD__mirror_xmit_decode_uint64(&(out->size_t_blob), &buf[n_eaten]);
     assert((H5FD_MIRROR_XMIT_OPEN_SIZE - H5FD_MIRROR_XMIT_FILEPATH_MAX) == n_eaten);
-    HDstrncpy(out->filename, (const char *)&buf[n_eaten], H5FD_MIRROR_XMIT_FILEPATH_MAX - 1);
+    strncpy(out->filename, (const char *)&buf[n_eaten], H5FD_MIRROR_XMIT_FILEPATH_MAX - 1);
     out->filename[H5FD_MIRROR_XMIT_FILEPATH_MAX - 1] = 0; /* force final NULL */
 
     return H5FD_MIRROR_XMIT_OPEN_SIZE;
@@ -653,7 +653,7 @@ H5FD_mirror_xmit_decode_reply(H5FD_mirror_xmit_reply_t *out, const unsigned char
     n_eaten += H5FD_mirror_xmit_decode_header(&(out->pub), buf);
     n_eaten += H5FD__mirror_xmit_decode_uint32(&(out->status), &buf[n_eaten]);
     assert((H5FD_MIRROR_XMIT_REPLY_SIZE - H5FD_MIRROR_STATUS_MESSAGE_MAX) == n_eaten);
-    HDstrncpy(out->message, (const char *)&buf[n_eaten], H5FD_MIRROR_STATUS_MESSAGE_MAX - 1);
+    strncpy(out->message, (const char *)&buf[n_eaten], H5FD_MIRROR_STATUS_MESSAGE_MAX - 1);
     out->message[H5FD_MIRROR_STATUS_MESSAGE_MAX - 1] = 0; /* force NULL term */
 
     return H5FD_MIRROR_XMIT_REPLY_SIZE;
@@ -825,7 +825,7 @@ H5FD_mirror_xmit_encode_open(unsigned char *dest, const H5FD_mirror_xmit_open_t 
     n_writ += H5FD__mirror_xmit_encode_uint64(&dest[n_writ], x->maxaddr);
     n_writ += H5FD__mirror_xmit_encode_uint64(&dest[n_writ], x->size_t_blob);
     assert((H5FD_MIRROR_XMIT_OPEN_SIZE - H5FD_MIRROR_XMIT_FILEPATH_MAX) == n_writ);
-    HDstrncpy((char *)&dest[n_writ], x->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
+    strncpy((char *)&dest[n_writ], x->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX);
 
     return H5FD_MIRROR_XMIT_OPEN_SIZE;
 } /* end H5FD_mirror_xmit_encode_open() */
@@ -860,7 +860,7 @@ H5FD_mirror_xmit_encode_reply(unsigned char *dest, const H5FD_mirror_xmit_reply_
     n_writ += H5FD_mirror_xmit_encode_header(dest, (const H5FD_mirror_xmit_t *)&(x->pub));
     n_writ += H5FD__mirror_xmit_encode_uint32(&dest[n_writ], x->status);
     assert((H5FD_MIRROR_XMIT_REPLY_SIZE - H5FD_MIRROR_STATUS_MESSAGE_MAX) == n_writ);
-    HDstrncpy((char *)&dest[n_writ], x->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    strncpy((char *)&dest[n_writ], x->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
 
     return H5FD_MIRROR_XMIT_REPLY_SIZE;
 } /* end H5FD_mirror_xmit_encode_reply() */
@@ -935,20 +935,20 @@ H5FD_mirror_xmit_encode_write(unsigned char *dest, const H5FD_mirror_xmit_write_
  *
  *              Checks header validity and op code.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_close(const H5FD_mirror_xmit_t *xmit)
 {
     LOG_OP_CALL(__func__);
 
     assert(xmit);
 
-    if ((TRUE == H5FD_mirror_xmit_is_xmit(xmit)) && (H5FD_MIRROR_OP_CLOSE == xmit->op))
-        return TRUE;
+    if ((true == H5FD_mirror_xmit_is_xmit(xmit)) && (H5FD_MIRROR_OP_CLOSE == xmit->op))
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5FD_mirror_xmit_is_close() */
 
 /* ---------------------------------------------------------------------------
@@ -958,20 +958,20 @@ H5FD_mirror_xmit_is_close(const H5FD_mirror_xmit_t *xmit)
  *
  *              Checks header validity and op code.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_lock(const H5FD_mirror_xmit_lock_t *xmit)
 {
     LOG_OP_CALL(__func__);
 
     assert(xmit);
 
-    if ((TRUE == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_LOCK == xmit->pub.op))
-        return TRUE;
+    if ((true == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_LOCK == xmit->pub.op))
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5FD_mirror_xmit_is_lock() */
 
 /* ---------------------------------------------------------------------------
@@ -981,21 +981,21 @@ H5FD_mirror_xmit_is_lock(const H5FD_mirror_xmit_lock_t *xmit)
  *
  *              Checks header validity and op code.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_open(const H5FD_mirror_xmit_open_t *xmit)
 {
     LOG_OP_CALL(__func__);
 
     assert(xmit);
 
-    if ((TRUE == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_OPEN == xmit->pub.op))
+    if ((true == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_OPEN == xmit->pub.op))
 
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5FD_mirror_xmit_is_open() */
 
 /* ---------------------------------------------------------------------------
@@ -1005,20 +1005,20 @@ H5FD_mirror_xmit_is_open(const H5FD_mirror_xmit_open_t *xmit)
  *
  *              Checks header validity and op code.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_set_eoa(const H5FD_mirror_xmit_eoa_t *xmit)
 {
     LOG_OP_CALL(__func__);
 
     assert(xmit);
 
-    if ((TRUE == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_SET_EOA == xmit->pub.op))
-        return TRUE;
+    if ((true == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_SET_EOA == xmit->pub.op))
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5FD_mirror_xmit_is_eoa() */
 
 /* ---------------------------------------------------------------------------
@@ -1028,20 +1028,20 @@ H5FD_mirror_xmit_is_set_eoa(const H5FD_mirror_xmit_eoa_t *xmit)
  *
  *              Checks header validity and op code.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_reply(const H5FD_mirror_xmit_reply_t *xmit)
 {
     LOG_OP_CALL(__func__);
 
     assert(xmit);
 
-    if ((TRUE == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_REPLY == xmit->pub.op))
-        return TRUE;
+    if ((true == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_REPLY == xmit->pub.op))
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5FD_mirror_xmit_is_reply() */
 
 /* ---------------------------------------------------------------------------
@@ -1051,20 +1051,20 @@ H5FD_mirror_xmit_is_reply(const H5FD_mirror_xmit_reply_t *xmit)
  *
  *              Checks header validity and op code.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_write(const H5FD_mirror_xmit_write_t *xmit)
 {
     LOG_OP_CALL(__func__);
 
     assert(xmit);
 
-    if ((TRUE == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_WRITE == xmit->pub.op))
-        return TRUE;
+    if ((true == H5FD_mirror_xmit_is_xmit(&(xmit->pub))) && (H5FD_MIRROR_OP_WRITE == xmit->pub.op))
+        return true;
 
-    return FALSE;
+    return false;
 } /* end H5FD_mirror_xmit_is_write() */
 
 /* ---------------------------------------------------------------------------
@@ -1074,10 +1074,10 @@ H5FD_mirror_xmit_is_write(const H5FD_mirror_xmit_write_t *xmit)
  *
  *              Checks magic number and structure version.
  *
- * Return:      TRUE if valid; else FALSE.
+ * Return:      true if valid; else false.
  * ---------------------------------------------------------------------------
  */
-H5_ATTR_PURE hbool_t
+H5_ATTR_PURE bool
 H5FD_mirror_xmit_is_xmit(const H5FD_mirror_xmit_t *xmit)
 {
     LOG_OP_CALL(__func__);
@@ -1085,9 +1085,9 @@ H5FD_mirror_xmit_is_xmit(const H5FD_mirror_xmit_t *xmit)
     assert(xmit);
 
     if ((H5FD_MIRROR_XMIT_MAGIC != xmit->magic) || (H5FD_MIRROR_XMIT_CURR_VERSION != xmit->version))
-        return FALSE;
+        return false;
 
-    return TRUE;
+    return true;
 } /* end H5FD_mirror_xmit_is_xmit() */
 
 /* ----------------------------------------------------------------------------
@@ -1130,7 +1130,7 @@ H5FD__mirror_verify_reply(H5FD_mirror_t *file)
     if (H5FD_mirror_xmit_decode_reply(&reply, xmit_buf) != H5FD_MIRROR_XMIT_REPLY_SIZE)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to decode reply xmit");
 
-    if (H5FD_mirror_xmit_is_reply(&reply) != TRUE)
+    if (H5FD_mirror_xmit_is_reply(&reply) != true)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "xmit op code was not REPLY");
 
     if (reply.pub.session_token != file->xmit.session_token)
@@ -1360,7 +1360,7 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
-    if (HDstrlen(name) >= H5FD_MIRROR_XMIT_FILEPATH_MAX)
+    if (strlen(name) >= H5FD_MIRROR_XMIT_FILEPATH_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "filename is too long");
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
@@ -1417,7 +1417,7 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     open_xmit->flags       = (uint32_t)flags;
     open_xmit->maxaddr     = (uint64_t)maxaddr;
     open_xmit->size_t_blob = (uint64_t)((size_t)(-1));
-    HDsnprintf(open_xmit->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX - 1, "%s", name);
+    snprintf(open_xmit->filename, H5FD_MIRROR_XMIT_FILEPATH_MAX - 1, "%s", name);
 
     xmit_buf = H5FL_BLK_MALLOC(xmit, H5FD_MIRROR_XMIT_BUFFER_MAX);
     if (NULL == xmit_buf)
@@ -1512,15 +1512,14 @@ done:
              * We can ignore any response from the writer, if we receive
              * any reply at all.
              */
-            if (HDwrite(file->sock_fd, "GOODBYE", HDstrlen("GOODBYE")) < 0) {
+            if (HDwrite(file->sock_fd, "GOODBYE", strlen("GOODBYE")) < 0) {
                 HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to transmit close");
                 if (HDclose(file->sock_fd) < 0)
                     HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close socket");
                 file->sock_fd = -1; /* invalidate for later */
             }                       /* end if problem writing goodbye; go down hard */
             else if (HDshutdown(file->sock_fd, SHUT_WR) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't shutdown socket write: %s",
-                            HDstrerror(errno));
+                HDONE_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't shutdown socket write: %s", strerror(errno));
         } /* end if xmit encode failed */
 
         if (file->sock_fd >= 0)
@@ -1777,7 +1776,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mirror_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
+H5FD__mirror_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     unsigned char *xmit_buf  = NULL;
     H5FD_mirror_t *file      = (H5FD_mirror_t *)_file;
@@ -1817,14 +1816,14 @@ done:
  *
  * Purpose:     To place an advisory lock on a file.
  *              The lock type to apply depends on the parameter "rw":
- *                      TRUE--opens for write: an exclusive lock
- *                      FALSE--opens for read: a shared lock
+ *                      true--opens for write: an exclusive lock
+ *                      false--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__mirror_lock(H5FD_t *_file, hbool_t rw)
+H5FD__mirror_lock(H5FD_t *_file, bool rw)
 {
     H5FD_mirror_xmit_lock_t xmit_lock;
     unsigned char          *xmit_buf  = NULL;

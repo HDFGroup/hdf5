@@ -368,7 +368,7 @@ DSetCreatPropList::setFilter(H5Z_filter_t filter_id, unsigned int flags, size_t 
 ///\exception   H5::PropListIException
 ///\par Description
 ///             Deletes a filter from the dataset creation property list;
-///             deletes all filters if \a filter_id is \c H5Z_FILTER_NONE.
+///             deletes all filters if \a filter_id is \c H5Z_FILTER_ALL.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::removeFilter(H5Z_filter_t filter_id) const

@@ -69,7 +69,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 exit(EXIT_SUCCESS);
                 break;
             case 'f': /* usecase data file name */
-                opts->filename = HDstrdup(optarg);
+                opts->filename = strdup(optarg);
                 break;
             case 'i': /* iterations */
                 if ((opts->iterations = atoi(optarg)) <= 0) {
@@ -107,7 +107,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                     usage(opts->progname);
                     Hgoto_error(-1);
                 }
-                opts->use_swmr = (hbool_t)use_swmr;
+                opts->use_swmr = (bool)use_swmr;
                 break;
             case 'y': /* Number of planes per chunk */
                 if ((opts->chunkplanes = strtoul(optarg, NULL, 0)) <= 0) {
@@ -137,12 +137,12 @@ parse_option(int argc, char *const argv[], options_t *opts)
     /* set test file name if not given */
     if (!opts->filename) {
         /* default data file name is <progname>.h5 */
-        if ((opts->filename = (char *)malloc(HDstrlen(opts->progname) + 4)) == NULL) {
+        if ((opts->filename = (char *)malloc(strlen(opts->progname) + 4)) == NULL) {
             fprintf(stderr, "malloc: failed\n");
             Hgoto_error(-1);
         }
-        HDstrcpy(opts->filename, opts->progname);
-        HDstrcat(opts->filename, ".h5");
+        strcpy(opts->filename, opts->progname);
+        strcat(opts->filename, ".h5");
     }
 
 done:
@@ -258,7 +258,7 @@ create_uc_file(options_t *opts)
  * ----------------------------------------------------------------------------
  */
 int
-write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
+write_uc_file(bool tosend, hid_t file_id, options_t *opts)
 {
     hid_t     dsid;                           /* dataset ID */
     hid_t     dcpl;                           /* Dataset creation property list */
@@ -273,7 +273,7 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
     hsize_t   start[3] = {0, 0, 0}, count[3]; /* Hyperslab selection values */
     hsize_t   i, j, k;
 
-    if (TRUE == tosend) {
+    if (true == tosend) {
         /* Send a message that H5Fopen is complete--releasing the file lock */
         h5_send_message(WRITER_MESSAGE, NULL, NULL);
     }
@@ -447,7 +447,7 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
  * ----------------------------------------------------------------------------
  */
 int
-read_uc_file(hbool_t towait, options_t *opts)
+read_uc_file(bool towait, options_t *opts)
 {
     hid_t     fid;                            /* File ID for new HDF5 file */
     hid_t     dsid;                           /* dataset ID */

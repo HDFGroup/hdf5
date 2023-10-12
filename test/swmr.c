@@ -63,9 +63,9 @@ static int test_metadata_read_attempts(hid_t in_fapl);
 static int test_metadata_read_retry_info(hid_t in_fapl);
 
 /* Tests for H5Fstart_swmr_write() */
-static int test_start_swmr_write(hid_t in_fapl, hbool_t new_format);
-static int test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format);
-static int test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format);
+static int test_start_swmr_write(hid_t in_fapl, bool new_format);
+static int test_err_start_swmr_write(hid_t in_fapl, bool new_format);
+static int test_start_swmr_write_concur(hid_t in_fapl, bool new_format);
 static int test_start_swmr_write_stress_ohdr(hid_t in_fapl);
 static int test_start_swmr_write_persist_dapl(hid_t in_fapl);
 
@@ -90,16 +90,16 @@ static int test_file_lock_concur(hid_t fapl);
 static int test_file_lock_swmr_concur(hid_t fapl);
 
 /* Test file lock environment variable */
-static int test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override);
+static int test_file_locking(hid_t in_fapl, bool turn_locking_on, bool env_var_override);
 
 /* Tests for SWMR VFD flag */
 static int test_swmr_vfd_flag(void);
 
 /* Tests for H5Drefresh: concurrent access */
-static int test_refresh_concur(hid_t in_fapl, hbool_t new_format);
+static int test_refresh_concur(hid_t in_fapl, bool new_format);
 
 /* Tests for multiple opens of files and datasets with H5Drefresh() & H5Fstart_swmr_write(): same process */
-static int test_multiple_same(hid_t in_fapl, hbool_t new_format);
+static int test_multiple_same(hid_t in_fapl, bool new_format);
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -115,12 +115,12 @@ static int test_multiple_same(hid_t in_fapl, hbool_t new_format);
 static int
 test_metadata_read_attempts(hid_t in_fapl)
 {
-    hid_t         fapl      = -1;                 /* File access property list            */
-    hid_t         file_fapl = -1;                 /* The file's access property list      */
-    hid_t         fid = -1, fid1 = -1, fid2 = -1; /* File IDs                             */
-    hid_t         driver_id    = -1;              /* ID for this VFD                      */
+    hid_t         fapl      = H5I_INVALID_HID; /* File access property list            */
+    hid_t         file_fapl = H5I_INVALID_HID; /* The file's access property list      */
+    hid_t         fid = H5I_INVALID_HID, fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t         driver_id    = H5I_INVALID_HID; /* ID for this VFD                      */
     unsigned long driver_flags = 0;               /* VFD feature flags                    */
-    hbool_t       compat_w_default_vfd;           /* current VFD compat w/ H5P_DEFAULT?   */
+    bool          compat_w_default_vfd;           /* current VFD compat w/ H5P_DEFAULT?   */
     unsigned      attempts;                       /* The # of read attempts               */
     char          filename[NAME_BUF_SIZE];        /* File name                            */
     herr_t        ret;                            /* Generic return value                 */
@@ -138,11 +138,11 @@ test_metadata_read_attempts(hid_t in_fapl)
         FAIL_STACK_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
         FAIL_STACK_ERROR;
-    compat_w_default_vfd = (driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE) ? TRUE : FALSE;
+    compat_w_default_vfd = (driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE) ? true : false;
 
     if (!compat_w_default_vfd) {
         SKIPPED();
-        HDputs("    The current VFD is not compatible with the default VFD.");
+        puts("    The current VFD is not compatible with the default VFD.");
         return 0;
     }
 
@@ -1570,28 +1570,28 @@ error:
  *      Close the group and file
  */
 static int
-test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
+test_start_swmr_write(hid_t in_fapl, bool new_format)
 {
-    hid_t             fid       = -1;                  /* File ID */
-    hid_t             fapl      = -1;                  /* File access property */
-    hid_t             gid       = -1;                  /* Group ID */
-    hid_t             dcpl      = -1;                  /* Dataset creation property */
-    hid_t             file_fapl = -1;                  /* File access property for the file */
-    hid_t             did1 = -1, did2 = -1, did3 = -1; /* Dataset IDs */
-    hid_t             did1_a = -1, did1_b = -1;
-    hid_t             sid1 = -1, sid2 = -1, sid3 = -1;                /* Dataspace IDs */
-    hsize_t           dim[1]        = {1};                            /* Dimension sizes */
-    hsize_t           max_dim[1]    = {H5S_UNLIMITED};                /* Maximum dimension sizes */
-    hsize_t           chunk_dim[1]  = {2};                            /* Chunk dimension sizes */
-    hsize_t           dim2[2]       = {5, 10};                        /* Dimension sizes */
-    hsize_t           max_dim2[2]   = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dimension sizes */
-    hsize_t           chunk_dim2[2] = {2, 7};                         /* Chunk dimension sizes */
-    H5D_chunk_index_t idx_type;                                       /* Dataset chunk index type */
-    int               wdata = 99;                                     /* Data to write */
-    int               rdata;                                          /* Data read */
-    unsigned          attempts;                                       /* The retrieved # of read attempts */
-    char              filename[NAME_BUF_SIZE];                        /* File name */
-    herr_t            ret;                                            /* Return value */
+    hid_t   fid       = H5I_INVALID_HID; /* File ID */
+    hid_t   fapl      = H5I_INVALID_HID; /* File access property */
+    hid_t   gid       = H5I_INVALID_HID; /* Group ID */
+    hid_t   dcpl      = H5I_INVALID_HID; /* Dataset creation property */
+    hid_t   file_fapl = H5I_INVALID_HID; /* File access property for the file */
+    hid_t   did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t   did1_a = H5I_INVALID_HID, did1_b = H5I_INVALID_HID;
+    hid_t   sid1 = H5I_INVALID_HID, sid2 = H5I_INVALID_HID, sid3 = H5I_INVALID_HID; /* Dataspace IDs */
+    hsize_t dim[1]        = {1};                                                    /* Dimension sizes */
+    hsize_t max_dim[1]    = {H5S_UNLIMITED};                /* Maximum dimension sizes */
+    hsize_t chunk_dim[1]  = {2};                            /* Chunk dimension sizes */
+    hsize_t dim2[2]       = {5, 10};                        /* Dimension sizes */
+    hsize_t max_dim2[2]   = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dimension sizes */
+    hsize_t chunk_dim2[2] = {2, 7};                         /* Chunk dimension sizes */
+    H5D_chunk_index_t idx_type;                             /* Dataset chunk index type */
+    int               wdata = 99;                           /* Data to write */
+    int               rdata;                                /* Data read */
+    unsigned          attempts;                             /* The retrieved # of read attempts */
+    char              filename[NAME_BUF_SIZE];              /* File name */
+    herr_t            ret;                                  /* Return value */
 
     /* Get a copy of the parameter fapl (non-latest-format) */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
@@ -1938,20 +1938,20 @@ error:
  *              --fail to enable SWMR due to superblock version not 3
  */
 static int
-test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
+test_err_start_swmr_write(hid_t in_fapl, bool new_format)
 {
-    hid_t  fid      = -1;           /* File ID */
-    hid_t  fid2     = -1;           /* File ID */
-    hid_t  fapl     = -1;           /* A copy of file access property */
-    hid_t  new_fapl = -1;           /* A copy of file access property */
-    hid_t  gid      = -1;           /* Group ID */
-    hid_t  did      = -1;           /* Dataset ID */
-    hid_t  sid      = -1;           /* Dataspace ID */
-    hid_t  aid      = -1;           /* Attribute ID */
-    hid_t  tid      = -1;           /* Datatype ID */
-    hid_t  bad_fid  = -1;           /* Test fid (should never represent a real ID) */
-    herr_t ret;                     /* Return value */
-    char   filename[NAME_BUF_SIZE]; /* File name */
+    hid_t  fid      = H5I_INVALID_HID; /* File ID */
+    hid_t  fid2     = H5I_INVALID_HID; /* File ID */
+    hid_t  fapl     = H5I_INVALID_HID; /* A copy of file access property */
+    hid_t  new_fapl = H5I_INVALID_HID; /* A copy of file access property */
+    hid_t  gid      = H5I_INVALID_HID; /* Group ID */
+    hid_t  did      = H5I_INVALID_HID; /* Dataset ID */
+    hid_t  sid      = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t  aid      = H5I_INVALID_HID; /* Attribute ID */
+    hid_t  tid      = H5I_INVALID_HID; /* Datatype ID */
+    hid_t  bad_fid  = H5I_INVALID_HID; /* Test fid (should never represent a real ID) */
+    herr_t ret;                        /* Return value */
+    char   filename[NAME_BUF_SIZE];    /* File name */
 
     /* Create a copy of the input parameter in_fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
@@ -2401,7 +2401,7 @@ error:
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
-test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
+test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, bool new_format)
 {
     if (new_format) {
         TESTING("H5Fstart_swmr_write()--concurrent access for latest format");
@@ -2411,27 +2411,27 @@ test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_start_swmr_write_concur() */
 
 #else  /* !defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
 static int
-test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
+test_start_swmr_write_concur(hid_t in_fapl, bool new_format)
 {
-    hid_t fid = -1, fid1 = -1, fid2 = -1; /* File IDs */
-    hid_t fapl;                           /* File access property list */
-    pid_t childpid = 0;                   /* Child process ID */
-    pid_t tmppid;                         /* Child process ID returned by waitpid */
-    int   child_status;                   /* Status passed to waitpid */
-    int   child_wait_option = 0;          /* Options passed to waitpid */
-    int   child_exit_val;                 /* Exit status of the child */
-    char  filename[NAME_BUF_SIZE];        /* File name */
+    hid_t fid = H5I_INVALID_HID, fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t fapl;                    /* File access property list */
+    pid_t childpid = 0;            /* Child process ID */
+    pid_t tmppid;                  /* Child process ID returned by waitpid */
+    int   child_status;            /* Status passed to waitpid */
+    int   child_wait_option = 0;   /* Options passed to waitpid */
+    int   child_exit_val;          /* Exit status of the child */
+    char  filename[NAME_BUF_SIZE]; /* File name */
 
-    hid_t   did = -1, did1 = -1, did2 = -1, did3 = -1;
-    hid_t   sid           = -1;
-    hid_t   dcpl          = -1;
+    hid_t   did = H5I_INVALID_HID, did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID;
+    hid_t   sid           = H5I_INVALID_HID;
+    hid_t   dcpl          = H5I_INVALID_HID;
     hsize_t chunk_dims[1] = {1};
     hsize_t maxdims[1]    = {H5S_UNLIMITED};
     hsize_t dims[1]       = {1};
@@ -2583,9 +2583,9 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
     if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
-    if (childpid == 0) {                        /* Child process */
-        hid_t child_fid1 = -1, child_fid2;      /* File IDs */
-        hid_t child_did1 = -1, child_did2 = -1; /* Dataset IDs */
+    if (childpid == 0) {                                                  /* Child process */
+        hid_t child_fid1 = H5I_INVALID_HID, child_fid2;                   /* File IDs */
+        hid_t child_did1 = H5I_INVALID_HID, child_did2 = H5I_INVALID_HID; /* Dataset IDs */
         int   child_notify = 0;
         int   rdata        = 0;
 
@@ -3029,14 +3029,14 @@ error:
 static int
 test_start_swmr_write_stress_ohdr(hid_t in_fapl)
 {
-    hid_t    fid = -1;                /* File IDs */
-    hid_t    fapl;                    /* File access property list */
-    char     filename[NAME_BUF_SIZE]; /* File name */
-    hid_t    did = -1, did2 = -1;     /* Dataset IDs */
-    hid_t    sid           = -1;      /* Dataspace ID */
-    hid_t    tid           = -1;      /* Datatype ID */
-    hid_t    dcpl          = -1;      /* Dataset creation property list ID */
-    hid_t    aid           = -1;      /* Attribute ID */
+    hid_t    fid = H5I_INVALID_HID;                         /* File IDs */
+    hid_t    fapl;                                          /* File access property list */
+    char     filename[NAME_BUF_SIZE];                       /* File name */
+    hid_t    did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t    sid           = H5I_INVALID_HID;               /* Dataspace ID */
+    hid_t    tid           = H5I_INVALID_HID;               /* Datatype ID */
+    hid_t    dcpl          = H5I_INVALID_HID;               /* Dataset creation property list ID */
+    hid_t    aid           = H5I_INVALID_HID;               /* Attribute ID */
     hsize_t  chunk_dims[2] = {10, 10};
     hsize_t  maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     char     fill[256];     /* Fill value for dataset */
@@ -3241,19 +3241,19 @@ tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary
         TEST_ERROR;
     if (rdcc_nbytes != rdcc_nbytes_out)
         TEST_ERROR;
-    if (HDfabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
+    if (fabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
         TEST_ERROR;
 
     /* Get efile prefix property and verify */
     if (H5Pget_efile_prefix(dapl, efile_prefix_out, sizeof(efile_prefix_out)) < 0)
         TEST_ERROR;
-    if (HDstrncmp(efile_prefix, efile_prefix_out, sizeof(efile_prefix_out)))
+    if (strncmp(efile_prefix, efile_prefix_out, sizeof(efile_prefix_out)))
         TEST_ERROR;
 
     /* Get virtual prefix property and verify */
     if (H5Pget_virtual_prefix(vds_dapl1, virtual_prefix_out, sizeof(virtual_prefix_out)) < 0)
         TEST_ERROR;
-    if (HDstrncmp(virtual_prefix, virtual_prefix_out, sizeof(virtual_prefix_out)))
+    if (strncmp(virtual_prefix, virtual_prefix_out, sizeof(virtual_prefix_out)))
         TEST_ERROR;
 
     /* Get virtual printf gap property and verify */
@@ -3582,14 +3582,14 @@ flush_cb(hid_t H5_ATTR_UNUSED obj_id, void *_udata)
 static int
 test_object_flush_cb(hid_t in_fapl)
 {
-    hid_t          fapl  = -1;              /* A copy of file access property list */
-    hid_t          ffapl = -1;              /* A file's file access property list */
-    hid_t          fid   = -1;              /* File ID */
-    hid_t          gid   = -1;              /* Group ID */
-    hid_t          did1 = -1, did2 = -1;    /* Dataset IDs */
-    hid_t          sid     = -1;            /* Dataspace ID */
-    hsize_t        dims[2] = {5, 10};       /* Dataset dimension sizes */
-    int            buf[50];                 /* Data buffer */
+    hid_t          fapl  = H5I_INVALID_HID;                        /* A copy of file access property list */
+    hid_t          ffapl = H5I_INVALID_HID;                        /* A file's file access property list */
+    hid_t          fid   = H5I_INVALID_HID;                        /* File ID */
+    hid_t          gid   = H5I_INVALID_HID;                        /* Group ID */
+    hid_t          did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t          sid     = H5I_INVALID_HID;                      /* Dataspace ID */
+    hsize_t        dims[2] = {5, 10};                              /* Dataset dimension sizes */
+    int            buf[50];                                        /* Data buffer */
     H5F_flush_cb_t ret_cb;                  /* The callback function set in object flush property */
     void          *ret_ct;                  /* The user data set in object flush property */
     unsigned       flush_ct = 0;            /* The user data for object flush property */
@@ -3860,13 +3860,13 @@ append_cb2(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void 
 static int
 test_append_flush_generic(void)
 {
-    hid_t           dapl = -1;       /* A copy of dataset access property */
-    hsize_t         boundary[3];     /* The boundary for append flush property */
-    unsigned        count = 0;       /* The user data for append flush property */
-    hsize_t         ret_boundary[3]; /* The boundary set in append flush property */
-    H5D_append_cb_t ret_cb;          /* The callback function set in append flush property */
-    unsigned       *ret_count;       /* The user data set in append flush property */
-    herr_t          ret;             /* The return value */
+    hid_t           dapl = H5I_INVALID_HID; /* A copy of dataset access property */
+    hsize_t         boundary[3];            /* The boundary for append flush property */
+    unsigned        count = 0;              /* The user data for append flush property */
+    hsize_t         ret_boundary[3];        /* The boundary set in append flush property */
+    H5D_append_cb_t ret_cb;                 /* The callback function set in append flush property */
+    unsigned       *ret_count;              /* The user data set in append flush property */
+    herr_t          ret;                    /* The return value */
 
     TESTING("H5Fget/set_append_flush() for a generic dataset access property list");
 
@@ -4035,13 +4035,13 @@ error:
 static int
 test_append_flush_dataset_chunked(hid_t in_fapl)
 {
-    hid_t fid  = -1;            /* file ID */
-    hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The dataset ID */
-    hid_t sid   = -1;           /* The dataspace ID */
-    hid_t dcpl  = -1;           /* A copy of dataset creation property */
-    hid_t dapl  = -1;           /* A copy of dataset access property */
-    hid_t ddapl = -1;           /* The dataset access property of the opened dataset */
+    hid_t fid  = H5I_INVALID_HID;                         /* file ID */
+    hid_t fapl = H5I_INVALID_HID;                         /* A copy of file access property */
+    hid_t did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* The dataset ID */
+    hid_t sid   = H5I_INVALID_HID;                        /* The dataspace ID */
+    hid_t dcpl  = H5I_INVALID_HID;                        /* A copy of dataset creation property */
+    hid_t dapl  = H5I_INVALID_HID;                        /* A copy of dataset access property */
+    hid_t ddapl = H5I_INVALID_HID; /* The dataset access property of the opened dataset */
 
     hsize_t  boundary[3]; /* Boundary size */
     unsigned count = 0;   /* User data */
@@ -4258,12 +4258,12 @@ error:
 static int
 test_append_flush_dataset_fixed(hid_t in_fapl)
 {
-    hid_t fid  = -1;            /* file ID */
-    hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The dataset ID */
-    hid_t sid   = -1;           /* The dataspace ID */
-    hid_t dapl  = -1;           /* A copy of dataset access property */
-    hid_t ddapl = -1;           /* The dataset access property of the opened dataset */
+    hid_t fid  = H5I_INVALID_HID;                         /* file ID */
+    hid_t fapl = H5I_INVALID_HID;                         /* A copy of file access property */
+    hid_t did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* The dataset ID */
+    hid_t sid   = H5I_INVALID_HID;                        /* The dataspace ID */
+    hid_t dapl  = H5I_INVALID_HID;                        /* A copy of dataset access property */
+    hid_t ddapl = H5I_INVALID_HID; /* The dataset access property of the opened dataset */
 
     hsize_t  boundary[3]; /* Boundary size */
     unsigned count = 0;   /* User data */
@@ -4476,14 +4476,14 @@ error:
 static int
 test_append_flush_dataset_multiple(hid_t in_fapl)
 {
-    hid_t fid  = -1;            /* file ID */
-    hid_t fapl = -1;            /* A copy of file access property */
-    hid_t did1 = -1, did2 = -1; /* The dataset ID */
-    hid_t sid   = -1;           /* The dataspace ID */
-    hid_t dcpl  = -1;           /* A copy of dataset creation property */
-    hid_t dapl1 = -1;           /* A copy of dataset access property */
-    hid_t dapl2 = -1;           /* A copy of dataset access property */
-    hid_t ddapl = -1;           /* The dataset access property of the opened dataset */
+    hid_t fid  = H5I_INVALID_HID;                         /* file ID */
+    hid_t fapl = H5I_INVALID_HID;                         /* A copy of file access property */
+    hid_t did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* The dataset ID */
+    hid_t sid   = H5I_INVALID_HID;                        /* The dataspace ID */
+    hid_t dcpl  = H5I_INVALID_HID;                        /* A copy of dataset creation property */
+    hid_t dapl1 = H5I_INVALID_HID;                        /* A copy of dataset access property */
+    hid_t dapl2 = H5I_INVALID_HID;                        /* A copy of dataset access property */
+    hid_t ddapl = H5I_INVALID_HID; /* The dataset access property of the opened dataset */
 
     hsize_t  boundary1[3]; /* Boundary size */
     hsize_t  boundary2[3]; /* Boundary size */
@@ -4705,10 +4705,10 @@ error:
 static int
 test_file_lock_same(hid_t in_fapl)
 {
-    hid_t    fid = -1, fid2 = -1;     /* File IDs */
-    hid_t    fapl = -1;               /* File access property list */
-    unsigned intent;                  /* File access flags */
-    char     filename[NAME_BUF_SIZE]; /* file name */
+    hid_t    fid = H5I_INVALID_HID, fid2 = H5I_INVALID_HID; /* File IDs */
+    hid_t    fapl = H5I_INVALID_HID;                        /* File access property list */
+    unsigned intent;                                        /* File access flags */
+    char     filename[NAME_BUF_SIZE];                       /* file name */
 
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--single process access");
@@ -4716,7 +4716,7 @@ test_file_lock_same(hid_t in_fapl)
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, true, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -5188,7 +5188,7 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_concur() */
@@ -5198,8 +5198,8 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
 static int
 test_file_lock_concur(hid_t in_fapl)
 {
-    hid_t fid  = -1;               /* File ID */
-    hid_t fapl = -1;               /* File access property list */
+    hid_t fid  = H5I_INVALID_HID;  /* File ID */
+    hid_t fapl = H5I_INVALID_HID;  /* File access property list */
     char  filename[NAME_BUF_SIZE]; /* file name */
     pid_t childpid = 0;            /* Child process ID */
     int   child_status;            /* Status passed to waitpid */
@@ -5213,7 +5213,7 @@ test_file_lock_concur(hid_t in_fapl)
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, true, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -5581,7 +5581,7 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
 } /* end test_file_lock_swmr_concur() */
@@ -5606,7 +5606,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
-    if (H5Pset_file_locking(fapl, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, true, true) < 0)
         FAIL_STACK_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -6596,7 +6596,7 @@ error:
 **
 *****************************************************************/
 static int
-test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override)
+test_file_locking(hid_t in_fapl, bool turn_locking_on, bool env_var_override)
 {
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
     if (turn_locking_on && env_var_override)
@@ -6608,11 +6608,11 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
     else
         TESTING("File locking: OFF");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 #else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
-    hid_t  fid  = -1;               /* File ID */
-    hid_t  fapl = -1;               /* File access property list */
+    hid_t  fid  = H5I_INVALID_HID;  /* File ID */
+    hid_t  fapl = H5I_INVALID_HID;  /* File access property list */
     char   filename[NAME_BUF_SIZE]; /* file name */
     pid_t  childpid = 0;            /* Child process ID */
     int    child_status;            /* Status passed to waitpid */
@@ -6636,18 +6636,18 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
         TEST_ERROR;
 
     /* Set locking in the fapl */
-    if (H5Pset_file_locking(fapl, turn_locking_on ? TRUE : FALSE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl, turn_locking_on ? true : false, true) < 0)
         TEST_ERROR;
 
     /* If requested, set the environment variable */
     if (env_var_override) {
-        if (HDsetenv(HDF5_USE_FILE_LOCKING, turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, turn_locking_on ? "FALSE" : "TRUE", true) < 0)
             TEST_ERROR;
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR;
     }
     else {
-        if (HDsetenv(HDF5_USE_FILE_LOCKING, "", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, "", true) < 0)
             TEST_ERROR;
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR;
@@ -6803,7 +6803,7 @@ test_different_lock_flags(hid_t in_fapl)
         TEST_ERROR;
 
     /* Set locking in the fapl */
-    if (H5Pset_file_locking(fapl_id, TRUE, TRUE) < 0)
+    if (H5Pset_file_locking(fapl_id, true, true) < 0)
         TEST_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -6818,7 +6818,7 @@ test_different_lock_flags(hid_t in_fapl)
         TEST_ERROR;
 
     /* Unset locking in the fapl */
-    if (H5Pset_file_locking(fapl_id, FALSE, FALSE) < 0)
+    if (H5Pset_file_locking(fapl_id, false, false) < 0)
         TEST_ERROR;
 
     /* Open the test file with different flags (should FAIL) */
@@ -6860,10 +6860,10 @@ error:
 static int
 test_swmr_vfd_flag(void)
 {
-    hid_t fid       = -1;          /* file ID */
-    hid_t sec2_fapl = -1;          /* fapl ID of a VFD that supports SWMR writes (sec2) */
-    hid_t bad_fapl  = -1;          /* fapl ID of a VFD that does not support SWMR writes (stdio) */
-    char  filename[NAME_BUF_SIZE]; /* file name */
+    hid_t fid       = H5I_INVALID_HID; /* file ID */
+    hid_t sec2_fapl = H5I_INVALID_HID; /* fapl ID of a VFD that supports SWMR writes (sec2) */
+    hid_t bad_fapl  = H5I_INVALID_HID; /* fapl ID of a VFD that does not support SWMR writes (stdio) */
+    char  filename[NAME_BUF_SIZE];     /* file name */
 
     TESTING("SWMR-enabled VFD flag functionality");
 
@@ -7073,7 +7073,7 @@ error:
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
 static int
-test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
+test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, bool new_format)
 {
     if (new_format) {
         TESTING("H5Drefresh()--concurrent access for latest format");
@@ -7083,14 +7083,14 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     }
 
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
 } /* test_refresh_concur() */
 
 #else  /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 static int
-test_refresh_concur(hid_t in_fapl, hbool_t new_format)
+test_refresh_concur(hid_t in_fapl, bool new_format)
 {
     hid_t fid = H5I_INVALID_HID;   /* File ID */
     hid_t fapl;                    /* File access property list */
@@ -7101,9 +7101,9 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
     int   child_exit_val;          /* Exit status of the child */
     char  filename[NAME_BUF_SIZE]; /* File name */
 
-    hid_t   did           = -1;
-    hid_t   sid           = -1;
-    hid_t   dcpl          = -1;
+    hid_t   did           = H5I_INVALID_HID;
+    hid_t   sid           = H5I_INVALID_HID;
+    hid_t   dcpl          = H5I_INVALID_HID;
     hsize_t chunk_dims[1] = {1};
     hsize_t maxdims[1]    = {H5S_UNLIMITED};
     hsize_t dims[1]       = {1};
@@ -7175,11 +7175,11 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
     if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
-    if (childpid == 0) {         /* Child process */
-        hid_t   child_fid1 = -1; /* File ID */
-        hid_t   child_fid2 = -1; /* File ID */
-        hid_t   child_did1 = -1, child_did2 = -1;
-        hid_t   child_sid = -1;
+    if (childpid == 0) {                      /* Child process */
+        hid_t   child_fid1 = H5I_INVALID_HID; /* File ID */
+        hid_t   child_fid2 = H5I_INVALID_HID; /* File ID */
+        hid_t   child_did1 = H5I_INVALID_HID, child_did2 = H5I_INVALID_HID;
+        hid_t   child_sid = H5I_INVALID_HID;
         hsize_t tdims[1];
         int     rbuf[2]      = {0, 0};
         int     child_notify = 0;
@@ -7403,14 +7403,15 @@ error:
  * opens of files and datasets.
  */
 static int
-test_multiple_same(hid_t in_fapl, hbool_t new_format)
+test_multiple_same(hid_t in_fapl, bool new_format)
 {
-    hid_t   fid = -1, fid1 = -1, fid2 = -1, fid3 = -1; /* File IDs */
-    hid_t   fapl;                                      /* File access property list */
-    char    filename[NAME_BUF_SIZE];                   /* File name */
-    hid_t   did = -1, did1 = -1, did2 = -1, did3 = -1;
-    hid_t   sid           = -1;
-    hid_t   dcpl          = -1;
+    hid_t fid = H5I_INVALID_HID, fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID,
+          fid3 = H5I_INVALID_HID;    /* File IDs */
+    hid_t   fapl;                    /* File access property list */
+    char    filename[NAME_BUF_SIZE]; /* File name */
+    hid_t   did = H5I_INVALID_HID, did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID;
+    hid_t   sid           = H5I_INVALID_HID;
+    hid_t   dcpl          = H5I_INVALID_HID;
     hsize_t chunk_dims[2] = {1, 2};
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t dims[2]       = {1, 1};
@@ -7728,12 +7729,12 @@ error:
 int
 main(void)
 {
-    int     nerrors      = 0;               /* The # of errors */
-    hid_t   fapl         = H5I_INVALID_HID; /* File access property list ID */
-    char   *driver       = NULL;            /* VFD string (from env variable) */
-    char   *lock_env_var = NULL;            /* file locking env var pointer */
-    hbool_t use_file_locking;               /* read from env var */
-    hbool_t file_locking_enabled = FALSE;   /* Checks if the file system supports locks */
+    int   nerrors      = 0;               /* The # of errors */
+    hid_t fapl         = H5I_INVALID_HID; /* File access property list ID */
+    char *driver       = NULL;            /* VFD string (from env variable) */
+    char *lock_env_var = NULL;            /* file locking env var pointer */
+    bool  use_file_locking;               /* read from env var */
+    bool  file_locking_enabled = false;   /* Checks if the file system supports locks */
 
     /* Testing setup */
     h5_reset();
@@ -7741,7 +7742,7 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv(HDF5_DRIVER);
+    driver = getenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
@@ -7751,11 +7752,11 @@ main(void)
      * about file locking. File locking should be used unless explicitly
      * disabled.
      */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
-        use_file_locking = FALSE;
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !strcmp(lock_env_var, "FALSE"))
+        use_file_locking = false;
     else
-        use_file_locking = TRUE;
+        use_file_locking = true;
 
     /* Check if file locking is enabled on this file system */
     if (use_file_locking)
@@ -7770,10 +7771,10 @@ main(void)
 #ifdef OUT
     nerrors += test_bug_refresh(fapl);
 #endif
-    nerrors += test_refresh_concur(fapl, TRUE);
-    nerrors += test_refresh_concur(fapl, FALSE);
-    nerrors += test_multiple_same(fapl, TRUE);
-    nerrors += test_multiple_same(fapl, FALSE);
+    nerrors += test_refresh_concur(fapl, true);
+    nerrors += test_refresh_concur(fapl, false);
+    nerrors += test_multiple_same(fapl, true);
+    nerrors += test_multiple_same(fapl, false);
 
     /* Tests on H5Pget/set_metadata_read_attempts() and H5Fget_metadata_read_retry_info() */
     nerrors += test_metadata_read_attempts(fapl);
@@ -7785,12 +7786,12 @@ main(void)
      *   H5Fcreate(write, latest format) or  H5Fcreate(SWMR write, non-latest-format)
      *   --both result in v3 superblock and latest version support
      */
-    nerrors += test_start_swmr_write(fapl, TRUE);
-    nerrors += test_start_swmr_write(fapl, FALSE);
-    nerrors += test_err_start_swmr_write(fapl, TRUE);
-    nerrors += test_err_start_swmr_write(fapl, FALSE);
-    nerrors += test_start_swmr_write_concur(fapl, TRUE);
-    nerrors += test_start_swmr_write_concur(fapl, FALSE);
+    nerrors += test_start_swmr_write(fapl, true);
+    nerrors += test_start_swmr_write(fapl, false);
+    nerrors += test_err_start_swmr_write(fapl, true);
+    nerrors += test_err_start_swmr_write(fapl, false);
+    nerrors += test_start_swmr_write_concur(fapl, true);
+    nerrors += test_start_swmr_write_concur(fapl, false);
     nerrors += test_start_swmr_write_stress_ohdr(fapl);
     nerrors += test_start_swmr_write_persist_dapl(fapl);
 
@@ -7827,7 +7828,7 @@ main(void)
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
      */
-    if (NULL == driver || !HDstrcmp(driver, "") || !HDstrcmp(driver, "sec2"))
+    if (NULL == driver || !strcmp(driver, "") || !strcmp(driver, "sec2"))
         nerrors += test_swmr_vfd_flag();
 
     /* Test multiple opens via different locking flags */
@@ -7838,10 +7839,10 @@ main(void)
      * so they should be run last.
      */
     if (use_file_locking && file_locking_enabled) {
-        nerrors += test_file_locking(fapl, TRUE, TRUE);
-        nerrors += test_file_locking(fapl, TRUE, FALSE);
-        nerrors += test_file_locking(fapl, FALSE, TRUE);
-        nerrors += test_file_locking(fapl, FALSE, FALSE);
+        nerrors += test_file_locking(fapl, true, true);
+        nerrors += test_file_locking(fapl, true, false);
+        nerrors += test_file_locking(fapl, false, true);
+        nerrors += test_file_locking(fapl, false, false);
     }
 
     if (nerrors)

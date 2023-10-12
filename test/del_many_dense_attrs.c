@@ -53,17 +53,17 @@ catch_signal(int H5_ATTR_UNUSED signo)
 int
 main(void)
 {
-    hid_t       fid  = -1;         /* HDF5 File ID                 */
-    hid_t       gid  = -1;         /* Group ID                     */
-    hid_t       sid  = -1;         /* Dataspace ID                 */
-    hid_t       aid  = -1;         /* Attribute ID                 */
-    hid_t       tid  = -1;         /* Datatype ID                  */
-    hid_t       fapl = -1;         /* File access property lists   */
-    hid_t       gcpl = -1;         /* Group creation property list */
-    char        aname[50];         /* Name of attribute            */
-    const char *basename = "attr"; /* Name prefix for attribute    */
-    char        filename[100];     /* File name                    */
-    int         i;                 /* Local index variable         */
+    hid_t       fid  = H5I_INVALID_HID; /* HDF5 File ID                 */
+    hid_t       gid  = H5I_INVALID_HID; /* Group ID                     */
+    hid_t       sid  = H5I_INVALID_HID; /* Dataspace ID                 */
+    hid_t       aid  = H5I_INVALID_HID; /* Attribute ID                 */
+    hid_t       tid  = H5I_INVALID_HID; /* Datatype ID                  */
+    hid_t       fapl = H5I_INVALID_HID; /* File access property lists   */
+    hid_t       gcpl = H5I_INVALID_HID; /* Group creation property list */
+    char        aname[50];              /* Name of attribute            */
+    const char *basename = "attr";      /* Name prefix for attribute    */
+    char        filename[100];          /* File name                    */
+    int         i;                      /* Local index variable         */
 
     /* Testing setup */
     h5_reset();
@@ -114,7 +114,7 @@ main(void)
     /* Create attributes in the group */
     for (i = ATTR_COUNT; i >= 0; i--) {
         /* Set up the attribute name */
-        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
+        snprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Create the attribute */
         if ((aid = H5Acreate2(gid, aname, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -160,7 +160,7 @@ main(void)
     /* Delete the attributes */
     for (i = 0; i <= ATTR_COUNT; i++) {
         /* Set up the attribute name */
-        HDsnprintf(aname, sizeof(aname), "%s%d", basename, i);
+        snprintf(aname, sizeof(aname), "%s%d", basename, i);
 
         /* Delete the attribute */
         if (H5Adelete(gid, aname) < 0)

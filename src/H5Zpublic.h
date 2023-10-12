@@ -286,7 +286,7 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  *          H5Z_FILTER_CONFIG_ENCODE_ENABLED & filter_config_flags
  *          \endcode
  *          is true, i.e., greater than 0 (zero), the queried filter
- *          is configured to encode data; if the value is \c FALSE, i.e., equal to
+ *          is configured to encode data; if the value is \c false, i.e., equal to
  *          0 (zero), the filter is not so configured.
  *
  *          If a filter is not encode-enabled, the corresponding \c H5Pset_*

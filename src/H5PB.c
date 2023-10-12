@@ -112,7 +112,7 @@
 /* Iteration context for destroying page buffer */
 typedef struct {
     H5PB_t *page_buf;
-    hbool_t actual_slist;
+    bool    actual_slist;
 } H5PB_ud1_t;
 
 /********************/
@@ -464,12 +464,12 @@ H5PB_dest(H5F_shared_t *f_sh)
         op_data.page_buf = page_buf;
 
         /* Destroy the skip list containing all the entries in the PB */
-        op_data.actual_slist = TRUE;
+        op_data.actual_slist = true;
         if (H5SL_destroy(page_buf->slist_ptr, H5PB__dest_cb, &op_data))
             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTCLOSEOBJ, FAIL, "can't destroy page buffer skip list");
 
         /* Destroy the skip list containing the new entries */
-        op_data.actual_slist = FALSE;
+        op_data.actual_slist = false;
         if (H5SL_destroy(page_buf->mf_slist_ptr, H5PB__dest_cb, &op_data))
             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTCLOSEOBJ, FAIL, "can't destroy page buffer skip list");
 
@@ -526,7 +526,7 @@ H5PB_add_new_page(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t page_addr)
         /* Initialize page fields */
         page_entry->addr     = page_addr;
         page_entry->type     = (H5F_mem_page_t)type;
-        page_entry->is_dirty = FALSE;
+        page_entry->is_dirty = false;
 
         /* Insert entry in skip list */
         if (H5SL_insert(page_buf->mf_slist_ptr, page_entry, &(page_entry->addr)) < 0)
@@ -656,7 +656,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
     size_t        access_size = 0;
-    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
+    bool          bypass_pb   = false; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -672,7 +672,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
 #ifdef H5_HAVE_PARALLEL
     if (H5F_SHARED_HAS_FEATURE(f_sh, H5FD_FEAT_HAS_MPI)) {
 #if 1
-        bypass_pb = TRUE;
+        bypass_pb = true;
 #else
         /* MSC - why this stopped working ? */
         int mpi_size;
@@ -680,7 +680,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
         if ((mpi_size = H5F_shared_mpi_get_size(f_sh)) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size");
         if (1 != mpi_size)
-            bypass_pb = TRUE;
+            bypass_pb = true;
 #endif
     } /* end if */
 #endif
@@ -865,7 +865,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                     /* if make_space returns 0, then we can't use the page
                        buffer for this I/O and we need to bypass */
                     if (0 == can_make_space) {
-                        /* make space can't return FALSE on second touched page since the first is of the same
+                        /* make space can't return false on second touched page since the first is of the same
                          * type */
                         assert(0 == i);
 
@@ -914,7 +914,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 page_entry->page_buf_ptr = new_page_buf;
                 page_entry->addr         = search_addr;
                 page_entry->type         = (H5F_mem_page_t)type;
-                page_entry->is_dirty     = FALSE;
+                page_entry->is_dirty     = false;
 
                 /* Insert page into PB */
                 if (H5PB__insert_entry(page_buf, page_entry) < 0)
@@ -955,7 +955,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
     size_t        access_size = 0;
-    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
+    bool          bypass_pb   = false; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -970,7 +970,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
 #ifdef H5_HAVE_PARALLEL
     if (H5F_SHARED_HAS_FEATURE(f_sh, H5FD_FEAT_HAS_MPI)) {
 #if 1
-        bypass_pb = TRUE;
+        bypass_pb = true;
 #else
         /* MSC - why this stopped working ? */
         int mpi_size;
@@ -978,7 +978,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
         if ((mpi_size = H5F_shared_mpi_get_size(f_sh)) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size");
         if (1 != mpi_size)
-            bypass_pb = TRUE;
+            bypass_pb = true;
 #endif
     } /* end if */
 #endif
@@ -1070,7 +1070,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                                 page_buf->page_size - (size_t)offset);
 
                     /* Mark page dirty and push to top of LRU */
-                    page_entry->is_dirty = TRUE;
+                    page_entry->is_dirty = true;
                     H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
                 } /* end if */
             }     /* end if */
@@ -1090,7 +1090,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                                 (size_t)((addr + size) - last_page_addr));
 
                     /* Mark page dirty and push to top of LRU */
-                    page_entry->is_dirty = TRUE;
+                    page_entry->is_dirty = true;
                     H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
                 } /* end if */
             }     /* end else-if */
@@ -1143,7 +1143,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                             access_size);
 
                 /* Mark page dirty and push to top of LRU */
-                page_entry->is_dirty = TRUE;
+                page_entry->is_dirty = true;
                 H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
 
                 /* Update statistics */
@@ -1263,7 +1263,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                 H5MM_memcpy((uint8_t *)new_page_buf + offset, (const uint8_t *)buf + buf_offset, access_size);
 
                 /* Page is dirty now */
-                page_entry->is_dirty = TRUE;
+                page_entry->is_dirty = true;
 
                 /* Insert page into PB, evicting other pages as necessary */
                 if (H5PB__insert_entry(page_buf, page_entry) < 0)
@@ -1287,10 +1287,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
+H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, bool *enabled)
 {
     H5PB_t *page_buf;            /* Page buffering info for this file */
-    hbool_t bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    bool    bypass_pb = false;   /* Whether to bypass page buffering */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
@@ -1304,7 +1304,7 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
 #ifdef H5_HAVE_PARALLEL
     if (H5F_SHARED_HAS_FEATURE(f_sh, H5FD_FEAT_HAS_MPI)) {
 #if 1
-        bypass_pb = TRUE;
+        bypass_pb = true;
 #else
         /* MSC - why this stopped working ? */
         int mpi_size;
@@ -1312,7 +1312,7 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
         if ((mpi_size = H5F_shared_mpi_get_size(f_sh)) < 0)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTGET, FAIL, "can't retrieve MPI communicator size");
         if (1 != mpi_size)
-            bypass_pb = TRUE;
+            bypass_pb = true;
 #endif
     } /* end if */
 #endif
@@ -1320,13 +1320,13 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
     /* If page buffering is disabled, or if this is a parallel raw data access,
      * bypass page buffering. Note that page buffering may still be disabled for
      * large metadata access or large non-parallel raw data access, but this
-     * function doesn't take I/O size into account so if it returns TRUE the
-     * page buffer may still be disabled for some I/O. If it returns FALSE it is
+     * function doesn't take I/O size into account so if it returns true the
+     * page buffer may still be disabled for some I/O. If it returns false it is
      * always disabled for this access type.
      */
     if (NULL == page_buf || (bypass_pb && H5FD_MEM_DRAW == type)) {
         /* Update statistics, since wherever this function is called, if it
-         * returns FALSE, the calling function performs I/O avoiding the page
+         * returns false, the calling function performs I/O avoiding the page
          * buffer layer */
         if (page_buf) {
             assert(type == H5FD_MEM_DRAW);
@@ -1334,11 +1334,11 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
         } /* end if */
 
         /* Page buffer is disabled, at least for this data access type */
-        *enabled = FALSE;
+        *enabled = false;
     } /* end if */
     else
         /* Page buffer may be enabled */
-        *enabled = TRUE;
+        *enabled = true;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PB_enabled() */
@@ -1409,7 +1409,7 @@ static htri_t
 H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
 {
     H5PB_entry_t *page_entry;       /* Pointer to page eviction candidate */
-    htri_t        ret_value = TRUE; /* Return value */
+    htri_t        ret_value = true; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1425,7 +1425,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
            metadata, then we can't make space for raw data */
         if (0 == page_buf->raw_count && page_buf->min_meta_count == page_buf->meta_count) {
             assert(page_buf->meta_count * page_buf->page_size == page_buf->max_size);
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
         } /* end if */
 
         /* check the metadata threshold before evicting metadata items */
@@ -1442,7 +1442,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
            raw data, then we can't make space for meta data */
         if (0 == page_buf->meta_count && page_buf->min_raw_count == page_buf->raw_count) {
             assert(page_buf->raw_count * page_buf->page_size == page_buf->max_size);
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(false);
         } /* end if */
 
         /* check the raw data threshold before evicting raw data items */
@@ -1536,7 +1536,7 @@ H5PB__write_entry(H5F_shared_t *f_sh, H5PB_entry_t *page_entry)
             HGOTO_ERROR(H5E_PAGEBUF, H5E_WRITEERROR, FAIL, "file write failed");
     } /* end if */
 
-    page_entry->is_dirty = FALSE;
+    page_entry->is_dirty = false;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

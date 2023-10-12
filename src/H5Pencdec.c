@@ -44,7 +44,7 @@
 
 /* Typedef for iterator when encoding a property list */
 typedef struct {
-    hbool_t encode;       /* Whether the property list should be encoded */
+    bool    encode;       /* Whether the property list should be encoded */
     size_t *enc_size_ptr; /* Pointer to size of encoded buffer */
     void  **pp;           /* Pointer to encoding buffer pointer */
 } H5P_enc_iter_ud_t;
@@ -208,9 +208,9 @@ H5P__encode_uint8_t(const void *value, void **_pp, size_t *size)
 } /* end H5P__encode_uint8_t() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__encode_hbool_t
+ * Function:       H5P__encode_bool
  *
- * Purpose:        Generic encoding callback routine for 'hbool_t' properties.
+ * Purpose:        Generic encoding callback routine for 'bool' properties.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -218,7 +218,7 @@ H5P__encode_uint8_t(const void *value, void **_pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_hbool_t(const void *value, void **_pp, size_t *size)
+H5P__encode_bool(const void *value, void **_pp, size_t *size)
 {
     uint8_t **pp = (uint8_t **)_pp;
 
@@ -230,13 +230,13 @@ H5P__encode_hbool_t(const void *value, void **_pp, size_t *size)
 
     if (NULL != *pp)
         /* Encode the value */
-        *(*pp)++ = (uint8_t) * (const hbool_t *)value;
+        *(*pp)++ = (uint8_t) * (const bool *)value;
 
     /* Set size needed for encoding */
     *size += 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__encode_hbool_t() */
+} /* end H5P__encode_bool() */
 
 /*-------------------------------------------------------------------------
  * Function:       H5P__encode_double
@@ -311,9 +311,9 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
         size_t prop_value_len; /* Encoded size of property's value */
 
         /* Encode (or not, if the 'encode' flag is off) the property's name */
-        prop_name_len = HDstrlen(prop->name) + 1;
+        prop_name_len = strlen(prop->name) + 1;
         if (udata->encode) {
-            HDstrcpy((char *)*(udata->pp), prop->name);
+            strcpy((char *)*(udata->pp), prop->name);
             *(uint8_t **)(udata->pp) += prop_name_len;
         } /* end if */
         *(udata->enc_size_ptr) += prop_name_len;
@@ -337,8 +337,8 @@ done:
  USAGE
     herr_t H5P__encode(plist, enc_all_prop, buf, nalloc)
         const H5P_genplist_t *plist;  IN: Property list to encode
-        hbool_t enc_all_prop;  IN: Whether to encode all properties (TRUE),
-                or just non-default (i.e. changed) properties (FALSE).
+        bool enc_all_prop;  IN: Whether to encode all properties (true),
+                or just non-default (i.e. changed) properties (false).
         uint8_t *buf;    OUT: buffer to hold the encoded plist
         size_t *nalloc;  IN/OUT: size of buffer needed to encode plist
  RETURNS
@@ -353,13 +353,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P__encode(const H5P_genplist_t *plist, hbool_t enc_all_prop, void *buf, size_t *nalloc)
+H5P__encode(const H5P_genplist_t *plist, bool enc_all_prop, void *buf, size_t *nalloc)
 {
     H5P_enc_iter_ud_t udata;                 /* User data for property iteration callback */
     uint8_t          *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     int               idx;                   /* Index of property to start at */
     size_t            encode_size = 0;       /* Size of buffer needed to encode properties */
-    hbool_t           encode      = TRUE;    /* Whether the property list should be encoded */
+    bool              encode      = true;    /* Whether the property list should be encoded */
     herr_t            ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -372,7 +372,7 @@ H5P__encode(const H5P_genplist_t *plist, hbool_t enc_all_prop, void *buf, size_t
      * space is needed to encode a property.
      */
     if (NULL == p)
-        encode = FALSE;
+        encode = false;
 
     /* Encode property list description info */
     if (encode) {
@@ -547,9 +547,9 @@ H5P__decode_uint8_t(const void **_pp, void *_value)
 } /* end H5P__decode_uint8_t() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__decode_hbool_t
+ * Function:       H5P__decode_bool
  *
- * Purpose:        Generic decoding callback routine for 'hbool_t' properties.
+ * Purpose:        Generic decoding callback routine for 'bool' properties.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
@@ -557,9 +557,9 @@ H5P__decode_uint8_t(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_hbool_t(const void **_pp, void *_value)
+H5P__decode_bool(const void **_pp, void *_value)
 {
-    hbool_t        *value     = (hbool_t *)_value; /* Property value to return */
+    bool           *value     = (bool *)_value; /* Property value to return */
     const uint8_t **pp        = (const uint8_t **)_pp;
     herr_t          ret_value = SUCCEED; /* Return value */
 
@@ -571,10 +571,10 @@ H5P__decode_hbool_t(const void **_pp, void *_value)
     assert(value);
 
     /* Decode the value */
-    *value = (hbool_t) * (*pp)++;
+    *value = (bool)*(*pp)++;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__decode_hbool_t() */
+} /* end H5P__decode_bool() */
 
 /*-------------------------------------------------------------------------
  * Function:       H5P__decode_double
@@ -683,7 +683,7 @@ H5P__decode(const void *buf)
 
         /* Get property list name */
         name = (const char *)p;
-        p += HDstrlen(name) + 1;
+        p += strlen(name) + 1;
 
         /* Find property with name */
         if (NULL == (prop = H5P__find_prop_plist(plist, name)))

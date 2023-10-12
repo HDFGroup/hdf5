@@ -324,7 +324,7 @@ H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val)
  *-------------------------------------------------------------------------
  */
 void
-H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
+H5T__bit_set(uint8_t *buf, size_t offset, size_t size, bool value)
 {
     int idx;
 
@@ -383,7 +383,7 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value)
+H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, bool value)
 {
     ssize_t base = (ssize_t)offset;
     ssize_t idx, i;
@@ -393,8 +393,8 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
     /* Use FUNC_ENTER_PACKAGE_NOERR here to avoid performance issues */
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Some functions call this with value=TRUE */
-    assert(TRUE == 1);
+    /* Some functions call this with value=true */
+    assert(true == 1);
 
     switch (direction) {
         case H5T_BIT_LSB:
@@ -405,7 +405,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
             /* Beginning */
             if (offset) {
                 for (iu = offset; iu < 8 && size > 0; iu++, size--)
-                    if (value == (hbool_t)((buf[idx] >> iu) & 0x01))
+                    if (value == (bool)((buf[idx] >> iu) & 0x01))
                         HGOTO_DONE(8 * idx + (ssize_t)iu - base);
 
                 offset = 0;
@@ -416,7 +416,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
             while (size >= 8) {
                 if ((value ? 0x00 : 0xff) != buf[idx])
                     for (i = 0; i < 8; i++)
-                        if (value == (hbool_t)((buf[idx] >> i) & 0x01))
+                        if (value == (bool)((buf[idx] >> i) & 0x01))
                             HGOTO_DONE(8 * idx + i - base);
 
                 size -= 8;
@@ -425,7 +425,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
 
             /* End */
             for (i = 0; i < (ssize_t)size; i++)
-                if (value == (hbool_t)((buf[idx] >> i) & 0x01))
+                if (value == (bool)((buf[idx] >> i) & 0x01))
                     HGOTO_DONE(8 * idx + i - base);
             break;
 
@@ -437,7 +437,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
             /* Beginning */
             if (size > 8 - offset && (offset + size) % 8) {
                 for (iu = (offset + size) % 8; iu > 0; --iu, --size)
-                    if (value == (hbool_t)((buf[idx] >> (iu - 1)) & 0x01))
+                    if (value == (bool)((buf[idx] >> (iu - 1)) & 0x01))
                         HGOTO_DONE(8 * idx + (ssize_t)(iu - 1) - base);
 
                 --idx;
@@ -447,7 +447,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
             while (size >= 8) {
                 if ((value ? 0x00 : 0xff) != buf[idx]) {
                     for (i = 7; i >= 0; --i)
-                        if (value == (hbool_t)((buf[idx] >> i) & 0x01))
+                        if (value == (bool)((buf[idx] >> i) & 0x01))
                             HGOTO_DONE(8 * idx + i - base);
                 } /* end if */
 
@@ -458,7 +458,7 @@ H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t directi
             /* End */
             if (size > 0) {
                 for (iu = offset + size; iu > offset; --iu)
-                    if (value == (hbool_t)((buf[idx] >> (iu - 1)) & 0x01))
+                    if (value == (bool)((buf[idx] >> (iu - 1)) & 0x01))
                         HGOTO_DONE(8 * idx + (ssize_t)(iu - 1) - base);
             }
             break;
@@ -477,11 +477,11 @@ done:
  * Purpose:     Increment part of a bit field by adding 1.  The bit field
  *              starts with bit position START and is SIZE bits long.
  *
- * Return:      The carry-out value.  TRUE if overflows, FALSE otherwise.
+ * Return:      The carry-out value.  true if overflows, false otherwise.
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
 {
     size_t   idx   = start / 8;
@@ -531,7 +531,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
         buf[idx] |= (uint8_t)(acc & mask);
     }
 
-    FUNC_LEAVE_NOAPI(carry ? TRUE : FALSE)
+    FUNC_LEAVE_NOAPI(carry ? true : false)
 } /* end H5T__bit_inc() */
 
 /*-------------------------------------------------------------------------
@@ -540,12 +540,12 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
  * Purpose:     Decrement part of a bit field by subtracting 1.  The bit
  *              field starts with bit position START and is SIZE bits long.
  *
- * Return:      The "borrow-in" value. It's TRUE if underflows, FALSE
+ * Return:      The "borrow-in" value. It's true if underflows, false
  *              otherwise.
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
 {
     size_t   idx = start / 8;
@@ -608,7 +608,7 @@ H5T__bit_dec(uint8_t *buf, size_t start, size_t size)
         }
     }
 
-    FUNC_LEAVE_NOAPI(borrow ? TRUE : FALSE)
+    FUNC_LEAVE_NOAPI(borrow ? true : false)
 } /* end H5T__bit_dec() */
 
 /*-------------------------------------------------------------------------

@@ -1,0 +1,509 @@
+name: hdf5 1.14 autotools special CI
+
+# Controls when the action will run. Triggers the workflow on a call
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel. We just have one job, but the matrix items defined below will
+# run in parallel.
+jobs:
+  #
+  # SPECIAL AUTOTOOLS BUILDS
+  #
+  # These do not run tests and are not built into the matrix and instead
+  # become NEW configs as their name would clobber one of the matrix
+  # names (so make sure the names are UNIQUE).
+  #
+
+  build_v1_6:
+    name: "gcc DBG v1.6 default API (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v16 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --enable-fortran \
+            --enable-java \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_v1_8:
+    name: "gcc DBG v1.8 default API (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v18 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --enable-fortran \
+            --enable-java \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_v1_10:
+    name: "gcc DBG v1.10 default API (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v110 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --enable-fortran \
+            --enable-java \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_v1_12:
+    name: "gcc DBG v1.12 default API (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v112 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --enable-fortran \
+            --enable-java \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_v1_14:
+    name: "gcc DBG v1.14 default API (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v114 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --enable-fortran \
+            --enable-java \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_no_deprecated:
+    name: "gcc no deprecated symbols (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --disable-deprecated-symbols \
+            --with-default-api-version=default \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --enable-fortran \
+            --enable-java \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_debug_werror:
+    name: "gcc DBG -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CFLAGS=-Werror $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v114 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --disable-fortran \
+            --enable-java \
+            --disable-mirror-vfd \
+            --enable-direct-vfd \
+            --disable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_release_werror:
+    name: "gcc REL -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CFLAGS=-Werror $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=production \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v114 \
+            --enable-shared \
+            --disable-parallel \
+            --enable-cxx \
+            --disable-fortran \
+            --enable-java \
+            --disable-mirror-vfd \
+            --enable-direct-vfd \
+            --disable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+

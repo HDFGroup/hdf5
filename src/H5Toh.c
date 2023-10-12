@@ -75,8 +75,8 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
  * Purpose:	Determines if an object has the requisite messages for being
  *		a datatype.
  *
- * Return:	Success:	TRUE if the required data type messages are
- *				present; FALSE otherwise.
+ * Return:	Success:	true if the required data type messages are
+ *				present; false otherwise.
  *
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.

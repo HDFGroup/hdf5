@@ -92,6 +92,14 @@ PROGRAM fortranlibtest
   CALL file_space("file_space",cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File free space test', total_error)
 
+  ret_total_error = 0
+  CALL test_file_info("file_info",cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' File information test', total_error)
+
+  ret_total_error = 0
+  CALL test_get_file_image(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing get file image ', total_error)
+
 !
 !      '========================================='
 !      'Testing DATASET Interface                '
@@ -113,6 +121,11 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_dset_fill(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Filling dataspace elements', total_error)
+
+  ! Direct chunk IO
+  ret_total_error = 0
+  CALL test_direct_chunk_io(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Direct chunk IO', total_error)
 
 !
 !      '========================================='

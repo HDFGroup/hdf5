@@ -90,11 +90,11 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
-    else if (TRUE != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
+    else if (true != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list");
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector_by_class(cls, TRUE, vipl_id)) < 0)
+    if ((ret_value = H5VL__register_connector_by_class(cls, true, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector");
 
 done:
@@ -129,18 +129,18 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
     /* Check arguments */
     if (!name)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null VOL connector name is disallowed");
-    if (0 == HDstrlen(name))
+    if (0 == strlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
                     "zero-length VOL connector name is disallowed");
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
-    else if (TRUE != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
+    else if (true != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list");
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector_by_name(name, TRUE, vipl_id)) < 0)
+    if ((ret_value = H5VL__register_connector_by_name(name, true, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector");
 
 done:
@@ -180,11 +180,11 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
-    else if (TRUE != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
+    else if (true != H5P_isa_class(vipl_id, H5P_VOL_INITIALIZE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list");
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector_by_value(value, TRUE, vipl_id)) < 0)
+    if ((ret_value = H5VL__register_connector_by_value(value, true, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector");
 
 done:
@@ -206,7 +206,7 @@ done:
 htri_t
 H5VLis_connector_registered_by_name(const char *name)
 {
-    htri_t ret_value = FALSE; /* Return value */
+    htri_t ret_value = false; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "*s", name);
@@ -234,7 +234,7 @@ done:
 htri_t
 H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value)
 {
-    htri_t ret_value = FALSE;
+    htri_t ret_value = false;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("t", "VC", connector_value);
@@ -268,7 +268,7 @@ H5VLget_connector_id(hid_t obj_id)
     H5TRACE1("i", "i", obj_id);
 
     /* Get connector ID */
-    if ((ret_value = H5VL__get_connector_id(obj_id, TRUE)) < 0)
+    if ((ret_value = H5VL__get_connector_id(obj_id, true)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
 
 done:
@@ -298,7 +298,7 @@ H5VLget_connector_id_by_name(const char *name)
     H5TRACE1("i", "*s", name);
 
     /* Get connector ID with this name */
-    if ((ret_value = H5VL__get_connector_id_by_name(name, TRUE)) < 0)
+    if ((ret_value = H5VL__get_connector_id_by_name(name, true)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
 
 done:
@@ -328,7 +328,7 @@ H5VLget_connector_id_by_value(H5VL_class_value_t connector_value)
     H5TRACE1("i", "VC", connector_value);
 
     /* Get connector ID with this value */
-    if ((ret_value = H5VL__get_connector_id_by_value(connector_value, TRUE)) < 0)
+    if ((ret_value = H5VL__get_connector_id_by_value(connector_value, true)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
 
 done:
@@ -494,7 +494,7 @@ H5VLunregister_connector(hid_t vol_id)
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
     /* For the time being, we disallow unregistering the native VOL connector */
-    if (H5I_INVALID_HID == (native_id = H5VL__get_connector_id_by_name(H5VL_NATIVE_NAME, FALSE)))
+    if (H5I_INVALID_HID == (native_id = H5VL__get_connector_id_by_name(H5VL_NATIVE_NAME, false)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to find the native VOL connector ID");
     if (vol_id == native_id)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "unregistering the native VOL connector is not allowed");
@@ -609,7 +609,7 @@ H5VLwrap_register(void *obj, H5I_type_t type)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID, "obj is NULL");
 
     /* Wrap the object and register an ID for it */
-    if ((ret_value = H5VL_wrap_register(type, obj, TRUE)) < 0)
+    if ((ret_value = H5VL_wrap_register(type, obj, true)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to wrap object");
 
 done:
@@ -707,7 +707,7 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (NULL == (dtype = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
-    /* Create VOL object for file if necessary (force_conv will be TRUE if and
+    /* Create VOL object for file if necessary (force_conv will be true if and
      * only if file needs to be passed to H5T_set_loc) */
     if (H5T_GET_FORCE_CONV(dtype) &&
         (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
@@ -718,7 +718,7 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy datatype");
 
     /* Register file type id */
-    if ((file_type_id = H5I_register(H5I_DATATYPE, file_type, FALSE)) < 0) {
+    if ((file_type_id = H5I_register(H5I_DATATYPE, file_type, false)) < 0) {
         (void)H5T_close_real(file_type);
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "unable to register file datatype");
     } /* end if */

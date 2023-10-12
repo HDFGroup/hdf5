@@ -274,7 +274,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -313,7 +313,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -374,7 +374,7 @@ test_fapl_config_validation(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -397,7 +397,7 @@ test_fapl_config_validation(void)
      * test-local variables *
      ************************/
 
-    hid_t            fapl_id = -1; /* file access property list ID */
+    hid_t            fapl_id = H5I_INVALID_HID; /* file access property list ID */
     H5FD_hdfs_fapl_t config;
     H5FD_hdfs_fapl_t fa_fetch;
     herr_t           success  = SUCCEED;
@@ -579,7 +579,7 @@ test_hdfs_fapl(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl ");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -588,9 +588,9 @@ test_hdfs_fapl(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;             /* file access property list ID */
-    hid_t driver_id = -1;           /* ID for this VFD              */
-    unsigned long driver_flags = 0; /* VFD feature flags            */
+    hid_t fapl_id = H5I_INVALID_HID;   /* file access property list ID */
+    hid_t driver_id = H5I_INVALID_HID; /* ID for this VFD              */
+    unsigned long driver_flags = 0;    /* VFD feature flags            */
     H5FD_hdfs_fapl_t hdfs_fa_0 = {
         1,    /* version*/
         "",   /* node name */
@@ -662,7 +662,7 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -687,7 +687,7 @@ test_vfd_open(void)
         unsigned flags;
         int which_fapl;
         haddr_t maxaddr;
-        hbool_t might_use_other_driver;
+        bool might_use_other_driver;
     };
 
     /************************
@@ -701,7 +701,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_H5P_DEFAULT,
             MAXADDR,
-            TRUE,
+            true,
         },
         {
             "generic file access property list is invalid",
@@ -709,7 +709,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_UNCONFIGURED,
             MAXADDR,
-            TRUE,
+            true,
         },
         {
             "filename cannot be null",
@@ -717,7 +717,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "filename cannot be empty",
@@ -725,7 +725,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "file at filename must exist",
@@ -733,7 +733,7 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "read-write flag not supported",
@@ -741,7 +741,7 @@ test_vfd_open(void)
             H5F_ACC_RDWR,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "truncate flag not supported",
@@ -749,7 +749,7 @@ test_vfd_open(void)
             H5F_ACC_TRUNC,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "create flag not supported",
@@ -757,7 +757,7 @@ test_vfd_open(void)
             H5F_ACC_CREAT,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "EXCL flag not supported",
@@ -765,7 +765,7 @@ test_vfd_open(void)
             H5F_ACC_EXCL,
             FAPL_HDFS,
             MAXADDR,
-            FALSE,
+            false,
         },
         {
             "maxaddr cannot be 0 (caught in `H5FD_open()`)",
@@ -773,14 +773,14 @@ test_vfd_open(void)
             H5F_ACC_RDONLY,
             FAPL_HDFS,
             0,
-            FALSE,
+            false,
         },
     };
     unsigned i = 0;
     unsigned failing_conditions_count = 10;
     H5FD_t *fd = NULL;
-    hid_t fapl_hdfs = -1;
-    hid_t fapl_unconfigured = -1;
+    hid_t fapl_hdfs = H5I_INVALID_HID;
+    hid_t fapl_unconfigured = H5I_INVALID_HID;
 
     TESTING("HDFS VFD-level open");
 
@@ -820,7 +820,7 @@ test_vfd_open(void)
         }
         H5E_END_TRY
         if (NULL != fd) {
-            if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
+            if (true == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
                 fprintf(stderr, "\n!!!!! WARNING !!!!!\n"
                                 "    Successful open of file on local system "
                                 "with non-HDFS VFD.\n");
@@ -915,7 +915,7 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -934,7 +934,7 @@ test_eof_eoa(void)
      ************************/
 
     H5FD_t *fd_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS eof/eoa gets and sets");
 
@@ -1025,7 +1025,7 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1034,7 +1034,7 @@ test_H5FDread_without_eoa_set_fails(void)
     char buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int i = 0;
     H5FD_t *file_shakespeare = NULL;
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
 
@@ -1124,7 +1124,7 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1206,7 +1206,7 @@ test_read(void)
     char buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int i = 0;
     H5FD_t *file_raven = NULL;
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS VFD read/range-gets");
 
@@ -1331,7 +1331,7 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1349,7 +1349,7 @@ test_noops_and_autofails(void)
      * test-local variables *
      ************************/
 
-    hid_t fapl_id = -1;
+    hid_t fapl_id = H5I_INVALID_HID;
     H5FD_t *file = NULL;
     const char data[36] = "The Force shall be with you, always";
 
@@ -1379,10 +1379,10 @@ test_noops_and_autofails(void)
     H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
                            "write must fail")} H5E_END_TRY
 
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY
+    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, false), "truncate must fail")} H5E_END_TRY
 
     H5E_BEGIN_TRY{
-        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY
+        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, true), "truncate must fail (closing)")} H5E_END_TRY
 
     /************
      * TEARDOWN *
@@ -1467,7 +1467,7 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    HDputs("    HDFS VFD is not enabled");
+    puts("    HDFS VFD is not enabled");
     fflush(stdout);
     return 0;
 
@@ -1485,8 +1485,8 @@ test_H5F_integration(void)
      * test-local variables *
      ************************/
 
-    hid_t file = -1;
-    hid_t fapl_id = -1;
+    hid_t file = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
 
     TESTING("HDFS file access through HD5F library (H5F API)");
 
@@ -1579,13 +1579,13 @@ main(void)
     static char hdfs_namenode_name[HDFS_NAMENODE_NAME_MAX_SIZE] = "";
     const char *hdfs_namenode_name_env                          = NULL;
 
-    hdfs_namenode_name_env = HDgetenv("HDFS_TEST_NAMENODE_NAME");
+    hdfs_namenode_name_env = getenv("HDFS_TEST_NAMENODE_NAME");
     if (hdfs_namenode_name_env == NULL || hdfs_namenode_name_env[0] == '\0') {
-        HDstrncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(hdfs_namenode_name, "localhost", HDFS_NAMENODE_NAME_MAX_SIZE);
     }
     else {
-        HDstrncpy(/* TODO: error-check? */
-                  default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
+        strncpy(/* TODO: error-check? */
+                default_fa.namenode_name, hdfs_namenode_name_env, HDFS_NAMENODE_NAME_MAX_SIZE);
     }
 #endif /* H5_HAVE_LIBHDFS */
 

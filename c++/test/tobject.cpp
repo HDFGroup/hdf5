@@ -307,7 +307,7 @@ test_get_objname_ontypes()
         // Name this datatype
         new_int_type.commit(grp, "IntType NATIVE_INT");
         ssize_t name_len = new_int_type.getObjName(type_name); // default len
-        verify_val(name_len, static_cast<ssize_t>(HDstrlen("/typetests/IntType NATIVE_INT")),
+        verify_val(name_len, static_cast<ssize_t>(strlen("/typetests/IntType NATIVE_INT")),
                    "DataType::getObjName", __LINE__, __FILE__);
         verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 

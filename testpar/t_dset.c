@@ -2902,10 +2902,10 @@ test_actual_io_mode(int selection_mode)
     H5D_mpio_actual_io_mode_t        actual_io_mode_expected        = H5D_MPIO_NO_COLLECTIVE;
     const char                      *filename;
     const char                      *test_name;
-    hbool_t                          direct_multi_chunk_io;
-    hbool_t                          multi_chunk_io;
-    hbool_t                          is_chunked;
-    hbool_t                          is_collective;
+    bool                             direct_multi_chunk_io;
+    bool                             multi_chunk_io;
+    bool                             is_chunked;
+    bool                             is_collective;
     int                              mpi_size = -1;
     int                              mpi_rank = -1;
     int                              length;
@@ -2913,16 +2913,16 @@ test_actual_io_mode(int selection_mode)
     int                              i;
     MPI_Comm                         mpi_comm   = MPI_COMM_NULL;
     MPI_Info                         mpi_info   = MPI_INFO_NULL;
-    hid_t                            fid        = -1;
-    hid_t                            sid        = -1;
-    hid_t                            dataset    = -1;
+    hid_t                            fid        = H5I_INVALID_HID;
+    hid_t                            sid        = H5I_INVALID_HID;
+    hid_t                            dataset    = H5I_INVALID_HID;
     hid_t                            data_type  = H5T_NATIVE_INT;
-    hid_t                            fapl       = -1;
-    hid_t                            mem_space  = -1;
-    hid_t                            file_space = -1;
-    hid_t                            dcpl       = -1;
-    hid_t                            dxpl_write = -1;
-    hid_t                            dxpl_read  = -1;
+    hid_t                            fapl       = H5I_INVALID_HID;
+    hid_t                            mem_space  = H5I_INVALID_HID;
+    hid_t                            file_space = H5I_INVALID_HID;
+    hid_t                            dcpl       = H5I_INVALID_HID;
+    hid_t                            dxpl_write = H5I_INVALID_HID;
+    hid_t                            dxpl_read  = H5I_INVALID_HID;
     hsize_t                          dims[RANK];
     hsize_t                          chunk_dims[RANK];
     hsize_t                          start[RANK];
@@ -3251,10 +3251,10 @@ test_actual_io_mode(int selection_mode)
     /* Test values */
     if (actual_chunk_opt_mode_expected != (H5D_mpio_actual_chunk_opt_mode_t)-1 &&
         actual_io_mode_expected != (H5D_mpio_actual_io_mode_t)-1) {
-        HDsnprintf(message, sizeof(message), "Actual Chunk Opt Mode has the correct value for %s.\n",
-                   test_name);
+        snprintf(message, sizeof(message), "Actual Chunk Opt Mode has the correct value for %s.\n",
+                 test_name);
         VRFY((actual_chunk_opt_mode_write == actual_chunk_opt_mode_expected), message);
-        HDsnprintf(message, sizeof(message), "Actual IO Mode has the correct value for %s.\n", test_name);
+        snprintf(message, sizeof(message), "Actual IO Mode has the correct value for %s.\n", test_name);
         VRFY((actual_io_mode_write == actual_io_mode_expected), message);
     }
     else {
@@ -3424,7 +3424,7 @@ actual_io_mode_tests(void)
  *         Test for Compact layout as the cause of breaking collective I/O.
  *
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
- *         Test for Externl-File storage as the cause of breaking collective I/O.
+ *         Test for External-File storage as the cause of breaking collective I/O.
  *
  */
 #define FILE_EXTERNAL "nocolcause_extern.data"
@@ -3444,8 +3444,8 @@ test_no_collective_cause_mode(int selection_mode)
 
     const char *filename;
     const char *test_name;
-    hbool_t     is_chunked     = 1;
-    hbool_t     is_independent = 0;
+    bool        is_chunked     = 1;
+    bool        is_independent = 0;
     int         mpi_size       = -1;
     int         mpi_rank       = -1;
     int         length;
@@ -3453,17 +3453,17 @@ test_no_collective_cause_mode(int selection_mode)
     int         i;
     MPI_Comm    mpi_comm;
     MPI_Info    mpi_info;
-    hid_t       fid        = -1;
-    hid_t       sid        = -1;
-    hid_t       dataset    = -1;
+    hid_t       fid        = H5I_INVALID_HID;
+    hid_t       sid        = H5I_INVALID_HID;
+    hid_t       dataset    = H5I_INVALID_HID;
     hid_t       data_type  = H5T_NATIVE_INT;
-    hid_t       fapl       = -1;
-    hid_t       dcpl       = -1;
-    hid_t       dxpl_write = -1;
-    hid_t       dxpl_read  = -1;
+    hid_t       fapl       = H5I_INVALID_HID;
+    hid_t       dcpl       = H5I_INVALID_HID;
+    hid_t       dxpl_write = H5I_INVALID_HID;
+    hid_t       dxpl_read  = H5I_INVALID_HID;
     hsize_t     dims[RANK];
-    hid_t       mem_space  = -1;
-    hid_t       file_space = -1;
+    hid_t       mem_space  = H5I_INVALID_HID;
+    hid_t       file_space = H5I_INVALID_HID;
     hsize_t     chunk_dims[RANK];
     herr_t      ret;
     /* set to global value as default */
@@ -3728,12 +3728,12 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* Test values */
     memset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message),
-               "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    snprintf(message, sizeof(message), "Local cause of Broken Collective I/O has the correct value for %s.\n",
+             test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
     memset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message),
-               "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    snprintf(message, sizeof(message),
+             "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */
@@ -3827,7 +3827,7 @@ dataset_atomicity(void)
     herr_t      ret; /* Generic return value */
     int         mpi_size, mpi_rank;
     int         i, j, k;
-    hbool_t     atomicity = FALSE;
+    bool        atomicity = false;
     MPI_Comm    comm      = MPI_COMM_WORLD;
     MPI_Info    info      = MPI_INFO_NULL;
 
@@ -3907,7 +3907,7 @@ dataset_atomicity(void)
         /* should fail */
         H5E_BEGIN_TRY
         {
-            ret = H5Fset_mpi_atomicity(fid, TRUE);
+            ret = H5Fset_mpi_atomicity(fid, true);
         }
         H5E_END_TRY
         VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
@@ -3930,7 +3930,7 @@ dataset_atomicity(void)
     ret = H5Pclose(acc_tpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
-    ret = H5Fset_mpi_atomicity(fid, TRUE);
+    ret = H5Fset_mpi_atomicity(fid, true);
     VRFY((ret >= 0), "H5Fset_mpi_atomicity succeeded");
 
     /* open dataset1 (contiguous case) */
@@ -3951,7 +3951,7 @@ dataset_atomicity(void)
     /* check that the atomicity flag is set */
     ret = H5Fget_mpi_atomicity(fid, &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
-    VRFY((atomicity == TRUE), "atomcity set failed");
+    VRFY((atomicity == true), "atomcity set failed");
 
     MPI_Barrier(comm);
 
@@ -4021,11 +4021,11 @@ dataset_atomicity(void)
         read_buf[i] = 8;
     }
 
-    atomicity = FALSE;
+    atomicity = false;
     /* check that the atomicity flag is set */
     ret = H5Fget_mpi_atomicity(fid, &atomicity);
     VRFY((ret >= 0), "atomcity get failed");
-    VRFY((atomicity == TRUE), "atomcity set failed");
+    VRFY((atomicity == true), "atomcity set failed");
 
     block[0]  = (hsize_t)(dim0 / mpi_size - 1);
     block[1]  = (hsize_t)(dim1 / mpi_size - 1);

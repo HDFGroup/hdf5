@@ -114,7 +114,7 @@ test_unregister_filters(hid_t fapl_id)
     /* Register DUMMY filter */
     if (H5Zregister(H5Z_DUMMY) < 0)
         goto error;
-    if (H5Zfilter_avail(H5Z_FILTER_DUMMY) != TRUE)
+    if (H5Zfilter_avail(H5Z_FILTER_DUMMY) != true)
         goto error;
 
     /*******************
@@ -133,7 +133,7 @@ test_unregister_filters(hid_t fapl_id)
 
     /* Create multiple groups under the main group */
     for (i = 0; i < GROUP_ITERATION; i++) {
-        HDsnprintf(group_name, sizeof(group_name), "group_%d", i);
+        snprintf(group_name, sizeof(group_name), "group_%d", i);
         if ((gid_loop = H5Gcreate2(gid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid_loop) < 0)
@@ -275,9 +275,9 @@ error:
 int
 main(void)
 {
-    hid_t   fapl_id        = H5I_INVALID_HID;
-    int     nerrors        = 0;
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+    hid_t fapl_id        = H5I_INVALID_HID;
+    int   nerrors        = 0;
+    bool  api_ctx_pushed = false; /* Whether API context pushed */
 
     /* Testing setup */
     h5_reset();
@@ -286,7 +286,7 @@ main(void)
     /* Push API context */
     if (H5CX_push() < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = TRUE;
+    api_ctx_pushed = true;
 
     /* Test unregistering filter in its own file */
     nerrors += (test_unregister_filters(fapl_id) < 0 ? 1 : 0);
@@ -298,9 +298,9 @@ main(void)
     printf("All filter unregistration tests passed.\n");
 
     /* Pop API context */
-    if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
+    if (api_ctx_pushed && H5CX_pop(false) < 0)
         FAIL_STACK_ERROR;
-    api_ctx_pushed = FALSE;
+    api_ctx_pushed = false;
 
     exit(EXIT_SUCCESS);
 
@@ -309,7 +309,7 @@ error:
     printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
 
     if (api_ctx_pushed)
-        H5CX_pop(FALSE);
+        H5CX_pop(false);
 
     exit(EXIT_FAILURE);
 } /* end main() */

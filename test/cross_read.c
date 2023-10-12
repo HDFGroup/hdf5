@@ -66,11 +66,11 @@ static const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
 static int
 check_data_i(const char *dsetname, hid_t fid)
 {
-    hid_t     did = -1;             /* dataset ID                       */
-    long long data_in[NX + 1][NY];  /* input buffer                     */
-    long long data_out[NX + 1][NY]; /* output buffer                    */
-    int       i, j;                 /* iterators                        */
-    int       nerrors = 0;          /* # errors in dataset values       */
+    hid_t     did = H5I_INVALID_HID; /* dataset ID                       */
+    long long data_in[NX + 1][NY];   /* input buffer                     */
+    long long data_out[NX + 1][NY];  /* output buffer                    */
+    int       i, j;                  /* iterators                        */
+    int       nerrors = 0;           /* # errors in dataset values       */
 
     /* Open the dataset. */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
@@ -137,11 +137,11 @@ error:
 static int
 check_data_f(const char *dsetname, hid_t fid)
 {
-    hid_t  did = -1;             /* dataset ID                       */
-    double data_in[NX + 1][NY];  /* input buffer                     */
-    double data_out[NX + 1][NY]; /* output buffer                    */
-    int    i, j;                 /* iterators                        */
-    int    nerrors = 0;          /* # of errors in dataset values    */
+    hid_t  did = H5I_INVALID_HID; /* dataset ID                       */
+    double data_in[NX + 1][NY];   /* input buffer                     */
+    double data_out[NX + 1][NY];  /* output buffer                    */
+    int    i, j;                  /* iterators                        */
+    int    nerrors = 0;           /* # of errors in dataset values    */
 
     /* Open the dataset. */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
@@ -209,7 +209,7 @@ static int
 check_file(char *filename)
 {
     const char *pathname = H5_get_srcdir_filename(filename); /* Corrected test file name     */
-    hid_t       fid      = -1;                               /* file ID                      */
+    hid_t       fid      = H5I_INVALID_HID;                  /* file ID                      */
     int         nerrors  = 0;                                /* # of datasets with errors    */
 #if !defined(H5_HAVE_FILTER_DEFLATE) || !defined(H5_HAVE_FILTER_SZIP)
     const char *not_supported = "    filter is not enabled."; /* no filter message            */
@@ -274,7 +274,7 @@ check_file(char *filename)
     nerrors += check_data_f(DATASETNAME16, fid);
 #else  /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
-    HDputs(not_supported);
+    puts(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     TESTING("dataset of BE FLOAT with Deflate filter");
@@ -282,7 +282,7 @@ check_file(char *filename)
     nerrors += check_data_f(DATASETNAME17, fid);
 #else  /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
-    HDputs(not_supported);
+    puts(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     TESTING("dataset of LE FLOAT with Szip filter");
@@ -290,7 +290,7 @@ check_file(char *filename)
     nerrors += check_data_f(DATASETNAME18, fid);
 #else  /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
-    HDputs(not_supported);
+    puts(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/
 
     TESTING("dataset of BE FLOAT with Szip filter");
@@ -298,7 +298,7 @@ check_file(char *filename)
     nerrors += check_data_f(DATASETNAME19, fid);
 #else  /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
-    HDputs(not_supported);
+    puts(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/
 
     TESTING("dataset of LE FLOAT with Shuffle filter");
@@ -338,9 +338,9 @@ error:
 int
 main(void)
 {
-    hbool_t driver_is_default_compatible;
-    char    filename[1024];
-    int     nerrors = 0;
+    bool driver_is_default_compatible;
+    char filename[1024];
+    int  nerrors = 0;
 
     h5_reset();
 
@@ -348,21 +348,21 @@ main(void)
      * Skip tests for VFDs that aren't compatible with default VFD.
      */
     if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0) {
-        HDputs(" -- couldn't check if VFD is compatible with default VFD --");
+        puts(" -- couldn't check if VFD is compatible with default VFD --");
         exit(EXIT_SUCCESS);
     }
     if (!driver_is_default_compatible) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+        puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }
 
-    HDputs("\n");
-    HDputs("Testing reading data created on Linux");
+    puts("\n");
+    puts("Testing reading data created on Linux");
     h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename));
     nerrors += check_file(filename);
 
-    HDputs("\n");
-    HDputs("Testing reading data created on Solaris");
+    puts("\n");
+    puts("Testing reading data created on Solaris");
     h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof(filename));
     nerrors += check_file(filename);
 

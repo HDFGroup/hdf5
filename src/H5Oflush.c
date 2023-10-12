@@ -150,7 +150,7 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
     assert(oloc);
 
     /* Get object header for object */
-    if (NULL == (oh = H5O_protect(oloc, H5AC__READ_ONLY_FLAG, FALSE)))
+    if (NULL == (oh = H5O_protect(oloc, H5AC__READ_ONLY_FLAG, false)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header");
 
     /* Get object header's address (i.e. the tag value for this object) */
@@ -186,7 +186,7 @@ herr_t
 H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
 {
     H5VL_object_t *vol_obj   = NULL;  /* VOL object associated with the ID */
-    hbool_t        objs_incr = FALSE; /* Whether the object count in the file was incremented */
+    bool           objs_incr = false; /* Whether the object count in the file was incremented */
     H5F_t         *file      = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */
 
@@ -214,7 +214,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
          *  if this object is the only thing holding the file open.
          */
         H5F_incr_nopen_objs(oloc->file);
-        objs_incr = TRUE;
+        objs_incr = true;
 
         /* Save important datatype state */
         if (H5I_get_type(oid) == H5I_DATATYPE)
@@ -239,7 +239,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object");
 
         /* Re-open the object, re-fetching its metadata */
-        if (H5O_refresh_metadata_reopen(oid, H5P_DEFAULT, &obj_loc, connector, FALSE) < 0)
+        if (H5O_refresh_metadata_reopen(oid, H5P_DEFAULT, &obj_loc, connector, false) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object");
 
         /* Restore the number of references on the VOL connector */
@@ -280,7 +280,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
 {
     H5F_t  *file;                /* Local copy of the object's file pointer */
     haddr_t tag       = 0;       /* Tag for object */
-    hbool_t corked    = FALSE;   /* Whether object's metadata is corked */
+    bool    corked    = false;   /* Whether object's metadata is corked */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -319,7 +319,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata");
 
     /* Evict the object's tagged metadata */
-    if (H5AC_evict_tagged_metadata(file, tag, TRUE) < 0)
+    if (H5AC_evict_tagged_metadata(file, tag, true) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to evict metadata");
 
     /* Re-cork object with tag */
@@ -344,7 +344,7 @@ done:
  */
 herr_t
 H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t *vol_connector,
-                            hbool_t start_swmr)
+                            bool start_swmr)
 {
     void      *object = NULL;       /* Object for this operation */
     H5I_type_t type;                /* Type of object for the ID */
@@ -374,7 +374,7 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
 
         case H5I_DATASET:
             /* Set dataset access property list in API context if appropriate */
-            if (H5CX_set_apl(&apl_id, H5P_CLS_DACC, oid, TRUE) < 0)
+            if (H5CX_set_apl(&apl_id, H5P_CLS_DACC, oid, true) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info");
 
             /* Re-open the dataset */
@@ -411,7 +411,7 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
     } /* end switch */
 
     /* Re-register ID for the object */
-    if ((H5VL_register_using_existing_id(type, object, vol_connector, TRUE, oid)) < 0)
+    if ((H5VL_register_using_existing_id(type, object, vol_connector, true, oid)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh");
 
 done:

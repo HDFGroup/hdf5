@@ -134,7 +134,7 @@ herr_t
 H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
 {
     H5FA_dblk_page_t *dblk_page = NULL;  /* Fixed array data block page */
-    hbool_t           inserted  = FALSE; /* Whether the header was inserted into cache */
+    bool              inserted  = false; /* Whether the header was inserted into cache */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -166,7 +166,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     /* Cache the new fixed array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINSERT, FAIL, "can't add fixed array data block page to cache");
-    inserted = TRUE;
+    inserted = true;
 
     /* Add data block page as child of 'top' proxy */
     if (hdr->top_proxy) {

@@ -146,7 +146,7 @@ main(int argc, char *argv[])
          * anything. */
 
         /* Determine driver being used */
-        envval = HDgetenv(HDF5_DRIVER);
+        envval = getenv(HDF5_DRIVER);
 
         if (envval == NULL || H5FD__supports_swmr_test(envval)) {
             if (test_flush() != SUCCEED)
@@ -1054,7 +1054,7 @@ herr_t
 flush_verification(const char *obj_pathname, const char *expected)
 {
     /* Variables */
-    hid_t       oid = -1, fid = -1;
+    hid_t       oid = H5I_INVALID_HID, fid = H5I_INVALID_HID;
     herr_t      status = 0;
     H5O_info2_t oinfo;
 
@@ -1068,13 +1068,13 @@ flush_verification(const char *obj_pathname, const char *expected)
     H5E_END_TRY
 
     /* Compare to expected result */
-    if (HDstrcmp(expected, FLUSHED) == 0) {
+    if (strcmp(expected, FLUSHED) == 0) {
         if ((oid < 0) || (status < 0)) {
             fprintf(stderr, "Error! %s should be on disk, but was NOT!\n", obj_pathname);
             PROCESS_ERROR;
         } /* end if */
     }
-    else if (HDstrcmp(expected, NOT_FLUSHED) == 0) {
+    else if (strcmp(expected, NOT_FLUSHED) == 0) {
         if ((oid > 0) || (status > 0)) {
             fprintf(stderr, "Error! %s not expected to be flushed, but it was found on disk!\n",
                     obj_pathname);
@@ -1199,7 +1199,7 @@ refresh_verification(const char *obj_pathname)
     H5O_native_info_t refreshed_ninfo;
     int               tries = 800, sleep_tries = 400;
     int               token_cmp;
-    hbool_t           ok = FALSE;
+    bool              ok = false;
 
     HDremove(SIGNAL_BETWEEN_PROCESSES_2);
 
@@ -1265,20 +1265,20 @@ refresh_verification(const char *obj_pathname)
      * test cases is easy). */
     do {
 
-        if ((HDstrcmp(obj_pathname, D1) == 0) || (HDstrcmp(obj_pathname, D2) == 0)) {
+        if ((strcmp(obj_pathname, D1) == 0) || (strcmp(obj_pathname, D2) == 0)) {
             if (H5Drefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
-        else if ((HDstrcmp(obj_pathname, G1) == 0) || (HDstrcmp(obj_pathname, G2) == 0)) {
+        else if ((strcmp(obj_pathname, G1) == 0) || (strcmp(obj_pathname, G2) == 0)) {
             if (H5Grefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
-        else if ((HDstrcmp(obj_pathname, T1) == 0) || (HDstrcmp(obj_pathname, T2) == 0)) {
+        else if ((strcmp(obj_pathname, T1) == 0) || (strcmp(obj_pathname, T2) == 0)) {
             if (H5Trefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
-        else if ((HDstrcmp(obj_pathname, D3) == 0) || (HDstrcmp(obj_pathname, G3) == 0) ||
-                 (HDstrcmp(obj_pathname, T3) == 0)) {
+        else if ((strcmp(obj_pathname, D3) == 0) || (strcmp(obj_pathname, G3) == 0) ||
+                 (strcmp(obj_pathname, T3) == 0)) {
             if (H5Orefresh(oid) < 0)
                 PROCESS_ERROR;
         } /* end if */
@@ -1304,7 +1304,7 @@ refresh_verification(const char *obj_pathname)
             (flushed_ninfo.hdr.nmesgs != refreshed_ninfo.hdr.nmesgs) &&
             (flushed_ninfo.hdr.nchunks != refreshed_ninfo.hdr.nchunks) &&
             (flushed_ninfo.hdr.space.total != refreshed_ninfo.hdr.space.total)) {
-            ok = TRUE;
+            ok = true;
             break;
         }
 

@@ -225,7 +225,7 @@ static herr_t  H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
                                void *buf);
 static herr_t  H5FD__ros3_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                 const void *buf);
-static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, bool closing);
 
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
@@ -306,7 +306,7 @@ H5FD_ros3_init(void)
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
-        H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), FALSE);
+        H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), false);
         if (H5I_INVALID_HID == H5FD_ROS3_g) {
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
         }
@@ -423,7 +423,7 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
 
     /* if set to authenticate, region and id cannot be empty strings */
-    if (fa->authenticate == TRUE)
+    if (fa->authenticate == true)
         if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0'))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Inconsistent authentication information");
 
@@ -623,7 +623,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     }
 
     /* Copy the token data out */
-    tokenlen = HDstrlen(token_src);
+    tokenlen = strlen(token_src);
     if (size <= tokenlen) {
         tokenlen = size - 1;
     }
@@ -659,7 +659,7 @@ H5FD__ros3_str_token_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED
 #endif
 
     if (*value)
-        if (NULL == (*value = HDstrdup(*value)))
+        if (NULL == (*value = strdup(*value)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy string property token");
 
 done:
@@ -691,7 +691,7 @@ H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t H5_ATT
 
     if (*value1) {
         if (*value2)
-            ret_value = HDstrcmp(*value1, *value2);
+            ret_value = strcmp(*value1, *value2);
         else
             ret_value = 1;
     }
@@ -798,7 +798,7 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_ROS3 != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if (HDstrlen(token) > H5FD_ROS3_MAX_SECRET_TOK_LEN)
+    if (strlen(token) > H5FD_ROS3_MAX_SECRET_TOK_LEN)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
                     "specified token exceeds the internally specified maximum string length");
 
@@ -809,13 +809,13 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value");
 
-        memcpy(token_src, token, HDstrlen(token) + 1);
+        H5MM_memcpy(token_src, token, strlen(token) + 1);
     }
     else {
         token_src = (char *)malloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
         if (token_src == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for token_src variable.");
-        memcpy(token_src, token, HDstrlen(token) + 1);
+        H5MM_memcpy(token_src, token, strlen(token) + 1);
         if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
                        H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
                        H5FD__ros3_str_token_close) < 0)
@@ -957,7 +957,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
-    if (fa.authenticate == TRUE) {
+    if (fa.authenticate == true) {
         /* compute signing key (part of AWS/S3 REST API)
          * can be re-used by user/key for 7 days after creation.
          * find way to reuse/share
@@ -1398,16 +1398,16 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     assert(purl2->host != NULL);
 
     /* URL: SCHEME */
-    if (HDstrcmp(purl1->scheme, purl2->scheme))
+    if (strcmp(purl1->scheme, purl2->scheme))
         HGOTO_DONE(-1);
 
     /* URL: HOST */
-    if (HDstrcmp(purl1->host, purl2->host))
+    if (strcmp(purl1->host, purl2->host))
         HGOTO_DONE(-1);
 
     /* URL: PORT */
     if (purl1->port && purl2->port) {
-        if (HDstrcmp(purl1->port, purl2->port))
+        if (strcmp(purl1->port, purl2->port))
             HGOTO_DONE(-1);
     }
     else if (purl1->port)
@@ -1417,7 +1417,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* URL: PATH */
     if (purl1->path && purl2->path) {
-        if (HDstrcmp(purl1->path, purl2->path))
+        if (strcmp(purl1->path, purl2->path))
             HGOTO_DONE(-1);
     }
     else if (purl1->path && !purl2->path)
@@ -1427,7 +1427,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* URL: QUERY */
     if (purl1->query && purl2->query) {
-        if (HDstrcmp(purl1->query, purl2->query))
+        if (strcmp(purl1->query, purl2->query))
             HGOTO_DONE(-1);
     }
     else if (purl1->query && !purl2->query)
@@ -1437,7 +1437,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* FAPL: AWS_REGION */
     if (f1->fa.aws_region[0] != '\0' && f2->fa.aws_region[0] != '\0') {
-        if (HDstrcmp(f1->fa.aws_region, f2->fa.aws_region))
+        if (strcmp(f1->fa.aws_region, f2->fa.aws_region))
             HGOTO_DONE(-1);
     }
     else if (f1->fa.aws_region[0] != '\0')
@@ -1447,7 +1447,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* FAPL: SECRET_ID */
     if (f1->fa.secret_id[0] != '\0' && f2->fa.secret_id[0] != '\0') {
-        if (HDstrcmp(f1->fa.secret_id, f2->fa.secret_id))
+        if (strcmp(f1->fa.secret_id, f2->fa.secret_id))
             HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_id[0] != '\0')
@@ -1457,7 +1457,7 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* FAPL: SECRET_KEY */
     if (f1->fa.secret_key[0] != '\0' && f2->fa.secret_key[0] != '\0') {
-        if (HDstrcmp(f1->fa.secret_key, f2->fa.secret_key))
+        if (strcmp(f1->fa.secret_key, f2->fa.secret_key))
             HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_key[0] != '\0')
@@ -1757,8 +1757,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
-                    hbool_t H5_ATTR_UNUSED closing)
+H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 

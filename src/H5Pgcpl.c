@@ -252,9 +252,9 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
 
     /* Update fields */
     if (max_compact != H5G_CRT_GINFO_MAX_COMPACT || min_dense != H5G_CRT_GINFO_MIN_DENSE)
-        ginfo.store_link_phase_change = TRUE;
+        ginfo.store_link_phase_change = true;
     else
-        ginfo.store_link_phase_change = FALSE;
+        ginfo.store_link_phase_change = false;
     ginfo.max_compact = (uint16_t)max_compact;
     ginfo.min_dense   = (uint16_t)min_dense;
 
@@ -350,9 +350,9 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
 
     /* Update fields */
     if (est_num_entries != H5G_CRT_GINFO_EST_NUM_ENTRIES || est_name_len != H5G_CRT_GINFO_EST_NAME_LEN)
-        ginfo.store_est_entry_info = TRUE;
+        ginfo.store_est_entry_info = true;
     else
-        ginfo.store_est_entry_info = FALSE;
+        ginfo.store_est_entry_info = false;
     ginfo.est_num_entries = (uint16_t)est_num_entries;
     ginfo.est_name_len    = (uint16_t)est_name_len;
 
@@ -437,8 +437,8 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info");
 
     /* Update fields */
-    linfo.track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
-    linfo.index_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
+    linfo.track_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? true : false);
+    linfo.index_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? true : false);
 
     /* Set link info */
     if (H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
@@ -556,15 +556,15 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
 
     /* Update fields */
     if (ginfo->max_compact != H5G_CRT_GINFO_MAX_COMPACT || ginfo->min_dense != H5G_CRT_GINFO_MIN_DENSE)
-        ginfo->store_link_phase_change = TRUE;
+        ginfo->store_link_phase_change = true;
     else
-        ginfo->store_link_phase_change = FALSE;
+        ginfo->store_link_phase_change = false;
 
     if (ginfo->est_num_entries != H5G_CRT_GINFO_EST_NUM_ENTRIES ||
         ginfo->est_name_len != H5G_CRT_GINFO_EST_NAME_LEN)
-        ginfo->store_est_entry_info = TRUE;
+        ginfo->store_est_entry_info = true;
     else
-        ginfo->store_est_entry_info = FALSE;
+        ginfo->store_est_entry_info = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__gcrt_group_info_dec() */
@@ -641,8 +641,8 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
     H5_DECODE_UNSIGNED(*pp, crt_order_flags);
 
     /* Update fields */
-    linfo->track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
-    linfo->index_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
+    linfo->track_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? true : false);
+    linfo->index_corder = (bool)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? true : false);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

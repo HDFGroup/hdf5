@@ -77,7 +77,7 @@ static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_
 static int
 test_one(hid_t file)
 {
-    hid_t  work = -1, grp = -1;
+    hid_t  work = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     herr_t status;
 
     /* Create a test group */
@@ -149,7 +149,7 @@ error:
 static int
 test_many(hid_t file)
 {
-    hid_t     work = -1, grp = -1;
+    hid_t     work = H5I_INVALID_HID, grp = H5I_INVALID_HID;
     int       i;
     const int how_many = 500;
     char      name[32];
@@ -165,12 +165,12 @@ test_many(hid_t file)
     /* Create a bunch of names and unlink them in order */
     TESTING("forward unlink");
     for (i = 0; i < how_many; i++) {
-        HDsnprintf(name, sizeof(name), "obj_%05d", i);
+        snprintf(name, sizeof(name), "obj_%05d", i);
         if (H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
     for (i = 0; i < how_many; i++) {
-        HDsnprintf(name, sizeof(name), "obj_%05d", i);
+        snprintf(name, sizeof(name), "obj_%05d", i);
         if (H5Ldelete(work, name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -179,12 +179,12 @@ test_many(hid_t file)
     /* Create a bunch of names and unlink them in reverse order */
     TESTING("backward unlink");
     for (i = 0; i < how_many; i++) {
-        HDsnprintf(name, sizeof(name), "obj_%05d", i);
+        snprintf(name, sizeof(name), "obj_%05d", i);
         if (H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
     for (i = (how_many - 1); i >= 0; --i) {
-        HDsnprintf(name, sizeof(name), "obj_%05d", i);
+        snprintf(name, sizeof(name), "obj_%05d", i);
         if (H5Ldelete(work, name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -193,15 +193,15 @@ test_many(hid_t file)
     /* Create a bunch of names and unlink them from both directions */
     TESTING("inward unlink");
     for (i = 0; i < how_many; i++) {
-        HDsnprintf(name, sizeof(name), "obj_%05d", i);
+        snprintf(name, sizeof(name), "obj_%05d", i);
         if (H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
     for (i = 0; i < how_many; i++) {
         if (i % 2)
-            HDsnprintf(name, sizeof(name), "obj_%05d", how_many - (1 + i / 2));
+            snprintf(name, sizeof(name), "obj_%05d", how_many - (1 + i / 2));
         else
-            HDsnprintf(name, sizeof(name), "obj_%05d", i / 2);
+            snprintf(name, sizeof(name), "obj_%05d", i / 2);
         if (H5Ldelete(work, name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -210,15 +210,15 @@ test_many(hid_t file)
     /* Create a bunch of names and unlink them from the midle */
     TESTING("outward unlink");
     for (i = 0; i < how_many; i++) {
-        HDsnprintf(name, sizeof(name), "obj_%05d", i);
+        snprintf(name, sizeof(name), "obj_%05d", i);
         if (H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
     for (i = (how_many - 1); i >= 0; --i) {
         if (i % 2)
-            HDsnprintf(name, sizeof(name), "obj_%05d", how_many - (1 + i / 2));
+            snprintf(name, sizeof(name), "obj_%05d", how_many - (1 + i / 2));
         else
-            HDsnprintf(name, sizeof(name), "obj_%05d", i / 2);
+            snprintf(name, sizeof(name), "obj_%05d", i / 2);
         if (H5Ldelete(work, name, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -253,7 +253,7 @@ error:
 static int
 test_symlink(hid_t file)
 {
-    hid_t work = -1;
+    hid_t work = H5I_INVALID_HID;
 
     TESTING("symlink removal");
 
@@ -295,7 +295,7 @@ error:
 static int
 test_rename(hid_t file)
 {
-    hid_t work = -1, foo = -1, inner = -1;
+    hid_t work = H5I_INVALID_HID, foo = H5I_INVALID_HID, inner = H5I_INVALID_HID;
 
     /* Create a test group and rename something */
     TESTING("object renaming");
@@ -356,9 +356,10 @@ error:
 static int
 test_new_move(hid_t fapl)
 {
-    hid_t file_a, file_b = (-1);
-    hid_t grp_1 = (-1), grp_2 = (-1), grp_move = (-1), moved_grp = (-1);
-    char  filename[1024];
+    hid_t file_a, file_b = (H5I_INVALID_HID);
+    hid_t grp_1 = (H5I_INVALID_HID), grp_2 = (H5I_INVALID_HID), grp_move = (H5I_INVALID_HID),
+          moved_grp = (H5I_INVALID_HID);
+    char filename[1024];
 
     TESTING("new move");
 
@@ -484,7 +485,7 @@ check_new_move(hid_t fapl)
     /* Check soft links */
     if (H5Lget_val(file, "group2/soft", linkval, sizeof(linkval), H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(linkval, "/group1/group_move") != 0)
+    if (strcmp(linkval, "/group1/group_move") != 0)
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value");
 
     /* Cleanup */
@@ -544,7 +545,7 @@ test_filespace(hid_t fapl)
     size_t rdcc_nbytes;
     double rdcc_w0;
 
-    HDputs("Testing file space gets reused:");
+    puts("Testing file space gets reused:");
 
     /* Open file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
@@ -901,7 +902,7 @@ test_filespace(hid_t fapl)
     /* Alternate adding attributes to each one */
     for (u = 0; u < FILESPACE_NATTR; u++) {
         /* Set the name of the attribute to create */
-        HDsnprintf(objname, sizeof(objname), "%s %u", ATTRNAME, u);
+        snprintf(objname, sizeof(objname), "%s %u", ATTRNAME, u);
 
         /* Create an attribute on the first dataset */
         if ((attr = H5Acreate2(dataset, objname, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -1033,7 +1034,7 @@ test_filespace(hid_t fapl)
 
     /* Create a many groups to remove */
     for (u = 0; u < UNLINK_NGROUPS; u++) {
-        HDsnprintf(objname, sizeof(objname), "%s %u", GROUPNAME, u);
+        snprintf(objname, sizeof(objname), "%s %u", GROUPNAME, u);
         if ((group = H5Gcreate2(file, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Gclose(group) < 0)
@@ -1043,7 +1044,7 @@ test_filespace(hid_t fapl)
     /* Remove the all the groups */
     /* (Remove them in reverse order just to make file size calculation easier -QAK) */
     for (u = UNLINK_NGROUPS; u > 0; u--) {
-        HDsnprintf(objname, sizeof(objname), "%s %u", GROUPNAME, (u - 1));
+        snprintf(objname, sizeof(objname), "%s %u", GROUPNAME, (u - 1));
         if (H5Ldelete(file, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -1111,21 +1112,21 @@ test_filespace(hid_t fapl)
     /* Create a complex group hierarchy to remove */
     for (u = 0; u < FILESPACE_TOP_GROUPS; u++) {
         /* Create group */
-        HDsnprintf(objname, sizeof(objname), "%s %u", GROUPNAME, u);
+        snprintf(objname, sizeof(objname), "%s %u", GROUPNAME, u);
         if ((group = H5Gcreate2(file, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
 
         /* Create nested groups inside top groups */
         for (v = 0; v < FILESPACE_NESTED_GROUPS; v++) {
             /* Create group */
-            HDsnprintf(objname, sizeof(objname), "%s %u", GROUP2NAME, v);
+            snprintf(objname, sizeof(objname), "%s %u", GROUP2NAME, v);
             if ((group2 = H5Gcreate2(group, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR;
 
             /* Create datasets inside nested groups */
             for (w = 0; w < FILESPACE_NDATASETS; w++) {
                 /* Create & close a dataset */
-                HDsnprintf(objname, sizeof(objname), "%s %u", DATASETNAME, w);
+                snprintf(objname, sizeof(objname), "%s %u", DATASETNAME, w);
                 if ((dataset = H5Dcreate2(group2, objname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT,
                                           H5P_DEFAULT)) < 0)
                     FAIL_STACK_ERROR;
@@ -1147,21 +1148,21 @@ test_filespace(hid_t fapl)
     /* (Remove them in reverse order just to make file size calculation easier -QAK) */
     for (u = FILESPACE_TOP_GROUPS; u > 0; u--) {
         /* Open group */
-        HDsnprintf(objname, sizeof(objname), "%s %u", GROUPNAME, (u - 1));
+        snprintf(objname, sizeof(objname), "%s %u", GROUPNAME, (u - 1));
         if ((group = H5Gopen2(file, objname, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
 
         /* Open nested groups inside top groups */
         for (v = 0; v < FILESPACE_NESTED_GROUPS; v++) {
             /* Create group */
-            HDsnprintf(objname, sizeof(objname), "%s %u", GROUP2NAME, v);
+            snprintf(objname, sizeof(objname), "%s %u", GROUP2NAME, v);
             if ((group2 = H5Gopen2(group, objname, H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR;
 
             /* Remove datasets inside nested groups */
             for (w = 0; w < FILESPACE_NDATASETS; w++) {
                 /* Remove dataset */
-                HDsnprintf(objname, sizeof(objname), "%s %u", DATASETNAME, w);
+                snprintf(objname, sizeof(objname), "%s %u", DATASETNAME, w);
                 if (H5Ldelete(group2, objname, H5P_DEFAULT) < 0)
                     FAIL_STACK_ERROR;
             } /* end for */
@@ -1171,7 +1172,7 @@ test_filespace(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Remove nested group */
-            HDsnprintf(objname, sizeof(objname), "%s %u", GROUP2NAME, v);
+            snprintf(objname, sizeof(objname), "%s %u", GROUP2NAME, v);
             if (H5Ldelete(group, objname, H5P_DEFAULT) < 0)
                 FAIL_STACK_ERROR;
         } /* end for */
@@ -1181,7 +1182,7 @@ test_filespace(hid_t fapl)
             FAIL_STACK_ERROR;
 
         /* Remove top group */
-        HDsnprintf(objname, sizeof(objname), "%s %u", GROUPNAME, (u - 1));
+        snprintf(objname, sizeof(objname), "%s %u", GROUPNAME, (u - 1));
         if (H5Ldelete(file, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -1460,7 +1461,7 @@ test_create_unlink(const char *msg, hid_t fapl)
 
     /* Create a many groups to remove */
     for (u = 0; u < UNLINK_NGROUPS; u++) {
-        HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
+        snprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if ((group = H5Gcreate2(file, groupname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
             printf("group %s creation failed\n", groupname);
@@ -1475,7 +1476,7 @@ test_create_unlink(const char *msg, hid_t fapl)
 
     /* Remove the all the groups */
     for (u = 0; u < UNLINK_NGROUPS; u++) {
-        HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
+        snprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if (H5Ldelete(file, groupname, H5P_DEFAULT) < 0) {
             H5_FAILED();
             printf("Unlinking group %s failed\n", groupname);
@@ -1664,7 +1665,7 @@ delete_node(hid_t pid, hid_t id)
         return (-1);
 
     /* If this object is the right-most child, try opening the previous object */
-    if (HDstrcmp(name, "/Zone81") == 0) {
+    if (strcmp(name, "/Zone81") == 0) {
         hid_t gid;
 
         if ((gid = H5Gopen2(pid, "/Zone80", H5P_DEFAULT)) < 0)
@@ -1691,11 +1692,11 @@ delete_node(hid_t pid, hid_t id)
 static int
 test_unlink_rightleaf(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 150;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 150;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
@@ -1708,7 +1709,7 @@ test_unlink_rightleaf(hid_t fid)
 
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
-        HDsnprintf(name, sizeof(name), "Zone%d", n + 1);
+        snprintf(name, sizeof(name), "Zone%d", n + 1);
         if ((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
     } /* end for */
@@ -1717,7 +1718,7 @@ test_unlink_rightleaf(hid_t fid)
     for (n = 0; n < ngroups; n++) {
         if (delete_node(rootid, gids[n]) < 0)
             TEST_ERROR;
-        HDsnprintf(name, sizeof(name), "Zone%d", n + 1);
+        snprintf(name, sizeof(name), "Zone%d", n + 1);
         if ((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
     } /* end for */
@@ -1775,11 +1776,11 @@ error:
 static int
 test_unlink_rightnode(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 150;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 150;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
@@ -1792,7 +1793,7 @@ test_unlink_rightnode(hid_t fid)
 
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
-        HDsnprintf(name, sizeof(name), "ZoneB%d", n + 1);
+        snprintf(name, sizeof(name), "ZoneB%d", n + 1);
         if ((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -1862,11 +1863,11 @@ error:
 static int
 test_unlink_middlenode(hid_t fid)
 {
-    hid_t rootid = -1,   /* Group ID for root group */
-        *gids    = NULL; /* Array of IDs for groups created */
-    int n,               /* Local index variable */
-        ngroups = 250;   /* Number of groups to create */
-    char name[256];      /* Name of object to create */
+    hid_t rootid = H5I_INVALID_HID, /* Group ID for root group */
+        *gids    = NULL;            /* Array of IDs for groups created */
+    int n,                          /* Local index variable */
+        ngroups = 250;              /* Number of groups to create */
+    char name[256];                 /* Name of object to create */
 
     TESTING("deleting right-most child in non-leaf B-tree node");
 
@@ -1879,7 +1880,7 @@ test_unlink_middlenode(hid_t fid)
 
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
-        HDsnprintf(name, sizeof(name), "ZoneC%d", n + 1);
+        snprintf(name, sizeof(name), "ZoneC%d", n + 1);
         if ((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -2235,7 +2236,7 @@ error:
 static int
 test_resurrect_dataset(hid_t fapl)
 {
-    hid_t f = -1, s = -1, d = -1;
+    hid_t f = H5I_INVALID_HID, s = H5I_INVALID_HID, d = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting dataset after deletion");
@@ -2315,7 +2316,7 @@ error:
 static int
 test_resurrect_datatype(hid_t fapl)
 {
-    hid_t file = -1, type = -1;
+    hid_t file = H5I_INVALID_HID, type = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting datatype after deletion");
@@ -2392,7 +2393,7 @@ error:
 static int
 test_resurrect_group(hid_t fapl)
 {
-    hid_t file = -1, group = -1;
+    hid_t file = H5I_INVALID_HID, group = H5I_INVALID_HID;
     char  filename[1024];
 
     TESTING("resurrecting group after deletion");
@@ -2466,10 +2467,10 @@ error:
 static int
 test_unlink_chunked_dataset(hid_t fapl)
 {
-    hid_t   file_id                     = -1;
-    hid_t   dset_id                     = -1;
-    hid_t   space_id                    = -1;
-    hid_t   dcpl_id                     = -1;
+    hid_t   file_id                     = H5I_INVALID_HID;
+    hid_t   dset_id                     = H5I_INVALID_HID;
+    hid_t   space_id                    = H5I_INVALID_HID;
+    hid_t   dcpl_id                     = H5I_INVALID_HID;
     hsize_t dims[FILESPACE_NDIMS]       = {FILESPACE_DIM0, FILESPACE_DIM1, FILESPACE_DIM2};
     hsize_t max_dims[FILESPACE_NDIMS]   = {H5S_UNLIMITED, H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[FILESPACE_NDIMS] = {FILESPACE_CHUNK0, FILESPACE_CHUNK1, FILESPACE_CHUNK2};
@@ -2561,15 +2562,15 @@ error:
 static int
 test_full_group_compact(hid_t fapl)
 {
-    hid_t          file_id = -1;
-    hid_t          gid = -1, gid2 = -1; /* Group IDs */
-    H5O_info2_t    oi;                  /* Stat buffer for object */
-    char           objname[128];        /* Buffer for name of objects to create */
-    char           objname2[128];       /* Buffer for name of objects to create */
-    char           filename[1024];      /* Buffer for filename */
-    h5_stat_size_t keep_size;           /* Size of the file with objects to keep */
-    h5_stat_size_t file_size;           /* Size of each file created */
-    unsigned       u;                   /* Local index variable */
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info2_t    oi;                                            /* Stat buffer for object */
+    char           objname[128];                                  /* Buffer for name of objects to create */
+    char           objname2[128];                                 /* Buffer for name of objects to create */
+    char           filename[1024];                                /* Buffer for filename */
+    h5_stat_size_t keep_size;                                     /* Size of the file with objects to keep */
+    h5_stat_size_t file_size;                                     /* Size of each file created */
+    unsigned       u;                                             /* Local index variable */
 
     TESTING("unlinking non-empty compact group");
 
@@ -2586,7 +2587,7 @@ test_full_group_compact(hid_t fapl)
 
     /* Create several objects to link to */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "keep %u\n", u);
+        snprintf(objname, sizeof(objname), "keep %u\n", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Gclose(gid2) < 0)
@@ -2623,15 +2624,15 @@ test_full_group_compact(hid_t fapl)
 
     /* Create hard links to objects in group to keep */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
-        HDsnprintf(objname2, sizeof(objname2), "keep %u\n", u);
+        snprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
+        snprintf(objname2, sizeof(objname2), "keep %u\n", u);
         if (H5Lcreate_hard(file_id, objname, gid, objname2, H5P_DEFAULT, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
 
     /* Create several objects to delete */
     for (u = 0; u < FULL_GROUP_NUM_DELETE_COMPACT; u++) {
-        HDsnprintf(objname, sizeof(objname), "delete %u\n", u);
+        snprintf(objname, sizeof(objname), "delete %u\n", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Gclose(gid2) < 0)
@@ -2639,11 +2640,11 @@ test_full_group_compact(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) != TRUE)
+    if (H5G__has_links_test(gid, NULL) != true)
         TEST_ERROR;
-    if (H5G__has_stab_test(gid) == TRUE)
+    if (H5G__has_stab_test(gid) == true)
         TEST_ERROR;
 
     /* Close group with objects to delete */
@@ -2652,7 +2653,7 @@ test_full_group_compact(hid_t fapl)
 
     /* Check reference count on objects to keep */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
+        snprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
         if (H5Oget_info_by_name3(file_id, objname, &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
         if (oi.rc != 2)
@@ -2673,7 +2674,7 @@ test_full_group_compact(hid_t fapl)
 
     /* Check reference count on objects to keep */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
+        snprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
         if (H5Oget_info_by_name3(file_id, objname, &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
         if (oi.rc != 1)
@@ -2719,16 +2720,16 @@ error:
 static int
 test_full_group_dense(hid_t fapl)
 {
-    hid_t          file_id = -1;
-    hid_t          gcpl    = (-1);      /* Group creation property list ID */
-    hid_t          gid = -1, gid2 = -1; /* Group IDs */
-    H5O_info2_t    oi;                  /* Stat buffer for object */
-    char           objname[128];        /* Buffer for name of objects to create */
-    char           objname2[128];       /* Buffer for name of objects to create */
-    char           filename[1024];      /* Buffer for filename */
-    h5_stat_size_t keep_size;           /* Size of the file with objects to keep */
-    h5_stat_size_t file_size;           /* Size of each file created */
-    unsigned       u;                   /* Local index variable */
+    hid_t          file_id = H5I_INVALID_HID;
+    hid_t          gcpl    = (H5I_INVALID_HID);                   /* Group creation property list ID */
+    hid_t          gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info2_t    oi;                                            /* Stat buffer for object */
+    char           objname[128];                                  /* Buffer for name of objects to create */
+    char           objname2[128];                                 /* Buffer for name of objects to create */
+    char           filename[1024];                                /* Buffer for filename */
+    h5_stat_size_t keep_size;                                     /* Size of the file with objects to keep */
+    h5_stat_size_t file_size;                                     /* Size of each file created */
+    unsigned       u;                                             /* Local index variable */
 
     TESTING("unlinking non-empty dense group");
 
@@ -2745,7 +2746,7 @@ test_full_group_dense(hid_t fapl)
 
     /* Create several objects to link to */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "keep %u\n", u);
+        snprintf(objname, sizeof(objname), "keep %u\n", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Gclose(gid2) < 0)
@@ -2797,15 +2798,15 @@ test_full_group_dense(hid_t fapl)
 
     /* Create hard links to objects in group to keep */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
-        HDsnprintf(objname2, sizeof(objname2), "keep %u\n", u);
+        snprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
+        snprintf(objname2, sizeof(objname2), "keep %u\n", u);
         if (H5Lcreate_hard(file_id, objname, gid, objname2, H5P_DEFAULT, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
 
     /* Create several objects to delete */
     for (u = 0; u < FULL_GROUP_NUM_DELETE_DENSE; u++) {
-        HDsnprintf(objname, sizeof(objname), "delete %u\n", u);
+        snprintf(objname, sizeof(objname), "delete %u\n", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Gclose(gid2) < 0)
@@ -2813,11 +2814,11 @@ test_full_group_dense(hid_t fapl)
     } /* end for */
 
     /* Check on group's status */
-    if (H5G__is_empty_test(gid) == TRUE)
+    if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
-    if (H5G__has_links_test(gid, NULL) == TRUE)
+    if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
-    if (H5G__is_new_dense_test(gid) != TRUE)
+    if (H5G__is_new_dense_test(gid) != true)
         TEST_ERROR;
 
     /* Close group with objects to delete */
@@ -2826,7 +2827,7 @@ test_full_group_dense(hid_t fapl)
 
     /* Check reference count on objects to keep */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
+        snprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
         if (H5Oget_info_by_name3(file_id, objname, &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
         if (oi.rc != 2)
@@ -2847,7 +2848,7 @@ test_full_group_dense(hid_t fapl)
 
     /* Check reference count on objects to keep */
     for (u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
-        HDsnprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
+        snprintf(objname, sizeof(objname), "/keep/keep %u\n", u);
         if (H5Oget_info_by_name3(file_id, objname, &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
         if (oi.rc != 1)
@@ -2920,16 +2921,16 @@ main(void)
         TEST_ERROR;
 
     /* Test with old & new format groups */
-    for (new_format = FALSE; new_format <= TRUE; new_format++) {
+    for (new_format = false; new_format <= true; new_format++) {
         hid_t my_fapl;
 
         /* Set the FAPL for the type of format */
         if (new_format) {
-            HDputs("\nTesting with new group format:");
+            puts("\nTesting with new group format:");
             my_fapl = fapl2;
         } /* end if */
         else {
-            HDputs("Testing with old group format:");
+            puts("Testing with old group format:");
             my_fapl = fapl;
         } /* end else */
 
@@ -3016,7 +3017,7 @@ main(void)
         exit(EXIT_FAILURE);
     }
 
-    HDputs("All unlink tests passed.");
+    puts("All unlink tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 

@@ -253,7 +253,7 @@ H5Eprint1(FILE *stream)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Print error stack */
-    if (H5E__print(estack, stream, TRUE) < 0)
+    if (H5E__print(estack, stream, true) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack");
 
 done:
@@ -381,9 +381,9 @@ H5Eset_auto1(H5E_auto1_t func, void *client_data)
     /* Set the automatic error reporting information */
     auto_op.vers = 1;
     if (func != auto_op.func1_default)
-        auto_op.is_default = FALSE;
+        auto_op.is_default = false;
     else
-        auto_op.is_default = TRUE;
+        auto_op.is_default = true;
     auto_op.func1 = func;
 
     if (H5E__set_auto(estack, &auto_op, client_data) < 0)

@@ -60,11 +60,11 @@ test_open_link_without_leading_slash(void)
         goto error;
     }
 
-    if ((space_id = generate_random_dataspace(OPEN_LINK_WITHOUT_SLASH_DSET_SPACE_RANK, NULL, NULL, FALSE)) <
+    if ((space_id = generate_random_dataspace(OPEN_LINK_WITHOUT_SLASH_DSET_SPACE_RANK, NULL, NULL, false)) <
         0)
         TEST_ERROR;
 
-    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(container_group, OPEN_LINK_WITHOUT_SLASH_DSET_NAME, dset_dtype, space_id,
@@ -235,13 +235,13 @@ test_object_creation_by_absolute_path(void)
 
             /* Try to create a dataset nested at the end of this group chain by using an absolute pathname */
             if ((fspace_id = generate_random_dataspace(OBJECT_CREATE_BY_ABSOLUTE_PATH_TEST_DSET_SPACE_RANK,
-                                                       NULL, NULL, FALSE)) < 0) {
+                                                       NULL, NULL, false)) < 0) {
                 H5_FAILED();
                 printf("    failed to generate dataspace\n");
                 PART_ERROR(H5Dcreate_using_absolute_path);
             }
 
-            if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+            if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
                 H5_FAILED();
                 printf("    failed to generate datatype\n");
                 PART_ERROR(H5Dcreate_using_absolute_path);
@@ -284,7 +284,7 @@ test_object_creation_by_absolute_path(void)
             TESTING_2("creation of committed datatype using absolute pathname");
 
             /* Try to create a committed datatype in the same fashion as the preceding dataset */
-            if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
+            if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
                 H5_FAILED();
                 printf("    couldn't create datatype\n");
                 PART_ERROR(H5Tcommit_using_absolute_path);
@@ -411,20 +411,20 @@ test_absolute_vs_relative_path(void)
     }
 
     if ((fspace_id = generate_random_dataspace(ABSOLUTE_VS_RELATIVE_PATH_TEST_DSET_SPACE_RANK, NULL, NULL,
-                                               FALSE)) < 0)
+                                               false)) < 0)
         TEST_ERROR;
 
-    if ((dset_dtype1 = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype1 = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
-    if ((dset_dtype2 = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype2 = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
-    if ((dset_dtype3 = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype3 = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
-    if ((dset_dtype4 = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype4 = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
-    if ((dset_dtype5 = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype5 = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
-    if ((dset_dtype6 = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
+    if ((dset_dtype6 = generate_random_datatype(H5T_NO_CLASS, false)) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -944,19 +944,19 @@ test_symbols_in_compound_field_name(void)
     }
 
     for (i = 0, total_type_size = 0; i < COMPOUND_WITH_SYMBOLS_IN_MEMBER_NAMES_TEST_NUM_SUBTYPES; i++) {
-        type_pool[i] = generate_random_datatype(H5T_NO_CLASS, FALSE);
+        type_pool[i] = generate_random_datatype(H5T_NO_CLASS, false);
         total_type_size += H5Tget_size(type_pool[i]);
     }
 
-    HDsnprintf(member_names[0], 256, "{{{ member0");
-    HDsnprintf(member_names[1], 256, "member1 }}}");
-    HDsnprintf(member_names[2], 256, "{{{ member2 }}");
-    HDsnprintf(member_names[3], 256, "{{ member3 }}}");
-    HDsnprintf(member_names[4], 256, "\\\"member4");
-    HDsnprintf(member_names[5], 256, "member5\\\"");
-    HDsnprintf(member_names[6], 256, "mem\\\"ber6");
-    HDsnprintf(member_names[7], 256, "{{ member7\\\" }");
-    HDsnprintf(member_names[8], 256, "{{ member8\\\\");
+    snprintf(member_names[0], 256, "{{{ member0");
+    snprintf(member_names[1], 256, "member1 }}}");
+    snprintf(member_names[2], 256, "{{{ member2 }}");
+    snprintf(member_names[3], 256, "{{ member3 }}}");
+    snprintf(member_names[4], 256, "\\\"member4");
+    snprintf(member_names[5], 256, "member5\\\"");
+    snprintf(member_names[6], 256, "mem\\\"ber6");
+    snprintf(member_names[7], 256, "{{ member7\\\" }");
+    snprintf(member_names[8], 256, "{{ member8\\\\");
 
     if ((compound_type = H5Tcreate(H5T_COMPOUND, total_type_size)) < 0) {
         H5_FAILED();
@@ -978,7 +978,7 @@ test_symbols_in_compound_field_name(void)
         TEST_ERROR;
 
     if ((fspace_id = generate_random_dataspace(COMPOUND_WITH_SYMBOLS_IN_MEMBER_NAMES_TEST_DSET_RANK, NULL,
-                                               NULL, FALSE)) < 0)
+                                               NULL, false)) < 0)
         TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(group_id, COMPOUND_WITH_SYMBOLS_IN_MEMBER_NAMES_TEST_DSET_NAME, compound_type,

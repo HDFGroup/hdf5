@@ -119,11 +119,11 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
     assert(msg);
 
     /* Get the length of the message string */
-    len = (ssize_t)HDstrlen(msg->msg);
+    len = (ssize_t)strlen(msg->msg);
 
     /* Copy the message into the user's buffer, if given */
     if (msg_str) {
-        HDstrncpy(msg_str, msg->msg, size);
+        strncpy(msg_str, msg->msg, size);
         if ((size_t)len >= size)
             msg_str[size - 1] = '\0';
     } /* end if */
@@ -209,7 +209,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     cls_ptr = maj_ptr->cls;
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
+    if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -245,7 +245,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
-    if (err_desc->desc == NULL || HDstrlen(err_desc->desc) == 0)
+    if (err_desc->desc == NULL || strlen(err_desc->desc) == 0)
         have_desc = 0;
 
     /* Print error message */
@@ -333,7 +333,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         HGOTO_DONE(FAIL);
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
+    if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -369,7 +369,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
-    if (err_desc->desc == NULL || HDstrlen(err_desc->desc) == 0)
+    if (err_desc->desc == NULL || strlen(err_desc->desc) == 0)
         have_desc = 0;
 
     /* Print error message */
@@ -396,7 +396,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
+H5E__print(const H5E_t *estack, FILE *stream, bool bk_compatible)
 {
     H5E_print_t   eprint;  /* Callback information to pass to H5E_walk() */
     H5E_walk_op_t walk_op; /* Error stack walking callback */
@@ -457,8 +457,8 @@ done:
  *              CLIENT_DATA pointer passed to H5E_print.
  *
  *              The function FUNC is also provided for backward compatibility.
- *              When BK_COMPATIBLE is set to be TRUE, FUNC is used to be
- *              compatible with older library.  If BK_COMPATIBLE is FALSE,
+ *              When BK_COMPATIBLE is set to be true, FUNC is used to be
+ *              compatible with older library.  If BK_COMPATIBLE is false,
  *              STACK_FUNC is used.
  *
  * Return:      SUCCEED/FAIL
@@ -623,7 +623,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 {
     va_list ap;                   /* Varargs info */
     char   *tmp        = NULL;    /* Buffer to place formatted description in */
-    hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
+    bool    va_started = false;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
     /*
@@ -648,7 +648,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 
     /* Start the variable-argument parsing */
     va_start(ap, fmt);
-    va_started = TRUE;
+    va_started = true;
 
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
@@ -731,13 +731,13 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
 
     if (estack->nused < H5E_NSLOTS) {
         /* Increment the IDs to indicate that they are used in this stack */
-        if (H5I_inc_ref(cls_id, FALSE) < 0)
+        if (H5I_inc_ref(cls_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].cls_id = cls_id;
-        if (H5I_inc_ref(maj_id, FALSE) < 0)
+        if (H5I_inc_ref(maj_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].maj_num = maj_id;
-        if (H5I_inc_ref(min_id, FALSE) < 0)
+        if (H5I_inc_ref(min_id, false) < 0)
             HGOTO_DONE(FAIL);
         estack->slot[estack->nused].min_num = min_id;
         /* The 'func' & 'file' strings are statically allocated (by the compiler)
@@ -882,7 +882,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_dump_api_stack(hbool_t is_api)
+H5E_dump_api_stack(bool is_api)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

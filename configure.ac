@@ -1553,7 +1553,7 @@ AC_ARG_WITH([fnord],
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
-## will be filled in during the deflate (zlib) and szip processing
+## will be filled in during the deflate/zlib and szip/libaec processing
 ## below.
 ##
 AC_SUBST([EXTERNAL_FILTERS])
@@ -1658,13 +1658,18 @@ fi
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
+## libaec also implements Space Data System Standard 121.0-B-2 and has
+## an szip compatibility header. Since the AEC library is BSD licensed
+## for both encoding and decoding, we now build with the filter enabled
+## by default when the library is found.
+##
 AC_SUBST([LL_PATH])
 AC_SUBST([USE_FILTER_SZIP]) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AS_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
-                             filter [default=no]])],,
-            [withval=no])
+                             filter [default=yes]])],,
+            [withval=yes])
 
 case "X-$withval" in
   X-yes)
@@ -2025,7 +2030,7 @@ case "`uname`" in
   CYGWIN*)
     ;;
   *)
-    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo getpwuid])
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
     ;;
 esac
 AC_CHECK_FUNCS([_scrsize ioctl])
@@ -2479,8 +2484,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,O,S,T,Z"
+## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,MM,O,S,T,Z"
+all_packages="AC,B2,CX,D,F,HL,I,MM,O,S,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -4188,6 +4193,11 @@ AC_CONFIG_FILES([Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
+if test -n "$TESTPARALLEL"; then
+  if test "X$SUBFILING_VFD" = "Xyes"; then
+    AC_CONFIG_LINKS([testpar/h5fuse.sh:utils/subfiling_vfd/h5fuse.sh])
+  fi
+fi
 
 AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
                 $MKDIR_P java/test/.classes;

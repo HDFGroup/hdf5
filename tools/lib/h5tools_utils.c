@@ -51,7 +51,7 @@ static void init_table(hid_t fid, table_t **tbl);
 #ifdef H5DUMP_DEBUG
 static void dump_table(hid_t fid, char *tablename, table_t *table);
 #endif /* H5DUMP_DEBUG */
-static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t recorded);
+static void add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, bool recorded);
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -68,10 +68,10 @@ parallel_print(const char *format, ...)
     va_start(ap, format);
 
     if (!g_Parallel)
-        HDvprintf(format, ap);
+        vprintf(format, ap);
     else {
         if (overflow_file == NULL) /*no overflow has occurred yet */ {
-            bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
+            bytes_written = vsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
             va_end(ap);
             va_start(ap, format);
 
@@ -84,13 +84,13 @@ parallel_print(const char *format, ...)
                     fprintf(rawerrorstream,
                             "warning: could not create overflow file.  Output may be truncated.\n");
                 else
-                    bytes_written = HDvfprintf(overflow_file, format, ap);
+                    bytes_written = vfprintf(overflow_file, format, ap);
             }
             else
                 outBuffOffset += (unsigned)bytes_written;
         }
         else
-            bytes_written = HDvfprintf(overflow_file, format, ap);
+            bytes_written = vfprintf(overflow_file, format, ap);
     }
     va_end(ap);
 }
@@ -114,7 +114,7 @@ error_msg(const char *fmt, ...)
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
     fprintf(rawerrorstream, "%s error: ", h5tools_getprogname());
-    HDvfprintf(rawerrorstream, fmt, ap);
+    vfprintf(rawerrorstream, fmt, ap);
 
     va_end(ap);
 }
@@ -138,7 +138,7 @@ warn_msg(const char *fmt, ...)
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
     fprintf(rawerrorstream, "%s warning: ", h5tools_getprogname());
-    HDvfprintf(rawerrorstream, fmt, ap);
+    vfprintf(rawerrorstream, fmt, ap);
     va_end(ap);
 }
 
@@ -241,10 +241,10 @@ parse_subset_params(const char *dset)
     H5TOOLS_START_DEBUG(" - dset:%s", dset);
     /* if dset name is quoted wait till after second quote to look for subset brackets */
     if (*dset == '"')
-        q_dset = HDstrchr(dset, '"');
+        q_dset = strchr(dset, '"');
     else
         q_dset = dset;
-    if ((brace = HDstrrchr(q_dset, '[')) != NULL) {
+    if ((brace = strrchr(q_dset, '[')) != NULL) {
         *brace++ = '\0';
 
         s = (struct subset_t *)calloc(1, sizeof(struct subset_t));
@@ -388,8 +388,8 @@ parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char *
 
     /* create destination string
      */
-    start++;                                                /* advance past opening paren '(' */
-    cpy = (char *)malloc(sizeof(char) * (HDstrlen(start))); /* no +1; less '(' */
+    start++;                                              /* advance past opening paren '(' */
+    cpy = (char *)malloc(sizeof(char) * (strlen(start))); /* no +1; less '(' */
     if (cpy == NULL) {
         ret_value = FAIL;
         goto done;
@@ -660,7 +660,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
     switch (oinfo->type) {
         case H5O_TYPE_GROUP:
             if (NULL == already_seen)
-                add_obj(info->group_table, &oinfo->token, name, TRUE);
+                add_obj(info->group_table, &oinfo->token, name, true);
             break;
 
         case H5O_TYPE_DATASET:
@@ -668,7 +668,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
                 hid_t dset = H5I_INVALID_HID;
 
                 /* Add the dataset to the list of objects */
-                add_obj(info->dset_table, &oinfo->token, name, TRUE);
+                add_obj(info->dset_table, &oinfo->token, name, true);
 
                 /* Check for a dataset that uses a named datatype */
                 if ((dset = H5Dopen2(info->fid, name, H5P_DEFAULT)) >= 0) {
@@ -679,7 +679,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
 
                         H5Oget_info3(type, &type_oinfo, H5O_INFO_BASIC);
                         if (search_obj(info->type_table, &type_oinfo.token) == NULL)
-                            add_obj(info->type_table, &type_oinfo.token, name, FALSE);
+                            add_obj(info->type_table, &type_oinfo.token, name, false);
                     } /* end if */
 
                     H5Tclose(type);
@@ -695,14 +695,14 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
                 obj_t *found_obj;
 
                 if ((found_obj = search_obj(info->type_table, &oinfo->token)) == NULL)
-                    add_obj(info->type_table, &oinfo->token, name, TRUE);
+                    add_obj(info->type_table, &oinfo->token, name, true);
                 else {
                     /* Use latest version of name */
                     free(found_obj->objname);
-                    found_obj->objname = HDstrdup(name);
+                    found_obj->objname = strdup(name);
 
                     /* Mark named datatype as having valid name */
-                    found_obj->recorded = TRUE;
+                    found_obj->recorded = true;
                 } /* end else */
             }     /* end if */
             break;
@@ -744,7 +744,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table, table_t **dset_ta
     info->dset_table  = *dset_table;
 
     /* Find all shared objects */
-    if ((ret_value = h5trav_visit(fid, "/", TRUE, TRUE, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
+    if ((ret_value = h5trav_visit(fid, "/", true, true, find_objs_cb, NULL, info, H5O_INFO_BASIC)) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "finding shared objects failed");
 
 done:
@@ -770,7 +770,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool_t record)
+add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, bool record)
 {
     size_t u;
 
@@ -785,7 +785,7 @@ add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool
 
     /* Set information about object */
     memcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
-    table->objs[u].objname   = HDstrdup(objname);
+    table->objs[u].objname   = strdup(objname);
     table->objs[u].recorded  = record;
     table->objs[u].displayed = 0;
 }
@@ -831,7 +831,7 @@ tmpfile(void)
  *-------------------------------------------------------------------------*/
 int
 H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info,
-                         hbool_t get_obj_type)
+                         bool get_obj_type)
 {
     htri_t      l_ret;
     H5O_info2_t trg_oinfo;
@@ -843,7 +843,7 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
     /* if path is root, return group type */
-    if (!HDstrcmp(linkpath, "/")) {
+    if (!strcmp(linkpath, "/")) {
         link_info->trg_type = H5O_TYPE_GROUP;
         H5TOOLS_GOTO_DONE(2);
     }
@@ -905,7 +905,7 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
         l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
 
         /* detect dangling link */
-        if (l_ret == FALSE) {
+        if (l_ret == false) {
             H5TOOLS_GOTO_DONE(0);
         }
         else if (l_ret < 0) { /* function failed */
@@ -994,7 +994,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
     int         ret_value = 1;
 
     /* check if environment variable is set for the hyperslab buffer size */
-    if (NULL != (env_str = HDgetenv("H5TOOLS_BUFSIZE"))) {
+    if (NULL != (env_str = getenv("H5TOOLS_BUFSIZE"))) {
         errno                = 0;
         hyperslab_bufsize_mb = strtol(env_str, (char **)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
@@ -1146,7 +1146,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
         printf("  preset fapl with default values\n");
     }
     fa->fa.version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
-    fa->fa.authenticate  = FALSE;
+    fa->fa.authenticate  = false;
     *(fa->fa.aws_region) = '\0';
     *(fa->fa.secret_id)  = '\0';
     *(fa->fa.secret_key) = '\0';
@@ -1188,55 +1188,55 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
+            if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 if (show_progress) {
                     printf("  ERROR: aws_region value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->fa.aws_region, values[0], (HDstrlen(values[0]) + 1));
+            memcpy(fa->fa.aws_region, values[0], (strlen(values[0]) + 1));
             if (show_progress) {
                 printf("  aws_region set\n");
             }
 
-            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
+            if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
                 if (show_progress) {
                     printf("  ERROR: secret_id value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->fa.secret_id, values[1], (HDstrlen(values[1]) + 1));
+            memcpy(fa->fa.secret_id, values[1], (strlen(values[1]) + 1));
             if (show_progress) {
                 printf("  secret_id set\n");
             }
 
-            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
+            if (strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
                 if (show_progress) {
                     printf("  ERROR: secret_key value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->fa.secret_key, values[2], (HDstrlen(values[2]) + 1));
+            memcpy(fa->fa.secret_key, values[2], (strlen(values[2]) + 1));
             if (show_progress) {
                 printf("  secret_key set\n");
             }
 
-            if (HDstrlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
+            if (strlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
                 if (show_progress) {
                     printf("  ERROR: token value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->token, values[3], (HDstrlen(values[3]) + 1));
+            memcpy(fa->token, values[3], (strlen(values[3]) + 1));
             if (show_progress) {
                 printf("  token set\n");
             }
 
-            fa->fa.authenticate = TRUE;
+            fa->fa.authenticate = true;
             if (show_progress) {
                 printf("  set to authenticate\n");
             }
@@ -1288,22 +1288,22 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
      * WARNING: No error-checking is done on length of input strings...
      *          Silent overflow is possible, albeit unlikely.
      */
-    if (HDstrncmp(props[0], "", 1)) {
-        HDstrncpy(fapl_config_out->namenode_name, (const char *)props[0], HDstrlen(props[0]));
+    if (strncmp(props[0], "", 1)) {
+        strncpy(fapl_config_out->namenode_name, (const char *)props[0], strlen(props[0]));
     }
-    if (HDstrncmp(props[1], "", 1)) {
+    if (strncmp(props[1], "", 1)) {
         k = strtoul((const char *)props[1], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed port number wasn't");
         fapl_config_out->namenode_port = (int32_t)k;
     }
-    if (HDstrncmp(props[2], "", 1)) {
-        HDstrncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
+    if (strncmp(props[2], "", 1)) {
+        strncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], strlen(props[2]));
     }
-    if (HDstrncmp(props[3], "", 1)) {
-        HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
+    if (strncmp(props[3], "", 1)) {
+        strncpy(fapl_config_out->user_name, (const char *)props[3], strlen(props[3]));
     }
-    if (HDstrncmp(props[4], "", 1)) {
+    if (strncmp(props[4], "", 1)) {
         k = strtoul((const char *)props[4], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");

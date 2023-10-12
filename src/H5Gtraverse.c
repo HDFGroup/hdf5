@@ -51,11 +51,11 @@
 /* User data for path traversal routine */
 typedef struct {
     /* down */
-    hbool_t chk_exists; /* Flag to indicate we are checking if object exists */
+    bool chk_exists; /* Flag to indicate we are checking if object exists */
 
     /* up */
     H5G_loc_t *obj_loc; /* Object location */
-    hbool_t    exists;  /* Indicate if object exists */
+    bool       exists;  /* Indicate if object exists */
 } H5G_trav_slink_t;
 
 /********************/
@@ -69,9 +69,9 @@ static herr_t H5G__traverse_slink_cb(H5G_loc_t *grp_loc, const char *name, const
                                      H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                                      H5G_own_loc_t *own_loc /*out*/);
 static herr_t H5G__traverse_ud(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj_loc /*in,out*/,
-                               unsigned target, hbool_t *obj_exists);
+                               unsigned target, bool *obj_exists);
 static herr_t H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
-                                  H5G_loc_t *obj_loc /*in,out*/, unsigned target, hbool_t *obj_exists);
+                                  H5G_loc_t *obj_loc /*in,out*/, unsigned target, bool *obj_exists);
 static herr_t H5G__traverse_real(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traverse_t op,
                                  void *op_data);
 
@@ -110,7 +110,7 @@ H5G__traverse_slink_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc, const char H5_ATTR_UNU
     /* Check for dangling soft link */
     if (obj_loc == NULL) {
         if (udata->chk_exists)
-            udata->exists = FALSE;
+            udata->exists = false;
         else
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
     } /* end if */
@@ -119,7 +119,7 @@ H5G__traverse_slink_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc, const char H5_ATTR_UNU
         H5O_loc_copy_deep(udata->obj_loc->oloc, obj_loc->oloc);
 
         /* Indicate that the object exists */
-        udata->exists = TRUE;
+        udata->exists = true;
     } /* end else */
 
 done:
@@ -142,7 +142,7 @@ done:
  */
 static herr_t
 H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G_loc_t *obj_loc /*in,out*/,
-                 unsigned target, hbool_t *obj_exists)
+                 unsigned target, bool *obj_exists)
 {
     const H5L_class_t *link_class;     /* User-defined link class */
     hid_t              cb_return = -1; /* The ID the user-defined callback returned */
@@ -177,7 +177,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
     /* Create a group ID to pass to the user-defined callback */
     if (NULL == (grp = H5G_open(&grp_loc_copy)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
-    if ((cur_grp = H5VL_wrap_register(H5I_GROUP, grp, FALSE)) < 0)
+    if ((cur_grp = H5VL_wrap_register(H5I_GROUP, grp, false)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group");
 
         /* User-defined callback function */
@@ -202,7 +202,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
             H5E_clear_stack(NULL);
 
             /* Indicate that the object doesn't exist */
-            *obj_exists = FALSE;
+            *obj_exists = false;
 
             /* Get out now */
             HGOTO_DONE(SUCCEED);
@@ -261,15 +261,15 @@ done:
  */
 static herr_t
 H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *obj_loc /*in,out*/,
-                    unsigned target, hbool_t *obj_exists)
+                    unsigned target, bool *obj_exists)
 {
     H5G_trav_slink_t udata;                     /* User data to pass to link traversal callback */
     H5G_name_t       tmp_obj_path;              /* Temporary copy of object's path */
-    hbool_t          tmp_obj_path_set = FALSE;  /* Flag to indicate that tmp object path is initialized */
+    bool             tmp_obj_path_set = false;  /* Flag to indicate that tmp object path is initialized */
     H5O_loc_t        tmp_grp_oloc;              /* Temporary copy of group entry */
     H5G_name_t       tmp_grp_path;              /* Temporary copy of group's path */
     H5G_loc_t        tmp_grp_loc;               /* Temporary copy of group's location */
-    hbool_t          tmp_grp_loc_set = FALSE;   /* Flag to indicate that tmp group location is initialized */
+    bool             tmp_grp_loc_set = false;   /* Flag to indicate that tmp group location is initialized */
     herr_t           ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -292,16 +292,16 @@ H5G__traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, H5G_loc_t *
      *  link traversal on the object's & group's paths - QAK)
      */
     H5G_loc_copy(&tmp_grp_loc, grp_loc, H5_COPY_DEEP);
-    tmp_grp_loc_set = TRUE;
+    tmp_grp_loc_set = true;
 
     /* Hold the object's group hier. path to restore later */
     /* (Part of "tracking the names properly") */
     H5G_name_copy(&tmp_obj_path, obj_loc->path, H5_COPY_SHALLOW);
-    tmp_obj_path_set = TRUE;
+    tmp_obj_path_set = true;
 
     /* Set up user data for traversal callback */
-    udata.chk_exists = (target & H5G_TARGET_EXISTS) ? TRUE : FALSE;
-    udata.exists     = FALSE;
+    udata.chk_exists = (target & H5G_TARGET_EXISTS) ? true : false;
+    udata.exists     = false;
     udata.obj_loc    = obj_loc;
 
     /* Traverse the link */
@@ -335,8 +335,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned target, hbool_t last_comp,
-                      H5G_loc_t *obj_loc, hbool_t *obj_exists)
+H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned target, bool last_comp,
+                      H5G_loc_t *obj_loc, bool *obj_exists)
 {
     size_t nlinks;              /* # of soft / UD links left to traverse */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -447,14 +447,14 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
     H5G_loc_t     obj_loc;                /* Location of object           */
     size_t        nchars;                 /* component name length	*/
     H5O_link_t    lnk;                    /* Link information for object  */
-    hbool_t       link_valid    = FALSE;  /* Flag to indicate that the link information is valid */
-    hbool_t       obj_loc_valid = FALSE;  /* Flag to indicate that the object location is valid */
+    bool          link_valid    = false;  /* Flag to indicate that the link information is valid */
+    bool          obj_loc_valid = false;  /* Flag to indicate that the object location is valid */
     H5G_own_loc_t own_loc = H5G_OWN_NONE; /* Enum to indicate whether callback took ownership of locations*/
-    hbool_t       group_copy = FALSE;     /* Flag to indicate that the group entry is copied */
+    bool          group_copy = false;     /* Flag to indicate that the group entry is copied */
     char          comp_buf[1024];         /* Temporary buffer for path components */
     char         *comp;                   /* Pointer to buffer for path components */
     H5WB_t       *wb        = NULL;       /* Wrapped buffer for temporary buffer */
-    hbool_t       last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
+    bool          last_comp = false; /* Flag to indicate that a component is the last component in the name */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -500,7 +500,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
     /* Deep copy of the starting location to group location */
     if (H5G_loc_copy(&grp_loc, &loc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy location");
-    group_copy = TRUE;
+    group_copy = true;
 
     /* Clear object location */
     if (H5G_loc_reset(&obj_loc) < 0)
@@ -511,14 +511,14 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer");
 
     /* Get a pointer to a buffer that's large enough  */
-    if (NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+    if (NULL == (comp = (char *)H5WB_actual(wb, (strlen(name) + 1))))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer");
 
     /* Traverse the path */
     while ((name = H5G__component(name, &nchars)) && *name) {
         const char *s;             /* Temporary string pointer */
-        hbool_t     lookup_status; /* Status from object lookup */
-        hbool_t     obj_exists;    /* Whether the object exists */
+        bool        lookup_status; /* Status from object lookup */
+        bool        obj_exists;    /* Whether the object exists */
 
         /*
          * Copy the component name into a null-terminated buffer so
@@ -537,34 +537,34 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
 
         /* Check if this is the last component of the name */
         if (!((s = H5G__component(name + nchars, NULL)) && *s))
-            last_comp = TRUE;
+            last_comp = true;
 
         /* If there's valid information in the link, reset it */
         if (link_valid) {
             H5O_msg_reset(H5O_LINK_ID, &lnk);
-            link_valid = FALSE;
+            link_valid = false;
         } /* end if */
 
         /* Get information for object in current group */
-        lookup_status = FALSE;
+        lookup_status = false;
         if (H5G__obj_lookup(grp_loc.oloc, comp, &lookup_status, &lnk /*out*/) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't look up component");
-        obj_exists = FALSE;
+        obj_exists = false;
 
         /* If the lookup was OK, build object location and traverse special links, etc. */
         if (lookup_status) {
             /* Sanity check link and indicate it's valid */
             assert(lnk.type >= H5L_TYPE_HARD);
-            assert(!HDstrcmp(comp, lnk.name));
-            link_valid = TRUE;
+            assert(!strcmp(comp, lnk.name));
+            link_valid = true;
 
             /* Build object location from the link */
             if (H5G__link_to_loc(&grp_loc, &lnk, &obj_loc) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot initialize object location");
-            obj_loc_valid = TRUE;
+            obj_loc_valid = true;
 
             /* Assume object exists */
-            obj_exists = TRUE;
+            obj_exists = true;
 
             /* Perform any special traversals that the link needs */
             /* (soft links, user-defined links, file mounting, etc.) */
@@ -719,7 +719,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
         H5G_loc_free(&grp_loc);
         H5G_loc_copy(&grp_loc, &obj_loc, H5_COPY_SHALLOW);
         H5G_loc_reset(&obj_loc);
-        obj_loc_valid = FALSE;
+        obj_loc_valid = false;
 
         /* Advance to next component in string */
         name += nchars;

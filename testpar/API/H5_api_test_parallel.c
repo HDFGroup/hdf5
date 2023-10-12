@@ -105,7 +105,7 @@ H5_api_test_run(void)
 }
 
 hid_t
-create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read)
+create_mpi_fapl(MPI_Comm comm, MPI_Info info, bool coll_md_read)
 {
     hid_t ret_pl = H5I_INVALID_HID;
 
@@ -118,7 +118,7 @@ create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read)
         goto error;
     if (H5Pset_all_coll_metadata_ops(ret_pl, coll_md_read) < 0)
         goto error;
-    if (H5Pset_coll_metadata_write(ret_pl, TRUE) < 0)
+    if (H5Pset_coll_metadata_write(ret_pl, true) < 0)
         goto error;
 
     return ret_pl;
@@ -236,13 +236,13 @@ main(int argc, char **argv)
 
     srand(seed);
 
-    if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
+    if (NULL == (test_path_prefix = getenv(HDF5_API_TEST_PATH_PREFIX)))
         test_path_prefix = "";
 
-    HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-               PARALLEL_TEST_FILE_NAME);
+    snprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+             PARALLEL_TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = getenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)
             printf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";
@@ -253,7 +253,7 @@ main(int argc, char **argv)
 
         BEGIN_INDEPENDENT_OP(copy_connector_string)
         {
-            if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
+            if (NULL == (vol_connector_string_copy = strdup(vol_connector_string))) {
                 if (MAINPROCESS)
                     fprintf(stderr, "Unable to copy VOL connector string\n");
                 INDEPENDENT_OP_ERROR(copy_connector_string);
@@ -263,7 +263,7 @@ main(int argc, char **argv)
 
         BEGIN_INDEPENDENT_OP(get_connector_name)
         {
-            if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
+            if (NULL == (token = strtok(vol_connector_string_copy, " "))) {
                 if (MAINPROCESS)
                     fprintf(stderr, "Error while parsing VOL connector string\n");
                 INDEPENDENT_OP_ERROR(get_connector_name);
@@ -273,7 +273,7 @@ main(int argc, char **argv)
 
         vol_connector_name = token;
 
-        if (NULL != (token = HDstrtok(NULL, " "))) {
+        if (NULL != (token = strtok(NULL, " "))) {
             vol_connector_info = token;
         }
     }
@@ -290,7 +290,7 @@ main(int argc, char **argv)
 
     BEGIN_INDEPENDENT_OP(create_fapl)
     {
-        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
+        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, false)) < 0) {
             if (MAINPROCESS)
                 fprintf(stderr, "Unable to create FAPL\n");
             INDEPENDENT_OP_ERROR(create_fapl);
@@ -307,7 +307,7 @@ main(int argc, char **argv)
          * Otherwise, HDF5 will default to running the tests
          * with the native connector, which could be misleading.
          */
-        if (0 != HDstrcmp(vol_connector_name, "native")) {
+        if (0 != strcmp(vol_connector_name, "native")) {
             htri_t is_registered;
 
             if ((is_registered = H5VLis_connector_registered_by_name(vol_connector_name)) < 0) {

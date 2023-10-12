@@ -87,7 +87,7 @@ gen_newgrat_file(const char *fname)
 
     /* Create NUM_GRPS groups in the root group */
     for (i = 1; i <= NUM_GRPS; i++) {
-        HDsnprintf(name, sizeof(name), "%s%d", GROUP_NAME, i);
+        snprintf(name, sizeof(name), "%s%d", GROUP_NAME, i);
         if ((gid = H5Gcreate2(fid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -108,7 +108,7 @@ gen_newgrat_file(const char *fname)
 
     /* Create NUM_ATTRS for the dataset */
     for (i = 1; i <= NUM_ATTRS; i++) {
-        HDsnprintf(attrname, sizeof(attrname), "%s%d", ATTR_NAME, i);
+        snprintf(attrname, sizeof(attrname), "%s%d", ATTR_NAME, i);
         if ((attr_id = H5Acreate2(did, attrname, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Aclose(attr_id) < 0)
@@ -210,7 +210,7 @@ gen_threshold_file(const char *fname)
 
     /* Create 11 attributes for the dataset */
     for (i = 1; i <= (THRES_NUM + 1); i++) {
-        HDsnprintf(name, sizeof(name), "%s%d", THRES_ATTR_NAME, i);
+        snprintf(name, sizeof(name), "%s%d", THRES_ATTR_NAME, i);
         if ((attr_id = H5Acreate2(did, name, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Aclose(attr_id) < 0)
@@ -239,7 +239,7 @@ gen_threshold_file(const char *fname)
 
     /* Create 10 attributes for the 2-D dataset */
     for (i = 1; i <= THRES_NUM; i++) {
-        HDsnprintf(name, sizeof(name), "%s%d", THRES_ATTR_NAME, i);
+        snprintf(name, sizeof(name), "%s%d", THRES_ATTR_NAME, i);
         if ((attr_id = H5Acreate2(did, name, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Aclose(attr_id) < 0)
@@ -263,7 +263,7 @@ gen_threshold_file(const char *fname)
     /* Create 10 1-D datasets with non-zero dimension size for the group */
     for (i = 1; i <= THRES_NUM; i++) {
         /* set up dataset name */
-        HDsnprintf(name, sizeof(name), "%s%d", THRES_DSET_NAME, i);
+        snprintf(name, sizeof(name), "%s%d", THRES_DSET_NAME, i);
 
         /* Create the dataset */
         if ((did = H5Dcreate2(gid, name, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -285,7 +285,7 @@ gen_threshold_file(const char *fname)
     /* Create 25 attributes for the group */
     for (i = 1; i <= THRES_NUM_25; i++) {
         /* Set up attribute name */
-        HDsnprintf(name, sizeof(name), "%s%d", THRES_ATTR_GRP_NAME, i);
+        snprintf(name, sizeof(name), "%s%d", THRES_ATTR_GRP_NAME, i);
 
         /* Create the attribute */
         if ((attr_id = H5Acreate2(gid, name, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -307,7 +307,7 @@ gen_threshold_file(const char *fname)
     /* Create 9 1-D datasets with non-zero dimension size for the group */
     for (i = 1; i < THRES_NUM; i++) {
         /* set up dataset name */
-        HDsnprintf(name, sizeof(name), "%s%d", THRES_DSET_NAME, i);
+        snprintf(name, sizeof(name), "%s%d", THRES_DSET_NAME, i);
 
         /* Create the dataset */
         if ((did = H5Dcreate2(gid, name, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)

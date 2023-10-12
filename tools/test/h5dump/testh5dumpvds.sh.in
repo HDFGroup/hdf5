@@ -45,10 +45,10 @@ verbose=yes
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
+SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
 SRC_H5DUMP_ERRORFILES="$srcdir/errfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
@@ -106,23 +106,23 @@ $SRC_H5DUMP_TESTFILES/vds/vds-eiger.h5
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5DUMP_TESTFILES/vds/tvds-1.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds-2.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds-3_1.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds-3_2.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds-4.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds-5.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds_layout-1.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds_layout-2.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds_layout-3_1.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds_layout-3_2.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds_layout-4.ddl
-$SRC_H5DUMP_TESTFILES/vds/tvds_layout-5.ddl
-$SRC_H5DUMP_TESTFILES/vds/vds-first.ddl
-$SRC_H5DUMP_TESTFILES/vds/vds-gap1.ddl
-$SRC_H5DUMP_TESTFILES/vds/vds-gap2.ddl
-$SRC_H5DUMP_TESTFILES/vds/vds_layout-eiger.ddl
-$SRC_H5DUMP_TESTFILES/vds/vds_layout-maxmin.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds-1.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds-2.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds-3_1.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds-3_2.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds-4.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds-5.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds_layout-1.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds_layout-2.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds_layout-3_1.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds_layout-3_2.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds_layout-4.ddl
+$SRC_H5DUMP_OUTFILES/vds/tvds_layout-5.ddl
+$SRC_H5DUMP_OUTFILES/vds/vds-first.ddl
+$SRC_H5DUMP_OUTFILES/vds/vds-gap1.ddl
+$SRC_H5DUMP_OUTFILES/vds/vds-gap2.ddl
+$SRC_H5DUMP_OUTFILES/vds/vds_layout-eiger.ddl
+$SRC_H5DUMP_OUTFILES/vds/vds_layout-maxmin.ddl
 "
 
 LIST_ERROR_TEST_FILES="

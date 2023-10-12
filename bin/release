@@ -42,36 +42,36 @@ for compressing the resulting tar archive (if none are given then
                    using CMake on unix machines.
     cmake-zip   -- convert all text files to DOS style and create a zip file including cmake
                    scripts and .bat files to build HDF5 source using CMake on Windows.
-    hpc-cmake-tgz
-                -- create a tar file using the gzip default level with a build-unix.sh
-                   command file and all other CMake files needed to build HDF5 source
-                   using CMake on unix machines, with HDF5options.cmake files for serial
-                   and parallel builds on machines requiring batch jobs to run tests.
-                   The default is for parallel build, with serial only build by changing
-                   the HDF5options.cmake symlink to ser-HDF5options.cmake.  More
-                   information is available in the README_HPC file.
     doc         -- produce the latest doc tree in addition to the archive.
 
-A sha256 checksum is produced for each archive created and stored in the sha256 file.
+A sha256 checksum is produced for each archive created and stored in a corresponding sha256 file.
 
 Examples:
 
     $ bin/release -d /tmp
     /tmp/hdf5-1.8.13-RELEASE.txt
-    /tmp/hdf5-1.8.13.sha256
     /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.sha256
 
     $ bin/release -d /tmp gzip
     /tmp/hdf5-1.8.13-RELEASE.txt
-    /tmp/hdf5-1.8.13.sha256
+    /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.sha256
     /tmp/hdf5-1.8.13.tar.gz
+    /tmp/hdf5-1.8.13.tar.gz.sha256
 
     $ bin/release -d /tmp tar gzip zip
     /tmp/hdf5-1.8.13-RELEASE.txt
-    /tmp/hdf5-1.8.13.sha256
     /tmp/hdf5-1.8.13.tar
+    /tmp/hdf5-1.8.13.tar.sha256
     /tmp/hdf5-1.8.13.tar.gz
-    /tmp/hdf5-1.8.13.tar.zip
+    /tmp/hdf5-1.8.13.tar.gz.sha256
+    /tmp/hdf5-1.8.13.zip
+    /tmp/hdf5-1.8.13.zip.sha256
+
+The integrity of a downloaded file can be verified on Linux platforms by running 
+"sha256sum --check <filename>.sha256, which will display 'OK' if the calculated
+checksum of <filename> matches the checksum in <filename>.sha256.
 
 EOF
 
@@ -205,7 +205,7 @@ tar2cmakezip()
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-2.0.3-Source.zip $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.zip $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
@@ -297,7 +297,7 @@ tar2cmaketgz()
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-2.0.3-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
@@ -308,88 +308,6 @@ tar2cmaketgz()
     rm -rf $cmgztmpdir
 }
 
-# Function name: tar2hpccmaketgz
-# Convert the release tarball to a gzipped tarfile with files to run CMake build
-# and HDF5options.cmake files for parallel or serial only builds where build
-# tests are run on compute nodes using batch scripts.
-#
-# Steps:
-# 1. untar the tarball in a temporary directory;
-#    Note: do this in a temporary directory to avoid changing
-#    the original source directory which may be around.
-# 2. add build-unix.sh script.
-# 3. add LIBAEC.tar.gz, ZLib.tar.gz and cmake files to top level directory.
-# 4. create gzipped tar file with these contents:
-#        build-unix.sh          script
-#        hdf5-<version>         source code directory extracted from tar file
-#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
-#
-# 5. For HPC-CMake tgz file the following are also needed in the top-level directory:
-#        README_HPC                 copied from release_docs
-#        ser-HDF5options.cmake      copied from <hdf5 source code>/config/cmake/scripts/HPC
-#        par-HDF5options.cmake      copied from <hdf5 source code>/config/cmake/scripts/HPC
-#        HDF5options.cmake          symlink to par-HDF5options.cmake
-#
-
-# Parameters:
-# $1 version
-# $2 release tarball
-# $3 output zipball file name
-#
-# Returns 0 if successful; 1 otherwise
-#
- # need function to create another temporary directory, extract the
-            # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
-            # add CTestScript.cmake, HDF5config.cmake, LIBAEC.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
-tar2hpccmaketgz()
-{
-    if [ $# -ne 3 ]; then
-        echo "usage: tar2hpccmaketgz <tarfilename> <tgzfilename>"
-        return 1
-    fi
-    cmgztmpdir=/tmp/cmgztmpdir$$
-    cmgztmpsubdir=$cmgztmpdir/HPC-CMake-$HDF5_VERS
-    mkdir -p $cmgztmpsubdir
-    version=$1
-    tarfile=$2
-    tgzfile=$3
-
-    # step 1: untar tarball in cmgztmpdir
-    (cd $cmgztmpsubdir; tar xf -) < $tarfile
-    # sanity check
-    if [ ! -d $cmgztmpsubdir/$version ]; then
-        echo "untar did not create $cmgztmpsubdir/$version source dir"
-        # cleanup
-        rm -rf $cmgztmpdir
-        return 1
-    fi
-
-
-    # step 2: add build-unix.sh script
-    (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
-
-    # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-2.0.3-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
-
-    cp $cmgztmpsubdir/$version/release_docs/README_HPC $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/ser-HDF5options.cmake $cmgztmpsubdir
-    cp $cmgztmpsubdir/$version/config/cmake/scripts/HPC/par-HDF5options.cmake $cmgztmpsubdir
-    (cd $cmgztmpsubdir; ln -s par-HDF5options.cmake HDF5options.cmake)
-    tar czf $DEST/HPC-CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1
-
-    # cleanup
-    rm -rf $cmgztmpdir
-}
 
 # This command must be run at the top level of the hdf5 source directory.
 # Verify this requirement.
@@ -551,43 +469,38 @@ test "$verbose" && echo "   Running tar..." 1>&2
 (cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
 
 # Compress
-SHA256=$HDF5_VERS.sha256
+#SHA256=$HDF5_VERS.sha256
 cp /dev/null $DEST/$SHA256
 for comp in $methods; do
     case $comp in
         tar)
             cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-            (cd $DEST; sha256sum $HDF5_VERS.tar >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar > $HDF5_VERS.tar.sha256)
             ;;
         gzip)
             test "$verbose" && echo "   Running gzip..." 1>&2
             gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-            (cd $DEST; sha256sum $HDF5_VERS.tar.gz >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar.gz > $HDF5_VERS.tar.gz.sha256)
             ;;
         cmake-tgz)
             test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
             tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; sha256sum CMake-$HDF5_VERS.tar.gz >> $SHA256)
-            ;;
-        hpc-cmake-tgz)
-            test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
-            tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; sha256sum HPC-CMake-$HDF5_VERS.tar.gz >> $SHA256)
+            (cd $DEST; sha256sum CMake-$HDF5_VERS.tar.gz > CMake-$HDF5_VERS.tar.gz.sha256)
             ;;
         bzip2)
             test "$verbose" && echo "   Running bzip2..." 1>&2
             bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-            (cd $DEST; sha256sum $HDF5_VERS.tar.bz2 >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar.bz2 > $HDF5_VERS.tar.bz2.sha256)
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
             tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-            (cd $DEST; sha256sum $HDF5_VERS.zip >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.zip > $HDF5_VERS.zip.sha256)
             ;;
         cmake-zip)
             test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2
             tar2cmakezip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.zip 1>&2
-            (cd $DEST; sha256sum CMake-$HDF5_VERS.zip >> $SHA256)
+            (cd $DEST; sha256sum CMake-$HDF5_VERS.zip > CMake-$HDF5_VERS.zip.sha256)
             ;;
         doc)
             if [ "${DOCVERSION}" = "" ]; then

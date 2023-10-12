@@ -273,7 +273,7 @@ H5FL__reg_init(H5FL_reg_head_t *head)
     H5FL_reg_gc_head.first = new_node;
 
     /* Indicate that the free list is initialized */
-    head->init = TRUE;
+    head->init = true;
 
     /* Make certain that the space allocated is large enough to store a free list pointer (eventually) */
     if (head->size < sizeof(H5FL_reg_node_t))
@@ -609,7 +609,7 @@ H5FL__reg_term(void)
         /* No allocations left open for list, get rid of it */
         else {
             /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_reg_gc_head.first->list->init = FALSE;
+            H5FL_reg_gc_head.first->list->init = false;
 
             /* Free the node from the garbage collection list */
             H5MM_xfree(H5FL_reg_gc_head.first);
@@ -751,7 +751,7 @@ H5FL__blk_init(H5FL_blk_head_t *head)
     H5FL_blk_gc_head.first = new_node;
 
     /* Indicate that the PQ is initialized */
-    head->init = TRUE;
+    head->init = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -782,9 +782,9 @@ H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size)
     /* check if there is a free list for blocks of this size */
     /* and if there are any blocks available on the list */
     if ((free_list = H5FL__blk_find_list(&(head->head), size)) != NULL && free_list->list != NULL)
-        ret_value = TRUE;
+        ret_value = true;
     else
-        ret_value = FALSE;
+        ret_value = false;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FL_blk_free_block_avail() */
@@ -957,7 +957,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
         unsigned char *block_ptr = ((unsigned char *)block) - sizeof(H5FL_track_t);
         H5FL_track_t   trk;
 
-        memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+        H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
@@ -979,7 +979,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
                 trk.next->prev = trk.prev;
         } /* end else */
 
-        memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+        H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
     }
 #endif /* H5FL_TRACK */
 
@@ -1079,7 +1079,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 unsigned char *block_ptr = ((unsigned char *)block) - sizeof(H5FL_track_t);
                 H5FL_track_t   trk;
 
-                memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+                H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
                 /* Release previous tracking information */
                 H5CS_close_stack(trk.stack);
@@ -1099,7 +1099,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 trk.func = call_func;
                 trk.line = call_line;
 
-                memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+                H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
             }
 #endif /* H5FL_TRACK */
             ret_value = block;
@@ -1281,7 +1281,7 @@ H5FL__blk_term(void)
         /* No allocations left open for list, get rid of it */
         else {
             /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_blk_gc_head.first->pq->init = FALSE;
+            H5FL_blk_gc_head.first->pq->init = false;
 
             /* Free the node from the garbage collection list */
             H5MM_free(H5FL_blk_gc_head.first);
@@ -1337,7 +1337,7 @@ H5FL__arr_init(H5FL_arr_head_t *head)
         head->list_arr[u].size = head->base_size + (head->elem_size * u);
 
     /* Indicate that the free list is initialized */
-    head->init = TRUE;
+    head->init = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1380,7 +1380,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         unsigned char *block_ptr = ((unsigned char *)obj) - sizeof(H5FL_track_t);
         H5FL_track_t   trk;
 
-        memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+        H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
@@ -1402,7 +1402,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
                 trk.next->prev = trk.prev;
         } /* end else */
 
-        memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+        H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
     }
 #endif
 
@@ -1631,7 +1631,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
             unsigned char *block_ptr = ((unsigned char *)obj) - sizeof(H5FL_track_t);
             H5FL_track_t   trk;
 
-            memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+            H5MM_memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
             /* Release previous tracking information */
             H5CS_close_stack(trk.stack);
@@ -1651,7 +1651,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
             trk.func = call_func;
             trk.line = call_line;
 
-            memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+            H5MM_memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
 #endif
             ret_value = obj;
         }
@@ -1804,7 +1804,7 @@ H5FL__arr_term(void)
             H5MM_xfree(H5FL_arr_gc_head.first->list->list_arr);
 
             /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_arr_gc_head.first->list->init = FALSE;
+            H5FL_arr_gc_head.first->list->init = false;
 
             /* Free the node from the garbage collection list */
             H5MM_free(H5FL_arr_gc_head.first);
@@ -1983,7 +1983,7 @@ H5FL_fac_init(size_t size)
 #endif /* H5FL_TRACK */
 
     /* Indicate that the free list is initialized */
-    factory->init = TRUE;
+    factory->init = true;
 
     /* Set return value */
     ret_value = factory;
@@ -2353,7 +2353,7 @@ H5FL__fac_term_all(void)
         assert(H5FL_fac_gc_head.first->list->allocated == 0);
 
         /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-        H5FL_fac_gc_head.first->list->init = FALSE;
+        H5FL_fac_gc_head.first->list->init = false;
 
         /* Free the node from the garbage collection list */
         H5FL_fac_gc_head.first = H5FL_FREE(H5FL_fac_gc_node_t, H5FL_fac_gc_head.first);

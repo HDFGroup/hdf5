@@ -191,12 +191,12 @@ H5D__contig_fill(H5D_t *dset)
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
     int      mpi_code;                 /* MPI return code */
-    hbool_t  blocks_written = FALSE;   /* Flag to indicate that chunk was actually written */
-    hbool_t  using_mpi =
-        FALSE; /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
+    bool     blocks_written = false;   /* Flag to indicate that chunk was actually written */
+    bool     using_mpi =
+        false; /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
 #endif         /* H5_HAVE_PARALLEL */
     H5D_fill_buf_info_t fb_info;                /* Dataset's fill buffer info */
-    hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
+    bool                fb_info_init = false;   /* Whether the fill value buffer has been initialized */
     herr_t              ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -220,7 +220,7 @@ H5D__contig_fill(H5D_t *dset)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
 
         /* Set the MPI-capable file driver flag */
-        using_mpi = TRUE;
+        using_mpi = true;
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -241,7 +241,7 @@ H5D__contig_fill(H5D_t *dset)
     if (H5D__fill_init(&fb_info, NULL, NULL, NULL, NULL, NULL, &dset->shared->dcpl_cache.fill,
                        dset->shared->type, dset->shared->type_id, npoints, max_temp_buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info");
-    fb_info_init = TRUE;
+    fb_info_init = true;
 
     /* Start at the beginning of the dataset */
     offset = 0;
@@ -287,14 +287,14 @@ H5D__contig_fill(H5D_t *dset)
                     /* If writing fails, push an error and stop writing, but
                      * still participate in following MPI_Barrier.
                      */
-                    blocks_written = TRUE;
+                    blocks_written = true;
                     HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                     break;
                 }
             }
 
             /* Indicate that blocks are being written */
-            blocks_written = TRUE;
+            blocks_written = true;
         } /* end if */
         else {
 #endif /* H5_HAVE_PARALLEL */
@@ -506,10 +506,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5D__contig_is_space_alloc(const H5O_storage_t *storage)
 {
-    hbool_t ret_value = FALSE; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -517,7 +517,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
     assert(storage);
 
     /* Set return value */
-    ret_value = (hbool_t)H5_addr_defined(storage->u.contig.addr);
+    ret_value = (bool)H5_addr_defined(storage->u.contig.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_is_space_alloc() */
@@ -531,7 +531,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+bool
 H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
 {
     FUNC_ENTER_PACKAGE_NOERR
@@ -557,7 +557,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     H5D_t *dataset = dinfo->dset; /* Local pointer to dataset info */
 
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
-    htri_t   file_space_normalized = FALSE; /* File dataspace was normalized */
+    htri_t   file_space_normalized = false; /* File dataspace was normalized */
 
     int sf_ndims; /* The number of dimensions of the file dataspace (signed) */
 
@@ -598,7 +598,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         H5S_t *tmp_fspace; /* Temporary file dataspace */
 
         /* Create "temporary" chunk for selection operations (copy file space) */
-        if (NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
+        if (NULL == (tmp_fspace = H5S_copy(dinfo->file_space, true, false)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
 
         /* Add temporary chunk to the list of pieces */
@@ -614,7 +614,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
         /* Set the file chunk dataspace */
         new_piece_info->fspace        = tmp_fspace;
-        new_piece_info->fspace_shared = FALSE;
+        new_piece_info->fspace_shared = false;
 
         /* Set the memory chunk dataspace */
         /* same as one chunk, just use dset mem space */
@@ -624,7 +624,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
          * fspace gets free by application H5Sclose(), and
          * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
          */
-        new_piece_info->mspace_shared = TRUE;
+        new_piece_info->mspace_shared = true;
 
         /* Set the number of points */
         new_piece_info->piece_points = dinfo->nelmts;
@@ -641,8 +641,10 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
 
         /* Initialize in-place type conversion info. Start with it disabled. */
-        new_piece_info->in_place_tconv = FALSE;
+        new_piece_info->in_place_tconv = false;
         new_piece_info->buf_off        = 0;
+
+        new_piece_info->filtered_dset = dinfo->dset->shared->dcpl_cache.pline.nused > 0;
 
         /* Calculate type conversion buffer size and check for in-place conversion if necessary.  Currently
          * only implemented for selection I/O. */
@@ -715,7 +717,7 @@ H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
  * Purpose:    A small internal function to if it may be possible to use
  *             selection I/O.
  *
- * Return:    TRUE/FALSE/FAIL
+ * Return:    true/false/FAIL
  *
  *-------------------------------------------------------------------------
  */
@@ -752,7 +754,7 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
         io_info->no_selection_io_cause |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
     }
     else {
-        hbool_t page_buf_enabled;
+        bool page_buf_enabled;
 
         assert(dset_info->layout_ops.writevv == H5D__contig_writevv);
 
@@ -1029,7 +1031,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
             H5MM_memcpy(buf, dset_contig->sieve_buf, len);
 
             /* Reset sieve buffer dirty flag */
-            dset_contig->sieve_dirty = FALSE;
+            dset_contig->sieve_dirty = false;
         } /* end else */
     }     /* end if */
     else {
@@ -1058,7 +1060,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
                             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "block write failed");
 
                         /* Reset sieve buffer dirty flag */
-                        dset_contig->sieve_dirty = FALSE;
+                        dset_contig->sieve_dirty = false;
                     } /* end if */
                 }     /* end if */
 
@@ -1076,7 +1078,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
                         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "block write failed");
 
                     /* Reset sieve buffer dirty flag */
-                    dset_contig->sieve_dirty = FALSE;
+                    dset_contig->sieve_dirty = false;
                 } /* end if */
 
                 /* Determine the new sieve buffer size & location */
@@ -1106,7 +1108,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
                 H5MM_memcpy(buf, dset_contig->sieve_buf, len);
 
                 /* Reset sieve buffer dirty flag */
-                dset_contig->sieve_dirty = FALSE;
+                dset_contig->sieve_dirty = false;
             } /* end else */
         }     /* end else */
     }         /* end else */
@@ -1295,7 +1297,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
             H5MM_memcpy(dset_contig->sieve_buf, buf, len);
 
             /* Set sieve buffer dirty flag */
-            dset_contig->sieve_dirty = TRUE;
+            dset_contig->sieve_dirty = true;
 
             /* Stash local copies of these values */
             sieve_start = dset_contig->sieve_loc;
@@ -1315,7 +1317,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
             H5MM_memcpy(base_sieve_buf, buf, len);
 
             /* Set sieve buffer dirty flag */
-            dset_contig->sieve_dirty = TRUE;
+            dset_contig->sieve_dirty = true;
         } /* end if */
         /* Entire request is not within this data sieve buffer */
         else {
@@ -1332,7 +1334,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "block write failed");
 
                         /* Reset sieve buffer dirty flag */
-                        dset_contig->sieve_dirty = FALSE;
+                        dset_contig->sieve_dirty = false;
                     } /* end if */
 
                     /* Force the sieve buffer to be re-read the next time */
@@ -1381,7 +1383,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "block write failed");
 
                         /* Reset sieve buffer dirty flag */
-                        dset_contig->sieve_dirty = FALSE;
+                        dset_contig->sieve_dirty = false;
                     } /* end if */
 
                     /* Determine the new sieve buffer size & location */
@@ -1414,7 +1416,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     H5MM_memcpy(dset_contig->sieve_buf, buf, len);
 
                     /* Set sieve buffer dirty flag */
-                    dset_contig->sieve_dirty = TRUE;
+                    dset_contig->sieve_dirty = true;
                 } /* end else */
             }     /* end else */
         }         /* end else */
@@ -1613,11 +1615,11 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     H5S_t        *buf_space   = NULL;                          /* Dataspace describing buffer */
     hid_t         buf_sid     = -1;                            /* ID for buffer dataspace */
     hsize_t       buf_dim[1]  = {0};                           /* Dimension for buffer */
-    hbool_t       is_vlen     = FALSE; /* Flag to indicate that VL type conversion should occur */
-    hbool_t       fix_ref     = FALSE; /* Flag to indicate that ref values should be fixed */
+    bool          is_vlen     = false; /* Flag to indicate that VL type conversion should occur */
+    bool          fix_ref     = false; /* Flag to indicate that ref values should be fixed */
     H5D_shared_t *shared_fo =
         (H5D_shared_t *)cpy_info->shared_fo; /* Pointer to the shared struct for dataset object */
-    hbool_t try_sieve   = FALSE;             /* Try to get data from the sieve buffer */
+    bool    try_sieve   = false;             /* Try to get data from the sieve buffer */
     haddr_t sieve_start = HADDR_UNDEF;       /* Start location of sieve buffer */
     haddr_t sieve_end   = HADDR_UNDEF;       /* End locations of sieve buffer */
     herr_t  ret_value   = SUCCEED;           /* Return value */
@@ -1644,15 +1646,15 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     /* Create datatype ID for src datatype.  We may or may not use this ID,
      * but this ensures that the src datatype will be freed.
      */
-    if ((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)
+    if ((tid_src = H5I_register(H5I_DATATYPE, dt_src, false)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype");
 
     /* If there's a VLEN source datatype, set up type conversion information */
-    if (H5T_detect_class(dt_src, H5T_VLEN, FALSE) > 0) {
+    if (H5T_detect_class(dt_src, H5T_VLEN, false) > 0) {
         /* create a memory copy of the variable-length datatype */
         if (NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy");
-        if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0) {
+        if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, false)) < 0) {
             (void)H5T_close_real(dt_mem);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register memory datatype");
         } /* end if */
@@ -1664,7 +1666,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             (void)H5T_close_real(dt_dst);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "cannot mark datatype on disk");
         } /* end if */
-        if ((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, FALSE)) < 0) {
+        if ((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, false)) < 0) {
             (void)H5T_close_real(dt_dst);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype");
         } /* end if */
@@ -1705,20 +1707,20 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
 
         /* Register */
-        if ((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
+        if ((buf_sid = H5I_register(H5I_DATASPACE, buf_space, false)) < 0) {
             H5S_close(buf_space);
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
         } /* end if */
 
         /* Set flag to do type conversion */
-        is_vlen = TRUE;
+        is_vlen = true;
     } /* end if */
     else {
         /* Check for reference datatype */
-        if (H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
+        if (H5T_get_class(dt_src, false) == H5T_REFERENCE) {
             /* Need to fix values of references when copying across files */
             if (f_src != f_dst)
-                fix_ref = TRUE;
+                fix_ref = true;
         } /* end if */
 
         /* Set the number of bytes to read & write to the buffer size */
@@ -1747,7 +1749,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     /* If data sieving is enabled and the dataset is open in the file,
        set up to copy data out of the sieve buffer if deemed possible later */
     if (H5F_HAS_FEATURE(f_src, H5FD_FEAT_DATA_SIEVE) && shared_fo && shared_fo->cache.contig.sieve_buf) {
-        try_sieve   = TRUE;
+        try_sieve   = true;
         sieve_start = shared_fo->cache.contig.sieve_loc;
         sieve_end   = sieve_start + shared_fo->cache.contig.sieve_size;
     }

@@ -916,14 +916,14 @@ H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
  *          \code
  *          plist_class_id = H5Pget_class (dsetA_plist);
  *
- *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = TRUE;
+ *          if H5Pequal (plist_class_id, H5P_OBJECT_CREATE) = true;
  *              [ H5P_OBJECT_CREATE is the property list class    ]
  *              [ returned by H5Pget_class.                        ]
  *
- *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = TRUE;
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_CREATE) = true;
  *              [ H5P_DATASET_CREATE is the property list class.  ]
  *
- *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = TRUE;
+ *          else if H5Pequal (plist_class_id, H5P_DATASET_XFER) = true;
  *              [ H5P_DATASET_XFER is the property list class.    ]
  *
  *          .
@@ -2081,7 +2081,7 @@ H5_DLL int H5Pget_nfilters(hid_t plist_id);
  *       are being recorded
  *
  * \plist_id
- * \param[out] track_times Boolean value, 1 (TRUE) or 0 (FALSE),
+ * \param[out] track_times Boolean value, 1 (true) or 0 (false),
  *             specifying whether object times are being recorded
  *
  * \return \herr_t
@@ -3354,102 +3354,7 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *          Valid driver identifiers distributed with HDF5 are listed and
  *          described in the following table.
  *
- *          <table>
- *           <tr>
- *            <th>Driver Name</th>
- *            <th>Driver Identifier</th>
- *            <th>Description</th>
- *            <th>Related Function</th>
- *           </tr>
- *           <tr>
- *            <td>POSIX</td>
- *            <td>#H5FD_SEC2</td>
- *            <td>This driver uses POSIX file-system functions like read and
- *                write to perform I/O to a single, permanent file on local disk
- *                with no system buffering. This driver is POSIX-compliant and
- *                is the default file driver for all systems.</td>
- *            <td>H5Pset_fapl_sec2()</td>
- *           </tr>
- *           <tr>
- *            <td>Direct</td>
- *            <td>#H5FD_DIRECT</td>
- *            <td>This is the #H5FD_SEC2 driver, except data is written to or
- *                read from the file synchronously without being cached by the
- *                system.</td>
- *            <td>H5Pset_fapl_direct()</td>
- *           </tr>
- *           <tr>
- *            <td>Log</td>
- *            <td>#H5FD_LOG</td>
- *            <td>This is the #H5FD_SEC2 driver with logging capabilities.</td>
- *            <td>H5Pset_fapl_log()</td>
- *           </tr>
- *           <tr>
- *            <td>Windows</td>
- *            <td>#H5FD_WINDOWS</td>
- *            <td>This driver was modified in HDF5-1.8.8 to be a wrapper of the
- *                POSIX driver, #H5FD_SEC2. This change should not affect user
- *                applications.</td>
- *            <td>H5Pset_fapl_windows()</td>
- *           </tr>
- *           <tr>
- *            <td>STDIO</td>
- *            <td>#H5FD_STDIO</td>
- *            <td>This driver uses functions from the standard C stdio.h to
- *                perform I/O to a single, permanent file on local disk with
- *                additional system buffering.</td>
- *            <td>H5Pset_fapl_stdio()</td>
- *           </tr>
- *           <tr>
- *            <td>Memory</td>
- *            <td>#H5FD_CORE</td>
- *            <td>With this driver, an application can work with a file in
- *                memory for faster reads and writes. File contents are kept in
- *                memory until the file is closed. At closing, the memory
- *                version of the file can be written back to disk or abandoned.
- *            </td>
- *            <td>H5Pset_fapl_core()</td>
- *           </tr>
- *           <tr>
- *            <td>Family</td>
- *            <td>#H5FD_FAMILY</td>
- *            <td>With this driver, the HDF5 file's address space is partitioned
- *                into pieces and sent to separate storage files using an
- *                underlying driver of the user's choice. This driver is for
- *                systems that do not support files larger than 2 gigabytes.
- *            </td>
- *            <td>H5Pset_fapl_family()</td>
- *           </tr>
- *           <tr>
- *            <td>Multi</td>
- *            <td>#H5FD_MULTI</td>
- *            <td>With this driver, data can be stored in multiple files
- *                according to the type of data. I/O might work better if
- *                data is stored in separate files based on the type of data.
- *                The Split driver is a special case of this driver.</td>
- *            <td>H5Pset_fapl_multi()</td>
- *           </tr>
- *           <tr>
- *            <td>Parallel</td>
- *            <td>#H5FD_MPIO</td>
- *            <td>This is the standard HDF5 file driver for parallel file
- *                systems. This driver uses the MPI standard for both
- *                communication and file I/O.</td>
- *            <td>H5Pset_fapl_mpio()</td>
- *           </tr>
- *           <tr>
- *            <td>Parallel POSIX</td>
- *            <td>H5FD_MPIPOSIX</td>
- *            <td>This driver is no longer available.</td>
- *            <td></td>
- *           </tr>
- *           <tr>
- *            <td>Stream</td>
- *            <td>H5FD_STREAM</td>
- *            <td>This driver is no longer available.</td>
- *            <td></td>
- *           </tr>
- *          </table>
+ *          \snippet{doc} tables/fileDriverLists.dox supported_file_driver_table
  *
  *          This list does not include custom drivers that might be
  *          defined and registered by a user.
@@ -5807,7 +5712,7 @@ H5_DLL herr_t H5Pget_chunk_opts(hid_t plist_id, unsigned *opts);
  *          <i>no dataset attributes</i> hint setting for the dataset
  *          creation property list \p dcpl_id. This setting is used to
  *          inform the library to create minimized dataset object headers
- *          when TRUE. The setting value is returned in the boolean pointer
+ *          when true. The setting value is returned in the boolean pointer
  *          \p minimize.
  *
  * \since 1.10.5
@@ -6296,13 +6201,13 @@ H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
  *          hint setting for the dataset creation property list \p dcpl_id.
  *          Datasets created with the dataset creation property list
  *          \p dcpl_id will have their object headers minimized if the
- *          boolean flag \p minimize is set to TRUE. By setting \p minimize
- *          to TRUE, the library expects that no attributes will be added
+ *          boolean flag \p minimize is set to true. By setting \p minimize
+ *          to true, the library expects that no attributes will be added
  *          to the dataset. Attributes can be added, but they are appended
  *          with a continuation message, which can reduce performance.
  *
  *          This setting interacts with H5Fset_dset_no_attrs_hint(): if
- *          either is set to TRUE, then the created dataset's object header
+ *          either is set to true, then the created dataset's object header
  *          will be minimized.
  *
  * \since 1.10.5
@@ -8408,14 +8313,14 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  * \details H5Pset_modify_write_buf() sets whether the library is allowed to
  *          modify the contents of write buffers passed to HDF5 API routines
  *          that are passed the dataset transfer property list \p plist_id.  The
- *          default value for modify_write_buf is FALSE.
+ *          default value for modify_write_buf is false.
  *
  *          This function can be used to allow the library to perform in-place
  *          type conversion on write operations to save memory space.  After making an
- *          API call with this parameter set to TRUE, the contents of the write buffer
+ *          API call with this parameter set to true, the contents of the write buffer
  *          are undefined.
  *
- * \note    When modify_write_buf is set to TRUE the library may violate the
+ * \note    When modify_write_buf is set to true the library may violate the
  *          const qualifier on the API parameter for the write buffer.
  *
  * \since 1.14.1
@@ -8438,7 +8343,7 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf);
  *          from the dataset transfer property list \p plist_id.  This property
  *          determines whether the library is allowed to  modify the contents of
  *          write buffers passed to HDF5 API routines that are passed
- *          \p plist_id.  The default value for modify_write_buf is FALSE.
+ *          \p plist_id.  The default value for modify_write_buf is false.
  *
  * \since 1.14.1
  *

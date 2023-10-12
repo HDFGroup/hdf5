@@ -430,7 +430,7 @@ process_cmpd_fields(hid_t fid, char *dsetname)
     }
 
     /* Make a copy of "g_list_of_fields" */
-    if ((g_dup_fields = HDstrdup(g_list_of_fields)) == NULL) {
+    if ((g_dup_fields = strdup(g_list_of_fields)) == NULL) {
         error_msg("error in duplicating g_list_of_fields\n");
         ret_value = FAIL;
         goto done;
@@ -703,7 +703,7 @@ parse_command_line(int argc, const char *const *argv)
 
             case 'f': /* --fields=<list_of_fields> */
                 if (g_list_of_fields == NULL) {
-                    if ((g_list_of_fields = HDstrdup(H5_optarg)) == NULL) {
+                    if ((g_list_of_fields = strdup(H5_optarg)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
@@ -711,7 +711,7 @@ parse_command_line(int argc, const char *const *argv)
                 else {
                     char *str;
 
-                    if ((str = HDstrdup(H5_optarg)) == NULL) {
+                    if ((str = strdup(H5_optarg)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
@@ -823,7 +823,7 @@ main(int argc, char *argv[])
      * then there must have been something wrong with the file (perhaps it
      * doesn't exist).
      */
-    if ((fname = HDstrdup(argv[H5_optind])) == NULL) {
+    if ((fname = strdup(argv[H5_optind])) == NULL) {
         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -877,7 +877,7 @@ main(int argc, char *argv[])
     else {
         *dname = '/';
         x      = dname;
-        if ((dname = HDstrdup(dname)) == NULL) {
+        if ((dname = strdup(dname)) == NULL) {
             error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;

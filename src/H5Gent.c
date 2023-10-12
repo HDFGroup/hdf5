@@ -371,7 +371,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
     H5G__ent_reset(ent);
 
     /* Add the new name to the heap */
-    if (H5HL_insert(f, heap, HDstrlen(name) + 1, name, &name_offset) < 0)
+    if (H5HL_insert(f, heap, strlen(name) + 1, name, &name_offset) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap");
     ent->name_off = name_offset;
 
@@ -419,7 +419,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
                 targ_oloc.addr = lnk->u.hard.addr;
 
                 /* Get the object header */
-                if (NULL == (oh = H5O_protect(&targ_oloc, H5AC__READ_ONLY_FLAG, FALSE)))
+                if (NULL == (oh = H5O_protect(&targ_oloc, H5AC__READ_ONLY_FLAG, false)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, FAIL, "unable to protect target object header");
 
                 /* Check if a symbol table message exists */
@@ -459,7 +459,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
             size_t lnk_offset; /* Offset to sym-link value	*/
 
             /* Insert link value into local heap */
-            if (H5HL_insert(f, heap, HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name, &lnk_offset) < 0)
+            if (H5HL_insert(f, heap, strlen(lnk->u.soft.name) + 1, lnk->u.soft.name, &lnk_offset) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap");
 
             ent->type                    = H5G_CACHED_SLINK;
