@@ -2,9 +2,9 @@ cmake_minimum_required (VERSION 3.18)
 project(H5_API_TEST_DRIVER CXX)
 
 if (NOT KWSYS_USE_LOCALCONTENT)
-  set (KWSYS_URL ${KWSYS_TGZ_ORIGPATH}/${KWSYS_TGZ_ORIGNAME})
+  set (KWSYS_URL ${KWSYS_TGZ_ORIGPATH}/${KWSYS_TGZ_NAME})
 else ()
-  set (KWSYS_URL ${TGZPATH}/${KWSYS_TGZ_ORIGNAME})
+  set (KWSYS_URL ${TGZPATH}/${KWSYS_TGZ_NAME})
 endif ()
 # Only tgz files
 FetchContent_Declare (KWSYS

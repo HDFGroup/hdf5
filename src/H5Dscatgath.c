@@ -718,7 +718,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
             /* Use "vp" field of union to twiddle away const.  OK because if we're doing this it means the
              * user explicitly allowed us to modify this buffer via H5Pset_modify_write_buf(). */
             tmp_buf = (uint8_t *)dset_info->buf.vp + dset_info->layout_io_info.contig_piece_info->buf_off +
-                      (smine_start * dset_info->type_info.dst_type_size);
+                      (smine_start * dset_info->type_info.src_type_size);
         }
         else {
             /* Do type conversion using intermediate buffer */
@@ -1335,7 +1335,7 @@ done:
         write_mem_spaces = NULL;
     }
 
-    /* Free bakcground buffer parameter arrays */
+    /* Free background buffer parameter arrays */
     H5MM_free(bkg_mem_spaces);
     bkg_mem_spaces = NULL;
     H5MM_free(bkg_file_spaces);

@@ -61,8 +61,8 @@ H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
 H5Dwrite(..., dxpl_id, ...);
 ```
 
-The following are two simple examples of using the parallel compression
-feature:
+The following are two simple examples of using the parallel
+compression feature:
 
 [ph5_filtered_writes.c](https://github.com/HDFGroup/hdf5/blob/develop/examples/ph5_filtered_writes.c)
 
@@ -76,9 +76,30 @@ Remember that the feature requires these writes to use collective
 I/O, so the MPI ranks which have nothing to contribute must still
 participate in the collective write call.
 
+## Multi-dataset I/O support
+
+The parallel compression feature is supported when using the
+multi-dataset I/O API routines ([H5Dwrite_multi](https://hdfgroup.github.io/hdf5/group___h5_d.html#gaf6213bf3a876c1741810037ff2bb85d8)/[H5Dread_multi](https://hdfgroup.github.io/hdf5/group___h5_d.html#ga8eb1c838aff79a17de385d0707709915)), but the
+following should be kept in mind:
+
+ - Parallel writes to filtered datasets **must** still be collective,
+   even when using the multi-dataset I/O API routines
+
+ - When the multi-dataset I/O API routines are passed a mixture of
+   filtered and unfiltered datasets, the library currently has to
+   perform I/O on them separately in two phases. Since there is
+   some slight complexity involved in this, it may be best (depending
+   on the number of datasets, number of selected chunks, number of
+   filtered vs. unfiltered datasets, etc.) to make two individual
+   multi-dataset I/O calls, one for the filtered datasets and one
+   for the unfiltered datasets. When performing writes to the datasets,
+   this would also allow independent write access to the unfiltered
+   datasets if desired, while still performing collective writes to
+   the filtered datasets.
+
 ## Incremental file space allocation support
 
-HDF5's [file space allocation time](https://portal.hdfgroup.org/display/HDF5/H5P_SET_ALLOC_TIME)
+HDF5's [file space allocation time](https://hdfgroup.github.io/hdf5/group___d_c_p_l.html#ga85faefca58387bba409b65c470d7d851)
 is a dataset creation property that can have significant effects
 on application performance, especially if the application uses
 parallel HDF5. In a serial HDF5 application, the default file space
@@ -97,7 +118,7 @@ While this strategy has worked in the past, it has some noticeable
 drawbacks. For one, the larger the chunked dataset being created,
 the more noticeable overhead there will be during dataset creation
 as all of the data chunks are being allocated in the HDF5 file.
-Further, these data chunks will, by default, be [filled](https://portal.hdfgroup.org/display/HDF5/H5P_SET_FILL_VALUE)
+Further, these data chunks will, by default, be [filled](https://hdfgroup.github.io/hdf5/group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4)
 with HDF5's default fill data value, leading to extraordinary
 dataset creation overhead and resulting in pre-filling large
 portions of a dataset that the application might have been planning
@@ -105,7 +126,7 @@ to overwrite anyway. Even worse, there will be more initial overhead
 from compressing that fill data before writing it out, only to have
 it read back in, unfiltered and modified the first time a chunk is
 written to. In the past, it was typically suggested that parallel
-HDF5 applications should use [H5Pset_fill_time](https://portal.hdfgroup.org/display/HDF5/H5P_SET_FILL_TIME)
+HDF5 applications should use [H5Pset_fill_time](https://hdfgroup.github.io/hdf5/group___d_c_p_l.html#ga6bd822266b31f86551a9a1d79601b6a2)
 with a value of `H5D_FILL_TIME_NEVER` in order to disable writing of
 the fill value to dataset chunks, but this isn't ideal if the
 application actually wishes to make use of fill values. 
@@ -199,14 +220,14 @@ chunks to end up at addresses in the file that do not align
 well with the underlying file system, possibly leading to
 poor performance. As an example, Lustre performance is generally
 good when writes are aligned with the chosen stripe size.
-The HDF5 application can use [H5Pset_alignment](https://portal.hdfgroup.org/display/HDF5/H5P_SET_ALIGNMENT)
+The HDF5 application can use [H5Pset_alignment](https://hdfgroup.github.io/hdf5/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a)
 to have a bit more control over where objects in the HDF5
 file end up. However, do note that setting the alignment
 of objects generally wastes space in the file and has the
 potential to dramatically increase its resulting size, so
 caution should be used when choosing the alignment parameters.
 
-[H5Pset_alignment](https://portal.hdfgroup.org/display/HDF5/H5P_SET_ALIGNMENT)
+[H5Pset_alignment](https://hdfgroup.github.io/hdf5/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a)
 has two parameters that control the alignment of objects in
 the HDF5 file, the "threshold" value and the alignment
 value. The threshold value specifies that any object greater
@@ -243,19 +264,19 @@ in a file, this can create significant amounts of free space
 in the file over its lifetime and eventually cause performance
 issues.
 
-An HDF5 application can use [H5Pset_file_space_strategy](http://portal.hdfgroup.org/display/HDF5/H5P_SET_FILE_SPACE_STRATEGY)
+An HDF5 application can use [H5Pset_file_space_strategy](https://hdfgroup.github.io/hdf5/group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70)
 with a value of `H5F_FSPACE_STRATEGY_PAGE` to enable the paged
 aggregation feature, which can accumulate metadata and raw
 data for dataset data chunks into well-aligned, configurably
 sized "pages" for better performance. However, note that using
 the paged aggregation feature will cause any setting from
-[H5Pset_alignment](https://portal.hdfgroup.org/display/HDF5/H5P_SET_ALIGNMENT)
+[H5Pset_alignment](https://hdfgroup.github.io/hdf5/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a)
 to be ignored. While an application should be able to get
-comparable performance effects by [setting the size of these pages](http://portal.hdfgroup.org/display/HDF5/H5P_SET_FILE_SPACE_PAGE_SIZE) to be equal to the value that
-would have been set for [H5Pset_alignment](https://portal.hdfgroup.org/display/HDF5/H5P_SET_ALIGNMENT),
+comparable performance effects by [setting the size of these pages](https://hdfgroup.github.io/hdf5/group___f_c_p_l.html#gad012d7f3c2f1e1999eb1770aae3a4963) to be equal to the value that
+would have been set for [H5Pset_alignment](https://hdfgroup.github.io/hdf5/group___f_a_p_l.html#gab99d5af749aeb3896fd9e3ceb273677a),
 this may not necessarily be the case and should be studied.
 
-Note that [H5Pset_file_space_strategy](http://portal.hdfgroup.org/display/HDF5/H5P_SET_FILE_SPACE_STRATEGY)
+Note that [H5Pset_file_space_strategy](https://hdfgroup.github.io/hdf5/group___f_c_p_l.html#ga167ff65f392ca3b7f1933b1cee1b9f70)
 has a `persist` parameter. This determines whether or not the
 file free space manager should include extra metadata in the
 HDF5 file about free space sections in the file. If this
@@ -279,12 +300,12 @@ hid_t file_id = H5Fcreate("file.h5", H5F_ACC_TRUNC, fcpl_id, fapl_id);
 
 While the parallel compression feature requires that the HDF5
 application set and maintain collective I/O at the application
-interface level (via [H5Pset_dxpl_mpio](https://portal.hdfgroup.org/display/HDF5/H5P_SET_DXPL_MPIO)),
+interface level (via [H5Pset_dxpl_mpio](https://hdfgroup.github.io/hdf5/group___d_x_p_l.html#ga001a22b64f60b815abf5de8b4776f09e)),
 it does not require that the actual MPI I/O that occurs at
 the lowest layers of HDF5 be collective; independent I/O may
 perform better depending on the application I/O patterns and
 parallel file system performance, among other factors. The
-application may use [H5Pset_dxpl_mpio_collective_opt](https://portal.hdfgroup.org/display/HDF5/H5P_SET_DXPL_MPIO_COLLECTIVE_OPT)
+application may use [H5Pset_dxpl_mpio_collective_opt](https://hdfgroup.github.io/hdf5/group___d_x_p_l.html#gacb30d14d1791ec7ff9ee73aa148a51a3)
 to control this setting and see which I/O method provides the
 best performance.
 
@@ -297,7 +318,7 @@ H5Dwrite(..., dxpl_id, ...);
 
 ### Runtime HDF5 Library version
 
-An HDF5 application can use the [H5Pset_libver_bounds](http://portal.hdfgroup.org/display/HDF5/H5P_SET_LIBVER_BOUNDS)
+An HDF5 application can use the [H5Pset_libver_bounds](https://hdfgroup.github.io/hdf5/group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910)
 routine to set the upper and lower bounds on library versions
 to use when creating HDF5 objects. For parallel compression
 specifically, setting the library version to the latest available

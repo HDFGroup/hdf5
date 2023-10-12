@@ -1045,7 +1045,7 @@
  * The file access properties managed by #H5Pset_fapl_mpio and retrieved by
  * #H5Pget_fapl_mpio are the MPI communicator, comm, and the MPI info object, info. comm and
  * info are used for file open. info is an information object much like an HDF5 property list. Both
- * are defined in MPI_FILE_OPEN of MPI-2.
+ * are defined in MPI_FILE_OPEN of MPI.
  *
  * The communicator and the info object are saved in the file access property list fapl_id.
  * fapl_id can then be passed to MPI_FILE_OPEN to create and/or open the file.

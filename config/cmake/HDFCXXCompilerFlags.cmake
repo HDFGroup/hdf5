@@ -50,11 +50,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_LOADED)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Minform=warn"
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Minform=warn")
   if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s -O4"
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O4")
   else ()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Mbounds -g -gopt -O2"
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Mbounds -gopt -O2")
   endif ()
 endif ()
 
@@ -106,7 +106,7 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# HDF5 library compile options
+# HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")

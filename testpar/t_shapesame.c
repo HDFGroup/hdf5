@@ -2452,14 +2452,14 @@ do {
                             good_data = false;
                         }
 
-                        /* zero out buffer for re-use */
+                        /* zero out buffer for reuse */
                         *val_ptr = 0;
                     }
                     else if (*val_ptr != 0) {
 
                         good_data = false;
 
-                        /* zero out buffer for re-use */
+                        /* zero out buffer for reuse */
                         *val_ptr = 0;
                     }
 

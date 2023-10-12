@@ -47,6 +47,29 @@ New Features
 
     Configuration:
     -------------
+    - Converted the build of libaec and zlib to use FETCH_CONTENT with CMake.
+
+      Using the CMake FetchContent module, the external filters can populate
+      content at configure time via any method supported by the ExternalProject
+      module. Whereas ExternalProject_Add() downloads at build time, the
+      FetchContent module makes content available immediately, allowing the
+      configure step to use the content in commands like add_subdirectory(),
+      include() or file() operations.
+
+      Removed HDF options for using FETCH_CONTENT explicitly:
+          BUILD_SZIP_WITH_FETCHCONTENT:BOOL
+          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+    - Thread-safety + static library disabled on Windows w/ CMake
+
+      The thread-safety feature requires hooks in DllMain(), which is only
+      present in the shared library.
+
+      We previously just warned about this, but now any CMake configuration
+      that tries to build thread-safety and the static library will fail.
+      This cannot be overridden with ALLOW_UNSUPPORTED.
+
+      Fixes GitHub issue #3613
+
     - Autotools builds now build the szip filter by default when an appropriate
       library is found
 
@@ -196,7 +219,7 @@ New Features
       selection I/O should improve performance and reduce memory uses in some
       cases.
 
-    - Change the error handling for a not found path in the find plugin process.
+    - Changed the error handling for a not found path in the find plugin process.
 
       While attempting to load a plugin the HDF5 library will fail if one of the
       directories in the plugin paths does not exist, even if there are more paths
@@ -235,7 +258,16 @@ New Features
 
     Parallel Library:
     -----------------
-    -
+    - Added optimized support for the parallel compression feature when
+      using the multi-dataset I/O API routines collectively
+
+      Previously, calling H5Dwrite_multi/H5Dread_multi collectively in parallel
+      with a list containing one or more filtered datasets would cause HDF5 to
+      break out of the optimized multi-dataset I/O mode and instead perform I/O
+      by looping over each dataset in the I/O request. The library has now been
+      updated to perform I/O in a more optimized manner in this case by first
+      performing I/O on all the filtered datasets at once and then performing
+      I/O on all the unfiltered datasets at once.
 
 
     Fortran Library:
@@ -309,6 +341,12 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+
+    - Dropped support for MPI-2
+
+      The MPI-2 supporting artifacts have been removed due to the cessation
+      of MPI-2 maintenance and testing since version HDF5 1.12.
+
     - Fixed a bug with the way the Subfiling VFD assigns I/O concentrators
 
       During a file open operation, the Subfiling VFD determines the topology
@@ -653,7 +691,14 @@ Bug Fixes since HDF5-1.14.0 release
       Checks were added to the CMake and Autotools code to verify that CLOCK_MONOTONIC_COARSE,
       PTHREAD_MUTEX_ADAPTIVE_NP and pthread_condattr_setclock() are available before attempting
       to use them in Subfiling VFD-related utility code. Without these checks, attempting
-      to build the Subfiling VFD on macOS would fail. 
+      to build the Subfiling VFD on macOS would fail.
+
+    - Fixes the ordering of INCLUDES when building with CMake
+
+      Include directories in the source or build tree should come before other
+      directories to prioritize headers in the sources over installed ones.
+
+      Fixes GitHub #1027
 
     - The accum test now passes on macOS 12+ (Monterey) w/ CMake
 
@@ -956,6 +1001,12 @@ Platforms Tested
 
 Known Problems
 ==============
+
+    IEEE standard arithmetic enables software to raise exceptions such as overflow,
+    division by zero, and other illegal operations without interrupting or halting
+    the program flow. The HDF5 C library intentionally performs these exceptions.
+    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
+    to avoid stopping on an exception.
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces

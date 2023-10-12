@@ -41,7 +41,7 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# HDF5 library compile options
+# HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 10.0)
   if (HDF5_ENABLE_BUILD_DIAGS)
@@ -52,12 +52,17 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_Fortran_COMPILER_VERS
   endif ()
 endif ()
 
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+    message (STATUS "... Select IEEE floating-point mode full")
+    list (APPEND HDF5_CMAKE_Fortran_FLAGS "-ieee=full")
+endif ()
+
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
   set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC")
   if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
-    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fast -Mnoframe -s")
+    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fast -Mnoframe")
   else ()
-    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Mbounds -Mchkptr -Mdclchk -g")
+    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Mbounds -Mchkptr -Mdclchk")
   endif ()
 endif ()
 

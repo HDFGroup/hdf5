@@ -644,7 +644,6 @@ CONTAINS
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
     INTEGER(KIND=int_kind_1) , DIMENSION(1:DIM0), TARGET :: data_i1
     INTEGER(KIND=int_kind_4) , DIMENSION(1:DIM0), TARGET :: data_i4
-    INTEGER(KIND=int_kind_8) , DIMENSION(1:DIM0), TARGET :: data_i8
     INTEGER(KIND=int_kind_16), DIMENSION(1:DIM0), TARGET :: data_i16
     INTEGER(KIND=int_kind_1) , TARGET :: data0_i1 = 4
     INTEGER(KIND=int_kind_4) , TARGET :: data0_i4 = 4
@@ -683,7 +682,6 @@ CONTAINS
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
-    data_i8  = -2
     data_i16 = -2
     data_int = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
@@ -798,7 +796,6 @@ CONTAINS
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
-    data_i8  = -2
     data_i16 = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     data_i32 = -2

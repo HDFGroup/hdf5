@@ -2654,6 +2654,20 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
+# Requires MPI standard 3.0 and greater
+if test "X${enable_parallel}" = "Xyes"; then
+  AC_MSG_CHECKING([whether MPI meets the minimum 3.0 standard])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+       #include <mpi.h>
+       #if MPI_VERSION < 3
+       #error, found MPI_VERSION < 3
+       #endif]])],
+       [AC_MSG_RESULT([yes])],
+       [AC_MSG_RESULT([no])
+       AC_MSG_ERROR([HDF5 requires MPI standard 3.0 or greater])]
+  )
+fi
+
 AC_MSG_CHECKING([for parallel support files])
 case "X-$enable_parallel" in
   X-|X-no|X-none)

@@ -346,7 +346,7 @@ H5O__efl_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_m
  * Function:	H5O__efl_reset
  *
  * Purpose:	Frees internal pointers and resets the message to an
- *		initialial state.
+ *		initial state.
  *
  * Return:	Non-negative on success/Negative on failure
  *

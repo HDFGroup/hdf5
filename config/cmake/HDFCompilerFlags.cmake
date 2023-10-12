@@ -50,9 +50,9 @@ endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "NVHPC" )
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Minform=warn")
   if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fast -s -O4")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fast -O4")
   else ()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Mbounds -g -O2")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Mbounds -O2")
   endif ()
 endif()
 
@@ -115,7 +115,7 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# HDF5 library compile options
+# HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
