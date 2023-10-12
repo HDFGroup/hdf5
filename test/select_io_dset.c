@@ -125,7 +125,7 @@ error:
  *  --write/read dataset with H5T_NATIVE_INT
  */
 static herr_t
-test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
+test_no_type_conv(hid_t fid, unsigned set_cache, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int         i;
     hid_t       did         = H5I_INVALID_HID;
@@ -198,7 +198,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -210,7 +210,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data or transformed data read */
@@ -275,7 +275,7 @@ error:
  *  --read again with H5T_STD_I32BE
  */
 static herr_t
-test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
+test_no_size_change_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, unsigned mwbuf)
 {
     int     i;
     hid_t   did  = H5I_INVALID_HID;
@@ -351,7 +351,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -363,7 +363,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data read little endian */
@@ -436,7 +436,7 @@ error:
  *
  */
 static herr_t
-test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
+test_larger_mem_type_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int         i;
     hid_t       did         = H5I_INVALID_HID;
@@ -509,7 +509,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -521,7 +521,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data or transformed data read */
@@ -586,7 +586,7 @@ error:
  *  --read dataset with H5T_NATIVE_SHORT
  */
 static herr_t
-test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
+test_smaller_mem_type_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int         i;
     hid_t       did         = H5I_INVALID_HID;
@@ -660,7 +660,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -672,7 +672,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data or transformed data read */
@@ -820,7 +820,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         TEST_ERROR;
 
     if (H5Pset_fill_value(dcpl, s1_tid, &fillvalue) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (chunked) {
         cdims[0] = DSET_SELECT_CHUNK_DIM;
@@ -1077,7 +1077,7 @@ error:
  *    Datatype for all datasets: H5T_NATIVE_LONG
  */
 static herr_t
-test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
+test_multi_dsets_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     size_t  ndsets;
     int     i, j;
@@ -1223,7 +1223,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -1235,7 +1235,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify */
@@ -1255,7 +1255,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
             TEST_ERROR;
 
         /* Verify selection I/O mode */
-        if (check_actual_selection_io_mode(dxpl, chunked ? 0 : H5D_SCALAR_IO) < 0)
+        if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
             TEST_ERROR;
 
         /* Verify */
@@ -1374,7 +1374,7 @@ error:
     if (total_lrbuf)
         free(total_lrbuf);
     if (total_trans_lwbuf)
-        free(total_lrbuf);
+        free(total_trans_lwbuf);
 
     return FAIL;
 
@@ -2815,7 +2815,7 @@ test_set_get_select_io_mode(const char *filename, hid_t fapl)
     TESTING("H5Pget/set_selection_io_mode()");
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
@@ -3264,7 +3264,7 @@ main(void)
                             case TEST_NO_TYPE_CONV: /* case 1 */
                                 TESTING_2("No type conversion (null case)");
 
-                                nerrors += (test_no_type_conv(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                nerrors += (test_no_type_conv(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
 
                                 break;
 
@@ -3275,7 +3275,7 @@ main(void)
                                 if (dtrans)
                                     SKIPPED();
                                 else
-                                    nerrors += (test_no_size_change_no_bkg(fid, chunked, mwbuf) < 0 ? 1 : 0);
+                                    nerrors += (test_no_size_change_no_bkg(fid, set_cache, chunked, mwbuf) < 0 ? 1 : 0);
 
                                 break;
 
@@ -3283,7 +3283,7 @@ main(void)
                                 TESTING_2("Larger memory type, no background buffer");
 
                                 nerrors +=
-                                    (test_larger_mem_type_no_bkg(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                    (test_larger_mem_type_no_bkg(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
 
                                 break;
 
@@ -3291,7 +3291,7 @@ main(void)
                                 TESTING_2("Smaller memory type, no background buffer");
 
                                 nerrors +=
-                                    (test_smaller_mem_type_no_bkg(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                    (test_smaller_mem_type_no_bkg(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
 
                                 break;
 
@@ -3309,7 +3309,7 @@ main(void)
                             case TEST_MULTI_CONV_NO_BKG: /* case 6 */
                                 TESTING_2("multi-datasets: type conv + no bkg buffer");
 
-                                nerrors += test_multi_dsets_no_bkg(fid, chunked, dtrans, mwbuf);
+                                nerrors += test_multi_dsets_no_bkg(fid, set_cache, chunked, dtrans, mwbuf);
 
                                 break;
 
