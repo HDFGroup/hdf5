@@ -6,7 +6,7 @@
   file.  Next, it reopens the file, reads back the data,
   outputs it to the screen, extends the dataset, and writes
   new data to the entire extended dataset.  Finally it
-  reopens the file again, reads back the data, and utputs it
+  reopens the file again, reads back the data, and outputs it
   to the screen.
 
   This file is intended for use with HDF5 Library version 1.6

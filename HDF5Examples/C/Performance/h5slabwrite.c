@@ -17,7 +17,7 @@
 #include "h5slab.h"
 
 /* Write the chunks in the row order.  This provides good and bad read
- * performance if the read pattern is by row and by column respectivly.
+ * performance if the read pattern is by row and by column respectively.
  *
  * Created by Albert Cheng and Christian Chilan 2010/7/13.
  */
