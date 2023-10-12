@@ -139,7 +139,7 @@ test_non_extendible(hid_t file)
         FAIL_STACK_ERROR;
     if (1 != n) {
         H5_FAILED();
-        HDputs("    Returned external count is wrong.");
+        puts("    Returned external count is wrong.");
         printf("   got: %d\n    ans: 1\n", n);
         goto error;
     }
@@ -149,13 +149,13 @@ test_non_extendible(hid_t file)
         FAIL_STACK_ERROR;
     if (file_offset != 0) {
         H5_FAILED();
-        HDputs("    Wrong file offset.");
+        puts("    Wrong file offset.");
         printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
-        HDputs("    Wrong file size.");
+        puts("    Wrong file size.");
         printf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
@@ -396,7 +396,7 @@ test_unlimited(hid_t file)
         FAIL_STACK_ERROR;
     if (1 != n) {
         H5_FAILED();
-        HDputs("    Returned external count is wrong.");
+        puts("    Returned external count is wrong.");
         printf("    got: %d\n    ans: 1\n", n);
         goto error;
     } /* end if */
@@ -405,13 +405,13 @@ test_unlimited(hid_t file)
         FAIL_STACK_ERROR;
     if (file_offset != 0) {
         H5_FAILED();
-        HDputs("    Wrong file offset.");
+        puts("    Wrong file offset.");
         printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (H5F_UNLIMITED != file_size) {
         H5_FAILED();
-        HDputs("    Wrong file size.");
+        puts("    Wrong file size.");
         printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
         goto error;
     }
@@ -457,7 +457,7 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
         return -1;
     }
     for (i = 0; i < n_external_files; i++) {
-        if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
+        if (snprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
             fprintf(stderr, "External file %d overflows name buffer\n", i + 1);
             fflush(stderr);
             return -1;
@@ -513,7 +513,7 @@ test_multiple_files(hid_t file)
         FAIL_STACK_ERROR;
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
-    /* Re-use space below */
+    /* Reuse space below */
 
     /* ----------------------------------------------
      * Verify that too-small external files will fail
@@ -705,7 +705,7 @@ test_read_file_set(hid_t fapl)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
+        snprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     }
@@ -818,7 +818,7 @@ test_write_file_set(hid_t fapl)
     for (i = 0; i < N_EXT_FILES; i++) {
         hsize_t size;
 
-        HDsnprintf(filename, sizeof(filename), "extern_%dw.raw", (int)i + 1);
+        snprintf(filename, sizeof(filename), "extern_%dw.raw", (int)i + 1);
 
         if (i != N_EXT_FILES - 1)
             size = (hsize_t)sizeof(part);
@@ -849,8 +849,8 @@ test_write_file_set(hid_t fapl)
     for (i = 0; i < N_EXT_FILES; i++) {
         char name1[64], name2[64];
 
-        HDsnprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
-        HDsnprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
+        snprintf(name1, sizeof(name1), "extern_%dr.raw", i + 1);
+        snprintf(name2, sizeof(name2), "extern_%dw.raw", i + 1);
         if (!files_have_same_contents(name1, name2))
             FAIL_PUTS_ERROR("   Output differs from expected value.");
     } /* end for */
@@ -942,11 +942,11 @@ test_path_absolute(hid_t fapl)
     if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
         TEST_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath, H5_DIR_SEPS, i + 1);
+        snprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath, H5_DIR_SEPS, i + 1);
 #if defined(H5_HAVE_WINDOW_PATH)
         /* For windows, test path-absolute case (\dir\file.raw) for the second file */
         if (i == 1)
-            HDsnprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
+            snprintf(filename, sizeof(filename), "%s%sextern_%zur.raw", cwdpath + 2, H5_DIR_SEPS, i + 1);
 #endif
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
@@ -1037,7 +1037,7 @@ test_path_relative(hid_t fapl)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
+        snprintf(filename, sizeof(filename), "extern_%dr.raw", (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -1131,7 +1131,7 @@ test_path_relative_cwd(hid_t fapl)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
-        HDsnprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
+        snprintf(filename, sizeof(filename), "..%sextern_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -1145,7 +1145,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Pget_efile_prefix(dapl, buffer, sizeof(buffer)) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(buffer, "${ORIGIN}") != 0)
+    if (strcmp(buffer, "${ORIGIN}") != 0)
         FAIL_PUTS_ERROR("efile prefix not set correctly");
     if ((dapl2 = H5Pcopy(dapl)) < 0)
         FAIL_STACK_ERROR;
@@ -1315,7 +1315,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         TEST_ERROR;
     if (H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
         FAIL_STACK_ERROR;
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
 
     /* Close everything */
@@ -1383,7 +1383,7 @@ main(void)
 
     /* The file format doesn't matter for this test */
     nerrors += test_h5d_get_access_plist(fapl_id_new);
-    HDputs("");
+    puts("");
 
     /* Test with old & new format groups */
     for (latest_format = false; latest_format <= true; latest_format++) {
@@ -1391,11 +1391,11 @@ main(void)
 
         /* Set the fapl for different file formats */
         if (latest_format) {
-            HDputs("\nTesting with the latest file format:");
+            puts("\nTesting with the latest file format:");
             current_fapl_id = fapl_id_new;
         }
         else {
-            HDputs("Testing with the default file format:");
+            puts("Testing with the default file format:");
             current_fapl_id = fapl_id_old;
         }
 
@@ -1444,7 +1444,7 @@ main(void)
     if (H5Pclose(fapl_id_new) < 0)
         FAIL_STACK_ERROR;
 
-    HDputs("All external storage tests passed.");
+    puts("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
     if (h5_cleanup(EXT_FNAME, fapl_id_old)) {

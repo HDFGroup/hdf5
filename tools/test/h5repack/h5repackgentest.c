@@ -16,7 +16,7 @@
  * + h5repack_<NAME>.h5
  * + h5repack_<NAME>_ex.h5
  * + h5repack_<NAME>_ex-<N>.dat
- * ...where NAME idenfities the type, and N is a positive decimal number;
+ * ...where NAME identifies the type, and N is a positive decimal number;
  * multiple external files (*.dat) are allowed per file, but they must
  * follow the pattern and be in contiguous numerical sequence starting at 0.
  *
@@ -115,7 +115,7 @@ set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_fil
         return -1;
 
     for (i = 0; i < n_external_files; i++) {
-        if (HDsnprintf(name, MAX_NAME_SIZE, "%s_ex-%u.dat", filename, i) >= MAX_NAME_SIZE)
+        if (snprintf(name, MAX_NAME_SIZE, "%s_ex-%u.dat", filename, i) >= MAX_NAME_SIZE)
             return -1;
 
         if (H5Pset_external(dcpl, name, 0, n_elts_per_file * elt_size) < 0)
@@ -140,7 +140,7 @@ make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t
     hid_t space_id  = H5I_INVALID_HID;
     int   ret_value = 0;
 
-    if (HDsnprintf(filename, MAX_NAME_SIZE, "%s%s.h5", basename, (NULL != ext) ? "_ex" : "") >= MAX_NAME_SIZE)
+    if (snprintf(filename, MAX_NAME_SIZE, "%s%s.h5", basename, (NULL != ext) ? "_ex" : "") >= MAX_NAME_SIZE)
         H5REPACKGENTEST_OOPS;
 
     if (NULL != ext) {

@@ -932,7 +932,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
                 /* Store object names */
                 for (u = 0; u < hand->obj_count; u++)
-                    if (NULL == (hand->obj[u] = HDstrdup(H5_optarg))) {
+                    if (NULL == (hand->obj[u] = strdup(H5_optarg))) {
                         error_msg("unable to allocate memory for object name\n");
                         goto error;
                     } /* end if */
@@ -1625,11 +1625,11 @@ main(int argc, char *argv[])
         vfd_info.u.name = drivername;
 
 #ifdef H5_HAVE_ROS3_VFD
-        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX]))
+        if (!strcmp(drivername, drivernames[ROS3_VFD_IDX]))
             vfd_info.info = &ros3_fa;
 #endif
 #ifdef H5_HAVE_LIBHDFS
-        if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX]))
+        if (!strcmp(drivername, drivernames[HDFS_VFD_IDX]))
             vfd_info.info = &hdfs_fa;
 #endif
 

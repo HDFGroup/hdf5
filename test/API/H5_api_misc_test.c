@@ -948,15 +948,15 @@ test_symbols_in_compound_field_name(void)
         total_type_size += H5Tget_size(type_pool[i]);
     }
 
-    HDsnprintf(member_names[0], 256, "{{{ member0");
-    HDsnprintf(member_names[1], 256, "member1 }}}");
-    HDsnprintf(member_names[2], 256, "{{{ member2 }}");
-    HDsnprintf(member_names[3], 256, "{{ member3 }}}");
-    HDsnprintf(member_names[4], 256, "\\\"member4");
-    HDsnprintf(member_names[5], 256, "member5\\\"");
-    HDsnprintf(member_names[6], 256, "mem\\\"ber6");
-    HDsnprintf(member_names[7], 256, "{{ member7\\\" }");
-    HDsnprintf(member_names[8], 256, "{{ member8\\\\");
+    snprintf(member_names[0], 256, "{{{ member0");
+    snprintf(member_names[1], 256, "member1 }}}");
+    snprintf(member_names[2], 256, "{{{ member2 }}");
+    snprintf(member_names[3], 256, "{{ member3 }}}");
+    snprintf(member_names[4], 256, "\\\"member4");
+    snprintf(member_names[5], 256, "member5\\\"");
+    snprintf(member_names[6], 256, "mem\\\"ber6");
+    snprintf(member_names[7], 256, "{{ member7\\\" }");
+    snprintf(member_names[8], 256, "{{ member8\\\\");
 
     if ((compound_type = H5Tcreate(H5T_COMPOUND, total_type_size)) < 0) {
         H5_FAILED();

@@ -162,7 +162,7 @@ H5Z_term_package(void)
                 } /* end if */
 
                 /* Truncate the comment to fit in the field */
-                HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
+                strncpy(comment, H5Z_table_g[i].name, sizeof comment);
                 comment[sizeof(comment) - 1] = '\0';
 
                 /*
@@ -1568,7 +1568,7 @@ done:
  * Function: H5Z_delete
  *
  * Purpose:  Delete filter FILTER from pipeline PLINE;
- *           deletes all filters if FILTER is H5Z_FILTER_NONE
+ *           deletes all filters if FILTER is H5Z_FILTER_ALL
  *
  * Return:   Non-negative on success
  *           Negative on failure
@@ -1612,7 +1612,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 
         /* Free information for deleted filter */
         if (pline->filter[idx].name && pline->filter[idx].name != pline->filter[idx]._name)
-            assert((HDstrlen(pline->filter[idx].name) + 1) > H5Z_COMMON_NAME_LEN);
+            assert((strlen(pline->filter[idx].name) + 1) > H5Z_COMMON_NAME_LEN);
         if (pline->filter[idx].name != pline->filter[idx]._name)
             pline->filter[idx].name = (char *)H5MM_xfree(pline->filter[idx].name);
         if (pline->filter[idx].cd_values && pline->filter[idx].cd_values != pline->filter[idx]._cd_values)
@@ -1625,7 +1625,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
             /* Copy filters down & fix up any client data value arrays using internal storage */
             for (; (idx + 1) < pline->nused; idx++) {
                 pline->filter[idx] = pline->filter[idx + 1];
-                if (pline->filter[idx].name && (HDstrlen(pline->filter[idx].name) + 1) <= H5Z_COMMON_NAME_LEN)
+                if (pline->filter[idx].name && (strlen(pline->filter[idx].name) + 1) <= H5Z_COMMON_NAME_LEN)
                     pline->filter[idx].name = pline->filter[idx]._name;
                 if (pline->filter[idx].cd_nelmts <= H5Z_COMMON_CD_VALUES)
                     pline->filter[idx].cd_values = pline->filter[idx]._cd_values;

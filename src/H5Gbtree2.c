@@ -151,7 +151,7 @@ H5G__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link");
 
     /* Compare the string values */
-    udata->cmp = HDstrcmp(udata->name, lnk->name);
+    udata->cmp = strcmp(udata->name, lnk->name);
 
     /* Check for correct link & callback to make */
     if (udata->cmp == 0 && udata->found_op) {

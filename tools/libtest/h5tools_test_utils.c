@@ -241,7 +241,7 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -277,7 +277,7 @@ H5_GCC_CLANG_DIAG_OFF("format")
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -543,8 +543,8 @@ test_populate_ros3_fa(void)
     TESTING("programmatic ros3 fapl population");
 
 #ifndef H5_HAVE_ROS3_VFD
-    HDputs(" -SKIP-");
-    HDputs("    Read-Only S3 VFD not enabled");
+    puts(" -SKIP-");
+    puts("    Read-Only S3 VFD not enabled");
     fflush(stdout);
     return 0;
 #else
@@ -681,7 +681,7 @@ test_populate_ros3_fa(void)
             printf("region overflow\n");
         }
 
-        assert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
+        assert(strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
@@ -754,7 +754,7 @@ test_populate_ros3_fa(void)
             printf("id overflow\n");
         }
 
-        assert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
+        assert(strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
@@ -887,7 +887,7 @@ test_populate_ros3_fa(void)
             printf("key overflow\n");
         }
 
-        assert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        assert(strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)

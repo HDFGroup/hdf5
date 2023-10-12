@@ -644,7 +644,6 @@ CONTAINS
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
     INTEGER(KIND=int_kind_1) , DIMENSION(1:DIM0), TARGET :: data_i1
     INTEGER(KIND=int_kind_4) , DIMENSION(1:DIM0), TARGET :: data_i4
-    INTEGER(KIND=int_kind_8) , DIMENSION(1:DIM0), TARGET :: data_i8
     INTEGER(KIND=int_kind_16), DIMENSION(1:DIM0), TARGET :: data_i16
     INTEGER(KIND=int_kind_1) , TARGET :: data0_i1 = 4
     INTEGER(KIND=int_kind_4) , TARGET :: data0_i4 = 4
@@ -683,7 +682,6 @@ CONTAINS
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
-    data_i8  = -2
     data_i16 = -2
     data_int = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
@@ -798,7 +796,6 @@ CONTAINS
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
-    data_i8  = -2
     data_i16 = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     data_i32 = -2
@@ -1026,7 +1023,7 @@ CONTAINS
     INTEGER :: i, j, n
     INTEGER :: error
     TYPE(C_PTR) :: f_ptr
-    INTEGER(C_int32_t) :: filters
+    INTEGER :: filters
     INTEGER(SIZE_T) :: sizeINT
     INTEGER(HID_T) :: dxpl
 
@@ -1081,12 +1078,12 @@ CONTAINS
 
     f_ptr = C_LOC(wdata1)
     offset(1:2) = (/0, 0/)
-    CALL H5Dwrite_chunk_f(dset_id, 0_C_INT32_T, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error)
     CALL check("h5dwrite_f",error,total_error)
 
     f_ptr = C_LOC(wdata2)
     offset(1:2) = (/0, 16/)
-    CALL H5Dwrite_chunk_f(dset_id, 0_C_INT32_T, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error, dxpl)
+    CALL H5Dwrite_chunk_f(dset_id, 0, offset, CHUNK0 * CHUNK1 * sizeINT, f_ptr, error, dxpl)
     CALL check("h5dwrite_f",error,total_error)
 
     CALL h5dclose_f(dset_id, error)
@@ -1126,7 +1123,7 @@ CONTAINS
        ENDDO
     ENDDO
 
-    CALL VERIFY("H5Dread_chunk_f",filters, 0_C_INT32_T, total_error)
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
 
     f_ptr = C_LOC(rdata2)
     offset(1:2) = (/0, 16/)
@@ -1141,7 +1138,7 @@ CONTAINS
        ENDDO
     ENDDO
 
-    CALL VERIFY("H5Dread_chunk_f",filters, 0_C_INT32_T, total_error)
+    CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
 
     CALL h5dclose_f(dset_id, error)
     CALL check("h5dclose_f",error,total_error)

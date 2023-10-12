@@ -111,7 +111,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     if (H5Pget_virtual_prefix(dapl, buffer, sizeof(buffer)) < 0)
         TEST_ERROR;
 
-    if (HDstrcmp(buffer, "someprefix") != 0)
+    if (strcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("vds prefix not set correctly");
 
     /* Create source dataspace */
@@ -331,7 +331,7 @@ main(void)
     bool         driver_is_parallel;
     int          nerrors = 0;
 
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -347,8 +347,8 @@ main(void)
      * doesn't support parallel reads and the splitter VFD has external
      * link-related bugs.
      */
-    if (driver_is_parallel || !HDstrcmp(env_h5_drvr, "splitter")) {
-        HDputs(" -- SKIPPED for incompatible VFD --");
+    if (driver_is_parallel || !strcmp(env_h5_drvr, "splitter")) {
+        puts(" -- SKIPPED for incompatible VFD --");
         exit(EXIT_SUCCESS);
     }
 
@@ -378,10 +378,9 @@ main(void)
             /* Display testing info */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsnprintf(msg, sizeof(msg),
-                       "Testing virtual dataset with file version bounds: (%s, %s):", low_string,
-                       high_string);
-            HDputs(msg);
+            snprintf(msg, sizeof(msg),
+                     "Testing virtual dataset with file version bounds: (%s, %s):", low_string, high_string);
+            puts(msg);
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
                 printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",

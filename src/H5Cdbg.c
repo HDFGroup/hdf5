@@ -317,10 +317,10 @@ H5C_set_prefix(H5C_t *cache_ptr, char *prefix)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (cache_ptr == NULL || prefix == NULL || HDstrlen(prefix) >= H5C__PREFIX_LEN)
+    if (cache_ptr == NULL || prefix == NULL || strlen(prefix) >= H5C__PREFIX_LEN)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry");
 
-    HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
+    strncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
 
     cache_ptr->prefix[H5C__PREFIX_LEN - 1] = '\0';
 

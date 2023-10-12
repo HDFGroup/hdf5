@@ -111,7 +111,7 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
         if (h->obj[u].begin) {
             char buf[64];
 
-            HDsnprintf(buf, sizeof(buf), "Object %u", u);
+            snprintf(buf, sizeof(buf), "Object %u", u);
             fprintf(stream, "%*s%s\n", indent, "", buf);
             fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MIN(fwidth - 3, 0),
                     "Obffset in block:", (unsigned long)(h->obj[u].begin - h->chunk));
@@ -129,12 +129,12 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
                     if (j + k < h->obj[u].size)
                         fprintf(stream, "%02x ", p[j + k]);
                     else
-                        HDfputs("   ", stream);
+                        fputs("   ", stream);
                 }
                 for (k = 0; k < 16 && j + k < h->obj[u].size; k++) {
                     if (8 == k)
                         fprintf(stream, " ");
-                    HDfputc(p[j + k] > ' ' && p[j + k] <= '~' ? p[j + k] : '.', stream);
+                    fputc(p[j + k] > ' ' && p[j + k] <= '~' ? p[j + k] : '.', stream);
                 }
                 fprintf(stream, "\n");
             }

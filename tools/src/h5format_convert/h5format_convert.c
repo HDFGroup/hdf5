@@ -119,7 +119,7 @@ parse_command_line(int argc, const char *const *argv)
 
             case 'd': /* -d dname */
                 if (H5_optarg != NULL && *H5_optarg)
-                    dname_g = HDstrdup(H5_optarg);
+                    dname_g = strdup(H5_optarg);
                 if (dname_g == NULL) {
                     h5tools_setstatus(EXIT_FAILURE);
                     error_msg("No dataset name `%s`\n", H5_optarg);
@@ -152,7 +152,7 @@ parse_command_line(int argc, const char *const *argv)
         goto error;
     }
 
-    fname_g = HDstrdup(argv[H5_optind]);
+    fname_g = strdup(argv[H5_optind]);
 
     return 0;
 

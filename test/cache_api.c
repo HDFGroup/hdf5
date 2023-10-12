@@ -243,7 +243,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         }
     }
 
-    /* conpare the cache's internal configuration with the expected value */
+    /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
         if (!resize_configs_are_equal(&default_auto_size_ctl, &cache_ptr->resize_ctl, true)) {
@@ -386,7 +386,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         }
     }
 
-    /* conpare the cache's internal configuration with the expected value */
+    /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
         if (!resize_configs_are_equal(&mod_auto_size_ctl, &cache_ptr->resize_ctl, true)) {
@@ -1050,7 +1050,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             /* create the dataset */
             if (pass) {
 
-                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
+                snprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -1750,7 +1750,7 @@ check_fapl_mdc_api_errs(void)
         if (result >= 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5Pset_mdc_config() accepted invalid_configs[%d].", i);
+            snprintf(msg, (size_t)128, "H5Pset_mdc_config() accepted invalid_configs[%d].", i);
             failure_mssg = msg;
         }
         i++;
@@ -1979,7 +1979,7 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
         if (result >= 0) {
 
             pass = false;
-            HDsnprintf(msg, (size_t)128, "H5Fset_mdc_config() accepted invalid_configs[%d].", i);
+            snprintf(msg, (size_t)128, "H5Fset_mdc_config() accepted invalid_configs[%d].", i);
             failure_mssg = msg;
         }
         i++;

@@ -281,7 +281,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -323,7 +323,7 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+    if (strcmp((actual), (expected)) != 0) {                                                                 \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -1188,8 +1188,8 @@ test_HMAC_SHA256(void)
             SHA256_DIGEST_LENGTH,
             "AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
             "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972",
-            HDstrlen("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
-                     "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972"),
+            strlen("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
+                   "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972"),
             "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
             SHA256_DIGEST_LENGTH * 2 + 1, /* +1 for null terminator */
         },
@@ -1228,7 +1228,7 @@ test_HMAC_SHA256(void)
             cases[i].msg);
         if (cases[i].ret == SUCCEED) {
 #ifdef VERBOSE
-            if (0 != HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp))) {
+            if (0 != strncmp(cases[i].exp, dest, strlen(cases[i].exp))) {
                 /* print out how wrong things are, and then fail
                  */
                 dest = (char *)realloc(dest, cases[i].dest_size + 1);
@@ -1240,7 +1240,7 @@ test_HMAC_SHA256(void)
 #else  /* VERBOSE not defined */
             /* simple pass/fail test
              */
-            JSVERIFY(0, HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);
+            JSVERIFY(0, strncmp(cases[i].exp, dest, strlen(cases[i].exp)), NULL);
 #endif /* VERBOSE */
         }
         free(dest);
@@ -1313,7 +1313,7 @@ test_nlowercase(void)
 
         JSVERIFY(SUCCEED, H5FD_s3comms_nlowercase(dest, cases[i].in, cases[i].len), cases[i].in)
         if (cases[i].len > 0) {
-            JSVERIFY(0, HDstrncmp(dest, cases[i].exp, cases[i].len), NULL)
+            JSVERIFY(0, strncmp(dest, cases[i].exp, cases[i].len), NULL)
         }
         free(dest);
     } /* end for each testcase */
@@ -1679,7 +1679,7 @@ test_percent_encode_char(void)
         JSVERIFY(SUCCEED, H5FD_s3comms_percent_encode_char(dest, (const unsigned char)cases[i].c, &dest_len),
                  NULL)
         JSVERIFY(cases[i].exp_len, dest_len, NULL)
-        JSVERIFY(0, HDstrncmp(dest, cases[i].exp, dest_len), NULL)
+        JSVERIFY(0, strncmp(dest, cases[i].exp, dest_len), NULL)
         JSVERIFY_STR(cases[i].exp, dest, NULL)
     }
 
@@ -1713,13 +1713,13 @@ test_s3r_get_filesize(void)
      */
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     JSVERIFY(0, H5FD_s3comms_s3r_get_filesize(NULL), "filesize of the null handle should be 0")
 
@@ -1769,13 +1769,13 @@ test_s3r_open(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        HDputs("    s3 credentials are not loaded");
+        puts("    s3 credentials are not loaded");
         fflush(stdout);
         return 0;
     }
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
@@ -1784,14 +1784,14 @@ test_s3r_open(void)
      * PRE-TEST SETUP *
      ******************/
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s",
-                                              s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_RESTRICTED));
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s",
+                                            s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_RESTRICTED));
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_MISSING));
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+                                            S3_TEST_RESOURCE_MISSING));
 
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     /* Set given bucket url with invalid/inactive port number for badport.
      * Note, this sort of micro-management of parsed_url_t is not advised
@@ -1800,17 +1800,17 @@ test_s3r_open(void)
     if (purl->port == NULL) {
         purl->port = (char *)H5MM_malloc(sizeof(char) * 5);
         FAIL_IF(purl->port == NULL);
-        FAIL_IF(5 < HDsnprintf(purl->port, 5, "9000"))
+        FAIL_IF(5 < snprintf(purl->port, 5, "9000"))
     }
-    else if (HDstrcmp(purl->port, "9000") != 0) {
-        FAIL_IF(5 < HDsnprintf(purl->port, 5, "9000"))
+    else if (strcmp(purl->port, "9000") != 0) {
+        FAIL_IF(5 < snprintf(purl->port, 5, "9000"))
     }
     else {
-        FAIL_IF(5 < HDsnprintf(purl->port, 5, "1234"))
+        FAIL_IF(5 < snprintf(purl->port, 5, "1234"))
     }
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven_badport, S3_TEST_MAX_URL_SIZE, "%s://%s:%s/%s",
-                                              purl->scheme, purl->host, purl->port,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven_badport, S3_TEST_MAX_URL_SIZE, "%s://%s:%s/%s",
+                                            purl->scheme, purl->host, purl->port,
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl_ready = true;
@@ -1971,15 +1971,15 @@ test_s3r_read(void)
      */
     if (false == s3_test_bucket_defined) {
         SKIPPED();
-        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
         fflush(stdout);
         return 0;
     }
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl_ready = true;
-    FAIL_IF(S3_TEST_MAX_URL_SIZE < HDsnprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
-                                              S3_TEST_RESOURCE_TEXT_PUBLIC));
+    FAIL_IF(S3_TEST_MAX_URL_SIZE < snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
+                                            S3_TEST_RESOURCE_TEXT_PUBLIC));
 
     for (i = 0; i < S3COMMS_TEST_BUFFER_SIZE; i++)
         buffer[i] = '\0';
@@ -2032,7 +2032,7 @@ test_s3r_read(void)
     JSVERIFY(SUCCEED, H5FD_s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer), NULL)
     JSVERIFY(
         0,
-        HDstrncmp(
+        strncmp(
             buffer,
             "And my soul from out that shadow that lies floating on the floor\nShall be lifted—nevermore!\n",
             94),
@@ -2049,7 +2049,7 @@ test_s3r_read(void)
              H5FD_s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */
                                    buffer),
              NULL)
-    JSVERIFY(0, HDstrcmp("", buffer), NULL)
+    JSVERIFY(0, strcmp("", buffer), NULL)
 
     /************************
      * read starts past eof *
@@ -2059,14 +2059,14 @@ test_s3r_read(void)
              H5FD_s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */
                                    (size_t)100, buffer),
              NULL)
-    JSVERIFY(0, HDstrcmp("", buffer), NULL)
+    JSVERIFY(0, strcmp("", buffer), NULL)
 
     /**********************
      * read starts on eof *
      **********************/
 
     JSVERIFY(FAIL, H5FD_s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer), NULL)
-    JSVERIFY(0, HDstrcmp("", buffer), NULL)
+    JSVERIFY(0, strcmp("", buffer), NULL)
 
     /*************
      * TEAR DOWN *
@@ -2153,7 +2153,7 @@ test_signing_key(void)
         JSVERIFY(SUCCEED, H5FD_s3comms_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when),
                  NULL)
 
-        JSVERIFY(0, HDstrncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
+        JSVERIFY(0, strncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
                  (const char *)cases[i].exp)
 
         free(key);
@@ -2324,12 +2324,12 @@ test_trim(void)
         assert(str == NULL);
         str = (char *)malloc(sizeof(char) * cases[i].in_len);
         assert(str != NULL);
-        HDstrncpy(str, cases[i].in, cases[i].in_len);
+        strncpy(str, cases[i].in, cases[i].in_len);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_trim(dest, str, cases[i].in_len, &dest_len), NULL)
         JSVERIFY(cases[i].exp_len, dest_len, cases[i].in)
         if (dest_len > 0) {
-            JSVERIFY(0, HDstrncmp(cases[i].exp, dest, dest_len), cases[i].exp)
+            JSVERIFY(0, strncmp(cases[i].exp, dest, dest_len), cases[i].exp)
         }
         free(str);
         str = NULL;
@@ -2439,8 +2439,8 @@ test_uriencode(void)
         JSVERIFY(SUCCEED,
                  H5FD_s3comms_uriencode(dest, cases[i].str, str_len, cases[i].encode_slash, &dest_written),
                  NULL);
-        JSVERIFY(HDstrlen(cases[i].expected), dest_written, NULL)
-        JSVERIFY(0, HDstrncmp(dest, cases[i].expected, dest_written), cases[i].expected);
+        JSVERIFY(strlen(cases[i].expected), dest_written, NULL)
+        JSVERIFY(0, strncmp(dest, cases[i].expected, dest_written), cases[i].expected);
 
         free(dest);
         dest = NULL;
@@ -2520,13 +2520,13 @@ main(void)
         s3_test_credentials_loaded = 1;
     }
 
-    bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
+    bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
         printf("WARNING: S3 bucket url is not defined in environment "
                "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
-        HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
+        strncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
         s3_test_bucket_defined = true;
     }
 

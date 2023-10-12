@@ -104,7 +104,7 @@ static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name,
  *
  * Purpose:     This is the common function for creating HDF5 datasets.
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -146,7 +146,7 @@ done:
  *
  * Purpose:     This is the common function for creating HDF5 attributes
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -197,11 +197,11 @@ done:
  *              hid_t H5Acreate2(loc_id, attr_name, type_id, space_id, acpl_id,
  *                  aapl_id)
  *
- * Description: This function creates an attribute which is attached to the
+ * Description: This function creates an attribute that is attached to the
  *              object specified with 'loc_id'. The name specified with
  *              'attr_name' for each attribute for an object must be unique
  *              for that object. The 'type_id' and 'space_id' are created
- *              with the H5T and H5S interfaces respectively. The 'aapl_id'
+ *              with the H5T and H5S interfaces, respectively. The 'aapl_id'
  *              property list is currently unused, but will be used in the
  *              future for optional attribute access properties. The
  *              attribute ID returned from this function must be released
@@ -212,8 +212,8 @@ done:
  *              const char *attr_name;  IN: Name of attribute to locate and open
  *              hid_t type_id;          IN: ID of datatype for attribute
  *              hid_t space_id;         IN: ID of dataspace for attribute
- *              hid_t acpl_id;          IN: ID of creation property list (currently not used)
- *              hid_t aapl_id;          IN: Attribute access property list
+ *              hid_t acpl_id;          IN: ID of creation property list
+ *              hid_t aapl_id;          IN: ID of Attribute access property list (currently not used)
  *
  * Return:      Success:    An ID for the created attribute
  *
@@ -243,7 +243,7 @@ done:
  *
  * Purpose:     Asynchronous version of H5Acreate
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -291,7 +291,7 @@ done:
  *
  * Purpose:     This is the common function for creating HDF5 attributes by name
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -352,14 +352,14 @@ done:
         const char *attr_name;  IN: Name of attribute to locate and open
         hid_t type_id;          IN: ID of datatype for attribute
         hid_t space_id;         IN: ID of dataspace for attribute
-        hid_t acpl_id;          IN: ID of creation property list (currently not used)
-        hid_t aapl_id;          IN: Attribute access property list
+        hid_t acpl_id;          IN: ID of creation property list
+        hid_t aapl_id;          IN: ID of Attribute access property list (currently not used)
         hid_t lapl_id;          IN: Link access property list
  RETURNS
     Non-negative on success/H5I_INVALID_HID on failure
 
  DESCRIPTION
-        This function creates an attribute which is attached to the object
+        This function creates an attribute that is attached to the object
     specified with 'loc_id/obj_name'.  The name specified with 'attr_name' for
     each attribute for an object must be unique for that object.  The 'type_id'
     and 'space_id' are created with the H5T and H5S interfaces respectively.
@@ -392,7 +392,7 @@ done:
  *
  * Purpose:     Asynchronous version of H5Acreate_by_name
  *
- * Return:      Success:    A attribute ID
+ * Return:      Success:    An attribute ID
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -652,7 +652,7 @@ done:
  USAGE
     hid_t H5Aopen_by_name(loc_id, obj_name, attr_name, aapl_id, lapl_id)
         hid_t loc_id;           IN: Object that attribute is attached to
-        const char *obj_name;   IN: Name of object relative to location
+        const char *obj_name;   IN: Name of the object relative to location
         const char *attr_name;  IN: Name of attribute to locate and open
         hid_t aapl_id;          IN: Attribute access property list
         hid_t lapl_id;          IN: Link access property list
@@ -788,7 +788,7 @@ done:
  USAGE
     hid_t H5Aopen_by_idx(loc_id, obj_ame, idx_type, order, n, aapl_id, lapl_id)
         hid_t loc_id;           IN: Object that attribute is attached to
-        const char *obj_name;   IN: Name of object relative to location
+        const char *obj_name;   IN: Name of the object relative to location
         H5_index_t idx_type;    IN: Type of index to use
         H5_iter_order_t order;  IN: Order to iterate over index
         hsize_t n;              IN: Index (0-based) attribute to open
@@ -1183,7 +1183,7 @@ done:
     Gets a copy of the creation property list for an attribute
  USAGE
     hssize_t H5Aget_create_plist (attr_id, buf_size, buf)
-        hid_t attr_id;      IN: Attribute to get name of
+        hid_t attr_id;      IN: Attribute to get the name of
  RETURNS
     This function returns the ID of a copy of the attribute's creation
     property list, or H5I_INVALID_HID on failure.
@@ -1234,7 +1234,7 @@ done:
     Gets a copy of the name for an attribute
  USAGE
     hssize_t H5Aget_name (attr_id, buf_size, buf)
-        hid_t attr_id;      IN: Attribute to get name of
+        hid_t attr_id;      IN: Attribute to get the name of
         size_t buf_size;    IN: The size of the buffer to store the string in.
         char *buf;          IN: Buffer to store name in
  RETURNS
@@ -1287,7 +1287,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Aget_name_by_idx
  *
- * Purpose:	Retrieve name of an attribute, according to the
+ * Purpose:	Retrieve the name of an attribute, according to the
  *		order within an index.
  *
  *              Same pattern of behavior as H5Iget_name.
@@ -1580,7 +1580,7 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     assert(new_name);
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_name, new_name) != 0) {
+    if (strcmp(old_name, new_name) != 0) {
         H5VL_attr_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up VOL callback arguments */
@@ -1855,7 +1855,7 @@ done:
         The operation receives the ID for the group or dataset being iterated
     over ('loc_id'), the name of the current attribute about the object
     ('attr_name'), the attribute's "info" struct ('ainfo') and the pointer to
-    the operator data passed in to H5Aiterate2 ('op_data').  The return values
+    the operator data passed into H5Aiterate2 ('op_data').  The return values
     from an operator are:
         A. Zero causes the iterator to continue, returning zero when all
             attributes have been processed.
@@ -1943,7 +1943,7 @@ done:
         The operation receives the ID for the group or dataset being iterated
     over ('loc_id'), the name of the current attribute about the object
     ('attr_name'), the attribute's "info" struct ('ainfo') and the pointer to
-    the operator data passed in to H5Aiterate_by_name ('op_data').  The return values
+    the operator data passed into H5Aiterate_by_name ('op_data').  The return values
     from an operator are:
         A. Zero causes the iterator to continue, returning zero when all
             attributes have been processed.

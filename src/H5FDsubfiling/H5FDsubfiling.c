@@ -585,7 +585,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
     config_out->shared_cfg.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
 
-    if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
+    if ((h5_require_ioc = getenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = atoi(h5_require_ioc);
         if (value_check == 0)
             config_out->require_ioc = false;
@@ -724,7 +724,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
     }
     else {
         if (sf_context->config_file_prefix) {
-            ret_value += HDstrlen(sf_context->config_file_prefix) + 1;
+            ret_value += strlen(sf_context->config_file_prefix) + 1;
         }
     }
 
@@ -780,7 +780,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
     /* Encode driver name */
-    HDstrncpy(name, "Subfilin", 9);
+    strncpy(name, "Subfilin", 9);
     name[8] = '\0';
 
     /* Encode configuration structure magic number */
@@ -802,7 +802,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
 
     /* Encode config file prefix string length */
     if (sf_context->config_file_prefix) {
-        prefix_len = HDstrlen(sf_context->config_file_prefix) + 1;
+        prefix_len = strlen(sf_context->config_file_prefix) + 1;
         H5_CHECKED_ASSIGN(tmpu64, uint64_t, prefix_len, size_t);
     }
     else
@@ -862,7 +862,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
-    if (HDstrncmp(name, "Subfilin", 9))
+    if (strncmp(name, "Subfilin", 9))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
 
     /* Decode configuration structure magic number */
@@ -2031,7 +2031,7 @@ done:
  *                          The contents of supplied buffers are undefined.
  *
  * Notes:       Thus function doesn't actually implement vector read.
- *              Instead, it comverts the vector read call into a series
+ *              Instead, it converts the vector read call into a series
  *              of scalar read calls.  Fix this when time permits.
  *
  *              Also, it didn't support the sizes and types optimization.
@@ -2191,7 +2191,7 @@ done:
  *                          subfiling writes have failed for some reason.
  *
  * Notes:       Thus function doesn't actually implement vector write.
- *              Instead, it comverts the vector write call into a series
+ *              Instead, it converts the vector write call into a series
  *              of scalar read calls.  Fix this when time permits.
  *
  *              Also, it didn't support the sizes and types optimization.
@@ -2426,7 +2426,7 @@ H5FD__subfiling_lock(H5FD_t *_file, bool rw)
 
     if (file->fa.require_ioc) {
 #ifdef VERBOSE
-        HDputs("Subfiling driver doesn't support file locking");
+        puts("Subfiling driver doesn't support file locking");
 #endif
     }
     else {

@@ -736,10 +736,10 @@ h5_set_info_object(void)
     int   ret_value = 0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
-    if ((envp = HDgetenv("HDF5_MPI_INFO")) != NULL) {
+    if ((envp = getenv("HDF5_MPI_INFO")) != NULL) {
         char *next, *valp;
 
-        valp = envp = next = HDstrdup(envp);
+        valp = envp = next = strdup(envp);
 
         if (!valp)
             return 0;
@@ -764,7 +764,7 @@ h5_set_info_object(void)
             if (*next == ';')
                 ++next;
 
-            namep = HDstrncpy(key_val, valp, len);
+            namep = strncpy(key_val, valp, len);
 
             /* pass up any beginning whitespaces */
             while (*namep && (*namep == ' ' || *namep == '\t'))
@@ -774,13 +774,13 @@ h5_set_info_object(void)
                 continue; /* was all white space, so move to next k/v pair */
 
             /* eat up any ending white spaces */
-            endp = &namep[HDstrlen(namep) - 1];
+            endp = &namep[strlen(namep) - 1];
 
             while (endp && (*endp == ' ' || *endp == '\t'))
                 *endp-- = '\0';
 
             /* find the '=' */
-            valp = HDstrchr(namep, '=');
+            valp = strchr(namep, '=');
 
             if (valp != NULL) { /* it's a valid key/value pairing */
                 char *tmp_val = valp + 1;
@@ -1049,7 +1049,7 @@ output_report(const char *fmt, ...)
 
         va_start(ap, fmt);
         H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
-        HDvfprintf(output, fmt, ap);
+        vfprintf(output, fmt, ap);
         H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         va_end(ap);
     }
@@ -1072,7 +1072,7 @@ print_indent(int indent)
         indent *= TAB_SPACE;
 
         for (; indent > 0; --indent)
-            HDfputc(' ', output);
+            fputc(' ', output);
     }
 }
 
@@ -1215,7 +1215,7 @@ report_parameters(struct options *opts)
         fprintf(output, "Contiguous\n");
 
     {
-        char *prefix = HDgetenv("HDF5_PARAPREFIX");
+        char *prefix = getenv("HDF5_PARAPREFIX");
 
         fprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank, (prefix ? prefix : "not set"));
     }
@@ -1334,7 +1334,7 @@ parse_command_line(int argc, const char *const *argv)
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (HDstrlen(buf) > 1 || isdigit(buf[0])) {
+                    if (strlen(buf) > 1 || isdigit(buf[0])) {
                         size_t j;
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)

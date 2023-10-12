@@ -119,11 +119,11 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
     assert(msg);
 
     /* Get the length of the message string */
-    len = (ssize_t)HDstrlen(msg->msg);
+    len = (ssize_t)strlen(msg->msg);
 
     /* Copy the message into the user's buffer, if given */
     if (msg_str) {
-        HDstrncpy(msg_str, msg->msg, size);
+        strncpy(msg_str, msg->msg, size);
         if ((size_t)len >= size)
             msg_str[size - 1] = '\0';
     } /* end if */
@@ -209,7 +209,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     cls_ptr = maj_ptr->cls;
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
+    if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -245,7 +245,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
-    if (err_desc->desc == NULL || HDstrlen(err_desc->desc) == 0)
+    if (err_desc->desc == NULL || strlen(err_desc->desc) == 0)
         have_desc = 0;
 
     /* Print error message */
@@ -333,7 +333,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         HGOTO_DONE(FAIL);
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
+    if (eprint->cls.lib_name == NULL || strcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -369,7 +369,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     } /* end if */
 
     /* Check for "real" error description - used to format output more nicely */
-    if (err_desc->desc == NULL || HDstrlen(err_desc->desc) == 0)
+    if (err_desc->desc == NULL || strlen(err_desc->desc) == 0)
         have_desc = 0;
 
     /* Print error message */

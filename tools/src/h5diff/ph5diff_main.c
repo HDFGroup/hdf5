@@ -246,8 +246,8 @@ print_manager_output(void)
         if (overflow_file) {
             int tmp;
             rewind(overflow_file);
-            while ((tmp = HDgetc(overflow_file)) >= 0)
-                HDputchar(tmp);
+            while ((tmp = getc(overflow_file)) >= 0)
+                putchar(tmp);
             fclose(overflow_file);
             overflow_file = NULL;
         }

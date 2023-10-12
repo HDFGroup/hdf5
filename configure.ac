@@ -1074,14 +1074,6 @@ H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  ## tell libtool to do the right thing with COMMON symbols, this fixes
-  ## corrupt values with COMMON and EQUIVALENCE when building shared
-  ## Fortran libraries on OSX with gnu and Intel compilers (HDFFV-2772).
-  case "`uname`" in
-    Darwin*)
-    H5_LDFLAGS="$H5_LDFLAGS -Wl,-commons,use_dylibs"
-    ;;
-  esac
 
   ## Report results of check(s)
 
@@ -2662,6 +2654,20 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
+# Requires MPI standard 3.0 and greater
+if test "X${enable_parallel}" = "Xyes"; then
+  AC_MSG_CHECKING([whether MPI meets the minimum 3.0 standard])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+       #include <mpi.h>
+       #if MPI_VERSION < 3
+       #error, found MPI_VERSION < 3
+       #endif]])],
+       [AC_MSG_RESULT([yes])],
+       [AC_MSG_RESULT([no])
+       AC_MSG_ERROR([HDF5 requires MPI standard 3.0 or greater])]
+  )
+fi
+
 AC_MSG_CHECKING([for parallel support files])
 case "X-$enable_parallel" in
   X-|X-no|X-none)
@@ -4206,6 +4212,11 @@ AC_CONFIG_FILES([Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
+if test -n "$TESTPARALLEL"; then
+  if test "X$SUBFILING_VFD" = "Xyes"; then
+    AC_CONFIG_LINKS([testpar/h5fuse.sh:utils/subfiling_vfd/h5fuse.sh])
+  fi
+fi
 
 AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
                 $MKDIR_P java/test/.classes;

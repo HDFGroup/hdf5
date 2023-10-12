@@ -10,7 +10,7 @@ jobs:
     name: Check for spelling errors
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: codespell-project/actions-codespell@master
         with:
           skip: ./.github/workflows/codespell.yml,./bin/trace,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./config/sanitizer/LICENSE,./config/sanitizer/sanitizers.cmake,./tools/test/h5repack/testfiles/*.dat,./test/API/driver,./configure,./bin/ltmain.sh,./bin/depcomp,./bin/config.guess,./bin/config.sub,./autom4te.cache,./m4/libtool.m4,./c++/src/*.html

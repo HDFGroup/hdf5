@@ -2121,19 +2121,19 @@ test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2
 
     /* Simple check for correct names */
     if (*count == 0) {
-        if (HDstrcmp(name, DSETNAME2) == 0)
+        if (strcmp(name, DSETNAME2) == 0)
             ret_value = 0;
         else
             ret_value = -1;
     } /* end if */
     else if (*count == 1) {
-        if (HDstrcmp(name, GROUPNAME2) == 0)
+        if (strcmp(name, GROUPNAME2) == 0)
             ret_value = 0;
         else
             ret_value = -1;
     } /* end if */
     else if (*count == 2) {
-        if (HDstrcmp(name, GROUPNAME3) == 0)
+        if (strcmp(name, GROUPNAME3) == 0)
             ret_value = 0;
         else
             ret_value = -1;
@@ -3564,7 +3564,7 @@ test_reference(void)
     MESSAGE(5, ("Testing References\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -3588,7 +3588,7 @@ test_reference(void)
     }     /* end low bound */
 
     /* The following test is currently broken with the Direct VFD */
-    if (HDstrcmp(env_h5_drvr, "direct") != 0) {
+    if (strcmp(env_h5_drvr, "direct") != 0) {
         test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     }
 

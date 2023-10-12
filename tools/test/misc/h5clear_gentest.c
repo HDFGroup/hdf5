@@ -274,7 +274,7 @@ gen_enhance_files(bool user)
         }
 
         /* location of "end of file address" */
-        if (lseek(fd, (off_t)(28 + (user ? USERBLOCK : 0)), SEEK_SET) < 0)
+        if (lseek(fd, (HDoff_t)(28 + (user ? USERBLOCK : 0)), SEEK_SET) < 0)
             goto error;
 
         /* Write the bad eoa value to the file */
@@ -282,7 +282,7 @@ gen_enhance_files(bool user)
             goto error;
 
         /* location of "superblock checksum" */
-        if (lseek(fd, (off_t)(44 + (user ? USERBLOCK : 0)), SEEK_SET) < 0)
+        if (lseek(fd, (HDoff_t)(44 + (user ? USERBLOCK : 0)), SEEK_SET) < 0)
             goto error;
 
         /* Write the chksum value to the file */
@@ -421,7 +421,7 @@ main(void)
         if ((my_fapl = H5Pcopy(fapl2)) < 0)
             goto error;
         /* Create the file */
-        HDsnprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[0]);
+        snprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[0]);
         if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT,
                              my_fapl)) < 0)
             goto error;
@@ -446,7 +446,7 @@ main(void)
             goto error;
 
         /* Create the file */
-        HDsnprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[1]);
+        snprintf(fname, sizeof(fname), "%s%s", new_format ? "latest_" : "", FILENAME[1]);
         if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT,
                              my_fapl)) < 0)
             goto error;

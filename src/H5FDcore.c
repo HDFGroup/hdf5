@@ -362,7 +362,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
-    if ((HDoff_t)addr != HDlseek(file->fd, (off_t)addr, SEEK_SET))
+    if ((HDoff_t)addr != HDlseek(file->fd, (HDoff_t)addr, SEEK_SET))
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
 #endif /* H5_HAVE_PREADWRITE */
 
@@ -399,7 +399,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
                         "errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this "
                         "sub-write = %llu, bytes actually written = %llu, offset = %llu",
-                        HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), (void *)ptr,
+                        HDctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno), (void *)ptr,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -430,12 +430,12 @@ done:
 static inline const H5FD_core_fapl_t *
 H5FD__core_get_default_config(void)
 {
-    char *driver = HDgetenv(HDF5_DRIVER);
+    char *driver = getenv(HDF5_DRIVER);
 
     if (driver) {
-        if (!HDstrcmp(driver, "core"))
+        if (!strcmp(driver, "core"))
             return &H5FD_core_default_config_g;
-        else if (!HDstrcmp(driver, "core_paged"))
+        else if (!strcmp(driver, "core_paged"))
             return &H5FD_core_default_paged_config_g;
     }
 
@@ -462,10 +462,10 @@ H5FD_core_init(void)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = true; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1")))
         ignore_disabled_file_locks_s = false; /* Override: Don't ignore disabled locks */
     else
         ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
@@ -905,7 +905,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
-                            HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno),
+                            HDctime(&mytime), file->name, file->fd, myerrno, strerror(myerrno),
                             (void *)file->mem, (unsigned long long)size, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
@@ -1086,7 +1086,7 @@ H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         if (NULL == f2->name)
             HGOTO_DONE(1);
 
-        ret_value = HDstrcmp(f1->name, f2->name);
+        ret_value = strcmp(f1->name, f2->name);
     } /* end else */
 
 done:

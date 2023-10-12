@@ -401,7 +401,7 @@ H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     assert(!udata->attr);
 
     /* Check for correct attribute message to modify */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Make a copy of the attribute to return */
         if (NULL == (udata->attr = H5A__copy(NULL, (H5A_t *)mesg->native)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy attribute");
@@ -673,7 +673,7 @@ H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_
              *  address to which the attribute is attached, and file serial
              *  number should all match.
              */
-            if (!HDstrcmp(name_to_open, (*attr)->shared->name) && loc->addr == (*attr)->oloc.addr &&
+            if (!strcmp(name_to_open, (*attr)->shared->name) && loc->addr == (*attr)->oloc.addr &&
                 loc_fnum == attr_fnum) {
                 ret_value = true;
                 break;
@@ -784,7 +784,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
     assert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if (0 == HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name)) {
+    if (0 == strcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name)) {
         /* Protect chunk */
         if (NULL == (chk_proxy = H5O__chunk_protect(udata->f, oh, mesg->chunkno)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk");
@@ -935,7 +935,7 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
     assert(!udata->found);
 
     /* Check for existing attribute with new name */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->new_name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->new_name) == 0) {
         /* Indicate that we found an existing attribute with the new name*/
         udata->found = true;
 
@@ -978,7 +978,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
     assert(!udata->found);
 
     /* Find correct attribute message to rename */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->old_name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->old_name) == 0) {
         unsigned old_version = ((H5A_t *)mesg->native)->shared->version; /* Old version of the attribute */
 
         /* Protect chunk */
@@ -1015,7 +1015,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
             assert(H5O_msg_is_shared(H5O_ATTR_ID, (H5A_t *)mesg->native) == false);
 
             /* Check for attribute message changing size */
-            if (HDstrlen(udata->new_name) != HDstrlen(udata->old_name) ||
+            if (strlen(udata->new_name) != strlen(udata->old_name) ||
                 old_version != ((H5A_t *)mesg->native)->shared->version) {
                 H5A_t *attr; /* Attribute to re-add */
 
@@ -1421,7 +1421,7 @@ H5O__attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNU
     assert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Convert message into a null message (i.e. delete it) */
         if (H5O__release_mesg(udata->f, oh, mesg, true) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message");
@@ -1679,7 +1679,7 @@ H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsig
     assert(udata->exists && !*udata->exists);
 
     /* Check for correct attribute message */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Indicate that this message is the attribute sought */
         *udata->exists = true;
 

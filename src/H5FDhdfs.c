@@ -926,7 +926,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     unsigned long long max_raw      = 0;
     unsigned long long bytes_raw    = 0;
     unsigned long long bytes_meta   = 0;
-    double             re_dub       = 0.0; /* re-usable double variable */
+    double             re_dub       = 0.0; /* reusable double variable */
     unsigned           suffix_i     = 0;
     const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
@@ -1220,10 +1220,10 @@ H5FD__hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if (finfo1->mBlockSize != finfo2->mBlockSize) {
         HGOTO_DONE(-1);
     }
-    if (HDstrcmp(finfo1->mOwner, finfo2->mOwner)) {
+    if (strcmp(finfo1->mOwner, finfo2->mOwner)) {
         HGOTO_DONE(-1);
     }
-    if (HDstrcmp(finfo1->mGroup, finfo2->mGroup)) {
+    if (strcmp(finfo1->mGroup, finfo2->mGroup)) {
         HGOTO_DONE(-1);
     }
     if (finfo1->mPermissions != finfo2->mPermissions) {

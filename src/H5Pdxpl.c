@@ -736,7 +736,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression");
 
         /* Get the transform string expression size */
-        len = HDstrlen(pexp) + 1;
+        len = strlen(pexp) + 1;
     } /* end if */
 
     if (NULL != *pp) {
@@ -920,7 +920,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
 
         if (pexp1) {
             assert(pexp2);
-            ret_value = HDstrcmp(pexp1, pexp2);
+            ret_value = strcmp(pexp1, pexp2);
         } /* end if */
     }     /* end if */
 
@@ -1050,9 +1050,9 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression");
 
     /* Copy into application buffer */
-    len = HDstrlen(pexp);
+    len = strlen(pexp);
     if (expression) {
-        HDstrncpy(expression, pexp, size);
+        strncpy(expression, pexp, size);
         if (len >= size)
             expression[size - 1] = '\0';
     } /* end if */

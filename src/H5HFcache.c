@@ -2521,7 +2521,7 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap
@@ -2881,7 +2881,7 @@ done:
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap
@@ -2994,7 +2994,7 @@ done:
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap
@@ -3153,7 +3153,7 @@ done:
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap

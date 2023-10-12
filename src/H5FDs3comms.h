@@ -130,7 +130,7 @@
  *
  *     Format "S3 Credential" string from inputs, for AWS4.
  *
- *     Wrapper for HDsnprintf().
+ *     Wrapper for snprintf().
  *
  *     _HAS NO ERROR-CHECKING FACILITIES_
  *     It is left to programmer to ensure that return value confers success.
@@ -153,8 +153,8 @@
  *---------------------------------------------------------------------------
  */
 #define S3COMMS_FORMAT_CREDENTIAL(dest, access, iso8601_date, region, service)                               \
-    HDsnprintf((dest), S3COMMS_MAX_CREDENTIAL_SIZE, "%s/%s/%s/%s/aws4_request", (access), (iso8601_date),    \
-               (region), (service))
+    snprintf((dest), S3COMMS_MAX_CREDENTIAL_SIZE, "%s/%s/%s/%s/aws4_request", (access), (iso8601_date),      \
+             (region), (service))
 
 /*********************
  * PUBLIC STRUCTURES *
@@ -211,7 +211,7 @@
  *
  * `magic` (unsigned long)
  *
- *     "unique" idenfier number for the structure type
+ *     "unique" identifier number for the structure type
  *
  * `name` (char *)
  *
@@ -458,7 +458,7 @@ typedef struct {
  *
  * `signing_key` (unsigned char *)
  *
- *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "re-usable" signing
+ *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "reusable" signing
  *     key, generated via
  *     `HMAC-SHA256(HMAC-SHA256(HMAC-SHA256(HMAC-SHA256("AWS4<secret_key>",
  *         "<yyyyMMDD"), "<aws-region>"), "<aws-service>"), "aws4_request")`

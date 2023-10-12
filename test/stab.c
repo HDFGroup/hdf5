@@ -125,9 +125,9 @@ test_misc(hid_t fcpl, hid_t fapl, bool new_format)
         TEST_ERROR;
     if (H5Oget_comment_by_name(g3, "././.", comment, sizeof comment, H5P_DEFAULT) < 0)
         TEST_ERROR;
-    if (HDstrcmp(comment, "hello world") != 0) {
+    if (strcmp(comment, "hello world") != 0) {
         H5_FAILED();
-        HDputs("    Read the wrong comment string from the group.");
+        puts("    Read the wrong comment string from the group.");
         printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR;
     }
@@ -210,7 +210,7 @@ test_long(hid_t fcpl, hid_t fapl, bool new_format)
     name1[LONG_NAME_LEN - 1] = '\0';
     name2Len                 = (2 * LONG_NAME_LEN) + 2;
     name2                    = (char *)malloc(name2Len);
-    HDsnprintf(name2, name2Len, "%s/%s", name1, name1);
+    snprintf(name2, name2Len, "%s/%s", name1, name1);
 
     /* Create groups */
     if ((g1 = H5Gcreate2(fid, name1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -296,7 +296,7 @@ test_large(hid_t fcpl, hid_t fapl, bool new_format)
         if (H5G__has_stab_test(cwg) != false)
             TEST_ERROR;
     for (i = 0; i < LARGE_NOBJS; i++) {
-        HDsnprintf(name, sizeof(name), "%05d%05d", (HDrandom() % 100000), i);
+        snprintf(name, sizeof(name), "%05d%05d", (HDrandom() % 100000), i);
         if ((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Gclose(dir) < 0)
@@ -435,7 +435,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create first "bottom" group */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -458,7 +458,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     /* Create several more bottom groups, to push the top group almost to a symbol table */
     /* (Start counting at '1', since we've already created one bottom group */
     for (u = 1; u < LIFECYCLE_MAX_COMPACT; u++) {
-        HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+        snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
@@ -494,7 +494,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -528,7 +528,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Unlink objects from top group */
     while (u >= LIFECYCLE_MIN_DENSE) {
-        HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+        snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
 
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
@@ -545,7 +545,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Unlink one more object from the group, which should transform back to using links */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
     u--;
@@ -559,11 +559,11 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Unlink last two objects from top group */
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
     u--;
-    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
+    snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
@@ -818,7 +818,7 @@ read_old(void)
 
     /* Create a bunch of objects in the group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsnprintf(objname, sizeof(objname), "Group %u", u);
+        snprintf(objname, sizeof(objname), "Group %u", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
@@ -842,7 +842,7 @@ read_old(void)
 
     /* Delete new objects from old group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsnprintf(objname, sizeof(objname), "Group %u", u);
+        snprintf(objname, sizeof(objname), "Group %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -951,7 +951,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create first "bottom" group */
-    HDsnprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    snprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -972,7 +972,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Unlink object from top group */
-    HDsnprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    snprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
@@ -1250,7 +1250,7 @@ old_api(hid_t fapl)
     (void)fapl;
 
     SKIPPED();
-    HDputs("    Deprecated API symbols not enabled");
+    puts("    Deprecated API symbols not enabled");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     return 0;
@@ -1381,12 +1381,12 @@ main(void)
     int         nerrors = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* VFD that does not support contiguous address space */
-    contig_addr_vfd = (bool)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
+    contig_addr_vfd = (bool)(strcmp(env_h5_drvr, "split") != 0 && strcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1465,7 +1465,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDputs("All symbol table tests passed.");
+    puts("All symbol table tests passed.");
 
     /* Cleanup */
     if (GetTestCleanup()) {
@@ -1477,6 +1477,6 @@ main(void)
     return 0;
 
 error:
-    HDputs("*** TESTS FAILED ***");
+    puts("*** TESTS FAILED ***");
     return 1;
 }

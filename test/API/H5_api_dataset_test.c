@@ -1197,7 +1197,7 @@ test_create_dataset_random_shapes(void)
             goto error;
         }
 
-        HDsprintf(name, "%s%zu", DATASET_SHAPE_TEST_DSET_BASE_NAME, i + 1);
+        sprintf(name, "%s%zu", DATASET_SHAPE_TEST_DSET_BASE_NAME, i + 1);
 
         if ((dset_id = H5Dcreate2(group_id, name, dset_dtype, space_id, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0) {
@@ -1295,7 +1295,7 @@ test_create_dataset_predefined_types(void)
                  generate_random_dataspace(DATASET_PREDEFINED_TYPE_TEST_SPACE_RANK, NULL, NULL, false)) < 0)
             TEST_ERROR;
 
-        HDsprintf(name, "%s%zu", DATASET_PREDEFINED_TYPE_TEST_BASE_NAME, i);
+        sprintf(name, "%s%zu", DATASET_PREDEFINED_TYPE_TEST_BASE_NAME, i);
 
         if ((dset_id = H5Dcreate2(group_id, name, predefined_type_test_table[i], fspace_id, H5P_DEFAULT,
                                   H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -1598,7 +1598,7 @@ test_create_dataset_compound_types(void)
             size_t member_size;
             char   member_name[256];
 
-            HDsnprintf(member_name, 256, "member%zu", j);
+            snprintf(member_name, 256, "member%zu", j);
 
             if ((type_pool[j] = generate_random_datatype(H5T_NO_CLASS, false)) < 0) {
                 H5_FAILED();
@@ -1626,7 +1626,7 @@ test_create_dataset_compound_types(void)
         if (H5Tpack(compound_type) < 0)
             TEST_ERROR;
 
-        HDsnprintf(dset_name, sizeof(dset_name), "%s%zu", DATASET_COMPOUND_TYPE_TEST_DSET_NAME, i);
+        snprintf(dset_name, sizeof(dset_name), "%s%zu", DATASET_COMPOUND_TYPE_TEST_DSET_NAME, i);
 
         if ((dset_id = H5Dcreate2(group_id, dset_name, compound_type, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0) {
@@ -1747,7 +1747,7 @@ test_create_dataset_enum_types(void)
     for (i = 0; i < DATASET_ENUM_TYPE_TEST_NUM_MEMBERS; i++) {
         char val_name[15];
 
-        HDsnprintf(val_name, 15, "%s%zu", DATASET_ENUM_TYPE_TEST_VAL_BASE_NAME, i);
+        snprintf(val_name, 15, "%s%zu", DATASET_ENUM_TYPE_TEST_VAL_BASE_NAME, i);
 
         if (H5Tenum_insert(enum_non_native, val_name, &i) < 0)
             TEST_ERROR;
@@ -2118,7 +2118,7 @@ test_create_dataset_creation_properties(void)
                     PART_ERROR(DCPL_alloc_time_test);
                 }
 
-                HDsprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_ALLOC_TIMES_BASE_NAME, i);
+                sprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_ALLOC_TIMES_BASE_NAME, i);
 
                 if ((dset_id = H5Dcreate2(group_id, name, dset_dtype, fspace_id, H5P_DEFAULT, dcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -2194,7 +2194,7 @@ test_create_dataset_creation_properties(void)
                     PART_ERROR(DCPL_attr_crt_order_test);
                 }
 
-                HDsprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_CRT_ORDER_BASE_NAME, i);
+                sprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_CRT_ORDER_BASE_NAME, i);
 
                 if ((dset_id = H5Dcreate2(group_id, name, dset_dtype, fspace_id, H5P_DEFAULT, dcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -2327,7 +2327,7 @@ test_create_dataset_creation_properties(void)
                     PART_ERROR(DCPL_fill_time_property_test);
                 }
 
-                HDsprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_FILL_TIMES_BASE_NAME, i);
+                sprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_FILL_TIMES_BASE_NAME, i);
 
                 if ((dset_id = H5Dcreate2(group_id, name, dset_dtype, fspace_id, H5P_DEFAULT, dcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -2513,7 +2513,7 @@ test_create_dataset_creation_properties(void)
                     }
                 }
 
-                HDsprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_LAYOUTS_BASE_NAME, i);
+                sprintf(name, "%s%zu", DATASET_CREATION_PROPERTIES_TEST_LAYOUTS_BASE_NAME, i);
 
                 if ((dset_id =
                          H5Dcreate2(group_id, name, (H5D_COMPACT == layouts[i]) ? compact_dtype : dset_dtype,
@@ -3765,7 +3765,7 @@ test_dataset_property_lists(void)
                     PART_ERROR(H5Dget_access_plist);
                 }
 
-                if (HDstrncmp(tmp_prefix, path_prefix, (size_t)buf_size + 1)) {
+                if (strncmp(tmp_prefix, path_prefix, (size_t)buf_size + 1)) {
                     H5_FAILED();
                     printf("    DAPL values were incorrect!\n");
                     PART_ERROR(H5Dget_access_plist);
@@ -3779,7 +3779,7 @@ test_dataset_property_lists(void)
                     PART_ERROR(H5Dget_access_plist);
                 }
 
-                if (!HDstrncmp(tmp_prefix, path_prefix, (size_t)buf_size + 1)) {
+                if (!strncmp(tmp_prefix, path_prefix, (size_t)buf_size + 1)) {
                     H5_FAILED();
                     printf("    DAPL property value was set!\n");
                     PART_ERROR(H5Dget_access_plist);

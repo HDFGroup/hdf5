@@ -1203,7 +1203,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(fid, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(file_comment, check_comment);
+    ret_value = strcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Open the group */
@@ -1217,7 +1217,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(grp, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(grp_comment, check_comment);
+    ret_value = strcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Open the datatype */
@@ -1231,7 +1231,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(dtype, check_comment, (size_t)comment_len + 1);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(dtype_comment, check_comment);
+    ret_value = strcmp(dtype_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Open the dataset */
@@ -1245,7 +1245,7 @@ test_h5o_comment(void)
     len = H5Oget_comment(dset, check_comment, (size_t)comment_len + 1);
     CHECK(ret, len, "H5Oget_comment");
 
-    ret_value = HDstrcmp(dset_comment, check_comment);
+    ret_value = strcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
 
     /* Close the IDs */
@@ -1378,7 +1378,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(fid, ".", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
 
-    ret_value = HDstrcmp(file_comment, check_comment);
+    ret_value = strcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Open the group */
@@ -1392,7 +1392,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(fid, "group", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
 
-    ret_value = HDstrcmp(grp_comment, check_comment);
+    ret_value = strcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Getting the comment on the datatype and verify it */
@@ -1402,7 +1402,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(grp, "datatype", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment");
 
-    ret_value = HDstrcmp(dtype_comment, check_comment);
+    ret_value = strcmp(dtype_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Getting the comment on the dataset and verify it */
@@ -1412,7 +1412,7 @@ test_h5o_comment_by_name(void)
     len = H5Oget_comment_by_name(fid, "dataset", check_comment, (size_t)comment_len + 1, H5P_DEFAULT);
     CHECK(len, FAIL, "H5Oget_comment_by_name");
 
-    ret_value = HDstrcmp(dset_comment, check_comment);
+    ret_value = strcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
 
     /* Close the IDs */
@@ -1699,16 +1699,16 @@ visit_obj_cb(hid_t group_id, const char *name, const H5O_info1_t *oinfo1, void H
     H5O_info1_t oinfo2; /* Object info structs */
 
     /* Verify the object info for "group1", "group2" and the root group */
-    if (!(HDstrcmp(name, "group1"))) {
+    if (!(strcmp(name, "group1"))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_NUM_ATTRS, H5P_DEFAULT);
         VERIFY(oinfo1->num_attrs, oinfo2.num_attrs, "obj info from H5Ovisit1");
     }
-    else if (!(HDstrcmp(name, "group2"))) {
+    else if (!(strcmp(name, "group2"))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_HDR, H5P_DEFAULT);
         VERIFY(oinfo1->hdr.nmesgs, oinfo2.hdr.nmesgs, "obj info from H5Ovisit1/H5Oget_info2");
         VERIFY(oinfo1->hdr.nchunks, oinfo2.hdr.nchunks, "obj info from H5Ovisit1/H5Oget_info2");
     }
-    else if (!(HDstrcmp(name, "."))) {
+    else if (!(strcmp(name, "."))) {
         H5Oget_info_by_name2(group_id, name, &oinfo2, H5O_INFO_META_SIZE, H5P_DEFAULT);
         VERIFY(oinfo1->meta_size.obj.index_size, oinfo2.meta_size.obj.index_size,
                "obj info from H5Ovisit1/H5Oget_info2");
@@ -1761,7 +1761,7 @@ test_h5o_getinfo_visit(void)
     /* Attach 10 attributes to "group1" */
     for (j = 0; j < 10; j++) {
         /* Create the attribute name */
-        HDsnprintf(attrname, sizeof(attrname), "attr%u", j);
+        snprintf(attrname, sizeof(attrname), "attr%u", j);
         /* Create the attribute */
         aid = H5Acreate2(gid1, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");

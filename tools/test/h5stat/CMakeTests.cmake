@@ -75,15 +75,15 @@
   )
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}.err" "${PROJECT_BINARY_DIR}/${h5_file}.err" "h5stat_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
   endforeach ()
   add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
 
@@ -160,7 +160,7 @@
   ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
   ADD_H5_TEST (h5stat_nofile 1 '')
 
-# Test file with groups, compressed datasets, user-applied fileters, etc.
+# Test file with groups, compressed datasets, user-applied filters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
   ADD_H5_TEST (h5stat_filters 0 h5stat_filters.h5)
   ADD_H5_TEST (h5stat_filters-file 0 -f h5stat_filters.h5)

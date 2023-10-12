@@ -2881,7 +2881,7 @@ none_selection_chunk(void)
  *
  *              TEST_ACTUAL_IO_RESET:
  *                  Performs collective and then independent I/O with hthe same dxpl to
- *                  make sure the peroperty is correctly reset to the default on each use.
+ *                  make sure the property is correctly reset to the default on each use.
  *                  Specifically, this test runs TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE
  *                  (The most complex case that works on all builds) and then performs
  *                  an independent read and write with the same dxpls.
@@ -3251,10 +3251,10 @@ test_actual_io_mode(int selection_mode)
     /* Test values */
     if (actual_chunk_opt_mode_expected != (H5D_mpio_actual_chunk_opt_mode_t)-1 &&
         actual_io_mode_expected != (H5D_mpio_actual_io_mode_t)-1) {
-        HDsnprintf(message, sizeof(message), "Actual Chunk Opt Mode has the correct value for %s.\n",
-                   test_name);
+        snprintf(message, sizeof(message), "Actual Chunk Opt Mode has the correct value for %s.\n",
+                 test_name);
         VRFY((actual_chunk_opt_mode_write == actual_chunk_opt_mode_expected), message);
-        HDsnprintf(message, sizeof(message), "Actual IO Mode has the correct value for %s.\n", test_name);
+        snprintf(message, sizeof(message), "Actual IO Mode has the correct value for %s.\n", test_name);
         VRFY((actual_io_mode_write == actual_io_mode_expected), message);
     }
     else {
@@ -3728,12 +3728,12 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* Test values */
     memset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message),
-               "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    snprintf(message, sizeof(message), "Local cause of Broken Collective I/O has the correct value for %s.\n",
+             test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
     memset(message, 0, sizeof(message));
-    HDsnprintf(message, sizeof(message),
-               "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    snprintf(message, sizeof(message),
+             "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */

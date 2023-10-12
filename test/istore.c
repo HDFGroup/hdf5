@@ -62,7 +62,7 @@ is_sparse(void)
 
     if ((fd = HDopen("x.h5", O_RDWR | O_TRUNC | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
         return 0;
-    if (HDlseek(fd, (off_t)(1024 * 1024), SEEK_SET) != 1024 * 1024)
+    if (HDlseek(fd, (HDoff_t)(1024 * 1024), SEEK_SET) != 1024 * 1024)
         return 0;
     if (5 != HDwrite(fd, "hello", (size_t)5))
         return 0;
@@ -194,7 +194,7 @@ test_create(hid_t f, const char *prefix)
         dims[u] = my_chunk_dims[u] = 2;
 
         /* Create chunked dataset of this dimensionality */
-        HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
+        snprintf(name, sizeof name, "%s_%02u", prefix, u);
         if ((dataset = new_object(f, name, (int)u, dims, my_chunk_dims)) < 0)
             return FAIL;
 
@@ -240,21 +240,20 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         if (!ny) {
             ndims = 1;
             ny = nz = 1;
-            HDsnprintf(dims, sizeof(dims), "%lu", (unsigned long)nx);
+            snprintf(dims, sizeof(dims), "%lu", (unsigned long)nx);
         }
         else {
             ndims = 2;
             nz    = 1;
-            HDsnprintf(dims, sizeof(dims), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
+            snprintf(dims, sizeof(dims), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
         }
     }
     else {
         ndims = 3;
-        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny,
-                   (unsigned long)nz);
+        snprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
     }
 
-    HDsnprintf(s, sizeof(s), "istore extend: %s", dims);
+    snprintf(s, sizeof(s), "istore extend: %s", dims);
     TESTING(s);
     buf   = (uint8_t *)malloc(nx * ny * nz);
     check = (uint8_t *)malloc(nx * ny * nz);
@@ -268,7 +267,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
     max_corner[2] = 0;
 
     /* Build the new empty object */
-    HDsnprintf(name, sizeof(name), "%s_%s", prefix, dims);
+    snprintf(name, sizeof(name), "%s_%s", prefix, dims);
     if ((dataset = new_object(f, name, ndims, whole_size, whole_size)) < 0) {
         fprintf(stderr, "    Cannot create %u-d object `%s'\n", ndims, name);
         goto error;
@@ -433,21 +432,20 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
         if (!ny) {
             ndims = 1;
             ny = nz = 1;
-            HDsnprintf(dims, sizeof(dims), "%lu", (unsigned long)nx);
+            snprintf(dims, sizeof(dims), "%lu", (unsigned long)nx);
         }
         else {
             ndims = 2;
             nz    = 1;
-            HDsnprintf(dims, sizeof(dims), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
+            snprintf(dims, sizeof(dims), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
         }
     }
     else {
         ndims = 3;
-        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny,
-                   (unsigned long)nz);
+        snprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
     }
 
-    HDsnprintf(s, sizeof(s), "istore sparse: %s", dims);
+    snprintf(s, sizeof(s), "istore sparse: %s", dims);
     TESTING(s);
     if (skip_test) {
         SKIPPED();
@@ -466,7 +464,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     size[2] = nz;
 
     /* Build the new empty object */
-    HDsnprintf(name, sizeof(name), "%s_%s", prefix, dims);
+    snprintf(name, sizeof(name), "%s_%s", prefix, dims);
     if ((dataset = new_object(f, name, ndims, whole_size, chunk_dims)) < 0) {
         printf("    Cannot create %u-d object `%s'\n", ndims, name);
         goto error;
@@ -559,13 +557,13 @@ main(int argc, char *argv[])
     else {
         int i;
         for (i = 1, size_of_test = 0; i < argc; i++) {
-            if (!HDstrcmp(argv[i], "small")) {
+            if (!strcmp(argv[i], "small")) {
                 size_of_test |= TEST_SMALL;
             }
-            else if (!HDstrcmp(argv[i], "medium")) {
+            else if (!strcmp(argv[i], "medium")) {
                 size_of_test |= TEST_MEDIUM;
             }
-            else if (!HDstrcmp(argv[i], "large")) {
+            else if (!strcmp(argv[i], "large")) {
                 size_of_test |= TEST_LARGE;
             }
             else {

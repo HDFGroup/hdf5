@@ -297,7 +297,7 @@ test_get_config_str(void)
         TEST_ERROR;
     if (0 != config_str_len)
         TEST_ERROR;
-    if (HDstrlen(config_str_buf) > 0)
+    if (strlen(config_str_buf) > 0)
         TEST_ERROR;
 
     /* Set a new configuration string on the FAPL and retrieve it */
@@ -305,9 +305,9 @@ test_get_config_str(void)
         TEST_ERROR;
     if ((config_str_len = H5Pget_driver_config_str(fapl_id, config_str_buf, 128)) < 0)
         TEST_ERROR;
-    if (HDstrlen(config_str) != config_str_len)
+    if (strlen(config_str) != config_str_len)
         TEST_ERROR;
-    if (HDstrncmp(config_str_buf, config_str, 128))
+    if (strncmp(config_str_buf, config_str, 128))
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)
@@ -355,7 +355,7 @@ test_env_var(void)
         TEST_ERROR;
     if (0 != config_str_len)
         TEST_ERROR;
-    if (HDstrlen(config_str_buf) > 0)
+    if (strlen(config_str_buf) > 0)
         TEST_ERROR;
 
     /* Set default driver and driver configuration using environment variables */
@@ -382,9 +382,9 @@ test_env_var(void)
     memset(config_str_buf, 0, 128);
     if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
         TEST_ERROR;
-    if (HDstrlen(config_str) != config_str_len)
+    if (strlen(config_str) != config_str_len)
         TEST_ERROR;
-    if (HDstrncmp(config_str_buf, config_str, 128))
+    if (strncmp(config_str_buf, config_str, 128))
         TEST_ERROR;
 
     /* Unset environment variables */
@@ -420,7 +420,7 @@ main(void)
 
     h5_reset();
 
-    HDputs("Testing VFD plugin functionality.");
+    puts("Testing VFD plugin functionality.");
 
     nerrors += (test_set_by_name() < 0) ? 1 : 0;
     nerrors += (test_set_by_value() < 0) ? 1 : 0;
@@ -433,7 +433,7 @@ main(void)
         exit(EXIT_FAILURE);
     }
 
-    HDputs("All VFD plugin tests passed.");
+    puts("All VFD plugin tests passed.");
 
     exit(EXIT_SUCCESS);
 }

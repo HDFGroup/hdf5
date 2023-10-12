@@ -3054,7 +3054,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *suc
     /* Which kind of key are we looking for? */
     if (key->vfd.kind == H5FD_GET_DRIVER_BY_NAME) {
         /* Check if plugin name matches VFD class name */
-        if (cls->name && !HDstrcmp(cls->name, key->vfd.u.name))
+        if (cls->name && !strcmp(cls->name, key->vfd.u.name))
             *success = true;
     }
     else {
@@ -3090,7 +3090,7 @@ H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (H5FD_GET_DRIVER_BY_NAME == op_data->key.kind) {
-        if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {
+        if (0 == strcmp(cls->name, op_data->key.u.name)) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */

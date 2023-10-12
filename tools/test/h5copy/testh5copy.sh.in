@@ -24,16 +24,16 @@ USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 
 # source dirs
 SRC_TOOLS="$srcdir/../.."
-SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
-SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
-SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5LS_TESTFILES="$SRC_TOOLS/test/h5ls/testfiles"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
 SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+SRC_H5COPY_OUTFILES="$SRC_TOOLS/test/h5copy/expected"
 
 TESTNAME=h5copy
 EXIT_SUCCESS=0
@@ -58,10 +58,10 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 
 # List of expect files that will be copied over to local test dir
 LIST_OTHER_TEST_FILES="
-$SRC_H5COPY_TESTFILES/h5copy_misc1.out
-$SRC_H5COPY_TESTFILES/h5copy_misc1.err
-$SRC_H5COPY_TESTFILES/h5copy_help1.ddl
-$SRC_H5COPY_TESTFILES/h5copy_help2.ddl
+$SRC_H5COPY_OUTFILES/h5copy_misc1.out
+$SRC_H5COPY_OUTFILES/h5copy_misc1.err
+$SRC_H5COPY_OUTFILES/h5copy_help1.ddl
+$SRC_H5COPY_OUTFILES/h5copy_help2.ddl
 "
 
 H5COPY=../../src/h5copy/h5copy               # The tool name

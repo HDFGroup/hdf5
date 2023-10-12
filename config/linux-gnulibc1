@@ -92,7 +92,7 @@ else
             fc_version_info=`$FC -V | grep Absoft`
             ;;
          # The NAG compiler
-	 nagfor*|nagftn*)
+	 *nagfor*|*nagftn*)
             RM='rm -f'
             tmpfile=/tmp/cmpver.$$
             $FC -V >& $tmpfile
@@ -131,8 +131,6 @@ case $FC_BASENAME in
         H5_CFLAGS="$H5_CFLAGS"
 
         F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names
-# (just in case since this should be a default EIP)
         H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
 
@@ -162,9 +160,10 @@ case $FC_BASENAME in
     nagfor)
 
         F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names
-# (just in case since this should be a default EIP)
-        H5_FCFLAGS="$H5_FCFLAGS"
+        # NOTE: The default is -ieee=stop, which will cause problems
+        #       when the H5T module performs floating-point type
+        #       introspection
+        AM_FCFLAGS="$AM_FCFLAGS -ieee=full"
         FSEARCH_DIRS=""
 
         # Production

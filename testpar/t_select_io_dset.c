@@ -45,7 +45,7 @@ int curr_nerrors = 0;
             if (err_result == 0)                                                                             \
                 PASSED();                                                                                    \
             else                                                                                             \
-                HDputs("     ***TEST FAILED***");                                                            \
+                puts("     ***TEST FAILED***");                                                              \
         }                                                                                                    \
     } while (0)
 
@@ -241,8 +241,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "no_tconv_%s_%s_%s", chunked ? "chunked" : "contig",
-               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    snprintf(dset_name, sizeof(dset_name), "no_tconv_%s_%s_%s", chunked ? "chunked" : "contig",
+             dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create dataset */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -394,8 +394,8 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "no_size_change_%s_%s", chunked ? "chunked" : "contig",
-               mwbuf ? "mwbuf" : "nomwbuf");
+    snprintf(dset_name, sizeof(dset_name), "no_size_change_%s_%s", chunked ? "chunked" : "contig",
+             mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d dataset */
     if ((did = H5Dcreate2(fid, dset_name, H5T_STD_I32BE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -541,8 +541,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "larger_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig",
-               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    snprintf(dset_name, sizeof(dset_name), "larger_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig",
+             dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d chunked dataset with/without data transform */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -690,8 +690,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "smaller_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig",
-               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    snprintf(dset_name, sizeof(dset_name), "smaller_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig",
+             dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d chunked dataset with/without data transform */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -888,8 +888,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     /* Case 5(a) */
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "cmpd_with_bkg_%s_%s", chunked ? "chunked" : "contig",
-               mwbuf ? "mwbuf" : "nomwbuf");
+    snprintf(dset_name, sizeof(dset_name), "cmpd_with_bkg_%s_%s", chunked ? "chunked" : "contig",
+             mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d dataset */
     if ((did = H5Dcreate2(fid, dset_name, s1_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -1177,8 +1177,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "tconv_sel_empty_%s_%s_%s", chunked ? "chunked" : "contig",
-               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    snprintf(dset_name, sizeof(dset_name), "tconv_sel_empty_%s_%s_%s", chunked ? "chunked" : "contig",
+             dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create dataset */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -1493,8 +1493,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
             P_TEST_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_dset%d_%s_%s_%s", i,
-                   chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+        snprintf(dset_names[i], sizeof(dset_names[i]), "multi_dset%d_%s_%s_%s", i,
+                 chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
         if ((dset_dids[i] =
@@ -1815,8 +1815,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             P_TEST_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_cmpd_dset%d_%s_%s", i,
-                   chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+        snprintf(dset_names[i], sizeof(dset_names[i]), "multi_cmpd_dset%d_%s_%s", i,
+                 chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
         if ((dset_dids[i] =
@@ -2252,8 +2252,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             P_TEST_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_size_dset%d_%s_%s", i,
-                   chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+        snprintf(dset_names[i], sizeof(dset_names[i]), "multi_size_dset%d_%s_%s", i,
+                 chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
         if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_STD_I32BE, file_sids[i], H5P_DEFAULT, dcpl,
@@ -2607,8 +2607,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
             P_TEST_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_sel_dset%d_%s_%s_%s", i,
-                   chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+        snprintf(dset_names[i], sizeof(dset_names[i]), "multi_sel_dset%d_%s_%s_%s", i,
+                 chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
         if (i == 0) {
             if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
@@ -3063,24 +3063,24 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
             mm = HDrandom() % (int)ndsets;
             if (mm == 0) {
                 dset_types[i] = DSET_WITH_NO_CONV;
-                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s", i,
-                           chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+                snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s", i,
+                         chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
             }
             else if (mm == 1) {
                 dset_types[i] = DSET_WITH_CONV_AND_NO_BKG;
-                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_nbkg_dset%d_%s_%s", i,
-                           chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+                snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_nbkg_dset%d_%s_%s", i,
+                         chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_LONG, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
             }
             else {
                 dset_types[i] = DSET_WITH_CONV_AND_BKG;
-                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_bkg_dset%d_%s_%s", i,
-                           chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+                snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_bkg_dset%d_%s_%s", i,
+                         chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl,
                                                H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;

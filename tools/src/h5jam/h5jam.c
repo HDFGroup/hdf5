@@ -111,13 +111,13 @@ parse_command_line(int argc, const char *const *argv)
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
-                output_file = HDstrdup(H5_optarg);
+                output_file = strdup(H5_optarg);
                 break;
             case 'i':
-                input_file = HDstrdup(H5_optarg);
+                input_file = strdup(H5_optarg);
                 break;
             case 'u':
-                ub_file = HDstrdup(H5_optarg);
+                ub_file = strdup(H5_optarg);
                 break;
             case 'c':
                 do_clobber = true;
@@ -420,8 +420,8 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
     } /* end if */
 
     while (howmuch > 0) {
-        HDlseek(outfid, (off_t)to, SEEK_SET);
-        HDlseek(infid, (off_t)from, SEEK_SET);
+        HDlseek(outfid, (HDoff_t)to, SEEK_SET);
+        HDlseek(infid, (HDoff_t)from, SEEK_SET);
 
         if (howmuch > 512) {
             nchars = HDread(infid, buf, (unsigned)512);
@@ -499,7 +499,7 @@ write_pad(int ofile, hsize_t old_where, hsize_t *new_where)
 
     buf[0] = '\0';
 
-    HDlseek(ofile, (off_t)old_where, SEEK_SET);
+    HDlseek(ofile, (HDoff_t)old_where, SEEK_SET);
 
     psize = compute_user_block_size(old_where);
     psize -= old_where;

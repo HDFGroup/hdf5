@@ -191,8 +191,8 @@ H5D_init(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter");
 
     /* Retrieve the prefixes of VDS and external file from the environment variable */
-    H5D_prefix_vds_env = HDgetenv("HDF5_VDS_PREFIX");
-    H5D_prefix_ext_env = HDgetenv("HDF5_EXTFILE_PREFIX");
+    H5D_prefix_vds_env = getenv("HDF5_VDS_PREFIX");
+    H5D_prefix_ext_env = getenv("HDF5_EXTFILE_PREFIX");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1087,22 +1087,22 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
     /* Prefix has to be checked for NULL / empty string again because the
      * code above might have updated it.
      */
-    if (prefix == NULL || *prefix == '\0' || HDstrcmp(prefix, ".") == 0) {
+    if (prefix == NULL || *prefix == '\0' || strcmp(prefix, ".") == 0) {
         /* filename is interpreted as relative to the current directory,
          * does not need to be expanded
          */
         *file_prefix = NULL;
     } /* end if */
     else {
-        if (HDstrncmp(prefix, "${ORIGIN}", HDstrlen("${ORIGIN}")) == 0) {
+        if (strncmp(prefix, "${ORIGIN}", strlen("${ORIGIN}")) == 0) {
             /* Replace ${ORIGIN} at beginning of prefix by directory of HDF5 file */
-            filepath_len    = HDstrlen(filepath);
-            prefix_len      = HDstrlen(prefix);
-            file_prefix_len = filepath_len + prefix_len - HDstrlen("${ORIGIN}") + 1;
+            filepath_len    = strlen(filepath);
+            prefix_len      = strlen(prefix);
+            file_prefix_len = filepath_len + prefix_len - strlen("${ORIGIN}") + 1;
 
             if (NULL == (*file_prefix = (char *)H5MM_malloc(file_prefix_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer");
-            HDsnprintf(*file_prefix, file_prefix_len, "%s%s", filepath, prefix + HDstrlen("${ORIGIN}"));
+            snprintf(*file_prefix, file_prefix_len, "%s%s", filepath, prefix + strlen("${ORIGIN}"));
         } /* end if */
         else {
             if (NULL == (*file_prefix = (char *)H5MM_strdup(prefix)))
@@ -1526,7 +1526,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
          * matches the new external file prefix
          */
         if (extfile_prefix && dataset->shared->extfile_prefix) {
-            if (HDstrcmp(extfile_prefix, dataset->shared->extfile_prefix) != 0)
+            if (strcmp(extfile_prefix, dataset->shared->extfile_prefix) != 0)
                 HGOTO_ERROR(
                     H5E_DATASET, H5E_CANTOPENOBJ, NULL,
                     "new external file prefix does not match external file prefix of already open dataset");

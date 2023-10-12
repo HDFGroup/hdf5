@@ -408,15 +408,38 @@ done:
 bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
+    FUNC_ENTER_NOAPI_NOERR
+
+    assert(file && file->shared);
+
+    FUNC_LEAVE_NOAPI(H5F_shared_get_coll_metadata_reads(file->shared));
+} /* end H5F_get_coll_metadata_reads() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_shared_get_coll_metadata_reads
+ *
+ * Purpose:     Determines whether collective metadata reads should be
+ *              performed. This routine is meant to be the single source of
+ *              truth for the collective metadata reads status, as it
+ *              coordinates between the file-global flag and the flag set
+ *              for the current operation in the current API context.
+ *
+ * Return:      true/false (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5F_shared_get_coll_metadata_reads(const H5F_shared_t *f_sh)
+{
     H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
     bool                    ret_value = false;
 
     FUNC_ENTER_NOAPI_NOERR
 
-    assert(file && file->shared);
+    assert(f_sh);
 
     /* Retrieve the file-global flag */
-    file_flag = H5F_COLL_MD_READ(file);
+    file_flag = H5F_SHARED_COLL_MD_READ(f_sh);
 
     /* If file flag is set to H5P_FORCE_FALSE, exit early
      * with false, since collective metadata reads have
@@ -442,7 +465,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_coll_metadata_reads() */
+} /* end H5F_shared_get_coll_metadata_reads() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_coll_metadata_reads

@@ -228,7 +228,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
     }
 
     /* Retrieve file name */
-    options->fname = HDstrdup(argv[H5_optind]);
+    options->fname = strdup(argv[H5_optind]);
     H5_optind++;
 
     /* Check for group(s) to be created */
@@ -245,7 +245,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
     /* Retrieve the group names */
     curr_group = 0;
     while (H5_optind < argc) {
-        options->groups[curr_group] = HDstrdup(argv[H5_optind]);
+        options->groups[curr_group] = strdup(argv[H5_optind]);
         curr_group++;
         H5_optind++;
     }

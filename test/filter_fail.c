@@ -159,7 +159,7 @@ test_filter_write(char *file_name, hid_t my_fapl, bool cache_enabled)
         H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
-            HDputs("    Data writing is supposed to fail because the chunk can't be written to file.");
+            puts("    Data writing is supposed to fail because the chunk can't be written to file.");
             TEST_ERROR;
         }
     }
@@ -180,7 +180,7 @@ test_filter_write(char *file_name, hid_t my_fapl, bool cache_enabled)
         H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
-            HDputs("    Dataset is supposed to fail because the chunk can't be flushed to file.");
+            puts("    Dataset is supposed to fail because the chunk can't be flushed to file.");
             TEST_ERROR;
         }
     }

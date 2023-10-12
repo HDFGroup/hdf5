@@ -617,7 +617,7 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
 
         /* Set the user path, if given */
         if (user_path)
-            HDstrncpy(user_path, H5RS_get_str(obj_path->user_path_r), (len + 1));
+            strncpy(user_path, H5RS_get_str(obj_path->user_path_r), (len + 1));
 
         /* Set the length of the path */
         *user_path_len = len;

@@ -162,7 +162,7 @@ main(int argc, char *argv[])
     /* ============ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((childpid = fork()) < 0) {
-            HDperror("fork");
+            perror("fork");
             Hgoto_error(1);
         }
     }
@@ -236,7 +236,7 @@ main(int argc, char *argv[])
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE) {
         if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
-            HDperror("waitpid");
+            perror("waitpid");
             Hgoto_error(1);
         }
 

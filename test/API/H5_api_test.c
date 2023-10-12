@@ -155,13 +155,12 @@ main(int argc, char **argv)
     seed = (unsigned)HDtime(NULL);
     srand(seed);
 
-    if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
+    if (NULL == (test_path_prefix = getenv(HDF5_API_TEST_PATH_PREFIX)))
         test_path_prefix = "";
 
-    HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-               TEST_FILE_NAME);
+    snprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix, TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = getenv(HDF5_VOL_CONNECTOR))) {
         printf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";
         vol_connector_info = NULL;
@@ -169,13 +168,13 @@ main(int argc, char **argv)
     else {
         char *token;
 
-        if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
+        if (NULL == (vol_connector_string_copy = strdup(vol_connector_string))) {
             fprintf(stderr, "Unable to copy VOL connector string\n");
             err_occurred = true;
             goto done;
         }
 
-        if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
+        if (NULL == (token = strtok(vol_connector_string_copy, " "))) {
             fprintf(stderr, "Error while parsing VOL connector string\n");
             err_occurred = true;
             goto done;
@@ -183,7 +182,7 @@ main(int argc, char **argv)
 
         vol_connector_name = token;
 
-        if (NULL != (token = HDstrtok(NULL, " "))) {
+        if (NULL != (token = strtok(NULL, " "))) {
             vol_connector_info = token;
         }
     }
@@ -208,7 +207,7 @@ main(int argc, char **argv)
      * Otherwise, HDF5 will default to running the tests
      * with the native connector, which could be misleading.
      */
-    if (0 != HDstrcmp(vol_connector_name, "native")) {
+    if (0 != strcmp(vol_connector_name, "native")) {
         htri_t is_registered;
 
         if ((is_registered = H5VLis_connector_registered_by_name(vol_connector_name)) < 0) {

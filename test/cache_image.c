@@ -157,7 +157,7 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
             /* create the dataset */
             if (pass) {
 
-                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
+                snprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_id, H5P_DEFAULT,
                                             properties, H5P_DEFAULT);
 
@@ -433,7 +433,7 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
         i = min_dset;
 
         while ((pass) && (i <= max_dset)) {
-            HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
+            snprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
 
             if (H5Ldelete(file_id, dset_name, H5P_DEFAULT) < 0) {
 
@@ -1000,7 +1000,7 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             /* open the dataset */
             if (pass) {
 
-                HDsnprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
+                snprintf(dset_name, sizeof(dset_name), "/dset%03d", i);
                 dataset_ids[i] = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
                 if (dataset_ids[i] < 0) {
@@ -1261,7 +1261,7 @@ check_cache_image_ctl_flow_1(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -1535,7 +1535,7 @@ check_cache_image_ctl_flow_2(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -1796,7 +1796,7 @@ check_cache_image_ctl_flow_3(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -2159,7 +2159,7 @@ check_cache_image_ctl_flow_4(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -2485,7 +2485,7 @@ check_cache_image_ctl_flow_5(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -2763,7 +2763,7 @@ check_cache_image_ctl_flow_6(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -3046,7 +3046,7 @@ cache_image_smoke_check_1(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -3454,7 +3454,7 @@ cache_image_smoke_check_2(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -3749,7 +3749,7 @@ cache_image_smoke_check_3(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -4125,7 +4125,7 @@ cache_image_smoke_check_4(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -4518,7 +4518,7 @@ cache_image_smoke_check_5(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -4572,7 +4572,7 @@ cache_image_smoke_check_5(bool single_file_vfd)
     /* 2) Create a process specific group. */
     if (pass) {
 
-        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", min_group);
+        snprintf(process_group_name, sizeof(process_group_name), "/process_%d", min_group);
 
         proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -4675,7 +4675,7 @@ cache_image_smoke_check_5(bool single_file_vfd)
         if (pass) {
 
             max_group++;
-            HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", max_group);
+            snprintf(process_group_name, sizeof(process_group_name), "/process_%d", max_group);
 
             proc_gid = H5Gcreate2(file_id, process_group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -4746,7 +4746,7 @@ cache_image_smoke_check_5(bool single_file_vfd)
     /* 11) Validate all the zoos. */
     i = min_group;
     while (pass && i <= max_group) {
-        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
+        snprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
 
@@ -4798,7 +4798,7 @@ cache_image_smoke_check_5(bool single_file_vfd)
     i = min_group;
     while ((pass) && (i <= max_group)) {
 
-        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
+        snprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
 
@@ -4858,7 +4858,7 @@ cache_image_smoke_check_5(bool single_file_vfd)
      */
     i = min_group;
     while ((pass) && (i <= max_group)) {
-        HDsnprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
+        snprintf(process_group_name, sizeof(process_group_name), "/process_%d", i);
         validate_zoo(file_id, process_group_name, i++);
     }
 
@@ -5011,7 +5011,7 @@ cache_image_smoke_check_6(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -5400,7 +5400,7 @@ cache_image_api_error_check_1(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -5765,7 +5765,7 @@ cache_image_api_error_check_2(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -6163,7 +6163,7 @@ cache_image_api_error_check_3(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -6443,7 +6443,7 @@ cache_image_api_error_check_4(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -7011,7 +7011,7 @@ get_free_sections_test(bool single_file_vfd)
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -7450,14 +7450,14 @@ evict_on_close_test(bool H5_ATTR_PARALLEL_UNUSED single_file_vfd)
 
 #ifdef H5_HAVE_PARALLEL
     SKIPPED();
-    HDputs("    EoC not supported in the parallel library.");
+    puts("    EoC not supported in the parallel library.");
     return 0;
 #else
 
     /* Check for VFD that is a single file */
     if (!single_file_vfd) {
         SKIPPED();
-        HDputs("    Cache image not supported with the current VFD.");
+        puts("    Cache image not supported with the current VFD.");
         return 0;
     }
 
@@ -7758,7 +7758,7 @@ main(void)
     int         express_test;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    env_h5_drvr = getenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
