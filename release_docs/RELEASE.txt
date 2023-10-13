@@ -47,12 +47,12 @@ New Features
 
     Configuration:
     -------------
-    - Thread-safety + static library disabled on Windows w/ CMake
+    - Thread-safety and static library disabled on Windows with CMake.
 
       The thread-safety feature requires hooks in DllMain(), which is only
       present in the shared library.
 
-      We previously just warned about this, but now any CMake configuration
+      While there were previous warnings about this, now any CMake configuration
       that tries to build thread-safety and the static library will fail.
       This cannot be overridden with ALLOW_UNSUPPORTED.
 
@@ -149,8 +149,11 @@ New Features
 
     Fortran Library:
     ----------------
-    - Removed "-commons" linking option on Darwin, as COMMON and EQUIVALENCE
-      are no longer used in the Fortran source.
+    - Removed "-commons" linking option.
+
+      Compiling on MacOS Sonoma caused an error resulting in a build failure. 
+      Removed the -commons linking option since COMMON and EQUIVALENCE are no 
+      longer used in the Fortran source.
 
       Fixes GitHub issue #3571
 
@@ -744,7 +747,7 @@ Known Problems
 ==============
 
     testflushrefresh.sh will fail when run with "make check-passthrough-vol"
-    on centos7, with 3 Errors/Segmentation faults. These will not occur when
+    on centos7, with 3 errors or segmentation faults. These will not occur when
     run with "make check". See https://github.com/HDFGroup/hdf5/issues/673
     for details.
 
@@ -778,7 +781,7 @@ CMake vs. Autotools installations
 =================================
 While both build systems produce similar results, there are differences.
 Each system produces the same set of folders on linux (only CMake works
-on standard Windows); bin, include, lib and share. Autotools places the
+on standard Windows); bin, include, lib, and share. Autotools places the
 COPYING and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
 
