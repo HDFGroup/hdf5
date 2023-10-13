@@ -333,7 +333,7 @@ if (BUILD_STATIC_LIBS)
   target_compile_definitions(${HDF5_F90_LIB_TARGET}
       PRIVATE
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:HDF5F90_WINDOWS>
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
   )
   target_link_libraries (${HDF5_F90_LIB_TARGET}
       PUBLIC ${HDF5_F90_C_LIB_TARGET}
@@ -368,7 +368,7 @@ if (BUILD_SHARED_LIBS)
       PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
       PRIVATE
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:BUILD_HDF5_DLL;HDF5F90_WINDOWS>
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
   )
   target_link_libraries (${HDF5_F90_LIBSH_TARGET}
       PUBLIC ${HDF5_F90_C_LIBSH_TARGET}

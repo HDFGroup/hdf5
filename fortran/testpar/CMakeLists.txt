@@ -28,7 +28,7 @@ target_include_directories (parallel_test
 target_compile_options(parallel_test
     PRIVATE
         "${HDF5_CMAKE_Fortran_FLAGS}"
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+        "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (parallel_test
@@ -68,7 +68,7 @@ target_include_directories (subfiling_test
 target_compile_options(subfiling_test
     PRIVATE
         "${HDF5_CMAKE_Fortran_FLAGS}"
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+        "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (subfiling_test
@@ -108,7 +108,7 @@ target_include_directories (async_test
 target_compile_options(async_test
     PRIVATE
         "${HDF5_CMAKE_Fortran_FLAGS}"
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+        "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (async_test

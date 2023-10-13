@@ -16,7 +16,7 @@ macro (ADD_H5_FORTRAN_EXE file)
   target_compile_options(hl_f90_${file}
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
   )
 #  set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
 #  set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
