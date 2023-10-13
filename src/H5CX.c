@@ -2524,7 +2524,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_actual_selection_io_mode
  *
- * Purpose:     Retrieves the actual I/O mode (scalar, vector, and/or selection) for the current API call context.
+ * Purpose:     Retrieves the actual I/O mode (scalar, vector, and/or selection) for the current API call
+ *context.
  *
  * Return:      Non-negative on success / Negative on failure
  *

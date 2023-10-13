@@ -210,7 +210,7 @@ test_no_type_conv(hid_t fid, unsigned set_cache, unsigned chunked, unsigned dtra
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data or transformed data read */
@@ -363,7 +363,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, unsi
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data read little endian */
@@ -521,7 +521,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, uns
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Verify data or transformed data read */
@@ -660,7 +660,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned set_cache, unsigned chunked, un
         TEST_ERROR;
 
     /* Verify selection I/O mode */
-    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache  ? 0 : H5D_SCALAR_IO) < 0)
+    if (check_actual_selection_io_mode(dxpl, chunked && !set_cache ? 0 : H5D_SCALAR_IO) < 0)
         TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
@@ -3264,7 +3264,8 @@ main(void)
                             case TEST_NO_TYPE_CONV: /* case 1 */
                                 TESTING_2("No type conversion (null case)");
 
-                                nerrors += (test_no_type_conv(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                nerrors +=
+                                    (test_no_type_conv(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
 
                                 break;
 
@@ -3275,7 +3276,9 @@ main(void)
                                 if (dtrans)
                                     SKIPPED();
                                 else
-                                    nerrors += (test_no_size_change_no_bkg(fid, set_cache, chunked, mwbuf) < 0 ? 1 : 0);
+                                    nerrors +=
+                                        (test_no_size_change_no_bkg(fid, set_cache, chunked, mwbuf) < 0 ? 1
+                                                                                                        : 0);
 
                                 break;
 
@@ -3283,7 +3286,9 @@ main(void)
                                 TESTING_2("Larger memory type, no background buffer");
 
                                 nerrors +=
-                                    (test_larger_mem_type_no_bkg(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                    (test_larger_mem_type_no_bkg(fid, set_cache, chunked, dtrans, mwbuf) < 0
+                                         ? 1
+                                         : 0);
 
                                 break;
 
@@ -3291,7 +3296,9 @@ main(void)
                                 TESTING_2("Smaller memory type, no background buffer");
 
                                 nerrors +=
-                                    (test_smaller_mem_type_no_bkg(fid, set_cache, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                                    (test_smaller_mem_type_no_bkg(fid, set_cache, chunked, dtrans, mwbuf) < 0
+                                         ? 1
+                                         : 0);
 
                                 break;
 
