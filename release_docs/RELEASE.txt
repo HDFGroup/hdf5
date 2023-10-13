@@ -348,6 +348,11 @@ Bug Fixes since HDF5-1.14.2 release
       skip running the atomicity tests if the major version of OpenMPI is
       < 5.
 
+    - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+      Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+      with -fdefault-real-16. Fixes GH #2928.
+
 
 Platforms Tested
 ===================
