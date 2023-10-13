@@ -359,10 +359,6 @@ facilities for logging metrics and activity to a file.</td>
 <td>Modifies/queries the file driver properties of the mirror driver.</td>
 </tr>
 <tr>
-<td>#H5Pset_fapl_mirror/#H5Pget_fapl_mirror</td>
-<td>Modifies/queries the file driver properties of the mirror driver.</td>
-</tr>
-<tr>
 <td>#H5Pset_fapl_mpio/#H5Pget_fapl_mpio</td>
 <td>Sets driver for files on parallel file systems (MPI I/O) or retrieves information
 regarding the driver.</td>

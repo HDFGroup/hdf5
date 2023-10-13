@@ -903,14 +903,6 @@ if (WINDOWS)
 else ()
     H5_DEFAULT_PLUGINDIR  "/usr/local/hdf5/lib/plugin"
 endif ()
-if (BUILD_SZIP_WITH_FETCHCONTENT)
-    LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
-    LIBAEC_TGZ_ORIGNAME       "Use LIBAEC from original compressed file" "libaec-v1.0.6.tar.gz"
-    LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    ON
-if (BUILD_ZLIB_WITH_FETCHCONTENT)
-    ZLIB_TGZ_ORIGPATH         "Use ZLIB from original location"        "https://github.com/madler/zlib/releases/download/v1.2.13"
-    ZLIB_TGZ_ORIGNAME         "Use ZLIB from original compressed file" "zlib-1.2.13.tar.gz"
-    ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"    ON
 
 NOTE:
   The BUILD_STATIC_EXECS ("Build Static Executables") option is only valid
