@@ -880,7 +880,12 @@ Bug Fixes since HDF5-1.14.0 release
       configuration information in the HDF5_VOL_CONNECTOR environment variable and
       would incorrectly report that the specified VOL connector isn't registered
       due to including the configuration information as part of the VOL connector
-      name being checked for registration status. This has now been fixed. 
+      name being checked for registration status. This has now been fixed.
+
+   - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+     Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+     with -fdefault-real-16. Fixes GH #2928.
 
 
 Platforms Tested
