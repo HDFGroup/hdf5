@@ -122,6 +122,9 @@ fi
 # Figure out Intel FC compiler flags
 . $srcdir/config/intel-fflags
 
+# Figure out Clang FC compiler flags
+. $srcdir/config/clang-fflags
+
 case $FC_BASENAME in
     #
     # Absoft compiler
