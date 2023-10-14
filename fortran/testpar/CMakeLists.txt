@@ -28,13 +28,13 @@ target_include_directories (parallel_test
 target_compile_options(parallel_test
     PRIVATE
         "${HDF5_CMAKE_Fortran_FLAGS}"
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+        "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (parallel_test
       PRIVATE
           ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_Fortran_LIBS}
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:ws2_32.lib>"
   )
   set_target_properties (parallel_test PROPERTIES
       FOLDER test/fortran
@@ -45,7 +45,7 @@ else ()
   target_link_libraries (parallel_test
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${LINK_Fortran_LIBS}
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:ws2_32.lib>"
   )
   set_target_properties (parallel_test PROPERTIES
       FOLDER test/fortran
@@ -68,13 +68,13 @@ target_include_directories (subfiling_test
 target_compile_options(subfiling_test
     PRIVATE
         "${HDF5_CMAKE_Fortran_FLAGS}"
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+        "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (subfiling_test
       PRIVATE
           ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_Fortran_LIBS}
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:ws2_32.lib>"
   )
   set_target_properties (subfiling_test PROPERTIES
       FOLDER test/fortran
@@ -85,7 +85,7 @@ else ()
   target_link_libraries (subfiling_test
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${LINK_Fortran_LIBS}
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:ws2_32.lib>"
   )
   set_target_properties (subfiling_test PROPERTIES
       FOLDER test/fortran
@@ -108,13 +108,13 @@ target_include_directories (async_test
 target_compile_options(async_test
     PRIVATE
         "${HDF5_CMAKE_Fortran_FLAGS}"
-        $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
+        "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (async_test
       PRIVATE
           ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_Fortran_LIBS}
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:ws2_32.lib>"
   )
   set_target_properties (async_test PROPERTIES
       FOLDER test/fortran
@@ -125,7 +125,7 @@ else ()
   target_link_libraries (async_test
       PRIVATE
           ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${LINK_Fortran_LIBS}
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"ws2_32.lib">
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:ws2_32.lib>"
   )
   set_target_properties (async_test PROPERTIES
       FOLDER test/fortran
