@@ -143,17 +143,19 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
         }
 
         /* Wait for truncate operations to complete */
+        H5_GCC_DIAG_OFF("stringop-overflow")
         if (MPI_SUCCESS != (mpi_code = MPI_Waitall(num_subfiles_owned, recv_reqs, MPI_STATUSES_IGNORE)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
+        H5_GCC_DIAG_ON("stringop-overflow")
 
-            /* sanity check -- compute the file eof using the same mechanism used to
-             * compute the subfile eof.  Assert that the computed value and the
-             * actual value match.
-             *
-             * Do this only for debug builds -- probably delete this before release.
-             *
-             *                                           JRM -- 12/15/21
-             */
+        /* sanity check -- compute the file eof using the same mechanism used to
+         * compute the subfile eof.  Assert that the computed value and the
+         * actual value match.
+         *
+         * Do this only for debug builds -- probably delete this before release.
+         *
+         *                                           JRM -- 12/15/21
+         */
 
 #ifndef NDEBUG
         {
@@ -339,8 +341,10 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     }
 
     /* Wait for EOF communication to complete */
+    H5_GCC_DIAG_OFF("stringop-overflow")
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall(num_subfiles, recv_reqs, MPI_STATUSES_IGNORE)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
+    H5_GCC_DIAG_ON("stringop-overflow")
 
     for (int i = 0; i < num_subfiles; i++) {
         int ioc_rank = (int)recv_msg[3 * i];
