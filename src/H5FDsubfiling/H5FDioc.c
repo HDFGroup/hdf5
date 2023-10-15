@@ -32,8 +32,6 @@
 #include "H5MMprivate.h"  /* Memory management        */
 #include "H5Pprivate.h"   /* Property lists           */
 
-#define CANBE_UNUSED(X) (void)(X)
-
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_IOC_g = H5I_INVALID_HID;
 
@@ -1219,13 +1217,14 @@ static herr_t
 H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                size_t size, void *buf)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED;
+#ifndef NDEBUG
+    H5FD_ioc_t *file = (H5FD_ioc_t *)_file;
+#endif
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
     assert(file && file->pub.cls);
-    CANBE_UNUSED(file);
     assert(buf);
 
     /* Check for overflow conditions */
