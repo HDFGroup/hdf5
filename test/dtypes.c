@@ -1983,26 +1983,36 @@ test_compound_10(void)
 
     cmpd_struct wdata[ARRAY_DIM];
     cmpd_struct rdata[ARRAY_DIM];
-    hid_t       file;
-    hid_t       arr_tid, cmpd_tid, cstr_id, vlstr_id;
-    hid_t       space_id;
-    hid_t       dset_id;
+    hid_t       file     = H5I_INVALID_HID;
+    hid_t       arr_tid  = H5I_INVALID_HID;
+    hid_t       cmpd_tid = H5I_INVALID_HID;
+    hid_t       cstr_id  = H5I_INVALID_HID;
+    hid_t       vlstr_id = H5I_INVALID_HID;
+    hid_t       space_id = H5I_INVALID_HID;
+    hid_t       dset_id  = H5I_INVALID_HID;
     hsize_t     arr_dim[1] = {ARRAY_DIM}; /* Array dimensions */
     hsize_t     dim1[1];
-    void       *t1, *t2;
+    void       *t1 = NULL;
+    void       *t2 = NULL;
     char        filename[1024];
     size_t      len;
     int         i;
 
     TESTING("array datatype of compound type with VL string");
 
+    memset(wdata, 0, sizeof(wdata));
+    memset(rdata, 0, sizeof(rdata));
+
+    /* Initialize */
     for (i = 0; i < ARRAY_DIM; i++) {
-        wdata[i].i1     = i * 10 + i;
-        wdata[i].str    = strdup("C string A");
+        wdata[i].i1 = i * 10 + i;
+        if (NULL == (wdata[i].str = strdup("C string A")))
+            FAIL_PUTS_ERROR("Unable to duplicate string");
         wdata[i].str[9] = (char)(wdata[i].str[9] + i);
         wdata[i].i2     = i * 1000 + i * 10;
 
-        wdata[i].text.p = (void *)strdup("variable-length text A\0");
+        if (NULL == (wdata[i].text.p = (void *)strdup("variable-length text A\0")))
+            FAIL_PUTS_ERROR("Unable to duplicate string");
         len = wdata[i].text.len              = strlen((char *)wdata[i].text.p) + 1;
         ((char *)(wdata[i].text.p))[len - 2] = (char)(((char *)(wdata[i].text.p))[len - 2] + i);
         ((char *)(wdata[i].text.p))[len - 1] = '\0';
@@ -2010,160 +2020,117 @@ test_compound_10(void)
 
     /* Create File */
     h5_fixname(FILENAME[4], H5P_DEFAULT, filename, sizeof filename);
-    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't create file!\n");
-        goto error;
-    } /* end if */
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
     /* Create first compound datatype */
-    if ((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't create datatype!\n");
-        goto error;
-    } /* end if */
+    if ((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(cmpd_tid, "i1", HOFFSET(struct cmpd_struct, i1), H5T_NATIVE_INT) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't insert field 'i1'\n");
-        goto error;
-    } /* end if */
+    if (H5Tinsert(cmpd_tid, "i1", HOFFSET(struct cmpd_struct, i1), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
 
-    cstr_id = H5Tcopy(H5T_C_S1);
-    if (H5Tset_size(cstr_id, H5T_VARIABLE) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't set size for C string\n");
-        goto error;
-    } /* end if */
+    if ((cstr_id = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(cstr_id, H5T_VARIABLE) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(cmpd_tid, "c_string", HOFFSET(cmpd_struct, str), cstr_id) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't insert field 'str'\n");
-        goto error;
-    } /* end if */
+    if (H5Tinsert(cmpd_tid, "c_string", HOFFSET(cmpd_struct, str), cstr_id) < 0)
+        TEST_ERROR;
 
     /* Create vl-string datatype */
-    if ((vlstr_id = H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't create VL string\n");
-        goto error;
-    } /* end if */
+    if ((vlstr_id = H5Tvlen_create(H5T_NATIVE_CHAR)) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(cmpd_tid, "vl_string", HOFFSET(cmpd_struct, text), vlstr_id) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't insert field 'text'\n");
-        goto error;
-    } /* end if */
+    if (H5Tinsert(cmpd_tid, "vl_string", HOFFSET(cmpd_struct, text), vlstr_id) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(cmpd_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't insert field 'i2'\n");
-        goto error;
-    } /* end if */
+    if (H5Tinsert(cmpd_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
 
     /* Create the array datatype for c_string data */
-    if ((arr_tid = H5Tarray_create2(cmpd_tid, 1, arr_dim)) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't create array type\n");
-        goto error;
-    } /* end if */
+    if ((arr_tid = H5Tarray_create2(cmpd_tid, 1, arr_dim)) < 0)
+        TEST_ERROR;
 
     dim1[0] = 1;
-    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't create space\n");
-        goto error;
-    } /* end if */
+    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0)
+        TEST_ERROR;
 
     if ((dset_id = H5Dcreate2(file, "Dataset", arr_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
-        0) {
-        H5_FAILED();
-        AT();
-        printf("Can't create dataset\n");
-        goto error;
-    } /* end if */
+        0)
+        TEST_ERROR;
 
-    if (H5Dwrite(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't write data\n");
-        goto error;
-    } /* end if */
+    if (H5Dwrite(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
 
-    if (H5Dread(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't read data\n");
-        goto error;
-    } /* end if */
+    if (H5Dread(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
+        TEST_ERROR;
 
     for (i = 0; i < ARRAY_DIM; i++) {
         if (rdata[i].i1 != wdata[i].i1 || rdata[i].i2 != wdata[i].i2 ||
-            strcmp(rdata[i].str, wdata[i].str) != 0) {
-            H5_FAILED();
-            AT();
-            printf("incorrect read data\n");
-            goto error;
-        } /* end if */
+            strcmp(rdata[i].str, wdata[i].str) != 0)
+            FAIL_PUTS_ERROR("incorrect read data\n");
 
-        if (rdata[i].text.len != wdata[i].text.len) {
-            H5_FAILED();
-            AT();
-            printf("incorrect VL length\n");
-            goto error;
-        } /* end if */
+        if (rdata[i].text.len != wdata[i].text.len)
+            FAIL_PUTS_ERROR("incorrect VL length\n");
 
         t1 = rdata[i].text.p;
         t2 = wdata[i].text.p;
-        if (strcmp((char *)t1, (char *)t2) != 0) {
-            H5_FAILED();
-            AT();
-            printf("incorrect VL read data\n");
-            goto error;
-        }
-    } /* end for */
-    if (H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't reclaim read data\n");
-        goto error;
-    } /* end if */
-    if (H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0) {
-        H5_FAILED();
-        AT();
-        printf("Can't reclaim read data\n");
-        goto error;
-    } /* end if */
+        if (strcmp((char *)t1, (char *)t2) != 0)
+            FAIL_PUTS_ERROR("incorrect VL read data\n");
+    }
+
+    if (H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0)
+        TEST_ERROR;
+    if (H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0)
+        TEST_ERROR;
 
     if (H5Dclose(dset_id) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Tclose(arr_tid) < 0)
-        goto error;
+        TEST_ERROR;
+    arr_tid = H5I_INVALID_HID;
     if (H5Tclose(cmpd_tid) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Tclose(cstr_id) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Tclose(vlstr_id) < 0)
-        goto error;
+        TEST_ERROR;
     if (H5Sclose(space_id) < 0)
-        goto error;
+        TEST_ERROR;
+    space_id = H5I_INVALID_HID;
     if (H5Fclose(file) < 0)
-        goto error;
+        TEST_ERROR;
 
     PASSED();
     return 0;
 
 error:
+
+    H5E_BEGIN_TRY
+    {
+        if (arr_tid != H5I_INVALID_HID && space_id != H5I_INVALID_HID) {
+            H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &rdata);
+            H5Treclaim(arr_tid, space_id, H5P_DEFAULT, &wdata);
+        }
+        else {
+            /* Clean up memory if we failed out early */
+            for (i = 0; i < ARRAY_DIM; i++) {
+                free(wdata[i].str);
+                free(wdata[i].text.p);
+            }
+        }
+
+        H5Dclose(dset_id);
+        H5Tclose(arr_tid);
+        H5Tclose(cmpd_tid);
+        H5Tclose(cstr_id);
+        H5Tclose(vlstr_id);
+        H5Sclose(space_id);
+        H5Fclose(file);
+    }
+    H5E_END_TRY
+
     return 1;
 }
 
