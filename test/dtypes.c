@@ -1983,13 +1983,13 @@ test_compound_10(void)
 
     cmpd_struct wdata[ARRAY_DIM];
     cmpd_struct rdata[ARRAY_DIM];
-    hid_t       file     = H5I_INVALID_HID;
-    hid_t       arr_tid  = H5I_INVALID_HID;
-    hid_t       cmpd_tid = H5I_INVALID_HID;
-    hid_t       cstr_id  = H5I_INVALID_HID;
-    hid_t       vlstr_id = H5I_INVALID_HID;
-    hid_t       space_id = H5I_INVALID_HID;
-    hid_t       dset_id  = H5I_INVALID_HID;
+    hid_t       file       = H5I_INVALID_HID;
+    hid_t       arr_tid    = H5I_INVALID_HID;
+    hid_t       cmpd_tid   = H5I_INVALID_HID;
+    hid_t       cstr_id    = H5I_INVALID_HID;
+    hid_t       vlstr_id   = H5I_INVALID_HID;
+    hid_t       space_id   = H5I_INVALID_HID;
+    hid_t       dset_id    = H5I_INVALID_HID;
     hsize_t     arr_dim[1] = {ARRAY_DIM}; /* Array dimensions */
     hsize_t     dim1[1];
     void       *t1 = NULL;
@@ -2056,8 +2056,7 @@ test_compound_10(void)
     if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0)
         TEST_ERROR;
 
-    if ((dset_id = H5Dcreate2(file, "Dataset", arr_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
-        0)
+    if ((dset_id = H5Dcreate2(file, "Dataset", arr_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Dwrite(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
