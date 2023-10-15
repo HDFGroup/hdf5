@@ -306,12 +306,12 @@ test_mpio_gb_file(char *filename)
             for (i = ntimes - 2; i <= ntimes; i++) {
                 mpi_off = (i * mpi_size + mpi_rank) * (MPI_Offset)MB;
                 if (VERBOSE_MED)
-                    fprintf(stdout, "proc %d: write to mpi_off=%016llx, %lld\n", mpi_rank, mpi_off, mpi_off);
+                    fprintf(stdout, "proc %d: write to mpi_off=%016llx, %lld\n", mpi_rank, (long long)mpi_off, (long long)mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++)
                     *(buf + j) = (int8_t)(i * mpi_size + mpi_rank);
                 if (VERBOSE_MED)
-                    fprintf(stdout, "proc %d: writing %d bytes at offset %lld\n", mpi_rank, MB, mpi_off);
+                    fprintf(stdout, "proc %d: writing %d bytes at offset %lld\n", mpi_rank, MB, (long long)mpi_off);
                 mrc = MPI_File_write_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file write");
                 if (mrc != MPI_SUCCESS)
@@ -345,7 +345,7 @@ test_mpio_gb_file(char *filename)
             for (i = ntimes - 2; i <= ntimes; i++) {
                 mpi_off = (i * mpi_size + (mpi_size - mpi_rank - 1)) * (MPI_Offset)MB;
                 if (VERBOSE_MED)
-                    fprintf(stdout, "proc %d: read from mpi_off=%016llx, %lld\n", mpi_rank, mpi_off, mpi_off);
+                    fprintf(stdout, "proc %d: read from mpi_off=%016llx, %lld\n", mpi_rank, (long long)mpi_off, (long long)mpi_off);
                 mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file read");
                 expected = (int8_t)(i * mpi_size + (mpi_size - mpi_rank - 1));
