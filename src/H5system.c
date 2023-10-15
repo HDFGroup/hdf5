@@ -620,7 +620,6 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Sanity check */
     assert(name);
     assert(extpath);
 
@@ -634,8 +633,9 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
     if (H5_CHECK_ABSOLUTE(name)) {
         if (NULL == (full_path = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
-    }      /* end if */
-    else { /* relative pathname */
+    }
+    else {
+        /* relative pathname */
         char  *retcwd;
         size_t name_len;
         int    drive;
@@ -655,12 +655,12 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             drive  = HDtoupper(name[0]) - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             strncpy(new_name, &name[2], name_len);
-        } /* end if */
-          /*
-           * Windows: name[0] is a '/' or '\'
-           *  Get current drive
-           * Unix: does not apply
-           */
+        }
+        /*
+         * Windows: name[0] is a '/' or '\'
+         *  Get current drive
+         * Unix: does not apply
+         */
         else if (H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
             snprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
@@ -670,28 +670,32 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         else {
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
             strncpy(new_name, name, name_len);
-        } /* end if */
+        }
 
         if (retcwd != NULL) {
             size_t cwdlen;
             size_t path_len;
 
-            assert(cwdpath);
             cwdlen = strlen(cwdpath);
-            assert(cwdlen);
-            assert(new_name);
+            if (cwdlen == 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "cwd length is zero");
             path_len = cwdlen + strlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-            strncpy(full_path, cwdpath, cwdlen + 1);
+            /* path_len will always be greater than zero, so no check before
+             * setting the terminal NUL byte of full_path
+             */
+            strncpy(full_path, cwdpath, path_len);
+            full_path[path_len - 1] = '\0';
+
             if (!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
                 strncat(full_path, H5_DIR_SEPS, path_len - (cwdlen + 1));
             strncat(full_path, new_name, path_len - (cwdlen + 1) - strlen(H5_DIR_SEPS));
-        } /* end if */
-    }     /* end else */
+        }
+    }
 
-    /* strip out the last component (the file name itself) from the path */
+    /* Strip out the last component (the file name itself) from the path */
     if (full_path) {
         char *ptr = NULL;
 
@@ -699,10 +703,9 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         assert(ptr);
         *++ptr   = '\0';
         *extpath = full_path;
-    } /* end if */
+    }
 
 done:
-    /* Release resources */
     if (cwdpath)
         H5MM_xfree(cwdpath);
     if (new_name)
