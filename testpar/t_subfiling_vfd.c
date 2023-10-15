@@ -886,7 +886,7 @@ test_selection_strategies(void)
                 char     criteria_buf[256];
                 char     sel_criteria[128]; /* Use char buffer for criteria as we may support
                                                the "with config" strategy in the future */
-                int expected_num_subfiles;
+                int expected_num_subfiles = -1;
 
                 cfg.ioc_selection = strategy;
                 cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
