@@ -47,6 +47,20 @@ New Features
 
     Configuration:
     -------------
+    - Added support for AOCC and classic Flang w/ the Autotools
+
+      * Adds a config/clang-fflags options file to support Flang
+      * Corrects missing "-Wl," from linker options in the libtool wrappers
+        when using Flang, the MPI Fortran compiler wrappers, and building
+        the shared library. This would often result in unrecognized options
+        like -soname.
+      * Enable -nomp w/ Flang to avoid linking to the OpenMPI library.
+
+      CMake can build the parallel, shared library w/ Fortran using AOCC
+      and Flang, so no changes were needed for that build system.
+
+      Fixes GitHub issues #3439, #1588, #366, #280
+
     - Converted the build of libaec and zlib to use FETCH_CONTENT with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
