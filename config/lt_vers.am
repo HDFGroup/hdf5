@@ -15,9 +15,9 @@
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 202
-LT_VERS_AGE = 2
-LT_VERS_REVISION = 1
+LT_VERS_INTERFACE = 203
+LT_VERS_AGE = 3
+LT_VERS_REVISION = 0
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
 ## reset LT_VERS_REVISION to 0.
