@@ -778,6 +778,11 @@ H5CX__push_common(H5CX_node_t *cnode)
     cnode->ctx.tag     = H5AC__INVALID_TAG;
     cnode->ctx.ring    = H5AC_RING_USER;
 
+#ifdef H5_HAVE_PARALLEL
+    cnode->ctx.btype = MPI_BYTE;
+    cnode->ctx.ftype = MPI_BYTE;
+#endif
+
     /* Push context node onto stack */
     cnode->next = *head;
     *head       = cnode;
