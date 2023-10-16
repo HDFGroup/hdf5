@@ -56,6 +56,7 @@ jobs:
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_BUILD_FORTRAN:BOOL=ON \
+          -DHDF5_ENABLE_ASSERTS:BOOL=ON \
           -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
           $GITHUB_WORKSPACE
           cat src/libhdf5.settings

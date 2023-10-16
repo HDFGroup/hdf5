@@ -56,7 +56,6 @@ if(CMAKE_C_COMPILER_ID STREQUAL "NVHPC" )
   else ()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Mbounds -g")
   endif ()
-  string(APPEND CMAKE_C_FLAGS " -O1") # -O2+ currently has test failures.
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
