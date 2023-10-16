@@ -58,9 +58,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=config/toolchain/intel.cmake \
           -DMKL_ROOT="/opt/intel/oneapi/mkl/latest" \
           -DTBB_ROOT="/opt/intel/oneapi/tbb/latest" \
-          -DBUILD_SZIP_WITH_FETCHCONTENT=ON \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
-          -DBUILD_ZLIB_WITH_FETCHCONTENT=ON \
           -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_BUILD_FORTRAN=OFF \
           $GITHUB_WORKSPACE

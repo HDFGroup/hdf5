@@ -1054,10 +1054,30 @@ H5F_coll_md_read(const H5F_t *f)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(f);
+    assert(f && f->shared);
 
     FUNC_LEAVE_NOAPI(f->shared->coll_md_read)
 } /* end H5F_coll_md_read() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_shared_coll_md_read
+ *
+ * Purpose:  Retrieve the 'collective metadata reads' flag for the file.
+ *
+ * Return:   Success:    Non-negative, the 'collective metadata reads' flag
+ *           Failure:    (can't happen)
+ *-------------------------------------------------------------------------
+ */
+H5P_coll_md_read_flag_t
+H5F_shared_coll_md_read(const H5F_shared_t *f_sh)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(f_sh);
+
+    FUNC_LEAVE_NOAPI(f_sh->coll_md_read)
+} /* end H5F_shared_coll_md_read() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_shared_get_mpi_file_sync_required

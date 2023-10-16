@@ -19,26 +19,24 @@
 #include "t_filters_parallel.h"
 
 static const char *FILENAME[] = {"t_filters_parallel", NULL};
-char               filenames[1][256];
+static char        filenames[1][256];
 
-static MPI_Comm comm = MPI_COMM_WORLD;
-static MPI_Info info = MPI_INFO_NULL;
-static int      mpi_rank;
-static int      mpi_size;
+static MPI_Comm comm     = MPI_COMM_WORLD;
+static MPI_Info info     = MPI_INFO_NULL;
+static int      mpi_rank = 0;
+static int      mpi_size = 0;
+
+static int test_express_level_g;
 
 int nerrors = 0;
 
 /* Arrays of filter ID values and filter names (should match each other) */
-H5Z_filter_t filterIDs[] = {
+static H5Z_filter_t filterIDs[] = {
     H5Z_FILTER_DEFLATE, H5Z_FILTER_SHUFFLE, H5Z_FILTER_FLETCHER32,
     H5Z_FILTER_SZIP,    H5Z_FILTER_NBIT,    H5Z_FILTER_SCALEOFFSET,
 };
 
-const char *filterNames[] = {"Deflate", "Shuffle", "Fletcher32", "SZIP", "Nbit", "ScaleOffset"};
-
-/* Function pointer typedef for test functions */
-typedef void (*test_func)(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                          hid_t dxpl_id);
+static const char *filterNames[] = {"Deflate", "Shuffle", "Fletcher32", "SZIP", "Nbit", "ScaleOffset"};
 
 /* Typedef for filter arguments for user-defined filters */
 typedef struct filter_options_t {
@@ -46,6 +44,15 @@ typedef struct filter_options_t {
     size_t             cd_nelmts;
     const unsigned int cd_values[];
 } filter_options_t;
+
+/* Enum for running these tests in different modes */
+typedef enum test_mode_t {
+    USE_SINGLE_DATASET,                   /* Operate on a single dataset with H5Dwrite/read */
+    USE_MULTIPLE_DATASETS,                /* Operate on multiple datasets with H5Dwrite_multi/read_multi */
+    USE_MULTIPLE_DATASETS_MIXED_FILTERED, /* Operate on multiple datasets with H5Dwrite_multi/read_multi
+                                             and with some of the datasets being unfiltered */
+    TEST_MODE_SENTINEL
+} test_mode_t;
 
 /*
  * Enum for verify_space_alloc_status which specifies
@@ -58,102 +65,160 @@ typedef enum num_chunks_written_t {
     ALL_CHUNKS_WRITTEN
 } num_chunks_written_t;
 
-static herr_t set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_options);
-static herr_t verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chunks_written);
+/* Function pointer typedef for test functions */
+typedef void (*test_func)(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
+                          hid_t dxpl_id, test_mode_t test_mode);
+
+static herr_t      set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_options);
+static void        verify_space_alloc_status(size_t num_dsets, hid_t *dset_ids, hid_t dcpl_id,
+                                             num_chunks_written_t chunks_written);
+static void        verify_chunk_opt_status(size_t num_dsets, hid_t dxpl_id);
+static const char *test_mode_to_string(test_mode_t test_mode);
+
+static void create_datasets(hid_t parent_obj_id, const char *dset_name, hid_t type_id, hid_t filespace_id,
+                            hid_t dcpl_id, test_mode_t test_mode, size_t *num_dsets, hid_t *dset_ids);
+static void open_datasets(hid_t parent_obj_id, const char *dset_name, size_t num_dsets, test_mode_t test_mode,
+                          hid_t *dset_ids);
+static void write_datasets(size_t num_dsets, hid_t *dset_ids, hid_t type_id, hid_t mspace_id,
+                           hid_t *fspace_ids, hid_t dxpl_id, const void **bufs, test_mode_t test_mode);
+static void read_datasets(size_t num_dsets, hid_t *dset_ids, hid_t type_id, hid_t mspace_id, hid_t fspace_id,
+                          hid_t dxpl_id, void **bufs, test_mode_t test_mode);
+
+static void select_hyperslab(size_t num_dsets, hid_t *dset_ids, hsize_t *start, hsize_t *stride,
+                             hsize_t *count, hsize_t *block, hid_t *fspace_ids);
+static void select_all(size_t num_dsets, hid_t *dset_ids, hid_t *fspace_ids);
+static void select_none(size_t num_dsets, hid_t *dset_ids, hid_t *fspace_ids);
+static void select_elements(size_t num_dsets, hid_t *dset_ids, size_t num_points, hsize_t *coords,
+                            hid_t *fspace_ids);
 
 #ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 /* Tests for writing data in parallel */
 static void test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id,
-                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                  test_mode_t test_mode);
 static void test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                   test_mode_t test_mode);
 static void test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_filter_t filter_id,
-                                                           hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                           hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                           test_mode_t test_mode);
 static void test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                test_mode_t test_mode);
 static void test_write_filtered_dataset_single_unlim_dim_no_overlap(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                    hid_t dcpl_id, hid_t dxpl_id);
+                                                                    hid_t dcpl_id, hid_t dxpl_id,
+                                                                    test_mode_t test_mode);
 static void test_write_filtered_dataset_single_unlim_dim_overlap(const char  *parent_group,
                                                                  H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                 hid_t dcpl_id, hid_t dxpl_id);
+                                                                 hid_t dcpl_id, hid_t dxpl_id,
+                                                                 test_mode_t test_mode);
 static void test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char  *parent_group,
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                   hid_t dcpl_id, hid_t dxpl_id);
+                                                                   hid_t dcpl_id, hid_t dxpl_id,
+                                                                   test_mode_t test_mode);
 static void test_write_filtered_dataset_multi_unlim_dim_overlap(const char  *parent_group,
                                                                 H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                hid_t dcpl_id, hid_t dxpl_id);
+                                                                hid_t dcpl_id, hid_t dxpl_id,
+                                                                test_mode_t test_mode);
 static void test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                            hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                            hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                            test_mode_t test_mode);
 static void test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                         test_mode_t test_mode);
 static void test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode);
 static void test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filter_t filter_id,
-                                                          hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                          hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                          test_mode_t test_mode);
 static void test_write_transformed_filtered_dataset_no_overlap(const char  *parent_group,
                                                                H5Z_filter_t filter_id, hid_t fapl_id,
-                                                               hid_t dcpl_id, hid_t dxpl_id);
+                                                               hid_t dcpl_id, hid_t dxpl_id,
+                                                               test_mode_t test_mode);
 static void test_write_3d_filtered_dataset_no_overlap_separate_pages(const char  *parent_group,
                                                                      H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                     hid_t dcpl_id, hid_t dxpl_id);
+                                                                     hid_t dcpl_id, hid_t dxpl_id,
+                                                                     test_mode_t test_mode);
 static void test_write_3d_filtered_dataset_no_overlap_same_pages(const char  *parent_group,
                                                                  H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                 hid_t dcpl_id, hid_t dxpl_id);
+                                                                 hid_t dcpl_id, hid_t dxpl_id,
+                                                                 test_mode_t test_mode);
 static void test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                   test_mode_t test_mode);
 static void test_write_cmpd_filtered_dataset_no_conversion_unshared(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                    hid_t dcpl_id, hid_t dxpl_id);
+                                                                    hid_t dcpl_id, hid_t dxpl_id,
+                                                                    test_mode_t test_mode);
 static void test_write_cmpd_filtered_dataset_no_conversion_shared(const char  *parent_group,
                                                                   H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                  hid_t dcpl_id, hid_t dxpl_id);
+                                                                  hid_t dcpl_id, hid_t dxpl_id,
+                                                                  test_mode_t test_mode);
 static void test_write_cmpd_filtered_dataset_type_conversion_unshared(const char  *parent_group,
                                                                       H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                      hid_t dcpl_id, hid_t dxpl_id);
+                                                                      hid_t dcpl_id, hid_t dxpl_id,
+                                                                      test_mode_t test_mode);
 static void test_write_cmpd_filtered_dataset_type_conversion_shared(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                    hid_t dcpl_id, hid_t dxpl_id);
+                                                                    hid_t dcpl_id, hid_t dxpl_id,
+                                                                    test_mode_t test_mode);
 #endif
 
 /* Tests for reading data in parallel */
 static void test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id,
-                                                 hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                 hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                 test_mode_t test_mode);
 static void test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                  test_mode_t test_mode);
 static void test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                               test_mode_t test_mode);
 static void test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                           hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                           hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                           test_mode_t test_mode);
 static void test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode);
 static void test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                       test_mode_t test_mode);
 static void test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode);
 static void test_read_transformed_filtered_dataset_no_overlap(const char  *parent_group,
                                                               H5Z_filter_t filter_id, hid_t fapl_id,
-                                                              hid_t dcpl_id, hid_t dxpl_id);
+                                                              hid_t dcpl_id, hid_t dxpl_id,
+                                                              test_mode_t test_mode);
 static void test_read_3d_filtered_dataset_no_overlap_separate_pages(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                    hid_t dcpl_id, hid_t dxpl_id);
+                                                                    hid_t dcpl_id, hid_t dxpl_id,
+                                                                    test_mode_t test_mode);
 static void test_read_3d_filtered_dataset_no_overlap_same_pages(const char  *parent_group,
                                                                 H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                hid_t dcpl_id, hid_t dxpl_id);
+                                                                hid_t dcpl_id, hid_t dxpl_id,
+                                                                test_mode_t test_mode);
 static void test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
+                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                  test_mode_t test_mode);
 static void test_read_cmpd_filtered_dataset_no_conversion_unshared(const char  *parent_group,
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                   hid_t dcpl_id, hid_t dxpl_id);
+                                                                   hid_t dcpl_id, hid_t dxpl_id,
+                                                                   test_mode_t test_mode);
 static void test_read_cmpd_filtered_dataset_no_conversion_shared(const char  *parent_group,
                                                                  H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                 hid_t dcpl_id, hid_t dxpl_id);
+                                                                 hid_t dcpl_id, hid_t dxpl_id,
+                                                                 test_mode_t test_mode);
 static void test_read_cmpd_filtered_dataset_type_conversion_unshared(const char  *parent_group,
                                                                      H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                     hid_t dcpl_id, hid_t dxpl_id);
+                                                                     hid_t dcpl_id, hid_t dxpl_id,
+                                                                     test_mode_t test_mode);
 static void test_read_cmpd_filtered_dataset_type_conversion_shared(const char  *parent_group,
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
-                                                                   hid_t dcpl_id, hid_t dxpl_id);
+                                                                   hid_t dcpl_id, hid_t dxpl_id,
+                                                                   test_mode_t test_mode);
 
 /*
  * Tests for attempting to round-trip the data going from
@@ -165,27 +230,25 @@ static void test_read_cmpd_filtered_dataset_type_conversion_shared(const char  *
  * written in parallel -> read serially
  */
 static void test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                            hid_t dcpl_id, hid_t dxpl_id);
+                                            hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 
 #ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
 static void test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                            hid_t dcpl_id, hid_t dxpl_id);
+                                            hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 
 /* Other miscellaneous tests */
 static void test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                          hid_t dcpl_id, hid_t dxpl_id);
+                                          hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 static void test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                        hid_t dcpl_id, hid_t dxpl_id);
+                                        hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 static void test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                     hid_t dcpl_id, hid_t dxpl_id);
-static void test_edge_chunks_partial_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                           hid_t dcpl_id, hid_t dxpl_id);
+                                     hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 static void test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                             hid_t dxpl_id);
+                             hid_t dxpl_id, test_mode_t test_mode);
 static void test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                      hid_t dcpl_id, hid_t dxpl_id);
+                                      hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 static void test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                 hid_t dcpl_id, hid_t dxpl_id);
+                                 hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode);
 #endif
 
 static test_func tests[] = {
@@ -232,7 +295,6 @@ static test_func tests[] = {
     test_shrinking_growing_chunks,
     test_edge_chunks_no_overlap,
     test_edge_chunks_overlap,
-    test_edge_chunks_partial_write,
     test_fill_values,
     test_fill_value_undefined,
     test_fill_time_never,
@@ -259,11 +321,12 @@ set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_
         case H5Z_FILTER_SZIP: {
             unsigned pixels_per_block         = H5_SZIP_MAX_PIXELS_PER_BLOCK;
             hsize_t  chunk_dims[H5S_MAX_RANK] = {0};
-            size_t   i, chunk_nelemts;
+            size_t   chunk_nelemts;
 
             VRFY(H5Pget_chunk(dcpl_id, H5S_MAX_RANK, chunk_dims) >= 0, "H5Pget_chunk succeeded");
 
-            for (i = 0, chunk_nelemts = 1; i < H5S_MAX_RANK; i++)
+            chunk_nelemts = 1;
+            for (size_t i = 0; i < H5S_MAX_RANK; i++)
                 if (chunk_dims[i] > 0)
                     chunk_nelemts *= chunk_dims[i];
 
@@ -305,26 +368,37 @@ set_dcpl_filter(hid_t dcpl_id, H5Z_filter_t filter_id, filter_options_t *filter_
  * based on the dataset's allocation time setting and how many chunks
  * in the dataset have been written to.
  */
-static herr_t
-verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chunks_written)
+static void
+verify_space_alloc_status(size_t num_dsets, hid_t *dset_ids, hid_t dcpl_id,
+                          num_chunks_written_t chunks_written)
 {
-    int    nfilters;
-    herr_t ret_value = SUCCEED;
+    H5D_space_status_t space_status;
+    H5D_alloc_time_t   alloc_time;
 
-    VRFY(((nfilters = H5Pget_nfilters(dcpl_id)) >= 0), "H5Pget_nfilters succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        hid_t dset_dcpl;
+        int   nfilters;
 
-    /*
-     * Only verify space allocation status when there are filters
-     * in the dataset's filter pipeline. When filters aren't in the
-     * pipeline, the space allocation time and status can vary based
-     * on whether the file was created in parallel or serial mode.
-     */
-    if (nfilters > 0) {
-        H5D_space_status_t space_status;
-        H5D_alloc_time_t   alloc_time;
+        /* Check if this particular dataset has any filters applied */
+        dset_dcpl = H5Dget_create_plist(dset_ids[dset_idx]);
+        VRFY((dset_dcpl >= 0), "H5Dget_create_plist");
+
+        nfilters = H5Pget_nfilters(dset_dcpl);
+        VRFY((nfilters >= 0), "H5Pget_nfilters");
+
+        VRFY((H5Pclose(dset_dcpl) >= 0), "H5Pclose");
+
+        /*
+         * Only verify space allocation status when there are filters
+         * in the dataset's filter pipeline. When filters aren't in the
+         * pipeline, the space allocation time and status can vary based
+         * on whether the file was created in parallel or serial mode.
+         */
+        if (nfilters == 0)
+            return;
 
         VRFY((H5Pget_alloc_time(dcpl_id, &alloc_time) >= 0), "H5Pget_alloc_time succeeded");
-        VRFY((H5Dget_space_status(dset_id, &space_status) >= 0), "H5Dget_space_status succeeded");
+        VRFY((H5Dget_space_status(dset_ids[dset_idx], &space_status) >= 0), "H5Dget_space_status succeeded");
 
         switch (alloc_time) {
             case H5D_ALLOC_TIME_EARLY:
@@ -347,7 +421,7 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                     VRFY((space_status == H5D_SPACE_STATUS_ALLOCATED) ||
                              (space_status == H5D_SPACE_STATUS_PART_ALLOCATED),
                          "verified space allocation status");
-                else if (chunks_written == NO_CHUNKS_WRITTEN)
+                else if (chunks_written == NO_CHUNKS_WRITTEN) {
                     /*
                      * A special case where we wrote to a dataset that
                      * uses late space allocation, but the write was
@@ -358,6 +432,7 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                      * been allocated.
                      */
                     VRFY(space_status == H5D_SPACE_STATUS_ALLOCATED, "verified space allocation status");
+                }
                 else
                     VRFY(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED, "verified space allocation status");
                 break;
@@ -385,8 +460,388 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
                 MPI_Abort(MPI_COMM_WORLD, 1);
         }
     }
+}
 
-    return ret_value;
+/*
+ * Function to verify the status of the chunk I/O optimization method
+ * used when the multi-dataset I/O API routines were used. As long as
+ * multi-dataset I/O was actually performed, the library should return
+ * that linked-chunk I/O was performed. Otherwise, if datasets were
+ * processed one at a time, the library should return that multi-chunk
+ * I/O was performed.
+ */
+static void
+verify_chunk_opt_status(size_t num_dsets, hid_t dxpl_id)
+{
+    H5D_mpio_actual_chunk_opt_mode_t chunk_opt_mode;
+    H5D_selection_io_mode_t          sel_io_mode;
+    uint32_t                         no_sel_io_cause = 0;
+    herr_t                           ret;
+
+    if (H5P_DEFAULT != dxpl_id) {
+        ret = H5Pget_mpio_actual_chunk_opt_mode(dxpl_id, &chunk_opt_mode);
+        VRFY((ret >= 0), "H5Pget_mpio_actual_chunk_opt_mode succeeded");
+
+        ret = H5Pget_selection_io(dxpl_id, &sel_io_mode);
+        VRFY((ret >= 0), "H5Pget_selection_io succeeded");
+
+        if (sel_io_mode == H5D_SELECTION_IO_MODE_DEFAULT || sel_io_mode == H5D_SELECTION_IO_MODE_ON) {
+            ret = H5Pget_no_selection_io_cause(dxpl_id, &no_sel_io_cause);
+            VRFY((ret >= 0), "H5Pget_no_selection_io_cause succeeded");
+        }
+
+        if (num_dsets == 0) {
+            /*
+             * num_dsets == 0 implies that the write call was expected to
+             * failed and did so. Verify that the library returns
+             * H5D_MPIO_NO_CHUNK_OPTIMIZATION as the chunk I/O optimization
+             * method
+             */
+            VRFY((H5D_MPIO_NO_CHUNK_OPTIMIZATION == chunk_opt_mode),
+                 "verified I/O optimization was H5D_MPIO_NO_CHUNK_OPTIMIZATION");
+        }
+        else if (num_dsets == 1) {
+            /*
+             * If selection I/O is set to ON and was actually performed, just
+             * verify that the library returns that either linked-chunk or
+             * multi-chunk I/O was performed. Otherwise, any of the optimization
+             * methods could potentially be returned by the library.
+             */
+            if ((sel_io_mode == H5D_SELECTION_IO_MODE_DEFAULT || sel_io_mode == H5D_SELECTION_IO_MODE_ON) &&
+                !no_sel_io_cause) {
+                VRFY((H5D_MPIO_NO_CHUNK_OPTIMIZATION != chunk_opt_mode),
+                     "verified I/O optimization wasn't H5D_MPIO_NO_CHUNK_OPTIMIZATION");
+                VRFY((H5D_MPIO_LINK_CHUNK == chunk_opt_mode || H5D_MPIO_MULTI_CHUNK == chunk_opt_mode),
+                     "verified I/O optimization was linked-chunk I/O or multi-chunk I/O");
+            }
+        }
+        else {
+            /*
+             * If selection I/O is set to ON and was actually performed, verify
+             * that the library returns that linked-chunk I/O was performed.
+             * Otherwise, any of the optimization methods could potentially be
+             * returned by the library.
+             */
+            if ((sel_io_mode == H5D_SELECTION_IO_MODE_DEFAULT || sel_io_mode == H5D_SELECTION_IO_MODE_ON) &&
+                !no_sel_io_cause) {
+                VRFY((H5D_MPIO_LINK_CHUNK == chunk_opt_mode),
+                     "verified I/O optimization was linked-chunk I/O");
+            }
+        }
+    }
+}
+
+static const char *
+test_mode_to_string(test_mode_t test_mode)
+{
+    switch (test_mode) {
+        case USE_SINGLE_DATASET:
+            return "USE_SINGLE_DATASET";
+        case USE_MULTIPLE_DATASETS:
+            return "USE_MULTIPLE_DATASETS";
+        case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
+            return "USE_MULTIPLE_DATASETS_MIXED_FILTERED";
+        case TEST_MODE_SENTINEL:
+        default:
+            return "INVALID";
+    }
+}
+
+/*
+ * Utility routine to create the datasets for each test,
+ * after adjusting for the current test mode
+ */
+static void
+create_datasets(hid_t parent_obj_id, const char *dset_name, hid_t type_id, hid_t filespace_id, hid_t dcpl_id,
+                test_mode_t test_mode, size_t *num_dsets, hid_t *dset_ids)
+{
+    const char *dset_name_ptr   = NULL;
+    hid_t       unfiltered_dcpl = H5I_INVALID_HID;
+    char        dset_name_multi_buf[512];
+    int         n_dsets      = 0;
+    int         n_unfiltered = 0;
+
+    VRFY((num_dsets != NULL), "verify num_dsets");
+    VRFY((dset_ids != NULL), "verify dset_ids");
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        dset_ids[dset_idx] = H5I_INVALID_HID;
+
+    switch (test_mode) {
+        case USE_SINGLE_DATASET:
+            dset_name_ptr = dset_name;
+            n_dsets       = 1;
+            break;
+
+        case USE_MULTIPLE_DATASETS:
+        case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
+            dset_name_ptr = dset_name_multi_buf;
+            n_dsets       = (rand() % (MAX_NUM_DSETS_MULTI - 1)) + 2;
+
+            /* Select between 1 and (n_dsets - 1) datasets to be unfiltered */
+            if (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
+                n_unfiltered = (rand() % (n_dsets - 1)) + 1;
+
+                unfiltered_dcpl = H5Pcopy(dcpl_id);
+                VRFY((unfiltered_dcpl >= 0), "H5Pcopy succeeded");
+
+                VRFY((H5Premove_filter(unfiltered_dcpl, H5Z_FILTER_ALL) >= 0), "H5Premove_filter succeeded");
+            }
+            break;
+
+        case TEST_MODE_SENTINEL:
+        default:
+            if (MAINPROCESS)
+                printf("Invalid test mode\n");
+            fflush(stdout);
+            MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < (size_t)n_dsets; dset_idx++) {
+        hid_t curr_dcpl = dcpl_id;
+
+        /* Add suffix to dataset name for multi-dataset tests */
+        if (test_mode == USE_MULTIPLE_DATASETS || test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED)
+            snprintf(dset_name_multi_buf, 512, "%s_%d", dset_name, (int)dset_idx);
+
+        /* Determine if this should be an unfiltered dataset */
+        if ((test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) && (n_unfiltered > 0)) {
+            size_t dsets_left = (size_t)n_dsets - dset_idx;
+            bool   unfiltered;
+
+            /*
+             * The number of unfiltered datasets should never be
+             * greater than the number of datasets left to create
+             */
+            VRFY(((size_t)n_unfiltered <= dsets_left), "number of unfiltered datasets sanity check");
+
+            /*
+             * If the number of unfiltered datasets left is the
+             * same as the number of datasets left, create the
+             * remaining datasets as unfiltered datasets. Otherwise,
+             * randomly determine if a dataset will be unfiltered.
+             */
+            unfiltered = ((size_t)n_unfiltered == dsets_left) || ((rand() % 2) == 0);
+
+            if (unfiltered) {
+                curr_dcpl = unfiltered_dcpl;
+                n_unfiltered--;
+            }
+        }
+
+        dset_ids[dset_idx] = H5Dcreate2(parent_obj_id, dset_name_ptr, type_id, filespace_id, H5P_DEFAULT,
+                                        curr_dcpl, H5P_DEFAULT);
+
+        VRFY((dset_ids[dset_idx] >= 0), "Dataset creation succeeded");
+    }
+
+    if (unfiltered_dcpl >= 0)
+        VRFY((H5Pclose(unfiltered_dcpl) >= 0), "H5Pclose succeeded");
+
+    *num_dsets = (size_t)n_dsets;
+}
+
+/*
+ * Utility routine to open the datasets that were created
+ * for each test, after adjusting for the current test mode
+ */
+static void
+open_datasets(hid_t parent_obj_id, const char *dset_name, size_t num_dsets, test_mode_t test_mode,
+              hid_t *dset_ids)
+{
+    const char *dset_name_ptr = NULL;
+    char        dset_name_multi_buf[512];
+
+    VRFY((dset_ids != NULL), "verify dset_ids");
+    VRFY((num_dsets <= INT_MAX), "verify num_dsets value");
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        dset_ids[dset_idx] = H5I_INVALID_HID;
+
+    switch (test_mode) {
+        case USE_SINGLE_DATASET:
+            dset_name_ptr = dset_name;
+            break;
+
+        case USE_MULTIPLE_DATASETS:
+        case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
+            dset_name_ptr = dset_name_multi_buf;
+            break;
+
+        case TEST_MODE_SENTINEL:
+        default:
+            if (MAINPROCESS)
+                printf("Invalid test mode\n");
+            fflush(stdout);
+            MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        /* Add suffix to dataset name for multi-dataset tests */
+        if (test_mode == USE_MULTIPLE_DATASETS || test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED)
+            snprintf(dset_name_multi_buf, 512, "%s_%d", dset_name, (int)dset_idx);
+
+        dset_ids[dset_idx] = H5Dopen2(parent_obj_id, dset_name_ptr, H5P_DEFAULT);
+
+        VRFY((dset_ids[dset_idx] >= 0), "Dataset open succeeded");
+    }
+}
+
+/*
+ * Utility routine to write to the datasets that were created
+ * for each test, after adjusting for the current test mode
+ */
+static void
+write_datasets(size_t num_dsets, hid_t *dset_ids, hid_t type_id, hid_t mspace_id, hid_t *fspace_ids,
+               hid_t dxpl_id, const void **bufs, test_mode_t test_mode)
+{
+    hid_t mem_type_ids[MAX_NUM_DSETS_MULTI];
+    hid_t mem_space_ids[MAX_NUM_DSETS_MULTI];
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mem_type_ids[dset_idx]  = type_id;
+        mem_space_ids[dset_idx] = mspace_id;
+    }
+
+    switch (test_mode) {
+        case USE_SINGLE_DATASET:
+            VRFY((H5Dwrite(dset_ids[0], type_id, mspace_id, fspace_ids[0], dxpl_id, bufs[0]) >= 0),
+                 "Dataset write succeeded");
+            break;
+
+        case USE_MULTIPLE_DATASETS:
+        case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
+            VRFY((H5Dwrite_multi(num_dsets, dset_ids, mem_type_ids, mem_space_ids, fspace_ids, dxpl_id,
+                                 bufs) >= 0),
+                 "Dataset write succeeded");
+            break;
+
+        case TEST_MODE_SENTINEL:
+        default:
+            if (MAINPROCESS)
+                printf("Invalid test mode\n");
+            fflush(stdout);
+            MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    verify_chunk_opt_status(num_dsets, dxpl_id);
+}
+
+/*
+ * Utility routine to read from the datasets that were created
+ * for each test, after adjusting for the current test mode
+ */
+static void
+read_datasets(size_t num_dsets, hid_t *dset_ids, hid_t type_id, hid_t mspace_id, hid_t fspace_id,
+              hid_t dxpl_id, void **bufs, test_mode_t test_mode)
+{
+    hid_t mem_type_ids[MAX_NUM_DSETS_MULTI];
+    hid_t mem_space_ids[MAX_NUM_DSETS_MULTI];
+    hid_t file_space_ids[MAX_NUM_DSETS_MULTI];
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mem_type_ids[dset_idx]   = type_id;
+        mem_space_ids[dset_idx]  = mspace_id;
+        file_space_ids[dset_idx] = fspace_id;
+    }
+
+    switch (test_mode) {
+        case USE_SINGLE_DATASET:
+            VRFY((H5Dread(dset_ids[0], type_id, mspace_id, fspace_id, dxpl_id, bufs[0]) >= 0),
+                 "Dataset read succeeded");
+            break;
+
+        case USE_MULTIPLE_DATASETS:
+        case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
+            VRFY((H5Dread_multi(num_dsets, dset_ids, mem_type_ids, mem_space_ids, file_space_ids, dxpl_id,
+                                bufs) >= 0),
+                 "Dataset read succeeded");
+            break;
+
+        case TEST_MODE_SENTINEL:
+        default:
+            if (MAINPROCESS)
+                printf("Invalid test mode\n");
+            fflush(stdout);
+            MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    verify_chunk_opt_status(num_dsets, dxpl_id);
+}
+
+static void
+select_hyperslab(size_t num_dsets, hid_t *dset_ids, hsize_t *start, hsize_t *stride, hsize_t *count,
+                 hsize_t *block, hid_t *fspace_ids)
+{
+    VRFY((fspace_ids != NULL), "verify fspace_ids");
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        fspace_ids[dset_idx] = H5I_INVALID_HID;
+
+    if (VERBOSE_MED) {
+        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+               ", %" PRIuHSIZE " ]\n",
+               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+        fflush(stdout);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        fspace_ids[dset_idx] = H5Dget_space(dset_ids[dset_idx]);
+        VRFY((fspace_ids[dset_idx] >= 0), "File dataspace retrieval succeeded");
+
+        VRFY((H5Sselect_hyperslab(fspace_ids[dset_idx], H5S_SELECT_SET, start, stride, count, block) >= 0),
+             "Hyperslab selection succeeded");
+    }
+}
+
+static void
+select_all(size_t num_dsets, hid_t *dset_ids, hid_t *fspace_ids)
+{
+    VRFY((fspace_ids != NULL), "verify fspace_ids");
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        fspace_ids[dset_idx] = H5I_INVALID_HID;
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        fspace_ids[dset_idx] = H5Dget_space(dset_ids[dset_idx]);
+        VRFY((fspace_ids[dset_idx] >= 0), "File dataspace retrieval succeeded");
+
+        VRFY((H5Sselect_all(fspace_ids[dset_idx]) >= 0), "H5Sselect_all succeeded");
+    }
+}
+
+static void
+select_none(size_t num_dsets, hid_t *dset_ids, hid_t *fspace_ids)
+{
+    VRFY((fspace_ids != NULL), "verify fspace_ids");
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        fspace_ids[dset_idx] = H5I_INVALID_HID;
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        fspace_ids[dset_idx] = H5Dget_space(dset_ids[dset_idx]);
+        VRFY((fspace_ids[dset_idx] >= 0), "File dataspace retrieval succeeded");
+
+        VRFY((H5Sselect_none(fspace_ids[dset_idx]) >= 0), "H5Sselect_none succeeded");
+    }
+}
+
+static void
+select_elements(size_t num_dsets, hid_t *dset_ids, size_t num_points, hsize_t *coords, hid_t *fspace_ids)
+{
+    VRFY((fspace_ids != NULL), "verify fspace_ids");
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        fspace_ids[dset_idx] = H5I_INVALID_HID;
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        fspace_ids[dset_idx] = H5Dget_space(dset_ids[dset_idx]);
+        VRFY((fspace_ids[dset_idx] >= 0), "File dataspace retrieval succeeded");
+
+        VRFY((H5Sselect_elements(fspace_ids[dset_idx], H5S_SELECT_SET, num_points, coords) >= 0),
+             "Point selection succeeded");
+    }
 }
 
 #ifdef H5_HAVE_PARALLEL_FILTERED_WRITES
@@ -397,11 +852,12 @@ verify_space_alloc_status(hid_t dset_id, hid_t dcpl_id, num_chunks_written_t chu
  */
 static void
 test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                      hid_t dcpl_id, hid_t dxpl_id)
+                                      hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS];
@@ -409,10 +865,13 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     hsize_t     stride[WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     count[WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     block[WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to one-chunk filtered dataset");
@@ -434,9 +893,6 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     filespace = H5Screate_simple(WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_ONE_CHUNK_FILTERED_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -446,12 +902,12 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -467,73 +923,73 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     start[0]  = ((hsize_t)mpi_rank * sel_dims[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
     data_size = (hsize_t)WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NROWS *
-                (hsize_t)WRITE_ONE_CHUNK_FILTERED_DATASET_NCOLS * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+                (hsize_t)WRITE_ONE_CHUNK_FILTERED_DATASET_NCOLS * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = ((C_DATATYPE)i % (WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
-                                           WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS)) +
-                         ((C_DATATYPE)i / (WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
-                                           WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS));
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_ONE_CHUNK_FILTERED_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_ONE_CHUNK_FILTERED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                ((C_DATATYPE)j % (WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
+                                  WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS)) +
+                ((C_DATATYPE)j / (WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
+                                  WRITE_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS)) +
+                (C_DATATYPE)dset_idx;
+    }
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -549,11 +1005,12 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
  */
 static void
 test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                       hid_t dcpl_id, hid_t dxpl_id)
+                                       hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -561,10 +1018,13 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     hsize_t     stride[WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks");
@@ -586,9 +1046,6 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     filespace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -599,12 +1056,12 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -621,70 +1078,69 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_CH_NROWS * count[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                (C_DATATYPE)((j % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                             (j / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) + dset_idx);
+    }
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -698,11 +1154,13 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
  */
 static void
 test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_filter_t filter_id,
-                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                               test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS];
@@ -710,8 +1168,11 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     hsize_t     stride[WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -746,12 +1207,12 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -768,78 +1229,77 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS * count[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < (size_t)mpi_size; i++) {
-        size_t rank_n_elems = (size_t)(mpi_size * (WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS *
-                                                   WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS));
-        size_t data_idx     = i;
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-        for (size_t j = 0; j < rank_n_elems; j++) {
-            if ((j % WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS) == 0) {
-                correct_buf[(i * rank_n_elems) + j] = (C_DATATYPE)data_idx;
-                data_idx++;
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
+
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    open_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
+
+    /* Verify the correct data was written */
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+
+        for (size_t j = 0; j < (size_t)mpi_size; j++) {
+            size_t data_idx     = j;
+            size_t rank_n_elems = (size_t)(mpi_size * (WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NROWS *
+                                                       WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS));
+
+            for (size_t k = 0; k < rank_n_elems; k++) {
+                if ((k % WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_CH_NCOLS) == 0) {
+                    correct_bufs[dset_idx][(j * rank_n_elems) + k] = (C_DATATYPE)(data_idx + dset_idx);
+                    data_idx++;
+                }
             }
         }
     }
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
 
-    if (data)
-        free(data);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-
-    /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
-
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -856,11 +1316,12 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
  */
 static void
 test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                    hid_t dcpl_id, hid_t dxpl_id)
+                                    hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -868,10 +1329,13 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     hsize_t     stride[WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     count[WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to shared filtered chunks");
@@ -893,9 +1357,6 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     filespace = H5Screate_simple(WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_SHARED_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -906,12 +1367,12 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -927,72 +1388,71 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
-    /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    /* Verify correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    /* Verify the correct data was written */
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                (C_DATATYPE)((dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                             (j % dataset_dims[1]) +
+                             (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) %
+                              dataset_dims[1]) +
+                             dset_idx);
+    }
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1009,10 +1469,12 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
  */
 static void
 test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     max_dims[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
@@ -1021,8 +1483,11 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     hsize_t     stride[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
-    size_t      i, data_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -1058,32 +1523,35 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
 
-    for (i = 0; i < (size_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS; i++) {
-        /* Select hyperslab in the file */
-        filespace = H5Dget_space(dset_id);
-        VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+        tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
+        read_bufs[dset_idx] = tmp_buf;
+    }
+
+    for (size_t i = 0; i < (size_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS; i++) {
         /* Each process defines the dataset selection in memory and writes
          * it to the hyperslab in the file
          */
@@ -1097,56 +1565,55 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
         start[0]  = ((hsize_t)mpi_rank * block[0] * count[0]);
         start[1]  = i * count[1] * block[1];
 
-        if (VERBOSE_MED) {
-            printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ]\n",
-                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                   block[1]);
-            fflush(stdout);
-        }
+        select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-        VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-             "Hyperslab selection succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-             "Dataset write succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        /* Close and re-open datasets */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-        dset_id = H5Dopen2(group_id, WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset open succeeded");
+        open_datasets(group_id, WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        memset(read_buf, 255, data_size);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            memset(read_bufs[dset_idx], 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+        read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                      test_mode);
 
         /* Verify the correct data was written */
-        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+                 "Data verification succeeded");
 
         if (i < (size_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS - 1) {
-            /* Extend the dataset by count[1] chunks in the extensible dimension */
+            /* Extend the dataset(s) by count[1] chunks in the extensible dimension */
             dataset_dims[1] += count[1] * block[1];
-            VRFY(H5Dset_extent(dset_id, dataset_dims) >= 0, "H5Dset_extent succeeded");
+
+            for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+                VRFY(H5Dset_extent(dset_ids[dset_idx], dataset_dims) >= 0, "H5Dset_extent succeeded");
 
             /* Verify space allocation status */
-            verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+            verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
         }
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
     }
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1163,10 +1630,12 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
  */
 static void
 test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                     hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                     hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                     test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     max_dims[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
@@ -1175,8 +1644,11 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     hsize_t     stride[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     count[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     hsize_t     block[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
-    size_t      i, data_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -1212,32 +1684,35 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
 
-    for (i = 0; i < (size_t)WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS; i++) {
-        /* Select hyperslab in the file */
-        filespace = H5Dget_space(dset_id);
-        VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+        tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
+        read_bufs[dset_idx] = tmp_buf;
+    }
+
+    for (size_t i = 0; i < (size_t)WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS; i++) {
         /* Each process defines the dataset selection in memory and writes
          * it to the hyperslab in the file
          */
@@ -1250,56 +1725,55 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
         start[0]  = (hsize_t)mpi_rank * block[0];
         start[1]  = i * count[1] * block[1];
 
-        if (VERBOSE_MED) {
-            printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ]\n",
-                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                   block[1]);
-            fflush(stdout);
-        }
+        select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-        VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-             "Hyperslab selection succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-             "Dataset write succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        /* Close and re-open datasets */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-        dset_id = H5Dopen2(group_id, WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset open succeeded");
+        open_datasets(group_id, WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        memset(read_buf, 255, data_size);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            memset(read_bufs[dset_idx], 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+        read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                      test_mode);
 
-        /* Verify correct data was written */
-        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+        /* Verify the correct data was written */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+                 "Data verification succeeded");
 
         if (i < (size_t)WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS - 1) {
-            /* Extend the dataset by count[1] chunks in the extensible dimension */
+            /* Extend the dataset(s) by count[1] chunks in the extensible dimension */
             dataset_dims[1] += count[1] * block[1];
-            VRFY(H5Dset_extent(dset_id, dataset_dims) >= 0, "H5Dset_extent succeeded");
+
+            for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+                VRFY(H5Dset_extent(dset_ids[dset_idx], dataset_dims) >= 0, "H5Dset_extent succeeded");
 
             /* Verify space allocation status */
-            verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+            verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
         }
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
     }
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1318,10 +1792,12 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
  */
 static void
 test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                       test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     max_dims[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
@@ -1330,8 +1806,11 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     hsize_t     stride[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
-    size_t      i, data_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -1367,40 +1846,38 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    for (i = 0; i < (size_t)WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS; i++) {
-        C_DATATYPE *tmp_realloc = NULL;
-        size_t      j;
-
+    for (size_t i = 0; i < (size_t)WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS; i++) {
         /* Set selected dimensions */
         sel_dims[0] = (i + 1) * WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NROWS;
         sel_dims[1] = (i + 1) * WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NCOLS;
 
         /* Fill data buffer */
-        data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+        data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-        tmp_realloc = (C_DATATYPE *)realloc(data, data_size);
-        VRFY((NULL != tmp_realloc), "realloc succeeded");
-        data = tmp_realloc;
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            C_DATATYPE *tmp_buf = realloc(data_bufs_nc[dset_idx], data_size);
+            VRFY((NULL != tmp_buf), "realloc succeeded");
 
-        tmp_realloc = (C_DATATYPE *)realloc(read_buf, data_size);
-        VRFY((NULL != tmp_realloc), "realloc succeeded");
-        read_buf = tmp_realloc;
+            for (size_t k = 0; k < data_size / sizeof(C_DATATYPE); k++)
+                tmp_buf[k] = (C_DATATYPE)(GEN_DATA(k) + dset_idx);
 
-        for (j = 0; j < data_size / sizeof(*data); j++)
-            data[j] = (C_DATATYPE)GEN_DATA(j);
+            data_bufs[dset_idx]    = tmp_buf;
+            data_bufs_nc[dset_idx] = tmp_buf;
 
-        /* Select hyperslab in the file */
-        filespace = H5Dget_space(dset_id);
-        VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+            tmp_buf = realloc(read_bufs[dset_idx], data_size);
+            VRFY((NULL != tmp_buf), "realloc succeeded");
+
+            read_bufs[dset_idx] = tmp_buf;
+        }
 
         /* Each process defines the dataset selection in memory and writes
          * it to the hyperslab in the file
@@ -1414,61 +1891,60 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
         start[0]  = ((hsize_t)mpi_rank * block[0] * count[0]);
         start[1]  = 0;
 
-        if (VERBOSE_MED) {
-            printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ]\n",
-                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                   block[1]);
-            fflush(stdout);
-        }
+        select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-        VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-             "Hyperslab selection succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-             "Dataset write succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        /* Close and re-open datasets */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-        dset_id = H5Dopen2(group_id, WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset open succeeded");
+        open_datasets(group_id, WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        memset(read_buf, 255, data_size);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            memset(read_bufs[dset_idx], 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+        read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                      test_mode);
 
         /* Verify the correct data was written */
-        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+                 "Data verification succeeded");
 
         if (i < (size_t)WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS - 1) {
             /*
-             * Extend the dataset by the size of one chunk per rank
-             * in the first extensible dimension. Extend the dataset
+             * Extend the dataset(s) by the size of one chunk per rank
+             * in the first extensible dimension. Extend the dataset(s)
              * by the size of chunk in the second extensible dimension.
              */
             dataset_dims[0] += (hsize_t)mpi_size * block[0];
             dataset_dims[1] += block[1];
-            VRFY(H5Dset_extent(dset_id, dataset_dims) >= 0, "H5Dset_extent succeeded");
+
+            for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+                VRFY(H5Dset_extent(dset_ids[dset_idx], dataset_dims) >= 0, "H5Dset_extent succeeded");
 
             /* Verify space allocation status */
-            verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+            verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
         }
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
     }
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1485,10 +1961,12 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
  */
 static void
 test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                    hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                    hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                    test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     max_dims[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
@@ -1497,8 +1975,11 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     hsize_t     stride[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     count[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     hsize_t     block[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
-    size_t      i, data_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -1534,40 +2015,38 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    for (i = 0; i < (size_t)WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS; i++) {
-        C_DATATYPE *tmp_realloc = NULL;
-        size_t      j;
-
+    for (size_t i = 0; i < (size_t)WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS; i++) {
         /* Set selected dimensions */
         sel_dims[0] = (i + 1);
         sel_dims[1] = (i + 1) * (size_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS;
 
         /* Fill data buffer */
-        data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+        data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-        tmp_realloc = (C_DATATYPE *)realloc(data, data_size);
-        VRFY((NULL != tmp_realloc), "realloc succeeded");
-        data = tmp_realloc;
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            C_DATATYPE *tmp_buf = realloc(data_bufs_nc[dset_idx], data_size);
+            VRFY((NULL != tmp_buf), "realloc succeeded");
 
-        tmp_realloc = (C_DATATYPE *)realloc(read_buf, data_size);
-        VRFY((NULL != tmp_realloc), "realloc succeeded");
-        read_buf = tmp_realloc;
+            for (size_t k = 0; k < data_size / sizeof(C_DATATYPE); k++)
+                tmp_buf[k] = (C_DATATYPE)(GEN_DATA(k) + dset_idx);
 
-        for (j = 0; j < data_size / sizeof(*data); j++)
-            data[j] = (C_DATATYPE)GEN_DATA(j);
+            data_bufs[dset_idx]    = tmp_buf;
+            data_bufs_nc[dset_idx] = tmp_buf;
 
-        /* Select hyperslab in the file */
-        filespace = H5Dget_space(dset_id);
-        VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+            tmp_buf = realloc(read_bufs[dset_idx], data_size);
+            VRFY((NULL != tmp_buf), "realloc succeeded");
+
+            read_bufs[dset_idx] = tmp_buf;
+        }
 
         /* Each process defines the dataset selection in memory and writes
          * it to the hyperslab in the file
@@ -1581,57 +2060,56 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
         start[0]  = (hsize_t)mpi_rank;
         start[1]  = 0;
 
-        if (VERBOSE_MED) {
-            printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-                   ", %" PRIuHSIZE " ]\n",
-                   mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
-                   block[1]);
-            fflush(stdout);
-        }
+        select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-        VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-             "Hyperslab selection succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-             "Dataset write succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        /* Close and re-open datasets */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-        dset_id = H5Dopen2(group_id, WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset open succeeded");
+        open_datasets(group_id, WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        memset(read_buf, 255, data_size);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            memset(read_bufs[dset_idx], 255, data_size);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+        read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                      test_mode);
 
-        /* Verify correct data was written */
-        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+        /* Verify the correct data was written */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+                 "Data verification succeeded");
 
         if (i < (size_t)WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS - 1) {
-            /* Extend the dataset by the size of a chunk in each extensible dimension */
+            /* Extend the dataset(s) by the size of a chunk in each extensible dimension */
             dataset_dims[0] += (hsize_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NROWS;
             dataset_dims[1] += (hsize_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS;
-            VRFY(H5Dset_extent(dset_id, dataset_dims) >= 0, "H5Dset_extent succeeded");
+
+            for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+                VRFY(H5Dset_extent(dset_ids[dset_idx], dataset_dims) >= 0, "H5Dset_extent succeeded");
 
             /* Verify space allocation status */
-            verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+            verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
         }
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
     }
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1650,11 +2128,13 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
  */
 static void
 test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                                hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -1662,11 +2142,13 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     hsize_t     stride[WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     count[WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    size_t      segment_length;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to filtered chunks with a single process having no selection");
@@ -1691,9 +2173,6 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     filespace = H5Screate_simple(WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -1704,12 +2183,12 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -1726,80 +2205,85 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     start[0]  = (hsize_t)mpi_rank * (hsize_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS * count[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
     if (mpi_rank == WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC)
-        VRFY((H5Sselect_none(filespace) >= 0), "Select none succeeded");
+        select_none(num_dsets, dset_ids, fspace_ids);
     else
-        VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-             "Hyperslab selection succeeded");
+        select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
     if (mpi_rank != WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
-        data = (C_DATATYPE *)calloc(1, data_size);
-        VRFY((NULL != data), "calloc succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+            VRFY((NULL != tmp_buf), "calloc succeeded");
 
-        for (i = 0; i < data_size / sizeof(*data); i++)
-            data[i] = (C_DATATYPE)GEN_DATA(i);
+            for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+                tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
+
+            data_bufs[dset_idx]    = tmp_buf;
+            data_bufs_nc[dset_idx] = tmp_buf;
+        }
     }
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
-
-    /* Compute the correct offset into the buffer for the process having no selection and clear it */
-    segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
-    memset(correct_buf + ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-           0, segment_length * sizeof(*data));
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status - data should only have been written if MPI size > 1 */
-    verify_space_alloc_status(dset_id, plist_id, (mpi_size > 1 ? SOME_CHUNKS_WRITTEN : NO_CHUNKS_WRITTEN));
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id,
+                              (mpi_size > 1 ? SOME_CHUNKS_WRITTEN : NO_CHUNKS_WRITTEN));
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++) {
+            size_t segment_length;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+            correct_bufs[dset_idx][j] =
+                (C_DATATYPE)((j % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                             (j / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) + dset_idx);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+            /* Compute the correct offset into the buffer for the process having no selection and clear it */
+            segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
+            memset(correct_bufs[dset_idx] +
+                       ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
+                   0, segment_length * sizeof(C_DATATYPE));
+        }
+    }
+
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1819,18 +2303,21 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
  */
 static void
 test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                             hid_t dcpl_id, hid_t dxpl_id)
+                                             hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    hsize_t     sel_dims[WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to filtered chunks with all processes having no selection");
@@ -1846,13 +2333,9 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     dataset_dims[1] = (hsize_t)WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
     chunk_dims[0]   = (hsize_t)WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS;
     chunk_dims[1]   = (hsize_t)WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
-    sel_dims[0] = sel_dims[1] = 0;
 
     filespace = H5Screate_simple(WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
-
-    memspace = H5Screate_simple(WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
@@ -1864,65 +2347,73 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_none(filespace) >= 0), "Select none succeeded");
+    select_none(num_dsets, dset_ids, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    /* Verify space allocation status - no ranks should have written any data */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
-    if (data)
-        free(data);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, NO_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    open_datasets(group_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1936,20 +2427,24 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
  */
 static void
 test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                            hid_t dcpl_id, hid_t dxpl_id)
+                                            hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    hsize_t    *coords      = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    hsize_t    *coords                            = NULL;
     hsize_t     dataset_dims[WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, j, data_size, correct_buf_size;
+    size_t      data_size, correct_buf_size;
     size_t      num_points;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to filtered chunks with point selection");
@@ -1971,9 +2466,6 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     filespace = H5Screate_simple(WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -1984,87 +2476,96 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
     /* Set up point selection */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
     num_points = (hsize_t)WRITE_POINT_SELECTION_FILTERED_CHUNKS_NROWS *
                  (hsize_t)WRITE_POINT_SELECTION_FILTERED_CHUNKS_NCOLS / (hsize_t)mpi_size;
     coords = (hsize_t *)calloc(1, 2 * num_points * sizeof(*coords));
     VRFY((NULL != coords), "Coords calloc succeeded");
 
-    for (i = 0; i < num_points; i++)
-        for (j = 0; j < WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
+    for (size_t i = 0; i < num_points; i++)
+        for (size_t j = 0; j < WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
             coords[(i * WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS) + j] =
                 (j > 0) ? (i % (hsize_t)WRITE_POINT_SELECTION_FILTERED_CHUNKS_NCOLS)
                         : ((hsize_t)mpi_rank +
                            ((hsize_t)mpi_size * (i / (hsize_t)WRITE_POINT_SELECTION_FILTERED_CHUNKS_NCOLS)));
 
-    VRFY((H5Sselect_elements(filespace, H5S_SELECT_SET, (hsize_t)num_points, (const hsize_t *)coords) >= 0),
-         "Point selection succeeded");
+    select_elements(num_dsets, dset_ids, num_points, coords, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
-    /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                (C_DATATYPE)((dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                             (j % dataset_dims[1]) +
+                             (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) %
+                              dataset_dims[1]) +
+                             dset_idx);
+    }
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (coords)
-        free(coords);
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    free(coords);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -2082,11 +2583,12 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
  */
 static void
 test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                              hid_t dcpl_id, hid_t dxpl_id)
+                                              hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
     hsize_t     chunk_dims[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
     hsize_t     sel_dims[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
@@ -2094,10 +2596,13 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     hsize_t     stride[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
     hsize_t     count[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
     hsize_t     block[INTERLEAVED_WRITE_FILTERED_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing interleaved write to filtered chunks");
@@ -2119,9 +2624,6 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     filespace = H5Screate_simple(INTERLEAVED_WRITE_FILTERED_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(INTERLEAVED_WRITE_FILTERED_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -2132,12 +2634,12 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2155,80 +2657,81 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        /* Add Column Index */
-        correct_buf[i] =
-            (C_DATATYPE)((i % (hsize_t)INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-                         /* Add the Row Index */
-                         + ((i % (hsize_t)(mpi_size * INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)) /
-                            (hsize_t)INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)
-
-                         /* Add the amount that gets added when a rank moves down to its next section
-                            vertically in the dataset */
-                         + ((hsize_t)INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS *
-                            (i / (hsize_t)(mpi_size * INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS))));
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                /* Add the Column Index */
+                (C_DATATYPE)((j % (hsize_t)INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+                             /* Add the Row Index */
+                             + ((j % (hsize_t)(mpi_size * INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)) /
+                                (hsize_t)INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+                             /* Add the amount that gets added when a rank moves down to its next section
+                                vertically in the dataset */
+                             + ((hsize_t)INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS *
+                                (j / (hsize_t)(mpi_size * INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS)))
+
+                             /* Add an increment factor for the multi-dataset case */
+                             + dset_idx);
+    }
+
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -2251,11 +2754,13 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
  */
 static void
 test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                   test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -2263,10 +2768,13 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     hsize_t     stride[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to unshared transformed and filtered chunks");
@@ -2288,9 +2796,6 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     filespace = H5Screate_simple(WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -2301,12 +2806,12 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME,
-                         HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -2324,37 +2829,21 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS * count[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
-
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
     /* Create property list for data transform */
     plist_id = H5Pcopy(dxpl_id);
@@ -2363,41 +2852,57 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     /* Set data transform expression */
     VRFY((H5Pset_data_transform(plist_id, "x") >= 0), "Set data transform expression succeeded");
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, plist_id, data_bufs,
+                   test_mode);
 
-    if (data)
-        free(data);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-
-    /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
-
-    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
 
     /* Verify space allocation status */
-    plist_id = H5Dget_create_plist(dset_id);
+    plist_id = H5Dget_create_plist(dset_ids[0]);
     VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    open_datasets(group_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
+
+    /* Verify the correct data was written */
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                (C_DATATYPE)((j % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                             (j / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) + dset_idx);
+    }
+
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -2413,11 +2918,13 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
  */
 static void
 test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group, H5Z_filter_t filter_id,
-                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                         test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
@@ -2425,10 +2932,13 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     hsize_t     stride[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks on separate pages in 3D dataset");
@@ -2453,9 +2963,6 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     filespace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -2466,12 +2973,12 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME,
-                         HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2493,71 +3000,69 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     start[1]  = 0;
     start[2]  = (hsize_t)mpi_rank;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
-               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ]\n",
-               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
-               start[2], block[0], block[1], block[2]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)mpi_size) + (i / (hsize_t)mpi_size));
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                (C_DATATYPE)((j % (hsize_t)mpi_size) + (j / (hsize_t)mpi_size) + dset_idx);
+    }
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -2573,11 +3078,13 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
  */
 static void
 test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5Z_filter_t filter_id,
-                                                     hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                     hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                     test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
@@ -2585,10 +3092,13 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     hsize_t     stride[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks on the same pages in 3D dataset");
@@ -2614,9 +3124,6 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
         H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -2627,12 +3134,12 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME,
-                         HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2653,72 +3160,69 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     start[1] = 0;
     start[2] = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
-               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ]\n",
-               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
-               start[2], block[0], block[1], block[2]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] * dataset_dims[1])));
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] = (C_DATATYPE)((j % (dataset_dims[0] * dataset_dims[1])) +
+                                                     (j / (dataset_dims[0] * dataset_dims[1])) + dset_idx);
+    }
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -2734,11 +3238,12 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
  */
 static void
 test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                       hid_t dcpl_id, hid_t dxpl_id)
+                                       hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
@@ -2746,10 +3251,13 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     hsize_t     stride[WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t     count[WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t     block[WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to shared filtered chunks in 3D dataset");
@@ -2774,9 +3282,6 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     filespace = H5Screate_simple(WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -2787,12 +3292,12 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -2812,86 +3317,86 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     start[1]  = 0;
     start[2]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE
-               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ]\n",
-               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
-               start[2], block[0], block[1], block[2]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size        = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        /* Add the Column Index */
-        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                     WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
-                                      /* Add the Row Index */
-                                      + ((i % (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
-                                         (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
-
-                                      /* Add the amount that gets added when a rank moves down to its next
-                                         section vertically in the dataset */
-                                      + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
-                                         (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] =
+                /* Add the Column Index */
+                (C_DATATYPE)((j % (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                            WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+                             /* Add the Row Index */
+                             + ((j % (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                               WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
+                                (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                          WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+                             /* Add the amount that gets added when a rank moves down to its next
+                                section vertically in the dataset */
+                             + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                          WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
+                                (j / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                               WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)))
+
+                             /* Add an increment factor for the multi-dataset case */
+                             + dset_idx);
+    }
+
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -2906,23 +3411,27 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
  */
 static void
 test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *data        = NULL;
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
+    COMPOUND_C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void          *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void                *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void                *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t              dataset_dims[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              chunk_dims[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              sel_dims[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              start[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              stride[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              count[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              block[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    size_t               i, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID,
-          memtype   = H5I_INVALID_HID;
-    hid_t group_id  = H5I_INVALID_HID;
-    hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t               data_size, correct_buf_size;
+    size_t               num_dsets;
+    hid_t                dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t                group_id  = H5I_INVALID_HID;
+    hid_t                memtype   = H5I_INVALID_HID;
+    hid_t                filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks in Compound Datatype dataset without Datatype "
@@ -2946,16 +3455,10 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     dataset_dims[1] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NCOLS;
     chunk_dims[0]   = WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NROWS;
     chunk_dims[1]   = WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS;
-    sel_dims[0]     = WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NROWS;
-    sel_dims[1]     = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC;
 
     filespace = H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS,
                                  dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
-
-    memspace =
-        H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
@@ -2979,12 +3482,12 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     VRFY((H5Tinsert(memtype, "LongData", HOFFSET(COMPOUND_C_DATATYPE, field3), H5T_NATIVE_LONG) >= 0),
          "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME,
-                         memtype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, memtype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3000,76 +3503,77 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     start[0]  = 0;
     start[1]  = ((hsize_t)mpi_rank * WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    data = (COMPOUND_C_DATATYPE *)calloc(
-        1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "calloc succeeded");
-
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
-
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC; i++) {
-        data[i].field1 = (short)GEN_DATA(i);
-        data[i].field2 = (int)GEN_DATA(i);
-        data[i].field3 = (long)GEN_DATA(i);
+    data_size = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC *
+                sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = (COMPOUND_C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        for (size_t j = 0;
+             j < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC; j++) {
+            tmp_buf[j].field1 = (short)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field2 = (int)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field3 = (long)(GEN_DATA(j) + dset_idx);
+        }
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
-        correct_buf[i].field1 = (short)((i % dataset_dims[1]) + (i / dataset_dims[1]));
+    write_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs, test_mode);
 
-        correct_buf[i].field2 = (int)((i % dataset_dims[1]) + (i / dataset_dims[1]));
-
-        correct_buf[i].field3 = (long)((i % dataset_dims[1]) + (i / dataset_dims[1]));
-    }
-
-    VRFY((H5Dwrite(dset_id, memtype, memspace, filespace, dxpl_id, data) >= 0), "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    dset_id =
-        H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(COMPOUND_C_DATATYPE); j++) {
+            size_t val = (j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+            correct_bufs[dset_idx][j].field1 = (short)val;
+            correct_bufs[dset_idx][j].field2 = (int)val;
+            correct_bufs[dset_idx][j].field3 = (long)val;
+        }
+    }
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    read_datasets(num_dsets, dset_ids, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Tclose(memtype) >= 0), "Datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -3085,23 +3589,27 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
  */
 static void
 test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
-                                                      hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                      hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                      test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *data        = NULL;
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
+    COMPOUND_C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void          *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void                *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void                *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t              dataset_dims[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              chunk_dims[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              sel_dims[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              start[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              stride[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              count[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              block[WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    size_t               i, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID,
-          memtype   = H5I_INVALID_HID;
-    hid_t group_id  = H5I_INVALID_HID;
-    hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t               data_size, correct_buf_size;
+    size_t               num_dsets;
+    hid_t                dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t                group_id  = H5I_INVALID_HID;
+    hid_t                memtype   = H5I_INVALID_HID;
+    hid_t                filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to shared filtered chunks in Compound Datatype dataset without Datatype "
@@ -3125,16 +3633,10 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     dataset_dims[1] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NCOLS;
     chunk_dims[0]   = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NROWS;
     chunk_dims[1]   = WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NCOLS;
-    sel_dims[0] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NROWS / (hsize_t)mpi_size;
-    sel_dims[1] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC;
 
     filespace = H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS,
                                  dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
-
-    memspace =
-        H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
@@ -3158,12 +3660,12 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     VRFY((H5Tinsert(memtype, "LongData", HOFFSET(COMPOUND_C_DATATYPE, field3), H5T_NATIVE_LONG) >= 0),
          "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, memtype,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, memtype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3179,82 +3681,80 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    data = (COMPOUND_C_DATATYPE *)calloc(
-        1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "calloc succeeded");
-
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
-
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC; i++) {
-        data[i].field1 = (short)GEN_DATA(i);
-        data[i].field2 = (int)GEN_DATA(i);
-        data[i].field3 = (long)GEN_DATA(i);
+    data_size = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC *
+                sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = (COMPOUND_C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        for (size_t j = 0; j < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC;
+             j++) {
+            tmp_buf[j].field1 = (short)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field2 = (int)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field3 = (long)(GEN_DATA(j) + dset_idx);
+        }
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
-        correct_buf[i].field1 =
-            (short)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                    (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+    write_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs, test_mode);
 
-        correct_buf[i].field2 =
-            (int)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                  (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
-
-        correct_buf[i].field3 =
-            (long)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                   (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
-    }
-
-    VRFY((H5Dwrite(dset_id, memtype, memspace, filespace, dxpl_id, data) >= 0), "Dataset write succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    open_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     /* Verify the correct data was written */
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    dset_id =
-        H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
+        for (size_t j = 0; j < correct_buf_size / sizeof(COMPOUND_C_DATATYPE); j++) {
+            size_t val1 = (dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1])));
+            size_t val2 = (j % dataset_dims[1]);
+            size_t val3 = (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]);
+            size_t val  = val1 + val2 + val3 + dset_idx;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+            correct_bufs[dset_idx][j].field1 = (short)val;
+            correct_bufs[dset_idx][j].field2 = (int)val;
+            correct_bufs[dset_idx][j].field3 = (long)val;
+        }
+    }
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    read_datasets(num_dsets, dset_ids, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Tclose(memtype) >= 0), "Datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -3276,23 +3776,27 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
  */
 static void
 test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
-                                                          hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                          hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                          test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *data        = NULL;
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
+    COMPOUND_C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void          *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void                *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void                *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t              dataset_dims[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              chunk_dims[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              sel_dims[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              start[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              stride[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              count[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
     hsize_t              block[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    size_t               i, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID,
-          filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
-    hid_t group_id  = H5I_INVALID_HID;
-    hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t               data_size, correct_buf_size;
+    size_t               num_dsets;
+    hid_t                dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t                group_id = H5I_INVALID_HID;
+    hid_t                filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
+    hid_t                filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype "
@@ -3322,16 +3826,10 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     dataset_dims[1] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NCOLS;
     chunk_dims[0]   = WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NROWS;
     chunk_dims[1]   = WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS;
-    sel_dims[0]     = WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NROWS;
-    sel_dims[1]     = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC;
 
     filespace = H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS,
                                  dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
-
-    memspace = H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS,
-                                sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
@@ -3363,12 +3861,12 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     VRFY((H5Tinsert(filetype, "IntData", 8, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(filetype, "LongData", 16, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME,
-                         filetype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, filetype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3384,73 +3882,147 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     start[0]  = 0;
     start[1]  = ((hsize_t)mpi_rank * WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    data = (COMPOUND_C_DATATYPE *)calloc(
-        1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "calloc succeeded");
-
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
-
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC; i++) {
-        data[i].field1 = (short)GEN_DATA(i);
-        data[i].field2 = (int)GEN_DATA(i);
-        data[i].field3 = (long)GEN_DATA(i);
+    data_size = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC *
+                sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = (COMPOUND_C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        for (size_t j = 0;
+             j < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC; j++) {
+            tmp_buf[j].field1 = (short)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field2 = (int)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field3 = (long)(GEN_DATA(j) + dset_idx);
+        }
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
-    /* Ensure that this test currently fails since type conversions break collective mode */
-    H5E_BEGIN_TRY
-    {
-        VRFY((H5Dwrite(dset_id, memtype, memspace, filespace, dxpl_id, data) < 0), "Dataset write succeeded");
+    /*
+     * Ensure that this test currently fails in most cases since type
+     * conversions break collective mode when selection I/O is disabled
+     * and the library will currently disable selection I/O when filters
+     * are applied to a dataset.
+     */
+
+    /* NOTE: Once type conversions no longer break collective mode, remove
+     * the H5E_BEGIN/END_TRY block and switch to the following code instead
+     * of the H5Dwrite loop:
+     */
+    /* write_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids,
+                      dxpl_id, data_bufs, test_mode); */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        herr_t expected = FAIL;
+        herr_t ret;
+
+        /*
+         * Since this currently writes datasets one by one regardless of
+         * test mode, the write call could succeed if the dataset doesn't
+         * have any filters applied to it (can currently only happen when
+         * testing a mix of filtered and unfiltered datasets with the
+         * multi-dataset APIs).
+         */
+        if (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
+            hid_t dset_dcpl;
+            int   nfilters;
+
+            dset_dcpl = H5Dget_create_plist(dset_ids[dset_idx]);
+            VRFY((dset_dcpl >= 0), "H5Dget_create_plist");
+
+            nfilters = H5Pget_nfilters(dset_dcpl);
+            VRFY((nfilters >= 0), "H5Pget_nfilters");
+
+            if (nfilters == 0)
+                expected = SUCCEED;
+
+            VRFY((H5Pclose(dset_dcpl) >= 0), "H5Pclose");
+        }
+
+        if (expected == SUCCEED)
+            ret = H5Dwrite(dset_ids[dset_idx], memtype, H5S_BLOCK, fspace_ids[dset_idx], dxpl_id,
+                           data_bufs[dset_idx]);
+        else {
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dset_ids[dset_idx], memtype, H5S_BLOCK, fspace_ids[dset_idx], dxpl_id,
+                               data_bufs[dset_idx]);
+            }
+            H5E_END_TRY
+        }
+
+        VRFY((ret == expected), "Dataset write");
+
+        if (expected == SUCCEED)
+            verify_chunk_opt_status(1, dxpl_id);
+        else
+            verify_chunk_opt_status(0, dxpl_id);
     }
-    H5E_END_TRY
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, NO_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    open_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     /* Verify that no data was written */
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
-    dset_id =
-        H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    read_datasets(num_dsets, dset_ids, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        hid_t dset_dcpl;
+        int   nfilters;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        dset_dcpl = H5Dget_create_plist(dset_ids[dset_idx]);
+        VRFY((dset_dcpl >= 0), "H5Dget_create_plist");
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+        nfilters = H5Pget_nfilters(dset_dcpl);
+        VRFY((nfilters >= 0), "H5Pget_nfilters");
+
+        VRFY((H5Pclose(dset_dcpl) >= 0), "H5Pclose");
+
+        /*
+         * TODO: For now, skip data verification for the datasets where
+         *       writes with type conversion succeeded due to selection
+         *       I/O being enabled.
+         */
+        if (nfilters == 0)
+            continue;
+
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Tclose(filetype) >= 0), "File datatype close succeeded");
     VRFY((H5Tclose(memtype) >= 0), "Memory datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -3473,23 +4045,27 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
  */
 static void
 test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *data        = NULL;
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
+    COMPOUND_C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void          *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void                *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void                *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t              dataset_dims[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              chunk_dims[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              sel_dims[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              start[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              stride[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              count[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
     hsize_t              block[WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    size_t               i, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t               data_size, correct_buf_size;
+    size_t               num_dsets;
+    hid_t                dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t                file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t                group_id = H5I_INVALID_HID;
     hid_t                filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
-    hid_t                group_id  = H5I_INVALID_HID;
-    hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t                filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
@@ -3518,16 +4094,10 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     dataset_dims[1] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NCOLS;
     chunk_dims[0]   = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NROWS;
     chunk_dims[1]   = WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NCOLS;
-    sel_dims[0] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NROWS / (hsize_t)mpi_size;
-    sel_dims[1] = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC;
 
     filespace = H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS,
                                  dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
-
-    memspace =
-        H5Screate_simple(WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
 
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
@@ -3559,12 +4129,12 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     VRFY((H5Tinsert(filetype, "IntData", 8, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(filetype, "LongData", 16, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
 
-    dset_id = H5Dcreate2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME,
-                         filetype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, filetype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -3580,73 +4150,147 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    data = (COMPOUND_C_DATATYPE *)calloc(
-        1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "calloc succeeded");
-
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
-
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC; i++) {
-        data[i].field1 = (short)GEN_DATA(i);
-        data[i].field2 = (int)GEN_DATA(i);
-        data[i].field3 = (long)GEN_DATA(i);
+    data_size = (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC *
+                sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = (COMPOUND_C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        for (size_t j = 0;
+             j < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC; j++) {
+            tmp_buf[j].field1 = (short)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field2 = (int)(GEN_DATA(j) + dset_idx);
+            tmp_buf[j].field3 = (long)(GEN_DATA(j) + dset_idx);
+        }
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
-    /* Ensure that this test currently fails since type conversions break collective mode */
-    H5E_BEGIN_TRY
-    {
-        VRFY((H5Dwrite(dset_id, memtype, memspace, filespace, dxpl_id, data) < 0), "Dataset write succeeded");
+    /*
+     * Ensure that this test currently fails in most cases since type
+     * conversions break collective mode when selection I/O is disabled
+     * and the library will currently disable selection I/O when filters
+     * are applied to a dataset.
+     */
+
+    /* NOTE: Once type conversions no longer break collective mode, remove
+     * the H5E_BEGIN/END_TRY block and switch to the following code instead
+     * of the H5Dwrite loop:
+     */
+    /* write_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids,
+                      dxpl_id, data_bufs, test_mode); */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        herr_t expected = FAIL;
+        herr_t ret;
+
+        /*
+         * Since this currently writes datasets one by one regardless of
+         * test mode, the write call could succeed if the dataset doesn't
+         * have any filters applied to it (can currently only happen when
+         * testing a mix of filtered and unfiltered datasets with the
+         * multi-dataset APIs).
+         */
+        if (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
+            hid_t dset_dcpl;
+            int   nfilters;
+
+            dset_dcpl = H5Dget_create_plist(dset_ids[dset_idx]);
+            VRFY((dset_dcpl >= 0), "H5Dget_create_plist");
+
+            nfilters = H5Pget_nfilters(dset_dcpl);
+            VRFY((nfilters >= 0), "H5Pget_nfilters");
+
+            if (nfilters == 0)
+                expected = SUCCEED;
+
+            VRFY((H5Pclose(dset_dcpl) >= 0), "H5Pclose");
+        }
+
+        if (expected == SUCCEED)
+            ret = H5Dwrite(dset_ids[dset_idx], memtype, H5S_BLOCK, fspace_ids[dset_idx], dxpl_id,
+                           data_bufs[dset_idx]);
+        else {
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dset_ids[dset_idx], memtype, H5S_BLOCK, fspace_ids[dset_idx], dxpl_id,
+                               data_bufs[dset_idx]);
+            }
+            H5E_END_TRY
+        }
+
+        VRFY((ret == expected), "Dataset write");
+
+        if (expected == SUCCEED)
+            verify_chunk_opt_status(1, dxpl_id);
+        else
+            verify_chunk_opt_status(0, dxpl_id);
     }
-    H5E_END_TRY
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, NO_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    open_datasets(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     /* Verify that no data was written */
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
-    dset_id =
-        H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    read_datasets(num_dsets, dset_ids, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        hid_t dset_dcpl;
+        int   nfilters;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        dset_dcpl = H5Dget_create_plist(dset_ids[dset_idx]);
+        VRFY((dset_dcpl >= 0), "H5Dget_create_plist");
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+        nfilters = H5Pget_nfilters(dset_dcpl);
+        VRFY((nfilters >= 0), "H5Pget_nfilters");
+
+        VRFY((H5Pclose(dset_dcpl) >= 0), "H5Pclose");
+
+        /*
+         * TODO: For now, skip data verification for the datasets where
+         *       writes with type conversion succeeded due to selection
+         *       I/O being enabled.
+         */
+        if (nfilters == 0)
+            continue;
+
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Tclose(filetype) >= 0), "File datatype close succeeded");
     VRFY((H5Tclose(memtype) >= 0), "Memory datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -3668,11 +4312,12 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
  */
 static void
 test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                     hid_t dcpl_id, hid_t dxpl_id)
+                                     hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[READ_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     chunk_dims[READ_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     sel_dims[READ_ONE_CHUNK_FILTERED_DATASET_DIMS];
@@ -3681,12 +4326,16 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     hsize_t     count[READ_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     block[READ_ONE_CHUNK_FILTERED_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from one-chunk filtered dataset");
@@ -3695,16 +4344,61 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     dataset_dims[1] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = ((C_DATATYPE)i % (READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = ((C_DATATYPE)j % (READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
                                            READ_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS)) +
-                         ((C_DATATYPE)i / (READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
-                                           READ_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS));
+                         ((C_DATATYPE)j / (READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
+                                           READ_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS)) +
+                         (C_DATATYPE)dset_idx;
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_ONE_CHUNK_FILTERED_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_ONE_CHUNK_FILTERED_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -3721,43 +4415,29 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_ONE_CHUNK_FILTERED_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_ONE_CHUNK_FILTERED_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_ONE_CHUNK_FILTERED_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_ONE_CHUNK_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                             H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -3765,21 +4445,13 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_ONE_CHUNK_FILTERED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_ONE_CHUNK_FILTERED_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_NROWS / (hsize_t)mpi_size;
     sel_dims[1] = (hsize_t)READ_ONE_CHUNK_FILTERED_DATASET_NCOLS;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -3794,61 +4466,54 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     start[0]  = ((hsize_t)mpi_rank * sel_dims[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)flat_dims[0];
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0]);
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)flat_dims[0];
+        displs[i]     = (int)(i * flat_dims[0]);
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf,
+                                  recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -3867,11 +4532,12 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
  */
 static void
 test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                      hid_t dcpl_id, hid_t dxpl_id)
+                                      hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -3880,12 +4546,16 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     hsize_t     count[READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks");
@@ -3894,15 +4564,61 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     dataset_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NROWS *
-                       (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NCOLS * sizeof(*correct_buf);
+    data_size = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NROWS * (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NCOLS *
+                sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] =
+                (C_DATATYPE)((j % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                             (j / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) + dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -3919,43 +4635,29 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                             filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -3963,21 +4665,13 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_CH_NROWS;
     sel_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NCOLS;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and reads
@@ -3992,61 +4686,54 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_CH_NROWS * count[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)flat_dims[0];
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0]);
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)flat_dims[0];
+        displs[i]     = (int)(i * flat_dims[0]);
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf,
+                                  recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -4066,11 +4753,12 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
  */
 static void
 test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                   hid_t dcpl_id, hid_t dxpl_id)
+                                   hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -4079,12 +4767,16 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     hsize_t     count[READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from shared filtered chunks");
@@ -4093,16 +4785,62 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     dataset_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)((dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                                      (j % dataset_dims[1]) +
+                                      (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) %
+                                       dataset_dims[1]) +
+                                      dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4119,43 +4857,29 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_SHARED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_SHARED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_SHARED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                             filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4163,21 +4887,13 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_SHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_SHARED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)DIM0_SCALE_FACTOR;
     sel_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_CH_NCOLS * (hsize_t)DIM1_SCALE_FACTOR;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -4192,77 +4908,71 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    /* Collect each piece of data from all ranks into a global buffer on all ranks */
+    global_buf = calloc(1, data_size);
     VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     /*
      * Since these chunks are shared, run multiple rounds of MPI_Allgatherv
      * to collect all of the pieces into their appropriate locations. The
-     * number of times MPI_Allgatherv is run should be equal to the number
-     * of chunks in the first dimension of the dataset.
+     * number of times MPI_Allgatherv is run for each dataset should be equal
+     * to the number of chunks in the first dimension of the dataset.
      */
-    {
-        size_t loop_count       = count[0];
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
         size_t total_recvcounts = 0;
 
-        recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-        VRFY((NULL != recvcounts), "calloc succeeded");
+        for (size_t j = 0; j < (size_t)mpi_size; j++) {
+            recvcounts[j] = (int)dataset_dims[1];
+            total_recvcounts += (size_t)recvcounts[j];
 
-        displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
-        VRFY((NULL != displs), "calloc succeeded");
-
-        for (i = 0; i < (size_t)mpi_size; i++) {
-            recvcounts[i] = (int)dataset_dims[1];
-            total_recvcounts += (size_t)recvcounts[i];
+            displs[j] = (int)(j * dataset_dims[1]);
         }
 
-        for (i = 0; i < (size_t)mpi_size; i++)
-            displs[i] = (int)(i * dataset_dims[1]);
+        for (size_t loop_count = count[0]; loop_count; loop_count--) {
+            C_DATATYPE *tmp_buf      = (C_DATATYPE *)read_bufs[dset_idx];
+            C_DATATYPE *tmp_glob_buf = (C_DATATYPE *)global_buf;
 
-        for (; loop_count; loop_count--) {
-            VRFY((MPI_SUCCESS == MPI_Allgatherv(&read_buf[(count[0] - loop_count) * dataset_dims[1]],
-                                                recvcounts[mpi_rank], C_DATATYPE_MPI,
-                                                &global_buf[(count[0] - loop_count) * total_recvcounts],
-                                                recvcounts, displs, C_DATATYPE_MPI, comm)),
-                 "MPI_Allgatherv succeeded");
+            mpi_code =
+                MPI_Allgatherv(&tmp_buf[(count[0] - loop_count) * dataset_dims[1]], recvcounts[mpi_rank],
+                               C_DATATYPE_MPI, &tmp_glob_buf[(count[0] - loop_count) * total_recvcounts],
+                               recvcounts, displs, C_DATATYPE_MPI, comm);
+            VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
         }
+
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
     }
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -4282,11 +4992,13 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
  */
 static void
 test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
-                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                               hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                               test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -4295,13 +5007,16 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     hsize_t     count[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    size_t      segment_length;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from filtered chunks with a single process having no selection");
@@ -4310,19 +5025,67 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     dataset_dims[1] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        size_t segment_length;
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    /* Compute the correct offset into the buffer for the process having no selection and clear it */
-    segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
-    memset(correct_buf + ((size_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-           0, segment_length * sizeof(*correct_buf));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] =
+                (C_DATATYPE)((j % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                             (j / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) + dset_idx);
+
+        /* Compute the correct offset into the buffer for the process having no selection and clear it */
+        segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
+        memset(tmp_buf + ((size_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
+               0, segment_length * sizeof(C_DATATYPE));
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4339,44 +5102,30 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace =
-            H5Screate_simple(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                      dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME,
-                             HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4384,8 +5133,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     sel_dims[0] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS;
     sel_dims[1] = (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
@@ -4395,13 +5144,6 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -4417,78 +5159,70 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     start[0]  = (hsize_t)mpi_rank * (hsize_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS * count[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
     if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC)
-        VRFY((H5Sselect_none(filespace) >= 0), "Select none succeeded");
+        select_none(num_dsets, dset_ids, fspace_ids);
     else
-        VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-             "Hyperslab selection succeeded");
+        select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
 
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, NULL) >= 0),
-             "Dataset read succeeded");
-    }
-    else {
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+    if (mpi_rank != READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            read_bufs[dset_idx] = calloc(1, read_buf_size);
+            VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+        }
     }
 
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS *
-                              READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS);
-    recvcounts[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC] = 0;
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * (size_t)(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS *
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS *
+                              READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS);
+        displs[i]     = (int)(i * (size_t)(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS *
                                        READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS));
+    }
 
-    if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC)
-        VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, 0, C_DATATYPE_MPI, global_buf, recvcounts, displs,
-                                            C_DATATYPE_MPI, comm)),
-             "MPI_Allgatherv succeeded");
-    else
-        VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf,
-                                            recvcounts, displs, C_DATATYPE_MPI, comm)),
-             "MPI_Allgatherv succeeded");
+    recvcounts[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC] = 0;
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
+            mpi_code = MPI_Allgatherv(read_bufs[dset_idx], 0, C_DATATYPE_MPI, global_buf, recvcounts, displs,
+                                      C_DATATYPE_MPI, comm);
+            VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
+        }
+        else {
+            mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf,
+                                      recvcounts, displs, C_DATATYPE_MPI, comm);
+            VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
+        }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -4509,17 +5243,21 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
  */
 static void
 test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                            hid_t dcpl_id, hid_t dxpl_id)
+                                            hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    size_t      read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing read from filtered chunks with all processes having no selection");
@@ -4528,10 +5266,58 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     dataset_dims[1] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        /* Fill buffer with garbage data before write call */
+        memset(tmp_buf, 255, data_size);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4548,43 +5334,30 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                      dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_ALL_NO_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                             filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4592,38 +5365,44 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     sel_dims[0] = sel_dims[1] = 0;
 
-    memspace = H5Screate_simple(READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+    select_none(num_dsets, dset_ids, fspace_ids);
 
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    VRFY((H5Sselect_none(filespace) >= 0), "Select none succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
-    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
+    /* Clear data buffer that will be used for comparison since
+     * no data should end up being read
+     */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        memset(data_bufs_nc[dset_idx], 0, data_size);
 
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+             "Data verification succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
 
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -4643,23 +5422,28 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
  */
 static void
 test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                           hid_t dcpl_id, hid_t dxpl_id)
+                                           hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *global_buf  = NULL;
-    hsize_t    *coords      = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
+    hsize_t    *coords                            = NULL;
     hsize_t     dataset_dims[READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, j, read_buf_size, correct_buf_size;
+    size_t      data_size, read_buf_size;
     size_t      num_points;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from filtered chunks with point selection");
@@ -4668,16 +5452,62 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     dataset_dims[1] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] =
-            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
-                         (i % dataset_dims[1]) +
-                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)((dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                                      (j % dataset_dims[1]) +
+                                      (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) %
+                                       dataset_dims[1]) +
+                                      dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4694,43 +5524,30 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                      dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                             filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4738,8 +5555,8 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     sel_dims[0] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NROWS / (hsize_t)mpi_size;
     sel_dims[1] = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS;
@@ -4747,92 +5564,87 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
 
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Set up point selection */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
     num_points = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NROWS *
                  (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS / (hsize_t)mpi_size;
     coords = (hsize_t *)calloc(1, 2 * num_points * sizeof(*coords));
     VRFY((NULL != coords), "Coords calloc succeeded");
 
-    for (i = 0; i < num_points; i++)
-        for (j = 0; j < READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
+    for (size_t i = 0; i < num_points; i++)
+        for (size_t j = 0; j < READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
             coords[(i * READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS) + j] =
                 (j > 0) ? (i % (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS)
                         : ((hsize_t)mpi_rank +
                            ((hsize_t)mpi_size * (i / (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS)));
 
-    VRFY((H5Sselect_elements(filespace, H5S_SELECT_SET, (hsize_t)num_points, (const hsize_t *)coords) >= 0),
-         "Point selection succeeded");
+    select_elements(num_dsets, dset_ids, num_points, coords, fspace_ids);
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
 
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    /* Collect each piece of data from all ranks into a global buffer on all ranks */
+    global_buf = calloc(1, data_size);
     VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     /*
      * Since these chunks are shared, run multiple rounds of MPI_Allgatherv
      * to collect all of the pieces into their appropriate locations. The
-     * number of times MPI_Allgatherv is run should be equal to the number
-     * of chunks in the first dimension of the dataset.
+     * number of times MPI_Allgatherv is run for each dataset should be equal
+     * to the number of chunks in the first dimension of the dataset.
      */
-    {
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
         size_t original_loop_count = dataset_dims[0] / (hsize_t)mpi_size;
-        size_t cur_loop_count      = original_loop_count;
         size_t total_recvcounts    = 0;
 
-        recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-        VRFY((NULL != recvcounts), "calloc succeeded");
+        for (size_t j = 0; j < (size_t)mpi_size; j++) {
+            recvcounts[j] = (int)dataset_dims[1];
+            total_recvcounts += (size_t)recvcounts[j];
 
-        displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
-        VRFY((NULL != displs), "calloc succeeded");
-
-        for (i = 0; i < (size_t)mpi_size; i++) {
-            recvcounts[i] = (int)dataset_dims[1];
-            total_recvcounts += (size_t)recvcounts[i];
+            displs[j] = (int)(j * dataset_dims[1]);
         }
 
-        for (i = 0; i < (size_t)mpi_size; i++)
-            displs[i] = (int)(i * dataset_dims[1]);
+        for (size_t cur_loop_count = original_loop_count; cur_loop_count; cur_loop_count--) {
+            C_DATATYPE *tmp_buf      = read_bufs[dset_idx];
+            C_DATATYPE *tmp_glob_buf = (C_DATATYPE *)global_buf;
 
-        for (; cur_loop_count; cur_loop_count--) {
-            VRFY((MPI_SUCCESS ==
-                  MPI_Allgatherv(&read_buf[(original_loop_count - cur_loop_count) * dataset_dims[1]],
-                                 recvcounts[mpi_rank], C_DATATYPE_MPI,
-                                 &global_buf[(original_loop_count - cur_loop_count) * total_recvcounts],
-                                 recvcounts, displs, C_DATATYPE_MPI, comm)),
-                 "MPI_Allgatherv succeeded");
+            mpi_code = MPI_Allgatherv(
+                &tmp_buf[(original_loop_count - cur_loop_count) * dataset_dims[1]], recvcounts[mpi_rank],
+                C_DATATYPE_MPI, &tmp_glob_buf[(original_loop_count - cur_loop_count) * total_recvcounts],
+                recvcounts, displs, C_DATATYPE_MPI, comm);
+            VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
         }
+
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
     }
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     free(coords);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -4855,11 +5667,12 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
  */
 static void
 test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                            hid_t dcpl_id, hid_t dxpl_id)
+                                            hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[INTERLEAVED_READ_FILTERED_DATASET_DIMS];
     hsize_t     chunk_dims[INTERLEAVED_READ_FILTERED_DATASET_DIMS];
     hsize_t     sel_dims[INTERLEAVED_READ_FILTERED_DATASET_DIMS];
@@ -4868,12 +5681,16 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     hsize_t     count[INTERLEAVED_READ_FILTERED_DATASET_DIMS];
     hsize_t     block[INTERLEAVED_READ_FILTERED_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing interleaved read from filtered chunks");
@@ -4882,24 +5699,71 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     dataset_dims[1] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        /* Add Column Index */
-        correct_buf[i] =
-            (C_DATATYPE)((i % (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS)
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] =
+                /* Add the Column Index */
+                (C_DATATYPE)((j % (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS)
 
-                         /* Add the Row Index */
-                         + ((i % (hsize_t)(mpi_size * INTERLEAVED_READ_FILTERED_DATASET_NCOLS)) /
-                            (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS)
+                             /* Add the Row Index */
+                             + ((j % (hsize_t)(mpi_size * INTERLEAVED_READ_FILTERED_DATASET_NCOLS)) /
+                                (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS)
 
-                         /* Add the amount that gets added when a rank moves down to its next section
-                            vertically in the dataset */
-                         + ((hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS *
-                            (i / (hsize_t)(mpi_size * INTERLEAVED_READ_FILTERED_DATASET_NCOLS))));
+                             /* Add the amount that gets added when a rank moves down to its next section
+                                vertically in the dataset */
+                             + ((hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS *
+                                (j / (hsize_t)(mpi_size * INTERLEAVED_READ_FILTERED_DATASET_NCOLS)))
+
+                             /* Add an increment factor for the multi-dataset case */
+                             + dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(INTERLEAVED_READ_FILTERED_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_CH_NROWS;
+    chunk_dims[1] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, INTERLEAVED_READ_FILTERED_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, INTERLEAVED_READ_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4916,43 +5780,29 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(INTERLEAVED_READ_FILTERED_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, INTERLEAVED_READ_FILTERED_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_CH_NROWS;
-        chunk_dims[1] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, INTERLEAVED_READ_FILTERED_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, INTERLEAVED_READ_FILTERED_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                             H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -4960,21 +5810,13 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, INTERLEAVED_READ_FILTERED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, INTERLEAVED_READ_FILTERED_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)(INTERLEAVED_READ_FILTERED_DATASET_NROWS / mpi_size);
     sel_dims[1] = (hsize_t)INTERLEAVED_READ_FILTERED_DATASET_NCOLS;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -4991,27 +5833,25 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    /* Collect each piece of data from all ranks into a global buffer on all ranks */
+    global_buf = calloc(1, data_size);
     VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     /*
      * Since these chunks are shared, run multiple rounds of MPI_Allgatherv
@@ -5019,49 +5859,45 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
      * number of times MPI_Allgatherv is run should be equal to the number
      * of chunks in the first dimension of the dataset.
      */
-    {
-        size_t loop_count       = count[0];
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
         size_t total_recvcounts = 0;
 
-        recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-        VRFY((NULL != recvcounts), "calloc succeeded");
+        for (size_t j = 0; j < (size_t)mpi_size; j++) {
+            recvcounts[j] = (int)dataset_dims[1];
+            total_recvcounts += (size_t)recvcounts[j];
 
-        displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
-        VRFY((NULL != displs), "calloc succeeded");
-
-        for (i = 0; i < (size_t)mpi_size; i++) {
-            recvcounts[i] = (int)dataset_dims[1];
-            total_recvcounts += (size_t)recvcounts[i];
+            displs[j] = (int)(j * dataset_dims[1]);
         }
 
-        for (i = 0; i < (size_t)mpi_size; i++)
-            displs[i] = (int)(i * dataset_dims[1]);
+        for (size_t loop_count = count[0]; loop_count; loop_count--) {
+            C_DATATYPE *tmp_buf      = read_bufs[dset_idx];
+            C_DATATYPE *tmp_glob_buf = (C_DATATYPE *)global_buf;
 
-        for (; loop_count; loop_count--) {
-            VRFY((MPI_SUCCESS == MPI_Allgatherv(&read_buf[(count[0] - loop_count) * dataset_dims[1]],
-                                                recvcounts[mpi_rank], C_DATATYPE_MPI,
-                                                &global_buf[(count[0] - loop_count) * total_recvcounts],
-                                                recvcounts, displs, C_DATATYPE_MPI, comm)),
-                 "MPI_Allgatherv succeeded");
+            mpi_code =
+                MPI_Allgatherv(&tmp_buf[(count[0] - loop_count) * dataset_dims[1]], recvcounts[mpi_rank],
+                               C_DATATYPE_MPI, &tmp_glob_buf[(count[0] - loop_count) * total_recvcounts],
+                               recvcounts, displs, C_DATATYPE_MPI, comm);
+            VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
         }
+
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
     }
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -5081,13 +5917,15 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
  */
 static void
 test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group, H5Z_filter_t filter_id,
-                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                        test_mode_t test_mode)
 {
     MPI_Datatype vector_type;
     MPI_Datatype resized_vector_type;
-    C_DATATYPE  *read_buf    = NULL;
-    C_DATATYPE  *correct_buf = NULL;
-    C_DATATYPE  *global_buf  = NULL;
+    const void  *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void        *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void        *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void        *global_buf                        = NULL;
     hsize_t      dataset_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t      chunk_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t      sel_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
@@ -5096,10 +5934,14 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     hsize_t      count[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t      block[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t      flat_dims[1];
-    size_t       i, read_buf_size, correct_buf_size;
-    hid_t        file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t       data_size, read_buf_size;
+    size_t       num_dsets;
+    hid_t        dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t        fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t        file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t        group_id  = H5I_INVALID_HID;
-    hid_t        filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t        filespace = H5I_INVALID_HID;
+    int          mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks on separate pages in 3D dataset");
@@ -5109,13 +5951,59 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     dataset_dims[2] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DEPTH;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)mpi_size) + (i / (hsize_t)mpi_size));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)((j % (hsize_t)mpi_size) + (j / (hsize_t)mpi_size) + dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_CH_NCOLS;
+    chunk_dims[2] = 1;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -5132,46 +6020,30 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace =
-            H5Screate_simple(READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, num_dsets, test_mode,
+                      dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_CH_NCOLS;
-        chunk_dims[2] = 1;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY(
-            (H5Pset_chunk(plist_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS, chunk_dims) >= 0),
-            "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME,
-                             HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5179,8 +6051,8 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     sel_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_NROWS;
     sel_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_NCOLS;
@@ -5188,13 +6060,6 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1] * sel_dims[2];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -5215,63 +6080,66 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     start[1]  = 0;
     start[2]  = (hsize_t)mpi_rank;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    /* Collect each piece of data from all ranks into a global buffer on all ranks */
+    global_buf = calloc(1, data_size);
     VRFY((NULL != global_buf), "calloc succeeded");
 
     /*
      * Due to the nature of 3-dimensional reading, create an MPI vector type that allows each
      * rank to write to the nth position of the global data buffer, where n is the rank number.
      */
-    VRFY((MPI_SUCCESS == MPI_Type_vector((int)flat_dims[0], 1, mpi_size, C_DATATYPE_MPI, &vector_type)),
-         "MPI_Type_vector succeeded");
-    VRFY((MPI_SUCCESS == MPI_Type_commit(&vector_type)), "MPI_Type_commit succeeded");
+    mpi_code = MPI_Type_vector((int)flat_dims[0], 1, mpi_size, C_DATATYPE_MPI, &vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_vector succeeded");
+    mpi_code = MPI_Type_commit(&vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_commit succeeded");
 
     /*
      * Resize the type to allow interleaving,
      * so make it only one MPI_LONG wide
      */
-    VRFY((MPI_SUCCESS == MPI_Type_create_resized(vector_type, 0, sizeof(long), &resized_vector_type)),
-         "MPI_Type_create_resized");
-    VRFY((MPI_SUCCESS == MPI_Type_commit(&resized_vector_type)), "MPI_Type_commit succeeded");
+    mpi_code = MPI_Type_create_resized(vector_type, 0, sizeof(long), &resized_vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_create_resized");
+    mpi_code = MPI_Type_commit(&resized_vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_commit succeeded");
 
-    VRFY((MPI_SUCCESS == MPI_Allgather(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, 1,
-                                       resized_vector_type, comm)),
-         "MPI_Allgather succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgather(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf, 1,
+                                 resized_vector_type, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgather succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Type_free(&vector_type)), "MPI_Type_free succeeded");
-    VRFY((MPI_SUCCESS == MPI_Type_free(&resized_vector_type)), "MPI_Type_free succeeded");
+    mpi_code = MPI_Type_free(&vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_free succeeded");
+    mpi_code = MPI_Type_free(&resized_vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_free succeeded");
 
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -5298,11 +6166,13 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
  */
 static void
 test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t filter_id,
-                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                  hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                  test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
@@ -5311,12 +6181,16 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     hsize_t     count[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     block[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from unshared transformed and filtered chunks");
@@ -5325,15 +6199,61 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     dataset_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS *
-                       (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS * sizeof(*correct_buf);
+    data_size = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS *
+                (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] =
+                (C_DATATYPE)((j % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                             (j / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) + dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -5350,34 +6270,8 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace =
-            H5Screate_simple(READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
-
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
-
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY(
-            (H5Pset_chunk(plist_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-            "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME,
-                             HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
-
-        VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+        open_datasets(group_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                      dset_ids);
 
         /* Create property list for collective dataset read */
         plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -5386,21 +6280,29 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
         /* Set data transform expression */
         VRFY((H5Pset_data_transform(plist_id, "x") >= 0), "Set data transform expression succeeded");
 
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, correct_buf) >= 0),
-             "Dataset write succeeded");
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-
-        /* Verify space allocation status */
-        plist_id = H5Dget_create_plist(dset_id);
-        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+
+        /* Verify space allocation status */
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
+
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
+
+        VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5408,21 +6310,14 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     sel_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
     sel_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and reads
@@ -5438,16 +6333,7 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS * count[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Create property list for data transform */
     plist_id = H5Pcopy(dxpl_id);
@@ -5456,50 +6342,52 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     /* Set data transform expression */
     VRFY((H5Pset_data_transform(plist_id, "x") >= 0), "Set data transform expression succeeded");
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
 
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)flat_dims[0];
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0]);
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)flat_dims[0];
+        displs[i]     = (int)(i * flat_dims[0]);
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf,
+                                  recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -5521,11 +6409,13 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
  */
 static void
 test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5Z_filter_t filter_id,
-                                                    hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                    hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                    test_mode_t test_mode)
 {
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
-    C_DATATYPE *global_buf  = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
     hsize_t     dataset_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     chunk_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     sel_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
@@ -5534,12 +6424,16 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     hsize_t     count[READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     block[READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS];
     hsize_t     flat_dims[1];
-    size_t      i, read_buf_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks on the same pages in 3D dataset");
@@ -5549,14 +6443,60 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     dataset_dims[2] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DEPTH;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] * dataset_dims[1])) +
-                                      (i / (dataset_dims[0] * dataset_dims[1])));
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)((j % (dataset_dims[0] * dataset_dims[1])) +
+                                      (j / (dataset_dims[0] * dataset_dims[1])) + dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_CH_NCOLS;
+    chunk_dims[2] = 1;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -5573,46 +6513,30 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace =
-            H5Screate_simple(READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, num_dsets, test_mode,
+                      dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_CH_NCOLS;
-        chunk_dims[2] = 1;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_DIMS, chunk_dims) >=
-              0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME,
-                             HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5620,8 +6544,8 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, num_dsets, test_mode,
+                  dset_ids);
 
     sel_dims[0] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_CH_NROWS;
     sel_dims[1] = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_NCOLS;
@@ -5629,13 +6553,6 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1] * sel_dims[2];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -5655,61 +6572,54 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     start[1]  = 0;
     start[2]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)flat_dims[0];
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0]);
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)flat_dims[0];
+        displs[i]     = (int)(i * flat_dims[0]);
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf,
+                                  recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -5730,13 +6640,14 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
  */
 static void
 test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                      hid_t dcpl_id, hid_t dxpl_id)
+                                      hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
     MPI_Datatype vector_type;
     MPI_Datatype resized_vector_type;
-    C_DATATYPE  *read_buf    = NULL;
-    C_DATATYPE  *correct_buf = NULL;
-    C_DATATYPE  *global_buf  = NULL;
+    const void  *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void        *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void        *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void        *global_buf                        = NULL;
     hsize_t      dataset_dims[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t      chunk_dims[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t      sel_dims[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
@@ -5745,10 +6656,14 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     hsize_t      count[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t      block[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t      flat_dims[1];
-    size_t       i, read_buf_size, correct_buf_size;
-    hid_t        file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t       data_size, read_buf_size;
+    size_t       num_dsets;
+    hid_t        dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t        fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t        file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t        group_id  = H5I_INVALID_HID;
-    hid_t        filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t        filespace = H5I_INVALID_HID;
+    int          mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from shared filtered chunks in 3D dataset");
@@ -5758,28 +6673,78 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     dataset_dims[2] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_DEPTH;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        /* Add the Column Index */
-        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                     READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] =
+                /* Add the Column Index */
+                (C_DATATYPE)((j % (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                            READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                      /* Add the Row Index */
-                                      + ((i % (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
-                                         (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+                             /* Add the Row Index */
+                             + ((j % (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                               READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
+                                (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                          READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-                                      /* Add the amount that gets added when a rank moves down to its next
-                                         section vertically in the dataset */
-                                      + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                   READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
-                                         (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                                                        READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
+                             /* Add the amount that gets added when a rank moves down to its next
+                                section vertically in the dataset */
+                             + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                          READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
+                                (j / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                               READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)))
+
+                             /* Add an increment factor for the multi-dataset case */
+                             + dset_idx);
+
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
+    chunk_dims[2] = 1;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -5796,44 +6761,29 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_CH_NCOLS;
-        chunk_dims[2] = 1;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, HDF5_DATATYPE_NAME,
-                             filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -5841,8 +6791,7 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_NROWS / mpi_size);
     sel_dims[1] = (hsize_t)READ_SHARED_FILTERED_CHUNKS_3D_NCOLS;
@@ -5850,13 +6799,6 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1] * sel_dims[2];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -5875,26 +6817,20 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     start[1]  = 0;
     start[2]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
-
-    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    /* Collect each piece of data from all ranks into a global buffer on all ranks */
+    global_buf = calloc(1, data_size);
     VRFY((NULL != global_buf), "calloc succeeded");
 
     {
@@ -5906,41 +6842,49 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
          * Due to the nature of 3-dimensional reading, create an MPI vector type that allows each
          * rank to write to the nth position of the global data buffer, where n is the rank number.
          */
-        VRFY(
-            (MPI_SUCCESS == MPI_Type_vector((int)num_blocks, (int)run_length,
-                                            (int)(mpi_size * (int)run_length), C_DATATYPE_MPI, &vector_type)),
-            "MPI_Type_vector succeeded");
-        VRFY((MPI_SUCCESS == MPI_Type_commit(&vector_type)), "MPI_Type_commit succeeded");
+        mpi_code = MPI_Type_vector((int)num_blocks, (int)run_length, (int)(mpi_size * (int)run_length),
+                                   C_DATATYPE_MPI, &vector_type);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_vector succeeded");
+        mpi_code = MPI_Type_commit(&vector_type);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_commit succeeded");
 
         /*
          * Resize the type to allow interleaving,
          * so make it "run_length" MPI_LONGs wide
          */
-        VRFY((MPI_SUCCESS == MPI_Type_create_resized(vector_type, 0, (MPI_Aint)(run_length * sizeof(long)),
-                                                     &resized_vector_type)),
-             "MPI_Type_create_resized");
-        VRFY((MPI_SUCCESS == MPI_Type_commit(&resized_vector_type)), "MPI_Type_commit succeeded");
+        mpi_code = MPI_Type_create_resized(vector_type, 0, (MPI_Aint)(run_length * sizeof(long)),
+                                           &resized_vector_type);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_create_resized");
+        mpi_code = MPI_Type_commit(&resized_vector_type);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_commit succeeded");
     }
 
-    VRFY((MPI_SUCCESS == MPI_Allgather(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, 1,
-                                       resized_vector_type, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgather(read_bufs[dset_idx], (int)flat_dims[0], C_DATATYPE_MPI, global_buf, 1,
+                                 resized_vector_type, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Type_free(&vector_type)), "MPI_Type_free succeeded");
-    VRFY((MPI_SUCCESS == MPI_Type_free(&resized_vector_type)), "MPI_Type_free succeeded");
+    mpi_code = MPI_Type_free(&vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_free succeeded");
+    mpi_code = MPI_Type_free(&resized_vector_type);
+    VRFY((MPI_SUCCESS == mpi_code), "MPI_Type_free succeeded");
 
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -5960,26 +6904,32 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
  */
 static void
 test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
-                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                       test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
-    COMPOUND_C_DATATYPE *global_buf  = NULL;
-    hsize_t              dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              sel_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              start[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              stride[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              count[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              block[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              flat_dims[1];
-    size_t               i, read_buf_size, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID,
-          memtype   = H5I_INVALID_HID;
-    hid_t group_id  = H5I_INVALID_HID;
-    hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int  *recvcounts = NULL;
-    int  *displs     = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
+    hsize_t     dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     sel_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     start[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     stride[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     count[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     block[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     flat_dims[1];
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       memtype    = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype "
@@ -5996,17 +6946,20 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     dataset_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
-        correct_buf[i].field1 = (short)((i % dataset_dims[1]) + (i / dataset_dims[1]));
+        for (size_t j = 0; j < data_size / sizeof(COMPOUND_C_DATATYPE); j++) {
+            tmp_buf[j].field1 = (short)((j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx);
+            tmp_buf[j].field2 = (int)((j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx);
+            tmp_buf[j].field3 = (long)((j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx);
+        }
 
-        correct_buf[i].field2 = (int)((i % dataset_dims[1]) + (i / dataset_dims[1]));
-
-        correct_buf[i].field3 = (long)((i % dataset_dims[1]) + (i / dataset_dims[1]));
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
     /* Create the compound type for memory. */
@@ -6019,6 +6972,48 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
          "Datatype insertion succeeded");
     VRFY((H5Tinsert(memtype, "LongData", HOFFSET(COMPOUND_C_DATATYPE, field3), H5T_NATIVE_LONG) >= 0),
          "Datatype insertion succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS,
+                                 dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NROWS;
+    chunk_dims[1] = READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS,
+                       chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, memtype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -6035,45 +7030,29 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS,
-                                     dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, num_dsets,
+                      test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NROWS;
-        chunk_dims[1] = READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_DIMS,
-                           chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME,
-                             memtype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, memtype, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs, test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6081,22 +7060,14 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id =
-        H5Dopen2(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NROWS;
     sel_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -6111,60 +7082,53 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     start[0]  = 0;
     start[1]  = ((hsize_t)mpi_rank * READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
-
-    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs, test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+        displs[i]     = (int)(i * flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE,
-                                        global_buf, recvcounts, displs, MPI_BYTE, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)),
+                                  MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Tclose(memtype) >= 0), "Memory datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -6185,26 +7149,32 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
  */
 static void
 test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
-                                                     hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                     hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                     test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
-    COMPOUND_C_DATATYPE *global_buf  = NULL;
-    hsize_t              dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              sel_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              start[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              stride[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              count[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              block[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              flat_dims[1];
-    size_t               i, read_buf_size, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID,
-          memtype   = H5I_INVALID_HID;
-    hid_t group_id  = H5I_INVALID_HID;
-    hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int  *recvcounts = NULL;
-    int  *displs     = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
+    hsize_t     dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     sel_dims[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     start[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     stride[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     count[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     block[READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     flat_dims[1];
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id   = H5I_INVALID_HID;
+    hid_t       memtype    = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype "
@@ -6221,23 +7191,25 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     dataset_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
-        correct_buf[i].field1 =
-            (short)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                    (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        for (size_t j = 0; j < data_size / sizeof(COMPOUND_C_DATATYPE); j++) {
+            size_t val1 = (dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1])));
+            size_t val2 = (j % dataset_dims[1]);
+            size_t val3 = (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]);
+            size_t val  = val1 + val2 + val3 + dset_idx;
 
-        correct_buf[i].field2 =
-            (int)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                  (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+            tmp_buf[j].field1 = (short)val;
+            tmp_buf[j].field2 = (int)val;
+            tmp_buf[j].field3 = (long)val;
+        }
 
-        correct_buf[i].field3 =
-            (long)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                   (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
     /* Create the compound type for memory. */
@@ -6250,6 +7222,48 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
          "Datatype insertion succeeded");
     VRFY((H5Tinsert(memtype, "LongData", HOFFSET(COMPOUND_C_DATATYPE, field3), H5T_NATIVE_LONG) >= 0),
          "Datatype insertion succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace =
+        H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS,
+                       chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, memtype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -6266,45 +7280,29 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS,
-                                     dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, num_dsets,
+                      test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_DIMS,
-                           chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME,
-                             memtype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, memtype, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs, test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6312,22 +7310,14 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id =
-        H5Dopen2(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_CH_NROWS / (hsize_t)mpi_size;
     sel_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -6342,60 +7332,53 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
-
-    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs, test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+        displs[i]     = (int)(i * flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE,
-                                        global_buf, recvcounts, displs, MPI_BYTE, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)),
+                                  MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Tclose(memtype) >= 0), "Memory datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -6416,26 +7399,32 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
  */
 static void
 test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_group, H5Z_filter_t filter_id,
-                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                         test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
-    COMPOUND_C_DATATYPE *global_buf  = NULL;
-    hsize_t              dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              sel_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              start[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              stride[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              count[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              block[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
-    hsize_t              flat_dims[1];
-    size_t               i, read_buf_size, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t                filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
-    hid_t                group_id  = H5I_INVALID_HID;
-    hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int                 *recvcounts = NULL;
-    int                 *displs     = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
+    hsize_t     dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     sel_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     start[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     stride[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     count[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     block[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS];
+    hsize_t     flat_dims[1];
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id = H5I_INVALID_HID;
+    hid_t       filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype "
@@ -6452,17 +7441,20 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     dataset_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
-        correct_buf[i].field1 = (short)((i % dataset_dims[1]) + (i / dataset_dims[1]));
+        for (size_t j = 0; j < data_size / sizeof(COMPOUND_C_DATATYPE); j++) {
+            tmp_buf[j].field1 = (short)((j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx);
+            tmp_buf[j].field2 = (int)((j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx);
+            tmp_buf[j].field3 = (long)((j % dataset_dims[1]) + (j / dataset_dims[1]) + dset_idx);
+        }
 
-        correct_buf[i].field2 = (int)((i % dataset_dims[1]) + (i / dataset_dims[1]));
-
-        correct_buf[i].field3 = (long)((i % dataset_dims[1]) + (i / dataset_dims[1]));
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
     /* Create the compound type for memory. */
@@ -6484,6 +7476,48 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     VRFY((H5Tinsert(filetype, "IntData", 8, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(filetype, "LongData", 16, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
 
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS,
+                                 dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NROWS;
+    chunk_dims[1] = READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS,
+                       chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, filetype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -6499,45 +7533,29 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS,
-                                     dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME,
+                      num_dsets, test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NROWS;
-        chunk_dims[1] = READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_DIMS,
-                           chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME,
-                             filetype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, memtype, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs, test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6545,22 +7563,14 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id =
-        H5Dopen2(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NROWS;
     sel_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -6575,60 +7585,53 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     start[0]  = 0;
     start[1]  = ((hsize_t)mpi_rank * READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
-
-    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs, test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+        displs[i]     = (int)(i * flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE,
-                                        global_buf, recvcounts, displs, MPI_BYTE, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)),
+                                  MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Tclose(filetype) >= 0), "File datatype close succeeded");
     VRFY((H5Tclose(memtype) >= 0), "Memory datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -6650,26 +7653,32 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
  */
 static void
 test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group, H5Z_filter_t filter_id,
-                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id)
+                                                       hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id,
+                                                       test_mode_t test_mode)
 {
-    COMPOUND_C_DATATYPE *read_buf    = NULL;
-    COMPOUND_C_DATATYPE *correct_buf = NULL;
-    COMPOUND_C_DATATYPE *global_buf  = NULL;
-    hsize_t              dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              sel_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              start[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              stride[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              count[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              block[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
-    hsize_t              flat_dims[1];
-    size_t               i, read_buf_size, correct_buf_size;
-    hid_t                file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t                filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
-    hid_t                group_id  = H5I_INVALID_HID;
-    hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int                 *recvcounts = NULL;
-    int                 *displs     = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *global_buf                        = NULL;
+    hsize_t     dataset_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     chunk_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     sel_dims[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     start[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     stride[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     count[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     block[READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS];
+    hsize_t     flat_dims[1];
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id = H5I_INVALID_HID;
+    hid_t       filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
+    hid_t       filespace  = H5I_INVALID_HID;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts(
@@ -6686,23 +7695,25 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     dataset_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_NCOLS;
 
     /* Setup the buffer for writing and for comparison */
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+    data_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        COMPOUND_C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
-        correct_buf[i].field1 =
-            (short)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                    (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        for (size_t j = 0; j < data_size / sizeof(COMPOUND_C_DATATYPE); j++) {
+            size_t val1 = (dataset_dims[1] * (j / ((hsize_t)mpi_size * dataset_dims[1])));
+            size_t val2 = (j % dataset_dims[1]);
+            size_t val3 = (((j % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]);
+            size_t val  = val1 + val2 + val3 + dset_idx;
 
-        correct_buf[i].field2 =
-            (int)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                  (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+            tmp_buf[j].field1 = (short)val;
+            tmp_buf[j].field2 = (int)val;
+            tmp_buf[j].field3 = (long)val;
+        }
 
-        correct_buf[i].field3 =
-            (long)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-                   (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
     }
 
     /* Create the compound type for memory. */
@@ -6724,6 +7735,48 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     VRFY((H5Tinsert(filetype, "IntData", 8, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
     VRFY((H5Tinsert(filetype, "LongData", 16, H5T_STD_I64BE) >= 0), "Datatype insertion succeeded");
 
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS,
+                                 dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NROWS;
+    chunk_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NCOLS;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS,
+                       chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, filetype,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
+
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY((plist_id >= 0), "FAPL creation succeeded");
@@ -6739,45 +7792,29 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS,
-                                     dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, num_dsets,
+                      test_mode, dset_ids);
 
-        /* Create chunked dataset */
-        chunk_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NROWS;
-        chunk_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NCOLS;
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
-
-        VRFY((H5Pset_chunk(plist_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_DIMS,
-                           chunk_dims) >= 0),
-             "Chunk size set");
-
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
-
-        dset_id = H5Dcreate2(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME,
-                             filetype, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        write_datasets(num_dsets, dset_ids, memtype, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs, test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        VRFY((H5Dwrite(dset_id, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, correct_buf) >= 0),
-             "Dataset write succeeded");
-
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
+
+    MPI_Barrier(comm);
 
     file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, fapl_id);
     VRFY((file_id >= 0), "Test file open succeeded");
@@ -6785,22 +7822,14 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id =
-        H5Dopen2(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, num_dsets,
+                  test_mode, dset_ids);
 
     sel_dims[0] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_CH_NROWS / (hsize_t)mpi_size;
     sel_dims[1] = (hsize_t)READ_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC;
 
     /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
     flat_dims[0] = sel_dims[0] * sel_dims[1];
-
-    memspace = H5Screate_simple(1, flat_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     /*
      * Each process defines the dataset selection in the file and
@@ -6815,60 +7844,53 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    read_buf_size = flat_dims[0] * sizeof(COMPOUND_C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
     }
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    read_buf_size = flat_dims[0] * sizeof(*read_buf);
-
-    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
-
-    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "calloc succeeded");
+    read_datasets(num_dsets, dset_ids, memtype, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs, test_mode);
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    global_buf = calloc(1, data_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
     VRFY((NULL != recvcounts), "calloc succeeded");
-
-    for (i = 0; i < (size_t)mpi_size; i++)
-        recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
-
-    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++)
-        displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
+        recvcounts[i] = (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+        displs[i]     = (int)(i * flat_dims[0] * sizeof(COMPOUND_C_DATATYPE));
+    }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)), MPI_BYTE,
-                                        global_buf, recvcounts, displs, MPI_BYTE, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(read_bufs[dset_idx], (int)(flat_dims[0] * sizeof(COMPOUND_C_DATATYPE)),
+                                  MPI_BYTE, global_buf, recvcounts, displs, MPI_BYTE, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(global_buf, data_bufs[dset_idx], data_size)), "Data verification succeeded");
+    }
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (global_buf)
-        free(global_buf);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+    free(displs);
+    free(recvcounts);
+    free(global_buf);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(read_bufs[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
+
     VRFY((H5Tclose(memtype) >= 0), "Memory datatype close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
@@ -6886,15 +7908,19 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
  */
 static void
 test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                hid_t dcpl_id, hid_t dxpl_id)
+                                hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SERIAL_READ_PARALLEL_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SERIAL_READ_PARALLEL_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -6904,6 +7930,47 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     dataset_dims[0] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_NROWS;
     dataset_dims[1] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_NCOLS;
     dataset_dims[2] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_DEPTH;
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    /* Create the dataspace for the dataset */
+    filespace = H5Screate_simple(WRITE_SERIAL_READ_PARALLEL_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    chunk_dims[0] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_CH_NROWS;
+    chunk_dims[1] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_CH_NCOLS;
+    chunk_dims[2] = 1;
+
+    plist_id = H5Pcopy(dcpl_id);
+    VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, WRITE_SERIAL_READ_PARALLEL_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
+
+    /* Verify space allocation status */
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     /* Write the file on the MAINPROCESS rank */
     if (MAINPROCESS) {
@@ -6922,66 +7989,58 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        /* Create the dataspace for the dataset */
-        chunk_dims[0] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_CH_NROWS;
-        chunk_dims[1] = (hsize_t)WRITE_SERIAL_READ_PARALLEL_CH_NCOLS;
-        chunk_dims[2] = 1;
+        open_datasets(group_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        filespace = H5Screate_simple(WRITE_SERIAL_READ_PARALLEL_DATASET_DIMS, dataset_dims, NULL);
-        VRFY((filespace >= 0), "File dataspace creation succeeded");
+        data_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-        /* Create chunked dataset */
-        plist_id = H5Pcopy(dcpl_id);
-        VRFY((plist_id >= 0), "DCPL copy succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+            VRFY((NULL != tmp_buf), "calloc succeeded");
 
-        VRFY((H5Pset_chunk(plist_id, WRITE_SERIAL_READ_PARALLEL_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
+            for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+                tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-        /* Add test filter to the pipeline */
-        VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
+            data_bufs[dset_idx]    = tmp_buf;
+            data_bufs_nc[dset_idx] = tmp_buf;
+        }
 
-        dset_id = H5Dcreate2(group_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                             H5P_DEFAULT, plist_id, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset creation succeeded");
+        select_all(num_dsets, dset_ids, fspace_ids);
 
-        /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+        write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, fspace_ids, H5P_DEFAULT, data_bufs,
+                       test_mode);
 
-        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-
-        data_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*data);
-
-        data = (C_DATATYPE *)calloc(1, data_size);
-        VRFY((NULL != data), "calloc succeeded");
-
-        for (i = 0; i < data_size / sizeof(*data); i++)
-            data[i] = (C_DATATYPE)GEN_DATA(i);
-
-        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) >= 0),
-             "Dataset write succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            free(data_bufs_nc[dset_idx]);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        plist_id = H5Dget_create_plist(dset_ids[0]);
+        VRFY((plist_id >= 0), "H5Dget_create_plist succeeded");
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        if (data)
-            free(data);
+        /* Close and re-open datasets */
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+        }
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
     }
 
-    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+    MPI_Barrier(comm);
 
-    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        correct_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, correct_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (long)i;
+        for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] = (long)(j + dset_idx);
+    }
 
     /* All ranks open the file and verify their "portion" of the dataset is correct */
     file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
@@ -6990,20 +8049,22 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
     VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-    dset_id = H5Dopen2(group_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, WRITE_SERIAL_READ_PARALLEL_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+             "Data verification succeeded");
 
-    if (correct_buf)
-        free(correct_buf);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -7021,11 +8082,12 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
  */
 static void
 test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id,
-                                hid_t dcpl_id, hid_t dxpl_id)
+                                hid_t dcpl_id, hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
@@ -7033,10 +8095,13 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     hsize_t     stride[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
     hsize_t     block[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
     hsize_t     offset[WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS];
-    size_t      i, data_size, correct_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, correct_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
-    hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing write file in parallel; read serially");
@@ -7061,9 +8126,6 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     filespace = H5Screate_simple(WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(WRITE_PARALLEL_READ_SERIAL_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -7074,12 +8136,12 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7099,47 +8161,41 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     offset[1] = 0;
     offset[2] = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ], stride[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE " ], offset[ %" PRIuHSIZE
-               ", %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
-               " ]\n",
-               mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], offset[0], offset[1],
-               offset[2], block[0], block[1], block[2]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, offset, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        free(data_bufs_nc[dset_idx]);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    if (data)
-        free(data);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    MPI_Barrier(comm);
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -7156,33 +8212,42 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
         group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
         VRFY((group_id >= 0), "H5Gopen2 succeeded");
 
-        dset_id = H5Dopen2(group_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, H5P_DEFAULT);
-        VRFY((dset_id >= 0), "Dataset open succeeded");
+        open_datasets(group_id, WRITE_PARALLEL_READ_SERIAL_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-        correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
+        correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(C_DATATYPE);
 
-        correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-        VRFY((NULL != correct_buf), "calloc succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            correct_bufs[dset_idx] = calloc(1, correct_buf_size);
+            VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+            read_bufs[dset_idx] = calloc(1, correct_buf_size);
+            VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
 
-        read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
-        VRFY((NULL != read_buf), "calloc succeeded");
+            for (size_t j = 0; j < correct_buf_size / sizeof(C_DATATYPE); j++)
+                correct_bufs[dset_idx][j] =
+                    (C_DATATYPE)((j % (dataset_dims[0] * dataset_dims[1])) +
+                                 (j / (dataset_dims[0] * dataset_dims[1])) + dset_idx);
+        }
 
-        for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-            correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] * dataset_dims[1])) +
-                                          (i / (dataset_dims[0] * dataset_dims[1])));
+        read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_bufs,
+                      test_mode);
 
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) >= 0),
-             "Dataset read succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], correct_buf_size)),
+                 "Data verification succeeded");
 
-        VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            free(read_bufs[dset_idx]);
+            free(correct_bufs[dset_idx]);
+        }
 
-        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
-
-        free(correct_buf);
-        free(read_buf);
     }
+
+    MPI_Barrier(comm);
 
     return;
 }
@@ -7196,21 +8261,25 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
  */
 static void
 test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                              hid_t dxpl_id)
+                              hid_t dxpl_id, test_mode_t test_mode)
 {
-    double *data     = NULL;
-    double *read_buf = NULL;
-    hsize_t dataset_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    hsize_t chunk_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    hsize_t sel_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    hsize_t start[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    hsize_t stride[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    hsize_t count[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    hsize_t block[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
-    size_t  i, data_size;
-    hid_t   file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t   group_id  = H5I_INVALID_HID;
-    hid_t   filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    hsize_t     dataset_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t     chunk_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t     sel_dims[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t     start[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t     stride[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t     count[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    hsize_t     block[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing continually shrinking/growing chunks");
@@ -7232,9 +8301,6 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     filespace = H5Screate_simple(SHRINKING_GROWING_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
-    memspace = H5Screate_simple(SHRINKING_GROWING_CHUNKS_DATASET_DIMS, sel_dims, NULL);
-    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
-
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
@@ -7244,12 +8310,12 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, SHRINKING_GROWING_CHUNKS_DATASET_NAME, H5T_NATIVE_DOUBLE, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, SHRINKING_GROWING_CHUNKS_DATASET_NAME, H5T_NATIVE_DOUBLE, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7266,68 +8332,74 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     start[0]  = ((hsize_t)mpi_rank * (hsize_t)SHRINKING_GROWING_CHUNKS_CH_NROWS * count[0]);
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((dset_id >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     data_size = sel_dims[0] * sel_dims[1] * sizeof(double);
 
-    data = (double *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        double *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    read_buf = (double *)calloc(1, data_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (double)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
-        /* Continually write random float data, followed by zeroed-out data */
-        if (i % 2)
-            memset(data, 0, data_size);
-        else {
-            size_t j;
-            for (j = 0; j < data_size / sizeof(*data); j++) {
-                data[j] = (rand() / (double)(RAND_MAX / (double)1.0L));
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+
+        tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        read_bufs[dset_idx] = tmp_buf;
+    }
+
+    for (size_t i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            /* Continually write random float data, followed by zeroed-out data */
+            if (i % 2)
+                memset(data_bufs_nc[dset_idx], 0, data_size);
+            else {
+                double *tmp_buf = data_bufs_nc[dset_idx];
+
+                for (size_t k = 0; k < data_size / sizeof(double); k++) {
+                    tmp_buf[k] = (rand() / (double)(RAND_MAX / (double)1.0L));
+                }
             }
         }
 
-        VRFY((H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, dxpl_id, data) >= 0),
-             "Dataset write succeeded");
+        write_datasets(num_dsets, dset_ids, H5T_NATIVE_DOUBLE, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                       test_mode);
 
         /* Verify space allocation status */
-        verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+        verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-        if (i % 2) {
-            memset(read_buf, 255, data_size);
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            if (i % 2) {
+                memset(read_bufs[dset_idx], 255, data_size);
+            }
+            else {
+                memset(read_bufs[dset_idx], 0, data_size);
+            }
         }
-        else {
-            memset(read_buf, 0, data_size);
-        }
 
-        VRFY((H5Dread(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+        read_datasets(num_dsets, dset_ids, H5T_NATIVE_DOUBLE, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                      test_mode);
 
-        VRFY((0 == memcmp(read_buf, data, data_size)), "data verification succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+            VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+                 "data verification succeeded");
     }
 
-    if (read_buf)
-        free(read_buf);
-    if (data)
-        free(data);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -7346,10 +8418,11 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
  */
 static void
 test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                            hid_t dxpl_id)
+                            hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
@@ -7357,8 +8430,11 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     hsize_t     stride[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     count[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     block[WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -7392,12 +8468,12 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7414,64 +8490,68 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     start[1] =
         (hsize_t)(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+        tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        read_bufs[dset_idx] = tmp_buf;
+    }
+
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, (mpi_size > 1) ? SOME_CHUNKS_WRITTEN : ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id,
+                              (mpi_size > 1) ? SOME_CHUNKS_WRITTEN : ALL_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    /* Close and re-open datasets */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+             "Data verification succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     /* Repeat the previous, but set option to not filter partial edge chunks */
     if (MAINPROCESS)
         puts("Testing write to unshared unfiltered edge chunks");
 
+    filespace = H5Screate_simple(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
-    dset_id = H5Dcreate2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME,
+                    filespace, plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7488,48 +8568,43 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     start[1] =
         (hsize_t)(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, (mpi_size > 1) ? SOME_CHUNKS_WRITTEN : ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id,
+                              (mpi_size > 1) ? SOME_CHUNKS_WRITTEN : ALL_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, num_dsets, test_mode,
+                  dset_ids);
 
-    memset(read_buf, 255, data_size);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        memset(read_bufs[dset_idx], 255, data_size);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+             "Data verification succeeded");
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -7548,10 +8623,11 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
  */
 static void
 test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                         hid_t dxpl_id)
+                         hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
@@ -7559,8 +8635,11 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     hsize_t     stride[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     count[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
     hsize_t     block[WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS];
-    size_t      i, data_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID;
 
@@ -7594,12 +8673,12 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7617,64 +8696,66 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     start[1] =
         (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+        tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
+
+        read_bufs[dset_idx] = tmp_buf;
+    }
+
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+             "Data verification succeeded");
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     /* Repeat the previous, but set option to not filter partial edge chunks */
     if (MAINPROCESS)
         puts("Testing write to shared unfiltered edge chunks");
 
+    filespace = H5Screate_simple(WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
-    dset_id = H5Dcreate2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME,
-                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace,
+                    plist_id, test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
@@ -7692,71 +8773,45 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     start[1] =
         (hsize_t)(WRITE_SHARED_FILTERED_EDGE_CHUNKS_NCOLS - WRITE_SHARED_FILTERED_EDGE_CHUNKS_CH_NCOLS);
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, num_dsets, test_mode, dset_ids);
 
-    memset(read_buf, 255, data_size);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        memset(read_bufs[dset_idx], 255, data_size);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids[0], dxpl_id, read_bufs,
+                  test_mode);
 
-    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
+             "Data verification succeeded");
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        free(read_bufs[dset_idx]);
+        free(data_bufs_nc[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     return;
-}
-
-/*
- * Tests that filtered and unfiltered partial edge chunks can be
- * written to and read from correctly in parallel when only one
- * MPI rank writes to a particular edge chunk in the dataset and
- * only performs a partial write to the edge chunk.
- *
- * The dataset contains partial edge chunks in the second dimension.
- * Each MPI rank selects a hyperslab in the shape of part of a single
- * edge chunk and writes to just a portion of the edge chunk.
- */
-static void
-test_edge_chunks_partial_write(const char H5_ATTR_PARALLEL_UNUSED  *parent_group,
-                               H5Z_filter_t H5_ATTR_PARALLEL_UNUSED filter_id,
-                               hid_t H5_ATTR_PARALLEL_UNUSED fapl_id, hid_t H5_ATTR_PARALLEL_UNUSED dcpl_id,
-                               hid_t H5_ATTR_PARALLEL_UNUSED dxpl_id)
-{
-    /* TODO */
 }
 
 /*
@@ -7766,11 +8821,12 @@ test_edge_chunks_partial_write(const char H5_ATTR_PARALLEL_UNUSED  *parent_group
  */
 static void
 test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                 hid_t dxpl_id)
+                 hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data        = NULL;
-    C_DATATYPE *read_buf    = NULL;
-    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *correct_bufs[MAX_NUM_DSETS_MULTI] = {0};
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     C_DATATYPE  fill_value;
     hsize_t     dataset_dims[FILL_VALUES_TEST_DATASET_DIMS];
     hsize_t     chunk_dims[FILL_VALUES_TEST_DATASET_DIMS];
@@ -7779,12 +8835,16 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     hsize_t     stride[FILL_VALUES_TEST_DATASET_DIMS];
     hsize_t     count[FILL_VALUES_TEST_DATASET_DIMS];
     hsize_t     block[FILL_VALUES_TEST_DATASET_DIMS];
-    size_t      i, data_size, read_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id   = H5I_INVALID_HID;
     hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing fill values");
@@ -7819,32 +8879,35 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     fill_value = FILL_VALUES_TEST_FILL_VAL;
     VRFY((H5Pset_fill_value(plist_id, HDF5_DATATYPE_NAME, &fill_value) >= 0), "Fill Value set");
 
-    dset_id = H5Dcreate2(group_id, FILL_VALUES_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT,
-                         plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, FILL_VALUES_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
     /* Allocate buffer for reading entire dataset */
-    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
+    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
 
-    read_buf = calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
-
-    correct_buf = calloc(1, read_buf_size);
-    VRFY((NULL != correct_buf), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        correct_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != correct_bufs[dset_idx]), "calloc succeeded");
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
     /* Read entire dataset and verify that the fill value is returned */
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
-        correct_buf[i] = FILL_VALUES_TEST_FILL_VAL;
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        for (size_t j = 0; j < read_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] = FILL_VALUES_TEST_FILL_VAL;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], read_buf_size)),
+             "Data verification succeeded");
+    }
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -7862,44 +8925,35 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_VALUES_TEST_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_VALUES_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
     /*
      * Each MPI rank communicates their written piece of data
@@ -7911,16 +8965,22 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++) {
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
         recvcounts[i] = (int)(count[1] * block[1]);
         displs[i]     = (int)(i * dataset_dims[1]);
     }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI, correct_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(data_bufs[dset_idx], recvcounts[mpi_rank], C_DATATYPE_MPI,
+                                  correct_bufs[dset_idx], recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], read_buf_size)),
+             "Data verification succeeded");
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -7939,60 +8999,62 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_VALUES_TEST_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_VALUES_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
-        VRFY((read_buf[i] != FILL_VALUES_TEST_FILL_VAL), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = read_bufs[dset_idx];
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        for (size_t j = 0; j < read_buf_size / sizeof(C_DATATYPE); j++)
+            VRFY((tmp_buf[j] != FILL_VALUES_TEST_FILL_VAL), "Data verification succeeded");
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     /********************************************************************
      * Set the fill time to H5D_FILL_TIME_ALLOC and repeat the previous *
      ********************************************************************/
 
+    filespace = H5Screate_simple(FILL_VALUES_TEST_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
     VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_ALLOC) >= 0), "H5Pset_fill_time succeeded");
 
-    dset_id = H5Dcreate2(group_id, FILL_VALUES_TEST_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT,
-                         plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, FILL_VALUES_TEST_DATASET_NAME2, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
     /* Read entire dataset and verify that the fill value is returned */
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
-        correct_buf[i] = FILL_VALUES_TEST_FILL_VAL;
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        for (size_t j = 0; j < read_buf_size / sizeof(C_DATATYPE); j++)
+            correct_bufs[dset_idx][j] = FILL_VALUES_TEST_FILL_VAL;
 
-    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], read_buf_size)),
+             "Data verification succeeded");
+    }
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -8010,40 +9072,30 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = data_bufs_nc[dset_idx];
+
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
     }
 
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_VALUES_TEST_DATASET_NAME2, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_VALUES_TEST_DATASET_NAME2, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < (size_t)mpi_size; i++) {
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
         recvcounts[i] = (int)(count[1] * block[1]);
         displs[i]     = (int)(i * dataset_dims[1]);
     }
@@ -8052,11 +9104,17 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
      * Each MPI rank communicates their written piece of data
      * into each other rank's correctness-checking buffer
      */
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI, correct_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(data_bufs[dset_idx], recvcounts[mpi_rank], C_DATATYPE_MPI,
+                                  correct_bufs[dset_idx], recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_bufs[dset_idx], correct_bufs[dset_idx], read_buf_size)),
+             "Data verification succeeded");
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -8075,49 +9133,44 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_VALUES_TEST_DATASET_NAME2, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_VALUES_TEST_DATASET_NAME2, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
-        VRFY((read_buf[i] != FILL_VALUES_TEST_FILL_VAL), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = read_bufs[dset_idx];
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
-    if (correct_buf)
-        free(correct_buf);
+        for (size_t j = 0; j < read_buf_size / sizeof(C_DATATYPE); j++)
+            VRFY((tmp_buf[j] != FILL_VALUES_TEST_FILL_VAL), "Data verification succeeded");
+    }
+
+    free(displs);
+    free(recvcounts);
+
+    for (size_t dset_idx = 0; dset_idx < MAX_NUM_DSETS_MULTI; dset_idx++) {
+        free(data_bufs_nc[dset_idx]);
+        free(read_bufs[dset_idx]);
+        free(correct_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -8131,11 +9184,12 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
  */
 static void
 test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                          hid_t dxpl_id)
+                          hid_t dxpl_id, test_mode_t test_mode)
 {
     H5D_alloc_time_t alloc_time;
-    C_DATATYPE      *data     = NULL;
-    C_DATATYPE      *read_buf = NULL;
+    const void      *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void            *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void            *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t          dataset_dims[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     hsize_t          chunk_dims[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     hsize_t          sel_dims[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
@@ -8143,8 +9197,11 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     hsize_t          stride[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     hsize_t          count[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     hsize_t          block[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
-    size_t           i, data_size, read_buf_size;
-    hid_t            file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t           data_size, read_buf_size;
+    size_t           num_dsets;
+    hid_t            dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t            fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t            file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t            group_id  = H5I_INVALID_HID;
     hid_t            filespace = H5I_INVALID_HID;
 
@@ -8182,37 +9239,93 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     /* Set an undefined fill value */
     VRFY((H5Pset_fill_value(plist_id, HDF5_DATATYPE_NAME, NULL) >= 0), "Fill Value set");
 
-    dset_id = H5Dcreate2(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    /* Allocate buffer for reading entire dataset */
-    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
+    /*
+     * Since we aren't writing fill values to the chunks of the
+     * datasets we just created, close and re-open file to ensure
+     * that file size is updated so we don't read past the end of
+     * the file later if doing multi-dataset I/O.
+     */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-    read_buf = calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    open_datasets(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
+
+    /* Allocate buffer for reading entire dataset */
+    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
     /*
      * Read entire dataset - nothing to verify since there's no fill value.
-     * If not using early space allocation, the read should fail since storage
-     * isn't allocated yet and no fill value is defined.
+     * If not using early space allocation, the read should fail for filtered
+     * datasets since storage isn't allocated yet and no fill value is defined.
+     * For unfiltered datasets, the library will still be forcing early space
+     * allocation in parallel, so the read should succeed in that case.
      */
     if (alloc_time == H5D_ALLOC_TIME_EARLY) {
-        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-             "Dataset read succeeded");
+        read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs,
+                      test_mode);
     }
     else {
-        H5E_BEGIN_TRY
-        {
-            VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) < 0),
-                 "Dataset read succeeded");
+        for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+            herr_t expected = FAIL;
+            herr_t ret;
+
+            if (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
+                hid_t dset_dcpl;
+                int   nfilters;
+
+                dset_dcpl = H5Dget_create_plist(dset_ids[dset_idx]);
+                VRFY((dset_dcpl >= 0), "H5Dget_create_plist");
+
+                nfilters = H5Pget_nfilters(dset_dcpl);
+                VRFY((nfilters >= 0), "H5Pget_nfilters");
+
+                if (nfilters == 0)
+                    expected = SUCCEED;
+
+                VRFY((H5Pclose(dset_dcpl) >= 0), "H5Pclose");
+            }
+
+            if (expected == SUCCEED)
+                ret = H5Dread(dset_ids[dset_idx], HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id,
+                              read_bufs[dset_idx]);
+            else {
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Dread(dset_ids[dset_idx], HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id,
+                                  read_bufs[dset_idx]);
+                }
+                H5E_END_TRY
+            }
+
+            VRFY((ret == expected), "Dataset write");
+
+            if (expected == SUCCEED)
+                verify_chunk_opt_status(1, dxpl_id);
+            else
+                verify_chunk_opt_status(0, dxpl_id);
         }
-        H5E_END_TRY
     }
 
     /*
@@ -8229,43 +9342,37 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
-    dset_id = H5Dopen2(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
 
     /*
      * Write to whole dataset and ensure data is correct
@@ -8284,40 +9391,33 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_VALUE_UNDEFINED_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(data_bufs_nc[dset_idx]);
+        free(read_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -8331,11 +9431,12 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
  */
 static void
 test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id, hid_t dcpl_id,
-                     hid_t dxpl_id)
+                     hid_t dxpl_id, test_mode_t test_mode)
 {
-    C_DATATYPE *data     = NULL;
-    C_DATATYPE *read_buf = NULL;
-    C_DATATYPE *fill_buf = NULL;
+    const void *data_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    void       *data_bufs_nc[MAX_NUM_DSETS_MULTI] = {0}; /* non-const buffer pointers for freeing */
+    void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
+    C_DATATYPE *fill_buf                          = NULL;
     C_DATATYPE  fill_value;
     hsize_t     dataset_dims[FILL_TIME_NEVER_TEST_DATASET_DIMS];
     hsize_t     chunk_dims[FILL_TIME_NEVER_TEST_DATASET_DIMS];
@@ -8344,12 +9445,16 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     hsize_t     stride[FILL_TIME_NEVER_TEST_DATASET_DIMS];
     hsize_t     count[FILL_TIME_NEVER_TEST_DATASET_DIMS];
     hsize_t     block[FILL_TIME_NEVER_TEST_DATASET_DIMS];
-    size_t      i, data_size, read_buf_size;
-    hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
+    size_t      data_size, read_buf_size;
+    size_t      num_dsets;
+    hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
+    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id   = H5I_INVALID_HID;
     hid_t       filespace  = H5I_INVALID_HID;
     int        *recvcounts = NULL;
     int        *displs     = NULL;
+    int         mpi_code;
 
     if (MAINPROCESS)
         puts("Testing fill time H5D_FILL_TIME_NEVER");
@@ -8405,29 +9510,49 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     /* Set fill time of 'never' */
     VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_NEVER) >= 0), "H5Pset_fill_time succeeded");
 
-    dset_id = H5Dcreate2(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset creation succeeded");
+    /* Create datasets depending on the current test mode */
+    create_datasets(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, HDF5_DATATYPE_NAME, filespace, plist_id,
+                    test_mode, &num_dsets, dset_ids);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, DATASET_JUST_CREATED);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    /* Allocate buffer for reading entire dataset */
-    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
+    /*
+     * Since we aren't writing fill values to the chunks of the
+     * datasets we just created, close and re-open file to ensure
+     * that file size is updated so we don't read past the end of
+     * the file later if doing multi-dataset I/O.
+     */
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-    read_buf = calloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "calloc succeeded");
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    group_id = H5Gopen2(file_id, parent_group, H5P_DEFAULT);
+    VRFY((group_id >= 0), "H5Gopen2 succeeded");
+
+    open_datasets(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
+
+    /* Allocate buffer for reading entire dataset */
+    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
 
     fill_buf = calloc(1, read_buf_size);
     VRFY((NULL != fill_buf), "calloc succeeded");
 
     /* Read entire dataset and verify that the fill value isn't returned */
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
+    for (size_t i = 0; i < read_buf_size / sizeof(C_DATATYPE); i++)
         fill_buf[i] = FILL_TIME_NEVER_TEST_FILL_VAL;
 
     /*
@@ -8435,7 +9560,8 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * values to all be the fill value, so this should be
      * a safe comparison in theory.
      */
-    VRFY((0 != memcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((0 != memcmp(read_bufs[dset_idx], fill_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -8453,44 +9579,35 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     start[0]  = (hsize_t)mpi_rank;
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
-
-    /* Select hyperslab in the file */
-    filespace = H5Dget_space(dset_id);
-    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
-
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
     /* Fill data buffer */
-    data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    data_size = sel_dims[0] * sel_dims[1] * sizeof(C_DATATYPE);
 
-    data = (C_DATATYPE *)calloc(1, data_size);
-    VRFY((NULL != data), "calloc succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = calloc(1, data_size);
+        VRFY((NULL != tmp_buf), "calloc succeeded");
 
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
+        for (size_t j = 0; j < data_size / sizeof(C_DATATYPE); j++)
+            tmp_buf[j] = (C_DATATYPE)(GEN_DATA(j) + dset_idx);
 
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+        data_bufs[dset_idx]    = tmp_buf;
+        data_bufs_nc[dset_idx] = tmp_buf;
+    }
+
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, SOME_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, SOME_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
     /*
      * Each MPI rank communicates their written piece of data
@@ -8502,21 +9619,26 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
     VRFY((NULL != displs), "calloc succeeded");
 
-    for (i = 0; i < (size_t)mpi_size; i++) {
+    for (size_t i = 0; i < (size_t)mpi_size; i++) {
         recvcounts[i] = (int)(count[1] * block[1]);
         displs[i]     = (int)(i * dataset_dims[1]);
     }
 
-    VRFY((MPI_SUCCESS == MPI_Allgatherv(data, recvcounts[mpi_rank], C_DATATYPE_MPI, fill_buf, recvcounts,
-                                        displs, C_DATATYPE_MPI, comm)),
-         "MPI_Allgatherv succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        mpi_code = MPI_Allgatherv(data_bufs[dset_idx], recvcounts[mpi_rank], C_DATATYPE_MPI, fill_buf,
+                                  recvcounts, displs, C_DATATYPE_MPI, comm);
+        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
 
-    /*
-     * It should be very unlikely for the dataset's random
-     * values to all be the fill value, so this should be
-     * a safe comparison in theory.
-     */
-    VRFY((0 != memcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
+        /*
+         * It should be very unlikely for the dataset's random
+         * values to all be the fill value, so this should be
+         * a safe comparison in theory.
+         */
+        VRFY((0 != memcmp(read_bufs[dset_idx], fill_buf, read_buf_size)), "Data verification succeeded");
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -8535,49 +9657,45 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
-    if (VERBOSE_MED) {
-        printf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
-               ", %" PRIuHSIZE " ]\n",
-               mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        fflush(stdout);
-    }
+    select_hyperslab(num_dsets, dset_ids, start, stride, count, block, fspace_ids);
 
-    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
-         "Hyperslab selection succeeded");
-
-    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, data) >= 0),
-         "Dataset write succeeded");
+    write_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_BLOCK, fspace_ids, dxpl_id, data_bufs,
+                   test_mode);
 
     /* Verify space allocation status */
-    verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
+    verify_space_alloc_status(num_dsets, dset_ids, plist_id, ALL_CHUNKS_WRITTEN);
 
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    dset_id = H5Dopen2(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "Dataset open succeeded");
+    open_datasets(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_bufs, test_mode);
 
-    for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
-        VRFY((read_buf[i] != FILL_TIME_NEVER_TEST_FILL_VAL), "Data verification succeeded");
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        C_DATATYPE *tmp_buf = read_bufs[dset_idx];
 
-    if (displs)
-        free(displs);
-    if (recvcounts)
-        free(recvcounts);
-    if (data)
-        free(data);
-    if (read_buf)
-        free(read_buf);
-    if (fill_buf)
-        free(fill_buf);
+        for (size_t j = 0; j < read_buf_size / sizeof(C_DATATYPE); j++)
+            VRFY((tmp_buf[j] != FILL_TIME_NEVER_TEST_FILL_VAL), "Data verification succeeded");
+    }
+
+    free(displs);
+    free(recvcounts);
+
+    free(fill_buf);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        free(data_bufs_nc[dset_idx]);
+        free(read_bufs[dset_idx]);
+    }
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
+        VRFY((H5Dclose(dset_ids[dset_idx]) >= 0), "Dataset close succeeded");
+    }
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
-    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -8588,28 +9706,45 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 int
 main(int argc, char **argv)
 {
-    size_t cur_filter_idx = 0;
-    size_t num_filters    = 0;
-    hid_t  file_id        = H5I_INVALID_HID;
-    hid_t  fcpl_id        = H5I_INVALID_HID;
-    hid_t  group_id       = H5I_INVALID_HID;
-    hid_t  fapl_id        = H5I_INVALID_HID;
-    hid_t  dxpl_id        = H5I_INVALID_HID;
-    hid_t  dcpl_id        = H5I_INVALID_HID;
-    int    mpi_code;
+    unsigned seed;
+    size_t   cur_filter_idx   = 0;
+    size_t   num_filters      = 0;
+    hid_t    file_id          = H5I_INVALID_HID;
+    hid_t    fcpl_id          = H5I_INVALID_HID;
+    hid_t    group_id         = H5I_INVALID_HID;
+    hid_t    fapl_id          = H5I_INVALID_HID;
+    hid_t    dxpl_id          = H5I_INVALID_HID;
+    hid_t    dcpl_id          = H5I_INVALID_HID;
+    bool     expedite_testing = false;
+    int      mpi_code;
 
     /* Initialize MPI */
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("Failed to initialize MPI: MPI error code %d\n", mpi_code);
+        fflush(stdout);
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size))) {
+        printf("Failed to retrieve MPI communicator size: MPI error code %d\n", mpi_code);
+        fflush(stdout);
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank))) {
+        printf("Failed to retrieve MPI communicator rank: MPI error code %d\n", mpi_code);
+        fflush(stdout);
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     if (mpi_size <= 0) {
         if (MAINPROCESS) {
             printf("The Parallel Filters tests require at least 1 rank.\n");
             printf("Quitting...\n");
+            fflush(stdout);
         }
 
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
     if (H5dont_atexit() < 0) {
@@ -8631,6 +9766,41 @@ main(int argc, char **argv)
 
     TestAlarmOn();
 
+    /*
+     * Get the TestExpress level setting
+     */
+    test_express_level_g = GetTestExpress();
+    if ((test_express_level_g >= 1) && MAINPROCESS) {
+        printf("** Some tests will be skipped due to TestExpress setting.\n");
+        printf("** Exhaustive tests will only be performed for the first available filter.\n");
+        printf("** Set the HDF5TestExpress environment variable to 0 to perform exhaustive testing for all "
+               "available filters.\n\n");
+    }
+
+    /*
+     * Obtain and broadcast seed value since ranks
+     * aren't guaranteed to arrive here at exactly
+     * the same time and could end up out of sync
+     * with each other in regards to random number
+     * generation
+     */
+    if (MAINPROCESS)
+        seed = (unsigned)time(NULL);
+
+    if (mpi_size > 1) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, comm))) {
+            if (MAINPROCESS)
+                printf("MPI_Bcast failed with error code %d\n", mpi_code);
+            fflush(stdout);
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+
+    srand(seed);
+
+    if (MAINPROCESS)
+        printf("Using seed: %u\n\n", seed);
+
     num_filters = ARRAY_SIZE(filterIDs);
 
     /* Set up file access property list with parallel I/O access,
@@ -8642,7 +9812,6 @@ main(int argc, char **argv)
     VRFY((H5Pset_fapl_mpio(fapl_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
     VRFY((H5Pset_all_coll_metadata_ops(fapl_id, true) >= 0), "H5Pset_all_coll_metadata_ops succeeded");
     VRFY((H5Pset_coll_metadata_write(fapl_id, true) >= 0), "H5Pset_coll_metadata_write succeeded");
-
     VRFY((H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
          "Set libver bounds succeeded");
 
@@ -8674,112 +9843,192 @@ main(int argc, char **argv)
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dcpl_id >= 0), "DCPL creation succeeded");
 
+    /* Add a space after the HDF5_PARAPREFIX notice from h5_fixname */
+    if (MAINPROCESS)
+        puts("");
+
     /* Run tests with all available filters */
     for (cur_filter_idx = 0; cur_filter_idx < num_filters; cur_filter_idx++) {
-        H5FD_mpio_chunk_opt_t chunk_opt;
-        H5Z_filter_t          cur_filter = filterIDs[cur_filter_idx];
+        H5D_selection_io_mode_t sel_io_mode;
+        H5Z_filter_t            cur_filter = filterIDs[cur_filter_idx];
+        htri_t                  filter_avail;
 
-        /* Run tests with both linked-chunk and multi-chunk I/O */
-        for (chunk_opt = H5FD_MPIO_CHUNK_ONE_IO; chunk_opt <= H5FD_MPIO_CHUNK_MULTI_IO; chunk_opt++) {
-            H5D_alloc_time_t space_alloc_time;
+        /* Make sure current filter is available before testing with it */
+        filter_avail = H5Zfilter_avail(cur_filter);
+        VRFY((filter_avail >= 0), "H5Zfilter_avail succeeded");
 
-            /* Run tests with all available space allocation times */
-            for (space_alloc_time = H5D_ALLOC_TIME_EARLY; space_alloc_time <= H5D_ALLOC_TIME_INCR;
-                 space_alloc_time++) {
-                const char *alloc_time;
-                unsigned    filter_config;
-                htri_t      filter_avail;
-                size_t      i;
-                char        group_name[512];
+        if (!filter_avail) {
+            if (MAINPROCESS)
+                printf("== SKIPPED tests with filter '%s' - filter unavailable ==\n\n",
+                       filterNames[cur_filter_idx]);
+            continue;
+        }
 
-                switch (space_alloc_time) {
-                    case H5D_ALLOC_TIME_EARLY:
-                        alloc_time = "Early";
-                        break;
-                    case H5D_ALLOC_TIME_LATE:
-                        alloc_time = "Late";
-                        break;
-                    case H5D_ALLOC_TIME_INCR:
-                        alloc_time = "Incremental";
-                        break;
-                    case H5D_ALLOC_TIME_DEFAULT:
-                    case H5D_ALLOC_TIME_ERROR:
-                    default:
-                        alloc_time = "Unknown";
-                }
+        /* Run tests with different selection I/O modes */
+        for (sel_io_mode = H5D_SELECTION_IO_MODE_DEFAULT; sel_io_mode <= H5D_SELECTION_IO_MODE_ON;
+             sel_io_mode++) {
+            H5FD_mpio_chunk_opt_t chunk_opt;
 
-                if (MAINPROCESS)
-                    printf("== Running tests with filter '%s' using '%s' and '%s' allocation time ==\n\n",
-                           filterNames[cur_filter_idx],
-                           H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O" : "Multi-Chunk I/O",
-                           alloc_time);
+            /* Run tests with both linked-chunk and multi-chunk I/O */
+            for (chunk_opt = H5FD_MPIO_CHUNK_ONE_IO; chunk_opt <= H5FD_MPIO_CHUNK_MULTI_IO; chunk_opt++) {
+                H5D_alloc_time_t space_alloc_time;
 
-                /* Make sure current filter is available before testing with it */
-                filter_avail = H5Zfilter_avail(cur_filter);
-                VRFY((filter_avail >= 0), "H5Zfilter_avail succeeded");
+                /* Run tests with all available space allocation times */
+                for (space_alloc_time = H5D_ALLOC_TIME_EARLY; space_alloc_time <= H5D_ALLOC_TIME_INCR;
+                     space_alloc_time++) {
+                    test_mode_t test_mode;
 
-                if (!filter_avail) {
-                    if (MAINPROCESS)
-                        printf(" ** SKIPPED tests with filter '%s' - filter unavailable **\n\n",
-                               filterNames[cur_filter_idx]);
-                    continue;
-                }
+                    /* Run with each of the test modes (single dataset, multiple datasets, etc.) */
+                    for (test_mode = USE_SINGLE_DATASET; test_mode < TEST_MODE_SENTINEL; test_mode++) {
+                        const char *sel_io_str;
+                        const char *alloc_time;
+                        const char *mode;
+                        unsigned    filter_config;
+                        char        group_name[512];
 
-                /* Get the current filter's info */
-                VRFY((H5Zget_filter_info(cur_filter, &filter_config) >= 0), "H5Zget_filter_info succeeded");
+                        switch (sel_io_mode) {
+                            case H5D_SELECTION_IO_MODE_DEFAULT:
+                                sel_io_str = "default";
+                                break;
+                            case H5D_SELECTION_IO_MODE_OFF:
+                                sel_io_str = "off";
+                                break;
+                            case H5D_SELECTION_IO_MODE_ON:
+                                sel_io_str = "on";
+                                break;
+                            default:
+                                sel_io_str = "unknown";
+                        }
 
-                /* Determine if filter is encode-enabled */
-                if (0 == (filter_config & H5Z_FILTER_CONFIG_ENCODE_ENABLED)) {
-                    if (MAINPROCESS)
-                        printf(" ** SKIPPED tests with filter '%s' - filter not encode-enabled **\n\n",
-                               filterNames[cur_filter_idx]);
-                    continue;
-                }
+                        switch (space_alloc_time) {
+                            case H5D_ALLOC_TIME_EARLY:
+                                alloc_time = "Early";
+                                break;
+                            case H5D_ALLOC_TIME_LATE:
+                                alloc_time = "Late";
+                                break;
+                            case H5D_ALLOC_TIME_INCR:
+                                alloc_time = "Incremental";
+                                break;
+                            case H5D_ALLOC_TIME_DEFAULT:
+                            case H5D_ALLOC_TIME_ERROR:
+                            default:
+                                alloc_time = "Unknown";
+                        }
 
-                /* Set space allocation time */
-                VRFY((H5Pset_alloc_time(dcpl_id, space_alloc_time) >= 0), "H5Pset_alloc_time succeeded");
+                        switch (test_mode) {
+                            case USE_SINGLE_DATASET:
+                                mode = "single";
+                                break;
+                            case USE_MULTIPLE_DATASETS:
+                                mode = "multi";
+                                break;
+                            case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
+                                mode = "multi-mixed-filtered";
+                                break;
+                            case TEST_MODE_SENTINEL:
+                            default:
+                                mode = "unknown";
+                        }
 
-                /* Set chunk I/O optimization method */
-                VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, chunk_opt) >= 0),
-                     "H5Pset_dxpl_mpio_chunk_opt succeeded");
+                        /*
+                         * If expediting the remaining tests, just run with a single
+                         * configuration that is interesting enough. In this case,
+                         * run with:
+                         *
+                         *   - A single dataset
+                         *   - Incremental file space allocation timing
+                         *   - Linked-chunk (single) I/O
+                         *   - The default setting for selection I/O
+                         */
+                        if (expedite_testing) {
+                            if (test_mode != USE_SINGLE_DATASET || space_alloc_time != H5D_ALLOC_TIME_INCR ||
+                                chunk_opt != H5FD_MPIO_CHUNK_ONE_IO ||
+                                sel_io_mode != H5D_SELECTION_IO_MODE_DEFAULT)
+                                continue;
+                        }
 
-                /* Create a group to hold all the datasets for this combination
-                 * of filter and chunk optimization mode. Then, close the file
-                 * again since some tests may need to open the file in a special
-                 * way, like on rank 0 only */
-                file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
-                VRFY((file_id >= 0), "H5Fopen succeeded");
-
-                snprintf(group_name, sizeof(group_name), "%s_%s_%s", filterNames[cur_filter_idx],
-                         H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
-                         alloc_time);
-
-                group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-                VRFY((group_id >= 0), "H5Gcreate2 succeeded");
-
-                VRFY((H5Gclose(group_id) >= 0), "H5Gclose failed");
-                group_id = H5I_INVALID_HID;
-
-                VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
-                file_id = H5I_INVALID_HID;
-
-                for (i = 0; i < ARRAY_SIZE(tests); i++) {
-                    test_func func = tests[i];
-
-                    if (MPI_SUCCESS == (mpi_code = MPI_Barrier(comm))) {
-                        func(group_name, cur_filter, fapl_id, dcpl_id, dxpl_id);
-                    }
-                    else {
                         if (MAINPROCESS)
-                            MESG("MPI_Barrier failed");
-                        nerrors++;
+                            printf("== Running tests in mode '%s' with filter '%s' using selection I/O mode "
+                                   "'%s', '%s' and '%s' allocation time ==\n\n",
+                                   test_mode_to_string(test_mode), filterNames[cur_filter_idx], sel_io_str,
+                                   H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O"
+                                                                       : "Multi-Chunk I/O",
+                                   alloc_time);
+
+                        /* Get the current filter's info */
+                        VRFY((H5Zget_filter_info(cur_filter, &filter_config) >= 0),
+                             "H5Zget_filter_info succeeded");
+
+                        /* Determine if filter is encode-enabled */
+                        if (0 == (filter_config & H5Z_FILTER_CONFIG_ENCODE_ENABLED)) {
+                            if (MAINPROCESS)
+                                printf(
+                                    " ** SKIPPED tests with filter '%s' - filter not encode-enabled **\n\n",
+                                    filterNames[cur_filter_idx]);
+                            continue;
+                        }
+
+                        /* Set space allocation time */
+                        VRFY((H5Pset_alloc_time(dcpl_id, space_alloc_time) >= 0),
+                             "H5Pset_alloc_time succeeded");
+
+                        /* Set selection I/O mode */
+                        VRFY((H5Pset_selection_io(dxpl_id, sel_io_mode) >= 0),
+                             "H5Pset_selection_io succeeded");
+
+                        /* Set chunk I/O optimization method */
+                        VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, chunk_opt) >= 0),
+                             "H5Pset_dxpl_mpio_chunk_opt succeeded");
+
+                        /* Create a group to hold all the datasets for this combination
+                         * of filter and chunk optimization mode. Then, close the file
+                         * again since some tests may need to open the file in a special
+                         * way, like on rank 0 only */
+                        file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, fapl_id);
+                        VRFY((file_id >= 0), "H5Fopen succeeded");
+
+                        snprintf(group_name, sizeof(group_name), "%s_sel-io-%s_%s_%s_%s",
+                                 filterNames[cur_filter_idx], sel_io_str,
+                                 H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "linked-chunk-io" : "multi-chunk-io",
+                                 alloc_time, mode);
+
+                        group_id = H5Gcreate2(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                        VRFY((group_id >= 0), "H5Gcreate2 succeeded");
+
+                        VRFY((H5Gclose(group_id) >= 0), "H5Gclose failed");
+                        group_id = H5I_INVALID_HID;
+
+                        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+                        file_id = H5I_INVALID_HID;
+
+                        /* Run all tests */
+                        for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
+                            test_func func = tests[i];
+
+                            if (MPI_SUCCESS == (mpi_code = MPI_Barrier(comm))) {
+                                func(group_name, cur_filter, fapl_id, dcpl_id, dxpl_id, test_mode);
+                            }
+                            else {
+                                if (MAINPROCESS)
+                                    MESG("MPI_Barrier failed");
+                                nerrors++;
+                            }
+                        }
+
+                        if (MAINPROCESS)
+                            puts("");
                     }
                 }
-
-                if (MAINPROCESS)
-                    puts("");
             }
         }
+
+        /*
+         * If the TestExpress level setting isn't set for exhaustive
+         * testing, run smoke checks for the other filters
+         */
+        if (!expedite_testing && (test_express_level_g >= 1))
+            expedite_testing = true;
     }
 
     VRFY((H5Pclose(dcpl_id) >= 0), "DCPL close succeeded");

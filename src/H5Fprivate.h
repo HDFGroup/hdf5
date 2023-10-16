@@ -85,7 +85,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_TMP_SPACE(F)             ((F)->shared->fs.use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR)         (H5_addr_le((F)->shared->fs.tmp_addr, (ADDR)))
 #ifdef H5_HAVE_PARALLEL
-#define H5F_COLL_MD_READ(F) ((F)->shared->coll_md_read)
+#define H5F_COLL_MD_READ(F)           ((F)->shared->coll_md_read)
+#define H5F_SHARED_COLL_MD_READ(F_SH) ((F_SH)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)         ((F)->shared->use_mdc_logging)
 #define H5F_START_MDC_LOG_ON_ACCESS(F) ((F)->shared->start_mdc_log_on_access)
@@ -148,7 +149,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_TMP_SPACE(F)             (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR)         (H5F_is_tmp_addr((F), (ADDR)))
 #ifdef H5_HAVE_PARALLEL
-#define H5F_COLL_MD_READ(F) (H5F_coll_md_read(F))
+#define H5F_COLL_MD_READ(F)           (H5F_coll_md_read(F))
+#define H5F_SHARED_COLL_MD_READ(F_SH) (H5F_shared_coll_md_read(F))
 #endif /* H5_HAVE_PARALLEL */
 #define H5F_USE_MDC_LOGGING(F)         (H5F_use_mdc_logging(F))
 #define H5F_START_MDC_LOG_ON_ACCESS(F) (H5F_start_mdc_log_on_access(F))
@@ -556,6 +558,7 @@ H5_DLL hsize_t            H5F_get_alignment(const H5F_t *f);
 H5_DLL hsize_t            H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
+H5_DLL H5P_coll_md_read_flag_t H5F_shared_coll_md_read(const H5F_shared_t *f_sh);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL bool  H5F_use_mdc_logging(const H5F_t *f);
 H5_DLL bool  H5F_start_mdc_log_on_access(const H5F_t *f);
@@ -642,6 +645,7 @@ H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
 H5_DLL herr_t   H5F_mpi_get_file_block_type(bool commit, MPI_Datatype *new_type, bool *new_type_derived);
 H5_DLL bool     H5F_get_coll_metadata_reads(const H5F_t *f);
+H5_DLL bool     H5F_shared_get_coll_metadata_reads(const H5F_shared_t *f_sh);
 H5_DLL void     H5F_set_coll_metadata_reads(H5F_t *f, H5P_coll_md_read_flag_t *file_flag, bool *context_flag);
 H5_DLL herr_t   H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, bool *flag);
 #endif /* H5_HAVE_PARALLEL */

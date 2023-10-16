@@ -58,6 +58,11 @@ size_t             cd_nelmts                      = FILTER_NUM_CDVALUES;
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2
 
+/* The maximum number of datasets to work on simultaneously
+ * when using H5Dwrite_multi/H5Dread_multi
+ */
+#define MAX_NUM_DSETS_MULTI 5
+
 /* Struct type for the compound datatype filtered dataset tests */
 typedef struct {
     short field1;
