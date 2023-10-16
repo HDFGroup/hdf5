@@ -105,8 +105,8 @@ if test "X-nvc" = "X-$cc_vendor" -o "X-nvcc" = "X-$cc_vendor"; then
     # Optimization #
     ################
 
-    HIGH_OPT_CFLAGS="-O4"
-    DEBUG_OPT_CFLAGS="-gopt -O2"
+    HIGH_OPT_CFLAGS="-O1"         # -O2+ currently has test failures.
+    DEBUG_OPT_CFLAGS="-gopt -O1"  # -O2+ currently has test failures.
     NO_OPT_CFLAGS="-O0"
 
     #################
