@@ -1,4 +1,4 @@
-!****h* ROBODoc/THDF5_1_8
+!****h* root/fortran/test/tHDF5_1_8.f90
 !
 ! NAME
 !  MODULE THDF5_1_8
