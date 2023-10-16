@@ -56,7 +56,8 @@ jobs:
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_BUILD_FORTRAN:BOOL=ON \
-          -DMPIEXEC_MAX_NUMPROCS:MPIEXEC_MAX_NUMPROCS="2" \
+          -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
+#          -DHDF5_TEST_PARALLEL:BOOL=OFF \
           $GITHUB_WORKSPACE
           #cat build/CMakeCache.txt
 

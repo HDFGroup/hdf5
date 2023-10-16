@@ -43,6 +43,8 @@ jobs:
 
       - name: Autotools Configure
         shell: bash
+        env:
+          NPROCS: 2      
         run: |
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:$PATH
           sh ./autogen.sh
@@ -68,7 +70,6 @@ jobs:
       # NORMAL
       - name: Autotools Run Tests
         run: |
-          export RUNPARALLEL="mpiexec -n 2"
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:$PATH
           make check -j
         working-directory: ${{ runner.workspace }}/build
