@@ -58,7 +58,7 @@ jobs:
           -DHDF5_BUILD_FORTRAN:BOOL=ON \
           -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
           $GITHUB_WORKSPACE
-          #cat build/CMakeCache.txt
+          cat build/src/libhdf5.settings
 
       # BUILD
       - name: CMake Build
