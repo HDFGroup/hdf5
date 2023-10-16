@@ -904,7 +904,7 @@ macro (H5ConversionTests TEST def msg)
       endif ()
     else ()
       # Use the default if there's no cache variable and cross-compiling
-      if ($def)
+      if (${def})
         message (VERBOSE "${msg}... yes (cross-compile default)")
         set (${TEST} 1 CACHE INTERNAL ${msg})
       else ()
