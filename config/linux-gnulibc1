@@ -298,6 +298,7 @@ case $FC in
     *pgf90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'pgf90'`
         ;;
+
     *nagfor*|*nagftn*)
         RM='rm -f'
         tmpfile=/tmp/cmpver.$$
@@ -322,6 +323,9 @@ fi
 # check if the compiler_version_info is already set
 if test -z "$cxx_version_info"; then
 case $CXX in
+    *nvc++*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'nvc++'`
+        ;;
     *pgc++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'pgc++'`
         ;;
