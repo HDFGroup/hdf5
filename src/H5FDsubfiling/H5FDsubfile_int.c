@@ -343,11 +343,12 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
 
     for (int i = 0; i < num_subfiles; i++) {
+#ifndef NDEBUG
         int ioc_rank = (int)recv_msg[3 * i];
+#endif
 
         assert(ioc_rank >= 0);
         assert(ioc_rank < n_io_concentrators);
-        CANBE_UNUSED(ioc_rank);
         assert(sf_eofs[i] == -1);
 
         sf_eofs[i] = recv_msg[(3 * i) + 1];

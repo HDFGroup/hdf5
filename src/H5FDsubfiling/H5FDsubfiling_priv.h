@@ -63,6 +63,4 @@ H5_DLL herr_t H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_e
 }
 #endif
 
-#define CANBE_UNUSED(X) (void)(X)
-
 #endif /* H5FDsubfiling_priv_H */
