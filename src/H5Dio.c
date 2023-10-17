@@ -627,6 +627,19 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (!(H5S_has_extent(dset_info[i].mem_space)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set");
 
+        /* H5S_select_shape_same() has been modified to accept topologically identical
+         * selections with different rank as having the same shape (if the most
+         * rapidly changing coordinates match up), but the I/O code still has
+         * difficulties with the notion.
+         *
+         * To solve this, check if H5S_select_shape_same() returns true
+         * and the ranks of the mem and file spaces are different.  If so,
+         * construct a new mem space that is equivalent to the old mem space, and
+         * use that instead.
+         *
+         * Note that in general, this requires us to touch up the memory buffer as
+         * well.
+         */        
         if (dset_info[i].nelmts > 0 &&
             true == H5S_SELECT_SHAPE_SAME(dset_info[i].mem_space, dset_info[i].file_space) &&
             H5S_GET_EXTENT_NDIMS(dset_info[i].mem_space) != H5S_GET_EXTENT_NDIMS(dset_info[i].file_space)) {
