@@ -4902,7 +4902,7 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                 format versions available to library release 1.16.x.
  *                 Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
  *                 limit on the format versions to use.  That is, if a
- *                 newer format version is required to support a feature 
+ *                 newer format version is required to support a feature
  *                 in 1.16.x series, this setting will allow the object to be
  *                 created.
  *             \li This is the library default setting and provides the greatest
@@ -4978,7 +4978,7 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                  format versions available to library release 1.16.x.
  *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
  *                  limit on the format versions to use.  That is, if a
- *                  newer format version is required to support a feature 
+ *                  newer format version is required to support a feature
  *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li Earlier versions of the library may not be able to access
@@ -5051,8 +5051,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.16.x.
  *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  That is, if a 
- *                  newer format version is required to support a feature 
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
  *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li This setting allows users to take advantage of the latest
@@ -5112,8 +5112,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.16.x.
  *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  That is, if a 
- *                  newer format version is required to support a feature 
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
  *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li This setting allows users to take advantage of the latest
@@ -5155,8 +5155,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.16.x.
  *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  That is, if a 
- *                  newer format version is required to support a feature 
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
  *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li This setting allows users to take advantage of the latest
@@ -5178,8 +5178,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will allow objects to be created with the latest
  *                  format versions available to library release 1.16.x.
  *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  That is, if a 
- *                  newer format version is required to support a feature 
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
  *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li This setting allows users to take advantage of the latest
