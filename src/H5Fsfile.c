@@ -47,14 +47,17 @@ static H5F_sfile_node_t *H5F_sfile_head_s = NULL;
  *-------------------------------------------------------------------------
  */
 void
-H5F_sfile_assert_num(unsigned n)
+H5F_sfile_assert_num(unsigned H5_ATTR_NDEBUG_UNUSED n)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* The only useful work this function does is asserting so when NDEBUG
+     * is defined it's a no-op.
+     */
+#ifndef NDEBUG
     if (n == 0) {
-        /* Sanity checking */
         assert(H5F_sfile_head_s == NULL);
-    } /* end if */
+    }
     else {
         unsigned          count; /* Number of open shared files */
         H5F_sfile_node_t *curr;  /* Current shared file node */
@@ -68,11 +71,11 @@ H5F_sfile_assert_num(unsigned n)
 
             /* Advance to next shared file node */
             curr = curr->next;
-        } /* end while */
+        }
 
-        /* Sanity checking */
         assert(count == n);
-    } /* end else */
+    }
+#endif
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5F_sfile_assert_num() */
