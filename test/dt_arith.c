@@ -696,7 +696,7 @@ test_particular_fp_integer(void)
 
     /* Print errors */
     if (dst_i != fill_value) {
-        float x = 0.0;
+        float x = 0.0F;
         int   y;
 
         if (0 == fails_this_test++)
@@ -2637,7 +2637,7 @@ my_isnan(dtype_t type, void *val)
     char s[256];
 
     if (FLT_FLOAT == type) {
-        float x = 0.0;
+        float x = 0.0F;
         memcpy(&x, val, sizeof(float));
         retval = isnan(x);
     }
@@ -2663,7 +2663,7 @@ my_isnan(dtype_t type, void *val)
      */
     if (!retval) {
         if (FLT_FLOAT == type) {
-            float x = 0.0;
+            float x = 0.0F;
 
             memcpy(&x, val, sizeof(float));
             snprintf(s, sizeof(s), "%g", (double)x);
@@ -3115,7 +3115,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             int    check_expo[2];
 
             if (FLT_FLOAT == dst_type) {
-                float x = 0.0;
+                float x = 0.0F;
                 memcpy(&x, &buf[j * dst_size], sizeof(float));
                 if (underflow && fabsf(x) <= FLT_MIN && fabsf(hw_f) <= FLT_MIN)
                     continue; /* all underflowed, no error */
@@ -3185,7 +3185,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             printf(" %02x", saved[j * src_size + ENDIAN(src_size, k, sendian)]);
         printf("%*s", (int)(3 * MAX(0, (ssize_t)dst_size - (ssize_t)src_size)), "");
         if (FLT_FLOAT == src_type) {
-            float x = 0.0;
+            float x = 0.0F;
             memcpy(&x, &saved[j * src_size], sizeof(float));
             printf(" %29.20e\n", (double)x);
         }
@@ -3207,7 +3207,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             printf(" %02x", buf[j * dst_size + ENDIAN(dst_size, k, dendian)]);
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         if (FLT_FLOAT == dst_type) {
-            float x = 0.0;
+            float x = 0.0F;
             memcpy(&x, &buf[j * dst_size], sizeof(float));
             printf(" %29.20e\n", (double)x);
         }
