@@ -143,17 +143,17 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     }  /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
-    /* iterate over all dsets and construct I/O information necessary to do I/O */
+    /* Iterate over all dsets and construct I/O information necessary to do I/O */
     for (i = 0; i < count; i++) {
         haddr_t prev_tag = HADDR_UNDEF;
 
-        /* check args */
+        /* Check args */
         if (NULL == dset_info[i].dset)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
         if (NULL == dset_info[i].dset->oloc.file)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
-        /* set metadata tagging with dset oheader addr */
+        /* Set metadata tagging with dset oheader addr */
         H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
         /* Set up datatype info for operation */
@@ -173,10 +173,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (dset_info[i].nelmts > 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
-            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-             * doesn't support this feature.
-             */
+            /* If the buffer is nil, and 0 element is selected, make a fake buffer. */
             dset_info[i].buf.vp = &fake_char;
         } /* end if */
 
@@ -191,8 +188,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
          * rapidly changing coordinates match up), but the I/O code still has
          * difficulties with the notion.
          *
-         * To solve this, we check to see if H5S_select_shape_same() returns true,
-         * and if the ranks of the mem and file spaces are different.  If they are,
+         * To solve this, check if H5S_select_shape_same() returns true
+         * and the ranks of the mem and file spaces are different.  If so,
          * construct a new mem space that is equivalent to the old mem space, and
          * use that instead.
          *
@@ -347,7 +344,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (dset_info[i].layout_ops.mdio_init) {
                 haddr_t prev_tag = HADDR_UNDEF;
 
-                /* set metadata tagging with dset oheader addr */
+                /* Set metadata tagging with dset oheader addr */
                 H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
                 /* Make second phase IO init call */
@@ -396,7 +393,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (dset_info[i].skip_io)
                 continue;
 
-            /* set metadata tagging with dset oheader addr */
+            /* Set metadata tagging with dset object header addr */
             H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
             /* Invoke correct "high level" I/O routine */
@@ -553,18 +550,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer");
 
-    /* iterate over all dsets and construct I/O information */
+    /* Iterate over all dsets and construct I/O information */
     for (i = 0; i < count; i++) {
         bool    should_alloc_space = false; /* Whether or not to initialize dataset's storage */
         haddr_t prev_tag           = HADDR_UNDEF;
 
-        /* check args */
+        /* Check args */
         if (NULL == dset_info[i].dset)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
         if (NULL == dset_info[i].dset->oloc.file)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
-        /* set metadata tagging with dset oheader addr */
+        /* Set metadata tagging with dset oheader addr */
         H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
         /* All filters in the DCPL must have encoding enabled. */
@@ -620,10 +617,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (dset_info[i].nelmts > 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no input buffer");
 
-            /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-             * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-             * doesn't support this feature.
-             */
+            /* If the buffer is nil, and 0 element is selected, make a fake buffer. */
             dset_info[i].buf.cvp = &fake_char;
         } /* end if */
 
@@ -633,19 +627,6 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (!(H5S_has_extent(dset_info[i].mem_space)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set");
 
-        /* H5S_select_shape_same() has been modified to accept topologically
-         * identical selections with different rank as having the same shape
-         * (if the most rapidly changing coordinates match up), but the I/O
-         * code still has difficulties with the notion.
-         *
-         * To solve this, we check to see if H5S_select_shape_same() returns
-         * true, and if the ranks of the mem and file spaces are different.
-         * If they are, construct a new mem space that is equivalent to the
-         * old mem space, and use that instead.
-         *
-         * Note that in general, this requires us to touch up the memory buffer
-         * as well.
-         */
         if (dset_info[i].nelmts > 0 &&
             true == H5S_SELECT_SHAPE_SAME(dset_info[i].mem_space, dset_info[i].file_space) &&
             H5S_GET_EXTENT_NDIMS(dset_info[i].mem_space) != H5S_GET_EXTENT_NDIMS(dset_info[i].file_space)) {
@@ -818,11 +799,11 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                                 "unable to allocate array of selected pieces");
         }
 
-        /* loop with serial & single-dset write IO path */
+        /* Loop with serial & single-dset write IO path */
         for (i = 0; i < count; i++) {
             assert(!dset_info[i].skip_io);
 
-            /* set metadata tagging with dset oheader addr */
+            /* Set metadata tagging with dset oheader addr */
             H5AC_tag(dset_info->dset->oloc.addr, &prev_tag);
 
             /* Invoke correct "high level" I/O routine */
@@ -936,7 +917,7 @@ H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dse
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* check args */
+    /* Check args */
     assert(count > 0);
     assert(dset_info);
     assert(dset_info[0].dset->oloc.file);
@@ -1057,7 +1038,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    /* Check args */
     assert(io_info);
     assert(dset_info);
 
@@ -1151,7 +1132,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_init_phase2
  *
- * Purpose:     Continue initializing type info for all datasets after
+ * Purpose:     Continues initializing type info for all datasets after
  *              calculating the max type size across all datasets, and
  *              before final determination of collective/independent in
  *              H5D__ioinfo_adjust().  Currently just checks to see if
@@ -1169,7 +1150,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    /* Check args */
     assert(io_info);
 
     /* If selection I/O mode is default (auto), enable it here if the VFD supports it (it will be turned off
@@ -1238,7 +1219,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__ioinfo_adjust
  *
- * Purpose:     Adjust operation's I/O info for any parallel I/O, also
+ * Purpose:     Adjusts operation's I/O info for any parallel I/O, also
  *              handle decision on selection I/O even in serial case
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1253,10 +1234,10 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    /* Check args */
     assert(io_info);
 
-    /* check the first dset, should exist either single or multi dset cases */
+    /* Check the first dset, should exist either single or multi dset cases */
     assert(io_info->dsets_info[0].dset);
     dset0 = io_info->dsets_info[0].dset;
     assert(dset0->oloc.file);
@@ -1317,7 +1298,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                     if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0)
                         break;
 
-                /* If the above loop didn't complete at least one dataset has a filter */
+                /* If the above loop didn't complete, at least one dataset has a filter */
                 if (i < io_info->count) {
                     int comm_size = 0;
 
@@ -1363,9 +1344,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_init_phase3
  *
- * Purpose:     Finish initializing type info for all datasets after
- *              calculating the max type size across all datasets.  And
- *              after final collective/independent determination in
+ * Purpose:     Finishes initializing type info for all datasets after
+ *              calculating the max type size across all datasets and
+ *              final collective/independent determination in
  *              H5D__ioinfo_adjust().
  *
  * Return:      Non-negative on success/Negative on failure
