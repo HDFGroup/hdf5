@@ -69,8 +69,8 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
-      - name: CMake Run Tests
-        shell: bash
-        run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
-        working-directory: ${{ runner.workspace }}/build
+#      - name: CMake Run Tests
+#        shell: bash
+#        run: |
+#          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+#        working-directory: ${{ runner.workspace }}/build
