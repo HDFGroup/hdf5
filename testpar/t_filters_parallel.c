@@ -9707,6 +9707,7 @@ int
 main(int argc, char **argv)
 {
     unsigned seed;
+    double   total_test_time  = 0.0;
     size_t   cur_filter_idx   = 0;
     size_t   num_filters      = 0;
     hid_t    file_id          = H5I_INVALID_HID;
@@ -9798,8 +9799,13 @@ main(int argc, char **argv)
 
     srand(seed);
 
-    if (MAINPROCESS)
-        printf("Using seed: %u\n\n", seed);
+    /* Print test settings */
+    if (MAINPROCESS) {
+        printf("Test Info:\n");
+        printf("  MPI size: %d\n", mpi_size);
+        printf("  Test express level: %d\n", test_express_level_g);
+        printf("  Using seed: %u\n\n", seed);
+    }
 
     num_filters = ARRAY_SIZE(filterIDs);
 
@@ -9884,6 +9890,8 @@ main(int argc, char **argv)
                         const char *alloc_time;
                         const char *mode;
                         unsigned    filter_config;
+                        double      start_time = 0.0;
+                        double      end_time   = 0.0;
                         char        group_name[512];
 
                         switch (sel_io_mode) {
@@ -9948,13 +9956,16 @@ main(int argc, char **argv)
                                 continue;
                         }
 
-                        if (MAINPROCESS)
+                        if (MAINPROCESS) {
                             printf("== Running tests in mode '%s' with filter '%s' using selection I/O mode "
                                    "'%s', '%s' and '%s' allocation time ==\n\n",
                                    test_mode_to_string(test_mode), filterNames[cur_filter_idx], sel_io_str,
                                    H5FD_MPIO_CHUNK_ONE_IO == chunk_opt ? "Linked-Chunk I/O"
                                                                        : "Multi-Chunk I/O",
                                    alloc_time);
+
+                            start_time = MPI_Wtime();
+                        }
 
                         /* Get the current filter's info */
                         VRFY((H5Zget_filter_info(cur_filter, &filter_config) >= 0),
@@ -10018,6 +10029,12 @@ main(int argc, char **argv)
 
                         if (MAINPROCESS)
                             puts("");
+
+                        if (MAINPROCESS) {
+                            end_time = MPI_Wtime();
+                            total_test_time += end_time - start_time;
+                            printf("Tests took %f seconds\n\n", end_time - start_time);
+                        }
                     }
                 }
             }
@@ -10041,7 +10058,7 @@ main(int argc, char **argv)
         goto exit;
 
     if (MAINPROCESS)
-        puts("All Parallel Filters tests passed\n");
+        printf("All Parallel Filters tests passed - total test time was %f seconds\n", total_test_time);
 
 exit:
     if (nerrors)
