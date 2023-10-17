@@ -401,8 +401,8 @@ compare_a_b_c_data(void *exp1_buf, void *exp2_buf, void *rbuf)
         if (s1_ptr->a != rbuf_ptr->a || s2_ptr->b != rbuf_ptr->b || s2_ptr->c != rbuf_ptr->c) {
             H5_FAILED();
             printf("    i=%d\n", i);
-            printf("    expect_buf:a=%ld, b=%ld, c=%ld\n", s1_ptr->a, s2_ptr->b, s2_ptr->c);
-            printf("    rbuf: a=%ld, b=%ld, c=%ld", rbuf_ptr->a, rbuf_ptr->b, rbuf_ptr->c);
+            printf("    expect_buf:a=%lld, b=%lld, c=%lld\n", s1_ptr->a, s2_ptr->b, s2_ptr->c);
+            printf("    rbuf: a=%lld, b=%lld, c=%lld", rbuf_ptr->a, rbuf_ptr->b, rbuf_ptr->c);
             goto error;
         }
     } /* end for */
