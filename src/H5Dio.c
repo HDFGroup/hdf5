@@ -639,7 +639,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
          *
          * Note that in general, this requires us to touch up the memory buffer as
          * well.
-         */        
+         */
         if (dset_info[i].nelmts > 0 &&
             true == H5S_SELECT_SHAPE_SAME(dset_info[i].mem_space, dset_info[i].file_space) &&
             H5S_GET_EXTENT_NDIMS(dset_info[i].mem_space) != H5S_GET_EXTENT_NDIMS(dset_info[i].file_space)) {
