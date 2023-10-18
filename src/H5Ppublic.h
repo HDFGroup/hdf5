@@ -4928,12 +4928,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will create objects with the latest format
  *                  versions available to library release 1.8.x.
  *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  For example, if a
- *                  newer format version is required to support a feature e.g.
- *                  virtual dataset, this setting will allow the object to be
- *                  created.
+ *                  format versions available to library release 1.10.x.  Note
+ *                  that 1.10.11 is the last release of the 1.10 series.
  *              \li API calls that create objects or features that are
  *                  available to versions of the library greater than 1.10.x
  *                  release will fail.
@@ -4992,7 +4988,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will create objects with the latest format
  *                  versions available to library release 1.10.x.
  *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.10.x.
+ *                  format versions available to library release 1.10.x.  Note
+ *                  that 1.10.11 is the last release of the 1.10 series.
  *              \li The objects written with this setting may be
  *                  accessible to a smaller range of library versions than
  *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
