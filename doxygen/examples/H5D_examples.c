@@ -10,7 +10,7 @@ int
 chunk_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *op_data)
 {
     // only print the allocated chunk size only
-    printf("%ld\n", size);
+    printf("%" PRIuHSIZE "\n", size);
     return EXIT_SUCCESS;
 }
 //! <!-- [H5Dchunk_iter_cb] -->
