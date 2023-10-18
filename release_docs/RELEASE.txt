@@ -73,6 +73,7 @@ New Features
       Removed HDF options for using FETCH_CONTENT explicitly:
           BUILD_SZIP_WITH_FETCHCONTENT:BOOL
           BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+
     - Thread-safety + static library disabled on Windows w/ CMake
 
       The thread-safety feature requires hooks in DllMain(), which is only
@@ -286,7 +287,6 @@ New Features
 
     Fortran Library:
     ----------------
-
     - Fixed an uninitialized error return value for hdferr
       to return the error state of the h5aopen_by_idx_f API.
 
@@ -831,6 +831,7 @@ Bug Fixes since HDF5-1.14.0 release
     -----------
     -
 
+
     High-Level Library
     ------------------
     -
@@ -1007,14 +1008,12 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
                                     Visual Studio 2022 w/ clang 15.0.1
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
