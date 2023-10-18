@@ -4680,7 +4680,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
+    TYPE(C_PTR)                 :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
 
     hdferr = INT(H5Pget_fill_value(prp_id, type_id, fillvalue))
