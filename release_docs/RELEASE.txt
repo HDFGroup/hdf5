@@ -47,11 +47,11 @@ New Features
 
     Configuration:
     -------------
-    - Added new options for CMake and autotools to control the Doxygen
+    - Added new options for CMake and Autotools to control the Doxygen
       warnings as errors setting.
 
         * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
-        * doxygen-errors: enable/disable (Default: enable)
+        * --enable-doxygen-errors: enable/disable (Default: enable)
 
       The default will fail compile if the doxygen parsing generates warnings.
       The option can be disabled if certain versions of doxygen have parsing
