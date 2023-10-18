@@ -49,6 +49,22 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_LOADED)
   endif ()
 endif ()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC" AND CMAKE_CXX_COMPILER_LOADED)
+  if (NOT DEFINED CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION)
+    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 11)
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C11_STANDARD_COMPILE_OPTION}")
+    endif ()
+  endif ()
+  if (NOT ${HDF_CFG_NAME} MATCHES "Debug" AND NOT ${HDF_CFG_NAME} MATCHES "Developer")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minform=warn")
+    if (NOT ${HDF_CFG_NAME} MATCHES "RelWithDebInfo")
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s")
+    endif ()
+  else ()
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Mbounds -gopt -g")
+  endif ()
+endif ()
+
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
   set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS}")
   if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
@@ -97,7 +113,7 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# HDF5 library compile options
+# HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")

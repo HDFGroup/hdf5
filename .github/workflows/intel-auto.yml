@@ -13,14 +13,16 @@ permissions:
 
 jobs:
   Intel_build_and_test:
-    name: "Intel ${{ inputs.build_mode }} -Werror (build only)"
+    name: "Intel ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Dependencies
-        run:  |
+        run: |
           sudo apt-get update
           sudo apt-get install autoconf automake libtool libtool-bin libaec-dev
+
       - name: Add oneAPI to apt
         shell: bash
         run: |
@@ -39,9 +41,9 @@ jobs:
           sudo apt install -y intel-oneapi-mpi-devel
           sudo apt-get install doxygen graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           echo "CC=icx" >> $GITHUB_ENV
-           echo "CXX=icpx" >> $GITHUB_ENV
-           echo "FC=ifx" >> $GITHUB_ENV
+          echo "CC=icx" >> $GITHUB_ENV
+          echo "CXX=icpx" >> $GITHUB_ENV
+          echo "FC=ifx" >> $GITHUB_ENV
 
       - name: Install oneAPI MKL library
         shell: bash
