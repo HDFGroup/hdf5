@@ -859,6 +859,7 @@ HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                  
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                        OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                                OFF
 HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF
+HDF5_ENABLE_DOXY_WARNINGS      "Enable fail if doxygen parsing has warnings."       ON
 
 ---------------- HDF5 Advanced Test Options ---------------------
 if (BUILD_TESTING)
