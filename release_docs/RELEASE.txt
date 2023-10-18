@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Added new options for CMake and autotools to control the Doxygen
+      warnings as errors setting.
+
+        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
+        * doxygen-errors: enable/disable (Default: enable)
+
+      The default will fail compile if the doxygen parsing generates warnings.
+      The option can be disabled if certain versions of doxygen have parsing
+      issues. i.e. 1.9.5, 1.9.8.
+
+      Addresses GitHub issue #3398
+
     - Added support for AOCC and classic Flang w/ the Autotools
 
       * Adds a config/clang-fflags options file to support Flang

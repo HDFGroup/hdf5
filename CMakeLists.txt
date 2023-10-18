@@ -938,6 +938,13 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 # check if Doxygen is installed
   find_package(Doxygen)
   if (DOXYGEN_FOUND)
+    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." ON)
+    mark_as_advanced (HDF5_USE_FOLDERS)
+    if (HDF5_ENABLE_DOXY_WARNINGS)
+      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS")
+    else ()
+      set (HDF5_DOXY_WARNINGS "NO")
+    endif ()
     message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
     add_subdirectory (doxygen)
   else ()

@@ -1207,6 +1207,24 @@ AC_ARG_ENABLE([doxygen],
 
 AC_MSG_RESULT([$HDF5_DOXYGEN])
 
+## Check if they would like to enable doxygen warnings as errors
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_DOXY_WARNINGS])
+
+## Default is to not build DOXYGEN
+HDF5_DOXY_WARNINGS=no
+
+AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
+
+AC_ARG_ENABLE([doxygen-errors],
+              [AS_HELP_STRING([--enable-doxygen-errors],
+                              [Error on HDF5 doxygen warnings [default=yes]])],
+              [HDF5_DOXY_WARNINGS=$enableval])
+
+AC_MSG_RESULT([$HDF5_DOXY_WARNINGS])
+
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DX_DOXYGEN_FEATURE(ON)
   DX_DOT_FEATURE(OFF)
@@ -1269,6 +1287,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
   DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD H5_HAVE_MIRROR_VFD'
+  DOXYGEN_WARN_AS_ERROR=${HDF5_DOXY_WARNINGS}
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 fi
