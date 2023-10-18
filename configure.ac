@@ -1220,9 +1220,15 @@ AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
 
 AC_ARG_ENABLE([doxygen-errors],
               [AS_HELP_STRING([--enable-doxygen-errors],
-                              [Error on HDF5 doxygen warnings [default=yes]])],
-              [HDF5_DOXY_WARNINGS=$enableval])
+                               [default=yes]])],
+              [DOXY_ERR=$enableval], [DOXY_ERR=yes])
 
+if test "X$DOXY_ERR" = "Xyes"; then
+    HDF5_DOXY_WARNINGS="FAIL_ON_WARNINGS"
+else
+    HDF5_DOXY_WARNINGS="NO"
+
+fi
 AC_MSG_RESULT([$HDF5_DOXY_WARNINGS])
 
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
