@@ -47,6 +47,20 @@ New Features
 
     Configuration:
     -------------
+    - Added support for AOCC and classic Flang w/ the Autotools
+
+      * Adds a config/clang-fflags options file to support Flang
+      * Corrects missing "-Wl," from linker options in the libtool wrappers
+        when using Flang, the MPI Fortran compiler wrappers, and building
+        the shared library. This would often result in unrecognized options
+        like -soname.
+      * Enable -nomp w/ Flang to avoid linking to the OpenMPI library.
+
+      CMake can build the parallel, shared library w/ Fortran using AOCC
+      and Flang, so no changes were needed for that build system.
+
+      Fixes GitHub issues #3439, #1588, #366, #280
+
     - Converted the build of libaec and zlib to use FETCH_CONTENT with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
@@ -348,6 +362,11 @@ Bug Fixes since HDF5-1.14.2 release
       skip running the atomicity tests if the major version of OpenMPI is
       < 5.
 
+    - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+      Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+      with -fdefault-real-16. Fixes GH #2928.
+
 
 Platforms Tested
 ===================
@@ -477,6 +496,12 @@ Platforms Tested
 
 Known Problems
 ==============
+
+    IEEE standard arithmetic enables software to raise exceptions such as overflow,
+    division by zero, and other illegal operations without interrupting or halting
+    the program flow. The HDF5 C library intentionally performs these exceptions.
+    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
+    to avoid stopping on an exception.
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces

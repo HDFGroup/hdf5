@@ -1186,7 +1186,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     UNUSED(clss);
 
     if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL: write buffer is NULL");
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer is NULL");
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
