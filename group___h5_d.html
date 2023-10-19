@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.b166368</span>
+   &#160;<span id="projectnumber">1.15.0.c4a146e</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -479,10 +479,11 @@ Functions</h2></td></tr>
 <div class="line">chunk_cb(<span class="keyword">const</span> <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *offset, <span class="keywordtype">unsigned</span> filter_mask, <a class="code" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addr, <a class="code" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size, <span class="keywordtype">void</span> *op_data)</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// only print the allocated chunk size only</span></div>
-<div class="line">    printf(<span class="stringliteral">&quot;%ld\n&quot;</span>, size);</div>
+<div class="line">    printf(<span class="stringliteral">&quot;%&quot;</span> <a class="code" href="_h5public_8h.html#af2a07cc002d935ff50b0045b439c5e84">PRIuHSIZE</a> <span class="stringliteral">&quot;\n&quot;</span>, size);</div>
 <div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
 <div class="line">}</div>
 <div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:325</div></div>
+<div class="ttc" id="a_h5public_8h_html_af2a07cc002d935ff50b0045b439c5e84"><div class="ttname"><a href="_h5public_8h.html#af2a07cc002d935ff50b0045b439c5e84">PRIuHSIZE</a></div><div class="ttdeci">#define PRIuHSIZE</div><div class="ttdef"><b>Definition:</b> H5public.h:313</div></div>
 </div><!-- fragment -->Iterate over all chunked datasets and chunks in a file. <div class="fragment"><div class="line"><a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div>
 <div class="line">H5Ovisit_cb(<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keyword">const</span> <a class="code" href="struct_h5_o__info2__t.html">H5O_info2_t</a> *info, <span class="keywordtype">void</span> *op_data)</div>
 <div class="line">{</div>

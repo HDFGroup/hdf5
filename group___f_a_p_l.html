@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.b166368</span>
+   &#160;<span id="projectnumber">1.15.0.c4a146e</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -219,7 +219,7 @@ $(document).ready(function(){initNavTree('group___f_a_p_l.html',''); initResizab
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#gaad28d8c24f236590193215c5ae7a8f18" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3</a>/<a class="el" href="group___f_a_p_l.html#ga13e273711e160cbd58e60c701b4f50e6" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3</a> </td><td>Modifies/queries the file driver properties of the ros3 driver.  </td></tr>
 <tr>
-<td><a class="el" href="_h5_f_dsec2_8h.html#af581bceca36ad4eef3cd45b16eabbb20">H5Pset_fapl_sec2</a> </td><td>Sets driver for unbuffered permanent files or retrieves information regarding driver.  </td></tr>
+<td><a class="el" href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20" title="Modifies the file access property list to use the H5FD_SEC2 driver.">H5Pset_fapl_sec2</a> </td><td>Sets driver for unbuffered permanent files or retrieves information regarding driver.  </td></tr>
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed" title="Emulates the old split file driver.">H5Pset_fapl_split</a> </td><td>Sets driver for split files, a limited case of multi driver with one metadata file and one raw data file.  </td></tr>
 <tr>
@@ -312,6 +312,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga42bc76c556951027e30c4d26394323c6"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga42bc76c556951027e30c4d26394323c6">H5Pset_fapl_ros3_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *token)</td></tr>
 <tr class="memdesc:ga42bc76c556951027e30c4d26394323c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver by adding the specified session/security token.  <a href="group___f_a_p_l.html#ga42bc76c556951027e30c4d26394323c6">More...</a><br /></td></tr>
 <tr class="separator:ga42bc76c556951027e30c4d26394323c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf581bceca36ad4eef3cd45b16eabbb20"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20">H5Pset_fapl_sec2</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</td></tr>
+<tr class="memdesc:gaf581bceca36ad4eef3cd45b16eabbb20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> driver.  <a href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20">More...</a><br /></td></tr>
+<tr class="separator:gaf581bceca36ad4eef3cd45b16eabbb20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga49f386ea235bb48128e54c962c499f07"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">H5Pset_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
 <tr class="separator:ga49f386ea235bb48128e54c962c499f07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac">H5Pget_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
@@ -756,7 +759,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <tr>
 <th>Driver Name </th><th>Driver Identifier </th><th>Description </th><th>Related API  </th></tr>
 <tr>
-<td>POSIX </td><td><a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> </td><td>This driver uses POSIX file-system functions like read and write to perform I/O to a single, permanent file on local disk with no system buffering. This driver is POSIX-compliant and is the default file driver for all systems. </td><td><a class="el" href="_h5_f_dsec2_8h.html#af581bceca36ad4eef3cd45b16eabbb20">H5Pset_fapl_sec2</a>  </td></tr>
+<td>POSIX </td><td><a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> </td><td>This driver uses POSIX file-system functions like read and write to perform I/O to a single, permanent file on local disk with no system buffering. This driver is POSIX-compliant and is the default file driver for all systems. </td><td><a class="el" href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20" title="Modifies the file access property list to use the H5FD_SEC2 driver.">H5Pset_fapl_sec2</a>  </td></tr>
 <tr>
 <td>Memory </td><td><a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> </td><td>With this driver, an application can work with a file in memory for faster reads and writes. File contents are kept in memory until the file is closed. At closing, the memory version of the file can be written back to disk or abandoned. </td><td><a class="el" href="group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849" title="Modifies the file access property list to use the H5FD_CORE driver.">H5Pset_fapl_core</a>  </td></tr>
 <tr>
@@ -1285,8 +1288,8 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">comm</td><td>MPI-2 communicator </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">info</td><td>MPI-2 info object </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">comm</td><td>MPI communicator </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">info</td><td>MPI info object </td></tr>
   </table>
   </dd>
 </dl>
@@ -3800,16 +3803,16 @@ Flavor of allocation   </td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">comm</td><td>MPI-2 communicator </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">info</td><td>MPI-2 info object </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">comm</td><td>MPI communicator </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">info</td><td>MPI info object </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio()</a> stores the user-supplied MPI IO parameters <code>comm</code>, for communicator, and <code>info</code>, for information, in the file access property list <code>fapl_id</code>. That property list can then be used to create and/or open a file.</p>
 <p><a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio()</a> is available only in the parallel HDF5 library and is not a collective function.</p>
-<p><code>comm</code> is the MPI communicator to be used for file open, as defined in <code>MPI_File_open</code> of MPI-2. This function makes a duplicate of the communicator, so modifications to <code>comm</code> after this function call returns have no effect on the file access property list.</p>
-<p><code>info</code> is the MPI Info object to be used for file open, as defined in MPI_File_open() of MPI-2. This function makes a duplicate copy of the Info object, so modifications to the Info object after this function call returns will have no effect on the file access property list.</p>
+<p><code>comm</code> is the MPI communicator to be used for file open, as defined in <code>MPI_File_open</code> of MPI. This function makes a duplicate of the communicator, so modifications to <code>comm</code> after this function call returns have no effect on the file access property list.</p>
+<p><code>info</code> is the MPI Info object to be used for file open, as defined in MPI_File_open() of MPI. This function makes a duplicate copy of the Info object, so modifications to the Info object after this function call returns will have no effect on the file access property list.</p>
 <p>If the file access property list already contains previously-set communicator and Info values, those values will be replaced and the old communicator and Info object will be freed.</p>
 <dl class="section note"><dt>Note</dt><dd>Raw dataset chunk caching is not currently supported when using this file driver in read/write mode. All calls to <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread()</a> and <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite()</a> will access the disk directly, and <a class="el" href="group___f_a_p_l.html#ga034a5fc54d9b05296555544d8dd9fe89" title="Sets the raw data chunk cache parameters.">H5Pset_cache()</a> and <a class="el" href="group___d_a_p_l.html#ga104d00442c31714ee073dee518f661f1" title="Sets the raw data chunk cache parameters.">H5Pset_chunk_cache()</a> will have no effect on performance.<br  />
  Raw dataset chunk caching is supported when this driver is used in read-only mode.</dd></dl>
@@ -4068,6 +4071,35 @@ Flavor of allocation   </td></tr>
 <p><a class="el" href="group___f_a_p_l.html#ga42bc76c556951027e30c4d26394323c6" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver by adding the specified ...">H5Pset_fapl_ros3_token()</a> modifies an existing File Access Property List which is used by <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver by adding or updating the session/security token of the property list. Be aware, to set the token first you need to create a proper File Access Property List using H5Pset_fapl_ros() and use this list as input argument of the function <a class="el" href="group___f_a_p_l.html#ga42bc76c556951027e30c4d26394323c6" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver by adding the specified ...">H5Pset_fapl_ros3_token()</a>.</p>
 <p>Note, the session token is only needed when you want to access a S3 bucket using temporary security credentials.</p>
 <dl class="section since"><dt>Since</dt><dd>1.14.2 </dd></dl>
+
+</div>
+</div>
+<a id="gaf581bceca36ad4eef3cd45b16eabbb20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf581bceca36ad4eef3cd45b16eabbb20">&#9670;&nbsp;</a></span>H5Pset_fapl_sec2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pset_fapl_sec2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
+          <td class="paramname"><em>fapl_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Modifies the file access property list to use the <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> driver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20" title="Modifies the file access property list to use the H5FD_SEC2 driver.">H5Pset_fapl_sec2()</a> modifies the file access property list to use the <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> driver.</p>
+<dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
 </div>
