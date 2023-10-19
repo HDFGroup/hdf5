@@ -14,6 +14,8 @@
 # Tests for the h5diff tool
 #
 
+srcdir=@srcdir@
+
 TESTNAME=h5diff
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -44,10 +46,10 @@ mydomainname=`domainname 2>/dev/null`
 # --------------------------------------------------------------------
 
 # Where the tool's HDF5 input files are located
-TESTFILES_HDF5_DIR="./testfiles/hdf5"
+TESTFILES_HDF5_DIR="../../../tools/test/h5diff/testfiles"
 
 # Where the tool's expected output files are located
-H5DIFF_TESTFILES_OUT_DIR="./testfiles/expected/h5diff"
+H5DIFF_TESTFILES_OUT_DIR="../../../tools/test/h5diff/expected"
 
 ######################################################################
 # Output files
@@ -345,7 +347,7 @@ while [ $# -gt 0 ]; do
     -p)    # reset the tool name and bin to run ph5diff tests
     TESTNAME=ph5diff
     H5DIFF=ph5diff  # The tool name
-    pmode=yes
+        pmode=yes
     shift
     ;;
     -h) # print help page
@@ -391,7 +393,7 @@ REPACK_HDF5_FILES()
         # Repack the file
         $H5REPACK --src-vol-name=native --enable-error-stack $inpath $outpath
         if [ $? -ne 0 ]; then
-            echo "Error: FAILED to repack HDF5 file: $inpath ."
+    echo "Error: FAILED to repack HDF5 file: $inpath ."
         fi
     done
 }
@@ -483,7 +485,7 @@ RUNTEST() {
     # don't add exit code check in pmode, as it causes failure. (exit code
     # is from mpirun not tool)
     # if any problem occurs relate to an exit code, it will be caught in
-    # serial mode, so the test is fullfilled.
+    # serial mode, so the test is fulfilled.
     if test $h5haveexitcode = 'yes' -a -z "$pmode"; then
       echo "EXIT CODE: $EXIT_CODE" >> $actual
     fi
@@ -513,22 +515,22 @@ RUNTEST() {
         # is done by serial mode.
         grep -v "EXIT CODE:" $expect_sorted > $expect_sorted.noexit
         mv $expect_sorted.noexit $expect_sorted
-    if $CMP $expect_sorted $actual_sorted; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-        if test yes = "$verbose"; then
-        echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
-        $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
-        echo "====The actual output ($actual_sav)"
-        sed 's/^/    /' < $actual_sav
-        echo "====The actual stderr ($actual_err_sav)"
-        sed 's/^/    /' < $actual_err_sav
-        echo "====End of actual stderr ($actual_err_sav)"
-        echo ""
+        if $CMP $expect_sorted $actual_sorted; then
+            echo " PASSED"
+        else
+            echo "*FAILED*"
+            nerrors="`expr $nerrors + 1`"
+            if test yes = "$verbose"; then
+            echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
+            $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
+            echo "====The actual output ($actual_sav)"
+            sed 's/^/    /' < $actual_sav
+            echo "====The actual stderr ($actual_err_sav)"
+            sed 's/^/    /' < $actual_err_sav
+            echo "====End of actual stderr ($actual_err_sav)"
+            echo ""
+            fi
         fi
-    fi
     fi
 }
 
@@ -885,7 +887,7 @@ RUNTEST h5diff_206.txt -c $REPACK_OUTPUT_DIR/h5diff_basic2.h5 $REPACK_OUTPUT_DIR
 #RUNTEST h5diff_208.txt -c $REPACK_OUTPUT_DIR/h5diff_dset_zero_dim_size1.h5 $REPACK_OUTPUT_DIR/h5diff_dset_zero_dim_size2.h5
 
 # non-comparable dataset with comparable attribute, and other comparable datasets.
-# Also test non-compatible attributes with different type, dimention, rank.
+# Also test non-compatible attributes with different type, dimension, rank.
 # All the comparables should display differences.
 RUNTEST h5diff_220.txt -c $REPACK_OUTPUT_DIR/non_comparables1.h5 $REPACK_OUTPUT_DIR/non_comparables2.h5 /g1
 
@@ -1048,7 +1050,7 @@ RUNTEST h5diff_224.txt -c $REPACK_OUTPUT_DIR/non_comparables2.h5 $REPACK_OUTPUT_
 #RUNTEST h5diff_475.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link1
 
 # ##############################################################################
-# # test for group diff recursivly
+# # test for group diff recursively
 # ##############################################################################
 # root
 #RUNTEST h5diff_500.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /
