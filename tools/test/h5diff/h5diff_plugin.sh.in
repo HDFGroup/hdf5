@@ -47,7 +47,7 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 SRC_H5DIFF_OUTFILES="$SRC_TOOLS/test/h5diff/expected"
 
-TESTDIR=./testplug
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################

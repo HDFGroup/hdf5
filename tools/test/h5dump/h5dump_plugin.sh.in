@@ -48,7 +48,7 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS/test/h5dump/testfiles"
 SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
 
-TESTDIR=./testplug
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################

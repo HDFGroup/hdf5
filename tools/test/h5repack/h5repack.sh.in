@@ -68,7 +68,7 @@ SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5REPACK_OUTFILES="$SRC_TOOLS/test/h5repack/expected"
 
-TESTDIR=./testpack
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################

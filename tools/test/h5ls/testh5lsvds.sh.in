@@ -51,7 +51,7 @@ SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5LS_OUTFILES="$SRC_TOOLS/test/h5ls/expected"
 
 TEST_P_DIR=./testfiles
-TESTDIR=./testfiles/vds
+TESTDIR=./tmp
 test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir $TESTDIR
 
