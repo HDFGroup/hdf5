@@ -3407,8 +3407,6 @@ SUBROUTINE multiple_dset_rw(total_error)
 !         Failure:      number of errors
 !-------------------------------------------------------------------------
 !
-  USE iso_c_binding
-  USE hdf5
   IMPLICIT NONE
   
   INTEGER, INTENT(INOUT) :: total_error   ! number of errors
