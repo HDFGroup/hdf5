@@ -439,7 +439,6 @@ END SUBROUTINE test_genprop_class_callback
 
 SUBROUTINE test_h5p_file_image(total_error)
 
-  USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) ::   fapl_1 = -1
@@ -653,7 +652,6 @@ END SUBROUTINE external_test_offset
 !
 SUBROUTINE test_vds(total_error)
 
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
