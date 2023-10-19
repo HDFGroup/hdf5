@@ -54,12 +54,12 @@ int curr_nerrors = 0;
  */
 typedef enum {
 <<<<<<< HEAD
-    TEST_NO_TYPE_CONV,           /* no type conversion (null case) */
-    TEST_NO_SIZE_CHANGE_NO_BKG,  /* no size change, no bkg buffer */
-    TEST_LARGER_MEM_NO_BKG,      /* larger memory type, no bkg buffer */
-    TEST_SMALLER_MEM_NO_BKG,     /* smaller memory type, no bkg buffer */
-    TEST_CMPD_WITH_BKG,          /* compound types with bkg buffer */
-    TEST_TYPE_CONV_SEL_EMPTY,    /* some processes have null/empty selections and with type conversion */
+    TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
+    TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
+    TEST_LARGER_MEM_NO_BKG,     /* larger memory type, no bkg buffer */
+    TEST_SMALLER_MEM_NO_BKG,    /* smaller memory type, no bkg buffer */
+    TEST_CMPD_WITH_BKG,         /* compound types with bkg buffer */
+    TEST_TYPE_CONV_SEL_EMPTY,   /* some processes have null/empty selections and with type conversion */
 =======
     TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
     TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
@@ -80,9 +80,9 @@ typedef enum {
 #define DSET_SELECT_DIM       100
 #define DSET_SELECT_CHUNK_DIM 10
 
-#define MULTI_NUM_DSETS 3
-#define MULTI_MIN_DSETS 3
-#define DSET_NAME_LEN   64
+#define MULTI_NUM_DSETS                        3
+#define MULTI_MIN_DSETS                        3
+#define DSET_NAME_LEN                          64
 
 /* Compound type */
 typedef struct s1_t {
@@ -128,8 +128,8 @@ typedef enum {
 } multi_dset_type_t;
 
 /* Test setting A and B */
-#define SETTING_A 1
-#define SETTING_B 2
+#define SETTING_A                              1
+#define SETTING_B                              2
 
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
 #define TEST_DISABLE_BY_API                    0x001
@@ -139,9 +139,9 @@ typedef enum {
 #define TEST_IN_PLACE_TCONV                    0x010
 
 /* Definitions used by test_bug_optimized_bufs() and test_bug_api_library() */
-#define DIMS         10000
-#define BIG_X_FACTOR 1048576
-#define BIG_Y_FACTOR 32
+#define DIMS                                   10000
+#define BIG_X_FACTOR                           1048576
+#define BIG_Y_FACTOR                           32
 
 /*
  * Helper routine to set dxpl
