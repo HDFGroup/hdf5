@@ -339,7 +339,7 @@ PROGRAM subfiling_test
 
      CALL EXECUTE_COMMAND_LINE("stat --format='%i' "//filename//" >> tmp_inode", EXITSTAT=i)
      IF(i.ne.0)THEN
-        WRITE(*,"(A,A)") "Failed to stat the stub  subfile ",TRIM(filename)
+        WRITE(*,"(A,A)") "Failed to stat the stub subfile ",TRIM(filename)
         nerrors = nerrors + 1
      ENDIF
 
