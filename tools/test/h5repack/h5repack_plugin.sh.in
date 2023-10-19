@@ -49,7 +49,7 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
 SRC_H5REPACK_OUTFILES="$SRC_TOOLS/test/h5repack/expected"
 
-TESTDIR=./tmp
+TESTDIR=./tmppl
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
