@@ -54,6 +54,7 @@ PROGRAM subfiling_test
   INTEGER(HID_T) :: driver_id
 
   CHARACTER(len=8) :: hex1, hex2
+  CHARACTER(len=1) :: arg
 
   !
   ! initialize MPI
@@ -336,10 +337,14 @@ PROGRAM subfiling_test
         WRITE(*,"(A,A)") "Failed to find the stub subfile ",TRIM(filename)
         nerrors = nerrors + 1
      ENDIF
-
-     CALL EXECUTE_COMMAND_LINE("stat --format='%i' "//filename//" >> tmp_inode", EXITSTAT=i)
+#if __APPLE__
+     arg(1:1)="f"
+#else
+     arg(1:1)="c"
+#endif
+     CALL EXECUTE_COMMAND_LINE("stat -"//arg(1:1)//" %i "//filename//" >> tmp_inode", EXITSTAT=i)
      IF(i.ne.0)THEN
-        WRITE(*,"(A,A)") "Failed to stat the stub  subfile ",TRIM(filename)
+        WRITE(*,"(A,A)") "Failed to stat the stub subfile ",TRIM(filename)
         nerrors = nerrors + 1
      ENDIF
 
