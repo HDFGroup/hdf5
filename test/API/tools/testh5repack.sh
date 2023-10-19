@@ -14,6 +14,8 @@
 # Tests for the h5repack tool
 
 # Assume the HDF5 library was built with gzip support
+srcdir=@srcdir@
+
 USE_FILTER_DEFLATE="no"
 
 TESTNAME=h5repack
@@ -24,7 +26,6 @@ H5DELETE='h5delete -f'      # The h5delete tool name
 H5REPACK=h5repack           # The h5repack tool name
 H5DIFF=h5diff               # The h5diff tool name
 H5DUMP=h5dump               # The h5dump tool name
-
 
 RM='rm -rf'
 CMP='cmp'
@@ -43,10 +44,10 @@ verbose=yes
 # --------------------------------------------------------------------
 
 # Where the tool's HDF5 input files are located
-TESTFILES_HDF5_DIR="./testfiles/hdf5"
+TESTFILES_HDF5_DIR="../../../tools/h5repack/testfiles"
 
 # Where the tool's expected output files are located
-H5REPACK_TESTFILES_OUT_DIR="./testfiles/expected/h5repack"
+H5REPACK_TESTFILES_OUT_DIR="../../../tools/h5repack/testfiles/expected"
 
 ######################################################################
 # Output files
@@ -171,9 +172,9 @@ COPY_EXPECTED_OUTPUT_FILES()
         filepath="$H5REPACK_TESTFILES_OUT_DIR/$outfile"
 
         # Use -f to make sure get a new copy
-        $CP -f $filepath $TEXT_OUTPUT_DIR
-        if [ $? -ne 0 ]; then
-            echo "Error: FAILED to copy expected output file: $filepath ."
+    $CP -f $filepath $TEXT_OUTPUT_DIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy expected output file: $filepath ."
         fi
     done
 }
@@ -205,7 +206,7 @@ CLEAN_OUTPUT()
         # The re-repacked directory should only contain native HDF5
         # files and can be deleted normally.
         $RM $REPACK_FROM_VOL_DIR
-   fi
+    fi
 }
 
 # Print a $* message left justified in a field of 70 characters
@@ -345,7 +346,7 @@ VERIFY_LAYOUT_DSET()
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
-        DIFF_HDF5 "1_NATIVE" $inpath $outpath
+DIFF_HDF5 "1_NATIVE" $inpath $outpath
     fi
 
     #---------------------------------
@@ -356,11 +357,11 @@ VERIFY_LAYOUT_DSET()
     )
     $GREP $expectlayout $layoutpath > /dev/null
     if [ $? -eq 0 ]; then
-        echo " PASSED"
+     echo " PASSED"
     else
-        echo " FAILED"
-        nerrors="`expr $nerrors + 1`"
-    fi
+     echo " FAILED"
+     nerrors="`expr $nerrors + 1`"
+     fi
 }
 
 #----------------------------------------
@@ -398,7 +399,7 @@ VERIFY_LAYOUT_ALL()
     # check if the other layouts still exist
     VERIFY  "layouts"
     (
-        echo
+                echo
         # if CONTIGUOUS
         if [ $expectlayout = "CONTIGUOUS" ]; then
             TESTING $H5DUMP -pH $outpath
@@ -474,21 +475,21 @@ RUNTEST_HELP() {
     # Run test.
     TESTING $H5REPACK $@
     (
-      $RUNSERIAL $H5REPACK "$@"
-    ) >$actual 2>$actual_err
-
+        $RUNSERIAL $H5REPACK "$@"
+        ) >$actual 2>$actual_err
+    
     if [ ! -f $expectdata ]; then
-        # Create the expect data file if it doesn't yet exist.
-        echo " CREATED"
-        cp $actual $expect-CREATED
-        echo "    Expected output (*.txt) missing"
-        nerrors="`expr $nerrors + 1`"
+    # Create the expect data file if it doesn't yet exist.
+      echo " CREATED"
+      cp $actual $expect-CREATED
+      echo "    Expected output (*.txt) missing"
+      nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
-        echo " PASSED"
+      echo " PASSED"
     else
-        echo "*FAILED*"
-        echo "    Expected output (*.txt) differs from actual output (*.out)"
-        nerrors="`expr $nerrors + 1`"
+      echo "*FAILED*"
+      echo "    Expected output (*.txt) differs from actual output (*.out)"
+      nerrors="`expr $nerrors + 1`"
     fi
 }
 
@@ -601,4 +602,5 @@ else
     echo "$TESTNAME tests failed with $nerrors errors."
     exit $EXIT_FAILURE
 fi
+
 

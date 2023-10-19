@@ -13,6 +13,8 @@
 #
 # Tests for the h5copy tool
 
+srcdir=@srcdir@
+
 TESTNAME=h5copy
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -40,10 +42,10 @@ h5haveexitcode=yes        # default is yes
 # --------------------------------------------------------------------
 
 # Where the tool's HDF5 input files are located
-TESTFILES_HDF5_DIR="./testfiles/hdf5"
+TESTFILES_HDF5_DIR="../../../tools/h5copy/testfiles"
 
 # Where the tool's expected output files are located
-H5COPY_TESTFILES_OUT_DIR="./testfiles/expected/h5copy"
+H5COPY_TESTFILES_OUT_DIR="../../../tools/h5copy/expected"
 
 ######################################################################
 # Output files
@@ -128,8 +130,8 @@ COPY_EXPECTED_OUTPUT_FILES()
 
         # Use -f to make sure get a new copy
         $CP -f $filepath $TEXT_OUTPUT_DIR
-        if [ $? -ne 0 ]; then
-            echo "Error: FAILED to copy expected output file: $filepath ."
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy expected output file: $filepath ."
         fi
     done
 }
@@ -536,39 +538,39 @@ TESTFILE="$REPACK_OUTPUT_DIR/h5copytst.h5"
 # Copy single datasets of various forms from one group to another,
 #       adding object copied to the destination file each time
 
-echo "Test copying various forms of datasets"
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/simple.out.h5 -v -s simple     -d simple
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/chunk.out.h5 -v -s chunk      -d chunk
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/compact.out.h5 -v -s compact    -d compact
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/compound.out.h5 -v -s compound   -d compound
+    echo "Test copying various forms of datasets"
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/simple.out.h5 -v -s simple     -d simple
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/chunk.out.h5 -v -s chunk      -d chunk
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/compact.out.h5 -v -s compact    -d compact
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/compound.out.h5 -v -s compound   -d compound
 TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/named_vl.out.h5 -v -s named_vl   -d named_vl
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/nested_vl.out.h5 -v -s nested_vl  -d nested_vl
-#TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/dset_attr.out.h5 -v -s /dset_attr  -d /dset_attr
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/nested_vl.out.h5 -v -s nested_vl  -d nested_vl
+    #TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/dset_attr.out.h5 -v -s /dset_attr  -d /dset_attr
 
-echo "Test copying dataset within group in source file to root of destination"
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/simple_top.out.h5 -v -s grp_dsets/simple  -d simple_top
+    echo "Test copying dataset within group in source file to root of destination"
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/simple_top.out.h5 -v -s grp_dsets/simple  -d simple_top
 
-echo "Test copying & renaming dataset"
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/dsrename.out.h5 -v -s compound   -d rename
+    echo "Test copying & renaming dataset"
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/dsrename.out.h5 -v -s compound   -d rename
 
-echo "Test copying empty, 'full' & 'nested' groups"
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/grp_empty.out.h5 -v -s grp_empty  -d grp_empty
+    echo "Test copying empty, 'full' & 'nested' groups"
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/grp_empty.out.h5 -v -s grp_empty  -d grp_empty
 #TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/grp_attr.out.h5 -v -s grp_attr -d grp_attr
 
-#echo "Test copying dataset within group in source file to group in destination"
-#TOOLTEST_PREFILL -i $TESTFILE -o $HDF5_OUTPUT_DIR/simple_group.out.h5 grp_dsets grp_dsets /grp_dsets/simple /grp_dsets/simple_group
+    #echo "Test copying dataset within group in source file to group in destination"
+    #TOOLTEST_PREFILL -i $TESTFILE -o $HDF5_OUTPUT_DIR/simple_group.out.h5 grp_dsets grp_dsets /grp_dsets/simple /grp_dsets/simple_group
 
-echo "Test copying objects into group hier. that doesn't exist yet in destination file"
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/A_B1_simple.out.h5 -vp -s simple    -d /A/B1/simple
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/A_B2_simple2.out.h5 -vp -s simple    -d /A/B2/simple2
-TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/C_D_simple.out.h5 -vp -s /grp_dsets/simple    -d /C/D/simple
+    echo "Test copying objects into group hier. that doesn't exist yet in destination file" # "hier"
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/A_B1_simple.out.h5 -vp -s simple    -d /A/B1/simple
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/A_B2_simple2.out.h5 -vp -s simple    -d /A/B2/simple2
+    TOOLTEST -i $TESTFILE -o $HDF5_OUTPUT_DIR/C_D_simple.out.h5 -vp -s /grp_dsets/simple    -d /C/D/simple
 
 # Misc tests
-echo "Test copying object into group which doesn't exist, without -p"
-TOOLTEST_FAIL h5copy_misc1.out -i $TESTFILE -o $HDF5_OUTPUT_DIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
+    echo "Test copying object into group which doesn't exist, without -p"
+    TOOLTEST_FAIL h5copy_misc1.out -i $TESTFILE -o $HDF5_OUTPUT_DIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
 
-echo "Test copying objects to the same file "
-TOOLTEST_SAME -i $TESTFILE -o $HDF5_OUTPUT_DIR/samefile1.out.h5 /simple /simple_cp
+    echo "Test copying objects to the same file "
+    TOOLTEST_SAME -i $TESTFILE -o $HDF5_OUTPUT_DIR/samefile1.out.h5 /simple /simple_cp
 
 # Clean up generated files/directories
 CLEAN_OUTPUT

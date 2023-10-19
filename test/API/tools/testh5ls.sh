@@ -14,6 +14,9 @@
 # Tests for the h5ls tool
 
 # Assume we are on a little-endian system
+
+srcdir=@srcdir@
+
 WORDS_BIGENDIAN="no"
 
 TESTNAME=h5ls
@@ -42,10 +45,10 @@ h5haveexitcode=yes      # default is yes
 # --------------------------------------------------------------------
 
 # Where the tool's HDF5 input files are located
-TESTFILES_HDF5_DIR="./testfiles/hdf5"
+TESTFILES_HDF5_DIR="../../../tools/h5dump/testfiles"
 
 # Where the tool's expected output files are located
-H5LS_TESTFILES_OUT_DIR="./testfiles/expected/h5ls"
+H5LS_TESTFILES_OUT_DIR="../../../tools/h5ls/expected"
 
 ######################################################################
 # Output files
@@ -197,9 +200,9 @@ COPY_EXPECTED_OUTPUT_FILES()
         filepath="$H5LS_TESTFILES_OUT_DIR/$outfile"
 
         # Use -f to make sure get a new copy
-        $CP -f $filepath $TEXT_OUTPUT_DIR
-        if [ $? -ne 0 ]; then
-            echo "Error: FAILED to copy expected output file: $filepath ."
+    $CP -f $filepath $TEXT_OUTPUT_DIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy expected output file: $filepath ."
         fi
     done
 }
@@ -244,7 +247,7 @@ CLEAN_OUTPUT()
         # The HDF5 output directory is always created, even if the VOL
         # storage won't use it. Delete it here.
         $RM $REPACK_OUTPUT_DIR
-   fi
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -266,7 +269,7 @@ TESTING() {
 # the `nerrors' global variable and (if $verbose is set) display up to $NLINS
 # lines of the actual output from the tool test.  The actual output is not
 # removed if $HDF5_NOCLEANUP has a non-zero value.
-# Arguemnts:
+# Arguments:
 # $1 -- actual output filename to use
 # $2 and on -- argument for the h5ls tool
 RUNTEST() {
@@ -472,17 +475,17 @@ RUNTEST tempty.ls 0 -w80 -d $REPACK_OUTPUT_DIR/tempty.h5
 # test for variable length data types in verbose mode
 # TODO: Diff fails on hard-coded dataset locations.
 #if test $WORDS_BIGENDIAN != "yes"; then
-#    RUNTEST tvldtypes2le.ls 0 -v $REPACK_OUTPUT_DIR/tvldtypes1.h5
+ #    RUNTEST tvldtypes2le.ls 0 -v $REPACK_OUTPUT_DIR/tvldtypes1.h5
 #else
-#    RUNTEST tvldtypes2be.ls 0 -v $REPACK_OUTPUT_DIR/tvldtypes1.h5
+ #    RUNTEST tvldtypes2be.ls 0 -v $REPACK_OUTPUT_DIR/tvldtypes1.h5
 #fi
 
 # test for dataset region references data types in verbose mode
 # TODO: Diff fails on hard-coded dataset locations.
 #if test $WORDS_BIGENDIAN != "yes"; then
-#    RUNTEST tdataregle.ls 0 -v $REPACK_OUTPUT_DIR/tdatareg.h5
+ #    RUNTEST tdataregle.ls 0 -v $REPACK_OUTPUT_DIR/tdatareg.h5
 #else
-#    RUNTEST tdataregbe.ls 0 -v $REPACK_OUTPUT_DIR/tdatareg.h5
+ #    RUNTEST tdataregbe.ls 0 -v $REPACK_OUTPUT_DIR/tdatareg.h5
 #fi
 
 # Clean up generated files/directories
@@ -495,3 +498,4 @@ else
     echo "$TESTNAME tests failed with $nerrors errors."
     exit $EXIT_FAILURE
 fi
+

@@ -14,6 +14,9 @@
 # Tests for the h5dump tool
 
 # Assume we are on a little-endian system
+
+srcdir=@srcdir@
+
 WORDS_BIGENDIAN="no"
 
 TESTNAME=h5dump
@@ -41,10 +44,10 @@ verbose=yes
 # --------------------------------------------------------------------
 
 # Where the tool's HDF5 input files are located
-TESTFILES_HDF5_DIR="./testfiles/hdf5"
+TESTFILES_HDF5_DIR="../../../tools/h5dump/testfiles"
 
 # Where the tool's expected output files are located
-H5DUMP_TESTFILES_OUT_DIR="./testfiles/expected/h5dump"
+H5DUMP_TESTFILES_OUT_DIR="../../../tools/h5dump/expected"
 
 ######################################################################
 # Output files
@@ -407,7 +410,7 @@ COPY_EXPECTED_OUTPUT_FILES()
         filepath="$H5DUMP_TESTFILES_OUT_DIR/$outfile"
 
         # Use -f to make sure get a new copy
-        $CP -f $filepath $TEXT_OUTPUT_DIR
+    $CP -f $filepath $TEXT_OUTPUT_DIR
         if [ $? -ne 0 ]; then
             echo "Error: FAILED to copy expected output file: $filepath ."
         fi
@@ -425,8 +428,8 @@ REPACK_HDF5_FILES()
 
         # Repack the file
         $H5REPACK --src-vol-name=native --enable-error-stack $inpath $outpath
-        if [ $? -ne 0 ]; then
-            echo "Error: FAILED to repack HDF5 file: $inpath ."
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to repack HDF5 file: $inpath ."
         fi
     done
 }
@@ -454,7 +457,7 @@ CLEAN_OUTPUT()
         # The HDF5 output directory is always created, even if the VOL
         # storage won't use it. Delete it here.
         $RM $REPACK_OUTPUT_DIR
-   fi
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -484,14 +487,14 @@ TESTING() {
 RUNTEST() {
     # check if caseless compare and diff requested
     if [ "$1" = ignorecase ]; then
-    caseless="-i"
-    # replace cmp with diff which runs much longer.
-    xCMP="$DIFF -i"
-    shift
+        caseless="-i"
+        # replace cmp with diff which runs much longer.
+        xCMP="$DIFF -i"
+        shift
     else
-    caseless=""
-    # stick with faster cmp if ignorecase is not requested.
-    xCMP="$CMP"
+        caseless=""
+        # stick with faster cmp if ignorecase is not requested.
+        xCMP="$CMP"
     fi
 
     expect="$TEXT_OUTPUT_DIR/$1"
@@ -504,7 +507,7 @@ RUNTEST() {
     # Run test.
     TESTING $H5DUMP $@
     (
-      $RUNSERIAL $H5DUMP "$@"
+        $RUNSERIAL $H5DUMP "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.
@@ -707,7 +710,7 @@ RUNTEST_HELP() {
     expect="$TEXT_OUTPUT_DIR/$1"
     actual="$TEXT_OUTPUT_DIR/`basename $1 .txt`.out"
     actual_err="$TEXT_OUTPUT_DIR/`basename $1 .txt`.err"
-    shift
+        shift
 
     # Run test.
     TESTING $H5DUMP $@
@@ -745,7 +748,7 @@ RUNTEST_GREP()
     # Run test.
     TESTING $H5DUMP -p $@
     (
-      $ENVCMD $RUNSERIAL $H5DUMP -p "$@"
+        $ENVCMD $RUNSERIAL $H5DUMP -p "$@"
     ) >$actual 2>$actual_err
     if [ "$txttype" = "ERRTXT" ]; then
         $GREP "$expectdata" $actual_err > /dev/null
@@ -775,7 +778,7 @@ RUNTEST_GREP2()
     # Run test.
     TESTING $H5DUMP -p $@
     (
-      $ENVCMD $RUNSERIAL $H5DUMP -p "$@"
+        $ENVCMD $RUNSERIAL $H5DUMP -p "$@"
     ) >$actual 2>$actual_err
     if [ "$txttype" = "ERRTXT" ]; then
         $GREP "$expectdata" $actual_err > /dev/null
@@ -907,9 +910,9 @@ RUNTEST tcomp-4.ddl --enable-error-stack $REPACK_OUTPUT_DIR/tcompound_complex.h5
 RUNTEST tcompound_complex2.ddl --enable-error-stack $REPACK_OUTPUT_DIR/tcompound_complex2.h5
 # tests for bitfields and opaque data types
 if test $WORDS_BIGENDIAN != "yes"; then
-RUNTEST tbitnopaque_le.ddl --enable-error-stack $REPACK_OUTPUT_DIR/tbitnopaque.h5
+    RUNTEST tbitnopaque_le.ddl --enable-error-stack $REPACK_OUTPUT_DIR/tbitnopaque.h5
 else
-RUNTEST tbitnopaque_be.ddl --enable-error-stack $REPACK_OUTPUT_DIR/tbitnopaque.h5
+    RUNTEST tbitnopaque_be.ddl --enable-error-stack $REPACK_OUTPUT_DIR/tbitnopaque.h5
 fi
 
 #test for the nested compound type
@@ -1133,4 +1136,3 @@ else
     echo "$TESTNAME tests failed with $nerrors errors."
     exit $EXIT_FAILURE
 fi
-
