@@ -53,12 +53,12 @@ int curr_nerrors = 0;
  * Test configurations
  */
 typedef enum {
-    TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
-    TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
-    TEST_LARGER_MEM_NO_BKG,     /* larger memory type, no bkg buffer */
-    TEST_SMALLER_MEM_NO_BKG,    /* smaller memory type, no bkg buffer */
-    TEST_CMPD_WITH_BKG,         /* compound types with bkg buffer */
-    TEST_TYPE_CONV_SEL_EMPTY,   /* some processes have null/empty selections and with type conversion */
+    TEST_NO_TYPE_CONV,           /* no type conversion (null case) */
+    TEST_NO_SIZE_CHANGE_NO_BKG,  /* no size change, no bkg buffer */
+    TEST_LARGER_MEM_NO_BKG,      /* larger memory type, no bkg buffer */
+    TEST_SMALLER_MEM_NO_BKG,     /* smaller memory type, no bkg buffer */
+    TEST_CMPD_WITH_BKG,          /* compound types with bkg buffer */
+    TEST_TYPE_CONV_SEL_EMPTY,    /* some processes have null/empty selections and with type conversion */
     TEST_MULTI_CONV_NO_BKG,      /* multi dataset test 1 */
     TEST_MULTI_CONV_BKG,         /* multi dataset test 2 */
     TEST_MULTI_CONV_SIZE_CHANGE, /* multi dataset test 3 */
@@ -70,9 +70,9 @@ typedef enum {
 #define DSET_SELECT_DIM       100
 #define DSET_SELECT_CHUNK_DIM 10
 
-#define MULTI_NUM_DSETS                        3
-#define MULTI_MIN_DSETS                        3
-#define DSET_NAME_LEN                          64
+#define MULTI_NUM_DSETS 3
+#define MULTI_MIN_DSETS 3
+#define DSET_NAME_LEN   64
 
 /* Compound type */
 typedef struct s1_t {
@@ -118,8 +118,8 @@ typedef enum {
 } multi_dset_type_t;
 
 /* Test setting A and B */
-#define SETTING_A                              1
-#define SETTING_B                              2
+#define SETTING_A 1
+#define SETTING_B 2
 
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
 #define TEST_DISABLE_BY_API                    0x001
@@ -129,9 +129,9 @@ typedef enum {
 #define TEST_IN_PLACE_TCONV                    0x010
 
 /* Definitions used by test_bug_optimized_bufs() and test_bug_api_library() */
-#define DIMS                                   10000
-#define BIG_X_FACTOR                           1048576
-#define BIG_Y_FACTOR                           32
+#define DIMS         10000
+#define BIG_X_FACTOR 1048576
+#define BIG_Y_FACTOR 32
 
 /*
  * Helper routine to set dxpl
@@ -1300,8 +1300,10 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
     if (mwbuf)
         memcpy(lwbuf, lwbuf_bak, sizeof(lwbuf));
 
-    /* If not using selection I/O there will be no collective I/O, since type conversion is unsupported by legacy collective I/O */
-    testing_check_io_mode(dxpl, select ? (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE) : 0);
+    /* If not using selection I/O there will be no collective I/O, since type conversion is unsupported by
+     * legacy collective I/O */
+    testing_check_io_mode(
+        dxpl, select ? (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE) : 0);
 
     /* If not using selection I/O then the main process will do scalar I/O and others will do none */
     check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : (MAINPROCESS ? H5D_SCALAR_IO : 0));
@@ -1459,7 +1461,6 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
 
 } /* test_type_conv_sel_empty() */
 
-
 /*
  *  Test 1 for multi-dataset:
  *  --Datasets with/without type conversion+smaller/larger mem type+no background buffer
@@ -1537,7 +1538,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE,
+             H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -1556,7 +1558,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
 
         /* Generate dataset name */
         snprintf(dset_names[i], sizeof(dset_names[i]), "multi_dset%d_%s_%s_%s_%s", i,
-                 chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", select ? "select" : "noselect", mwbuf ? "mwbuf" : "nomwbuf");
+                 chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", select ? "select" : "noselect",
+                 mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Flip a coin to see if we're doing type conversion */
         tconv = HDrandom() % 2;
@@ -1564,9 +1567,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
             any_tconv = true;
 
         /* Create ith dataset */
-        if ((dset_dids[i] =
-                 H5Dcreate2(fid, dset_names[i], (tconv ? H5T_NATIVE_LONG : H5T_NATIVE_INT),
-                            file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], (tconv ? H5T_NATIVE_LONG : H5T_NATIVE_INT),
+                                       file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
     }
 
@@ -1642,8 +1644,11 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned s
     if (mwbuf)
         memcpy(total_wbuf, total_wbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
 
-    /* If doing type conversion or transform and not using selection I/O there will be no collective I/O, since type conversion is unsupported by legacy collective I/O */
-    testing_check_io_mode(dxpl, ((any_tconv || dtrans) && !select) ? 0 : (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE));
+    /* If doing type conversion or transform and not using selection I/O there will be no collective I/O,
+     * since type conversion is unsupported by legacy collective I/O */
+    testing_check_io_mode(dxpl, ((any_tconv || dtrans) && !select)
+                                    ? 0
+                                    : (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE));
     check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : H5D_SCALAR_IO);
 
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
@@ -1858,7 +1863,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned select, uns
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE,
+             H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     /* Each process takes x number of elements */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -2312,7 +2318,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned select
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE,
+             H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     /* Set up file space ids, mem space ids, and dataset ids */
     for (i = 0; i < (int)ndsets; i++) {
@@ -2659,7 +2666,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+    set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE,
+             H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -2676,7 +2684,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
 
         /* Generate dataset name */
         snprintf(dset_names[i], sizeof(dset_names[i]), "multi_sel_dset%d_%s_%s_%s_%s", i,
-                 chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", select ? "select" : "noselect", mwbuf ? "mwbuf" : "nomwbuf");
+                 chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", select ? "select" : "noselect",
+                 mwbuf ? "mwbuf" : "nomwbuf");
 
         if (i == 0) {
             if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
@@ -2860,8 +2869,10 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
     if (mwbuf)
         memcpy(total_wbuf, total_wbuf_bak, buf_size);
 
-    /* If not using selection I/O there will be no collective I/O, since type conversion is unsupported by legacy collective I/O */
-    testing_check_io_mode(dxpl, select ? (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE) : 0);
+    /* If not using selection I/O there will be no collective I/O, since type conversion is unsupported by
+     * legacy collective I/O */
+    testing_check_io_mode(
+        dxpl, select ? (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE) : 0);
     check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : H5D_SCALAR_IO);
 
     /* Initialize buffer indices */
@@ -3073,7 +3084,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned select, un
             P_TEST_ERROR;
 
         /* Set selection I/O mode, type of I/O and type of collective I/O */
-        set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+        set_dxpl(dxpl, select ? H5D_SELECTION_IO_MODE_ON : H5D_SELECTION_IO_MODE_OFF, H5FD_MPIO_COLLECTIVE,
+                 H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
         /* Set dataset layout: contiguous or chunked */
         dims[0] = DSET_SELECT_DIM;
@@ -3135,7 +3147,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned select, un
             if (mm == 0) {
                 dset_types[i] = DSET_WITH_NO_CONV;
                 snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s_%s", i,
-                         chunked ? "chunked" : "contig", select ? "select" : "noselect", mwbuf ? "mwbuf" : "nomwbuf");
+                         chunked ? "chunked" : "contig", select ? "select" : "noselect",
+                         mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
@@ -3143,7 +3156,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned select, un
             else if (mm == 1) {
                 dset_types[i] = DSET_WITH_CONV_AND_NO_BKG;
                 snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_nbkg_dset%d_%s_%s_%s", i,
-                         chunked ? "chunked" : "contig", select ? "select" : "noselect", mwbuf ? "mwbuf" : "nomwbuf");
+                         chunked ? "chunked" : "contig", select ? "select" : "noselect",
+                         mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_LONG, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
@@ -3151,7 +3165,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned select, un
             else {
                 dset_types[i] = DSET_WITH_CONV_AND_BKG;
                 snprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_bkg_dset%d_%s_%s_%s", i,
-                         chunked ? "chunked" : "contig", select ? "select" : "noselect", mwbuf ? "mwbuf" : "nomwbuf");
+                         chunked ? "chunked" : "contig", select ? "select" : "noselect",
+                         mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl,
                                                H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
@@ -3349,8 +3364,11 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned select, un
             if (H5Dread_multi(ndsets, dset_dids, r_mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
                 P_TEST_ERROR;
 
-            /* If doing type conversion and not using selection I/O there will be no collective I/O, since type conversion is unsupported by legacy collective I/O */
-            testing_check_io_mode(dxpl, (any_tconv && !select) ? 0 : (chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE));
+            /* If doing type conversion and not using selection I/O there will be no collective I/O, since
+             * type conversion is unsupported by legacy collective I/O */
+            testing_check_io_mode(dxpl, (any_tconv && !select) ? 0
+                                                               : (chunked ? H5D_MPIO_CHUNK_COLLECTIVE
+                                                                          : H5D_MPIO_CONTIGUOUS_COLLECTIVE));
             check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : H5D_SCALAR_IO);
 
             /* Verify result read */
@@ -4253,8 +4271,8 @@ main(int argc, char *argv[])
                 } /* end mwbuf */
 
             } /* end select */
-        } /* end dtrans */
-    }     /* end chunked */
+        }     /* end dtrans */
+    }         /* end chunked */
 
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;
