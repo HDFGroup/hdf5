@@ -53,22 +53,12 @@ int curr_nerrors = 0;
  * Test configurations
  */
 typedef enum {
-<<<<<<< HEAD
     TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
     TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
     TEST_LARGER_MEM_NO_BKG,     /* larger memory type, no bkg buffer */
     TEST_SMALLER_MEM_NO_BKG,    /* smaller memory type, no bkg buffer */
     TEST_CMPD_WITH_BKG,         /* compound types with bkg buffer */
     TEST_TYPE_CONV_SEL_EMPTY,   /* some processes have null/empty selections and with type conversion */
-=======
-    TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
-    TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
-    TEST_LARGER_MEM_NO_BKG,     /* larger memory type, no bkg buffer */
-    TEST_SMALLER_MEM_NO_BKG,    /* smaller memory type, no bkg buffer */
-    TEST_CMPD_WITH_BKG,         /* compound types with bkg buffer */
-    TEST_TYPE_CONV_SEL_EMPTY,   /* some processes have null/empty selections and with type conversion */
-#ifdef OUT
->>>>>>> 45187118ec5e42934279244a0c634a14fafbfe76
     TEST_MULTI_CONV_NO_BKG,      /* multi dataset test 1 */
     TEST_MULTI_CONV_BKG,         /* multi dataset test 2 */
     TEST_MULTI_CONV_SIZE_CHANGE, /* multi dataset test 3 */
