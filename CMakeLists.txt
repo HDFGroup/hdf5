@@ -413,6 +413,13 @@ set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
+# Set variables needed for installation
+#-----------------------------------------------------------------------------
+set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
+set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
+set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
+
+#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (${HDF_RESOURCES_DIR}/HDFMacros.cmake)
