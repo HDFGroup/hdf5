@@ -144,9 +144,15 @@ if test -z "$subfile_dir"; then
     exit $FAILED
 fi
 
-# For bash 4.4+
 subfs=$(sed -e '1,/subfile_dir=/d' "$file_config")
-mapfile -t subfiles <<< "$subfs"
+if command -v mapfile > /dev/null; then
+    # For bash 4.4+
+    mapfile -t subfiles <<< "$subfs"
+else
+    while IFS= read -r line; do
+         subfiles+=("$line")
+    done <<< "$subfs"
+fi
 if [ ${#subfiles[@]} -eq 0 ]; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
     exit $FAILED
