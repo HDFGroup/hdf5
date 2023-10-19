@@ -116,7 +116,7 @@ usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS] <compile line>"
   echo "  OPTIONS:"
-  echo "    -help        This help message."
+  echo "    -help | --help | -h   This help message."
   echo "    -echo        Show all the shell commands executed"
   echo "    -prefix=DIR  Prefix directory to find HDF5 lib/ and include/"
   echo "                   subdirectories [default: $prefix]"
@@ -254,6 +254,12 @@ for arg in $@ ; do
       USE_SHARED_LIB="no"
       ;;
     -help)
+      usage
+      ;;
+    --help)
+      usage
+      ;;
+    -h)
       usage
       ;;
     *\"*)
