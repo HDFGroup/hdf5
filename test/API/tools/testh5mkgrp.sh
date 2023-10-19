@@ -13,9 +13,8 @@
 #
 # Tests for the h5mkgrp tool
 #
-# Quincey Koziol (koziol@hdfgroup.org)
-# Tuesday, February 13, 2007
-#
+
+srcdir=@srcdir@
 
 TESTNAME=h5mkgrp
 EXIT_SUCCESS=0
@@ -42,7 +41,7 @@ verbose=yes
 # --------------------------------------------------------------------
 
 # Where the tool's expected output files are located
-H5MKGRP_TESTFILES_OUT_DIR="./testfiles/expected/h5mkgrp"
+H5MKGRP_TESTFILES_OUT_DIR="../../../tools/h5mkgrp/expected"
 
 ######################################################################
 # Output files
@@ -163,7 +162,7 @@ CLEAN_OUTPUT()
         # The HDF5 output directory is always created, even if the VOL
         # storage won't use it. Delete it here.
         $RM $HDF5_OUTPUT_DIR
-   fi
+    fi
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -201,7 +200,7 @@ RUNTOOL()
 {
     TESTING $H5MKGRP $@
     (
-    $H5MKGRP $@
+        $H5MKGRP $@
     ) > $TEXT_OUTPUT_DIR/output.out
     RET=$?
     if [ $RET != 0 ]; then
@@ -214,7 +213,7 @@ RUNTOOL()
 
         # Clean up output file
         if test -z "$HDF5_NOCLEANUP"; then
-           $RM $TEXT_OUTPUT_DIR/output.out
+            $RM $TEXT_OUTPUT_DIR/output.out
         fi
     fi
 }
@@ -231,7 +230,7 @@ RUNH5LS()
     # any unexpected output from that stream too.
     VERIFY_H5LS  $@
     (
-      $H5LS $H5LS_ARGS $@
+        $H5LS $H5LS_ARGS $@
     ) 2>&1 > $actual
 #    ) 2>&1 | sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' |\
 #        sed 's/Location:.*/Location:  XXX:XXX/' |\
@@ -306,24 +305,24 @@ CMPTEST()
     # any unexpected output from that stream too.
     TESTING $H5MKGRP $@
     (
-    $H5MKGRP $@
+        $H5MKGRP $@
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
 
-   if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-      echo " CREATED"
-      cp $actual $expect
-      echo "    Expected result (*.txt) missing"
-      nerrors="`expr $nerrors + 1`"
-   elif $CMP $expect $actual; then
-      echo " PASSED"
-   else
-      echo "*FAILED*"
-      echo "    Expected result (*.txt) differs from actual result (*.out)"
-      nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-   fi
+    if [ ! -f $expect ]; then
+        # Create the expect file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect
+        echo "    Expected result (*.txt) missing"
+        nerrors="`expr $nerrors + 1`"
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result (*.txt) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
 }
 
 ##############################################################################
@@ -370,3 +369,4 @@ else
     echo "$TESTNAME tests failed with $nerrors errors."
     exit $EXIT_FAILURE
 fi
+
