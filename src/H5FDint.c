@@ -259,7 +259,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
     /* Set actual selection I/O, if this is a raw data operation */
-    if (type == H5FD_MEM_DRAW) {
+    if (type == H5FD_MEM_DRAW && size > 0) {
         H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
         actual_selection_io_mode |= H5D_SCALAR_IO;
         H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -318,7 +318,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
 
     /* Set actual selection I/O, if this is a raw data operation */
-    if (type == H5FD_MEM_DRAW) {
+    if (type == H5FD_MEM_DRAW && size > 0) {
         H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
         actual_selection_io_mode |= H5D_SCALAR_IO;
         H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
