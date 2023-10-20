@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and tools/lib directories
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/test -I$(top_srcdir)/tools/lib
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 # All programs depend on the hdf5, hdf5 test, and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
