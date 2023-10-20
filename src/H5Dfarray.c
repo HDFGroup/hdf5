@@ -1110,7 +1110,7 @@ H5D__farray_idx_load_metadata(const H5D_chk_idx_info_t *idx_info)
      * until an element is looked up for the first time. Since
      * there isn't currently a good way of controlling that
      * explicitly, perform a fake lookup of a chunk to cause
-     * it to be read in or created if it doesn't exist yet.
+     * it to be read in.
      */
     chunk_ud.common.layout  = idx_info->layout;
     chunk_ud.common.storage = idx_info->storage;

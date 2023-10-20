@@ -1079,7 +1079,7 @@ done:
  * Function:    H5D__bt2_idx_load_metadata
  *
  * Purpose:     Load additional chunk index metadata beyond the chunk index
- *              itself. Currently a no-op.
+ *              itself.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1088,11 +1088,34 @@ done:
 static herr_t
 H5D__bt2_idx_load_metadata(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    H5D_chunk_ud_t chunk_ud;
+    hsize_t        scaled[H5O_LAYOUT_NDIMS] = {0};
+    herr_t         ret_value                = SUCCEED;
 
-    /* NO OP */
+    FUNC_ENTER_PACKAGE
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /*
+     * After opening a dataset that uses a v2 Btree, the root
+     * node will generally not be read in until an element is
+     * looked up for the first time. Since there isn't currently
+     * a good way of controlling that explicitly, perform a fake
+     * lookup of a chunk to cause it to be read in.
+     */
+    chunk_ud.common.layout  = idx_info->layout;
+    chunk_ud.common.storage = idx_info->storage;
+    chunk_ud.common.scaled  = scaled;
+
+    chunk_ud.chunk_block.offset = HADDR_UNDEF;
+    chunk_ud.chunk_block.length = 0;
+    chunk_ud.filter_mask        = 0;
+    chunk_ud.new_unfilt_chunk   = false;
+    chunk_ud.idx_hint           = UINT_MAX;
+
+    if (H5D__bt2_idx_get_addr(idx_info, &chunk_ud) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't load v2 B-tree root node");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__bt2_idx_load_metadata() */
 
 /*-------------------------------------------------------------------------
