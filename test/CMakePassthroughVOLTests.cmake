@@ -37,19 +37,19 @@ endforeach ()
 
 foreach (voltest ${VOL_LIST})
   foreach (h5_tfile ${HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${voltest}/${h5_tfile}" "HDF5_VOLTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" "${PROJECT_BINARY_DIR}/${voltest}/testfiles/${h5_tfile}" "HDF5_VOLTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (voltest ${VOL_LIST})
   foreach (ref_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${voltest}/${ref_file}" "HDF5_VOLTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${ref_file}" "${PROJECT_BINARY_DIR}/${voltest}/testfiles/${ref_file}" "HDF5_VOLTEST_LIB_files")
   endforeach ()
 endforeach ()
 
 foreach (voltest ${VOL_LIST})
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${voltest}/${h5_file}" "HDF5_VOLTEST_LIB_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${voltest}/testfiles/${h5_file}" "HDF5_VOLTEST_LIB_files")
   endforeach ()
 endforeach ()
 

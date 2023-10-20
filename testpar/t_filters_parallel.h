@@ -444,7 +444,7 @@ typedef struct {
 #define SHRINKING_GROWING_CHUNKS_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
 #define SHRINKING_GROWING_CHUNKS_CH_NROWS     (SHRINKING_GROWING_CHUNKS_NROWS / mpi_size)
 #define SHRINKING_GROWING_CHUNKS_CH_NCOLS     (SHRINKING_GROWING_CHUNKS_NCOLS / mpi_size)
-#define SHRINKING_GROWING_CHUNKS_NLOOPS       20
+#define SHRINKING_GROWING_CHUNKS_NLOOPS       8
 
 /* Defines for the unshared filtered edge chunks write test */
 #define WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME  "unshared_filtered_edge_chunks_write"

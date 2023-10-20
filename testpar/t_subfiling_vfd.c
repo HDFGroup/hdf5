@@ -382,16 +382,20 @@ test_config_file(void)
         substr = strstr(config_buf, "hdf5_file");
         VRFY(substr, "strstr succeeded");
 
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         snprintf(scan_format, sizeof(scan_format), "hdf5_file=%%%zus", (size_t)(PATH_MAX - 1));
         VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         VRFY((strcmp(tmp_buf, resolved_path) == 0), "strcmp succeeded");
 
         substr = strstr(config_buf, "subfile_dir");
         VRFY(substr, "strstr succeeded");
 
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         snprintf(scan_format, sizeof(scan_format), "subfile_dir=%%%zus", (size_t)(PATH_MAX - 1));
         VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         VRFY((strcmp(tmp_buf, subfile_dir) == 0), "strcmp succeeded");
 
@@ -886,7 +890,7 @@ test_selection_strategies(void)
                 char     criteria_buf[256];
                 char     sel_criteria[128]; /* Use char buffer for criteria as we may support
                                                the "with config" strategy in the future */
-                int expected_num_subfiles;
+                int expected_num_subfiles = -1;
 
                 cfg.ioc_selection = strategy;
                 cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;

@@ -47,6 +47,7 @@ load_clang_arguments()
     done)
     IFS=' ' echo "$*"
 }
+
 # Get the compiler version in a way that works for clang++
 # unless a compiler version is already known
 #

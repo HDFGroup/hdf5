@@ -420,6 +420,13 @@ typedef enum H5D_selection_io_mode_t {
 } H5D_selection_io_mode_t;
 //! <!--[H5D_selection_io_mode_t_snip] -->
 
+/**
+ * Causes for H5Pget_actual_selection_io_mode() property
+ */
+#define H5D_SCALAR_IO    (0x0001u) /**< Scalar (or legacy MPIO) I/O was performed */
+#define H5D_VECTOR_IO    (0x0002u) /**< Vector I/O was performed */
+#define H5D_SELECTION_IO (0x0004u) /**< Selection I/O was performed */
+
 /********************/
 /* Public Variables */
 /********************/
@@ -4830,9 +4837,8 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *          enumerated value in #H5F_libver_t, indicating that this is
  *          currently the latest format available.
  *
- *          The library supports the following five pairs of
- *          (\p low, \p high) combinations as derived from the values
- *          in #H5F_libver_t:
+ *          The library supports the following pairs of (\p low, \p high)
+ *          combinations as derived from the values in #H5F_libver_t:
  *
  *          <table>
  *           <tr>
@@ -4859,11 +4865,53 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *             \li The library will create objects with the earliest possible
  *                 format versions.
  *             \li The library will allow objects to be created with the latest
- *                 format versions available to library release 1.10.x.
- *                 Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                 limit on the format versions to use.  For example, if a newer
- *                 format version is required to support a feature e.g. virtual
- *                 dataset, this setting will allow the object to be created.
+ *                 format versions available to library release 1.10.x.  Note
+ *                 that as 1.10.11 is the last release of the 1.10 series.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.10.x
+ *                 release will fail.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V112</td>
+ *            <td>
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.12.x.  Note
+ *                 that as 1.12.3 is the last release of the 1.12 series.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.12.x
+ *                 release will fail.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *            <td>
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.14.x.
+ *             \li API calls that create objects or features that are
+ *                 available to versions of the library greater than 1.14.x
+ *                 release will fail.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_EARLIEST<br />
+ *                \p high=#H5F_LIBVER_V116</td>
+ *            <td>
+ *             \li The library will create objects with the earliest possible
+ *                 format versions.
+ *             \li The library will allow objects to be created with the latest
+ *                 format versions available to library release 1.16.x.
+ *                 Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                 limit on the format versions to use.  That is, if a
+ *                 newer format version is required to support a feature
+ *                 in 1.16.x series, this setting will allow the object to be
+ *                 created.
  *             \li This is the library default setting and provides the greatest
  *                 format compatibility.
  *            </td>
@@ -4887,11 +4935,54 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will create objects with the latest format
  *                  versions available to library release 1.8.x.
  *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use.  For example, if a
- *                  newer format version is required to support a feature e.g.
- *                  virtual dataset, this setting will allow the object to be
+ *                  format versions available to library release 1.10.x.  Note
+ *                  that 1.10.11 is the last release of the 1.10 series.
+ *              \li API calls that create objects or features that are
+ *                  available to versions of the library greater than 1.10.x
+ *                  release will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V112</td>
+ *            <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.8.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.12.x.
+ *              \li API calls that create objects or features that are
+ *                  available to versions of the library greater than 1.12.x
+ *                  release will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V114</td>
+ *            <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.8.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li API calls that create objects or features that are
+ *                  available to versions of the library greater than 1.14.x
+ *                  release will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V18<br />
+ *                \p high=#H5F_LIBVER_V116</td>
+ *            <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.8.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.16.x.
+ *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
+ *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li Earlier versions of the library may not be able to access
  *                  objects created with this setting.</td>
@@ -4904,11 +4995,69 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *              \li The library will create objects with the latest format
  *                  versions available to library release 1.10.x.
  *              \li The library will allow objects to be created with the latest
- *                  format versions available to library release 1.10.x.
- *                  Since 1.10.x is also #H5F_LIBVER_LATEST, there is no upper
- *                  limit on the format versions to use. For example, if a
- *                  newer format version is required to support a feature e.g.
- *                  virtual dataset, this setting will allow the object to be
+ *                  format versions available to library release 1.10.x.  Note
+ *                  that 1.10.11 is the last release of the 1.10 series.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.10.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=#H5F_LIBVER_V112
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.12.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.12.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=#H5F_LIBVER_V114
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.14.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V110<br />
+ *                \p high=#H5F_LIBVER_V116
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.10.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.16.x.
+ *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
+ *                  in 1.16.x series, this setting will allow the object to be
  *                  created.
  *              \li This setting allows users to take advantage of the latest
  *                  features and performance enhancements in the library.
@@ -4916,8 +5065,134 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                  accessible to a smaller range of library versions than
  *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
  *              \li Earlier versions of the library may not be able to access
- *                  objects created with this
- * setting.
+ *                  objects created with this setting.
+ *            </td>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V112<br />
+ *                \p high=#H5F_LIBVER_V112
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.12.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.12.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.12.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V112<br />
+ *                \p high=#H5F_LIBVER_V114
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.12.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.14.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *            </td>
+ *           </tr>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V112<br />
+ *                \p high=#H5F_LIBVER_V116
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.12.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.16.x.
+ *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
+ *                  in 1.16.x series, this setting will allow the object to be
+ *                  created.
+ *              \li This setting allows users to take advantage of the latest
+ *                  features and performance enhancements in the library.
+ *                  However, objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V114<br />
+ *                \p high=#H5F_LIBVER_V114
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.14.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.14.x.
+ *              \li The objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than 1.14.x release will
+ *                  fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *            </td>
+ *           </tr>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V114<br />
+ *                \p high=#H5F_LIBVER_V116
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.14.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.16.x.
+ *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
+ *                  in 1.16.x series, this setting will allow the object to be
+ *                  created.
+ *              \li This setting allows users to take advantage of the latest
+ *                  features and performance enhancements in the library.
+ *                  However, objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.
+ *            </td>
+ *           </tr>
+ *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V116<br />
+ *                \p high=#H5F_LIBVER_V116
+ *             </td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 1.16.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release 1.16.x.
+ *                  Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                  limit on the format versions to use.  That is, if a
+ *                  newer format version is required to support a feature
+ *                  in 1.16.x series, this setting will allow the object to be
+ *                  created.
+ *              \li This setting allows users to take advantage of the latest
+ *                  features and performance enhancements in the library.
+ *                  However, objects written with this setting may be
+ *                  accessible to a smaller range of library versions than
+ *                  would be the case if low is set to #H5F_LIBVER_EARLIEST.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.
  *            </td>
  *           </tr>
  *          </table>
@@ -5811,7 +6086,7 @@ H5_DLL int H5Pget_external_count(hid_t plist_id);
  * \note H5Pget_fill_time() is designed to work in coordination with the
  *       dataset fill value and dataset storage allocation time properties,
  *       retrieved with the functions H5Pget_fill_value() and
- *       H5Pget_alloc_time().
+ *       H5Pget_alloc_time().type == H5FD_MEM_DRAW
  *
  * \since 1.6.0
  *
@@ -8298,6 +8573,61 @@ H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selec
  *
  */
 H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+ *        during the last I/O call
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] actual_selection_io_mode A bitwise set value indicating the
+ *                                      type(s) of I/O performed
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request selection I/O to be performed via a data transfer
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
+ *      This function allows the user to determine which type or types of
+ *      I/O were actually performed.
+ *
+ * \details H5Pget_actual_selection_io_mode() allows the user to determine which
+ *          type(s) of I/O were actually performed on raw data during the last
+ *          I/O operation which used \p plist_id.  This property is set after
+ *          all I/O is completed; if I/O fails, it will not be set.
+ *
+ *          H5Pget_no_selection_io_cause() can be used to determine the reason
+ *          why selection or vector I/O was not performed.
+ *
+ *          Valid bitflags returned in \p actual_selection_io_mode are listed
+ *          as follows.
+ *
+ *          - #H5D_SCALAR_IO
+ *          Scalar (or legacy MPIO) I/O was performed
+ *          - #H5D_VECTOR_IO
+ *          Vector I/O was performed
+ *          - #H5D_SELECTION_IO
+ *          Selection I/O was performed
+ *
+ *          0 or more of these can be present in \p actual_selection_io_mode in
+ *          a bitwise fashion, since a single operation can trigger multiple
+ *          instances of I/O, possibly with different types.  A value of \p 0
+ *          indicates no raw data I/O was performed during the operation.
+ *
+ *          Be aware that this function will only include raw data I/O performed
+ *          to/from disk as part of the last I/O operation.  Any metadata
+ *          I/O, including attribute and compact dataset I/O, is disregarded.
+ *          It is also possible that data was cached in the dataset chunk cache
+ *          or sieve buffer, which may prevent I/O from hitting the disk, and
+ *          thereby prevent it from being counted by this function.
+ *
+ * \since 1.14.3
+ *
+ */
+H5_DLL herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode);
 
 /**
  *

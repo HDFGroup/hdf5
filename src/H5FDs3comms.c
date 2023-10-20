@@ -1713,7 +1713,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     } /* end while node is not NULL */
 
     /* remove trailing ';' from signed headers sequence */
-    signed_headers_dest[strlen(signed_headers_dest) - 1] = '\0';
+    if (*signed_headers_dest != '\0')
+        signed_headers_dest[strlen(signed_headers_dest) - 1] = '\0';
 
     /* append signed headers and payload hash
      * NOTE: at present, no HTTP body is handled, per the nature of

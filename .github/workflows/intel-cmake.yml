@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   Intel_build_and_test:
-    name: "Intel ${{ inputs.build_mode }} -Werror (build only)"
+    name: "Intel ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,9 +30,9 @@ jobs:
 
       - name: Install Linux Dependencies
         run: |
-           sudo apt update
-           sudo apt-get install ninja-build doxygen graphviz
-           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt update
+          sudo apt-get install ninja-build doxygen graphviz
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: install oneAPI dpcpp and fortran compiler
         shell: bash

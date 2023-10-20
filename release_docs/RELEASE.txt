@@ -47,6 +47,32 @@ New Features
 
     Configuration:
     -------------
+    - Added new options for CMake and Autotools to control the Doxygen
+      warnings as errors setting.
+
+        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
+        * --enable-doxygen-errors: enable/disable (Default: enable)
+
+      The default will fail compile if the doxygen parsing generates warnings.
+      The option can be disabled if certain versions of doxygen have parsing
+      issues. i.e. 1.9.5, 1.9.8.
+
+      Addresses GitHub issue #3398
+
+    - Added support for AOCC and classic Flang w/ the Autotools
+
+      * Adds a config/clang-fflags options file to support Flang
+      * Corrects missing "-Wl," from linker options in the libtool wrappers
+        when using Flang, the MPI Fortran compiler wrappers, and building
+        the shared library. This would often result in unrecognized options
+        like -soname.
+      * Enable -nomp w/ Flang to avoid linking to the OpenMPI library.
+
+      CMake can build the parallel, shared library w/ Fortran using AOCC
+      and Flang, so no changes were needed for that build system.
+
+      Fixes GitHub issues #3439, #1588, #366, #280
+
     - Converted the build of libaec and zlib to use FETCH_CONTENT with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
@@ -59,6 +85,7 @@ New Features
       Removed HDF options for using FETCH_CONTENT explicitly:
           BUILD_SZIP_WITH_FETCHCONTENT:BOOL
           BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+
     - Thread-safety + static library disabled on Windows w/ CMake
 
       The thread-safety feature requires hooks in DllMain(), which is only
@@ -201,6 +228,12 @@ New Features
 
     Library:
     --------
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
+
     - Added support for in-place type conversion in most cases
 
       In-place type conversion allows the library to perform type conversion
@@ -272,7 +305,6 @@ New Features
 
     Fortran Library:
     ----------------
-
     - Fixed an uninitialized error return value for hdferr
       to return the error state of the h5aopen_by_idx_f API.
 
@@ -777,6 +809,19 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+    - Fixed an issue with unmatched MPI messages in ph5diff
+
+      The "manager" MPI rank in ph5diff was unintentionally sending "program end"
+      messages to its workers twice, leading to an error from MPICH similar to the
+      following:
+
+      Abort(810645519) on node 1 (rank 1 in comm 0): Fatal error in internal_Finalize: Other MPI error, error stack:
+      internal_Finalize(50)...........: MPI_Finalize failed
+      MPII_Finalize(394)..............:
+      MPIR_Comm_delete_internal(1224).: Communicator (handle=44000000) being freed has 1 unmatched message(s)
+      MPIR_Comm_release_always(1250)..:
+      MPIR_finalize_builtin_comms(154):
+
     - Fixed an issue in h5repack for variable-length typed datasets
 
       When repacking datasets into a new file, h5repack tries to determine whether
@@ -816,6 +861,7 @@ Bug Fixes since HDF5-1.14.0 release
     Fortran API
     -----------
     -
+
 
     High-Level Library
     ------------------
@@ -880,7 +926,12 @@ Bug Fixes since HDF5-1.14.0 release
       configuration information in the HDF5_VOL_CONNECTOR environment variable and
       would incorrectly report that the specified VOL connector isn't registered
       due to including the configuration information as part of the VOL connector
-      name being checked for registration status. This has now been fixed. 
+      name being checked for registration status. This has now been fixed.
+
+   - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
+
+     Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
+     with -fdefault-real-16. Fixes GH #2928.
 
 
 Platforms Tested
@@ -988,14 +1039,12 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
                                     Visual Studio 2022 w/ clang 15.0.1
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 

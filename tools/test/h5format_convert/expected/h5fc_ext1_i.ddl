@@ -1,4 +1,4 @@
-HDF5 "./testfiles/h5fc_ext1_i-tmp.h5" {
+HDF5 "h5fc_ext1_i-tmp.h5" {
 SUPER_BLOCK {
    SUPERBLOCK_VERSION 2
    FREELIST_VERSION 0

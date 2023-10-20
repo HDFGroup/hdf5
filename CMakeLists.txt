@@ -413,6 +413,13 @@ set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
+# Set variables needed for installation
+#-----------------------------------------------------------------------------
+set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
+set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
+set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
+
+#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (${HDF_RESOURCES_DIR}/HDFMacros.cmake)
@@ -952,6 +959,13 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 # check if Doxygen is installed
   find_package(Doxygen)
   if (DOXYGEN_FOUND)
+    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." ON)
+    mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
+    if (HDF5_ENABLE_DOXY_WARNINGS)
+      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS")
+    else ()
+      set (HDF5_DOXY_WARNINGS "NO")
+    endif ()
     message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
     add_subdirectory (doxygen)
   else ()

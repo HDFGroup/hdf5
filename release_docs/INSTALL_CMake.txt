@@ -859,6 +859,7 @@ HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                  
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                        OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                                OFF
 HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF
+HDF5_ENABLE_DOXY_WARNINGS      "Enable fail if doxygen parsing has warnings."       ON
 
 ---------------- HDF5 Advanced Test Options ---------------------
 if (BUILD_TESTING)
@@ -885,19 +886,19 @@ HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                             
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     ON
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 
-ZLIB_USE_EXTERNAL         "Use External Library Building for ZLIB"              0
-ZLIB_TGZ_ORIGPATH         "Use ZLIB from original location"        "https://github.com/madler/zlib/releases/download/v1.2.13"
-ZLIB_TGZ_NAME             "Use ZLIB from original compressed file" "zlib-1.2.13.tar.gz"
-ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"    ON
+ZLIB_USE_EXTERNAL         "Use External Library Building for ZLIB"    OFF
+ZLIB_TGZ_ORIGPATH         "Use ZLIB from original location"           "https://github.com/madler/zlib/releases/download/v1.2.13"
+ZLIB_TGZ_NAME             "Use ZLIB from original compressed file"    "zlib-1.2.13.tar.gz"
+ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"      ON
 
-SZIP_USE_EXTERNAL         "Use External Library Building for SZIP"              0
+SZIP_USE_EXTERNAL         "Use External Library Building for SZIP"    OFF
 if (HDF5_ENABLE_SZIP_SUPPORT)
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 ON
-LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
-LIBAEC_TGZ_NAME           "Use LIBAEC from original compressed file" "libaec-v1.0.6.tar.gz"
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                     ON
+LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"         "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
+LIBAEC_TGZ_NAME           "Use LIBAEC from original compressed file"  "libaec-v1.0.6.tar.gz"
 LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    ON
 
-PLUGIN_USE_EXTERNAL       "Use External Library Building for PLUGINS"           0
+PLUGIN_USE_EXTERNAL       "Use External Library Building for PLUGINS" OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR  "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()

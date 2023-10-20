@@ -84,7 +84,7 @@ nerrors=0
 verbose=yes
 h5haveexitcode=yes        # default is yes
 
-TESTDIR=./testfiles
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 # RUNSERIAL is used. Check if it can return exit code from executalbe correctly.

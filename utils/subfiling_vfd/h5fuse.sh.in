@@ -13,7 +13,6 @@
 BLD='\033[1m'
 GRN='\033[0;32m'
 RED='\033[0;31m'
-PUR='\033[0;35m'
 CYN='\033[0;36m'
 NC='\033[0m' # No Color
 
@@ -58,115 +57,9 @@ EOL
 
 }
 
-############################################################
-############################################################
-# Main program                                             #
-############################################################
-############################################################
+function fuse {
 
-############################################################
-# Process the input options. Add options as needed.        #
-############################################################
-# Get the options
-file_config=""
-verbose="false"
-quiet="false"
-rm_subf="false"
-parallel="false"
-while getopts "hpqrvf:" option; do
-   case $option in
-      f) # subfiling configuration file
-         file_config=$OPTARG;;
-      h) # display Help
-         usage
-         exit;;
-      p) # HDF5 fused file
-         parallel="true";;
-      q) # quiet all output
-         quiet="true";;
-      r) # remove completed subfiles
-         rm_subf="true";;
-      v) # verbose output
-         verbose="true";;
-     \?) # Invalid option
-         echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
-         usage
-         exit 1;;
-     * ) usage
-         exit 1;;
-   esac
-done
-
-FAILED=1
-############################################################
-# Configure file checks                                    #
-############################################################
-#
-SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-$PWD}"
-
-# Try to find the config file
-if [ -z "$file_config" ]; then
-    nfiles=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
-    if [[ "$nfiles" != "1" ]]; then
-      if [[ "$nfiles" == "0" ]]; then
-         echo -e "$RED Failed to find .config file in ${SUBF_CONFDIR} $NC"
-         usage
-         exit $FAILED
-      else
-         echo -e "$RED More than one .config file found in ${SUBF_CONFDIR} $NC"
-         usage
-         exit $FAILED
-      fi
-    fi
-    file_config=$(find "${SUBF_CONFDIR}" -maxdepth 1 -type f -iname '*.config')
-fi
-
-if [ ! -f "$file_config" ]; then
-    echo -e "${RED} configuration file ${BLD}$file_config${NC} ${RED}does not exist. $NC"
-    exit $FAILED
-fi
-
-stripe_size=$(grep "stripe_size=" "$file_config"  | cut -d "=" -f2)
-if test -z "$stripe_size"; then
-    echo -e "$RED failed to find stripe_size in $file_config $NC"
-    exit $FAILED
-fi
-
-hdf5_file="$(grep "hdf5_file=" "$file_config"  | cut -d "=" -f2)"
-if test -z "$hdf5_file"; then
-    echo -e "$RED failed to find hdf5 output file in $file_config $NC"
-    exit $FAILED
-fi
-
-subfile_dir="$(grep "subfile_dir=" "$file_config"  | cut -d "=" -f2)"
-if test -z "$subfile_dir"; then
-    echo -e "$RED failed to find subfile directory in $file_config $NC"
-    exit $FAILED
-fi
-
-# For bash 4.4+
-subfs=$(sed -e '1,/subfile_dir=/d' "$file_config")
-mapfile -t subfiles <<< "$subfs"
-if [ ${#subfiles[@]} -eq 0 ]; then
-    echo -e "$RED failed to find subfiles list in $file_config $NC"
-    exit $FAILED
-fi
-nsubfiles=${#subfiles[@]}
-
-# Get the number of local subfiles
-subfiles_loc=()
-subfiles_size=()
-for i in "${subfiles[@]}"; do
-    subfile="${subfile_dir}/${i}"
-    if [ -f "${subfile}" ]; then
-        subfiles_loc+=("$subfile")
-        subfiles_size+=($(wc -c "${subfile}" | awk '{print $1}'))
-    else
-        subfiles_size+=(0)
-    fi
-done
-
-START="$(date +%s%N)"
+# function for fusing the files
 
 mpi_rank=0
 mpi_size=1
@@ -262,8 +155,125 @@ for i in "${subfiles[@]}"; do
     icnt=$(( icnt +1 ))
 done; wait
 
-END=$(( $(date +%s%N) - START ))
-DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
+}
+
+############################################################
+############################################################
+# Main program                                             #
+############################################################
+############################################################
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+file_config=""
+verbose="false"
+quiet="false"
+rm_subf="false"
+parallel="false"
+while getopts "hpqrvf:" option; do
+   case $option in
+      f) # subfiling configuration file
+         file_config=$OPTARG;;
+      h) # display Help
+         usage
+         exit;;
+      p) # HDF5 fused file
+         parallel="true";;
+      q) # quiet all output
+         quiet="true";;
+      r) # remove completed subfiles
+         rm_subf="true";;
+      v) # verbose output
+         verbose="true";;
+     \?) # Invalid option
+         echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
+         usage
+         exit 1;;
+     * ) usage
+         exit 1;;
+   esac
+done
+
+FAILED=1
+############################################################
+# Configure file checks                                    #
+############################################################
+#
+SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-$PWD}"
+
+# Try to find the config file
+if [ -z "$file_config" ]; then
+    nfiles=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
+    if [[ "$nfiles" != "1" ]]; then
+      if [[ "$nfiles" == "0" ]]; then
+         echo -e "$RED Failed to find .config file in ${SUBF_CONFDIR} $NC"
+         usage
+         exit $FAILED
+      else
+         echo -e "$RED More than one .config file found in ${SUBF_CONFDIR} $NC"
+         usage
+         exit $FAILED
+      fi
+    fi
+    file_config=$(find "${SUBF_CONFDIR}" -maxdepth 1 -type f -iname '*.config')
+fi
+
+if [ ! -f "$file_config" ]; then
+    echo -e "${RED} configuration file ${BLD}$file_config${NC} ${RED}does not exist. $NC"
+    exit $FAILED
+fi
+
+stripe_size=$(grep "stripe_size=" "$file_config"  | cut -d "=" -f2)
+if test -z "$stripe_size"; then
+    echo -e "$RED failed to find stripe_size in $file_config $NC"
+    exit $FAILED
+fi
+
+hdf5_file="$(grep "hdf5_file=" "$file_config"  | cut -d "=" -f2)"
+if test -z "$hdf5_file"; then
+    echo -e "$RED failed to find hdf5 output file in $file_config $NC"
+    exit $FAILED
+fi
+
+subfile_dir="$(grep "subfile_dir=" "$file_config"  | cut -d "=" -f2)"
+if test -z "$subfile_dir"; then
+    echo -e "$RED failed to find subfile directory in $file_config $NC"
+    exit $FAILED
+fi
+
+subfs=$(sed -e '1,/subfile_dir=/d' "$file_config")
+if command -v mapfile > /dev/null; then
+    # For bash 4.4+
+    mapfile -t subfiles <<< "$subfs"
+else
+    while IFS= read -r line; do
+         subfiles+=("$line")
+    done <<< "$subfs"
+fi
+if [ ${#subfiles[@]} -eq 0 ]; then
+    echo -e "$RED failed to find subfiles list in $file_config $NC"
+    exit $FAILED
+fi
+nsubfiles=${#subfiles[@]}
+
+# Get the number of local subfiles
+subfiles_loc=()
+subfiles_size=()
+for i in "${subfiles[@]}"; do
+    subfile="${subfile_dir}/${i}"
+    if [ -f "${subfile}" ]; then
+        subfiles_loc+=("$subfile")
+        subfiles_size+=($(wc -c "${subfile}" | awk '{print $1}'))
+    else
+        subfiles_size+=(0)
+    fi
+done
+
 if [ "$quiet" == "false" ]; then
-    echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
+    TIMEFORMAT="COMPLETION TIME = %R s"
+    time fuse
+else
+    fuse
 fi
