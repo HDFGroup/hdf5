@@ -420,6 +420,13 @@ typedef enum H5D_selection_io_mode_t {
 } H5D_selection_io_mode_t;
 //! <!--[H5D_selection_io_mode_t_snip] -->
 
+/**
+ * Causes for H5Pget_actual_selection_io_mode() property
+ */
+#define H5D_SCALAR_IO    (0x0001u) /**< Scalar (or legacy MPIO) I/O was performed */
+#define H5D_VECTOR_IO    (0x0002u) /**< Vector I/O was performed */
+#define H5D_SELECTION_IO (0x0004u) /**< Selection I/O was performed */
+
 /********************/
 /* Public Variables */
 /********************/
@@ -5811,7 +5818,7 @@ H5_DLL int H5Pget_external_count(hid_t plist_id);
  * \note H5Pget_fill_time() is designed to work in coordination with the
  *       dataset fill value and dataset storage allocation time properties,
  *       retrieved with the functions H5Pget_fill_value() and
- *       H5Pget_alloc_time().
+ *       H5Pget_alloc_time().type == H5FD_MEM_DRAW
  *
  * \since 1.6.0
  *
@@ -8298,6 +8305,61 @@ H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selec
  *
  */
 H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+ *        during the last I/O call
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] actual_selection_io_mode A bitwise set value indicating the
+ *                                      type(s) of I/O performed
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request selection I/O to be performed via a data transfer
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
+ *      This function allows the user to determine which type or types of
+ *      I/O were actually performed.
+ *
+ * \details H5Pget_actual_selection_io_mode() allows the user to determine which
+ *          type(s) of I/O were actually performed on raw data during the last
+ *          I/O operation which used \p plist_id.  This property is set after
+ *          all I/O is completed; if I/O fails, it will not be set.
+ *
+ *          H5Pget_no_selection_io_cause() can be used to determine the reason
+ *          why selection or vector I/O was not performed.
+ *
+ *          Valid bitflags returned in \p actual_selection_io_mode are listed
+ *          as follows.
+ *
+ *          - #H5D_SCALAR_IO
+ *          Scalar (or legacy MPIO) I/O was performed
+ *          - #H5D_VECTOR_IO
+ *          Vector I/O was performed
+ *          - #H5D_SELECTION_IO
+ *          Selection I/O was performed
+ *
+ *          0 or more of these can be present in \p actual_selection_io_mode in
+ *          a bitwise fashion, since a single operation can trigger multiple
+ *          instances of I/O, possibly with different types.  A value of \p 0
+ *          indicates no raw data I/O was performed during the operation.
+ *
+ *          Be aware that this function will only include raw data I/O performed
+ *          to/from disk as part of the last I/O operation.  Any metadata
+ *          I/O, including attribute and compact dataset I/O, is disregarded.
+ *          It is also possible that data was cached in the dataset chunk cache
+ *          or sieve buffer, which may prevent I/O from hitting the disk, and
+ *          thereby prevent it from being counted by this function.
+ *
+ * \since 1.14.3
+ *
+ */
+H5_DLL herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode);
 
 /**
  *

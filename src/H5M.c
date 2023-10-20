@@ -893,9 +893,6 @@ H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     /* Set up VOL callback arguments */
     map_args.get.get_type             = H5VL_MAP_GET_COUNT;
     map_args.get.args.get_count.count = 0;
@@ -951,9 +948,6 @@ H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t 
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.put.key_mem_type_id   = key_mem_type_id;
@@ -1086,9 +1080,6 @@ H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t 
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.get_val.key_mem_type_id   = key_mem_type_id;
@@ -1225,9 +1216,6 @@ H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists,
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     /* Set up VOL callback arguments */
     map_args.exists.key_mem_type_id = key_mem_type_id;
     map_args.exists.key             = key;
@@ -1304,9 +1292,6 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                    = H5VL_MAP_ITER;
@@ -1394,9 +1379,6 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                                        = H5VL_MAP_ITER;
     map_args.specific.args.iterate.loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -1461,9 +1443,6 @@ H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else if (true != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
 
     /* Set up VOL callback arguments */
     map_args.specific.specific_type                = H5VL_MAP_DELETE;
