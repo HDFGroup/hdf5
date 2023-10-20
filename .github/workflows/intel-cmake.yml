@@ -119,7 +119,7 @@ jobs:
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-          -DCMAKE_TOOLCHAIN_FILE=config/toolchain/intel.cmake \
+#          -DCMAKE_TOOLCHAIN_FILE=config/toolchain/intel.cmake \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_BUILD_FORTRAN=OFF \
