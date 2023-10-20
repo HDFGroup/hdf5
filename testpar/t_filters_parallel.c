@@ -9803,7 +9803,8 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * yet, because there's no guarantee as to what may have been
      * read from the dataset.
      */
-    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dcpl_id, dxpl_id, read_bufs, test_mode, true, true, true);
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dcpl_id, dxpl_id, read_bufs,
+                  test_mode, true, true, true);
 
     /*
      * Write to part of the first chunk in the dataset with
