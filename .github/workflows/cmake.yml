@@ -44,3 +44,9 @@ jobs:
         uses: ./.github/workflows/intel-cmake.yml
         with:
             build_mode: "Release"
+
+    call-release-cmake-nvhpc:
+        name: "CMake nvhpc Workflows"
+        uses: ./.github/workflows/nvhpc-cmake.yml
+        with:
+            build_mode: "Release"

@@ -1207,6 +1207,30 @@ AC_ARG_ENABLE([doxygen],
 
 AC_MSG_RESULT([$HDF5_DOXYGEN])
 
+## Check if they would like to enable doxygen warnings as errors
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_DOXY_WARNINGS])
+
+## Default is to consider doxygen warnings as errors
+DOXY_ERR=yes
+
+AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
+
+AC_ARG_ENABLE([doxygen-errors],
+              [AS_HELP_STRING([--enable-doxygen-errors],
+                              [Error on HDF5 doxygen warnings [default=yes]])],
+              [DOXY_ERR=$enableval])
+
+if test "X$DOXY_ERR" = "Xyes"; then
+    HDF5_DOXY_WARNINGS="FAIL_ON_WARNINGS"
+else
+    HDF5_DOXY_WARNINGS="NO"
+
+fi
+AC_MSG_RESULT([$HDF5_DOXY_WARNINGS])
+
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DX_DOXYGEN_FEATURE(ON)
   DX_DOT_FEATURE(OFF)
@@ -1269,6 +1293,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
   DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD H5_HAVE_MIRROR_VFD'
+  DOXYGEN_WARN_AS_ERROR=${HDF5_DOXY_WARNINGS}
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 fi
@@ -4244,14 +4269,17 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 
-  ### libtool does not pass the correct argument linking (-Wl,-Wl,,) for the NAG Fortran compiler
+  ### libtool does not pass the correct linker options for some Fortran compilers
   ### on Linux (other OSs have not been tested).
-  ### Therefore, detect if we are using the NAG Fortran compiler, and replace the wl="-Wl," for Fortran to
-  ### wl="-Wl,-Wl,," in the libtool file. (HDFFV-10037)
   case "`uname`" in
     Linux*)
+      ### NAG Fortran needs to replace "-Wl," with "-Wl,-Wl,," (HDFFV-10037)
       if test "X$FC_BASENAME" = "Xnagfor"; then
          cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,-Wl,,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
+      fi
+      ### Flang needs to replace "", with "-Wl," (avoids unknown option: -soname issues)
+      if test "X$FC_BASENAME" = "Xflang"; then
+         cat libtool | awk '/BEGIN LIBTOOL TAG CONFIG: FC/{flag=1}flag&&/wl=/{$NF="wl=\"-Wl,\"";flag=0}1' > libtool.tmp && mv -f libtool.tmp libtool && chmod 755 libtool
       fi
       ;;
   esac

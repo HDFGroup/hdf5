@@ -38,9 +38,9 @@ foreach (example ${examples})
   target_compile_options(f90_ex_${example}
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
-#  set_property(TARGET f90_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
-#  set_property(TARGET f90_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>")
+#  set_property(TARGET f90_ex_${example} APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:-SUBSYSTEM:CONSOLE>")
+#  set_property(TARGET f90_ex_${example} APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_LINK_FLAGS}>")
   if(MSVC)
     set_property(TARGET f90_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
@@ -82,9 +82,9 @@ foreach (example ${F2003_examples})
   target_compile_options(f03_ex_${example}
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
-#  set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
-#  set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>")
+#  set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:-SUBSYSTEM:CONSOLE>")
+#  set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_LINK_FLAGS}>")
   if(MSVC)
     set_property(TARGET f03_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
@@ -126,9 +126,9 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   target_compile_options(f90_ex_ph5example
       PRIVATE
           "${HDF5_CMAKE_Fortran_FLAGS}"
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
-#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
-#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
+          "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>")
+#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:-SUBSYSTEM:CONSOLE>")
+#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_LINK_FLAGS}>")
   if(MSVC)
     set_property(TARGET f90_ex_ph5example PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()

@@ -9,9 +9,8 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN" 0)
+option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN" OFF)
 
-set (PLUGIN_USE_EXTERNAL "Use External Library Building for PLUGIN" 1)
 if (NOT PLUGIN_USE_LOCALCONTENT)
   set (PLUGIN_URL ${PLUGIN_TGZ_ORIGPATH}/${PLUGIN_TGZ_NAME})
 else ()
@@ -27,7 +26,7 @@ include (ExternalProject)
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-  set (PLUGIN_USE_EXTERNAL "Use External Library Building for PLUGIN" 1)
+  set (PLUGIN_USE_EXTERNAL ON CACHE BOOL "Use External Library Building for PLUGIN" FORCE)
   if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
     set (PLUGIN_URL ${PLUGIN_GIT_URL} CACHE STRING "Path to PLUGIN git repository")
     set (PLUGIN_BRANCH ${PLUGIN_GIT_BRANCH})
@@ -42,7 +41,7 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
       endif ()
     endif ()
   else ()
-    set (PLUGIN_USE_EXTERNAL 0)
+    set (PLUGIN_USE_EXTERNAL OFF CACHE BOOL "Use External Library Building for PLUGIN")
     message (VERBOSE "Filter PLUGIN not built")
   endif ()
 endif ()

@@ -146,7 +146,6 @@ SUBROUTINE test_create(total_error)
   !  Compound datatype test
 
   f_ptr = C_LOC(fill_ctype)
-
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -184,6 +183,7 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong fill value (real)", rfill, 2.0, total_error)
 
   ! For the actual compound type
+  f_ptr = C_LOC(fill_ctype)
   CALL H5Pset_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
 
@@ -254,7 +254,6 @@ SUBROUTINE test_create(total_error)
   CALL check("H5Dget_create_plist_f", error, total_error)
 
   f_ptr = C_LOC(rd_c)
-
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f", error, total_error)
   CALL verify("***ERROR: Returned wrong fill value", rd_c%a, fill_ctype%a, total_error)
@@ -440,7 +439,6 @@ END SUBROUTINE test_genprop_class_callback
 
 SUBROUTINE test_h5p_file_image(total_error)
 
-  USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) ::   fapl_1 = -1
@@ -654,7 +652,6 @@ END SUBROUTINE external_test_offset
 !
 SUBROUTINE test_vds(total_error)
 
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error

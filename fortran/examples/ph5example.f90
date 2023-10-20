@@ -16,10 +16,10 @@
      PROGRAM DATASET
 
      USE HDF5 ! This module contains all necessary modules
+     USE MPI
 
      IMPLICIT NONE
 
-     INCLUDE 'mpif.h'
      CHARACTER(LEN=10), PARAMETER :: default_fname = "sds.h5"  ! Default name
      CHARACTER(LEN=8), PARAMETER :: dsetname = "IntArray" ! Dataset name
 
@@ -72,10 +72,8 @@
      CALL h5pset_fapl_mpio_f(plist_id, comm, info, error)
 
      !
-     ! Figure out the filename to use.  If your system does not support
-     ! getenv, comment that statement with this,
-     ! filename = ""
-     CALL getenv("HDF5_PARAPREFIX", filename)
+     ! Figure out the filename to use.
+     CALL get_environment_variable("HDF5_PARAPREFIX", filename)
      fnamelen = LEN_TRIM(filename)
      if ( fnamelen == 0 ) then
 	filename = default_fname

@@ -179,7 +179,7 @@ out:
                "                    %6f = %f\n",
                (double)fok[0], (double)fptr[0], (double)fok[1], (double)fptr[1], (double)fnok[0],
                (double)fptr[2], (double)fnok[1], (double)fptr[3]);
-        puts("*FAILED - compound type alignmnent problem*");
+        puts("*FAILED - compound type alignment problem*");
     }
     else {
         puts(" PASSED");

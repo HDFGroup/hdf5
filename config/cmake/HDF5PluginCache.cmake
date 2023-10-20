@@ -6,7 +6,7 @@
 
 # examples are the tests for plugins
 set (H5PL_BUILD_TESTING ON CACHE BOOL "Enable H5PL testing" FORCE)
-set (BUILD_EXAMPLES ON CACHE BOOL "Build H5PL Examples" FORCE)
+set (BUILD_EXAMPLES ${HDF5_BUILD_EXAMPLES} CACHE BOOL "Build H5PL Examples" FORCE)
 
 #preset HDF5 cache vars to this projects libraries instead of searching
 set (H5PL_HDF5_HEADER "H5pubconf.h" CACHE STRING "Name of HDF5 header" FORCE)

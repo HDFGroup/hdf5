@@ -44,8 +44,6 @@ MODULE TH5F
 CONTAINS
 
   SUBROUTINE h5openclose(total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     INTEGER, INTENT(INOUT) :: total_error
 
@@ -141,8 +139,6 @@ CONTAINS
   END SUBROUTINE h5openclose
 
   SUBROUTINE mountingtest(cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(INOUT) :: total_error
@@ -502,8 +498,6 @@ CONTAINS
   !
 
   SUBROUTINE reopentest(cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(INOUT) :: total_error
@@ -690,8 +684,6 @@ CONTAINS
   !    correct output for a given obj_id and filename.
   !
   SUBROUTINE check_get_name(obj_id, fix_filename, len_filename, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     INTEGER(HID_T) :: obj_id                          ! Object identifier
     CHARACTER(LEN=80), INTENT(IN) :: fix_filename     ! Expected filename
@@ -780,8 +772,6 @@ CONTAINS
   !
 
   SUBROUTINE get_name_test(cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(INOUT) :: total_error
@@ -846,8 +836,6 @@ CONTAINS
   !    created using the got property lists
 
   SUBROUTINE plisttest(cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(INOUT) :: total_error
@@ -946,8 +934,6 @@ CONTAINS
   !
 
   SUBROUTINE file_close(cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(INOUT) :: total_error
@@ -1075,8 +1061,6 @@ CONTAINS
   !
 
   SUBROUTINE file_space(filename, cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     CHARACTER(*), INTENT(IN) :: filename
     LOGICAL, INTENT(IN) :: cleanup
@@ -1168,8 +1152,6 @@ CONTAINS
   !
 
   SUBROUTINE test_file_info(filename, cleanup, total_error)
-    USE HDF5  ! This module contains all necessary modules
-    USE TH5_MISC
     IMPLICIT NONE
     CHARACTER(*), INTENT(IN) :: filename
     LOGICAL, INTENT(IN) :: cleanup

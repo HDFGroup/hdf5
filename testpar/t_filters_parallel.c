@@ -26,6 +26,8 @@ static MPI_Info info     = MPI_INFO_NULL;
 static int      mpi_rank = 0;
 static int      mpi_size = 0;
 
+static int test_express_level_g;
+
 int nerrors = 0;
 
 /* Arrays of filter ID values and filter names (should match each other) */
@@ -670,11 +672,21 @@ create_datasets(hid_t parent_obj_id, const char *dset_name, hid_t type_id, hid_t
         case USE_MULTIPLE_DATASETS:
         case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
             dset_name_ptr = dset_name_multi_buf;
-            n_dsets       = (rand() % (MAX_NUM_DSETS_MULTI - 1)) + 2;
+
+            if (MAINPROCESS)
+                n_dsets = (rand() % (MAX_NUM_DSETS_MULTI - 1)) + 2;
+
+            if (mpi_size > 1)
+                VRFY((MPI_SUCCESS == MPI_Bcast(&n_dsets, 1, MPI_INT, 0, comm)), "MPI_Bcast succeeded");
 
             /* Select between 1 and (n_dsets - 1) datasets to be unfiltered */
             if (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
-                n_unfiltered = (rand() % (n_dsets - 1)) + 1;
+                if (MAINPROCESS)
+                    n_unfiltered = (rand() % (n_dsets - 1)) + 1;
+
+                if (mpi_size > 1)
+                    VRFY((MPI_SUCCESS == MPI_Bcast(&n_unfiltered, 1, MPI_INT, 0, comm)),
+                         "MPI_Bcast succeeded");
 
                 unfiltered_dcpl = H5Pcopy(dcpl_id);
                 VRFY((unfiltered_dcpl >= 0), "H5Pcopy succeeded");
@@ -715,7 +727,11 @@ create_datasets(hid_t parent_obj_id, const char *dset_name, hid_t type_id, hid_t
              * remaining datasets as unfiltered datasets. Otherwise,
              * randomly determine if a dataset will be unfiltered.
              */
-            unfiltered = ((size_t)n_unfiltered == dsets_left) || ((rand() % 2) == 0);
+            if (MAINPROCESS)
+                unfiltered = ((size_t)n_unfiltered == dsets_left) || ((rand() % 2) == 0);
+
+            if (mpi_size > 1)
+                VRFY((MPI_SUCCESS == MPI_Bcast(&unfiltered, 1, MPI_C_BOOL, 0, comm)), "MPI_Bcast succeeded");
 
             if (unfiltered) {
                 curr_dcpl = unfiltered_dcpl;
@@ -1311,6 +1327,12 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
 
+    /*
+     * Since we're only doing a partial write to the dataset, make
+     * sure the fill time is set appropriately
+     */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
+
     VRFY((H5Pset_chunk(plist_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_DIMS, chunk_dims) >= 0),
          "Chunk size set");
 
@@ -1597,6 +1619,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     hsize_t     block[WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     size_t      data_size;
     size_t      num_dsets;
+    size_t      num_loops;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
     hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
     hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
@@ -1663,7 +1686,12 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
         read_bufs[dset_idx] = tmp_buf;
     }
 
-    for (size_t i = 0; i < (size_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS; i++) {
+    /* Determine number of loops to run through */
+    num_loops = WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS;
+    if ((test_mode == USE_MULTIPLE_DATASETS) || (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
+        num_loops /= 2;
+
+    for (size_t i = 0; i < num_loops; i++) {
         /* Each process defines the dataset selection in memory and writes
          * it to the hyperslab in the file
          */
@@ -1702,7 +1730,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
             VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
                  "Data verification succeeded");
 
-        if (i < (size_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS - 1) {
+        if (i < num_loops - 1) {
             /* Extend the dataset(s) by count[1] chunks in the extensible dimension */
             dataset_dims[1] += count[1] * block[1];
 
@@ -1758,6 +1786,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     hsize_t     block[WRITE_SHARED_ONE_UNLIM_DIM_DATASET_DIMS];
     size_t      data_size;
     size_t      num_dsets;
+    size_t      num_loops;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
     hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
     hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
@@ -1824,7 +1853,12 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
         read_bufs[dset_idx] = tmp_buf;
     }
 
-    for (size_t i = 0; i < (size_t)WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS; i++) {
+    /* Determine number of loops to run through */
+    num_loops = WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS;
+    if ((test_mode == USE_MULTIPLE_DATASETS) || (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
+        num_loops /= 2;
+
+    for (size_t i = 0; i < num_loops; i++) {
         /* Each process defines the dataset selection in memory and writes
          * it to the hyperslab in the file
          */
@@ -1862,7 +1896,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
             VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
                  "Data verification succeeded");
 
-        if (i < (size_t)WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS - 1) {
+        if (i < num_loops - 1) {
             /* Extend the dataset(s) by count[1] chunks in the extensible dimension */
             dataset_dims[1] += count[1] * block[1];
 
@@ -1920,6 +1954,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     hsize_t     block[WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     size_t      data_size;
     size_t      num_dsets;
+    size_t      num_loops;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
     hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
     hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
@@ -1967,7 +2002,12 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    for (size_t i = 0; i < (size_t)WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS; i++) {
+    /* Determine number of loops to run through */
+    num_loops = WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS;
+    if ((test_mode == USE_MULTIPLE_DATASETS) || (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
+        num_loops /= 2;
+
+    for (size_t i = 0; i < num_loops; i++) {
         /* Set selected dimensions */
         sel_dims[0] = (i + 1) * WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NROWS;
         sel_dims[1] = (i + 1) * WRITE_UNSHARED_TWO_UNLIM_DIM_CH_NCOLS;
@@ -2028,7 +2068,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
             VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
                  "Data verification succeeded");
 
-        if (i < (size_t)WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS - 1) {
+        if (i < num_loops - 1) {
             /*
              * Extend the dataset(s) by the size of one chunk per rank
              * in the first extensible dimension. Extend the dataset(s)
@@ -2089,6 +2129,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     hsize_t     block[WRITE_SHARED_TWO_UNLIM_DIM_DATASET_DIMS];
     size_t      data_size;
     size_t      num_dsets;
+    size_t      num_loops;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
     hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
     hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
@@ -2136,7 +2177,12 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
 
-    for (size_t i = 0; i < (size_t)WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS; i++) {
+    /* Determine number of loops to run through */
+    num_loops = WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS;
+    if ((test_mode == USE_MULTIPLE_DATASETS) || (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
+        num_loops /= 2;
+
+    for (size_t i = 0; i < num_loops; i++) {
         /* Set selected dimensions */
         sel_dims[0] = (i + 1);
         sel_dims[1] = (i + 1) * (size_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS;
@@ -2197,7 +2243,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
             VRFY((0 == memcmp(read_bufs[dset_idx], data_bufs[dset_idx], data_size)),
                  "Data verification succeeded");
 
-        if (i < (size_t)WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS - 1) {
+        if (i < num_loops - 1) {
             /* Extend the dataset(s) by the size of a chunk in each extensible dimension */
             dataset_dims[0] += (hsize_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NROWS;
             dataset_dims[1] += (hsize_t)WRITE_SHARED_TWO_UNLIM_DIM_CH_NCOLS;
@@ -2291,6 +2337,12 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    /*
+     * Since we're only doing a partial write to the dataset, make
+     * sure the fill time is set appropriately
+     */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
 
     VRFY((H5Pset_chunk(plist_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
          "Chunk size set");
@@ -2459,6 +2511,12 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    /*
+     * Since we're doing a no-op write to the dataset,
+     * make sure the fill time is set appropriately
+     */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
 
     VRFY((H5Pset_chunk(plist_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
          "Chunk size set");
@@ -5398,7 +5456,6 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     void       *read_bufs[MAX_NUM_DSETS_MULTI]    = {0};
     hsize_t     dataset_dims[READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
-    hsize_t     sel_dims[READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     size_t      data_size, read_buf_size;
     size_t      num_dsets;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
@@ -5515,8 +5572,6 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
 
     open_datasets(group_id, READ_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, num_dsets, test_mode,
                   dset_ids);
-
-    sel_dims[0] = sel_dims[1] = 0;
 
     select_none(num_dsets, dset_ids, fspace_ids);
 
@@ -8432,6 +8487,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     hsize_t     block[SHRINKING_GROWING_CHUNKS_DATASET_DIMS];
     size_t      data_size;
     size_t      num_dsets;
+    size_t      num_loops;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
     hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
     hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
@@ -8509,7 +8565,12 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
         read_bufs[dset_idx] = tmp_buf;
     }
 
-    for (size_t i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
+    /* Determine number of loops to run through */
+    num_loops = SHRINKING_GROWING_CHUNKS_NLOOPS;
+    if ((test_mode == USE_MULTIPLE_DATASETS) || (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
+        num_loops /= 2;
+
+    for (size_t i = 0; i < num_loops; i++) {
         for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
             /* Continually write random float data, followed by zeroed-out data */
             if (i % 2)
@@ -8700,6 +8761,12 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
 
     filespace = H5Screate_simple(WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    /*
+     * Since we're only doing a partial write to the dataset, make
+     * sure the fill time is set appropriately
+     */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
 
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
@@ -8905,6 +8972,12 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     filespace = H5Screate_simple(WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
     VRFY((filespace >= 0), "File dataspace creation succeeded");
 
+    /*
+     * Since we're only doing a partial write to the dataset, make
+     * sure the fill time is set appropriately
+     */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
+
     H5Pset_chunk_opts(plist_id, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
 
     /* Create datasets depending on the current test mode */
@@ -9026,6 +9099,9 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Create chunked dataset */
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
+
+    /* Make sure the fill time is set appropriately */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
 
     VRFY((H5Pset_chunk(plist_id, FILL_VALUES_TEST_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
@@ -9394,6 +9470,9 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     plist_id = H5Pcopy(dcpl_id);
     VRFY((plist_id >= 0), "DCPL copy succeeded");
 
+    /* Make sure the fill time is set appropriately */
+    VRFY((H5Pset_fill_time(plist_id, H5D_FILL_TIME_IFSET) >= 0), "H5Pset_fill_time succeeded");
+
     VRFY((H5Pset_chunk(plist_id, FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS, chunk_dims) >= 0), "Chunk size set");
 
     /* Add test filter to the pipeline */
@@ -9616,12 +9695,10 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     size_t      num_dsets;
     hid_t       dset_ids[MAX_NUM_DSETS_MULTI];
     hid_t       fspace_ids[MAX_NUM_DSETS_MULTI];
-    hid_t       file_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
-    hid_t       group_id   = H5I_INVALID_HID;
-    hid_t       filespace  = H5I_INVALID_HID;
-    int        *recvcounts = NULL;
-    int        *displs     = NULL;
-    int         mpi_code;
+    hid_t       file_id   = H5I_INVALID_HID;
+    hid_t       plist_id  = H5I_INVALID_HID;
+    hid_t       group_id  = H5I_INVALID_HID;
+    hid_t       filespace = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         puts("Testing fill time H5D_FILL_TIME_NEVER");
@@ -9671,7 +9748,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     VRFY((set_dcpl_filter(plist_id, filter_id, NULL) >= 0), "Filter set");
 
     /* Set a fill value */
-    fill_value = FILL_VALUES_TEST_FILL_VAL;
+    fill_value = FILL_TIME_NEVER_TEST_FILL_VAL;
     VRFY((H5Pset_fill_value(plist_id, HDF5_DATATYPE_NAME, &fill_value) >= 0), "Fill Value set");
 
     /* Set fill time of 'never' */
@@ -9685,6 +9762,21 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     verify_space_alloc_status(num_dsets, dset_ids, plist_id, DATASET_JUST_CREATED);
 
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+    /* Allocate buffer for reading entire dataset */
+    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
+
+    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
+        read_bufs[dset_idx] = calloc(1, read_buf_size);
+        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
+    }
+
+    /* Allocate buffer of fill values */
+    fill_buf = calloc(1, read_buf_size);
+    VRFY((NULL != fill_buf), "calloc succeeded");
+
+    for (size_t i = 0; i < read_buf_size / sizeof(C_DATATYPE); i++)
+        fill_buf[i] = FILL_TIME_NEVER_TEST_FILL_VAL;
 
     /*
      * Since we aren't writing fill values to the chunks of the
@@ -9705,38 +9797,21 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 
     open_datasets(group_id, FILL_TIME_NEVER_TEST_DATASET_NAME, num_dsets, test_mode, dset_ids);
 
-    /* Allocate buffer for reading entire dataset */
-    read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(C_DATATYPE);
-
-    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
-        read_bufs[dset_idx] = calloc(1, read_buf_size);
-        VRFY((NULL != read_bufs[dset_idx]), "calloc succeeded");
-    }
-
-    fill_buf = calloc(1, read_buf_size);
-    VRFY((NULL != fill_buf), "calloc succeeded");
-
-    /* Read entire dataset and verify that the fill value isn't returned */
-    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dcpl_id, dxpl_id, read_bufs,
-                  test_mode, true, true, true);
-
-    for (size_t i = 0; i < read_buf_size / sizeof(C_DATATYPE); i++)
-        fill_buf[i] = FILL_TIME_NEVER_TEST_FILL_VAL;
-
     /*
-     * It should be very unlikely for the dataset's random
-     * values to all be the fill value, so this should be
-     * a safe comparison in theory.
+     * Read entire dataset just to try to verify bad behavior doesn't
+     * occur. Don't attempt to verify the contents of the read buffer(s)
+     * yet, because there's no guarantee as to what may have been
+     * read from the dataset.
      */
-    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
-        VRFY((0 != memcmp(read_bufs[dset_idx], fill_buf, read_buf_size)), "Data verification succeeded");
+    read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dcpl_id, dxpl_id, read_bufs, test_mode, true, true, true);
 
     /*
      * Write to part of the first chunk in the dataset with
-     * all ranks, then read the whole dataset and ensure that
-     * the fill value isn't returned for the unwritten part of
-     * the chunk, as well as for the rest of the dataset that
-     * hasn't been written to yet.
+     * all ranks, then read the whole dataset just to try to
+     * verify bad behavior doesn't occur. Don't attempt to
+     * verify the contents of the read buffer(s) yet, because
+     * there's no guarantee as to what may have been read from
+     * the dataset.
      */
     count[0]  = 1;
     count[1]  = 1;
@@ -9777,34 +9852,6 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
 
     read_datasets(num_dsets, dset_ids, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dcpl_id, dxpl_id, read_bufs,
                   test_mode, true, true, false);
-
-    /*
-     * Each MPI rank communicates their written piece of data
-     * into each other rank's correctness-checking buffer
-     */
-    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "calloc succeeded");
-
-    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "calloc succeeded");
-
-    for (size_t i = 0; i < (size_t)mpi_size; i++) {
-        recvcounts[i] = (int)(count[1] * block[1]);
-        displs[i]     = (int)(i * dataset_dims[1]);
-    }
-
-    for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
-        mpi_code = MPI_Allgatherv(data_bufs[dset_idx], recvcounts[mpi_rank], C_DATATYPE_MPI, fill_buf,
-                                  recvcounts, displs, C_DATATYPE_MPI, comm);
-        VRFY((MPI_SUCCESS == mpi_code), "MPI_Allgatherv succeeded");
-
-        /*
-         * It should be very unlikely for the dataset's random
-         * values to all be the fill value, so this should be
-         * a safe comparison in theory.
-         */
-        VRFY((0 != memcmp(read_bufs[dset_idx], fill_buf, read_buf_size)), "Data verification succeeded");
-    }
 
     for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++)
         VRFY((H5Sclose(fspace_ids[dset_idx]) >= 0), "File dataspace close succeeded");
@@ -9850,9 +9897,6 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
             VRFY((tmp_buf[j] != FILL_TIME_NEVER_TEST_FILL_VAL), "Data verification succeeded");
     }
 
-    free(displs);
-    free(recvcounts);
-
     free(fill_buf);
 
     for (size_t dset_idx = 0; dset_idx < num_dsets; dset_idx++) {
@@ -9877,14 +9921,16 @@ int
 main(int argc, char **argv)
 {
     unsigned seed;
-    size_t   cur_filter_idx = 0;
-    size_t   num_filters    = 0;
-    hid_t    file_id        = H5I_INVALID_HID;
-    hid_t    fcpl_id        = H5I_INVALID_HID;
-    hid_t    group_id       = H5I_INVALID_HID;
-    hid_t    fapl_id        = H5I_INVALID_HID;
-    hid_t    dxpl_id        = H5I_INVALID_HID;
-    hid_t    dcpl_id        = H5I_INVALID_HID;
+    double   total_test_time  = 0.0;
+    size_t   cur_filter_idx   = 0;
+    size_t   num_filters      = 0;
+    hid_t    file_id          = H5I_INVALID_HID;
+    hid_t    fcpl_id          = H5I_INVALID_HID;
+    hid_t    group_id         = H5I_INVALID_HID;
+    hid_t    fapl_id          = H5I_INVALID_HID;
+    hid_t    dxpl_id          = H5I_INVALID_HID;
+    hid_t    dcpl_id          = H5I_INVALID_HID;
+    bool     expedite_testing = false;
     int      mpi_code;
 
     /* Initialize MPI */
@@ -9936,6 +9982,17 @@ main(int argc, char **argv)
     TestAlarmOn();
 
     /*
+     * Get the TestExpress level setting
+     */
+    test_express_level_g = GetTestExpress();
+    if ((test_express_level_g >= 1) && MAINPROCESS) {
+        printf("** Some tests will be skipped due to TestExpress setting.\n");
+        printf("** Exhaustive tests will only be performed for the first available filter.\n");
+        printf("** Set the HDF5TestExpress environment variable to 0 to perform exhaustive testing for all "
+               "available filters.\n\n");
+    }
+
+    /*
      * Obtain and broadcast seed value since ranks
      * aren't guaranteed to arrive here at exactly
      * the same time and could end up out of sync
@@ -9956,8 +10013,13 @@ main(int argc, char **argv)
 
     srand(seed);
 
-    if (MAINPROCESS)
-        printf("Using seed: %u\n\n", seed);
+    /* Print test settings */
+    if (MAINPROCESS) {
+        printf("Test Info:\n");
+        printf("  MPI size: %d\n", mpi_size);
+        printf("  Test express level: %d\n", test_express_level_g);
+        printf("  Using seed: %u\n\n", seed);
+    }
 
     num_filters = ARRAY_SIZE(filterIDs);
 
@@ -9979,7 +10041,13 @@ main(int argc, char **argv)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     VRFY((fcpl_id >= 0), "FCPL creation succeeded");
 
-    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, true, 1) >= 0),
+    /*
+     * TODO: Ideally, use persistent free space management. However,
+     * this occasionally runs into an infinite loop in the library's
+     * free space management code, so don't persist free space for now
+     * until that is fixed.
+     */
+    VRFY((H5Pset_file_space_strategy(fcpl_id, H5F_FSPACE_STRATEGY_PAGE, false, 1) >= 0),
          "H5Pset_file_space_strategy succeeded");
 
     VRFY((h5_fixname(FILENAME[0], fapl_id, filenames[0], sizeof(filenames[0])) != NULL),
@@ -10001,9 +10069,26 @@ main(int argc, char **argv)
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dcpl_id >= 0), "DCPL creation succeeded");
 
+    /* Add a space after the HDF5_PARAPREFIX notice from h5_fixname */
+    if (MAINPROCESS)
+        puts("");
+
     /* Run tests with all available filters */
     for (cur_filter_idx = 0; cur_filter_idx < num_filters; cur_filter_idx++) {
         H5D_selection_io_mode_t sel_io_mode;
+        H5Z_filter_t            cur_filter = filterIDs[cur_filter_idx];
+        htri_t                  filter_avail;
+
+        /* Make sure current filter is available before testing with it */
+        filter_avail = H5Zfilter_avail(cur_filter);
+        VRFY((filter_avail >= 0), "H5Zfilter_avail succeeded");
+
+        if (!filter_avail) {
+            if (MAINPROCESS)
+                printf("== SKIPPED tests with filter '%s' - filter unavailable ==\n\n",
+                       filterNames[cur_filter_idx]);
+            continue;
+        }
 
         /* Run tests with different selection I/O modes */
         for (sel_io_mode = H5D_SELECTION_IO_MODE_DEFAULT; sel_io_mode <= H5D_SELECTION_IO_MODE_ON;
@@ -10021,13 +10106,13 @@ main(int argc, char **argv)
 
                     /* Run with each of the test modes (single dataset, multiple datasets, etc.) */
                     for (test_mode = USE_SINGLE_DATASET; test_mode < TEST_MODE_SENTINEL; test_mode++) {
-                        H5Z_filter_t cur_filter = filterIDs[cur_filter_idx];
-                        const char  *sel_io_str;
-                        const char  *alloc_time;
-                        const char  *mode;
-                        unsigned     filter_config;
-                        htri_t       filter_avail;
-                        char         group_name[512];
+                        const char *sel_io_str;
+                        const char *alloc_time;
+                        const char *mode;
+                        unsigned    filter_config;
+                        double      start_time = 0.0;
+                        double      end_time   = 0.0;
+                        char        group_name[512];
 
                         switch (sel_io_mode) {
                             case H5D_SELECTION_IO_MODE_DEFAULT:
@@ -10074,7 +10159,37 @@ main(int argc, char **argv)
                                 mode = "unknown";
                         }
 
-                        if (MAINPROCESS)
+                        /*
+                         * If expediting the remaining tests, just run with a single
+                         * configuration that is interesting enough. In this case,
+                         * run with:
+                         *
+                         *   - A single dataset
+                         *   - Incremental file space allocation timing
+                         *   - Linked-chunk (single) I/O
+                         *   - The default setting for selection I/O
+                         */
+                        if (expedite_testing) {
+                            if (test_mode != USE_SINGLE_DATASET || space_alloc_time != H5D_ALLOC_TIME_INCR ||
+                                chunk_opt != H5FD_MPIO_CHUNK_ONE_IO ||
+                                sel_io_mode != H5D_SELECTION_IO_MODE_DEFAULT)
+                                continue;
+                        }
+
+                        /*
+                         * If TestExpress is > 1, only run the multi-chunk I/O
+                         * configuration tests for the 'USE_SINGLE_DATASET' case,
+                         * as the 'USE_MULTIPLE_DATASETS' and 'USE_MULTIPLE_DATASETS_MIXED_FILTERED'
+                         * cases are more stressful on the file system.
+                         */
+                        if (test_express_level_g > 1) {
+                            if (((test_mode == USE_MULTIPLE_DATASETS) ||
+                                 (test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED)) &&
+                                (chunk_opt != H5FD_MPIO_CHUNK_ONE_IO))
+                                continue;
+                        }
+
+                        if (MAINPROCESS) {
                             printf("== Running tests in mode '%s' with filter '%s' using selection I/O mode "
                                    "'%s', '%s' and '%s' allocation time ==\n\n",
                                    test_mode_to_string(test_mode), filterNames[cur_filter_idx], sel_io_str,
@@ -10082,15 +10197,7 @@ main(int argc, char **argv)
                                                                        : "Multi-Chunk I/O",
                                    alloc_time);
 
-                        /* Make sure current filter is available before testing with it */
-                        filter_avail = H5Zfilter_avail(cur_filter);
-                        VRFY((filter_avail >= 0), "H5Zfilter_avail succeeded");
-
-                        if (!filter_avail) {
-                            if (MAINPROCESS)
-                                printf(" ** SKIPPED tests with filter '%s' - filter unavailable **\n\n",
-                                       filterNames[cur_filter_idx]);
-                            continue;
+                            start_time = MPI_Wtime();
                         }
 
                         /* Get the current filter's info */
@@ -10117,6 +10224,15 @@ main(int argc, char **argv)
                         /* Set chunk I/O optimization method */
                         VRFY((H5Pset_dxpl_mpio_chunk_opt(dxpl_id, chunk_opt) >= 0),
                              "H5Pset_dxpl_mpio_chunk_opt succeeded");
+
+                        /*
+                         * Disable writing of fill values by default. Otherwise, a
+                         * lot of time may be spent writing fill values to chunks
+                         * when they're going to be fully overwritten anyway.
+                         * Individual tests will alter this behavior as necessary.
+                         */
+                        VRFY((H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_NEVER) >= 0),
+                             "H5Pset_fill_time succeeded");
 
                         /* Create a group to hold all the datasets for this combination
                          * of filter and chunk optimization mode. Then, close the file
@@ -10155,10 +10271,23 @@ main(int argc, char **argv)
 
                         if (MAINPROCESS)
                             puts("");
+
+                        if (MAINPROCESS) {
+                            end_time = MPI_Wtime();
+                            total_test_time += end_time - start_time;
+                            printf("Tests took %f seconds\n\n", end_time - start_time);
+                        }
                     }
                 }
             }
         }
+
+        /*
+         * If the TestExpress level setting isn't set for exhaustive
+         * testing, run smoke checks for the other filters
+         */
+        if (!expedite_testing && (test_express_level_g >= 1))
+            expedite_testing = true;
     }
 
     VRFY((H5Pclose(dcpl_id) >= 0), "DCPL close succeeded");
@@ -10171,7 +10300,7 @@ main(int argc, char **argv)
         goto exit;
 
     if (MAINPROCESS)
-        puts("All Parallel Filters tests passed\n");
+        printf("All Parallel Filters tests passed - total test time was %f seconds\n", total_test_time);
 
 exit:
     if (nerrors)
