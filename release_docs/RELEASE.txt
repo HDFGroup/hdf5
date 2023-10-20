@@ -385,15 +385,15 @@ Bug Fixes since HDF5-1.14.0 release
       get loaded collectively by all MPI ranks at the start of dataset
       I/O to ensure that the ranks don't unintentionally read this
       metadata independently further on. These changes fix collective
-      loading of the main chunk index structure, as well as extensible
-      array index blocks and fixed array data blocks. There are still
-      pieces of metadata that cannot currently be loaded collectively,
-      however, such as extensible array data blocks, data block pages
-      and super blocks, as well as fixed array data block pages. These
-      pieces of metadata are not necessarily read in by all MPI ranks
-      since this depends on which chunks the ranks have selected in
-      the dataset. Therefore, reading of these pieces of metadata
-      remains an independent operation.
+      loading of the main chunk index structure, as well as v2 B-tree
+      root nodes, extensible array index blocks and fixed array data
+      blocks. There are still pieces of metadata that cannot currently
+      be loaded collectively, however, such as extensible array data
+      blocks, data block pages and super blocks, as well as fixed array
+      data block pages. These pieces of metadata are not necessarily
+      read in by all MPI ranks since this depends on which chunks the
+      ranks have selected in the dataset. Therefore, reading of these
+      pieces of metadata remains an independent operation.
 
     - Dropped support for MPI-2
 
