@@ -712,7 +712,7 @@ of the library for reading or writing the actual data.</td>
 </tr>
 <tr>
 <td>#H5Pget_actual_selection_io_mode</td>
-<td>Gets the type(s) (scalar, vector, selection) of raw data I/O performed I/O on the last I/O call.</td>
+<td>Gets the type(s) (scalar, vector, selection) of raw data I/O performed on the last I/O call.</td>
 </tr>
 <tr>
 <td>#H5Pset_modify_write_buf/#H5Pget_modify_write_buf</td>

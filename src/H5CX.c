@@ -2546,7 +2546,7 @@ H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode)
     assert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
     /* This property is a special case - we want to wipe out any previous setting.  Copy the default setting
-     * if  */
+     * if it has not been set yet. */
     if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT && !(*head)->ctx.actual_selection_io_mode_set &&
         !(*head)->ctx.actual_selection_io_mode_valid) {
         (*head)->ctx.actual_selection_io_mode     = H5CX_def_dxpl_cache.actual_selection_io_mode;
@@ -3548,7 +3548,7 @@ H5CX_set_actual_selection_io_mode(uint32_t actual_selection_io_mode)
     if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {
         /* Cache the value for later, marking it to set in DXPL when context popped */
         (*head)->ctx.actual_selection_io_mode     = actual_selection_io_mode;
-        (*head)->ctx.actual_selection_io_mode_set = TRUE;
+        (*head)->ctx.actual_selection_io_mode_set = true;
     }
 
     FUNC_LEAVE_NOAPI_VOID

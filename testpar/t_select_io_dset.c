@@ -3567,20 +3567,12 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     /* Datatype conversion */
     if (test_mode & TEST_DATATYPE_CONVERSION) {
 
-        /* With one exception, all will land at H5FD__mpio_read/write_selection().
-         * As the xfer mode is H5FD_MPIO_INDEPENDENT, this will call
-         * H5FD__read/write_from_selection() triggering H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB.
-         */
-        //    no_selection_io_cause_read_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+        /* With one exception, all will land at H5FD__mpio_read/write_selection() */
 
-        /* Exception case: This will turn off selection I/O landing at H5FD__mpio_write() */
-        if ((test_mode & TEST_TCONV_BUF_TOO_SMALL) && !(test_mode & TEST_IN_PLACE_TCONV))
-            no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
-        else
-            //       no_selection_io_cause_write_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
-
-            if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        if (test_mode & TEST_IN_PLACE_TCONV)
+            if (H5Pset_modify_write_buf(dxpl, true) < 0)
                 P_TEST_ERROR;
+
         tid = H5T_NATIVE_UINT;
 
         /* If we're testing a too small tconv buffer, set the buffer to be too small */
@@ -3588,11 +3580,10 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
             if (H5Pset_buffer(dxpl, sizeof(int), NULL, NULL) < 0)
                 P_TEST_ERROR;
 
-            if (test_mode & TEST_IN_PLACE_TCONV) {
-                if (H5Pset_modify_write_buf(dxpl, true) < 0)
-                    P_TEST_ERROR;
-            }
-            /* In-place type conversion for read doesn't require modify_write_buf */
+            /* Exception case: When the type conversion buffer is too small and we're not allowing the library to modify the write buffer, the library will fall back to scalar independent I/O since the selection I/O path with type conversion requires a full size conversion buffer */
+            if (!(test_mode & TEST_IN_PLACE_TCONV))
+                /* In-place type conversion for read doesn't require modify_write_buf, so the read will still use selection I/O */
+                no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
         }
     }
 
@@ -3664,9 +3655,6 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 static void
 test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
-    hid_t                   dxpl = H5I_INVALID_HID;
-    H5D_selection_io_mode_t selection_io_mode;
-
     if (MAINPROCESS) {
         printf("\n");
         TESTING("for H5Pget_no_selection_io_cause()");
@@ -3674,24 +3662,8 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 
     curr_nerrors = nerrors;
 
-    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        P_TEST_ERROR;
-    if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
-        P_TEST_ERROR;
-    if (H5Pclose(dxpl) < 0)
-        P_TEST_ERROR;
-
-    /* The following tests are based on H5D_SELECTION_IO_MODE_DEFAULT as the
-     * default setting in the library; skip the tests if that is not true */
-    if (selection_io_mode != H5D_SELECTION_IO_MODE_DEFAULT) {
-        if (MAINPROCESS)
-            SKIPPED();
-        return;
-    }
-
     test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
     test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
-    /* CHECK: the following tests: modified to have 0 expected ... things changed */
     test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
     test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
     test_no_selection_io_cause_mode(

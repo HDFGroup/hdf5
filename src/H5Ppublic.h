@@ -5818,7 +5818,7 @@ H5_DLL int H5Pget_external_count(hid_t plist_id);
  * \note H5Pget_fill_time() is designed to work in coordination with the
  *       dataset fill value and dataset storage allocation time properties,
  *       retrieved with the functions H5Pget_fill_value() and
- *       H5Pget_alloc_time().
+ *       H5Pget_alloc_time().type == H5FD_MEM_DRAW
  *
  * \since 1.6.0
  *
@@ -8356,7 +8356,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *          or sieve buffer, which may prevent I/O from hitting the disk, and
  *          thereby prevent it from being counted by this function.
  *
- * \since 1.14.2
+ * \since 1.14.3
  *
  */
 H5_DLL herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode);

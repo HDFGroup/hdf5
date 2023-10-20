@@ -259,7 +259,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
     /* Set actual selection I/O, if this is a raw data operation */
-    if (type == H5FD_MEM_DRAW && size > 0) {
+    if (type == H5FD_MEM_DRAW) {
         H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
         actual_selection_io_mode |= H5D_SCALAR_IO;
         H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -318,7 +318,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
 
     /* Set actual selection I/O, if this is a raw data operation */
-    if (type == H5FD_MEM_DRAW && size > 0) {
+    if (type == H5FD_MEM_DRAW) {
         H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
         actual_selection_io_mode |= H5D_SCALAR_IO;
         H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -480,7 +480,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
         /* We must still check if this is a raw data read */
         for (i = 0; i < count && types[i] != H5FD_MEM_NOLIST; i++)
             if (types[i] == H5FD_MEM_DRAW) {
-                is_raw = TRUE;
+                is_raw = true;
                 break;
             }
 
@@ -693,7 +693,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
 
                 /* Check for raw data operation */
                 if (type == H5FD_MEM_DRAW)
-                    is_raw = TRUE;
+                    is_raw = true;
             }
         }
 
@@ -1067,13 +1067,13 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW) {
+        if (type == H5FD_MEM_DRAW && count > 0) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_VECTOR_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
         }
     }
-    else {
+    else if (count > 0) {
         uint32_t no_selection_io_cause;
         uint32_t actual_selection_io_mode;
 
@@ -1270,7 +1270,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW) {
+        if (type == H5FD_MEM_DRAW && count > 0) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -1433,7 +1433,7 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW) {
+        if (type == H5FD_MEM_DRAW && count > 0) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -1759,13 +1759,13 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW) {
+        if (type == H5FD_MEM_DRAW && count > 0) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_VECTOR_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
         }
     }
-    else {
+    else if (count > 0) {
         uint32_t no_selection_io_cause;
         uint32_t actual_selection_io_mode;
 
@@ -1954,7 +1954,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW) {
+        if (type == H5FD_MEM_DRAW && count > 0) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -2110,7 +2110,7 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW) {
+        if (type == H5FD_MEM_DRAW && count > 0) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
