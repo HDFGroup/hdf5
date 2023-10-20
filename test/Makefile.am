@@ -229,7 +229,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 mdset.h5 compact_dataset.h5 dataset.h5 d
     splitter*.h5 splitter.log mirror_rw mirror_ro event_set_[0-9].h5 \
     cmpd_dtransform.h5 single_latest.h5 source_file.h5 stdio_file.h5 \
     tfile_is_accessible.h5 tfile_is_accessible_non_hdf5.h5 tverbounds_dtype.h5 \
-    virtual_file1.h5
+    virtual_file1.h5 flushrefresh_test
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
