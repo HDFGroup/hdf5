@@ -228,6 +228,12 @@ New Features
 
     Library:
     --------
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
+
     - Added support for in-place type conversion in most cases
 
       In-place type conversion allows the library to perform type conversion
