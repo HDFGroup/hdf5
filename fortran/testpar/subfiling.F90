@@ -337,7 +337,7 @@ PROGRAM subfiling_test
         WRITE(*,"(A,A)") "Failed to find the stub subfile ",TRIM(filename)
         nerrors = nerrors + 1
      ENDIF
-#if __APPLE__
+#ifdef H5_HAVE_DARWIN
      arg(1:1)="f"
 #else
      arg(1:1)="c"
