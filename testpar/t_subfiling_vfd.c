@@ -100,18 +100,24 @@ static void test_subfiling_precreate_rank_0(void);
 static void test_subfiling_write_many_read_one(void);
 static void test_subfiling_write_many_read_few(void);
 static void test_subfiling_h5fuse(void);
+#ifdef H5_HAVE_FILTER_DEFLATE
+static void t_zlib(void);
+#endif
 
-static test_func tests[] = {
-    test_create_and_close,
-    test_ioc_only_fail,
-    test_config_file,
-    test_stripe_sizes,
-    test_selection_strategies,
-    test_read_different_stripe_size,
-    test_subfiling_precreate_rank_0,
-    test_subfiling_write_many_read_one,
-    test_subfiling_write_many_read_few,
-    test_subfiling_h5fuse,
+static test_func tests[] = {test_create_and_close,
+                            test_ioc_only_fail,
+                            test_config_file,
+                            test_stripe_sizes,
+                            test_selection_strategies,
+                            test_read_different_stripe_size,
+                            test_subfiling_precreate_rank_0,
+                            test_subfiling_write_many_read_one,
+                            test_subfiling_write_many_read_few,
+                            test_subfiling_h5fuse
+#ifdef H5_HAVE_FILTER_DEFLATE
+                            ,
+                            t_zlib
+#endif
 };
 
 /* ---------------------------------------------------------------------------
@@ -1537,7 +1543,6 @@ test_subfiling_write_many_read_one(void)
 
     free(buf);
     buf = NULL;
-
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -2116,6 +2121,159 @@ parse_subfiling_env_vars(void)
     }
 }
 
+#ifdef H5_HAVE_FILTER_DEFLATE
+/*
+ * Test zlib.
+ */
+#define SUBF_FILENAME  "t_zlib.h5"
+#define SUBF_HDF5_TYPE H5T_NATIVE_INT
+#define SUBF_C_TYPE    int
+static void
+t_zlib(void)
+{
+    hsize_t start[1];
+    hsize_t count[1];
+    hsize_t dset_dims[1];
+    hsize_t chunk_dims[1];
+    size_t  target_size;
+    hid_t   file_id   = H5I_INVALID_HID;
+    hid_t   fapl_id   = H5I_INVALID_HID;
+    hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   dxpl_id   = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    hid_t   plist_id  = H5I_INVALID_HID;
+    void   *buf       = NULL;
+
+    curr_nerrors = nerrors;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio() succeeded");
+
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
+
+    if (MAINPROCESS)
+        TESTING_2("write zlib & read w/ single MPI rank");
+
+    /* Get a default Subfiling FAPL */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    /* Create file on all ranks */
+    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate() succeeded");
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    /* Calculate target size for dataset to stripe it across available IOCs */
+    target_size = (stripe_size_g > 0) ? (size_t)stripe_size_g : H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+
+    /* Nudge stripe size to be multiple of C type size */
+    if ((target_size % sizeof(SUBF_C_TYPE)) != 0)
+        target_size += sizeof(SUBF_C_TYPE) - (target_size % sizeof(SUBF_C_TYPE));
+
+    target_size *= (size_t)mpi_size;
+
+    VRFY(((target_size % sizeof(SUBF_C_TYPE)) == 0), "target size check succeeded");
+
+    if (stripe_size_g > 0) {
+        VRFY((target_size >= (size_t)stripe_size_g), "target size check succeeded");
+    }
+    else {
+        VRFY((target_size >= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE), "target size check succeeded");
+    }
+
+    dset_dims[0] = (hsize_t)(target_size / sizeof(SUBF_C_TYPE));
+
+    fspace_id = H5Screate_simple(1, dset_dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple() succeeded");
+
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((plist_id >= 0), "H5Pcreate() succeeded");
+    chunk_dims[0] = dset_dims[0] / 2;
+    VRFY((H5Pset_chunk(plist_id, 1, chunk_dims) >= 0), "H5Pset_chunk() succeeded");
+    VRFY((H5Pset_deflate(plist_id, 9) >= 0), "H5Pset_deflate() succeeded");
+    dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2() succeeded");
+
+    /* Select hyperslab */
+    count[0] = dset_dims[0] / (hsize_t)mpi_size;
+    start[0] = (hsize_t)mpi_rank * count[0];
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
+         "H5Sselect_hyperslab() succeeded");
+
+    buf = malloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "malloc() succeeded");
+
+    for (size_t i = 0; i < count[0]; i++)
+        ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
+
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
+         "H5Dwrite() succeeded");
+
+    free(buf);
+    buf = NULL;
+
+    VRFY((H5Pclose(plist_id) >= 0), "H5Pclose() succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    if (MAINPROCESS) {
+        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, false, NULL, 0);
+        VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+        file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
+        VRFY((file_id >= 0), "H5Fopen() succeeded");
+
+        dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
+        VRFY((dset_id >= 0), "H5Dopen2() succeeded");
+
+        buf = calloc(1, target_size);
+        VRFY(buf, "calloc succeeded");
+
+        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
+             "Dataset read succeeded");
+
+        for (size_t i = 0; i < (size_t)mpi_size; i++) {
+            for (size_t j = 0; j < count[0]; j++) {
+                SUBF_C_TYPE buf_value = ((SUBF_C_TYPE *)buf)[(i * count[0]) + j];
+
+                VRFY((buf_value == (SUBF_C_TYPE)(j + i)), "data verification succeeded");
+            }
+        }
+
+        free(buf);
+        buf = NULL;
+
+        VRFY((H5Dclose(dset_id) >= 0), "H5Dclose() succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose() succeeded");
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(SUBF_FILENAME, fapl_id);
+        }
+        H5E_END_TRY
+
+        VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+    }
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+#undef SUBF_HDF5_TYPE
+#undef SUBF_C_TYPE
+#endif
+
 int
 main(int argc, char **argv)
 {
@@ -2450,7 +2608,7 @@ exit:
 
     if (MAINPROCESS) {
         if (HDrmdir(SUBFILING_CONFIG_FILE_DIR) < 0 && (errno != ENOENT)) {
-            printf("couldn't remove temporary testing directory\n");
+            printf("couldn't remove temporary testing directory '%s'\n", SUBFILING_CONFIG_FILE_DIR);
             nerrors++;
         }
     }
