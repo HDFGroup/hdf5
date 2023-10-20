@@ -30,7 +30,7 @@ exit_code=$EXIT_SUCCESS
 
 
 # Add Testing files into the local testfiles directory::
-TESTDIR=./testfiles
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 echo "HDF5 \"$THIS_DIR/testfiles/h5diff_basic1.h5\" {" > "$THIS_DIR"/testfiles/h5diff_basic1.h5_h5dump.txt

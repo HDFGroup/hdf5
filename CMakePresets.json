@@ -91,7 +91,7 @@
         "HDF5_EXAMPLES_COMPRESSED": {"type": "STRING", "value": "hdf5-examples-master.tar.gz"},
         "HDF5_EXAMPLES_COMPRESSED_DIR": {"type": "PATH", "value": "${sourceParentDir}/temp"},
         "EXAMPLES_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5-examples/releases/download/snapshot"},
-        "EXAMPLES_TGZ_ORIGNAME": {"type": "STRING", "value": "snapshot.tar.gz"}
+        "EXAMPLES_TGZ_ORIGNAME": {"type": "STRING", "value": "hdf5-examples-2.0.4.tar.gz"}
       }
     },
     {

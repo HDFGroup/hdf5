@@ -378,11 +378,11 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=-BH;./testfiles/${testname}-tmp.h5"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=testfiles/${testname}_chk.out"
+              -D "TEST_ARGS:STRING=-BH;${testname}-tmp.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${testname}_chk.out"
               -D "TEST_EXPECT=0"
-              -D "TEST_REFERENCE=testfiles/${testname}.ddl"
+              -D "TEST_REFERENCE=${testname}.ddl"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC_H5DUMP_CHECK-${testname}-dump PROPERTIES
