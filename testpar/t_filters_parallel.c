@@ -573,7 +573,7 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                          "verified actual selection I/O mode was scalar I/O");
             }
             /* Independent I/O, library should have done no I/O if reading from unallocated datasets, scalar
-             * I/O otherwise, since fitlered I/O is only supported with scalar I/O in independent/serial */
+             * I/O otherwise, since filtered I/O is only supported with scalar I/O in independent/serial */
             else if (!collective) {
                 if (unalloc_read)
                     VRFY(0 == actual_sel_io_mode_reduced,
