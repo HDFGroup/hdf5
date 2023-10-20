@@ -42,6 +42,8 @@
 /* Local Macros */
 /****************/
 
+#define H5D_BTREE_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.btree.shared)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -932,7 +934,7 @@ H5D__btree_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
     assert(H5D_CHUNK_IDX_BTREE == idx_info->storage->idx_type);
     assert(is_open);
 
-    *is_open = (NULL != idx_info->storage->u.btree.shared);
+    *is_open = H5D_BTREE_IDX_IS_OPEN(idx_info);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_idx_is_open() */

@@ -39,6 +39,8 @@
 /* Local Macros */
 /****************/
 
+#define H5D_EARRAY_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.earray.ea)
+
 /* Value to fill unset array elements with */
 #define H5D_EARRAY_FILL HADDR_UNDEF
 #define H5D_EARRAY_FILT_FILL                                                                                 \
@@ -962,7 +964,7 @@ H5D__earray_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
     assert(H5D_CHUNK_IDX_EARRAY == idx_info->storage->idx_type);
     assert(is_open);
 
-    *is_open = (NULL != idx_info->storage->u.earray.ea);
+    *is_open = H5D_EARRAY_IDX_IS_OPEN(idx_info);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__earray_idx_is_open() */
@@ -1001,7 +1003,6 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
                        const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5EA_t *ea;                  /* Pointer to extensible array structure */
-    bool    index_open;          /* Whether index is opened */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1016,10 +1017,7 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     assert(udata);
 
     /* Check if the extensible array is open yet */
-    if (H5D__earray_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if extensible array is open");
-
-    if (!index_open) {
+    if (!H5D_EARRAY_IDX_IS_OPEN(idx_info)) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
@@ -1073,7 +1071,6 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 {
     H5EA_t *ea;                  /* Pointer to extensible array structure */
     hsize_t idx;                 /* Array index of chunk */
-    bool    index_open;          /* Whether index is opened */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1088,10 +1085,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     assert(udata);
 
     /* Check if the extensible array is open yet */
-    if (H5D__earray_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if extensible array is open");
-
-    if (!index_open) {
+    if (!H5D_EARRAY_IDX_IS_OPEN(idx_info)) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
@@ -1319,7 +1313,6 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
 {
     H5EA_t     *ea;                       /* Pointer to extensible array structure */
     H5EA_stat_t ea_stat;                  /* Extensible array statistics */
-    bool        index_open;               /* Whether index is opened */
     int         ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1335,10 +1328,7 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     assert(chunk_udata);
 
     /* Check if the extensible array is open yet */
-    if (H5D__earray_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5_ITER_ERROR, "can't check if extensible array is open");
-
-    if (!index_open) {
+    if (!H5D_EARRAY_IDX_IS_OPEN(idx_info)) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5_ITER_ERROR, "can't open extensible array");
@@ -1392,7 +1382,6 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
 {
     H5EA_t *ea;                  /* Pointer to extensible array structure */
     hsize_t idx;                 /* Array index of chunk */
-    bool    index_open;          /* Whether index is opened */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1407,10 +1396,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     assert(udata);
 
     /* Check if the extensible array is open yet */
-    if (H5D__earray_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if extensible array is open");
-
-    if (!index_open) {
+    if (!H5D_EARRAY_IDX_IS_OPEN(idx_info)) {
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
@@ -1594,7 +1580,6 @@ done:
 static herr_t
 H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_idx_info_t *idx_info_dst)
 {
-    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1613,10 +1598,7 @@ H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
     assert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source extensible array is open yet */
-    if (H5D__earray_idx_is_open(idx_info_src, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if extensible array is open");
-
-    if (!index_open)
+    if (!H5D_EARRAY_IDX_IS_OPEN(idx_info_src))
         /* Open the extensible array in file */
         if (H5D__earray_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array");
@@ -1784,7 +1766,6 @@ H5D__earray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 static herr_t
 H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
-    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1795,10 +1776,7 @@ H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->storage);
 
     /* Check if the extensible array is open */
-    if (H5D__earray_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if extensible array is open");
-
-    if (index_open) {
+    if (H5D_EARRAY_IDX_IS_OPEN(idx_info)) {
         /* Patch the top level file pointer contained in ea if needed */
         if (H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch earray file pointer");

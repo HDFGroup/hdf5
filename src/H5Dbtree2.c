@@ -37,6 +37,8 @@
 /* Local Macros */
 /****************/
 
+#define H5D_BT2_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.btree2.bt2)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -814,7 +816,7 @@ H5D__bt2_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
     assert(H5D_CHUNK_IDX_BT2 == idx_info->storage->idx_type);
     assert(is_open);
 
-    *is_open = (NULL != idx_info->storage->u.btree2.bt2);
+    *is_open = H5D_BT2_IDX_IS_OPEN(idx_info);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__bt2_idx_is_open() */
@@ -904,7 +906,6 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     H5B2_t      *bt2;                 /* v2 B-tree handle for indexing chunks */
     H5D_bt2_ud_t bt2_udata;           /* User data for v2 B-tree calls */
     unsigned     u;                   /* Local index variable */
-    bool         index_open;          /* Whether index is opened */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -920,10 +921,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     assert(H5_addr_defined(udata->chunk_block.offset));
 
     /* Check if the v2 B-tree is open yet */
-    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
-
-    if (!index_open) {
+    if (!H5D_BT2_IDX_IS_OPEN(idx_info)) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -997,7 +995,6 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     H5D_bt2_ud_t    bt2_udata;           /* User data for v2 B-tree calls */
     H5D_chunk_rec_t found_rec;           /* Record found from searching for object */
     unsigned        u;                   /* Local index variable */
-    bool            index_open;          /* Whether index is opened */
     bool            found;               /* Whether chunk was found */
     herr_t          ret_value = SUCCEED; /* Return value */
 
@@ -1014,10 +1011,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     assert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
-
-    if (!index_open) {
+    if (!H5D_BT2_IDX_IS_OPEN(idx_info)) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -1163,7 +1157,6 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
 {
     H5B2_t         *bt2;              /* v2 B-tree handle for indexing chunks */
     H5D_bt2_it_ud_t udata;            /* User data for B-tree iterator callback */
-    bool            index_open;       /* Whether index is opened */
     int             ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1179,10 +1172,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
     assert(chunk_udata);
 
     /* Check if the v2 B-tree is open yet */
-    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
-
-    if (!index_open) {
+    if (!H5D_BT2_IDX_IS_OPEN(idx_info)) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -1256,7 +1246,6 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     H5B2_t      *bt2;                 /* v2 B-tree handle for indexing chunks */
     H5D_bt2_ud_t bt2_udata;           /* User data for v2 B-tree find call */
     unsigned     u;                   /* Local index variable */
-    bool         index_open;          /* Whether index is opened */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1271,10 +1260,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     assert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
-
-    if (!index_open) {
+    if (!H5D_BT2_IDX_IS_OPEN(idx_info)) {
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
@@ -1369,7 +1355,6 @@ done:
 static herr_t
 H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_idx_info_t *idx_info_dst)
 {
-    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1390,10 +1375,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
     assert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source v2 B-tree is open yet */
-    if (H5D__bt2_idx_is_open(idx_info_src, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
-
-    if (!index_open)
+    if (!H5D_BT2_IDX_IS_OPEN(idx_info_src))
         if (H5D__bt2_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
 
@@ -1555,7 +1537,6 @@ H5D__bt2_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 static herr_t
 H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
 {
-    bool   index_open;          /* Whether index is opened */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1566,10 +1547,7 @@ H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info)
     assert(idx_info->storage);
 
     /* Check if the v2-btree is open */
-    if (H5D__bt2_idx_is_open(idx_info, &index_open) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if v2 B-tree is open");
-
-    if (index_open) {
+    if (H5D_BT2_IDX_IS_OPEN(idx_info)) {
         /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
