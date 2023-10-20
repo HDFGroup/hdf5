@@ -1270,7 +1270,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW && count > 0) {
+        if (type == H5FD_MEM_DRAW) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -1433,7 +1433,7 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW && count > 0) {
+        if (type == H5FD_MEM_DRAW) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -1954,7 +1954,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW && count > 0) {
+        if (type == H5FD_MEM_DRAW) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
@@ -2110,7 +2110,7 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
 
         /* Set actual selection I/O, if this is a raw data operation */
-        if (type == H5FD_MEM_DRAW && count > 0) {
+        if (type == H5FD_MEM_DRAW) {
             H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
             actual_selection_io_mode |= H5D_SELECTION_IO;
             H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
