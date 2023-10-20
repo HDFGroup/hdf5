@@ -21,7 +21,7 @@
 #undef HAVE_SUBFILING_VFD
 
 ! Define if on APPLE
-#undef H5_HAVE_DARWIN
+#undef HAVE_DARWIN
 
 ! Define if the intrinsic function STORAGE_SIZE exists
 #undef FORTRAN_HAVE_STORAGE_SIZE
