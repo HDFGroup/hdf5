@@ -97,7 +97,7 @@ jobs:
 
       # CMake gets libaec from fetchcontent
 
-      - name: add oneAPI to apt
+      - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
@@ -108,7 +108,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4
 
-      - name: CMake Configure with icx
+      - name: CMake Configure with oneapi
         shell: bash
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -121,7 +121,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
-          -DHDF5_BUILD_FORTRAN=OFF \
           $GITHUB_WORKSPACE
 
       # BUILD
