@@ -14,50 +14,112 @@ permissions:
 
 jobs:
   Intel_build_and_test:
-    name: "Intel ${{ inputs.build_mode }}"
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name:
+          - "Windows MSVC"
+          - "Ubuntu gcc"
+
+        include:
+          # Windows w/ MSVC + CMake
+          #
+          # No Fortran, parallel, or VFDs that rely on POSIX things
+          - name: "Windows MSVC"
+            os: windows-2022
+            toolchain: ""
+            cpp: ON
+            fortran: OFF
+            java: ON
+            docs: OFF
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
+            ros3_vfd: OFF
+            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            run_tests: true
+
+          # Linux (Ubuntu) w/ gcc + CMake
+          #
+          # We might think about adding Clang, but MacOS already tests that
+          # so it's not critical
+          - name: "Ubuntu gcc"
+            os: ubuntu-latest
+            cpp: ON
+            fortran: ON
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
+            ros3_vfd: ON
+            toolchain: "config/toolchain/gcc.cmake"
+            generator: "-G Ninja"
+            run_tests: true
+
+    name: "Intel ${{ matrix.name }}-${{ inputs.build_mode }}"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@v4
 
-      - name: add oneAPI to apt
-        shell: bash
-        run: |
-          cd /tmp
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
+      #
+      # SETUP
+      #
 
+      #Useful for debugging
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
+
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-          sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+        if: matrix.os == 'ubuntu-latest'
 
-      - name: install oneAPI dpcpp and fortran compiler
-        shell: bash
-        run: |
-          sudo apt update
-          sudo apt install -y intel-oneapi-compiler-dpcpp-cpp
-          sudo apt install -y intel-oneapi-compiler-fortran
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+        if: matrix.os == 'windows-latest'
 
-      - name: install oneAPI MKL library
-        shell: bash
-        run: |
-          sudo apt install -y intel-oneapi-mkl-devel
+      # CMake gets libaec from fetchcontent
+
+      - name: add oneAPI to apt
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2023.2'
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
 
       - name: CMake Configure with icx
         shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          source /opt/intel/oneapi/setvars.sh
-          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DCMAKE_TOOLCHAIN_FILE=config/toolchain/intel.cmake \
-          -DMKL_ROOT="/opt/intel/oneapi/mkl/latest" \
-          -DTBB_ROOT="/opt/intel/oneapi/tbb/latest" \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_BUILD_FORTRAN=OFF \
@@ -66,16 +128,21 @@ jobs:
       # BUILD
       - name: CMake Build
         shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          source /opt/intel/oneapi/setvars.sh
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: CMake Run Tests
         shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          source /opt/intel/oneapi/setvars.sh
-          export SYCL_DEVICE_FILTER=opencl.cpu
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
