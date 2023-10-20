@@ -545,7 +545,15 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
 
         /* Verify selection I/O mode on rank 0 */
         if (mpi_rank == 0) {
-            /* No actual I/O performed, only reported I/O will be from allocation, even if "no" datasets were involved (num_dsets == 0 implies the call was expected to fail, but it fails after allocation). Also if the test mode is mixed filtered and unfiltered and the call did not fail, then there will always be an I/O callback made with raw data. This is because unfiltered datasets fall back to scalar I/O when mixed with filtered, and scalar I/O reports an I/O call was made even with a size of 0 bytes, while vector I/O does not report I/O was made if passed 0 vector elements (because no elements were raw data), which is what happens when performing I/O on a filtered dataset with no selection. Vector I/O does report an I/O call was made if passed a raw data element of size 0, so this is consistent. */
+            /* No actual I/O performed, only reported I/O will be from allocation, even if "no" datasets were
+             * involved (num_dsets == 0 implies the call was expected to fail, but it fails after allocation).
+             * Also if the test mode is mixed filtered and unfiltered and the call did not fail, then there
+             * will always be an I/O callback made with raw data. This is because unfiltered datasets fall
+             * back to scalar I/O when mixed with filtered, and scalar I/O reports an I/O call was made even
+             * with a size of 0 bytes, while vector I/O does not report I/O was made if passed 0 vector
+             * elements (because no elements were raw data), which is what happens when performing I/O on a
+             * filtered dataset with no selection. Vector I/O does report an I/O call was made if passed a raw
+             * data element of size 0, so this is consistent. */
             if (!any_io) {
                 if (did_alloc || (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
                     VRFY(H5D_SCALAR_IO == actual_sel_io_mode_reduced,
@@ -564,7 +572,8 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                     VRFY(H5D_SCALAR_IO == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was scalar I/O");
             }
-            /* Independent I/O, library should have done no I/O if reading from unallocated datasets, scalar I/O otherwise, since fitlered I/O is only supported with scalar I/O in independent/serial */
+            /* Independent I/O, library should have done no I/O if reading from unallocated datasets, scalar
+             * I/O otherwise, since fitlered I/O is only supported with scalar I/O in independent/serial */
             else if (!collective) {
                 if (unalloc_read)
                     VRFY(0 == actual_sel_io_mode_reduced,
@@ -577,7 +586,10 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                 switch (test_mode) {
                     case USE_SINGLE_DATASET:
                     case USE_MULTIPLE_DATASETS:
-                        /* Collective case with only filtered datasets. If we performed allocation then there should be scalar I/O for allocation in addition to vector I/O for the actual data. If we're reading from an unallocated dataset then there should be no actual I/O. Otherwise there should only be vector I/O. */
+                        /* Collective case with only filtered datasets. If we performed allocation then there
+                         * should be scalar I/O for allocation in addition to vector I/O for the actual data.
+                         * If we're reading from an unallocated dataset then there should be no actual I/O.
+                         * Otherwise there should only be vector I/O. */
                         if (did_alloc)
                             VRFY((H5D_SCALAR_IO | H5D_VECTOR_IO) == actual_sel_io_mode_reduced,
                                  "verified actual selection I/O mode was scalar and vector I/O");
@@ -590,7 +602,11 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                         break;
 
                     case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
-                        /* Collective case with mixed filtered and unfiltered datasets. If we're reading from a unallocated datasets then there should be scalar I/O from reading the unfilitered datasets, since they are always allocated in parallel. Otherwise there should be vector I/O from the filtered datasets and scalar I/O from the unfiltered datasets. */
+                        /* Collective case with mixed filtered and unfiltered datasets. If we're reading from
+                         * a unallocated datasets then there should be scalar I/O from reading the unfilitered
+                         * datasets, since they are always allocated in parallel. Otherwise there should be
+                         * vector I/O from the filtered datasets and scalar I/O from the unfiltered datasets.
+                         */
                         if (unalloc_read)
                             VRFY(H5D_SCALAR_IO == actual_sel_io_mode_reduced,
                                  "verified actual selection I/O mode was scalar I/O");

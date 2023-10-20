@@ -3580,9 +3580,12 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
             if (H5Pset_buffer(dxpl, sizeof(int), NULL, NULL) < 0)
                 P_TEST_ERROR;
 
-            /* Exception case: When the type conversion buffer is too small and we're not allowing the library to modify the write buffer, the library will fall back to scalar independent I/O since the selection I/O path with type conversion requires a full size conversion buffer */
+            /* Exception case: When the type conversion buffer is too small and we're not allowing the library
+             * to modify the write buffer, the library will fall back to scalar independent I/O since the
+             * selection I/O path with type conversion requires a full size conversion buffer */
             if (!(test_mode & TEST_IN_PLACE_TCONV))
-                /* In-place type conversion for read doesn't require modify_write_buf, so the read will still use selection I/O */
+                /* In-place type conversion for read doesn't require modify_write_buf, so the read will still
+                 * use selection I/O */
                 no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
         }
     }
