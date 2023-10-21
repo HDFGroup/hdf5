@@ -922,7 +922,7 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
 
   CALL h5pget_actual_selection_io_mode_f(plist_id, actual_selection_io_mode, error)
   CALL check("h5pget_actual_selection_io_mode_f", error, total_error)
-  CALL VERIFY("h5pget_actual_selection_io_mode_f", actual_selection_io_mode, H5D_SELECTION_IO_F, total_error)
+  CALL VERIFY("h5pget_actual_selection_io_mode_f", actual_selection_io_mode, H5D_SCALAR_IO_F, total_error)
 
   f_ptr = C_LOC(rbuf)
   CALL h5dread_f(dset_id, h5kind_to_type(KIND(rbuf(1)), H5_REAL_KIND), f_ptr, error)

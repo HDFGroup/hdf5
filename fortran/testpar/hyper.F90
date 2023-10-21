@@ -55,6 +55,7 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER :: local_no_collective_cause
   INTEGER :: global_no_collective_cause
   INTEGER :: no_selection_io_cause
+  INTEGER :: actual_selection_io_mode
 
   !
   ! initialize the array data between the processes (3)
@@ -242,6 +243,11 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
 
   CALL h5pget_mpio_no_collective_cause_f(dxpl_id, local_no_collective_cause, global_no_collective_cause, hdferror)
   CALL check("h5pget_mpio_no_collective_cause_f", hdferror, nerrors)
+
+  CALL h5pget_actual_selection_io_mode_f(dxpl_id, actual_selection_io_mode, hdferror)
+  CALL check("h5pget_actual_selection_io_mode_f", hdferror, nerrors)
+  !PRINT*,actual_selection_io_mode
+  !CALL VERIFY("h5pget_actual_selection_io_mode_f", actual_selection_io_mode, H5D_SCALAR_IO_F, nerrors)
 
   IF(do_collective) THEN
      IF(local_no_collective_cause .NE. H5D_MPIO_COLLECTIVE_F) &
