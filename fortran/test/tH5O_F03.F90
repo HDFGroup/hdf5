@@ -267,6 +267,10 @@ END MODULE visit_cb
 
 MODULE TH5O_F03
 
+  USE HDF5
+  USE TH5_MISC
+  USE ISO_C_BINDING
+
 CONTAINS
 !***************************************************************
 !**
@@ -276,9 +280,6 @@ CONTAINS
 
 SUBROUTINE test_h5o_refcount(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -415,11 +416,8 @@ END SUBROUTINE test_h5o_refcount
 
 SUBROUTINE test_obj_visit(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-
   USE visit_cb
-  USE ISO_C_BINDING
+
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -553,9 +551,6 @@ END SUBROUTINE test_obj_visit
 
 SUBROUTINE test_obj_info(total_error)
 
-  USE HDF5
-  USE TH5_MISC
-  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -702,8 +697,6 @@ END SUBROUTINE test_obj_info
 
 SUBROUTINE build_visit_file(fid)
 
-  USE HDF5
-  USE TH5_MISC
   IMPLICIT NONE
 
   INTEGER(hid_t) :: fid                   ! File ID

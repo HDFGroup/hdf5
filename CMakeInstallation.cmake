@@ -151,9 +151,9 @@ if (HDF5_PACK_EXAMPLES)
       COMPONENT hdfdocuments
   )
 
-  option (EXAMPLES_USE_RELEASE_NAME "Use the released examples artifact name" OFF)
   option (EXAMPLES_DOWNLOAD "Download to use released examples files" OFF)
   if (EXAMPLES_DOWNLOAD)
+    option (EXAMPLES_USE_RELEASE_NAME "Use the released examples artifact name" OFF)
     if (EXAMPLES_USE_RELEASE_NAME)
       set (EXAMPLES_NAME ${EXAMPLES_TGZ_ORIGNAME})
     else ()

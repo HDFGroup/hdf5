@@ -127,7 +127,11 @@ New Features
 
     Library:
     --------
-    -
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
 
 
     Parallel Library:
@@ -325,7 +329,18 @@ Bug Fixes since HDF5-1.14.2 release
 
     Tools
     -----
-    -
+    - Fixed an issue with unmatched MPI messages in ph5diff
+
+      The "manager" MPI rank in ph5diff was unintentionally sending "program end"
+      messages to its workers twice, leading to an error from MPICH similar to the
+      following:
+
+      Abort(810645519) on node 1 (rank 1 in comm 0): Fatal error in internal_Finalize: Other MPI error, error stack:
+      internal_Finalize(50)...........: MPI_Finalize failed
+      MPII_Finalize(394)..............:
+      MPIR_Comm_delete_internal(1224).: Communicator (handle=44000000) being freed has 1 unmatched message(s)
+      MPIR_Comm_release_always(1250)..:
+      MPIR_finalize_builtin_comms(154):
 
 
     Performance

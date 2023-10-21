@@ -38,6 +38,7 @@ MODULE TH5D
   USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
   USE TH5_MISC_GEN
+  USE ISO_C_BINDING
 
 CONTAINS
   SUBROUTINE datasettest(cleanup, total_error)
@@ -514,8 +515,6 @@ CONTAINS
 
   SUBROUTINE test_userblock_offset(cleanup, total_error)
 
-    USE ISO_C_BINDING
-
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(OUT) :: total_error
@@ -631,8 +630,6 @@ CONTAINS
 
   SUBROUTINE test_dset_fill(cleanup, total_error)
 
-    USE ISO_C_BINDING
-
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(OUT) :: total_error
@@ -640,7 +637,6 @@ CONTAINS
     INTEGER, PARAMETER :: DIM0=10
     INTEGER, PARAMETER :: int_kind_1  = SELECTED_INT_KIND(2)  !should map to INTEGER*1 on most modern processors
     INTEGER, PARAMETER :: int_kind_4  = SELECTED_INT_KIND(4)  !should map to INTEGER*2 on most modern processors
-    INTEGER, PARAMETER :: int_kind_8  = SELECTED_INT_KIND(9)  !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
     INTEGER(KIND=int_kind_1) , DIMENSION(1:DIM0), TARGET :: data_i1
     INTEGER(KIND=int_kind_4) , DIMENSION(1:DIM0), TARGET :: data_i4
@@ -990,8 +986,6 @@ CONTAINS
   END SUBROUTINE test_dset_fill
 
   SUBROUTINE test_direct_chunk_io(cleanup, total_error)
-
-    USE ISO_C_BINDING
 
     IMPLICIT NONE
 

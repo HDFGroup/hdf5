@@ -92,16 +92,14 @@ CONTAINS
 
 END MODULE test_my_hdf5_error_handler
 
-
-
 MODULE TH5E_F03
+
+  USE ISO_C_BINDING
+  USE test_my_hdf5_error_handler
 
 CONTAINS
 
 SUBROUTINE test_error(total_error)
-
-  USE ISO_C_BINDING
-  USE test_my_hdf5_error_handler
 
   IMPLICIT NONE
 

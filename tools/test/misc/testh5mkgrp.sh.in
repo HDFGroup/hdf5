@@ -43,7 +43,7 @@ SRC_TOOLS="$srcdir/../.."
 SRC_H5MKGRP_TESTFILES="$SRC_TOOLS/test/misc/testfiles"
 SRC_H5MKGRP_OUTFILES="$SRC_TOOLS/test/misc/expected"
 
-TESTDIR=./testgrp
+TESTDIR=./tmpmkg
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
