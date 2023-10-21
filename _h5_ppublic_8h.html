@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.97a6efb</span>
+   &#160;<span id="projectnumber">1.15.0.98b5779</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -270,6 +270,12 @@ Macros</h2></td></tr>
 <tr class="separator:af6d12803003dfbaf21ceaad70decd098"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a7430d52f5c60b5be36a881e8fb5c6c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_ppublic_8h.html#a8a7430d52f5c60b5be36a881e8fb5c6c">H5D_MPIO_NO_SELECTION_IO_CAUSES</a></td></tr>
 <tr class="separator:a8a7430d52f5c60b5be36a881e8fb5c6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33a8e40afb222e4c7854ad9aaee140cb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_ppublic_8h.html#a33a8e40afb222e4c7854ad9aaee140cb">H5D_SCALAR_IO</a>&#160;&#160;&#160;(0x0001u)</td></tr>
+<tr class="separator:a33a8e40afb222e4c7854ad9aaee140cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acde6ec06c2ba407bffd67335a82835ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_ppublic_8h.html#acde6ec06c2ba407bffd67335a82835ae">H5D_VECTOR_IO</a>&#160;&#160;&#160;(0x0002u)</td></tr>
+<tr class="separator:acde6ec06c2ba407bffd67335a82835ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0795b084ee2432646a985523ff60ed1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_ppublic_8h.html#ad0795b084ee2432646a985523ff60ed1">H5D_SELECTION_IO</a>&#160;&#160;&#160;(0x0004u)</td></tr>
+<tr class="separator:ad0795b084ee2432646a985523ff60ed1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d3e6b2d837557e34e1fe5d73d96a0bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_ppublic_8h.html#a1d3e6b2d837557e34e1fe5d73d96a0bc">H5P_NO_CLASS</a>&#160;&#160;&#160;<a class="el" href="_h5_ppublic_8h.html#a67dc6b2468403501eb136f36a9f4c77e">H5P_ROOT</a></td></tr>
 <tr class="separator:a1d3e6b2d837557e34e1fe5d73d96a0bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -896,6 +902,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gad6fa6bfa5956e8c0bd69c22bde65f84c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_x_p_l.html#gad6fa6bfa5956e8c0bd69c22bde65f84c">H5Pget_no_selection_io_cause</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, uint32_t *no_selection_io_cause)</td></tr>
 <tr class="memdesc:gad6fa6bfa5956e8c0bd69c22bde65f84c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the cause for not performing selection or vector I/O on the last parallel I/O call.  <a href="group___d_x_p_l.html#gad6fa6bfa5956e8c0bd69c22bde65f84c">More...</a><br /></td></tr>
 <tr class="separator:gad6fa6bfa5956e8c0bd69c22bde65f84c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga252fe801869970c14a5e800a1ea7ab84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_x_p_l.html#ga252fe801869970c14a5e800a1ea7ab84">H5Pget_actual_selection_io_mode</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, uint32_t *actual_selection_io_mode)</td></tr>
+<tr class="memdesc:ga252fe801869970c14a5e800a1ea7ab84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the type(s) of I/O that HDF5 actually performed on raw data during the last I/O call.  <a href="group___d_x_p_l.html#ga252fe801869970c14a5e800a1ea7ab84">More...</a><br /></td></tr>
+<tr class="separator:ga252fe801869970c14a5e800a1ea7ab84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6f65ca81d8a10015513a69fe76c5d542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_x_p_l.html#ga6f65ca81d8a10015513a69fe76c5d542">H5Pset_modify_write_buf</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> modify_write_buf)</td></tr>
 <tr class="memdesc:ga6f65ca81d8a10015513a69fe76c5d542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows the library to modify the contents of the write buffer.  <a href="group___d_x_p_l.html#ga6f65ca81d8a10015513a69fe76c5d542">More...</a><br /></td></tr>
 <tr class="separator:ga6f65ca81d8a10015513a69fe76c5d542"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1123,6 +1132,21 @@ Variables</h2></td></tr>
 </div><!-- fragment -->
 </div>
 </div>
+<a id="a33a8e40afb222e4c7854ad9aaee140cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33a8e40afb222e4c7854ad9aaee140cb">&#9670;&nbsp;</a></span>H5D_SCALAR_IO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5D_SCALAR_IO&#160;&#160;&#160;(0x0001u)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Causes for <a class="el" href="group___d_x_p_l.html#ga252fe801869970c14a5e800a1ea7ab84" title="Retrieves the type(s) of I/O that HDF5 actually performed on raw data during the last I/O call.">H5Pget_actual_selection_io_mode()</a> property Scalar (or legacy MPIO) I/O was performed </p>
+
+</div>
+</div>
 <a id="a70f610a09605a2d228d3cff36d93f3ab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a70f610a09605a2d228d3cff36d93f3ab">&#9670;&nbsp;</a></span>H5D_SEL_IO_BKG_BUF_TOO_SMALL</h2>
 
@@ -1270,6 +1294,36 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Selection I/O was not performed because the \ type conversion buffer is too small </p>
+
+</div>
+</div>
+<a id="ad0795b084ee2432646a985523ff60ed1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0795b084ee2432646a985523ff60ed1">&#9670;&nbsp;</a></span>H5D_SELECTION_IO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5D_SELECTION_IO&#160;&#160;&#160;(0x0004u)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Selection I/O was performed </p>
+
+</div>
+</div>
+<a id="acde6ec06c2ba407bffd67335a82835ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acde6ec06c2ba407bffd67335a82835ae">&#9670;&nbsp;</a></span>H5D_VECTOR_IO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define H5D_VECTOR_IO&#160;&#160;&#160;(0x0002u)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Vector I/O was performed </p>
 
 </div>
 </div>
