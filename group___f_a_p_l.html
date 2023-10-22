@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.21ec373</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -4713,23 +4713,23 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code>  </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
 <li>The library will allow objects to be created with the latest format versions available to library release 1.8.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.8.x release will fail.   </li>
+<li>API calls that create objects or features that are available to versions of the library greater than 1.8.x release will fail.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code>  </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. Note that as 1.10.11 is the last release of the 1.10 series. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail.   </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code>  </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. Note that as 1.12.3 is the last release of the 1.12 series. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail.   </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
+<li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail.  </li>
 </ul>
 </td></tr>
 <tr>
@@ -4737,21 +4737,23 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
 <li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail.   </li>
+<li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
 <li>The library will create objects with the earliest possible format versions. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created. </li>
-<li>This is the library default setting and provides the greatest format compatibility.   </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<li>This is the library default setting and provides the greatest format compatibility.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.8.x. </li>
+<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.8.x release will fail. </li>
 <li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
@@ -4760,7 +4762,7 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. Note that 1.10.11 is the last release of the 1.10 series. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail. </li>
 <li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
@@ -4787,7 +4789,8 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.8.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
 <li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
@@ -4795,10 +4798,10 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. Note that 1.10.11 is the last release of the 1.10 series. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.10.x. </li>
 <li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.10.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
@@ -4806,9 +4809,8 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
 <li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
@@ -4816,17 +4818,16 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
 <li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3">H5F_LIBVER_V110</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.10.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created. </li>
-<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. However, objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
 <li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
@@ -4837,7 +4838,7 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <li>The library will allow objects to be created with the latest format versions available to library release 1.12.x. </li>
 <li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.12.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
@@ -4845,18 +4846,17 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.12.x. </li>
 <li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
-<li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.    </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b">H5F_LIBVER_V112</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.12.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created. </li>
-<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. However, objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
@@ -4866,28 +4866,30 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <li>The library will allow objects to be created with the latest format versions available to library release 1.14.x. </li>
 <li>The objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
 <li>API calls that create objects or features that are available to versions of the library greater than 1.14.x release will fail. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.    </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de">H5F_LIBVER_V114</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.14.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created. </li>
-<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. However, objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
+<li>This setting allows users to take advantage of the latest features and performance enhancements in the library. </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 <tr>
 <td><code>low=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code> <br  />
  <code>high=<a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2ac76e4d231ae67f1063472c9e7b55f04d">H5F_LIBVER_V116</a></code>  </td><td><ul>
 <li>The library will create objects with the latest format versions available to library release 1.16.x. </li>
-<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created. </li>
+<li>The library will allow objects to be created with the latest format versions available to library release 1.16.x. See note <em>H5F_LIBVER_LATEST</em> below the table. </li>
 <li>This setting allows users to take advantage of the latest features and performance enhancements in the library. However, objects written with this setting may be accessible to a smaller range of library versions than would be the case if low is set to <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a>. </li>
-<li>Earlier versions of the library may not be able to access objects created with this setting.   </li>
+<li>Earlier versions of the library may not be able to access objects created with this setting.  </li>
 </ul>
 </td></tr>
 </table>
+<dl class="section note"><dt>Note</dt><dd><em>H5F_LIBVER_LATEST</em>:<br  />
+ Since 1.16.x is also <a class="el" href="_h5_fpublic_8h.html#a47d050173da48a2b85c730446f0771c0">H5F_LIBVER_LATEST</a>, there is no upper limit on the format versions to use. That is, if a newer format version is required to support a feature in 1.16.x series, this setting will allow the object to be created.</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.10.2 <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8">H5F_LIBVER_V18</a> added to the enumerated defines in <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2">H5F_libver_t</a>.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
