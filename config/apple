@@ -55,29 +55,18 @@ fi
 # Figure out C compiler flags
 . $srcdir/config/gnu-flags
 . $srcdir/config/clang-flags
+. $srcdir/config/oneapi-flags
 . $srcdir/config/intel-flags
-
-# temp patch: if GCC 4.2.1 is used in Lion or Mountain Lion systems, do not
-# use -O option as it causes failures in test/dt_arith.
-case "$host_os" in
-    darwin1[12].*)   # lion & mountain lion
-        #echo cc_vendor=$cc_vendor'-'cc_version=$cc_version
-        case "$cc_vendor-$cc_version" in
-            gcc-4.2.1)
-                # Remove any -O flags
-                #echo PROD_CFLAGS=$PROD_CFLAGS
-                PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O[0-3]*//'`"
-                #echo new PROD_CFLAGS=$PROD_CFLAGS
-                ;;
-        esac
-        ;;
-esac
 
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*)
             FC=gfortran
             FC_BASENAME=gfortran
+            ;;
+        icx*)
+            FC=ifx
+            FC_BASENAME=ifx
             ;;
         icc*)
             FC=ifort
@@ -97,6 +86,7 @@ fi
 
 # Figure out FORTRAN compiler flags
 . $srcdir/config/gnu-fflags
+. $srcdir/config/oneapi-fflags
 . $srcdir/config/intel-fflags
 
 
@@ -106,6 +96,10 @@ if test "X-" = "X-$CXX"; then
         gcc)
             CXX=g++
             CXX_BASENAME=g++
+            ;;
+        icx)
+            CXX=icpx
+            CXX_BASENAME=icpx
             ;;
         icc)
             CXX=icpc
@@ -123,6 +117,7 @@ if test "X-" = "X-$CXX"; then
 fi
 
 # Figure out C++ compiler flags
+. $srcdir/config/oneapi-cxxflags
 . $srcdir/config/intel-cxxflags # Do this ahead of GNU to avoid icpc being detected as g++
 . $srcdir/config/gnu-cxxflags
 . $srcdir/config/clang-cxxflags
@@ -137,6 +132,11 @@ case $CC in
     *gcc*)
         cc_version_info=`$CC $CFLAGS $H5_CFLAGS --version 2>&1 | grep -v 'PathScale' |\
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
+        ;;
+
+    *icx*)
+        cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
 
     *icc*)
@@ -154,6 +154,11 @@ case $FC in
     *gfortran*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+
+    *ifx*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
 
     *ifc*|*ifort*)
@@ -177,6 +182,11 @@ case $CXX in
     *g++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
+        ;;
+
+   *icpx*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
 
    *icpc*)

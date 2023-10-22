@@ -38,7 +38,10 @@ fi
 # Figure out CCE C compiler flags
 . $srcdir/config/cce-flags
 
-# Figure out Intel C compiler flags
+# Figure out Intel oneAPI C compiler flags
+. $srcdir/config/oneapi-flags
+
+# Figure out Intel classic C compiler flags
 . $srcdir/config/intel-flags
 
 # Figure out Clang C compiler flags
@@ -54,6 +57,10 @@ if test "X-" = "X-$FC"; then
         pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
+            ;;
+        icx*)
+            FC=ifx
+            FC_BASENAME=ifx
             ;;
         icc*)
             FC=ifort
@@ -119,7 +126,10 @@ fi
 # Figure out CCE FC compiler flags
 . $srcdir/config/cce-fflags
 
-# Figure out Intel FC compiler flags
+# Figure out Intel oneAPI FC compiler flags
+. $srcdir/config/oneapi-fflags
+
+# Figure out Intel classic FC compiler flags
 . $srcdir/config/intel-fflags
 
 # Figure out Clang FC compiler flags
@@ -200,7 +210,10 @@ if test -z "$CXX"; then
   CXX_BASENAME=g++
 fi
 
-# Figure out Intel CXX compiler flags
+# Figure out Intel oneAPI CXX compiler flags
+. $srcdir/config/oneapi-cxxflags
+
+# Figure out Intel classic CXX compiler flags
 # Do this ahead of GNU to avoid icpc being detected as g++
 . $srcdir/config/intel-cxxflags
 
@@ -237,6 +250,11 @@ case $CC in
         cc_version_info=`echo $cc_version_info`
         ;; 
 
+    *icx*)
+        cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
+        ;;
+
     *icc*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
@@ -269,6 +287,11 @@ case $FC in
             sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         fc_version_info=`echo $fc_version_info`
+        ;;
+
+    *ifx*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
 
     *ifc*|*ifort*)
@@ -332,6 +355,10 @@ case $CXX in
     *g++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
+        ;;
+    *icpx*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
+            sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
     *icpc*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
