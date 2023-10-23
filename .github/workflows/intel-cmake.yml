@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: CMake Configure with oneapi
-        shell: bash
+        shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
@@ -125,7 +125,7 @@ jobs:
 
       # BUILD
       - name: CMake Build
-        shell: bash
+        shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
@@ -136,7 +136,7 @@ jobs:
 
       # RUN TESTS
       - name: CMake Run Tests
-        shell: bash
+        shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
