@@ -44,7 +44,7 @@
 #define ROS3_STATS 0
 
 /* Max size of the cache, in bytes */
-#define ROS3_MAX_CACHE_SIZE 16384
+#define ROS3_MAX_CACHE_SIZE 16777216
 
 /* The driver identification number, initialized at runtime
  */

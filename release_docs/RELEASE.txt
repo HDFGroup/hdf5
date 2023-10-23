@@ -242,7 +242,7 @@ New Features
       in S3 to avoid a lot of small I/O operations when opening files.
       This cache is per-file and created when the file is opened.
 
-      N is currently 16 kiB or the size of the file, whichever is smaller.
+      N is currently 16 MiB or the size of the file, whichever is smaller.
 
       Addresses GitHub issue #3381
 
