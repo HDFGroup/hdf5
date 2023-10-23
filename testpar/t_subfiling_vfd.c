@@ -100,9 +100,7 @@ static void test_subfiling_precreate_rank_0(void);
 static void test_subfiling_write_many_read_one(void);
 static void test_subfiling_write_many_read_few(void);
 static void test_subfiling_h5fuse(void);
-#ifdef H5_HAVE_FILTER_DEFLATE
 static void t_zlib(void);
-#endif
 
 static test_func tests[] = {test_create_and_close,
                             test_ioc_only_fail,
@@ -113,12 +111,8 @@ static test_func tests[] = {test_create_and_close,
                             test_subfiling_precreate_rank_0,
                             test_subfiling_write_many_read_one,
                             test_subfiling_write_many_read_few,
-                            test_subfiling_h5fuse
-#ifdef H5_HAVE_FILTER_DEFLATE
-                            ,
-                            t_zlib
-#endif
-};
+                            test_subfiling_h5fuse,
+                            t_zlib};
 
 /* ---------------------------------------------------------------------------
  * Function:    create_subfiling_ioc_fapl
@@ -2121,7 +2115,6 @@ parse_subfiling_env_vars(void)
     }
 }
 
-#ifdef H5_HAVE_FILTER_DEFLATE
 /*
  * Test zlib.
  */
@@ -2131,6 +2124,10 @@ parse_subfiling_env_vars(void)
 static void
 t_zlib(void)
 {
+    if (MAINPROCESS)
+        TESTING_2("write zlib & read w/ single MPI rank");
+
+#ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t start[1];
     hsize_t count[1];
     hsize_t dset_dims[1];
@@ -2152,9 +2149,6 @@ t_zlib(void)
 
     /* Set selection I/O mode on DXPL */
     VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
-
-    if (MAINPROCESS)
-        TESTING_2("write zlib & read w/ single MPI rank");
 
     /* Get a default Subfiling FAPL */
     fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, false, NULL, 0);
@@ -2268,11 +2262,14 @@ t_zlib(void)
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
 
     CHECK_PASSED();
+#else
+    if (MAINPROCESS)
+        SKIPPED();
+#endif
 }
 #undef SUBF_FILENAME
 #undef SUBF_HDF5_TYPE
 #undef SUBF_C_TYPE
-#endif
 
 int
 main(int argc, char **argv)
