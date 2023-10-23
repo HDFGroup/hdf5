@@ -366,6 +366,8 @@ main(int argc, char **argv)
     AddTest("invlibverassert", test_invalid_libver_bounds_file_close_assert, NULL,
             "Invalid libver bounds assertion failure", PARATESTFILE);
 
+    AddTest("fapl_preserve", test_fapl_preserve_hints, NULL, "preserve MPI I/O hints after fapl closed", PARATESTFILE);
+
     AddTest("idsetw", dataset_writeInd, NULL, "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL, "dataset independent read", PARATESTFILE);
 

@@ -1060,3 +1060,60 @@ test_invalid_libver_bounds_file_close_assert(void)
     ret = H5Pclose(fcpl_id);
     VRFY((SUCCEED == ret), "H5Pclose");
 }
+
+/*
+ * Verify that MPI I/O hints are preserved after closing the file access property list
+ * as described in issue #3025
+ * This is a test program from the user.
+ */
+void
+test_fapl_preserve_hints(void)
+{
+    hid_t       fid          = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id      = H5I_INVALID_HID; /* File access plist */
+    const char *filename;
+    MPI_Info    info     = MPI_INFO_NULL;
+    MPI_Info    info_used = MPI_INFO_NULL;
+    herr_t      ret;     /* Generic return value */
+    int         mpi_ret; /* MPI return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    mpi_ret = MPI_Info_create(&info);
+    VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
+
+    mpi_ret = MPI_Info_set(info, "hdf_info_fapl", "true");
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set succeeded");
+
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
+
+    ret = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, info);
+    VRFY((ret >= 0), "H5Pset_fapl_mpio");
+
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    fapl_id = H5Fget_access_plist(fid);
+    VRFY((fapl_id != H5I_INVALID_HID), "H5Fget_access_plist succeeded");
+
+    ret = H5Pget_fapl_mpio(fapl_id, NULL, &info_used);
+    VRFY((ret >= 0), "H5Pget_fapl_mpio succeeded");
+
+    VRFY((info_used != MPI_INFO_NULL), "H5Pget_fapl_mpio");
+    
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    /* Free the MPI info object */
+    mpi_ret = MPI_Info_free(&info);
+    VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+
+} /* end test_fapl_preserve_hints() */
