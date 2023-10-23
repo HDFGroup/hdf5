@@ -4852,6 +4852,8 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_cl
 {
     H5P_genplist_t *plist;               /* property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
+    MPI_Comm        comm;                /* MPI comm pointer */
+    int             mpi_size;            /* MPI size */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", fapl_id, evict_on_close);
@@ -4869,8 +4871,15 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_cl
     if (H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property");
 #else
-    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL,
+    if (H5Pget_driver(fapl_id) == H5FD_MPIO) {
+	H5Pget_fapl_mpio(fapl_id, &comm, NULL);
+	MPI_Comm_size(comm, &mpi_size);
+	MPI_Comm_free(&comm);
+	if (mpi_size > 1) {
+            HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL,
                 "evict on close is currently not supported in parallel HDF5");
+	}
+    }
 #endif /* H5_HAVE_PARALLEL */
 
 done:
