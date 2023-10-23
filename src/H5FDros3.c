@@ -1729,7 +1729,6 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         bin->bytes += (unsigned long long)size;
 
 #endif /* ROS3_STATS */
-
     }
 
 done:
