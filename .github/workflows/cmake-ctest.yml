@@ -191,8 +191,12 @@ jobs:
 
       # symlinks the compiler executables to a common location 
       - name: Setup GNU Fortran
-        uses: modflowpy/install-gfortran-action@v1
-  
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 12
+
       - name: Run ctest (MacOS)
         id: run-ctest
         run: |
