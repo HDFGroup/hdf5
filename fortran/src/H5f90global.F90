@@ -25,6 +25,12 @@ MODULE H5GLOBAL
 
   IMPLICIT NONE
 
+!> @brief H5_ih_info_t derived type.
+  TYPE, BIND(C) :: H5_ih_info_t
+     INTEGER(HSIZE_T) :: index_size !< btree and/or list
+     INTEGER(HSIZE_T) :: heap_size  !< Heap size
+  END TYPE H5_ih_info_t
+
 !> \addtogroup FH5
 !> @{
   ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
