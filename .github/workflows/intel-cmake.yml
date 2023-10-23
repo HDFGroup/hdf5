@@ -16,7 +16,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + CMake
   #
   Intel_oneapi_linux:
-    name: "intel oneapi ${{ inputs.build_mode }}"
+    name: "ubuntu-oneapi ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
@@ -74,7 +74,7 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
   Intel_oneapi_windows:
-    name: "intel oneapi ${{ inputs.build_mode }}"
+    name: "windows-oneapi ${{ inputs.build_mode }}"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -97,8 +97,8 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF $GITHUB_WORKSPACE
+          Set-Location -Path "${{ runner.workspace }}\\build"
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF $GITHUB_WORKSPACE
 
       # BUILD
       - name: CMake Build
