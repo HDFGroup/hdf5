@@ -869,6 +869,7 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   REAL(KIND=C_DOUBLE), DIMENSION(1:array_len) :: wbuf_d_org
   REAL(KIND=C_FLOAT), DIMENSION(1:array_len), TARGET  :: rbuf
   INTEGER :: i
+  INTEGER :: actual_selection_io_mode
   TYPE(C_PTR) :: f_ptr
 
   ! create the data
@@ -918,6 +919,10 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
 
   ! Should not be equal for in-place buffer use
   CALL VERIFY("h5dwrite_f -- in-place", wbuf_d(1), wbuf_d_org(1), total_error, .FALSE.)
+
+  CALL h5pget_actual_selection_io_mode_f(plist_id, actual_selection_io_mode, error)
+  CALL check("h5pget_actual_selection_io_mode_f", error, total_error)
+  CALL VERIFY("h5pget_actual_selection_io_mode_f", actual_selection_io_mode, H5D_SCALAR_IO_F, total_error)
 
   f_ptr = C_LOC(rbuf)
   CALL h5dread_f(dset_id, h5kind_to_type(KIND(rbuf(1)), H5_REAL_KIND), f_ptr, error)
