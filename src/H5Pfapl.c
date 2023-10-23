@@ -4872,13 +4872,13 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_cl
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property");
 #else
     if (H5Pget_driver(fapl_id) == H5FD_MPIO) {
-	H5Pget_fapl_mpio(fapl_id, &comm, NULL);
-	MPI_Comm_size(comm, &mpi_size);
-	MPI_Comm_free(&comm);
-	if (mpi_size > 1) {
+        H5Pget_fapl_mpio(fapl_id, &comm, NULL);
+        MPI_Comm_size(comm, &mpi_size);
+        MPI_Comm_free(&comm);
+        if (mpi_size > 1) {
             HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL,
-                "evict on close is currently not supported in parallel HDF5");
-	}
+                        "evict on close is currently not supported in parallel HDF5");
+        }
     }
 #endif /* H5_HAVE_PARALLEL */
 
