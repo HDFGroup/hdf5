@@ -55,6 +55,7 @@ jobs:
         run: |
           source /opt/intel/oneapi/setvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin/
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"

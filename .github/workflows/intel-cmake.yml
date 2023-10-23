@@ -51,6 +51,7 @@ jobs:
         run: |
           source /opt/intel/oneapi/setvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin/
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
@@ -60,7 +61,7 @@ jobs:
           -DTBB_ROOT="/opt/intel/oneapi/tbb/latest" \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
-          -DHDF5_BUILD_FORTRAN=OFF \
+          -DHDF5_BUILD_FORTRAN=ON \
           $GITHUB_WORKSPACE
 
       # BUILD
