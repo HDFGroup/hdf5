@@ -13,74 +13,13 @@ permissions:
   contents: read
 
 jobs:
-  Intel_build_and_test:
-    strategy:
-      matrix:
-        name:
-          - "Windows MSVC"
-          - "Ubuntu gcc"
-
-        include:
-          # Windows w/ MSVC + CMake
-          #
-          # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC"
-            os: windows-2022
-            toolchain: ""
-            cpp: ON
-            fortran: OFF
-            java: ON
-            docs: OFF
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            ros3_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
-
-          # Linux (Ubuntu) w/ gcc + CMake
-          #
-          # We might think about adding Clang, but MacOS already tests that
-          # so it's not critical
-          - name: "Ubuntu gcc"
-            os: ubuntu-latest
-            cpp: ON
-            fortran: ON
-            java: ON
-            docs: ON
-            libaecfc: ON
-            localaec: OFF
-            zlibfc: ON
-            localzlib: OFF
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: ON
-            ros3_vfd: ON
-            toolchain: "config/toolchain/gcc.cmake"
-            generator: "-G Ninja"
-            run_tests: true
-
-    name: "Intel ${{ matrix.name }}-${{ inputs.build_mode }}"
-
-    # Don't run the action if the commit message says to skip CI
-    if: "!contains(github.event.head_commit.message, 'skip-ci')"
-
-    # The type of runner that the job will run on
-    runs-on: ${{ matrix.os }}
-
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+  Intel_oneapi_linux:
+    name: "intel oneapi ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
     steps:
-
-      #
-      # SETUP
-      #
-
-      #Useful for debugging
-      - name: Dump matrix context
-        run: echo '${{ toJSON(matrix) }}'
+      - uses: actions/checkout@v4
 
       # Only CMake need ninja-build, but we just install it unilaterally
       # libssl, etc. are needed for the ros3 VFD
@@ -89,13 +28,6 @@ jobs:
            sudo apt update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-        if: matrix.os == 'ubuntu-latest'
-
-      - name: Install Dependencies (Windows)
-        run: choco install ninja
-        if: matrix.os == 'windows-latest'
-
-      # CMake gets libaec from fetchcontent
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@v1
@@ -104,9 +36,58 @@ jobs:
           compiler: intel
           version: '2023.2'
 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v4
+      - name: CMake Configure with oneapi
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DLIBAEC_USE_LOCALCONTENT=OFF \
+          -DZLIB_USE_LOCALCONTENT=OFF \
+          $GITHUB_WORKSPACE
+
+      # BUILD
+      - name: CMake Build
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: CMake Run Tests
+        shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+  Intel_oneapi_windows:
+    name: "intel oneapi ${{ inputs.build_mode }}"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2023.2'
 
       - name: CMake Configure with oneapi
         shell: pwsh
