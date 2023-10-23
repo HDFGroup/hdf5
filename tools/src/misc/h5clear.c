@@ -61,6 +61,13 @@ static struct h5_long_options l_opts[] = {
 static void
 usage(const char *prog)
 {
+    fprintf(stdout, "h5clear clears superblock status flag field, removes metadata cache image, prints\n");
+    fprintf(stdout, "EOA and EOF, or sets EOA of a file.  It is not a general repair tool and should not\n");
+    fprintf(stdout, "be used to fix file corruption.  If a process doesn't shut down cleanly, the\n");
+    fprintf(stdout, "superblock mark can be left that prevents opening a file without SWMR.  Then,\n");
+    fprintf(stdout, "h5clear can be used to remove this superblock mark so that the file can be inspected\n");
+    fprintf(stdout, "and appropriate actions can be taken.\n");
+    fprintf(stdout, "\n");
     fprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     fprintf(stdout, "  OPTIONS\n");
     fprintf(stdout, "   -h, --help                Print a usage message and exit\n");
@@ -73,8 +80,8 @@ usage(const char *prog)
     fprintf(stdout,
             "                             C is >= 0; C is optional and will default to 1M when not set.\n");
     fprintf(stdout,
-            "                             This option helps to repair a crashed file where the stored EOA\n");
-    fprintf(stdout, "                             in the superblock is different from the actual EOF.\n");
+            "                             This option helps to repair a crashed SWMR file when the stored\n");
+    fprintf(stdout, "                             EOA in the superblock is different from the actual EOF.\n");
     fprintf(stdout, "                             The file's EOA and EOF will be the same after applying\n");
     fprintf(stdout, "                             this option to the file.\n");
     fprintf(stdout, "\n");
