@@ -951,7 +951,7 @@ set (H5_PUBLIC_GENERATED_HEADERS
     ${HDF5_SRC_DIR}/H5overflow.h
 )
 
-option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" ON)
+option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" OFF)
 if (HDF5_GENERATE_HEADERS)
   set_source_files_properties(${H5_GENERATED_HEADERS} PROPERTIES GENERATED TRUE)
   if (H5_PERL_FOUND)

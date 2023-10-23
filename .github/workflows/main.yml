@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    branches: [ hdf5_1_12 ]
+    branches: [ hdf5_1_12_3 ]
     paths-ignore:
       - '.github/CODEOWNERS'
       - '.github/FUNDING.yml'
