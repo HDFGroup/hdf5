@@ -169,7 +169,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    char tbl_buf[1024];
+    char *tbl_buf = NULL;
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
     unsigned m, n;
     unsigned u;                   /* Local index variable */
@@ -190,16 +190,48 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     memset(entries_to_clear, 0, sizeof(entries_to_clear));
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    fprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
+    {
+        const char *const table_header = "candidate list = ";
+        size_t            tbl_buf_size;
+        size_t            tbl_buf_left;
+        size_t            entry_nchars;
+        int               bytes_printed;
 
-    memset(tbl_buf, 0, sizeof(tbl_buf));
+        fprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
 
-    snprintf(tbl_buf, sizeof(tbl_buf), "candidate list = ");
-    for (u = 0; u < num_candidates; u++)
-        sprintf(&(tbl_buf[strlen(tbl_buf)]), " 0x%llx", (long long)(*(candidates_list_ptr + u)));
-    sprintf(&(tbl_buf[strlen(tbl_buf)]), "\n");
+        /* Calculate maximum number of characters printed for each
+         * candidate entry, including the leading space and "0x"
+         */
+        entry_nchars = (sizeof(long long) * CHAR_BIT / 4) + 3;
 
-    fprintf(stdout, "%s", tbl_buf);
+        tbl_buf_size = strlen(table_header) + (num_candidates * entry_nchars) + 1;
+        if (NULL == (tbl_buf = H5MM_malloc(tbl_buf_size)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate debug buffer");
+        tbl_buf_left = tbl_buf_size;
+
+        if ((bytes_printed = snprintf(tbl_buf, tbl_buf_left, table_header)) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed;
+
+        for (u = 0; u < num_candidates; u++) {
+            if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, " 0x%llx",
+                                          (long long)(*(candidates_list_ptr + u)))) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+            assert((size_t)bytes_printed < tbl_buf_left);
+            tbl_buf_left -= (size_t)bytes_printed;
+        }
+
+        if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, "\n")) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed + 1; /* NUL terminator */
+
+        fprintf(stdout, "%s", tbl_buf);
+
+        H5MM_free(tbl_buf);
+        tbl_buf = NULL;
+    }
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     if (f->shared->coll_md_write) {
@@ -258,18 +290,50 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     last_entry_to_flush  = candidate_assignment_table[mpi_rank + 1] - 1;
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    for (u = 0; u < 1024; u++)
-        tbl_buf[u] = '\0';
-    snprintf(tbl_buf, sizeof(tbl_buf), "candidate assignment table = ");
-    for (u = 0; u <= (unsigned)mpi_size; u++)
-        sprintf(&(tbl_buf[strlen(tbl_buf)]), " %u", candidate_assignment_table[u]);
-    sprintf(&(tbl_buf[strlen(tbl_buf)]), "\n");
-    fprintf(stdout, "%s", tbl_buf);
+    {
+        const char *const table_header = "candidate assignment table = ";
+        unsigned          umax         = UINT_MAX;
+        size_t            tbl_buf_size;
+        size_t            tbl_buf_left;
+        size_t            entry_nchars;
+        int               bytes_printed;
 
-    fprintf(stdout, "%s:%d: flush entries [%u, %u].\n", __func__, mpi_rank, first_entry_to_flush,
-            last_entry_to_flush);
+        /* Calculate the maximum number of characters printed for each entry */
+        entry_nchars = (size_t)(log10(umax) + 1) + 1;
 
-    fprintf(stdout, "%s:%d: marking entries.\n", __func__, mpi_rank);
+        tbl_buf_size = strlen(table_header) + ((size_t)mpi_size * entry_nchars) + 1;
+        if (NULL == (tbl_buf = H5MM_malloc(tbl_buf_size)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate debug buffer");
+        tbl_buf_left = tbl_buf_size;
+
+        if ((bytes_printed = snprintf(tbl_buf, tbl_buf_left, table_header)) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed;
+
+        for (u = 0; u <= (unsigned)mpi_size; u++) {
+            if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, " %u",
+                                          candidate_assignment_table[u])) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+            assert((size_t)bytes_printed < tbl_buf_left);
+            tbl_buf_left -= (size_t)bytes_printed;
+        }
+
+        if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, "\n")) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed + 1; /* NUL terminator */
+
+        fprintf(stdout, "%s", tbl_buf);
+
+        H5MM_free(tbl_buf);
+        tbl_buf = NULL;
+
+        fprintf(stdout, "%s:%d: flush entries [%u, %u].\n", __func__, mpi_rank, first_entry_to_flush,
+                last_entry_to_flush);
+
+        fprintf(stdout, "%s:%d: marking entries.\n", __func__, mpi_rank);
+    }
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     for (u = 0; u < num_candidates; u++) {
