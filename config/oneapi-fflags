@@ -1,0 +1,145 @@
+#                            -*- shell-script -*-
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+
+
+# This file should be sourced into configure if the compiler is the
+# Intel oneAPI ifx compiler or a derivative.  It is careful not to do anything
+# if the compiler is not Intel; otherwise `f9x_flags_set' is set to `yes'
+#
+
+#
+# Prepend `$srcdir/config/intel-warnings/` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_intel_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/intel-warnings/${arg}
+    done)
+    IFS=' ' echo "$*"
+}
+
+# Get the compiler version in a way that works for ifx
+# ifx unless a compiler version is already known
+#
+#   f9x_vendor:    The compiler name: ifx
+#   f9x_version:   Version number: 2023.2.0
+#
+if test X = "X$f9x_flags_set"; then
+    f9x_version="`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 |grep '^Intel'`"
+    if test X != "X$f9x_version"; then
+        f9x_vendor=ifx
+        f9x_version="`echo $f9x_version |sed 's/.*Version \([-a-z0-9\.\-]*\).*/\1/'`"
+        echo "compiler '$FC' is Intel oneAPI $f9x_vendor-$f9x_version"
+
+        # Some version numbers
+        # Intel oneAPI version numbers are of the form: "major.minor.patch"
+        f9x_vers_major=`echo $f9x_version | cut -f1 -d.`
+        f9x_vers_minor=`echo $f9x_version | cut -f2 -d.`
+        f9x_vers_patch=`echo $f9x_version | cut -f2 -d.`
+        test -n "$f9x_vers_major" || f9x_vers_major=0
+        test -n "$f9x_vers_minor" || f9x_vers_minor=0
+        test -n "$f9x_vers_patch" || f9x_vers_patch=0
+        f9x_vers_all=`expr $f9x_vers_major '*' 1000000 + $f9x_vers_minor '*' 1000 + $f9x_vers_patch`
+    fi
+fi
+
+if test "X-ifx" = "X-$f9x_vendor"; then
+
+    FC_BASENAME=ifx
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
+
+    ###############################
+    # Architecture-specific flags #
+    ###############################
+
+    arch=
+    # Nothing currently. (Uncomment code below and modify to add any)
+    #case "$host_os-$host_cpu" in
+    #    *-i686)
+    #        arch="-march=i686"
+    #        ;;
+    #esac
+
+    # Host-specific flags
+    # Nothing currently. (Uncomment code below and modify to add any)
+    #case "`hostname`" in
+    #    sleipnir.ncsa.uiuc.edu)
+    #        arch="$arch -pipe"
+    #        ;;
+    #esac
+
+    ##############
+    # Production #
+    ##############
+
+    PROD_FCFLAGS=
+
+    #########
+    # Debug #
+    #########
+
+    # Don't use -check uninit or you'll get false positives from H5_buildiface
+    DEBUG_FCFLAGS="-check all,nouninit"
+
+    ###########
+    # Symbols #
+    ###########
+
+    NO_SYMBOLS_FCFLAGS=
+    SYMBOLS_FCFLAGS="-g"
+
+    #############
+    # Profiling #
+    #############
+
+    PROFILE_FCFLAGS="-p"
+
+    ################
+    # Optimization #
+    ################
+
+    HIGH_OPT_FCFLAGS="-O3"
+    DEBUG_OPT_FCFLAGS="-O0"
+    NO_OPT_FCFLAGS="-O0"
+
+    ############
+    # Warnings #
+    ############
+
+    ###########
+    # General #
+    ###########
+
+    H5_FCFLAGS="$H5_FCFLAGS -free"
+    H5_FCFLAGS="$H5_FCFLAGS $(load_intel_arguments oneapi/ifort-general)"
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
+
+    #################
+    # Flags are set #
+    #################
+    f9x_flags_set=yes
+fi
+
+# Clear f9x info if no flags set
+if test "X-$f9x_flags_set" = "X-"; then
+  f9x_vendor=
+  f9x_version=
+fi
+
