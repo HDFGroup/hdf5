@@ -1069,10 +1069,10 @@ test_invalid_libver_bounds_file_close_assert(void)
 void
 test_fapl_preserve_hints(void)
 {
-    hid_t       fid          = H5I_INVALID_HID; /* HDF5 file ID */
-    hid_t       fapl_id      = H5I_INVALID_HID; /* File access plist */
+    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
     const char *filename;
-    MPI_Info    info     = MPI_INFO_NULL;
+    MPI_Info    info      = MPI_INFO_NULL;
     MPI_Info    info_used = MPI_INFO_NULL;
     herr_t      ret;     /* Generic return value */
     int         mpi_ret; /* MPI return value */
@@ -1105,7 +1105,7 @@ test_fapl_preserve_hints(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio succeeded");
 
     VRFY((info_used != MPI_INFO_NULL), "H5Pget_fapl_mpio");
-    
+
     ret = H5Pclose(fapl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
 
