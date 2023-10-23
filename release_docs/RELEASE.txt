@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Improved support for Intel oneAPI
+
+      * Separates the old 'classic' Intel compiler settings and warnings
+        from the oneAPI settings
+      * Uses `-check nouninit` in debug builds to avoid false positives
+        when building H5_buildiface with `-check all`
+      * Both Autotools and CMake
+
     - Added new options for CMake and Autotools to control the Doxygen
       warnings as errors setting.
 
