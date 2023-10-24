@@ -1131,8 +1131,16 @@ test_fapl_preserve_hints(void)
     hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
     const char *filename;
+
     MPI_Info    info      = MPI_INFO_NULL;
+    const char *key = "hdf_info_fapl";
+    const char *value = "xyz";
+
     MPI_Info    info_used = MPI_INFO_NULL;
+    int flag = -1;
+    char value_used[20];
+    char key_used[20];
+
     herr_t      ret;     /* Generic return value */
     int         mpi_ret; /* MPI return value */
 
@@ -1142,7 +1150,7 @@ test_fapl_preserve_hints(void)
     mpi_ret = MPI_Info_create(&info);
     VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
 
-    mpi_ret = MPI_Info_set(info, "hdf_info_fapl", "true");
+    mpi_ret = MPI_Info_set(info, key, value);
     VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set succeeded");
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1164,6 +1172,21 @@ test_fapl_preserve_hints(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio succeeded");
 
     VRFY((info_used != MPI_INFO_NULL), "H5Pget_fapl_mpio");
+
+    memset(key_used, 0, 20);
+    memset(value_used, 0, 20);
+
+    mpi_ret = MPI_Info_get_nthkey(info_used, 0, key_used);
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nthkey succeeded");
+
+    mpi_ret = MPI_Info_get(info_used, key_used, 20, value_used, &flag);
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get succeeded");
+
+    ret = strcmp(key_used, key);
+    VRFY(ret == 0, "strcmp key");
+
+    ret = strcmp(value_used, value);
+    VRFY(ret == 0, "strcmp value");
 
     ret = H5Pclose(fapl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
