@@ -233,6 +233,7 @@ void zero_dim_dset(void);
 void test_file_properties(void);
 void test_delete(void);
 void test_invalid_libver_bounds_file_close_assert(void);
+void test_evict_on_close_parallel_unsupp(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);

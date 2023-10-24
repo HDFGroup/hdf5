@@ -1060,3 +1060,62 @@ test_invalid_libver_bounds_file_close_assert(void)
     ret = H5Pclose(fcpl_id);
     VRFY((SUCCEED == ret), "H5Pclose");
 }
+
+/*
+ * Tests that H5Pevict_on_close properly succeeds in serial/one rank and fails when 
+ * called by multiple ranks.
+ */
+void
+test_evict_on_close_parallel_unsupp(void)
+{
+    const char *filename = NULL;
+    MPI_Comm    comm     = MPI_COMM_WORLD;
+    MPI_Info    info     = MPI_INFO_NULL;
+    hid_t       fid      = H5I_INVALID_HID;
+    hid_t       fapl_id  = H5I_INVALID_HID;
+    herr_t      ret;
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* setup file access plist */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl_id, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18);
+    VRFY((SUCCEED == ret), "H5Pset_libver_bounds");
+
+    ret = H5Pset_evict_on_close(fapl_id, true);
+    VRFY((SUCCEED == ret), "H5Pset_evict_on_close");
+
+    /* test on 1 rank */
+    ret = H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, info);
+    VRFY((SUCCEED == ret), "H5Pset_fapl_mpio");
+
+    if (mpi_rank == 0) {
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((SUCCEED == ret), "H5Fcreate");
+        ret = H5Fclose(fid);
+        VRFY((SUCCEED == ret), "H5Fclose");
+    }
+
+    VRFY((MPI_SUCCESS == MPI_Barrier(MPI_COMM_WORLD)), "MPI_Barrier");
+
+    /* test on multiple ranks if we have them */
+    if (mpi_size > 1) {
+        ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+        VRFY((SUCCEED == ret), "H5Pset_fapl_mpio");
+
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        }
+        H5E_END_TRY
+        VRFY((fid == H5I_INVALID_HID), "H5Fcreate");
+    }
+
+    ret = H5Pclose(fapl_id);
+    VRFY((SUCCEED == ret), "H5Pclose");
+}
