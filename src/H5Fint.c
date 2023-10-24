@@ -1130,6 +1130,12 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         /* initialize point of no return */
         f->shared->point_of_no_return = false;
 
+#ifdef H5_HAVE_PARALLEL
+        /* Initialize this just in case we fail before setting this field and */
+        /* we try to call H5_mpi_info_free() on uninitialized memory in H5F__dest() */
+        f->shared->mpi_info = MPI_INFO_NULL;
+#endif /* H5_HAVE_PARALLEL */
+
         /* Copy the file creation and file access property lists into the
          * new file handle. We do this early because some values might need
          * to change as the file is being opened.
