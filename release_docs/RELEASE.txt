@@ -392,6 +392,25 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed potential hangs in parallel library during collective I/O with
+      independent metadata writes
+
+      When performing collective parallel writes to a dataset where metadata
+      writes are requested as (or left as the default setting of) independent,
+      hangs could potentially occur during metadata cache sync points. This
+      was due to incorrect management of the internal state tracking whether
+      an I/O operation should be collective or not, causing the library to
+      attempt collective writes of metadata when they were meant to be
+      independent writes. During the metadata cache sync points, if the number
+      of cache entries being flushed was a multiple of the number of MPI ranks
+      in the MPI communicator used to access the HDF5 file, an equal amount of
+      collective MPI I/O calls were made and the dataset write call would be
+      successful. However, when the number of cache entries being flushed was
+      NOT a multiple of the number of MPI ranks, the ranks with more entries
+      than others would get stuck in an MPI_File_set_view call, while other
+      ranks would get stuck in a post-write MPI_Barrier call. This issue has
+      been fixed by correctly switching to independent I/O temporarily when
+      writing metadata independently during collective dataset I/O.
 
     - Dropped support for MPI-2
 
