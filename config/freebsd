@@ -29,7 +29,10 @@ fi
 # Figure out GNU C compiler flags
 . $srcdir/config/gnu-flags
 
-# Figure out Intel C compiler flags
+# Figure out Intel oneAPI C compiler flags
+. $srcdir/config/oneapi-flags
+
+# Figure out Intel classic C compiler flags
 . $srcdir/config/intel-flags
 
 # The default Fortran 90 compiler
@@ -42,6 +45,10 @@ if test "X-" = "X-$FC"; then
         gcc*|pgcc*)
             FC=gfortran
             FC_BASENAME=gfortran
+            ;;
+        icx*)
+            FC=ifx
+            FC_BASENAME=ifx
             ;;
         icc*)
             FC=ifort
@@ -57,8 +64,11 @@ fi
 # Figure out FORTRAN compiler flags
 . $srcdir/config/gnu-fflags
 
-# Figure out Intel F90 compiler flags
-. $srcdir/config/intel-fflags
+# Figure out Intel oneAPI FC compiler flags
+. $srcdir/config/oneapi-fflags
+
+# Figure out Intel classic FC compiler flags
+. $srcdir/config/classic-fflags
 
 # The default C++ compiler
 

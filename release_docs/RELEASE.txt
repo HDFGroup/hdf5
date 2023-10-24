@@ -47,6 +47,26 @@ New Features
 
     Configuration:
     -------------
+    - Improved support for Intel oneAPI
+
+      * Separates the old 'classic' Intel compiler settings and warnings
+        from the oneAPI settings
+      * Uses `-check nouninit` in debug builds to avoid false positives
+        when building H5_buildiface with `-check all`
+      * Both Autotools and CMake
+
+    - Added new options for CMake and Autotools to control the Doxygen
+      warnings as errors setting.
+
+        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
+        * --enable-doxygen-errors: enable/disable (Default: enable)
+
+      The default will fail compile if the doxygen parsing generates warnings.
+      The option can be disabled if certain versions of doxygen have parsing
+      issues. i.e. 1.9.5, 1.9.8.
+
+      Addresses GitHub issue #3398
+
     - Added support for AOCC and classic Flang w/ the Autotools
 
       * Adds a config/clang-fflags options file to support Flang
@@ -73,6 +93,7 @@ New Features
       Removed HDF options for using FETCH_CONTENT explicitly:
           BUILD_SZIP_WITH_FETCHCONTENT:BOOL
           BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+
     - Thread-safety + static library disabled on Windows w/ CMake
 
       The thread-safety feature requires hooks in DllMain(), which is only
@@ -215,6 +236,22 @@ New Features
 
     Library:
     --------
+    - Added a simple cache to the read-only S3 (ros3) VFD
+
+      The read-only S3 VFD now caches the first N bytes of a file stored
+      in S3 to avoid a lot of small I/O operations when opening files.
+      This cache is per-file and created when the file is opened.
+
+      N is currently 16 MiB or the size of the file, whichever is smaller.
+
+      Addresses GitHub issue #3381
+
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
+
     - Added support for in-place type conversion in most cases
 
       In-place type conversion allows the library to perform type conversion
@@ -286,7 +323,6 @@ New Features
 
     Fortran Library:
     ----------------
-
     - Fixed an uninitialized error return value for hdferr
       to return the error state of the h5aopen_by_idx_f API.
 
@@ -296,7 +332,8 @@ New Features
     - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
-      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_selection_io_f, h5pget_selection_io_f,
+      h5pget_actual_selection_io_mode_f,
       h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
     - Added Fortran APIs:
@@ -394,6 +431,26 @@ Bug Fixes since HDF5-1.14.0 release
       read in by all MPI ranks since this depends on which chunks the
       ranks have selected in the dataset. Therefore, reading of these
       pieces of metadata remains an independent operation.
+
+    - Fixed potential hangs in parallel library during collective I/O with
+      independent metadata writes
+
+      When performing collective parallel writes to a dataset where metadata
+      writes are requested as (or left as the default setting of) independent,
+      hangs could potentially occur during metadata cache sync points. This
+      was due to incorrect management of the internal state tracking whether
+      an I/O operation should be collective or not, causing the library to
+      attempt collective writes of metadata when they were meant to be
+      independent writes. During the metadata cache sync points, if the number
+      of cache entries being flushed was a multiple of the number of MPI ranks
+      in the MPI communicator used to access the HDF5 file, an equal amount of
+      collective MPI I/O calls were made and the dataset write call would be
+      successful. However, when the number of cache entries being flushed was
+      NOT a multiple of the number of MPI ranks, the ranks with more entries
+      than others would get stuck in an MPI_File_set_view call, while other
+      ranks would get stuck in a post-write MPI_Barrier call. This issue has
+      been fixed by correctly switching to independent I/O temporarily when
+      writing metadata independently during collective dataset I/O.
 
     - Dropped support for MPI-2
 
@@ -830,6 +887,19 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+    - Fixed an issue with unmatched MPI messages in ph5diff
+
+      The "manager" MPI rank in ph5diff was unintentionally sending "program end"
+      messages to its workers twice, leading to an error from MPICH similar to the
+      following:
+
+      Abort(810645519) on node 1 (rank 1 in comm 0): Fatal error in internal_Finalize: Other MPI error, error stack:
+      internal_Finalize(50)...........: MPI_Finalize failed
+      MPII_Finalize(394)..............:
+      MPIR_Comm_delete_internal(1224).: Communicator (handle=44000000) being freed has 1 unmatched message(s)
+      MPIR_Comm_release_always(1250)..:
+      MPIR_finalize_builtin_comms(154):
+
     - Fixed an issue in h5repack for variable-length typed datasets
 
       When repacking datasets into a new file, h5repack tries to determine whether
@@ -869,6 +939,7 @@ Bug Fixes since HDF5-1.14.0 release
     Fortran API
     -----------
     -
+
 
     High-Level Library
     ------------------
@@ -1046,14 +1117,12 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
                                     Visual Studio 2022 w/ clang 15.0.1
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 

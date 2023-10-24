@@ -30,6 +30,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_STRIP_FROM_PATH ${HDF5_SOURCE_DIR})
   set (DOXYGEN_STRIP_FROM_INC_PATH ${HDF5_SOURCE_DIR})
   set (DOXYGEN_PREDEFINED "H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD H5_HAVE_MIRROR_VFD")
+  set (DOXYGEN_WARN_AS_ERROR ${HDF5_DOXY_WARNINGS})
 
 # This configure and individual custom targets work together
   # Replace variables inside @@ with the current values
@@ -38,7 +39,7 @@ if (DOXYGEN_FOUND)
   install (
       DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
       DESTINATION ${HDF5_INSTALL_DOC_DIR}
-      COMPONENT Documents
+      COMPONENT hdfdocuments
   )
 
   if (NOT TARGET doxygen)

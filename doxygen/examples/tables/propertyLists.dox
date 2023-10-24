@@ -711,6 +711,10 @@ of the library for reading or writing the actual data.</td>
 <td>Gets the cause for not performing selection or vector I/O on the last parallel I/O call.</td>
 </tr>
 <tr>
+<td>#H5Pget_actual_selection_io_mode</td>
+<td>Gets the type(s) (scalar, vector, selection) of raw data I/O performed on the last I/O call.</td>
+</tr>
+<tr>
 <td>#H5Pset_modify_write_buf/#H5Pget_modify_write_buf</td>
 <td>Sets/gets a flag allowing the library to modify the contents of the write buffer.</td>
 </tr>

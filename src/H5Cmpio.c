@@ -154,8 +154,9 @@ herr_t
 H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
                          int mpi_rank, int mpi_size)
 {
-    unsigned first_entry_to_flush;
-    unsigned last_entry_to_flush;
+    H5FD_mpio_xfer_t orig_xfer_mode;
+    unsigned         first_entry_to_flush;
+    unsigned         last_entry_to_flush;
 #ifndef NDEBUG
     unsigned total_entries_to_clear = 0;
     unsigned total_entries_to_flush = 0;
@@ -169,11 +170,12 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    char tbl_buf[1024];
+    char *tbl_buf = NULL;
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
     unsigned m, n;
-    unsigned u;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    unsigned u; /* Local index variable */
+    bool     restore_io_mode = false;
+    herr_t   ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -185,21 +187,57 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     assert(0 <= mpi_rank);
     assert(mpi_rank < mpi_size);
 
+    /* Get I/O transfer mode */
+    if (H5CX_get_io_xfer_mode(&orig_xfer_mode) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
+
     /* Initialize the entries_to_flush and entries_to_clear arrays */
     memset(entries_to_flush, 0, sizeof(entries_to_flush));
     memset(entries_to_clear, 0, sizeof(entries_to_clear));
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    fprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
+    {
+        const char *const table_header = "candidate list = ";
+        size_t            tbl_buf_size;
+        size_t            tbl_buf_left;
+        size_t            entry_nchars;
+        int               bytes_printed;
 
-    memset(tbl_buf, 0, sizeof(tbl_buf));
+        fprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
 
-    snprintf(tbl_buf, sizeof(tbl_buf), "candidate list = ");
-    for (u = 0; u < num_candidates; u++)
-        sprintf(&(tbl_buf[strlen(tbl_buf)]), " 0x%llx", (long long)(*(candidates_list_ptr + u)));
-    sprintf(&(tbl_buf[strlen(tbl_buf)]), "\n");
+        /* Calculate maximum number of characters printed for each
+         * candidate entry, including the leading space and "0x"
+         */
+        entry_nchars = (sizeof(long long) * CHAR_BIT / 4) + 3;
 
-    fprintf(stdout, "%s", tbl_buf);
+        tbl_buf_size = strlen(table_header) + (num_candidates * entry_nchars) + 1;
+        if (NULL == (tbl_buf = H5MM_malloc(tbl_buf_size)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate debug buffer");
+        tbl_buf_left = tbl_buf_size;
+
+        if ((bytes_printed = snprintf(tbl_buf, tbl_buf_left, table_header)) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed;
+
+        for (u = 0; u < num_candidates; u++) {
+            if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, " 0x%llx",
+                                          (long long)(*(candidates_list_ptr + u)))) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+            assert((size_t)bytes_printed < tbl_buf_left);
+            tbl_buf_left -= (size_t)bytes_printed;
+        }
+
+        if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, "\n")) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed + 1; /* NUL terminator */
+
+        fprintf(stdout, "%s", tbl_buf);
+
+        H5MM_free(tbl_buf);
+        tbl_buf = NULL;
+    }
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     if (f->shared->coll_md_write) {
@@ -258,18 +296,50 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     last_entry_to_flush  = candidate_assignment_table[mpi_rank + 1] - 1;
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    for (u = 0; u < 1024; u++)
-        tbl_buf[u] = '\0';
-    snprintf(tbl_buf, sizeof(tbl_buf), "candidate assignment table = ");
-    for (u = 0; u <= (unsigned)mpi_size; u++)
-        sprintf(&(tbl_buf[strlen(tbl_buf)]), " %u", candidate_assignment_table[u]);
-    sprintf(&(tbl_buf[strlen(tbl_buf)]), "\n");
-    fprintf(stdout, "%s", tbl_buf);
+    {
+        const char *const table_header = "candidate assignment table = ";
+        unsigned          umax         = UINT_MAX;
+        size_t            tbl_buf_size;
+        size_t            tbl_buf_left;
+        size_t            entry_nchars;
+        int               bytes_printed;
 
-    fprintf(stdout, "%s:%d: flush entries [%u, %u].\n", __func__, mpi_rank, first_entry_to_flush,
-            last_entry_to_flush);
+        /* Calculate the maximum number of characters printed for each entry */
+        entry_nchars = (size_t)(log10(umax) + 1) + 1;
 
-    fprintf(stdout, "%s:%d: marking entries.\n", __func__, mpi_rank);
+        tbl_buf_size = strlen(table_header) + ((size_t)mpi_size * entry_nchars) + 1;
+        if (NULL == (tbl_buf = H5MM_malloc(tbl_buf_size)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate debug buffer");
+        tbl_buf_left = tbl_buf_size;
+
+        if ((bytes_printed = snprintf(tbl_buf, tbl_buf_left, table_header)) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed;
+
+        for (u = 0; u <= (unsigned)mpi_size; u++) {
+            if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, " %u",
+                                          candidate_assignment_table[u])) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+            assert((size_t)bytes_printed < tbl_buf_left);
+            tbl_buf_left -= (size_t)bytes_printed;
+        }
+
+        if ((bytes_printed = snprintf(&(tbl_buf[tbl_buf_size - tbl_buf_left]), tbl_buf_left, "\n")) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSERRSTR, FAIL, "can't add to candidate list");
+        assert((size_t)bytes_printed < tbl_buf_left);
+        tbl_buf_left -= (size_t)bytes_printed + 1; /* NUL terminator */
+
+        fprintf(stdout, "%s", tbl_buf);
+
+        H5MM_free(tbl_buf);
+        tbl_buf = NULL;
+
+        fprintf(stdout, "%s:%d: flush entries [%u, %u].\n", __func__, mpi_rank, first_entry_to_flush,
+                last_entry_to_flush);
+
+        fprintf(stdout, "%s:%d: marking entries.\n", __func__, mpi_rank);
+    }
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     for (u = 0; u < num_candidates; u++) {
@@ -354,6 +424,19 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             num_candidates, total_entries_to_clear, total_entries_to_flush);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
+    /*
+     * If collective I/O was requested, but collective metadata
+     * writes were not requested, temporarily disable collective
+     * I/O while flushing candidate entries so that we don't cause
+     * a hang in the case where the number of candidate entries
+     * to flush isn't a multiple of mpi_size.
+     */
+    if ((orig_xfer_mode == H5FD_MPIO_COLLECTIVE) && !f->shared->coll_md_write) {
+        if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
+        restore_io_mode = true;
+    }
+
     /* We have now marked all the entries on the candidate list for
      * either flush or clear -- now scan the LRU and the pinned list
      * for these entries and do the deed.  Do this via a call to
@@ -367,6 +450,13 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     if (H5C__flush_candidate_entries(f, entries_to_flush, entries_to_clear) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush candidates failed");
 
+    /* Restore collective I/O if we temporarily disabled it */
+    if (restore_io_mode) {
+        if (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
+        restore_io_mode = false;
+    }
+
     /* If we've deferred writing to do it collectively, take care of that now */
     if (f->shared->coll_md_write) {
         /* Sanity check */
@@ -378,6 +468,10 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     } /* end if */
 
 done:
+    /* Restore collective I/O if we temporarily disabled it */
+    if (restore_io_mode && (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0))
+        HDONE_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
+
     if (candidate_assignment_table != NULL)
         candidate_assignment_table = (unsigned *)H5MM_xfree((void *)candidate_assignment_table);
     if (cache_ptr->coll_write_list) {
