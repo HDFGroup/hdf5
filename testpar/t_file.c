@@ -1062,7 +1062,7 @@ test_invalid_libver_bounds_file_close_assert(void)
 }
 
 /*
- * Tests that H5Pevict_on_close properly succeeds in serial/one rank and fails when 
+ * Tests that H5Pevict_on_close properly succeeds in serial/one rank and fails when
  * called by multiple ranks.
  */
 void

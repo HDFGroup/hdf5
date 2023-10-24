@@ -1980,7 +1980,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
         if ((mpi_size > 1) && evict_on_close)
             HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL,
-                                   "evict on close is currently not supported in parallel HDF5");
+                        "evict on close is currently not supported in parallel HDF5");
     }
 #endif
 
