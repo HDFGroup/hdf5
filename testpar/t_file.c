@@ -1132,17 +1132,17 @@ test_fapl_preserve_hints(void)
     hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
     const char *filename;
 
-    MPI_Info    info      = MPI_INFO_NULL;
-    const char *key = "hdf_info_fapl";
+    MPI_Info    info  = MPI_INFO_NULL;
+    const char *key   = "hdf_info_fapl";
     const char *value = "xyz";
 
-    MPI_Info    info_used = MPI_INFO_NULL;
-    int flag = -1;
-    char value_used[20];
-    char key_used[20];
+    MPI_Info info_used = MPI_INFO_NULL;
+    int      flag      = -1;
+    char     value_used[20];
+    char     key_used[20];
 
-    herr_t      ret;     /* Generic return value */
-    int         mpi_ret; /* MPI return value */
+    herr_t ret;     /* Generic return value */
+    int    mpi_ret; /* MPI return value */
 
     filename = (const char *)GetTestParameters();
 
