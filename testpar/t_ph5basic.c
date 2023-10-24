@@ -181,10 +181,10 @@ test_fapl_mpio_dup(void)
 /*-------------------------------------------------------------------------
  * Function:    test_get_dxpl_mpio
  *
- * Purpose:     Test that H5Pget_fxpl_mpio will properly return the data 
- *              transfer mode of collective and independent I/O access 
+ * Purpose:     Test that H5Pget_fxpl_mpio will properly return the data
+ *              transfer mode of collective and independent I/O access
  *              after setting it and writing some data.
- *           
+ *
  * Return:      Success:    None
  *              Failure:    Abort
  *-------------------------------------------------------------------------
@@ -192,13 +192,13 @@ test_fapl_mpio_dup(void)
 void
 test_get_dxpl_mpio(void)
 {
-    hid_t   fid           = H5I_INVALID_HID;
-    hid_t   sid           = H5I_INVALID_HID;
-    hid_t   did           = H5I_INVALID_HID;
-    hid_t   dxpl_id       = H5I_INVALID_HID;
-    hsize_t dims[2]       = {100, 100};
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   sid     = H5I_INVALID_HID;
+    hid_t   did     = H5I_INVALID_HID;
+    hid_t   dxpl_id = H5I_INVALID_HID;
+    hsize_t dims[2] = {100, 100};
     hsize_t i, j;
-    int    *data_g        = NULL;
+    int    *data_g = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
