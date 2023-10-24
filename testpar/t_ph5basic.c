@@ -177,3 +177,86 @@ test_fapl_mpio_dup(void)
         VRFY((mrc == MPI_SUCCESS), "MPI_Info_free");
     }
 } /* end test_fapl_mpio_dup() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_get_dxpl_mpio
+ *
+ * Purpose:     Test that H5Pget_fxpl_mpio will properly return the data 
+ *              transfer mode of collective and independent I/O access 
+ *              after setting it and writing some data.
+ *           
+ * Return:      Success:    None
+ *              Failure:    Abort
+ *-------------------------------------------------------------------------
+ */
+void
+test_get_dxpl_mpio(void)
+{
+    hid_t   fid           = H5I_INVALID_HID;
+    hid_t   sid           = H5I_INVALID_HID;
+    hid_t   did           = H5I_INVALID_HID;
+    hid_t   dxpl_id       = H5I_INVALID_HID;
+    hsize_t dims[2]       = {100, 100};
+    hsize_t i, j;
+    int    *data_g        = NULL;
+
+    if (VERBOSE_MED)
+        printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
+               set in the data transfer property list after a write\n");
+
+    if ((fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        goto error;
+
+    /* Create a dataset */
+    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+    if ((did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Use collective I/O access */
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        goto error;
+    if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+        goto error;
+    
+     /* Write some data */
+    for (i = 0; i < dims[0]; i++)
+        for (j = 0; j < dims[1]; j++)
+            data_g[(i * 100) + j] = (int)(i + (i * j) + j);
+
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
+        goto error;
+
+    /* Check to make sure the property is still correct */
+    if (H5Pget_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+        goto error;
+    
+    /* Use independent I/O access */
+    if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
+        goto error;
+
+    /* Write some data */
+    for (i = 0; i < dims[0]; i++)
+        for (j = 0; j < dims[1]; j++)
+            data_g[(i * 100) + j] = (int)(i + (j * j) + i);
+    
+    /* Check to make sure the property is still correct */
+    if (H5Pget_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
+        goto error;
+
+    /* Pass in NULL */
+    if (H5Pset_dxpl_mpio(dxpl_id, NULL) < 0)
+        goto error;
+
+    /* Write some data */
+    for (i = 0; i < dims[0]; i++)
+        for (j = 0; j < dims[1]; j++)
+            data_g[(i * 100) + j] = (int)(j + (i * i) + j);
+    
+    /* Check to make sure the property is still correct */
+    if (H5Pget_dxpl_mpio(dxpl_id, NULL) < 0)
+        goto error;
+
+error:
+    return H5I_INVALID_HID;
+} /* end test_get_dxpl_mpio() */

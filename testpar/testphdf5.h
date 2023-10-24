@@ -240,6 +240,7 @@ void collective_group_write_independent_group_read(void);
 void collective_group_write(void);
 void independent_group_read(void);
 void test_fapl_mpio_dup(void);
+void test_get_dxpl_mpio(void);
 void test_split_comm_access(void);
 void test_page_buffer_access(void);
 void dataset_atomicity(void);
