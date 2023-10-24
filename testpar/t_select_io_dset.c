@@ -222,6 +222,26 @@ check_actual_selection_io_mode(hid_t dxpl, uint32_t sel_io_mode_expected)
 }
 
 /*
+ * Helper routine to check actual selection I/O mode on a dxpl
+ */
+static void
+check_actual_selection_io_mode_either(hid_t dxpl, uint32_t sel_io_mode_expected1,
+                                      uint32_t sel_io_mode_expected2)
+{
+    uint32_t actual_sel_io_mode;
+
+    if (H5Pget_actual_selection_io_mode(dxpl, &actual_sel_io_mode) < 0)
+        P_TEST_ERROR;
+    if (actual_sel_io_mode != sel_io_mode_expected1 && actual_sel_io_mode != sel_io_mode_expected2) {
+        if (MAINPROCESS)
+            printf("\n     Failed: Incorrect selection I/O mode (expected/actual) %u or %u : %u",
+                   (unsigned)sel_io_mode_expected1, (unsigned)sel_io_mode_expected2,
+                   (unsigned)actual_sel_io_mode);
+        P_TEST_ERROR;
+    }
+}
+
+/*
  *  Case 1: single dataset read/write, no type conversion (null case)
  */
 static void
@@ -327,8 +347,14 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned select,
         exp_io_mode = chunked ? H5D_MPIO_CHUNK_COLLECTIVE : H5D_MPIO_CONTIGUOUS_COLLECTIVE;
     testing_check_io_mode(dxpl, exp_io_mode);
 
-    if (chunked && !dtrans)
-        check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
+    if (chunked && !dtrans) {
+        /* If there are more ranks than chunks, then some ranks will not perform vector I/O due to how the
+         * parallel compression code redistributes data */
+        if ((hsize_t)mpi_size > (dims[0] / cdims[0]))
+            check_actual_selection_io_mode_either(dxpl, H5D_VECTOR_IO, 0);
+        else
+            check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
+    }
     else
         check_actual_selection_io_mode(dxpl, select ? H5D_SELECTION_IO : H5D_SCALAR_IO);
 
