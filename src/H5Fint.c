@@ -1413,6 +1413,14 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
             f->shared->efc = NULL;
         } /* end if */
 
+#ifdef H5_HAVE_PARALLEL
+        if (f->shared->mpi_info != MPI_INFO_NULL) {
+            /* Free MPI info saved in the file struct */
+            if (H5_mpi_info_free(&f->shared->mpi_info) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't free MPI info");
+        }
+#endif
+
         /* With the shutdown modifications, the contents of the metadata cache
          * should be clean at this point, with the possible exception of the
          * the superblock and superblock extension.

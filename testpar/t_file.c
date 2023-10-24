@@ -1116,4 +1116,7 @@ test_fapl_preserve_hints(void)
     mpi_ret = MPI_Info_free(&info);
     VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
 
+    mpi_ret = MPI_Info_free(&info_used);
+    VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+
 } /* end test_fapl_preserve_hints() */
