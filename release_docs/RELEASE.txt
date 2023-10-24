@@ -95,12 +95,6 @@ New Features
       configure step to use the content in commands like add_subdirectory(),
       include() or file() operations.
 
-      The HDF options (and defaults) for using this are:
-          BUILD_SZIP_WITH_FETCHCONTENT:BOOL=OFF
-          LIBAEC_USE_LOCALCONTENT:BOOL=OFF
-          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL=OFF
-          ZLIB_USE_LOCALCONTENT:BOOL=OFF
-
       The CMake variables to control the path and file names:
           LIBAEC_TGZ_ORIGPATH:STRING
           LIBAEC_TGZ_ORIGNAME:STRING
