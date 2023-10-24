@@ -238,6 +238,46 @@ Bug Fixes since HDF5-1.14.2 release
 ===================================
     Library
     -------
+    - Fixed some issues with chunk index metadata not getting read
+      collectively when collective metadata reads are enabled
+
+      When looking up dataset chunks during I/O, the parallel library
+      temporarily disables collective metadata reads since it's generally
+      unlikely that the application will read the same chunks from all
+      MPI ranks. Leaving collective metadata reads enabled during
+      chunk lookups can lead to hangs or other bad behavior depending
+      on the chunk indexing structure used for the dataset in question.
+      However, due to the way that dataset chunk index metadata was
+      previously loaded in a deferred manner, this could mean that
+      the metadata for the main chunk index structure or its
+      accompanying pieces of metadata (e.g., fixed array data blocks)
+      could end up being read independently if these chunk lookup
+      operations are the first chunk index-related operation that
+      occurs on a dataset. This behavior is generally observed when
+      opening a dataset for which the metadata isn't in the metadata
+      cache yet and then immediately performing I/O on that dataset.
+      This behavior is not generally observed when creating a dataset
+      and then performing I/O on it, as the relevant metadata will
+      usually be in the metadata cache as a side effect of creating
+      the chunk index structures during dataset creation. 
+
+      This issue has been fixed by adding callbacks to the different
+      chunk indexing structure classes that allow more explicit control
+      over when chunk index metadata gets loaded. When collective
+      metadata reads are enabled, the necessary index metadata will now
+      get loaded collectively by all MPI ranks at the start of dataset
+      I/O to ensure that the ranks don't unintentionally read this
+      metadata independently further on. These changes fix collective
+      loading of the main chunk index structure, as well as v2 B-tree
+      root nodes, extensible array index blocks and fixed array data
+      blocks. There are still pieces of metadata that cannot currently
+      be loaded collectively, however, such as extensible array data
+      blocks, data block pages and super blocks, as well as fixed array
+      data block pages. These pieces of metadata are not necessarily
+      read in by all MPI ranks since this depends on which chunks the
+      ranks have selected in the dataset. Therefore, reading of these
+      pieces of metadata remains an independent operation.
+
     - Fixed potential hangs in parallel library during collective I/O with
       independent metadata writes
 
