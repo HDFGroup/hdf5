@@ -135,13 +135,13 @@ New Features
 
     Library:
     --------
-    - Added a simple cache to the read-only S3 VFD
+    - Added a simple cache to the read-only S3 (ros3) VFD
 
       The read-only S3 VFD now caches the first N bytes of a file stored
       in S3 to avoid a lot of small I/O operations when opening files.
       This cache is per-file and created when the file is opened.
 
-      N is currently 4kiB or the size of the file, whichever is smaller.
+      N is currently 16 MiB or the size of the file, whichever is smaller.
 
       Addresses GitHub issue #3381
 
