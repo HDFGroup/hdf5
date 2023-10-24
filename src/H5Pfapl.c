@@ -4848,7 +4848,7 @@ H5P__facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_close)
+H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
 {
     H5P_genplist_t *plist;               /* property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
@@ -4864,14 +4864,9 @@ H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_cl
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
-#ifndef H5_HAVE_PARALLEL
     /* Set value */
     if (H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property");
-#else
-    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL,
-                "evict on close is currently not supported in parallel HDF5");
-#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_API(ret_value)

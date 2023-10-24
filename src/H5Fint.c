@@ -1968,6 +1968,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum raw data fraction of page buffer");
     } /* end if */
 
+    /* Get the evict on close setting */
+    if (H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value");
+
+#ifdef H5_HAVE_PARALLEL
+    /* Check for evict on close in parallel (currently unsupported) */
+    assert(file->shared);
+    if (H5F_SHARED_HAS_FEATURE(file->shared, H5FD_FEAT_HAS_MPI)) {
+        int mpi_size = H5F_shared_mpi_get_size(file->shared);
+
+        if ((mpi_size > 1) && evict_on_close)
+            HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL,
+                        "evict on close is currently not supported in parallel HDF5");
+    }
+#endif
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -2046,8 +2062,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * or later, verify that the access property list value matches the value
      * in shared file structure.
      */
-    if (H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value");
     if (shared->nrefs == 1)
         shared->evict_on_close = evict_on_close;
     else if (shared->nrefs > 1) {
