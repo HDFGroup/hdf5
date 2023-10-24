@@ -154,8 +154,9 @@ herr_t
 H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
                          int mpi_rank, int mpi_size)
 {
-    unsigned first_entry_to_flush;
-    unsigned last_entry_to_flush;
+    H5FD_mpio_xfer_t orig_xfer_mode;
+    unsigned         first_entry_to_flush;
+    unsigned         last_entry_to_flush;
 #ifndef NDEBUG
     unsigned total_entries_to_clear = 0;
     unsigned total_entries_to_flush = 0;
@@ -172,8 +173,9 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     char *tbl_buf = NULL;
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
     unsigned m, n;
-    unsigned u;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    unsigned u; /* Local index variable */
+    bool     restore_io_mode = false;
+    herr_t   ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -184,6 +186,10 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     assert(candidates_list_ptr != NULL);
     assert(0 <= mpi_rank);
     assert(mpi_rank < mpi_size);
+
+    /* Get I/O transfer mode */
+    if (H5CX_get_io_xfer_mode(&orig_xfer_mode) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     /* Initialize the entries_to_flush and entries_to_clear arrays */
     memset(entries_to_flush, 0, sizeof(entries_to_flush));
@@ -418,6 +424,19 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             num_candidates, total_entries_to_clear, total_entries_to_flush);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
+    /*
+     * If collective I/O was requested, but collective metadata
+     * writes were not requested, temporarily disable collective
+     * I/O while flushing candidate entries so that we don't cause
+     * a hang in the case where the number of candidate entries
+     * to flush isn't a multiple of mpi_size.
+     */
+    if ((orig_xfer_mode == H5FD_MPIO_COLLECTIVE) && !f->shared->coll_md_write) {
+        if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
+        restore_io_mode = true;
+    }
+
     /* We have now marked all the entries on the candidate list for
      * either flush or clear -- now scan the LRU and the pinned list
      * for these entries and do the deed.  Do this via a call to
@@ -431,6 +450,13 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     if (H5C__flush_candidate_entries(f, entries_to_flush, entries_to_clear) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush candidates failed");
 
+    /* Restore collective I/O if we temporarily disabled it */
+    if (restore_io_mode) {
+        if (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
+        restore_io_mode = false;
+    }
+
     /* If we've deferred writing to do it collectively, take care of that now */
     if (f->shared->coll_md_write) {
         /* Sanity check */
@@ -442,6 +468,10 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     } /* end if */
 
 done:
+    /* Restore collective I/O if we temporarily disabled it */
+    if (restore_io_mode && (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0))
+        HDONE_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
+
     if (candidate_assignment_table != NULL)
         candidate_assignment_table = (unsigned *)H5MM_xfree((void *)candidate_assignment_table);
     if (cache_ptr->coll_write_list) {

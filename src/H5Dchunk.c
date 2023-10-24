@@ -1124,18 +1124,33 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_HAS_MPI) &&
         H5F_shared_get_coll_metadata_reads(io_info->f_sh) &&
         H5D__chunk_is_space_alloc(&dataset->shared->layout.storage)) {
-        H5D_chunk_ud_t udata;
-        hsize_t        scaled[H5O_LAYOUT_NDIMS] = {0};
+        H5O_storage_chunk_t *sc = &(dataset->shared->layout.storage.u.chunk);
+        H5D_chk_idx_info_t   idx_info;
+        bool                 index_is_open;
+
+        idx_info.f       = dataset->oloc.file;
+        idx_info.pline   = &dataset->shared->dcpl_cache.pline;
+        idx_info.layout  = &dataset->shared->layout.u.chunk;
+        idx_info.storage = sc;
+
+        assert(sc && sc->ops && sc->ops->is_open);
+        if (sc->ops->is_open(&idx_info, &index_is_open) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to check if dataset chunk index is open");
+
+        if (!index_is_open) {
+            assert(sc->ops->open);
+            if (sc->ops->open(&idx_info) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset chunk index");
+        }
 
         /*
-         * TODO: Until the dataset chunk index callback structure has
-         * callbacks for checking if an index is opened and also for
-         * directly opening the index, the following fake chunk lookup
-         * serves the purpose of forcing a chunk index open operation
-         * on all ranks
+         * Load any other chunk index metadata that we can,
+         * such as fixed array data blocks, while we know all
+         * MPI ranks will do so with collective metadata reads
+         * enabled
          */
-        if (H5D__chunk_lookup(dataset, scaled, &udata) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to collectively open dataset chunk index");
+        if (sc->ops->load_metadata && sc->ops->load_metadata(&idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load additional chunk index metadata");
     }
 #endif
 
@@ -3827,15 +3842,29 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
             idx_info.storage = sc;
 
 #ifdef H5_HAVE_PARALLEL
-            /* Disable collective metadata read for chunk indexes as it is
-             * highly unlikely that users would read the same chunks from all
-             * processes.
-             */
             if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
-                md_reads_file_flag    = H5P_FORCE_FALSE;
-                md_reads_context_flag = false;
-                H5F_set_coll_metadata_reads(idx_info.f, &md_reads_file_flag, &md_reads_context_flag);
-                restore_md_reads_state = true;
+                /* Disable collective metadata read for chunk indexes as it is
+                 * highly unlikely that users would read the same chunks from all
+                 * processes.
+                 */
+                if (H5F_get_coll_metadata_reads(idx_info.f)) {
+#ifndef NDEBUG
+                    bool index_is_open;
+
+                    /*
+                     * The dataset's chunk index should be open at this point.
+                     * Otherwise, we will end up reading it in independently,
+                     * which may not be desired.
+                     */
+                    sc->ops->is_open(&idx_info, &index_is_open);
+                    assert(index_is_open);
+#endif
+
+                    md_reads_file_flag    = H5P_FORCE_FALSE;
+                    md_reads_context_flag = false;
+                    H5F_set_coll_metadata_reads(idx_info.f, &md_reads_file_flag, &md_reads_context_flag);
+                    restore_md_reads_state = true;
+                }
             }
 #endif /* H5_HAVE_PARALLEL */
 
