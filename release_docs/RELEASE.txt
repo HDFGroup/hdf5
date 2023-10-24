@@ -147,6 +147,18 @@ New Features
       performing I/O on all the filtered datasets at once and then performing
       I/O on all the unfiltered datasets at once.
 
+    - Changed H5Pset_evict_on_close so that it can be called with a parallel
+      build of HDF5
+
+      Previously, H5Pset_evict_on_close would always fail when called from a
+      parallel build of HDF5, stating that the feature is not supported with
+      parallel HDF5. This failure would occur even if a parallel build of HDF5
+      was used with a serial HDF5 application. H5Pset_evict_on_close can now
+      be called regardless of the library build type and the library will
+      instead fail during H5Fcreate/H5Fopen if the "evict on close" property
+      has been set to true and the file is being opened for parallel access
+      with more than 1 MPI process.
+
 
     Fortran Library:
     ----------------
