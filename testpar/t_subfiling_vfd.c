@@ -185,7 +185,7 @@ error:
 
     return H5I_INVALID_HID;
 }
- /* ---------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------
  * Function:    create_dcpl_id
  *
  * Purpose:     Creates dataset creation property list identifier with
@@ -206,14 +206,14 @@ create_dcpl_id(int rank, const hsize_t dset_dims[], hid_t dxpl_id)
     if ((ret_value = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR;
 
-    if(enable_compression) {
-      if(H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
-         TEST_ERROR;
-      chunk_dims[0] = dset_dims[0] / 2;
-      if(H5Pset_chunk(ret_value, rank, chunk_dims) < 0)
-         TEST_ERROR;
-      if(H5Pset_deflate(ret_value, 9) < 0)
-         TEST_ERROR;
+    if (enable_compression) {
+        if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+            TEST_ERROR;
+        chunk_dims[0] = dset_dims[0] / 2;
+        if (H5Pset_chunk(ret_value, rank, chunk_dims) < 0)
+            TEST_ERROR;
+        if (H5Pset_deflate(ret_value, 9) < 0)
+            TEST_ERROR;
     }
 
     return ret_value;
@@ -1383,8 +1383,7 @@ test_subfiling_precreate_rank_0(void)
         dcpl_id = create_dcpl_id(1, dset_dims, dxpl_id);
         VRFY((dcpl_id >= 0), "DCPL creation succeeded");
 
-        dset_id =
-            H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+        dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         buf = malloc(dset_dims[0] * sizeof(SUBF_C_TYPE));
@@ -1571,7 +1570,7 @@ test_subfiling_write_many_read_one(void)
     fspace_id = H5Screate_simple(1, dset_dims, NULL);
     VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
-    dcpl_id = create_dcpl_id(1, dset_dims, dxpl_id );
+    dcpl_id = create_dcpl_id(1, dset_dims, dxpl_id);
     VRFY((dcpl_id >= 0), "DCPL creation succeeded");
 
     dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
@@ -2485,18 +2484,18 @@ main(int argc, char **argv)
     if (MAINPROCESS) {
         printf(" Re-running tests with compression enabled\n");
     }
-    enable_compression=true;
+    enable_compression = true;
     for (size_t i = 4; i < ARRAY_SIZE(tests); i++) {
-          if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
-              (*tests[i])();
-          }
-            else   {
-                if (MAINPROCESS)
-                    MESG("MPI_Barrier failed");
-                nerrors++;
-            }
+        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
+            (*tests[i])();
         }
-    enable_compression=false;
+        else {
+            if (MAINPROCESS)
+                MESG("MPI_Barrier failed");
+            nerrors++;
+        }
+    }
+    enable_compression = false;
 #endif
     if (MAINPROCESS) {
         printf("Re-running tests with environment variables set\n");
@@ -2516,7 +2515,7 @@ main(int argc, char **argv)
     if (MAINPROCESS) {
         printf(" Re-running tests with compression enabled\n");
     }
-    enable_compression=true;
+    enable_compression = true;
     for (size_t i = 5; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
             (*tests[i])();
@@ -2527,7 +2526,7 @@ main(int argc, char **argv)
             nerrors++;
         }
     }
-    enable_compression=false;
+    enable_compression = false;
 #endif
     if (MAINPROCESS)
         puts("");
