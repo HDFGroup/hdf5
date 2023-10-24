@@ -43,6 +43,11 @@
 #define COLL_GHEAP_WRITE_ATTR_NAME   "coll_gheap_write_attr"
 #define COLL_GHEAP_WRITE_ATTR_DIMS   1
 
+#define COLL_IO_IND_MD_WRITE_NDIMS   2
+#define COLL_IO_IND_MD_WRITE_CHUNK0  4
+#define COLL_IO_IND_MD_WRITE_CHUNK1  256
+#define COLL_IO_IND_MD_WRITE_NCHUNK1 16384
+
 /*
  * A test for issue HDFFV-10501. A parallel hang was reported which occurred
  * in linked-chunk I/O when collective metadata reads are enabled and some ranks
@@ -566,6 +571,104 @@ test_collective_global_heap_write(void)
     VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
     VRFY((H5Tclose(vl_type) >= 0), "H5Sclose succeeded");
     VRFY((H5Aclose(attr_id) >= 0), "H5Aclose succeeded");
+    VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+}
+
+/*
+ * A test to ensure that hangs don't occur when collective I/O
+ * is requested at the interface level (by a call to
+ * H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE)), while
+ * collective metadata writes are NOT requested.
+ */
+void
+test_coll_io_ind_md_write(void)
+{
+    const char *filename;
+    long long  *data = NULL;
+    hsize_t     dset_dims[COLL_IO_IND_MD_WRITE_NDIMS];
+    hsize_t     chunk_dims[COLL_IO_IND_MD_WRITE_NDIMS];
+    hsize_t     sel_dims[COLL_IO_IND_MD_WRITE_NDIMS];
+    hsize_t     offset[COLL_IO_IND_MD_WRITE_NDIMS];
+    hid_t       file_id   = H5I_INVALID_HID;
+    hid_t       fapl_id   = H5I_INVALID_HID;
+    hid_t       dset_id   = H5I_INVALID_HID;
+    hid_t       dset_id2  = H5I_INVALID_HID;
+    hid_t       dcpl_id   = H5I_INVALID_HID;
+    hid_t       dxpl_id   = H5I_INVALID_HID;
+    hid_t       fspace_id = H5I_INVALID_HID;
+    int         mpi_rank, mpi_size;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    filename = GetTestParameters();
+
+    fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
+
+    VRFY((H5Pset_all_coll_metadata_ops(fapl_id, false) >= 0), "Unset collective metadata reads succeeded");
+    VRFY((H5Pset_coll_metadata_write(fapl_id, false) >= 0), "Unset collective metadata writes succeeded");
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    dset_dims[0] = (hsize_t)(mpi_size * COLL_IO_IND_MD_WRITE_CHUNK0);
+    dset_dims[1] = (hsize_t)(COLL_IO_IND_MD_WRITE_CHUNK1 * COLL_IO_IND_MD_WRITE_NCHUNK1);
+
+    fspace_id = H5Screate_simple(COLL_IO_IND_MD_WRITE_NDIMS, dset_dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl_id >= 0), "H5Pcreate succeeded");
+
+    chunk_dims[0] = (hsize_t)(COLL_IO_IND_MD_WRITE_CHUNK0);
+    chunk_dims[1] = (hsize_t)(COLL_IO_IND_MD_WRITE_CHUNK1);
+
+    VRFY((H5Pset_chunk(dcpl_id, COLL_IO_IND_MD_WRITE_NDIMS, chunk_dims) >= 0), "H5Pset_chunk succeeded");
+
+    VRFY((H5Pset_shuffle(dcpl_id) >= 0), "H5Pset_shuffle succeeded");
+
+    dset_id = H5Dcreate2(file_id, "dset1", H5T_NATIVE_LLONG, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
+
+    sel_dims[0] = (hsize_t)(COLL_IO_IND_MD_WRITE_CHUNK0);
+    sel_dims[1] = (hsize_t)(COLL_IO_IND_MD_WRITE_CHUNK1 * COLL_IO_IND_MD_WRITE_NCHUNK1);
+
+    offset[0] = (hsize_t)mpi_rank * sel_dims[0];
+    offset[1] = 0;
+
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, offset, NULL, sel_dims, NULL) >= 0),
+         "H5Sselect_hyperslab succeeded");
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
+
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    data = malloc(sel_dims[0] * sel_dims[1] * sizeof(long long));
+    for (size_t i = 0; i < sel_dims[0] * sel_dims[1]; i++)
+        data[i] = rand();
+
+    VRFY((H5Dwrite(dset_id, H5T_NATIVE_LLONG, H5S_BLOCK, fspace_id, dxpl_id, data) >= 0),
+         "H5Dwrite succeeded");
+
+    dset_id2 = H5Dcreate2(file_id, "dset2", H5T_NATIVE_LLONG, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    VRFY((dset_id2 >= 0), "H5Dcreate2 succeeded");
+
+    for (size_t i = 0; i < sel_dims[0] * sel_dims[1]; i++)
+        data[i] = rand();
+
+    VRFY((H5Dwrite(dset_id2, H5T_NATIVE_LLONG, H5S_BLOCK, fspace_id, dxpl_id, data) >= 0),
+         "H5Dwrite succeeded");
+
+    free(data);
+
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Dclose(dset_id2) >= 0), "H5Dclose succeeded");
+    VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
     VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }

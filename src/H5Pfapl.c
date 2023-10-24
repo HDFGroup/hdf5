@@ -5174,7 +5174,7 @@ done:
  * Function:    H5Pset_coll_metadata_write
  *
  * Purpose:    Tell the library whether the metadata write operations will
- *        be done collectively (1) or not (0). Default is collective.
+ *             be done collectively (1) or not (0). Default is independent.
  *
  * Return:    Non-negative on success/Negative on failure
  *
