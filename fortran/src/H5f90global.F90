@@ -25,6 +25,12 @@ MODULE H5GLOBAL
 
   IMPLICIT NONE
 
+!> @brief H5_ih_info_t derived type.
+  TYPE, BIND(C) :: H5_ih_info_t
+     INTEGER(HSIZE_T) :: index_size !< btree and/or list
+     INTEGER(HSIZE_T) :: heap_size  !< Heap size
+  END TYPE H5_ih_info_t
+
 !> \addtogroup FH5
 !> @{
   ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
@@ -368,6 +374,12 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_MPIO_NO_CHUNK_OPTIMIZATION_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_MPIO_LINK_CHUNK_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_MPIO_MULTI_CHUNK_F
+
+  !DEC$ATTRIBUTES DLLEXPORT :: H5D_SCALAR_IO_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5D_VECTOR_IO_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5D_SELECTION_IO_F
+
+
   !DEC$endif
 !> \addtogroup FH5D
 !> @{
@@ -444,6 +456,10 @@ MODULE H5GLOBAL
   INTEGER :: H5D_MPIO_NO_CHUNK_OPTIMIZATION_F !< H5D_MPIO_NO_CHUNK_OPTIMIZATION
   INTEGER :: H5D_MPIO_LINK_CHUNK_F            !< H5D_MPIO_LINK_CHUNK
   INTEGER :: H5D_MPIO_MULTI_CHUNK_F           !< H5D_MPIO_MULTI_CHUNK
+
+  INTEGER :: H5D_SCALAR_IO_F    !< Scalar (or legacy MPIO) I/O was performed
+  INTEGER :: H5D_VECTOR_IO_F    !< Vector I/O was performed
+  INTEGER :: H5D_SELECTION_IO_F !< Selection I/O was performed
   !
   ! H5E flags declaration
   !

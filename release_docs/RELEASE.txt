@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Improved support for Intel oneAPI
+
+      * Separates the old 'classic' Intel compiler settings and warnings
+        from the oneAPI settings
+      * Uses `-check nouninit` in debug builds to avoid false positives
+        when building H5_buildiface with `-check all`
+      * Both Autotools and CMake
+
     - Added new options for CMake and Autotools to control the Doxygen
       warnings as errors setting.
 
@@ -228,6 +236,16 @@ New Features
 
     Library:
     --------
+    - Added a simple cache to the read-only S3 VFD
+
+      The read-only S3 VFD now caches the first N bytes of a file stored
+      in S3 to avoid a lot of small I/O operations when opening files.
+      This cache is per-file and created when the file is opened.
+
+      N is currently 4kiB or the size of the file, whichever is smaller.
+
+      Addresses GitHub issue #3381
+
     - Added new API function H5Pget_actual_selection_io_mode()
 
       This function allows the user to determine if the library performed
@@ -314,7 +332,8 @@ New Features
     - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
-      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_selection_io_f, h5pget_selection_io_f,
+      h5pget_actual_selection_io_mode_f,
       h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
     - Added Fortran APIs:
