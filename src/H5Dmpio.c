@@ -3024,6 +3024,26 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
          * metadata reads are enabled.
          */
         if (H5F_get_coll_metadata_reads(di->dset->oloc.file)) {
+#ifndef NDEBUG
+            {
+                H5D_chk_idx_info_t idx_info;
+                bool               index_is_open;
+
+                idx_info.f       = di->dset->oloc.file;
+                idx_info.pline   = &di->dset->shared->dcpl_cache.pline;
+                idx_info.layout  = &di->dset->shared->layout.u.chunk;
+                idx_info.storage = &di->dset->shared->layout.storage.u.chunk;
+
+                /*
+                 * The dataset's chunk index should be open at this point.
+                 * Otherwise, we will end up reading it in independently,
+                 * which may not be desired.
+                 */
+                idx_info.storage->ops->is_open(&idx_info, &index_is_open);
+                assert(index_is_open);
+            }
+#endif
+
             md_reads_file_flag    = H5P_FORCE_FALSE;
             md_reads_context_flag = false;
             H5F_set_coll_metadata_reads(di->dset->oloc.file, &md_reads_file_flag, &md_reads_context_flag);
@@ -3445,26 +3465,6 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
                 chunk_node = H5SL_next(chunk_node);
             }
-        }
-        else if (H5F_get_coll_metadata_reads(di[dset_idx].dset->oloc.file)) {
-            hsize_t scaled[H5O_LAYOUT_NDIMS] = {0};
-
-            /*
-             * If this rank has no selection in the dataset and collective
-             * metadata reads are enabled, do a fake lookup of a chunk to
-             * ensure that this rank has the chunk index opened. Otherwise,
-             * only the ranks that had a selection will have opened the
-             * chunk index and they will have done so independently. Therefore,
-             * when ranks with no selection participate in later collective
-             * metadata reads, they will try to open the chunk index collectively
-             * and issues will occur since other ranks won't participate.
-             *
-             * In the future, we should consider having a chunk index "open"
-             * callback that can be used to ensure collectivity between ranks
-             * in a more natural way, but this hack should suffice for now.
-             */
-            if (H5D__chunk_lookup(di[dset_idx].dset, scaled, &udata) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address");
         }
 
         /* Reset metadata tagging */
