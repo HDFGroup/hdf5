@@ -2487,12 +2487,12 @@ main(int argc, char **argv)
     if (num_iocs_g > mpi_size)
         num_iocs_g = mpi_size;
 
-#ifdef H5_HAVE_FILTER_DEFLATE
     if (MAINPROCESS) {
         printf(" Re-running tests with compression enabled\n");
     }
+#ifdef H5_HAVE_FILTER_DEFLATE
     enable_compression = true;
-    for (size_t i = 5; i < ARRAY_SIZE(tests); i++) {
+    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
             (*tests[i])();
         }
@@ -2505,7 +2505,6 @@ main(int argc, char **argv)
     enable_compression = false;
 #else
     if (MAINPROCESS) {
-        TESTING_2("re-running tests with compression enabled");
         SKIPPED();
     }
 #endif
@@ -2525,13 +2524,13 @@ main(int argc, char **argv)
         }
     }
 
-#ifdef H5_HAVE_FILTER_DEFLATE
     if (MAINPROCESS) {
         puts("");
         printf(" Re-running tests with compression enabled\n");
     }
+#ifdef H5_HAVE_FILTER_DEFLATE
     enable_compression = true;
-    for (size_t i = 5; i < ARRAY_SIZE(tests); i++) {
+    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
             (*tests[i])();
         }
@@ -2544,8 +2543,6 @@ main(int argc, char **argv)
     enable_compression = false;
 #else
     if (MAINPROCESS) {
-        puts("");
-        TESTING_2("re-running tests with compression enabled");
         SKIPPED();
     }
 #endif
