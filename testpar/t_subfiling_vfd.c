@@ -2487,9 +2487,9 @@ main(int argc, char **argv)
     if (num_iocs_g > mpi_size)
         num_iocs_g = mpi_size;
 
-    if (MAINPROCESS) {
+    if (MAINPROCESS)
         printf(" Re-running tests with compression enabled\n");
-    }
+
 #ifdef H5_HAVE_FILTER_DEFLATE
     enable_compression = true;
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
