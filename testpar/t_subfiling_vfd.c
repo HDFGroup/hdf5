@@ -1201,10 +1201,12 @@ test_read_different_stripe_size(void)
             VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
             /* Check file size */
-            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
-            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+            if (!enable_compression) {
+                VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+                subfile_size = (h5_stat_size_t)subfile_info.st_size;
 
-            VRFY((subfile_size >= cfg.stripe_size), "File size verification succeeded");
+                VRFY((subfile_size >= cfg.stripe_size), "File size verification succeeded");
+            }
         }
     }
 
@@ -1319,7 +1321,6 @@ test_subfiling_precreate_rank_0(void)
     hid_t   fapl_id   = H5I_INVALID_HID;
     hid_t   dset_id   = H5I_INVALID_HID;
     hid_t   dxpl_id   = H5I_INVALID_HID;
-    hid_t   dcpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID;
     void   *buf       = NULL;
 
@@ -1380,10 +1381,8 @@ test_subfiling_precreate_rank_0(void)
         fspace_id = H5Screate_simple(1, dset_dims, NULL);
         VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
-        dcpl_id = create_dcpl_id(1, dset_dims, dxpl_id);
-        VRFY((dcpl_id >= 0), "DCPL creation succeeded");
-
-        dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+        dset_id =
+            H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         buf = malloc(dset_dims[0] * sizeof(SUBF_C_TYPE));
@@ -1401,7 +1400,6 @@ test_subfiling_precreate_rank_0(void)
         VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-        VRFY((H5Pclose(dcpl_id) >= 0), "DCPL close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 
         /*
@@ -1428,10 +1426,12 @@ test_subfiling_precreate_rank_0(void)
             VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
             /* Check file size */
-            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
-            file_size = (h5_stat_size_t)subfile_info.st_size;
+            if (!enable_compression) {
+                VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+                file_size = (h5_stat_size_t)subfile_info.st_size;
 
-            VRFY((file_size >= cfg.stripe_size), "File size verification succeeded");
+                VRFY((file_size >= cfg.stripe_size), "File size verification succeeded");
+            }
         }
 
         /* Verify that there aren't too many subfiles */
@@ -1985,6 +1985,8 @@ test_subfiling_h5fuse(void)
     free(buf);
     buf = NULL;
 
+    VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
+
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Pclose(dcpl_id) >= 0), "DCPL close succeeded");
@@ -2040,8 +2042,10 @@ test_subfiling_h5fuse(void)
         }
 
         /* Verify the size of the fused file */
-        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
-        VRFY(((size_t)file_info.st_size >= target_size), "File size verification succeeded");
+        if (!enable_compression) {
+            VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+            VRFY(((size_t)file_info.st_size >= target_size), "File size verification succeeded");
+        }
 
         /* Re-open file with sec2 driver and verify the data */
         file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -2480,6 +2484,7 @@ main(int argc, char **argv)
     num_iocs_g = (ioc_per_node_g > 0) ? (int)ioc_per_node_g * num_nodes_g : num_nodes_g;
     if (num_iocs_g > mpi_size)
         num_iocs_g = mpi_size;
+
 #ifdef H5_HAVE_FILTER_DEFLATE
     if (MAINPROCESS) {
         printf(" Re-running tests with compression enabled\n");
@@ -2496,8 +2501,14 @@ main(int argc, char **argv)
         }
     }
     enable_compression = false;
+#else
+    if (MAINPROCESS) {
+        TESTING_2("re-running tests with compression enabled");
+        SKIPPED();
+    }
 #endif
     if (MAINPROCESS) {
+        puts("");
         printf("Re-running tests with environment variables set\n");
     }
 
@@ -2511,8 +2522,10 @@ main(int argc, char **argv)
             nerrors++;
         }
     }
+
 #ifdef H5_HAVE_FILTER_DEFLATE
     if (MAINPROCESS) {
+        puts("");
         printf(" Re-running tests with compression enabled\n");
     }
     enable_compression = true;
@@ -2527,6 +2540,12 @@ main(int argc, char **argv)
         }
     }
     enable_compression = false;
+#else
+    if (MAINPROCESS) {
+        puts("");
+        TESTING_2("re-running tests with compression enabled");
+        SKIPPED();
+    }
 #endif
     if (MAINPROCESS)
         puts("");
