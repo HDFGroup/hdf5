@@ -2507,10 +2507,8 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         SKIPPED();
 #endif
-    if (MAINPROCESS) {
-        puts("");
-        printf("Re-running tests with environment variables set\n");
-    }
+    if (MAINPROCESS)
+        printf("\nRe-running tests with environment variables set\n");
 
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
@@ -2523,10 +2521,8 @@ main(int argc, char **argv)
         }
     }
 
-    if (MAINPROCESS) {
-        puts("");
-        printf(" Re-running tests with compression enabled\n");
-    }
+    if (MAINPROCESS)
+        printf("\n Re-running tests with compression enabled\n");
 #ifdef H5_HAVE_FILTER_DEFLATE
     enable_compression = true;
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -2544,14 +2540,11 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         SKIPPED();
 #endif
-    if (MAINPROCESS)
-        puts("");
-
     if (nerrors)
         goto exit;
 
     if (MAINPROCESS)
-        puts("All Subfiling VFD tests passed\n");
+        puts("\nAll Subfiling VFD tests passed\n");
 
 exit:
     if (must_unset_stripe_size_env)
