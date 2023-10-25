@@ -40,6 +40,8 @@
 #define PATH_MAX 4096
 #endif
 
+#define DEFAULT_DEFLATE_LEVEL 9
+
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
 #define CHECK_PASSED()                                                                                       \
@@ -212,7 +214,7 @@ create_dcpl_id(int rank, const hsize_t dset_dims[], hid_t dxpl_id)
         chunk_dims[0] = dset_dims[0] / 2;
         if (H5Pset_chunk(ret_value, rank, chunk_dims) < 0)
             TEST_ERROR;
-        if (H5Pset_deflate(ret_value, 9) < 0)
+        if (H5Pset_deflate(ret_value, DEFAULT_DEFLATE_LEVEL) < 0)
             TEST_ERROR;
     }
 
@@ -2490,7 +2492,7 @@ main(int argc, char **argv)
         printf(" Re-running tests with compression enabled\n");
     }
     enable_compression = true;
-    for (size_t i = 4; i < ARRAY_SIZE(tests); i++) {
+    for (size_t i = 5; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
             (*tests[i])();
         }
