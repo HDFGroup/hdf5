@@ -2504,9 +2504,8 @@ main(int argc, char **argv)
     }
     enable_compression = false;
 #else
-    if (MAINPROCESS) {
+    if (MAINPROCESS)
         SKIPPED();
-    }
 #endif
     if (MAINPROCESS) {
         puts("");
@@ -2542,9 +2541,8 @@ main(int argc, char **argv)
     }
     enable_compression = false;
 #else
-    if (MAINPROCESS) {
+    if (MAINPROCESS)
         SKIPPED();
-    }
 #endif
     if (MAINPROCESS)
         puts("");
