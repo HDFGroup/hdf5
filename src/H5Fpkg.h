@@ -359,6 +359,7 @@ struct H5F_shared_t {
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     bool                    coll_md_write; /* Do all metadata writes collectively */
+    MPI_Info                mpi_info;      /* MPI info */
 #endif                                     /* H5_HAVE_PARALLEL */
 };
 
