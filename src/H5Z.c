@@ -603,7 +603,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__flush_file_cb(void H5_ATTR_UNUSED  *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARALLEL_USED *key)
+H5Z__flush_file_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void H5_ATTR_PARALLEL_USED *key)
 {
 
 #ifdef H5_HAVE_PARALLEL
@@ -613,8 +613,8 @@ H5Z__flush_file_cb(void H5_ATTR_UNUSED  *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, v
     H5VL_file_specific_args_t vol_cb_args_specific; /* Arguments to VOL callback */
     H5VL_object_t            *vol_obj;              /* File for file_id */
     H5VL_file_get_args_t      vol_cb_args;          /* Arguments to VOL callback */
-
-    unsigned int intent = 0;
+    bool                      is_native_vol_obj = true;
+    unsigned int              intent            = 0;
 
     FUNC_ENTER_PACKAGE
 
@@ -633,42 +633,43 @@ H5Z__flush_file_cb(void H5_ATTR_UNUSED  *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, v
     if (H5VL_file_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's intent flags");
 
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
+                    "can't determine if VOL object is native connector object");
+
     /* Do a global flush if the file is opened for write */
     if (H5F_ACC_RDWR & intent) {
 
 #ifdef H5_HAVE_PARALLEL
-        H5G_loc_t loc;
-        H5F_t    *f = NULL;
+        /* Checking MPI flag requires native VOL */
+        if (is_native_vol_obj) {
+            H5F_t *f = (H5F_t *)obj_ptr; /* File object for native VOL operation */
 
-        /* Check if MPIO driver is used */
-        if (H5G_loc(obj_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-        f = loc.oloc->file;
-        assert(f);
+            /* Check if MPIO driver is used */
+            if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
 
-        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+                /* Sanity check for collectively calling H5Zunregister, if requested */
+                /* (Sanity check assumes that a barrier on one file's comm
+                 *  is sufficient (i.e. that there aren't different comms for
+                 *  different files).  -QAK, 2018/02/14)
+                 */
+                if (H5_coll_api_sanity_check_g && !object->sanity_checked) {
+                    MPI_Comm mpi_comm; /* File's communicator */
 
-            /* Sanity check for collectively calling H5Zunregister, if requested */
-            /* (Sanity check assumes that a barrier on one file's comm
-             *  is sufficient (i.e. that there aren't different comms for
-             *  different files).  -QAK, 2018/02/14)
-             */
-            if (H5_coll_api_sanity_check_g && !object->sanity_checked) {
-                MPI_Comm mpi_comm; /* File's communicator */
+                    /* Retrieve the file communicator */
+                    if (H5F_mpi_retrieve_comm(obj_id, H5P_DEFAULT, &mpi_comm) < 0)
+                        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get MPI communicator");
 
-                /* Retrieve the file communicator */
-                if (H5F_mpi_retrieve_comm(obj_id, H5P_DEFAULT, &mpi_comm) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get MPI communicator");
+                    /* Issue the barrier */
+                    if (mpi_comm != MPI_COMM_NULL)
+                        MPI_Barrier(mpi_comm);
 
-                /* Issue the barrier */
-                if (mpi_comm != MPI_COMM_NULL)
-                    MPI_Barrier(mpi_comm);
-
-                /* Set the "sanity checked" flag */
-                object->sanity_checked = true;
-            } /* end if */
-        }     /* end if */
-#endif        /* H5_HAVE_PARALLEL */
+                    /* Set the "sanity checked" flag */
+                    object->sanity_checked = true;
+                } /* end if */
+            }     /* end if */
+        }
+#endif /* H5_HAVE_PARALLEL */
 
         /* Call the flush routine for mounted file hierarchies */
         vol_cb_args_specific.op_type             = H5VL_FILE_FLUSH;
