@@ -1132,8 +1132,11 @@ test_fapl_preserve_hints(void)
     hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
     const char *filename;
 
-    MPI_Info    info  = MPI_INFO_NULL;
-    const char *key   = "hdf_info_fapl";
+    int nkeys_used;
+    bool same = false;
+
+    MPI_Info    info      = MPI_INFO_NULL;
+    const char *key = "hdf_info_fapl";
     const char *value = "xyz";
 
     MPI_Info info_used = MPI_INFO_NULL;
@@ -1141,8 +1144,9 @@ test_fapl_preserve_hints(void)
     char     value_used[20];
     char     key_used[20];
 
-    herr_t ret;     /* Generic return value */
-    int    mpi_ret; /* MPI return value */
+    int         i;
+    herr_t      ret;     /* Generic return value */
+    int         mpi_ret; /* MPI return value */
 
     filename = (const char *)GetTestParameters();
 
@@ -1173,20 +1177,35 @@ test_fapl_preserve_hints(void)
 
     VRFY((info_used != MPI_INFO_NULL), "H5Pget_fapl_mpio");
 
-    memset(key_used, 0, 20);
-    memset(value_used, 0, 20);
+    mpi_ret = MPI_Info_get_nkeys(info_used, &nkeys_used);
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nkeys succeeded");
 
-    mpi_ret = MPI_Info_get_nthkey(info_used, 0, key_used);
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nthkey succeeded");
+    /* Loop over the # of keys */
+    for (i = 0; i < nkeys_used; i++) {
 
-    mpi_ret = MPI_Info_get(info_used, key_used, 20, value_used, &flag);
-    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get succeeded");
+        /* Memset the buffers to zero */
+        memset(key_used, 0, 20);
+        memset(value_used, 0, 20);
 
-    ret = strcmp(key_used, key);
-    VRFY(ret == 0, "strcmp key");
+        /* Get the nth key */
+        mpi_ret = MPI_Info_get_nthkey(info_used, i, key_used);
+        VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nthkey succeeded");
 
-    ret = strcmp(value_used, value);
-    VRFY(ret == 0, "strcmp value");
+        if (!strcmp(key_used, key)) {
+
+            mpi_ret = MPI_Info_get(info_used, key_used, 20, value_used, &flag);
+            VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get succeeded");
+
+            if (!strcmp(value_used, value)) {
+
+                /* Both key_used and value_used are the same */
+                same = true;
+                break;
+            }
+        }
+    } /* end for */
+
+    VRFY((same == true), "key_used and value_used are the same");
 
     ret = H5Pclose(fapl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
