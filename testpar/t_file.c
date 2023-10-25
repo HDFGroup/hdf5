@@ -1119,3 +1119,105 @@ test_evict_on_close_parallel_unsupp(void)
     ret = H5Pclose(fapl_id);
     VRFY((SUCCEED == ret), "H5Pclose");
 }
+
+/*
+ * Verify that MPI I/O hints are preserved after closing the file access property list
+ * as described in issue #3025
+ * This is a test program from the user.
+ */
+void
+test_fapl_preserve_hints(void)
+{
+    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
+    const char *filename;
+
+    int  nkeys_used;
+    bool same = false;
+
+    MPI_Info    info  = MPI_INFO_NULL;
+    const char *key   = "hdf_info_fapl";
+    const char *value = "xyz";
+
+    MPI_Info info_used = MPI_INFO_NULL;
+    int      flag      = -1;
+    char     value_used[20];
+    char     key_used[20];
+
+    int    i;
+    herr_t ret;     /* Generic return value */
+    int    mpi_ret; /* MPI return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    mpi_ret = MPI_Info_create(&info);
+    VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
+
+    mpi_ret = MPI_Info_set(info, key, value);
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_set succeeded");
+
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id != H5I_INVALID_HID), "H5Pcreate");
+
+    ret = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, info);
+    VRFY((ret >= 0), "H5Pset_fapl_mpio");
+
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid != H5I_INVALID_HID), "H5Fcreate succeeded");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    fapl_id = H5Fget_access_plist(fid);
+    VRFY((fapl_id != H5I_INVALID_HID), "H5Fget_access_plist succeeded");
+
+    ret = H5Pget_fapl_mpio(fapl_id, NULL, &info_used);
+    VRFY((ret >= 0), "H5Pget_fapl_mpio succeeded");
+
+    VRFY((info_used != MPI_INFO_NULL), "H5Pget_fapl_mpio");
+
+    mpi_ret = MPI_Info_get_nkeys(info_used, &nkeys_used);
+    VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nkeys succeeded");
+
+    /* Loop over the # of keys */
+    for (i = 0; i < nkeys_used; i++) {
+
+        /* Memset the buffers to zero */
+        memset(key_used, 0, 20);
+        memset(value_used, 0, 20);
+
+        /* Get the nth key */
+        mpi_ret = MPI_Info_get_nthkey(info_used, i, key_used);
+        VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nthkey succeeded");
+
+        if (!strcmp(key_used, key)) {
+
+            mpi_ret = MPI_Info_get(info_used, key_used, 20, value_used, &flag);
+            VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get succeeded");
+
+            if (!strcmp(value_used, value)) {
+
+                /* Both key_used and value_used are the same */
+                same = true;
+                break;
+            }
+        }
+    } /* end for */
+
+    VRFY((same == true), "key_used and value_used are the same");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    /* Free the MPI info object */
+    mpi_ret = MPI_Info_free(&info);
+    VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+
+    mpi_ret = MPI_Info_free(&info_used);
+    VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+
+} /* end test_fapl_preserve_hints() */
