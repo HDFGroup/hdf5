@@ -192,7 +192,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 mdset.h5 compact_dataset.h5 dataset.h5 d
     storage_size.h5 dls_01_strings.h5 power2up.h5 version_bounds.h5 \
     alloc_0sized.h5 h5s_block.h5 h5s_plist.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
-    sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
+    sys_file1 tfile[1-8].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
     ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
@@ -226,7 +226,10 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 mdset.h5 compact_dataset.h5 dataset.h5 d
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
     tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5 \
-    splitter*.h5 splitter.log mirror_rw mirror_ro event_set_[0-9].h5
+    splitter*.h5 splitter.log mirror_rw mirror_ro event_set_[0-9].h5 \
+    cmpd_dtransform.h5 single_latest.h5 source_file.h5 stdio_file.h5 \
+    tfile_is_accessible.h5 tfile_is_accessible_non_hdf5.h5 tverbounds_dtype.h5 \
+    virtual_file1.h5 tfile_double_open.h5 tfile_incr_filesize.h5 flushrefresh_test
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

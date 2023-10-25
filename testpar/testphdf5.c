@@ -366,6 +366,9 @@ main(int argc, char **argv)
     AddTest("invlibverassert", test_invalid_libver_bounds_file_close_assert, NULL,
             "Invalid libver bounds assertion failure", PARATESTFILE);
 
+    AddTest("evictparassert", test_evict_on_close_parallel_unsupp, NULL, "Evict on close in parallel failure",
+            PARATESTFILE);
+
     AddTest("idsetw", dataset_writeInd, NULL, "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL, "dataset independent read", PARATESTFILE);
 
@@ -521,6 +524,8 @@ main(int argc, char **argv)
             "Collective MD read with link chunk I/O (H5D__sort_chunk)", PARATESTFILE);
     AddTest("GH_coll_MD_wr", test_collective_global_heap_write, NULL,
             "Collective MD write of global heap data", PARATESTFILE);
+    AddTest("COLLIO_INDMDWR", test_coll_io_ind_md_write, NULL,
+            "Collective I/O with Independent metadata writes", PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);

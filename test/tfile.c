@@ -138,8 +138,14 @@
 #define NGROUPS 2
 #define NDSETS  4
 
-/* Declaration for test_incr_filesize() */
+/* Declaration for libver bounds tests */
 #define FILE8 "tfile8.h5" /* Test file */
+
+/* Declaration for test_file_double_file_dataset_open() */
+#define FILE_DOUBLE_OPEN "tfile_double_open"
+
+/* Declaration for test_incr_filesize() */
+#define FILE_INCR_FILESIZE "tfile_incr_filesize"
 
 /* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
 static const char *OLD_FILENAME[] = {
@@ -2623,8 +2629,8 @@ test_file_double_file_dataset_open(bool new_format)
     if (new_format) {
         ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
         CHECK(ret, FAIL, "H5Pset_libver_bounds");
-    } /* end if */
-    h5_fixname(FILE1, fapl, filename, sizeof filename);
+    }
+    h5_fixname(FILE_DOUBLE_OPEN, fapl, filename, sizeof filename);
 
     /* Create the test file */
     fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -2933,6 +2939,9 @@ test_file_double_file_dataset_open(bool new_format)
     /* Close the data type */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
+
+    /* Delete the test file */
+    h5_delete_test_file(filename, fapl);
 
     /* Close FAPL */
     ret = H5Pclose(fapl);
@@ -7649,7 +7658,7 @@ test_incr_filesize(void)
     MESSAGE(5, ("Testing H5Fincrement_filesize() and H5Fget_eoa())\n"));
 
     fapl = h5_fileaccess();
-    h5_fixname(FILE8, fapl, filename, sizeof filename);
+    h5_fixname(FILE_INCR_FILESIZE, fapl, filename, sizeof filename);
 
     /* Get the VFD feature flags */
     driver_id = H5Pget_driver(fapl);
@@ -7733,6 +7742,9 @@ test_incr_filesize(void)
 
         /* Verify the filesize is the previous stored_eoa + 512 */
         VERIFY(filesize, stored_eoa + 512, "file size");
+
+        /* Delete the test file */
+        h5_delete_test_file(FILE_INCR_FILESIZE, fapl);
 
         /* Close the file access property list */
         ret = H5Pclose(fapl);
@@ -8224,6 +8236,7 @@ cleanup_file(void)
         H5Fdelete(FILE5, H5P_DEFAULT);
         H5Fdelete(FILE6, H5P_DEFAULT);
         H5Fdelete(FILE7, H5P_DEFAULT);
+        H5Fdelete(FILE8, H5P_DEFAULT);
         H5Fdelete(DST_FILE, H5P_DEFAULT);
     }
     H5E_END_TRY
