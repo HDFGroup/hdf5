@@ -16,7 +16,7 @@ on:
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
-  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
   cancel-in-progress: true
 
 permissions:
