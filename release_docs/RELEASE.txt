@@ -109,6 +109,13 @@ Bug Fixes since HDF5-1.14.3 release
 ===================================
     Library
     -------
+    - Fixed a file handle leak in the core VFD
+
+      When opening a file with the core VFD and a file image, if the file
+      already exists, the file check would leak the POSIX file handle.
+
+      Fixes GitHub issue #635
+
     - Dropped support for MPI-2
 
       The MPI-2 supporting artifacts have been removed due to the cessation
