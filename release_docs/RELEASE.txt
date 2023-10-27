@@ -1,4 +1,4 @@
-HDF5 version 1.14.3 currently under development
+HDF5 version 1.14.3 released on 2023-10-27
 ================================================================================
 
 
@@ -615,6 +615,9 @@ Platforms Tested
 Known Problems
 ==============
 
+    Building HDF5 Fortran on windows with Intel oneAPI 2023.2 currently fails 
+    with link errors.  Windows binaries will be without Fortran for this release.
+ 
     IEEE standard arithmetic enables software to raise exceptions such as overflow,
     division by zero, and other illegal operations without interrupting or halting
     the program flow. The HDF5 C library intentionally performs these exceptions.
