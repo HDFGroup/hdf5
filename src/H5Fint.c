@@ -402,6 +402,7 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set collective metadata read flag");
     if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
         MPI_Comm mpi_comm;
+        MPI_Info mpi_info;
 
         /* Retrieve and set MPI communicator */
         if (MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(f)))
@@ -409,9 +410,11 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &mpi_comm) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI communicator");
 
-        /* Retrieve MPI info object */
-        if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &(f->shared->mpi_info)) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI info object");
+        /* Retrieve and set MPI info */
+        if (MPI_INFO_NULL == (mpi_info = H5F_mpi_get_info(f)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get MPI info");
+        if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &mpi_info) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI info");
     }
 #endif /* H5_HAVE_PARALLEL */
     if (H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
@@ -1130,12 +1133,6 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         /* initialize point of no return */
         f->shared->point_of_no_return = false;
 
-#ifdef H5_HAVE_PARALLEL
-        /* Initialize this just in case we fail before setting this field and */
-        /* we try to call H5_mpi_info_free() on uninitialized memory in H5F__dest() */
-        f->shared->mpi_info = MPI_INFO_NULL;
-#endif /* H5_HAVE_PARALLEL */
-
         /* Copy the file creation and file access property lists into the
          * new file handle. We do this early because some values might need
          * to change as the file is being opened.
@@ -1212,8 +1209,6 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag");
         if (H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->shared->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag");
-        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &(f->shared->mpi_info)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't set MPI info object");
 #endif /* H5_HAVE_PARALLEL */
         if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
             0)
@@ -1418,14 +1413,6 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache");
             f->shared->efc = NULL;
         } /* end if */
-
-#ifdef H5_HAVE_PARALLEL
-        if (f->shared->mpi_info != MPI_INFO_NULL) {
-            /* Free MPI info saved in the file struct */
-            if (H5_mpi_info_free(&f->shared->mpi_info) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't free MPI info");
-        }
-#endif
 
         /* With the shutdown modifications, the contents of the metadata cache
          * should be clean at this point, with the possible exception of the
