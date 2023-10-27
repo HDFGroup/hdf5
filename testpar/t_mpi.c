@@ -53,13 +53,13 @@ test_mpio_overlap_writes(char *filename)
     MPI_Offset     mpi_off;
     MPI_Status     mpi_stat;
 
-    if (VERBOSE_MED && MAINPROCESS)
-        printf("MPIO independent overlapping writes test on file %s\n", filename);
-
     nerrs = 0;
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    if (VERBOSE_MED && MAINPROCESS)
+        printf("MPIO independent overlapping writes test on file %s\n", filename);
 
     /* Need at least 2 processes */
     if (mpi_size < 2) {
