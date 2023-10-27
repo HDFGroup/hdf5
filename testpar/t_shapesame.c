@@ -4089,7 +4089,8 @@ parse_options(int argc, char **argv)
                 case 'h': /* print help message--return with nerrors set */
                     return (1);
                 default:
-                    printf("Illegal option(%s)\n", *argv);
+                    if (MAINPROCESS)
+                        printf("Illegal option(%s)\n", *argv);
                     nerrors++;
                     return (1);
             }
@@ -4098,12 +4099,14 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0) {
-        printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+        if (MAINPROCESS)
+            printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
         nerrors++;
         return (1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0) {
-        printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+        if (MAINPROCESS)
+            printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
         nerrors++;
         return (1);
     }
@@ -4128,9 +4131,11 @@ parse_options(int argc, char **argv)
                 nerrors++;
                 return (1);
             }
-        printf("Test filenames are:\n");
-        for (i = 0; i < n; i++)
-            printf("    %s\n", filenames[i]);
+        if (MAINPROCESS) {
+            printf("Test filenames are:\n");
+            for (i = 0; i < n; i++)
+                printf("    %s\n", filenames[i]);
+        }
     }
 
     return (0);

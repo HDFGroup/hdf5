@@ -53,7 +53,7 @@ test_mpio_overlap_writes(char *filename)
     MPI_Offset     mpi_off;
     MPI_Status     mpi_stat;
 
-    if (VERBOSE_MED)
+    if (VERBOSE_MED && MAINPROCESS)
         printf("MPIO independent overlapping writes test on file %s\n", filename);
 
     nerrs = 0;
@@ -211,7 +211,7 @@ test_mpio_gb_file(char *filename)
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    if (VERBOSE_MED)
+    if (VERBOSE_MED && MAINPROCESS)
         printf("MPI_Offset range test\n");
 
     /* figure out the signness and sizeof MPI_Offset */
@@ -274,12 +274,13 @@ test_mpio_gb_file(char *filename)
     /*
      * Verify if we can write to a file of multiple GB sizes.
      */
-    if (VERBOSE_MED)
+    if (VERBOSE_MED && MAINPROCESS)
         printf("MPIO GB file test %s\n", filename);
 
     if (sizeof_mpi_offset <= 4) {
-        printf("Skipped GB file range test "
-               "because MPI_Offset cannot support it\n");
+        if (MAINPROCESS)
+            printf("Skipped GB file range test "
+                   "because MPI_Offset cannot support it\n");
     }
     else {
         buf = (char *)malloc(MB);
@@ -294,7 +295,8 @@ test_mpio_gb_file(char *filename)
         mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE | MPI_MODE_RDWR, info, &fh);
         VRFY((mrc == MPI_SUCCESS), "MPI_FILE_OPEN");
 
-        printf("MPIO GB file write test %s\n", filename);
+        if (MAINPROCESS)
+            printf("MPIO GB file write test %s\n", filename);
 
         /* instead of writing every bytes of the file, we will just write
          * some data around the 2 and 4 GB boundaries.  That should cover
@@ -333,7 +335,8 @@ test_mpio_gb_file(char *filename)
          */
         /* open it again to verify the data written */
         /* but only if there was no write errors */
-        printf("MPIO GB file read test %s\n", filename);
+        if (MAINPROCESS)
+            printf("MPIO GB file read test %s\n", filename);
         if (errors_sum(writerrs) > 0) {
             printf("proc %d: Skip read test due to previous write errors\n", mpi_rank);
             goto finish;
@@ -377,7 +380,8 @@ test_mpio_gb_file(char *filename)
         mrc = MPI_Barrier(MPI_COMM_WORLD);
         VRFY((mrc == MPI_SUCCESS), "Sync before leaving test");
 
-        printf("Test if MPI_File_get_size works correctly with %s\n", filename);
+        if (MAINPROCESS)
+            printf("Test if MPI_File_get_size works correctly with %s\n", filename);
 
         mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, info, &fh);
         VRFY((mrc == MPI_SUCCESS), "");
@@ -432,7 +436,6 @@ finish:
 static int
 test_mpio_1wMr(char *filename, int special_request)
 {
-    char          hostname[128];
     int           mpi_size, mpi_rank;
     MPI_File      fh;
     char          mpi_err_str[MPI_MAX_ERROR_STRING];
@@ -456,19 +459,8 @@ test_mpio_1wMr(char *filename, int special_request)
     }
 
     /* show the hostname so that we can tell where the processes are running */
-    if (VERBOSE_DEF) {
-#ifdef H5_HAVE_GETHOSTNAME
-        if (gethostname(hostname, sizeof(hostname)) < 0) {
-            printf("gethostname failed\n");
-            hostname[0] = '\0';
-        }
-#else
-        printf("gethostname unavailable\n");
-        hostname[0] = '\0';
-#endif
-        PRINTID;
-        printf("hostname=%s\n", hostname);
-    }
+    if (VERBOSE_DEF)
+        h5_show_hostname();
 
     /* Delete any old file in order to start anew. */
     /* Must delete because MPI_File_open does not have a Truncate mode. */
@@ -1005,6 +997,10 @@ test_mpio_special_collective(char *filename)
 static int
 parse_options(int argc, char **argv)
 {
+    int mpi_rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
     while (--argc) {
         if (**(++argv) != '-') {
             break;
@@ -1053,7 +1049,7 @@ parse_options(int argc, char **argv)
                 return (1);
             }
         H5Pclose(plist);
-        if (VERBOSE_MED) {
+        if (VERBOSE_MED && MAINPROCESS) {
             printf("Test filenames are:\n");
             for (i = 0; i < n; i++)
                 printf("    %s\n", filenames[i]);
