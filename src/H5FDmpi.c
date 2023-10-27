@@ -143,7 +143,7 @@ done:
 } /* end H5FD_mpi_get_comm() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_mpi_get_comm
+ * Function:    H5FD_mpi_get_info
  *
  * Purpose:     Retrieves the file's MPI_Info info object
  *
