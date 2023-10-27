@@ -301,20 +301,24 @@ PerformTests(void)
 
     for (Loop = 0; Loop < Index; Loop++)
         if (Test[Loop].SkipFlag) {
-            MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
         }
         else {
             if (mpi_rank_framework_g == 0)
                 MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
-            MESSAGE(5, ("===============================================\n"));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
             Test_parameters      = Test[Loop].Parameters;
             TestAlarmOn();
             Test[Loop].Call();
             TestAlarmOff();
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
-            MESSAGE(5, ("===============================================\n"));
-            MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
+            if (mpi_rank_framework_g == 0) {
+                MESSAGE(5, ("===============================================\n"));
+                MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
+            }
         }
 
     Test_parameters = NULL; /* clear it. */
