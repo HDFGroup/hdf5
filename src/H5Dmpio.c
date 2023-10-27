@@ -911,7 +911,8 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
             case H5D_MPIO_COLLECTIVE:
             case H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE:
             default:
-                assert(0 && "invalid no collective cause reason");
+                cause_str = "invalid or unknown no collective cause reason";
+                assert(0 && "invalid or unknown no collective cause reason");
                 break;
         }
 
