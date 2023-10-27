@@ -1,4 +1,4 @@
-HDF5 version 1.14.3-2 currently under development
+HDF5 version 1.14.3 currently under development
 ================================================================================
 
 
@@ -61,8 +61,8 @@ New Features
         * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
         * --enable-doxygen-errors: enable/disable (Default: enable)
 
-      The default will fail compile if the doxygen parsing generates warnings.
-      The option can be disabled if certain versions of doxygen have parsing
+      The default will fail to compile if the doxygen parsing generates warnings.
+      The option can be disabled for certain versions of doxygen with parsing
       issues. i.e. 1.9.5, 1.9.8.
 
       Addresses GitHub issue #3398
@@ -316,12 +316,12 @@ Bug Fixes since HDF5-1.14.2 release
       of the application and uses that to select a subset of MPI ranks that
       I/O will be forwarded to, called I/O concentrators. The code for this
       had previously assumed that the parallel job launcher application (e.g.,
-      mpirun, srun, etc.) would distribute MPI ranks sequentially among a node
-      until all processors on that node have been assigned before going on to
-      the next node. When the launcher application mapped MPI ranks to nodes
-      in a different fashion, such as round-robin, this could cause the Subfiling
-      VFD to incorrectly map MPI ranks as I/O concentrators, leading to missing
-      subfiles.
+      mpirun, srun, etc.) would distribute MPI ranks sequentially to a node's
+      processors until all processors on that node have been assigned before
+      going on to the next node. When the launcher application mapped MPI ranks
+      to nodes in a different fashion, such as round-robin, this could cause 
+      the Subfiling VFD to incorrectly map MPI ranks as I/O concentrators,
+      leading to missing subfiles.
 
     - Fixed a file space allocation bug in the parallel library for chunked
       datasets
@@ -501,7 +501,7 @@ Platforms Tested
     Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
-    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
+    Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.27
     #1 SMP x86_64 GNU/Linux              cce/15.0.0
     (frontier)                           gcc/12.2.0
                                      (cmake)
@@ -605,10 +605,10 @@ Platforms Tested
 
     Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
-                                    Visual Studio 2022 w/ clang 15.0.1
+                                    Visual Studio 2019 w/ Intel oneAPI 2023.2 C/C++ only - cmake)
+                                    Visual Studio 2022 w/ clang 16.0.5
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
+                                    Visual Studio 2022 w/ Intel oneAPI 2023.2 (C/C++ only - cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
