@@ -155,35 +155,37 @@ TestUsage(void)
 {
     unsigned i;
 
-    print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n", TestProgName,
-               (TestPrivateUsage ? "<extra options>" : ""));
-    print_func("              [-[e]x[clude] name]+ \n");
-    print_func("              [-o[nly] name]+ \n");
-    print_func("              [-b[egin] name] \n");
-    print_func("              [-s[ummary]]  \n");
-    print_func("              [-c[leanoff]]  \n");
-    print_func("              [-h[elp]]  \n");
-    print_func("\n\n");
-    print_func("verbose   controls the amount of information displayed\n");
-    print_func("exclude   to exclude tests by name\n");
-    print_func("only      to name tests which should be run\n");
-    print_func("begin     start at the name of the test given\n");
-    print_func("summary   prints a summary of test results at the end\n");
-    print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
-    print_func("help      print out this information\n");
-    if (TestPrivateUsage) {
-        print_func("\nExtra options\n");
-        TestPrivateUsage();
+    if (mpi_rank_framework_g == 0) {
+        print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n", TestProgName,
+                   (TestPrivateUsage ? "<extra options>" : ""));
+        print_func("              [-[e]x[clude] name]+ \n");
+        print_func("              [-o[nly] name]+ \n");
+        print_func("              [-b[egin] name] \n");
+        print_func("              [-s[ummary]]  \n");
+        print_func("              [-c[leanoff]]  \n");
+        print_func("              [-h[elp]]  \n");
+        print_func("\n\n");
+        print_func("verbose   controls the amount of information displayed\n");
+        print_func("exclude   to exclude tests by name\n");
+        print_func("only      to name tests which should be run\n");
+        print_func("begin     start at the name of the test given\n");
+        print_func("summary   prints a summary of test results at the end\n");
+        print_func("cleanoff  does not delete *.hdf files after execution of tests\n");
+        print_func("help      print out this information\n");
+        if (TestPrivateUsage) {
+            print_func("\nExtra options\n");
+            TestPrivateUsage();
+        }
+        print_func("\n\n");
+        print_func("This program currently tests the following: \n\n");
+        print_func("%16s %s\n", "Name", "Description");
+        print_func("%16s %s\n", "----", "-----------");
+
+        for (i = 0; i < Index; i++)
+            print_func("%16s %s\n", Test[i].Name, Test[i].Description);
+
+        print_func("\n\n");
     }
-    print_func("\n\n");
-    print_func("This program currently tests the following: \n\n");
-    print_func("%16s %s\n", "Name", "Description");
-    print_func("%16s %s\n", "----", "-----------");
-
-    for (i = 0; i < Index; i++)
-        print_func("%16s %s\n", Test[i].Name, Test[i].Description);
-
-    print_func("\n\n");
 }
 
 /*
@@ -192,12 +194,14 @@ TestUsage(void)
 void
 TestInfo(const char *ProgName)
 {
-    unsigned major, minor, release;
+    if (mpi_rank_framework_g == 0) {
+        unsigned major, minor, release;
 
-    H5get_libversion(&major, &minor, &release);
+        H5get_libversion(&major, &minor, &release);
 
-    print_func("\nFor help use: %s -help\n", ProgName);
-    print_func("Linked with hdf5 version %u.%u release %u\n", major, minor, release);
+        print_func("\nFor help use: %s -help\n", ProgName);
+        print_func("Linked with hdf5 version %u.%u release %u\n", major, minor, release);
+    }
 }
 
 /*
@@ -301,20 +305,24 @@ PerformTests(void)
 
     for (Loop = 0; Loop < Index; Loop++)
         if (Test[Loop].SkipFlag) {
-            MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
         }
         else {
             if (mpi_rank_framework_g == 0)
                 MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
-            MESSAGE(5, ("===============================================\n"));
+            if (mpi_rank_framework_g == 0)
+                MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
             Test_parameters      = Test[Loop].Parameters;
             TestAlarmOn();
             Test[Loop].Call();
             TestAlarmOff();
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
-            MESSAGE(5, ("===============================================\n"));
-            MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
+            if (mpi_rank_framework_g == 0) {
+                MESSAGE(5, ("===============================================\n"));
+                MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
+            }
         }
 
     Test_parameters = NULL; /* clear it. */
@@ -358,7 +366,8 @@ TestCleanup(void)
 {
     unsigned Loop;
 
-    MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
+    if (mpi_rank_framework_g == 0)
+        MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
 
     /* call individual cleanup routines in each source module */
     for (Loop = 0; Loop < Index; Loop++)
@@ -619,7 +628,8 @@ SetTest(const char *testname, int action)
             break;
         default:
             /* error */
-            printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
+            if (mpi_rank_framework_g == 0)
+                printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
             break;
     }
 }
