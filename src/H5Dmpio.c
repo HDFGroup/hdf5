@@ -3782,6 +3782,10 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         counts_disps_array = H5MM_xfree(counts_disps_array);
     }
 
+    /* No useful work to do - exit */
+    if (coll_chunk_list_num_entries == 0)
+        HGOTO_DONE(SUCCEED);
+
     /*
      * Phase 2 - Involved ranks now redistribute any shared chunks to new
      * owners as necessary.
