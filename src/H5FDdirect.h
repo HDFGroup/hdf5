@@ -18,19 +18,19 @@
 
 #ifdef H5_HAVE_DIRECT
 
-    /** Initializer for the direct VFD */
-    #define H5FD_DIRECT (H5FDperform_init(H5FD_direct_init))
+/** Initializer for the direct VFD */
+#define H5FD_DIRECT (H5FDperform_init(H5FD_direct_init))
 
-    /** Identifier for the direct VFD */
-    #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
+/** Identifier for the direct VFD */
+#define H5FD_DIRECT_VALUE H5_VFD_DIRECT
 
 #else
 
-    /** Initializer for the direct VFD (disabled) */
-    #define H5FD_DIRECT (H5I_INVALID_HID)
+/** Initializer for the direct VFD (disabled) */
+#define H5FD_DIRECT       (H5I_INVALID_HID)
 
-    /** Identifier for the direct VFD (disabled) */
-    #define H5FD_DIRECT_VALUE H5_VFD_INVALID
+/** Identifier for the direct VFD (disabled) */
+#define H5FD_DIRECT_VALUE H5_VFD_INVALID
 
 #endif /* H5_HAVE_DIRECT */
 
