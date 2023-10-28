@@ -11,13 +11,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the "splitter" driver.
+ * Purpose:	The public header file for the splitter virtual file driver (VFD)
  */
 
 #ifndef H5FDsplitter_H
 #define H5FDsplitter_H
 
-#define H5FD_SPLITTER       (H5FDperform_init(H5FD_splitter_init))
+/** Initializer for the splitter VFD */
+#define H5FD_SPLITTER (H5FDperform_init(H5FD_splitter_init))
+
+/** Identifier for the splitter VFD */
 #define H5FD_SPLITTER_VALUE H5_VFD_SPLITTER
 
 /* The version of the H5FD_splitter_vfd_config_t structure used */
@@ -88,6 +91,11 @@ typedef struct H5FD_splitter_vfd_config_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** @private
+ *
+ * \brief Private initializer for the splitter VFD
+ */
 H5_DLL hid_t H5FD_splitter_init(void);
 
 /**

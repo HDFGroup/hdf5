@@ -11,35 +11,42 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the mpio driver.
+ * Purpose:	The public header file for the MPI-I/O (mpio) virtual file driver (VFD)
  */
 #ifndef H5FDmpio_H
 #define H5FDmpio_H
 
-/* Macros */
-
 #ifdef H5_HAVE_PARALLEL
+
+/** Initializer for the mpio VFD */
 #define H5FD_MPIO (H5FDperform_init(H5FD_mpio_init))
+
 #else
+
+/** Initializer for the mpio VFD (disabled) */
 #define H5FD_MPIO (H5I_INVALID_HID)
-#endif /* H5_HAVE_PARALLEL */
+
+#endif
 
 #ifdef H5_HAVE_PARALLEL
-/*Turn on H5FDmpio_debug if H5F_DEBUG is on */
-#ifdef H5F_DEBUG
-#ifndef H5FDmpio_DEBUG
+
+#if defined(H5F_DEBUG) && !defined(H5FDmpio_DEBUG)
+/** Turn mpio VFD debugging on (requires H5F_DEBUG) */
 #define H5FDmpio_DEBUG
-#endif
 #endif
 
 /* Global var whose value comes from environment variable */
 /* (Defined in H5FDmpio.c) */
 H5_DLLVAR hbool_t H5FD_mpi_opt_types_g;
 
-/* Function prototypes */
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** @private
+ *
+ * \brief Private initializer for the mpio VFD
+ */
 H5_DLL hid_t H5FD_mpio_init(void);
 
 /**
