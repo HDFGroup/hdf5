@@ -4291,8 +4291,9 @@ main(int argc, char **argv)
         printf("2 GByte IO TESTS START\n");
         printf("2 MPI ranks will run the tests...\n");
         printf("===================================\n");
-        h5_show_hostname();
     }
+
+    h5_show_hostname();
 
     if (H5dont_atexit() < 0) {
         printf("Failed to turn off atexit processing. Continue.\n");
@@ -4345,8 +4346,7 @@ main(int argc, char **argv)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Display testing information */
-        if (MAINPROCESS)
-            TestInfo(argv[0]);
+        TestInfo(argv[0]);
 
         /* setup file access property list */
         fapl = H5Pcreate(H5P_FILE_ACCESS);
