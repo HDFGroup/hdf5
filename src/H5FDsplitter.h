@@ -37,13 +37,18 @@
  * Configuration options for setting up the Splitter VFD
  */
 typedef struct H5FD_splitter_vfd_config_t {
-    int32_t      magic; /**< Magic number to identify this struct. Must be \p H5FD_SPLITTER_MAGIC. */
-    unsigned int version; /**< Version number of this struct. Currently must be \p H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION. */
-    hid_t        rw_fapl_id; /**< File-access property list for setting up the read/write channel. Can be \p H5P_DEFAULT. */
-    hid_t        wo_fapl_id; /**< File-access property list for setting up the read-only channel. The selected VFD must support the \p H5FD_FEAT_DEFAULT_VFD_COMPATIBLE flag. Can be \p H5P_DEFAULT. */
-    char         wo_path[H5FD_SPLITTER_PATH_MAX + 1]; /**< Path to the write-only file */
-    char         log_file_path[H5FD_SPLITTER_PATH_MAX + 1]; /**< Path to the log file, which will be created on HDF5 file open (existing files will be clobbered). Can be NULL, in which case no logging output is generated. */
-    hbool_t      ignore_wo_errs; /**< Whether to ignore errors on the write-only channel */
+    int32_t      magic;   /**< Magic number to identify this struct. Must be \p H5FD_SPLITTER_MAGIC. */
+    unsigned int version; /**< Version number of this struct. Currently must be \p
+                             H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION. */
+    hid_t rw_fapl_id;     /**< File-access property list for setting up the read/write channel. Can be \p
+                             H5P_DEFAULT. */
+    hid_t wo_fapl_id; /**< File-access property list for setting up the read-only channel. The selected VFD
+                         must support the \p H5FD_FEAT_DEFAULT_VFD_COMPATIBLE flag. Can be \p H5P_DEFAULT. */
+    char wo_path[H5FD_SPLITTER_PATH_MAX + 1];       /**< Path to the write-only file */
+    char log_file_path[H5FD_SPLITTER_PATH_MAX + 1]; /**< Path to the log file, which will be created on HDF5
+                                                       file open (existing files will be clobbered). Can be
+                                                       NULL, in which case no logging output is generated. */
+    hbool_t ignore_wo_errs;                         /**< Whether to ignore errors on the write-only channel */
 } H5FD_splitter_vfd_config_t;
 //! <!-- [H5FD_splitter_vfd_config_t_snip] -->
 
