@@ -615,9 +615,9 @@ Platforms Tested
 Known Problems
 ==============
 
-    Building HDF5 Fortran on Windows with Intel oneAPI 2023.2 currently fails
-    for this release with link errors. As a result, Windows binaries for this
-    release will not include Fortran.
+    Building HDF5 Fortran on Windows with Intel oneAPI 2023.2 currently fails for
+    this release with link errors. As a result, Windows binaries for this release
+    will not include Fortran.  The problem will be addressed in HDF5 1.14.4.
 
     IEEE standard arithmetic enables software to raise exceptions such as overflow,
     division by zero, and other illegal operations without interrupting or halting
