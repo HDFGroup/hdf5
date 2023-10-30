@@ -1,4 +1,4 @@
-HDF5 version 1.14.3-1 currently under development
+HDF5 version 1.14.4-1 currently under development
 ================================================================================
 
 
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.14.2
+- Bug Fixes since HDF5-1.14.3
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -47,164 +47,23 @@ New Features
 
     Configuration:
     -------------
-    - Improved support for Intel oneAPI
-
-      * Separates the old 'classic' Intel compiler settings and warnings
-        from the oneAPI settings
-      * Uses `-check nouninit` in debug builds to avoid false positives
-        when building H5_buildiface with `-check all`
-      * Both Autotools and CMake
-
-    - Added new options for CMake and Autotools to control the Doxygen
-      warnings as errors setting.
-
-        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
-        * --enable-doxygen-errors: enable/disable (Default: enable)
-
-      The default will fail compile if the doxygen parsing generates warnings.
-      The option can be disabled if certain versions of doxygen have parsing
-      issues. i.e. 1.9.5, 1.9.8.
-
-      Addresses GitHub issue #3398
-
-    - Added support for AOCC and classic Flang w/ the Autotools
-
-      * Adds a config/clang-fflags options file to support Flang
-      * Corrects missing "-Wl," from linker options in the libtool wrappers
-        when using Flang, the MPI Fortran compiler wrappers, and building
-        the shared library. This would often result in unrecognized options
-        like -soname.
-      * Enable -nomp w/ Flang to avoid linking to the OpenMPI library.
-
-      CMake can build the parallel, shared library w/ Fortran using AOCC
-      and Flang, so no changes were needed for that build system.
-
-      Fixes GitHub issues #3439, #1588, #366, #280
-
-    - Converted the build of libaec and zlib to use FETCH_CONTENT with CMake.
-
-      Using the CMake FetchContent module, the external filters can populate
-      content at configure time via any method supported by the ExternalProject
-      module. Whereas ExternalProject_Add() downloads at build time, the
-      FetchContent module makes content available immediately, allowing the
-      configure step to use the content in commands like add_subdirectory(),
-      include() or file() operations.
-
-      Removed HDF options for using FETCH_CONTENT explicitly:
-          BUILD_SZIP_WITH_FETCHCONTENT:BOOL
-          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
-
-    - Thread-safety + static library disabled on Windows w/ CMake
-
-      The thread-safety feature requires hooks in DllMain(), which is only
-      present in the shared library.
-
-      We previously just warned about this, but now any CMake configuration
-      that tries to build thread-safety and the static library will fail.
-      This cannot be overridden with ALLOW_UNSUPPORTED.
-
-      Fixes GitHub issue #3613
-
-    - Autotools builds now build the szip filter by default when an appropriate
-      library is found
-
-      Since libaec is prevalent and BSD-licensed for both encoding and
-      decoding, we build the szip filter by default now.
-
-      Both autotools and CMake build systems will process the szip filter the same as
-      the zlib filter is processed.
-
-    - Removed CMake cross-compiling variables
-
-      * HDF5_USE_PREGEN
-      * HDF5_BATCH_H5DETECT
-
-      These were used to work around H5detect and H5make_libsettings and
-      are no longer required.
-
-    - Running H5make_libsettings is no longer required for cross-compiling
-
-      The functionality of H5make_libsettings is now handled via template files,
-      so H5make_libsettings has been removed.
-
-    - Running H5detect is no longer required for cross-compiling
-
-      The functionality of H5detect is now exercised at library startup,
-      so H5detect has been removed.
+    -
 
 
     Library:
     --------
-    - Added a simple cache to the read-only S3 (ros3) VFD
-
-      The read-only S3 VFD now caches the first N bytes of a file stored
-      in S3 to avoid a lot of small I/O operations when opening files.
-      This cache is per-file and created when the file is opened.
-
-      N is currently 16 MiB or the size of the file, whichever is smaller.
-
-      Addresses GitHub issue #3381
-
-    - Added new API function H5Pget_actual_selection_io_mode()
-
-      This function allows the user to determine if the library performed
-      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
-      operation performed with the provided DXPL.
+    -
 
 
     Parallel Library:
     -----------------
-    - Added optimized support for the parallel compression feature when
-      using the multi-dataset I/O API routines collectively
-
-      Previously, calling H5Dwrite_multi/H5Dread_multi collectively in parallel
-      with a list containing one or more filtered datasets would cause HDF5 to
-      break out of the optimized multi-dataset I/O mode and instead perform I/O
-      by looping over each dataset in the I/O request. The library has now been
-      updated to perform I/O in a more optimized manner in this case by first
-      performing I/O on all the filtered datasets at once and then performing
-      I/O on all the unfiltered datasets at once.
-
-    - Changed H5Pset_evict_on_close so that it can be called with a parallel
-      build of HDF5
-
-      Previously, H5Pset_evict_on_close would always fail when called from a
-      parallel build of HDF5, stating that the feature is not supported with
-      parallel HDF5. This failure would occur even if a parallel build of HDF5
-      was used with a serial HDF5 application. H5Pset_evict_on_close can now
-      be called regardless of the library build type and the library will
-      instead fail during H5Fcreate/H5Fopen if the "evict on close" property
-      has been set to true and the file is being opened for parallel access
-      with more than 1 MPI process.
+    -
 
 
     Fortran Library:
     ----------------
-    - Fixed an uninitialized error return value for hdferr
-      to return the error state of the h5aopen_by_idx_f API.
+    -
 
-    - Added h5pget_vol_cap_flags_f and related Fortran VOL
-      capability definitions.
-
-    - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
-
-    - Added Fortran APIs:
-      h5pset_selection_io_f, h5pget_selection_io_f,
-      h5pget_actual_selection_io_mode_f,
-      h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
-
-    - Added Fortran APIs:
-      h5get_free_list_sizes_f, h5dwrite_chunk_f, h5dread_chunk_f,
-      h5fget_info_f, h5lvisit_f, h5lvisit_by_name_f,
-      h5pget_no_selection_io_cause_f, h5pget_mpio_no_collective_cause_f,
-      h5sselect_shape_same_f, h5sselect_intersect_block_f,
-      h5pget_file_space_page_size_f, h5pset_file_space_page_size_f,
-      h5pget_file_space_strategy_f, h5pset_file_space_strategy_f
-
-    - Removed "-commons" linking option on Darwin, as COMMON and EQUIVALENCE
-      are no longer used in the Fortran source.
-
-      Fixes GitHub issue #3571
 
     C++ Library:
     ------------
@@ -223,7 +82,7 @@ New Features
 
     High-Level APIs:
     ----------------
-    - Added Fortran HL API: h5doappend_f
+    -
 
 
     C Packet Table API:
@@ -246,138 +105,12 @@ Support for new platforms, languages and compilers
     -
 
 
-Bug Fixes since HDF5-1.14.2 release
+Bug Fixes since HDF5-1.14.3 release
 ===================================
     Library
     -------
-    - Fixed some issues with chunk index metadata not getting read
-      collectively when collective metadata reads are enabled
+    -
 
-      When looking up dataset chunks during I/O, the parallel library
-      temporarily disables collective metadata reads since it's generally
-      unlikely that the application will read the same chunks from all
-      MPI ranks. Leaving collective metadata reads enabled during
-      chunk lookups can lead to hangs or other bad behavior depending
-      on the chunk indexing structure used for the dataset in question.
-      However, due to the way that dataset chunk index metadata was
-      previously loaded in a deferred manner, this could mean that
-      the metadata for the main chunk index structure or its
-      accompanying pieces of metadata (e.g., fixed array data blocks)
-      could end up being read independently if these chunk lookup
-      operations are the first chunk index-related operation that
-      occurs on a dataset. This behavior is generally observed when
-      opening a dataset for which the metadata isn't in the metadata
-      cache yet and then immediately performing I/O on that dataset.
-      This behavior is not generally observed when creating a dataset
-      and then performing I/O on it, as the relevant metadata will
-      usually be in the metadata cache as a side effect of creating
-      the chunk index structures during dataset creation. 
-
-      This issue has been fixed by adding callbacks to the different
-      chunk indexing structure classes that allow more explicit control
-      over when chunk index metadata gets loaded. When collective
-      metadata reads are enabled, the necessary index metadata will now
-      get loaded collectively by all MPI ranks at the start of dataset
-      I/O to ensure that the ranks don't unintentionally read this
-      metadata independently further on. These changes fix collective
-      loading of the main chunk index structure, as well as v2 B-tree
-      root nodes, extensible array index blocks and fixed array data
-      blocks. There are still pieces of metadata that cannot currently
-      be loaded collectively, however, such as extensible array data
-      blocks, data block pages and super blocks, as well as fixed array
-      data block pages. These pieces of metadata are not necessarily
-      read in by all MPI ranks since this depends on which chunks the
-      ranks have selected in the dataset. Therefore, reading of these
-      pieces of metadata remains an independent operation.
-
-    - Fixed potential hangs in parallel library during collective I/O with
-      independent metadata writes
-
-      When performing collective parallel writes to a dataset where metadata
-      writes are requested as (or left as the default setting of) independent,
-      hangs could potentially occur during metadata cache sync points. This
-      was due to incorrect management of the internal state tracking whether
-      an I/O operation should be collective or not, causing the library to
-      attempt collective writes of metadata when they were meant to be
-      independent writes. During the metadata cache sync points, if the number
-      of cache entries being flushed was a multiple of the number of MPI ranks
-      in the MPI communicator used to access the HDF5 file, an equal amount of
-      collective MPI I/O calls were made and the dataset write call would be
-      successful. However, when the number of cache entries being flushed was
-      NOT a multiple of the number of MPI ranks, the ranks with more entries
-      than others would get stuck in an MPI_File_set_view call, while other
-      ranks would get stuck in a post-write MPI_Barrier call. This issue has
-      been fixed by correctly switching to independent I/O temporarily when
-      writing metadata independently during collective dataset I/O.
-
-    - Fixed a bug with the way the Subfiling VFD assigns I/O concentrators
-
-      During a file open operation, the Subfiling VFD determines the topology
-      of the application and uses that to select a subset of MPI ranks that
-      I/O will be forwarded to, called I/O concentrators. The code for this
-      had previously assumed that the parallel job launcher application (e.g.,
-      mpirun, srun, etc.) would distribute MPI ranks sequentially among a node
-      until all processors on that node have been assigned before going on to
-      the next node. When the launcher application mapped MPI ranks to nodes
-      in a different fashion, such as round-robin, this could cause the Subfiling
-      VFD to incorrectly map MPI ranks as I/O concentrators, leading to missing
-      subfiles.
-
-    - Fixed a file space allocation bug in the parallel library for chunked
-      datasets
-
-      With the addition of support for incremental file space allocation for
-      chunked datasets with filters applied to them that are created/accessed
-      in parallel, a bug was introduced to the library's parallel file space
-      allocation code. This could cause file space to not be allocated correctly
-      for datasets without filters applied to them that are created with serial
-      file access and later opened with parallel file access. In turn, this could
-      cause parallel writes to those datasets to place incorrect data in the file.
-
-    - Fixed an assertion failure in Parallel HDF5 when a file can't be created
-      due to an invalid library version bounds setting
-
-      An assertion failure could occur in H5MF_settle_raw_data_fsm when a file
-      can't be created with Parallel HDF5 due to specifying the use of a paged,
-      persistent file free space manager
-      (H5Pset_file_space_strategy(..., H5F_FSPACE_STRATEGY_PAGE, 1, ...)) with
-      an invalid library version bounds combination
-      (H5Pset_libver_bounds(..., H5F_LIBVER_EARLIEST, H5F_LIBVER_V18)). This
-      has now been fixed.
-
-    - Fixed an assertion in a previous fix for CVE-2016-4332
-
-      An assert could fail when processing corrupt files that have invalid
-      shared message flags (as in CVE-2016-4332).
-
-      The assert statement in question has been replaced with pointer checks
-      that don't raise errors. Since the function is in cleanup code, we do
-      our best to close and free things, even when presented with partially
-      initialized structs.
-
-      Fixes CVE-2016-4332 and HDFFV-9950 (confirmed via the cve_hdf5 repo)
-
-    - Fixed performance regression with some compound type conversions
-
-      In-place type conversion was introduced for most use cases in 1.14.2.
-      While being able to use the read buffer for type conversion potentially
-      improves performance by performing the entire I/O at once, it also
-      disables the optimized compound type conversion used when the destination
-      is a subset of the source. Disabled in-place type conversion when using
-      this optimized conversion and there is no benefit in terms of the I/O
-      size.
-
-    - Reading a H5std_string (std::string) via a C++ DataSet previously
-      truncated the string at the first null byte as if reading a C string.
-      Fixed length datasets are now read into H5std_string as a fixed length
-      string of the appropriate size. Variable length datasets will still be
-      truncated at the first null byte.
-
-      Fixes Github issue #3034
-
-    - Fixed write buffer overflow in H5O__alloc_chunk
-
-      The overflow was found by OSS-Fuzz https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58658
 
     Java Library
     ------------
@@ -386,52 +119,12 @@ Bug Fixes since HDF5-1.14.2 release
 
     Configuration
     -------------
-    - Fixes the ordering of INCLUDES when building with CMake
-
-      Include directories in the source or build tree should come before other
-      directories to prioritize headers in the sources over installed ones.
-
-      Fixes GitHub #1027
-
-    - The accum test now passes on macOS 12+ (Monterey) w/ CMake
-
-      Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
-      started failing on macOS 12+ when building with CMake. CMake has been
-      updated to set DYLD_LIBRARY_PATH on macOS and the test now passes.
-
-      Fixes GitHub #2994, #2261, and #1289
-
-    - Changed the default settings used by CMake for the GZIP filter
-
-      The default for the option HDF5_ENABLE_Z_LIB_SUPPORT was OFF. Now the default is ON.
-      This was done to match the defaults used by the autotools configure.ac.
-      In addition, the CMake message level for not finding a suitable filter library was
-      changed from FATAL_ERROR (which would halt the build process) to WARNING (which
-      will print a message to stderr). Associated files and documentation were changed to match.
-
-      In addition, the default settings in the config/cmake/cacheinit.cmake file were changed to
-      allow CMake to disable building the filters if the tgz file could not be found. The option
-      to allow CMake to download the file from the original Github location requires setting
-      the ZLIB_USE_LOCALCONTENT option to OFF for gzip. And setting the LIBAEC_USE_LOCALCONTENT
-      option to OFF for libaec (szip).
-
-      Fixes GitHub issue #2926
+    -
 
 
     Tools
     -----
-    - Fixed an issue with unmatched MPI messages in ph5diff
-
-      The "manager" MPI rank in ph5diff was unintentionally sending "program end"
-      messages to its workers twice, leading to an error from MPICH similar to the
-      following:
-
-      Abort(810645519) on node 1 (rank 1 in comm 0): Fatal error in internal_Finalize: Other MPI error, error stack:
-      internal_Finalize(50)...........: MPI_Finalize failed
-      MPII_Finalize(394)..............:
-      MPIR_Comm_delete_internal(1224).: Communicator (handle=44000000) being freed has 1 unmatched message(s)
-      MPIR_Comm_release_always(1250)..:
-      MPIR_finalize_builtin_comms(154):
+    -
 
 
     Performance
@@ -471,19 +164,7 @@ Bug Fixes since HDF5-1.14.2 release
 
     Testing
     -------
-    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
-
-      Support for MPI atomicity operations is not implemented for major
-      versions of OpenMPI less than version 5. This would cause the MPI
-      atomicity tests for parallel HDF5 to sporadically fail when run
-      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
-      skip running the atomicity tests if the major version of OpenMPI is
-      < 5.
-
-    - Fixed Fortran 2003 test with gfortran-v13, optimization levels O2,O3
-
-      Fixes failing Fortran 2003 test with gfortran, optimization level O2,O3
-      with -fdefault-real-16. Fixes GH #2928.
+    -
 
 
 Platforms Tested
