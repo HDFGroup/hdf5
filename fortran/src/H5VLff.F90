@@ -401,4 +401,68 @@ CONTAINS
 
   END SUBROUTINE H5VLunregister_connector_f
 
+!>
+!! \ingroup FH5VL
+!!
+!! \brief
+!!
+!! \param loc_id
+!! \param addr
+!! \param token
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5VLnative_addr_to_token()
+!!
+  SUBROUTINE H5VLnative_addr_to_token_f(loc_id, addr, token, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)     , INTENT(IN)  :: loc_id
+    INTEGER(HADDR_T)   , INTENT(IN)  :: addr
+    TYPE(H5O_TOKEN_T_F), INTENT(OUT) :: token
+    INTEGER            , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLnative_addr_to_token(loc_id, addr, token) BIND(C, NAME='H5VLnative_addr_to_token')
+         IMPORT :: HID_T, C_INT, HADDR_T, H5O_TOKEN_T_F
+         INTEGER(HID_T)  , VALUE :: loc_id
+         INTEGER(HADDR_T), VALUE :: addr
+         TYPE(H5O_TOKEN_T_F)     :: token
+       END FUNCTION H5VLnative_addr_to_token
+    END INTERFACE
+
+    hdferr = INT(H5VLnative_addr_to_token(loc_id, addr, token))
+
+  END SUBROUTINE H5VLnative_addr_to_token_f
+
+!>
+!! \ingroup FH5VL
+!!
+!! \brief TODO
+!!
+!! \param loc_id
+!! \param token
+!! \param addr
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5VLnative_token_to_addr()
+!!
+  SUBROUTINE H5VLnative_token_to_addr_f(loc_id, token, addr, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)     , INTENT(IN)  :: loc_id
+    TYPE(H5O_TOKEN_T_F), INTENT(IN)  :: token
+    INTEGER(HADDR_T)   , INTENT(OUT) :: addr
+    INTEGER            , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLnative_token_to_addr(loc_id, token, addr) BIND(C, NAME='H5VLnative_token_to_addr')
+         IMPORT :: HID_T, C_INT, HADDR_T, H5O_TOKEN_T_F
+         INTEGER(HID_T)     , VALUE :: loc_id
+         TYPE(H5O_TOKEN_T_F), VALUE :: token
+         INTEGER(HADDR_T)           :: addr
+       END FUNCTION H5VLnative_token_to_addr
+    END INTERFACE
+
+    hdferr = INT(H5VLnative_token_to_addr(loc_id, token, addr))
+
+  END SUBROUTINE H5VLnative_token_to_addr_f
+
 END MODULE H5VL
