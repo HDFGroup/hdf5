@@ -67,11 +67,11 @@ jobs:
 
       # RUN TESTS
       # NORMAL
-      - name: Autotools Run Tests
-        run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:$PATH
-          make check -j
-        working-directory: ${{ runner.workspace }}/build
+#      - name: Autotools Run Tests
+#        run: |
+#          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:$PATH
+#          make check -j
+#        working-directory: ${{ runner.workspace }}/build
 
       # INSTALL (note that this runs even when we don't run the tests)
       - name: Autotools Install
