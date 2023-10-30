@@ -62,11 +62,6 @@ if(NOT DEFINED CTEST_SOURCE_NAME)
   set(CTEST_SOURCE_NAME "HDF5Examples")
 endif()
 
-if(NOT DEFINED HDF_LOCAL)
-  set(CDASH_LOCAL "NO")
-else()
-  set(CDASH_LOCAL "YES")
-endif()
 if(NOT DEFINED CTEST_SITE)
   set(CTEST_SITE "local")
 endif()
@@ -100,9 +95,6 @@ else()
 endif()
 ### default HDF5_PLUGIN_PATH to where the filter libraries are located
 set(ENV{HDF5_PLUGIN_PATH} "${INSTALLDIR}/lib/plugin")
-if(${CDASH_LOCAL})
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCDASH_LOCAL:BOOL=ON")
-endif()
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
 ###############################################################################################################
