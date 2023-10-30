@@ -129,7 +129,15 @@ Bug Fixes since HDF5-1.14.3 release
 
     Configuration
     -------------
-    -
+    - Fixed an issue where the h5tools_test_utils test program was being
+      installed on the system for Autotools builds of HDF5
+
+      The h5tools_test_utils test program was mistakenly added to bin_PROGRAMS
+      in its Makefile.am configuration file, causing the executable to be
+      installed on the system. The executable is now added to noinst_PROGRAMS
+      instead and will no longer be installed on the system for Autotools builds
+      of HDF5. The CMake configuration code already avoids installing the
+      executable on the system.
 
 
     Tools
