@@ -76,7 +76,8 @@ if test "X-nvc" = "X-$cc_vendor" -o "X-nvcc" = "X-$cc_vendor"; then
     ##############
 
     # NDEBUG is handled explicitly by the configure script
-    PROD_CFLAGS="-fast"
+    #PROD_CFLAGS="-fast"
+    PROD_CFLAGS=""           # -fast implies -O2 and -O2+ currently has test failures.
 
     #########
     # Debug #
@@ -106,7 +107,8 @@ if test "X-nvc" = "X-$cc_vendor" -o "X-nvcc" = "X-$cc_vendor"; then
     ################
 
     HIGH_OPT_CFLAGS="-O1"         # -O2+ currently has test failures.
-    DEBUG_OPT_CFLAGS="-gopt -O2"
+    #DEBUG_OPT_CFLAGS="-gopt -O2"
+    DEBUG_OPT_CFLAGS="-gopt -O1"  # -O2+ currently has test failures.
     NO_OPT_CFLAGS="-O0"
 
     #################

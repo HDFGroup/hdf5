@@ -1158,6 +1158,20 @@ Platforms Tested
 Known Problems
 ==============
 
+    When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
+    also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
+    in the following tests:
+
+        H5PLUGIN-filter_plugin
+        H5TEST-flush2
+        H5TEST-testhdf5-base
+        MPI_TEST_t_filters_parallel
+
+    Since these tests pass with an optimization level of -O1 (and -O0) and it is
+    currently unclear whether the test failures are due to issues in HDF5 or issues
+    in the 'nvc' compiler, the maximum optimization level for NVHPC has been set
+    to -O1 until the test failures can be resolved.
+
     IEEE standard arithmetic enables software to raise exceptions such as overflow,
     division by zero, and other illegal operations without interrupting or halting
     the program flow. The HDF5 C library intentionally performs these exceptions.
