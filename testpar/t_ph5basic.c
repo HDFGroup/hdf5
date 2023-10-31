@@ -199,13 +199,13 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
-    int             *data_g = NULL;
+    int*             data_g = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
-               set in the data transfer property list after a write\n");
+            set in the data transfer property list after a write\n");
 
-    if ((fid = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+    if ((fid = H5Fcreate("file", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Create a dataset */
@@ -254,11 +254,21 @@ test_get_dxpl_mpio(void)
         goto error;
 
     if (xfer_mode != H5FD_MPIO_INDEPENDENT) {
-            goto error;
+        goto error;
     }
 
-    if (H5Pclose(dxpl) < 0) {
-            goto error;
+    /* Close everything */
+    if (H5Pclose(dxpl_id) < 0) {
+        goto error;
+    }
+    if (H5Dclose(did) < 0) {
+        goto error;
+    }
+    if (H5Sclose(sid) < 0) {
+        goto error;
+    }
+    if (H5Fclose(fid) < 0) {
+        goto error;
     }
 
 error:
