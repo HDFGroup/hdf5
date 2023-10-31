@@ -181,10 +181,10 @@ test_fapl_mpio_dup(void)
 /*-------------------------------------------------------------------------
  * Function:    test_get_dxpl_mpio
  *
- * Purpose:     Test that H5Pget_fxpl_mpio will properly return the data 
- *              transfer mode of collective and independent I/O access 
+ * Purpose:     Test that H5Pget_fxpl_mpio will properly return the data
+ *              transfer mode of collective and independent I/O access
  *              after setting it and writing some data.
- *           
+ *
  * Return:      Success:    None
  *              Failure:    Abort
  *-------------------------------------------------------------------------
