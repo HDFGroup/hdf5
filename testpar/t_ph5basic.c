@@ -192,14 +192,14 @@ test_fapl_mpio_dup(void)
 void
 test_get_dxpl_mpio(void)
 {
-    hid_t            fid           = H5I_INVALID_HID;
-    hid_t            sid           = H5I_INVALID_HID;
-    hid_t            did           = H5I_INVALID_HID;
-    hid_t            dxpl_id       = H5I_INVALID_HID;
-    hsize_t          dims[2]       = {100, 100};
+    hid_t            fid     = H5I_INVALID_HID;
+    hid_t            sid     = H5I_INVALID_HID;
+    hid_t            did     = H5I_INVALID_HID;
+    hid_t            dxpl_id = H5I_INVALID_HID;
+    hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
-    int              *data_g       = NULL;
+    int             *data_g = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
@@ -233,7 +233,7 @@ test_get_dxpl_mpio(void)
         goto error;
 
     if (xfer_mode != H5FD_MPIO_COLLECTIVE) {
-        goto error;
+            goto error;
     }
     
     /* Use independent I/O access */
@@ -250,11 +250,11 @@ test_get_dxpl_mpio(void)
         goto error;
 
     if (xfer_mode != H5FD_MPIO_INDEPENDENT) {
-        goto error;
+            goto error;
     }
 
     if (H5Pclose(dxpl) < 0) {
-        goto error;
+            goto error;
     }
 
 error:
