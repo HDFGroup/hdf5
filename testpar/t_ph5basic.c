@@ -196,15 +196,24 @@ test_get_dxpl_mpio(void)
     hid_t            sid     = H5I_INVALID_HID;
     hid_t            did     = H5I_INVALID_HID;
     hid_t            dxpl_id = H5I_INVALID_HID;
+    H5FD_mpio_xfer_t xfer_mode;
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
-    H5FD_mpio_xfer_t xfer_mode;
-    herr_t           ret;
     int             *data    = NULL;
+    
+    MPI_Comm         comm;
+    int              mrc;
+    int              mpi_size, mpi_rank;
+
+    herr_t           ret;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
             "set in the data transfer property list after a write\n");
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     data = malloc(100 * 100 * sizeof(*data));
     VRFY((data != NULL), "Data buffer initialized properly");
@@ -262,6 +271,11 @@ test_get_dxpl_mpio(void)
 
     /* Close everything */
     free(data);
+
+    if (comm != MPI_COMM_WORLD) {
+        mrc = MPI_Comm_free(&comm);
+        VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
+    }
 
     ret = H5Pclose(dxpl_id);
     VRFY((ret >= 0),"H5Pclose succeeded");
