@@ -727,7 +727,7 @@ GROUP "/" {
 \endcode
 
 The second example imports string data. The example program that creates this file can be downloaded
-from the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page.
+from the \ref ExAPI page.
 
 Note that string data requires use of the <code style="background-color:whitesmoke;">h5dump -y</code>
 option to exclude indexes and the <code style="background-color:whitesmoke;">h5dump --width=1</code>
