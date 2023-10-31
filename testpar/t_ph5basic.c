@@ -202,7 +202,7 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     int             *data = NULL;
-    int              mpi_rank;
+    int              mpi_rank, mpi_size;
     const char      *filename;
     herr_t           ret;
 
@@ -212,21 +212,20 @@ test_get_dxpl_mpio(void)
 
     /* Set up MPI rank for VRFY macro */
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     filename = (const char *)GetTestParameters();
 
     /* Create parallel fapl */
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, FACC_MPIO);
-    VRFY((fapl >= 0), "Create_faccess_plist succeeded");
-    fcpl = H5Pcreate(H5P_FILE_CREATE);
-    VRFY((fcpl >= 0), "H5Pcreate succeeded");
+    VRFY((fapl >= 0), "Fapl creation succeeded");
 
     /* Initialize data array */
     data = malloc(100 * 100 * sizeof(*data));
     VRFY((data != NULL), "Data buffer initialized properly");
 
     /* Create a file */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create a dataset */
@@ -279,6 +278,9 @@ test_get_dxpl_mpio(void)
 
     /* Close everything */
     free(data);
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
 
     ret = H5Pclose(dxpl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
