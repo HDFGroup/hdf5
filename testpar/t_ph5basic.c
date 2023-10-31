@@ -200,11 +200,11 @@ test_get_dxpl_mpio(void)
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
     herr_t           ret;
-    int             *data    = NULL;
+    int             *data = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
-            "set in the data transfer property list after a write\n");
+               "set in the data transfer property list after a write\n");
 
     data = malloc(100 * 100 * sizeof(*data));
     VRFY((data != NULL), "Data buffer initialized properly");
@@ -223,7 +223,7 @@ test_get_dxpl_mpio(void)
     VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
     ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pset_dxpl_mpio set to collective succeeded");
-    
+
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
@@ -236,8 +236,8 @@ test_get_dxpl_mpio(void)
     ret = H5Pget_dxpl_mpio(dxpl_id, &xfer_mode);
     VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
     VRFY((xfer_mode != H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
-        " successfully");
-    
+                                              " successfully");
+
     /* Check it does nothing on receiving NULL */
     ret = H5Pget_dxpl_mpio(dxpl_id, NULL);
     VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded on NULL input");
@@ -250,7 +250,7 @@ test_get_dxpl_mpio(void)
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
             data[(i * 100) + j] = (int)(i + (j * j) + i);
-    
+
     ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
@@ -258,21 +258,21 @@ test_get_dxpl_mpio(void)
     ret = H5Pget_dxpl_mpio(dxpl_id, &xfer_mode);
     VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
     VRFY((xfer_mode != H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
-        " successfully");
+                                               " successfully");
 
     /* Close everything */
     free(data);
 
     ret = H5Pclose(dxpl_id);
-    VRFY((ret >= 0),"H5Pclose succeeded");
+    VRFY((ret >= 0), "H5Pclose succeeded");
 
     ret = H5Dclose(did);
-    VRFY((ret >= 0),"H5Dclose succeeded");
+    VRFY((ret >= 0), "H5Dclose succeeded");
 
     ret = H5Sclose(sid) < 0;
-    VRFY((ret >= 0),"H5Sclose succeeded");
+    VRFY((ret >= 0), "H5Sclose succeeded");
 
     ret = H5Fclose(fid) < 0;
-    VRFY((ret >= 0),"H5Fclose succeeded");
+    VRFY((ret >= 0), "H5Fclose succeeded");
 
 } /* end test_get_dxpl_mpio() */
