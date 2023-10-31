@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.87b3e7c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('_h5_f_dlog_8h.html',''); initResizable
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a027aaf28f5104c77c4f51ecd29a5f7f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dlog_8h.html#a027aaf28f5104c77c4f51ecd29a5f7f4">H5FD_LOG</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dlog_8h.html#ae30a292f493b901549e44e5f781bd60c">H5FD_log_init</a>))</td></tr>
+<tr class="memitem:a027aaf28f5104c77c4f51ecd29a5f7f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dlog_8h.html#a027aaf28f5104c77c4f51ecd29a5f7f4">H5FD_LOG</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_log_init))</td></tr>
 <tr class="separator:a027aaf28f5104c77c4f51ecd29a5f7f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5bbbeab50a0ddd38f36c14b4971981e9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dlog_8h.html#a5bbbeab50a0ddd38f36c14b4971981e9">H5FD_LOG_VALUE</a>&#160;&#160;&#160;<a class="el" href="_h5_f_dpublic_8h.html#a35791bec7c48fe263be56adaa6da7600">H5_VFD_LOG</a></td></tr>
 <tr class="separator:a5bbbeab50a0ddd38f36c14b4971981e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,8 +168,6 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ae30a292f493b901549e44e5f781bd60c"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dlog_8h.html#ae30a292f493b901549e44e5f781bd60c">H5FD_log_init</a> (void)</td></tr>
-<tr class="separator:ae30a292f493b901549e44e5f781bd60c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4e03be2fe83ed02b32266a6c81427beb"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga4e03be2fe83ed02b32266a6c81427beb">H5Pset_fapl_log</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)</td></tr>
 <tr class="memdesc:ga4e03be2fe83ed02b32266a6c81427beb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the logging virtual file driver (<a class="el" href="_h5_f_dlog_8h.html#a027aaf28f5104c77c4f51ecd29a5f7f4">H5FD_LOG</a>) for use.  <a href="group___f_a_p_l.html#ga4e03be2fe83ed02b32266a6c81427beb">More...</a><br /></td></tr>
 <tr class="separator:ga4e03be2fe83ed02b32266a6c81427beb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,10 +180,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_LOG&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dlog_8h.html#ae30a292f493b901549e44e5f781bd60c">H5FD_log_init</a>))</td>
+          <td class="memname">#define H5FD_LOG&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_log_init))</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Initializer for the log VFD </p>
 
 </div>
 </div>
@@ -202,13 +201,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    (<a class="code" href="_h5_f_dlog_8h.html#a2c92e8aab6e2387f568bd2ce11b83bae">H5FD_LOG_FREE</a> | <a class="code" href="_h5_f_dlog_8h.html#afcf6971d3787ddfe911726db7385f6ac">H5FD_LOG_ALLOC</a> | <a class="code" href="_h5_f_dlog_8h.html#ab2abf6744e67751f6f3236ee6214bfe4">H5FD_LOG_TIME_IO</a> | <a class="code" href="_h5_f_dlog_8h.html#a73baff79dc4819dc5733aed41a2db676">H5FD_LOG_NUM_IO</a> | <a class="code" href="_h5_f_dlog_8h.html#ad5592d1612b80582c4440cc2352d29a6">H5FD_LOG_FLAVOR</a> |                 \</div>
 <div class="line">     H5FD_LOG_FILE_IO | <a class="code" href="_h5_f_dlog_8h.html#a7367b1298e0b4c87fa9465dd28827dca">H5FD_LOG_LOC_IO</a> | <a class="code" href="_h5_f_dlog_8h.html#a32bf4f1b42bc2f1d5f0f188511ae91c2">H5FD_LOG_META_IO</a>)</div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a2c92e8aab6e2387f568bd2ce11b83bae"><div class="ttname"><a href="_h5_f_dlog_8h.html#a2c92e8aab6e2387f568bd2ce11b83bae">H5FD_LOG_FREE</a></div><div class="ttdeci">#define H5FD_LOG_FREE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:56</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a32bf4f1b42bc2f1d5f0f188511ae91c2"><div class="ttname"><a href="_h5_f_dlog_8h.html#a32bf4f1b42bc2f1d5f0f188511ae91c2">H5FD_LOG_META_IO</a></div><div class="ttdeci">#define H5FD_LOG_META_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:25</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a7367b1298e0b4c87fa9465dd28827dca"><div class="ttname"><a href="_h5_f_dlog_8h.html#a7367b1298e0b4c87fa9465dd28827dca">H5FD_LOG_LOC_IO</a></div><div class="ttdeci">#define H5FD_LOG_LOC_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:30</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a73baff79dc4819dc5733aed41a2db676"><div class="ttname"><a href="_h5_f_dlog_8h.html#a73baff79dc4819dc5733aed41a2db676">H5FD_LOG_NUM_IO</a></div><div class="ttdeci">#define H5FD_LOG_NUM_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:42</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_ab2abf6744e67751f6f3236ee6214bfe4"><div class="ttname"><a href="_h5_f_dlog_8h.html#ab2abf6744e67751f6f3236ee6214bfe4">H5FD_LOG_TIME_IO</a></div><div class="ttdeci">#define H5FD_LOG_TIME_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:51</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_ad5592d1612b80582c4440cc2352d29a6"><div class="ttname"><a href="_h5_f_dlog_8h.html#ad5592d1612b80582c4440cc2352d29a6">H5FD_LOG_FLAVOR</a></div><div class="ttdeci">#define H5FD_LOG_FLAVOR</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:36</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_afcf6971d3787ddfe911726db7385f6ac"><div class="ttname"><a href="_h5_f_dlog_8h.html#afcf6971d3787ddfe911726db7385f6ac">H5FD_LOG_ALLOC</a></div><div class="ttdeci">#define H5FD_LOG_ALLOC</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:55</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a2c92e8aab6e2387f568bd2ce11b83bae"><div class="ttname"><a href="_h5_f_dlog_8h.html#a2c92e8aab6e2387f568bd2ce11b83bae">H5FD_LOG_FREE</a></div><div class="ttdeci">#define H5FD_LOG_FREE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:59</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a32bf4f1b42bc2f1d5f0f188511ae91c2"><div class="ttname"><a href="_h5_f_dlog_8h.html#a32bf4f1b42bc2f1d5f0f188511ae91c2">H5FD_LOG_META_IO</a></div><div class="ttdeci">#define H5FD_LOG_META_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:28</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a7367b1298e0b4c87fa9465dd28827dca"><div class="ttname"><a href="_h5_f_dlog_8h.html#a7367b1298e0b4c87fa9465dd28827dca">H5FD_LOG_LOC_IO</a></div><div class="ttdeci">#define H5FD_LOG_LOC_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:33</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a73baff79dc4819dc5733aed41a2db676"><div class="ttname"><a href="_h5_f_dlog_8h.html#a73baff79dc4819dc5733aed41a2db676">H5FD_LOG_NUM_IO</a></div><div class="ttdeci">#define H5FD_LOG_NUM_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:45</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_ab2abf6744e67751f6f3236ee6214bfe4"><div class="ttname"><a href="_h5_f_dlog_8h.html#ab2abf6744e67751f6f3236ee6214bfe4">H5FD_LOG_TIME_IO</a></div><div class="ttdeci">#define H5FD_LOG_TIME_IO</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:54</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_ad5592d1612b80582c4440cc2352d29a6"><div class="ttname"><a href="_h5_f_dlog_8h.html#ad5592d1612b80582c4440cc2352d29a6">H5FD_LOG_FLAVOR</a></div><div class="ttdeci">#define H5FD_LOG_FLAVOR</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:39</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_afcf6971d3787ddfe911726db7385f6ac"><div class="ttname"><a href="_h5_f_dlog_8h.html#afcf6971d3787ddfe911726db7385f6ac">H5FD_LOG_ALLOC</a></div><div class="ttdeci">#define H5FD_LOG_ALLOC</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:58</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -463,12 +462,12 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    (<a class="code" href="_h5_f_dlog_8h.html#ac253b663d693a3fa154a9f70de382e3e">H5FD_LOG_TIME_OPEN</a> | <a class="code" href="_h5_f_dlog_8h.html#a47fd3387519a8fc710cd0797e76fcef9">H5FD_LOG_TIME_STAT</a> | <a class="code" href="_h5_f_dlog_8h.html#ae243e77f6140dd939c7def71c2d9e1e3">H5FD_LOG_TIME_READ</a> | <a class="code" href="_h5_f_dlog_8h.html#a7e3f0ecd0d5065d9031e8da9446442d6">H5FD_LOG_TIME_WRITE</a> |                    \</div>
 <div class="line">     H5FD_LOG_TIME_SEEK | <a class="code" href="_h5_f_dlog_8h.html#a7a94c6602f08800ae0dccd002216b400">H5FD_LOG_TIME_TRUNCATE</a> | <a class="code" href="_h5_f_dlog_8h.html#a1fc445a926ae7cd9af6546166c0af552">H5FD_LOG_TIME_CLOSE</a>)</div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a1fc445a926ae7cd9af6546166c0af552"><div class="ttname"><a href="_h5_f_dlog_8h.html#a1fc445a926ae7cd9af6546166c0af552">H5FD_LOG_TIME_CLOSE</a></div><div class="ttdeci">#define H5FD_LOG_TIME_CLOSE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:50</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a47fd3387519a8fc710cd0797e76fcef9"><div class="ttname"><a href="_h5_f_dlog_8h.html#a47fd3387519a8fc710cd0797e76fcef9">H5FD_LOG_TIME_STAT</a></div><div class="ttdeci">#define H5FD_LOG_TIME_STAT</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:45</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a7a94c6602f08800ae0dccd002216b400"><div class="ttname"><a href="_h5_f_dlog_8h.html#a7a94c6602f08800ae0dccd002216b400">H5FD_LOG_TIME_TRUNCATE</a></div><div class="ttdeci">#define H5FD_LOG_TIME_TRUNCATE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:49</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_a7e3f0ecd0d5065d9031e8da9446442d6"><div class="ttname"><a href="_h5_f_dlog_8h.html#a7e3f0ecd0d5065d9031e8da9446442d6">H5FD_LOG_TIME_WRITE</a></div><div class="ttdeci">#define H5FD_LOG_TIME_WRITE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:47</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_ac253b663d693a3fa154a9f70de382e3e"><div class="ttname"><a href="_h5_f_dlog_8h.html#ac253b663d693a3fa154a9f70de382e3e">H5FD_LOG_TIME_OPEN</a></div><div class="ttdeci">#define H5FD_LOG_TIME_OPEN</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:44</div></div>
-<div class="ttc" id="a_h5_f_dlog_8h_html_ae243e77f6140dd939c7def71c2d9e1e3"><div class="ttname"><a href="_h5_f_dlog_8h.html#ae243e77f6140dd939c7def71c2d9e1e3">H5FD_LOG_TIME_READ</a></div><div class="ttdeci">#define H5FD_LOG_TIME_READ</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:46</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a1fc445a926ae7cd9af6546166c0af552"><div class="ttname"><a href="_h5_f_dlog_8h.html#a1fc445a926ae7cd9af6546166c0af552">H5FD_LOG_TIME_CLOSE</a></div><div class="ttdeci">#define H5FD_LOG_TIME_CLOSE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:53</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a47fd3387519a8fc710cd0797e76fcef9"><div class="ttname"><a href="_h5_f_dlog_8h.html#a47fd3387519a8fc710cd0797e76fcef9">H5FD_LOG_TIME_STAT</a></div><div class="ttdeci">#define H5FD_LOG_TIME_STAT</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:48</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a7a94c6602f08800ae0dccd002216b400"><div class="ttname"><a href="_h5_f_dlog_8h.html#a7a94c6602f08800ae0dccd002216b400">H5FD_LOG_TIME_TRUNCATE</a></div><div class="ttdeci">#define H5FD_LOG_TIME_TRUNCATE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:52</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_a7e3f0ecd0d5065d9031e8da9446442d6"><div class="ttname"><a href="_h5_f_dlog_8h.html#a7e3f0ecd0d5065d9031e8da9446442d6">H5FD_LOG_TIME_WRITE</a></div><div class="ttdeci">#define H5FD_LOG_TIME_WRITE</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:50</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_ac253b663d693a3fa154a9f70de382e3e"><div class="ttname"><a href="_h5_f_dlog_8h.html#ac253b663d693a3fa154a9f70de382e3e">H5FD_LOG_TIME_OPEN</a></div><div class="ttdeci">#define H5FD_LOG_TIME_OPEN</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:47</div></div>
+<div class="ttc" id="a_h5_f_dlog_8h_html_ae243e77f6140dd939c7def71c2d9e1e3"><div class="ttname"><a href="_h5_f_dlog_8h.html#ae243e77f6140dd939c7def71c2d9e1e3">H5FD_LOG_TIME_READ</a></div><div class="ttdeci">#define H5FD_LOG_TIME_READ</div><div class="ttdef"><b>Definition:</b> H5FDlog.h:49</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -581,25 +580,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="ae30a292f493b901549e44e5f781bd60c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae30a292f493b901549e44e5f781bd60c">&#9670;&nbsp;</a></span>H5FD_log_init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> H5FD_log_init </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Identifier for the log VFD </p>
 
 </div>
 </div>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0</span>
+   &#160;<span id="projectnumber">1.15.0.87b3e7c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -223,7 +223,7 @@ $(document).ready(function(){initNavTree('group___f_a_p_l.html',''); initResizab
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed" title="Emulates the old split file driver.">H5Pset_fapl_split</a> </td><td>Sets driver for split files, a limited case of multi driver with one metadata file and one raw data file.  </td></tr>
 <tr>
-<td><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">H5Pset_fapl_splitter</a>/<a class="el" href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac">H5Pget_fapl_splitter</a> </td><td>Modifies/queries the file driver properties of the splitter driver.  </td></tr>
+<td><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07" title="Sets the file access property list to use the splitter driver.">H5Pset_fapl_splitter</a>/<a class="el" href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac" title="Gets splitter driver properties from the the file access property list.">H5Pget_fapl_splitter</a> </td><td>Modifies/queries the file driver properties of the splitter driver.  </td></tr>
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052" title="Sets the standard I/O driver.">H5Pset_fapl_stdio</a> </td><td>Sets driver for buffered permanent files.  </td></tr>
 <tr>
@@ -316,8 +316,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:gaf581bceca36ad4eef3cd45b16eabbb20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> driver.  <a href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20">More...</a><br /></td></tr>
 <tr class="separator:gaf581bceca36ad4eef3cd45b16eabbb20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga49f386ea235bb48128e54c962c499f07"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">H5Pset_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
+<tr class="memdesc:ga49f386ea235bb48128e54c962c499f07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file access property list to use the splitter driver.  <a href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">More...</a><br /></td></tr>
 <tr class="separator:ga49f386ea235bb48128e54c962c499f07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac">H5Pget_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
+<tr class="memdesc:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets splitter driver properties from the the file access property list.  <a href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac">More...</a><br /></td></tr>
 <tr class="separator:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga77f0643117835e7f7992d573761b5052"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052">H5Pset_fapl_stdio</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</td></tr>
 <tr class="memdesc:ga77f0643117835e7f7992d573761b5052"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the standard I/O driver.  <a href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052">More...</a><br /></td></tr>
@@ -771,7 +773,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <tr>
 <td>STDIO </td><td><a class="el" href="_h5_f_dstdio_8h.html#a030a03b96a9f6e46035ce64e25389085">H5FD_STDIO</a> </td><td>This driver uses functions from the standard C stdio.h to perform I/O to a single, permanent file on local disk with additional system buffering. </td><td><a class="el" href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052" title="Sets the standard I/O driver.">H5Pset_fapl_stdio</a>  </td></tr>
 <tr>
-<td>Split </td><td><a class="el" href="_h5_f_dsplitter_8h.html#ac6c45c6a8e1cb7f5b4400d95bf651eae">H5FD_SPLITTER</a> </td><td>This file driver splits a file into two parts. One part stores metadata, and the other part stores raw data. This splitting a file into two parts is a limited case of the Multi driver. </td><td><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">H5Pset_fapl_splitter</a>  </td></tr>
+<td>Split </td><td><a class="el" href="_h5_f_dsplitter_8h.html#ac6c45c6a8e1cb7f5b4400d95bf651eae">H5FD_SPLITTER</a> </td><td>This file driver splits a file into two parts. One part stores metadata, and the other part stores raw data. This splitting a file into two parts is a limited case of the Multi driver. </td><td><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07" title="Sets the file access property list to use the splitter driver.">H5Pset_fapl_splitter</a>  </td></tr>
 <tr>
 <td>Parallel </td><td><a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a> </td><td>This is the standard HDF5 file driver for parallel file systems. This driver uses the MPI standard for both communication and file I/O. </td><td><a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff" title="Stores MPI IO communicator information to the file access property list.">H5Pset_fapl_mpio</a>  </td></tr>
 <tr>
@@ -1519,7 +1521,20 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000019">Todo:</a></b></dt><dd>Add missing documentation </dd></dl>
+
+<p>Gets splitter driver properties from the the file access property list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">config_ptr</td><td>Configuration options for the VFD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07" title="Sets the file access property list to use the splitter driver.">H5Pset_fapl_splitter()</a> sets the file access property list identifier, <code>fapl_id</code>, to use the splitter driver.</p>
+<p>The splitter VFD echoes file manipulation (e.g. create, truncate) and write calls to a second file.</p>
+<dl class="section note"><dt>Note</dt><dd>The splitter VFD should not be confused with the split VFD, which is a simplification of the multi VFD and creates separate files for metadata and data.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.7, 1.12.1 </dd></dl>
 
 </div>
 </div>
@@ -2352,7 +2367,7 @@ For a file opened without SWMR access, the value retrieved will always be the de
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga5554cf0775f9d7ac3b0cd844533d4486" title="Get the MPI communicator and info.">H5Pget_mpi_params()</a> gets the MPI communicator and info stored in the file access property list <code>fapl_id</code>.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000028">Todo:</a></b></dt><dd>When was this introduced?</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000026">Todo:</a></b></dt><dd>When was this introduced?</dd></dl>
 
 </div>
 </div>
@@ -4214,7 +4229,20 @@ Flavor of allocation   </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo:</a></b></dt><dd>Add missing documentation </dd></dl>
+
+<p>Sets the file access property list to use the splitter driver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config_ptr</td><td>Configuration options for the VFD </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07" title="Sets the file access property list to use the splitter driver.">H5Pset_fapl_splitter()</a> sets the file access property list identifier, <code>fapl_id</code>, to use the splitter driver.</p>
+<p>The splitter VFD echoes file manipulation (e.g. create, truncate) and write calls to a second, write-only file.</p>
+<dl class="section note"><dt>Note</dt><dd>The splitter VFD should not be confused with the split VFD, which is a simplification of the multi VFD and creates separate files for metadata and data.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.7, 1.12.1 </dd></dl>
 
 </div>
 </div>
@@ -4242,7 +4270,8 @@ Flavor of allocation   </td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052" title="Sets the standard I/O driver.">H5Pset_fapl_stdio()</a> modifies the file access property list to use the standard I/O driver, H5FDstdio().</p>
+<p><a class="el" href="group___f_a_p_l.html#ga77f0643117835e7f7992d573761b5052" title="Sets the standard I/O driver.">H5Pset_fapl_stdio()</a> modifies the file access property list to use the stdio VFD, which uses I/O calls from stdio.h.</p>
+<dl class="section note"><dt>Note</dt><dd>This VFD was designed to be a "demo" VFD that shows how to write your own VFD. Most applications should not use this VFD and should instead use the POSIX I/O VFD (sec2).</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
@@ -5287,7 +5316,7 @@ Failure Modes:<ul>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga6daceb4a9e51fca7cb198f964b67baf0" title="Set the MPI communicator and info.">H5Pset_mpi_params()</a> sets the MPI communicator and info stored in the file access property list <code>fapl_id</code>.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000029">Todo:</a></b></dt><dd>When was this introduced?</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000027">Todo:</a></b></dt><dd>When was this introduced?</dd></dl>
 
 </div>
 </div>
