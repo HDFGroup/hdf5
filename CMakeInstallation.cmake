@@ -141,6 +141,10 @@ install (
 #-----------------------------------------------------------------------------
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)
+  if (DEFINED CMAKE_TOOLCHAIN_FILE)
+    get_filename_component(TOOLCHAIN ${CMAKE_TOOLCHAIN_FILE} NAME)
+    set(CTEST_TOOLCHAIN_FILE "\${CTEST_SOURCE_DIRECTORY}/config/toolchain/${TOOLCHAIN}")
+  endif ()
   configure_file (
       ${HDF_RESOURCES_DIR}/examples/HDF5_Examples.cmake.in
       ${HDF5_BINARY_DIR}/HDF5_Examples.cmake @ONLY
