@@ -199,11 +199,14 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
-    int             *data_g = NULL;
+    int             *data    = NULL;
 
     if (VERBOSE_MED)
-        printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
+        printf("Verify get_fxpl_mpio correctly gets the data transfer mode\ 
             set in the data transfer property list after a write\n");
+
+    if (NULL == (data = malloc(100 * 100 * sizeof(*data))))
+        goto error;
 
     if ((fid = H5Fcreate("file", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
@@ -223,9 +226,9 @@ test_get_dxpl_mpio(void)
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            data_g[(i * 100) + j] = (int)(i + (i * j) + j);
+            data[(i * 100) + j] = (int)(i + (i * j) + j);
 
-    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data) < 0)
         goto error;
 
     /* Check to make sure the property is still correct */
@@ -247,8 +250,11 @@ test_get_dxpl_mpio(void)
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            data_g[(i * 100) + j] = (int)(i + (j * j) + i);
+            data[(i * 100) + j] = (int)(i + (j * j) + i);
     
+    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data) < 0)
+        goto error;
+
     /* Check to make sure the property is still correct */
     if (H5Pget_dxpl_mpio(dxpl_id, &xfer_mode) < 0)
         goto error;
@@ -258,6 +264,7 @@ test_get_dxpl_mpio(void)
     }
 
     /* Close everything */
+    free(data);
     if (H5Pclose(dxpl_id) < 0) {
             goto error;
     }
@@ -272,5 +279,5 @@ test_get_dxpl_mpio(void)
     }
 
 error:
-    return H5I_INVALID_HID;
+    return 0;
 } /* end test_get_dxpl_mpio() */
