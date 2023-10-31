@@ -211,13 +211,20 @@ test_get_dxpl_mpio(void)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
                "set in the data transfer property list after a write\n");
 
-    /* set up MPI parameters */
+    /* Set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
+     * Use MPI_Comm_split because it is simpler than MPI_Comm_create */
+    mrc = MPI_Comm_split(MPI_COMM_WORLD, 0, 0, &comm);
+    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_split");
+
+    /* Initialize data array */
     data = malloc(100 * 100 * sizeof(*data));
     VRFY((data != NULL), "Data buffer initialized properly");
 
+    /* Create a file */
     fid = H5Fcreate("file", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
