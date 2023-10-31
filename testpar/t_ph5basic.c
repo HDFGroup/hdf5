@@ -195,12 +195,15 @@ test_get_dxpl_mpio(void)
     hid_t            fid     = H5I_INVALID_HID;
     hid_t            sid     = H5I_INVALID_HID;
     hid_t            did     = H5I_INVALID_HID;
+    hid_t            fcpl    = H5I_INVALID_HID;
+    hid_t            fapl    = H5I_INVALID_HID;
     hid_t            dxpl_id = H5I_INVALID_HID;
     H5FD_mpio_xfer_t xfer_mode;
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     int             *data = NULL;
     int              mpi_rank;
+    const char      *filename;
     herr_t           ret;
 
     if (VERBOSE_MED)
@@ -210,12 +213,20 @@ test_get_dxpl_mpio(void)
     /* Set up MPI rank for VRFY macro */
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    filename = (const char *)GetTestParameters();
+
+    /* Create parallel fapl */
+    fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, FACC_MPIO);
+    VRFY((fapl >= 0), "Create_faccess_plist succeeded");
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    VRFY((fcpl >= 0), "H5Pcreate succeeded");
+
     /* Initialize data array */
     data = malloc(100 * 100 * sizeof(*data));
     VRFY((data != NULL), "Data buffer initialized properly");
 
     /* Create a file */
-    fid = H5Fcreate("file", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create a dataset */
