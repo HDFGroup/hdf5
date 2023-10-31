@@ -236,6 +236,10 @@ test_get_dxpl_mpio(void)
         goto error;
     }
     
+    /* Check it does nothing on receiving NULL */
+    if (H5Pget_dxpl_mpio(dxpl_id, NULL) < 0)
+        goto error;
+
     /* Use independent I/O access */
     if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
         goto error;
