@@ -192,13 +192,14 @@ test_fapl_mpio_dup(void)
 void
 test_get_dxpl_mpio(void)
 {
-    hid_t   fid           = H5I_INVALID_HID;
-    hid_t   sid           = H5I_INVALID_HID;
-    hid_t   did           = H5I_INVALID_HID;
-    hid_t   dxpl_id       = H5I_INVALID_HID;
-    hsize_t dims[2]       = {100, 100};
-    hsize_t i, j;
-    int    *data_g        = NULL;
+    hid_t            fid           = H5I_INVALID_HID;
+    hid_t            sid           = H5I_INVALID_HID;
+    hid_t            did           = H5I_INVALID_HID;
+    hid_t            dxpl_id       = H5I_INVALID_HID;
+    hsize_t          dims[2]       = {100, 100};
+    hsize_t          i, j;
+    H5FD_mpio_xfer_t xfer_mode;
+    int              *data_g       = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
@@ -219,7 +220,7 @@ test_get_dxpl_mpio(void)
     if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
         goto error;
     
-     /* Write some data */
+    /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
             data_g[(i * 100) + j] = (int)(i + (i * j) + j);
@@ -228,8 +229,12 @@ test_get_dxpl_mpio(void)
         goto error;
 
     /* Check to make sure the property is still correct */
-    if (H5Pget_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+    if (H5Pget_dxpl_mpio(dxpl_id, &xfer_mode) < 0)
         goto error;
+
+    if (xfer_mode != H5FD_MPIO_COLLECTIVE) {
+        goto error;
+    }
     
     /* Use independent I/O access */
     if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
@@ -241,21 +246,16 @@ test_get_dxpl_mpio(void)
             data_g[(i * 100) + j] = (int)(i + (j * j) + i);
     
     /* Check to make sure the property is still correct */
-    if (H5Pget_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
+    if (H5Pget_dxpl_mpio(dxpl_id, &xfer_mode) < 0)
         goto error;
 
-    /* Pass in NULL */
-    if (H5Pset_dxpl_mpio(dxpl_id, NULL) < 0)
+    if (xfer_mode != H5FD_MPIO_INDEPENDENT) {
         goto error;
+    }
 
-    /* Write some data */
-    for (i = 0; i < dims[0]; i++)
-        for (j = 0; j < dims[1]; j++)
-            data_g[(i * 100) + j] = (int)(j + (i * i) + j);
-    
-    /* Check to make sure the property is still correct */
-    if (H5Pget_dxpl_mpio(dxpl_id, NULL) < 0)
+    if (H5Pclose(dxpl) < 0) {
         goto error;
+    }
 
 error:
     return H5I_INVALID_HID;
