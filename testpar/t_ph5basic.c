@@ -199,13 +199,13 @@ test_get_dxpl_mpio(void)
     H5FD_mpio_xfer_t xfer_mode;
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
-    int             *data    = NULL;
-    
-    MPI_Comm         comm;
-    int              mrc;
-    int              mpi_size, mpi_rank;
+    int             *data = NULL;
 
-    herr_t           ret;
+    MPI_Comm comm;
+    int      mrc;
+    int      mpi_size, mpi_rank;
+
+    herr_t ret;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
