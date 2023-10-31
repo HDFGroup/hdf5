@@ -196,7 +196,7 @@ test_get_dxpl_mpio(void)
     hid_t            sid     = H5I_INVALID_HID;
     hid_t            did     = H5I_INVALID_HID;
     hid_t            fapl    = H5I_INVALID_HID;
-    hid_t            dxpl = H5I_INVALID_HID;
+    hid_t            dxpl    = H5I_INVALID_HID;
     H5FD_mpio_xfer_t xfer_mode;
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
@@ -243,7 +243,7 @@ test_get_dxpl_mpio(void)
         for (j = 0; j < dims[1]; j++)
             data[(i * 100) + j] = (int)(i + (i * j) + j);
 
-    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data);
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* Check to make sure the property is still correct */
