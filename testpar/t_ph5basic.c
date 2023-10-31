@@ -199,85 +199,80 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
+    herr_t           ret;
     int             *data    = NULL;
 
     if (VERBOSE_MED)
-        printf("Verify get_fxpl_mpio correctly gets the data transfer mode\ 
-            set in the data transfer property list after a write\n");
+        printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
+            "set in the data transfer property list after a write\n");
 
-    if (NULL == (data = malloc(100 * 100 * sizeof(*data))))
-        goto error;
+    data = malloc(100 * 100 * sizeof(*data));
+    VRFY((data != NULL), "Data buffer initialized properly");
 
-    if ((fid = H5Fcreate("file", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+    fid = H5Fcreate("file", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create a dataset */
-    if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
-        goto error;
-    if ((did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto error;
+    sid = H5Screate_simple(2, dims, NULL);
+    VRFY((sid >= 0), "H5Screate succeeded");
+    did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((did >= 0), "H5Dcreate2 succeeded");
 
     /* Use collective I/O access */
-    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        goto error;
-    if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
-        goto error;
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "H5Pcreate succeeded");
+    ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio set to collective succeeded");
     
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
             data[(i * 100) + j] = (int)(i + (i * j) + j);
 
-    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data) < 0)
-        goto error;
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* Check to make sure the property is still correct */
-    if (H5Pget_dxpl_mpio(dxpl_id, &xfer_mode) < 0)
-        goto error;
-
-    if (xfer_mode != H5FD_MPIO_COLLECTIVE) {
-            goto error;
-    }
+    ret = H5Pget_dxpl_mpio(dxpl_id, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode != H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
+        " successfully");
     
     /* Check it does nothing on receiving NULL */
-    if (H5Pget_dxpl_mpio(dxpl_id, NULL) < 0)
-        goto error;
+    ret = H5Pget_dxpl_mpio(dxpl_id, NULL);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded on NULL input");
 
     /* Use independent I/O access */
-    if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
-        goto error;
+    ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio set to independent succeeded");
 
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
             data[(i * 100) + j] = (int)(i + (j * j) + i);
     
-    if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data) < 0)
-        goto error;
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* Check to make sure the property is still correct */
-    if (H5Pget_dxpl_mpio(dxpl_id, &xfer_mode) < 0)
-        goto error;
-
-    if (xfer_mode != H5FD_MPIO_INDEPENDENT) {
-            goto error;
-    }
+    ret = H5Pget_dxpl_mpio(dxpl_id, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode != H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
+        " successfully");
 
     /* Close everything */
     free(data);
-    if (H5Pclose(dxpl_id) < 0) {
-            goto error;
-    }
-    if (H5Dclose(did) < 0) {
-            goto error;
-    }
-    if (H5Sclose(sid) < 0) {
-            goto error;
-    }
-    if (H5Fclose(fid) < 0) {
-            goto error;
-    }
 
-error:
-    return 0;
+    ret = H5Pclose(dxpl_id);
+    VRFY((ret >= 0),"H5Pclose succeeded");
+
+    ret = H5Dclose(did);
+    VRFY((ret >= 0),"H5Dclose succeeded");
+
+    ret = H5Sclose(sid) < 0;
+    VRFY((ret >= 0),"H5Sclose succeeded");
+
+    ret = H5Fclose(fid) < 0;
+    VRFY((ret >= 0),"H5Fclose succeeded");
+
 } /* end test_get_dxpl_mpio() */
