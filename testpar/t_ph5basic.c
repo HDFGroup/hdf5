@@ -192,10 +192,10 @@ test_fapl_mpio_dup(void)
 void
 test_get_dxpl_mpio(void)
 {
-    hid_t            fid     = H5I_INVALID_HID;
-    hid_t            sid     = H5I_INVALID_HID;
-    hid_t            did     = H5I_INVALID_HID;
-    hid_t            fapl    = H5I_INVALID_HID;
+    hid_t            fid  = H5I_INVALID_HID;
+    hid_t            sid  = H5I_INVALID_HID;
+    hid_t            did  = H5I_INVALID_HID;
+    hid_t            fapl = H5I_INVALID_HID;
     hid_t            dxpl = H5I_INVALID_HID;
     H5FD_mpio_xfer_t xfer_mode;
     hsize_t          dims[2] = {100, 100};
@@ -221,9 +221,9 @@ test_get_dxpl_mpio(void)
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, FACC_MPIO);
     VRFY((fapl >= 0), "Fapl creation succeeded");
 
-    /* Create a file */    
+    /* Create a file */
     filename = (const char *)GetTestParameters();
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid      = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Create a dataset */
