@@ -1128,27 +1128,26 @@ test_evict_on_close_parallel_unsupp(void)
 void
 test_fapl_preserve_hints(void)
 {
-    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
-    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
     const char *filename;
-
-    int  nkeys_used;
-    bool same = false;
-
-    MPI_Info    info  = MPI_INFO_NULL;
-    const char *key   = "hdf_info_fapl";
-    const char *value = "xyz";
-
-    MPI_Info info_used = MPI_INFO_NULL;
-    int      flag      = -1;
-    char     value_used[20];
-    char     key_used[20];
-
-    int    i;
-    herr_t ret;     /* Generic return value */
-    int    mpi_ret; /* MPI return value */
+    const char *key       = "hdf_info_fapl";
+    const char *value     = "xyz";
+    MPI_Info    info_used = MPI_INFO_NULL;
+    MPI_Info    info      = MPI_INFO_NULL;
+    hid_t       fid       = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id   = H5I_INVALID_HID; /* File access plist */
+    char        key_used[MPI_MAX_INFO_KEY + 1];
+    char       *value_used = NULL;
+    bool        same       = false;
+    int         flag       = -1;
+    int         nkeys_used;
+    int         i;
+    int         mpi_ret; /* MPI return value */
+    herr_t      ret;     /* Generic return value */
 
     filename = (const char *)GetTestParameters();
+
+    value_used = malloc(MPI_MAX_INFO_VAL + 1);
+    VRFY(value_used, "malloc succeeded");
 
     /* set up MPI parameters */
     mpi_ret = MPI_Info_create(&info);
@@ -1184,16 +1183,15 @@ test_fapl_preserve_hints(void)
     for (i = 0; i < nkeys_used; i++) {
 
         /* Memset the buffers to zero */
-        memset(key_used, 0, 20);
-        memset(value_used, 0, 20);
+        memset(key_used, 0, MPI_MAX_INFO_KEY + 1);
+        memset(value_used, 0, MPI_MAX_INFO_VAL + 1);
 
         /* Get the nth key */
         mpi_ret = MPI_Info_get_nthkey(info_used, i, key_used);
         VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get_nthkey succeeded");
 
         if (!strcmp(key_used, key)) {
-
-            mpi_ret = MPI_Info_get(info_used, key_used, 20, value_used, &flag);
+            mpi_ret = MPI_Info_get(info_used, key_used, MPI_MAX_INFO_VAL, value_used, &flag);
             VRFY((mpi_ret == MPI_SUCCESS), "MPI_Info_get succeeded");
 
             if (!strcmp(value_used, value)) {
@@ -1219,5 +1217,7 @@ test_fapl_preserve_hints(void)
 
     mpi_ret = MPI_Info_free(&info_used);
     VRFY((mpi_ret >= 0), "MPI_Info_free succeeded");
+
+    free(value_used);
 
 } /* end test_fapl_preserve_hints() */
