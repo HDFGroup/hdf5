@@ -200,25 +200,15 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     int             *data = NULL;
-
-    MPI_Comm comm;
-    int      mrc;
-    int      mpi_size, mpi_rank;
-
-    herr_t ret;
+    int              mpi_rank;
+    herr_t           ret;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
                "set in the data transfer property list after a write\n");
 
-    /* Set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    /* Set up MPI rank for VRFY macro */
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
-     * Use MPI_Comm_split because it is simpler than MPI_Comm_create */
-    mrc = MPI_Comm_split(MPI_COMM_WORLD, 0, 0, &comm);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_split");
 
     /* Initialize data array */
     data = malloc(100 * 100 * sizeof(*data));
@@ -278,11 +268,6 @@ test_get_dxpl_mpio(void)
 
     /* Close everything */
     free(data);
-
-    if (comm != MPI_COMM_WORLD) {
-        mrc = MPI_Comm_free(&comm);
-        VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
-    }
 
     ret = H5Pclose(dxpl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
