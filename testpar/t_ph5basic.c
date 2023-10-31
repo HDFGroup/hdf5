@@ -199,7 +199,7 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
-    int             *data    = NULL;
+    int             *data = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode\ 
@@ -222,7 +222,7 @@ test_get_dxpl_mpio(void)
         goto error;
     if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
         goto error;
-    
+
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
@@ -236,9 +236,9 @@ test_get_dxpl_mpio(void)
         goto error;
 
     if (xfer_mode != H5FD_MPIO_COLLECTIVE) {
-            goto error;
+        goto error;
     }
-    
+
     /* Check it does nothing on receiving NULL */
     if (H5Pget_dxpl_mpio(dxpl_id, NULL) < 0)
         goto error;
@@ -251,7 +251,7 @@ test_get_dxpl_mpio(void)
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
             data[(i * 100) + j] = (int)(i + (j * j) + i);
-    
+
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data) < 0)
         goto error;
 
@@ -260,22 +260,22 @@ test_get_dxpl_mpio(void)
         goto error;
 
     if (xfer_mode != H5FD_MPIO_INDEPENDENT) {
-            goto error;
+        goto error;
     }
 
     /* Close everything */
     free(data);
     if (H5Pclose(dxpl_id) < 0) {
-            goto error;
+        goto error;
     }
     if (H5Dclose(did) < 0) {
-            goto error;
+        goto error;
     }
     if (H5Sclose(sid) < 0) {
-            goto error;
+        goto error;
     }
     if (H5Fclose(fid) < 0) {
-            goto error;
+        goto error;
     }
 
 error:
