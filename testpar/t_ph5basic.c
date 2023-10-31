@@ -199,7 +199,7 @@ test_get_dxpl_mpio(void)
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
     H5FD_mpio_xfer_t xfer_mode;
-    int*             data_g = NULL;
+    int             *data_g = NULL;
 
     if (VERBOSE_MED)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode 
@@ -254,21 +254,21 @@ test_get_dxpl_mpio(void)
         goto error;
 
     if (xfer_mode != H5FD_MPIO_INDEPENDENT) {
-        goto error;
+            goto error;
     }
 
     /* Close everything */
     if (H5Pclose(dxpl_id) < 0) {
-        goto error;
+            goto error;
     }
     if (H5Dclose(did) < 0) {
-        goto error;
+            goto error;
     }
     if (H5Sclose(sid) < 0) {
-        goto error;
+            goto error;
     }
     if (H5Fclose(fid) < 0) {
-        goto error;
+            goto error;
     }
 
 error:
