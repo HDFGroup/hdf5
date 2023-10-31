@@ -807,13 +807,12 @@ H5_nanosleep(uint64_t nanosec)
 
 #ifdef H5_HAVE_WIN32_API
     DWORD dwMilliseconds = (DWORD)ceil(nanosec / 1.0e6);
-    DWORD ignore;
 
     /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
      * don't care about the return value since the second parameter
      * (bAlertable) is false, so it will always be zero.
      */
-    ignore = SleepEx(dwMilliseconds, false);
+    SleepEx(dwMilliseconds, false);
 
 #else
 
