@@ -457,7 +457,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     const char *suffix = _suffix;
     size_t      i, j;
     hid_t       driver     = H5I_INVALID_HID;
-    int         isppdriver = 0; /* if the driver is MPI parallel */
+    bool        isppdriver = false; /* if the driver is MPI parallel */
 
     if (!base_name || !fullname || size < 1)
         return NULL;
@@ -516,10 +516,8 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
         }
     }
 
-    /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
-     * could be of value -1 if it is not defined.
-     */
-    isppdriver = ((H5P_DEFAULT != fapl) || driver_env_var) && (H5FD_MPIO == driver);
+    if (h5_using_parallel_driver(fapl, &isppdriver) < 0)
+        return NULL;
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
