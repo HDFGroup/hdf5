@@ -209,7 +209,7 @@ test_get_dxpl_mpio(void)
         printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
                "set in the data transfer property list after a write\n");
 
-    /* Set up MPI rank for VRFY macro */
+    /* Set up MPI for VRFY macro */
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
@@ -249,7 +249,7 @@ test_get_dxpl_mpio(void)
     /* Check to make sure the property is still correct */
     ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
     VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
-    VRFY((xfer_mode != H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
+    VRFY((xfer_mode == H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
                                               " successfully");
 
     /* Check it does nothing on receiving NULL */
@@ -271,7 +271,7 @@ test_get_dxpl_mpio(void)
     /* Check to make sure the property is still correct */
     ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
     VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
-    VRFY((xfer_mode != H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
+    VRFY((xfer_mode == H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
                                                " successfully");
 
     /* Close everything */

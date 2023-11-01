@@ -351,7 +351,7 @@ main(int argc, char **argv)
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("mpiodup", test_fapl_mpio_dup, NULL, "fapl_mpio duplicate", NULL);
-    AddTest("getdxplmpio", test_get_dxpl_mpio, NULL, "dxpl_mpio get", NULL);
+    AddTest("getdxplmpio", test_get_dxpl_mpio, NULL, "dxpl_mpio get", PARATESTFILE);
 
     AddTest("split", test_split_comm_access, NULL, "dataset using split communicators", PARATESTFILE);
     AddTest("h5oflusherror", test_oflush, NULL, "H5Oflush failure", PARATESTFILE);
