@@ -5003,8 +5003,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER(HID_T)  , INTENT(OUT) :: class
     INTEGER         , INTENT(OUT) :: hdferr
-    TYPE(C_PTR)     , OPTIONAL, INTENT(INOUT) :: create_data, copy_data, close_data
-    TYPE(C_FUNPTR)  , OPTIONAL, INTENT(INOUT) :: create, copy, close
+    TYPE(C_PTR)     , OPTIONAL, INTENT(IN) :: create_data, copy_data, close_data
+    TYPE(C_FUNPTR)  , OPTIONAL, INTENT(IN) :: create, copy, close
     TYPE(C_PTR)    :: create_data_default, copy_data_default, close_data_default
     TYPE(C_FUNPTR) :: create_default, copy_default, close_default
 
