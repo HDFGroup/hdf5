@@ -100,7 +100,7 @@
       "name": "ci-Fortran-Clang",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_Fortran_COMPILER": "gfortran"
+        "CMAKE_Fortran_COMPILER":  {"type": "FILEPATH", "value": "gfortran"}
       },
       "condition": {
         "type": "matches",
