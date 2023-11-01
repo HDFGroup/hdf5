@@ -5026,12 +5026,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
     c_name = TRIM(name)//C_NULL_CHAR
 
-    create_default = c_null_funptr
-    create_data_default = c_null_ptr
-    copy_default = c_null_funptr
-    copy_data_default = c_null_ptr
-    close_default = c_null_funptr
-    close_data_default = c_null_ptr
+    create_default = C_NULL_FUNPTR
+    create_data_default = C_NULL_PTR
+    copy_default = C_NULL_FUNPTR
+    copy_data_default = C_NULL_PTR
+    close_default = C_NULL_FUNPTR
+    close_data_default = C_NULL_PTR
 
     IF(PRESENT(create)) create_default = create
     IF(PRESENT(create_data)) create_data_default = create_data
