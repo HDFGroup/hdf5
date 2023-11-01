@@ -192,11 +192,11 @@ test_fapl_mpio_dup(void)
 void
 test_get_dxpl_mpio(void)
 {
-    hid_t            fid     = H5I_INVALID_HID;
-    hid_t            sid     = H5I_INVALID_HID;
-    hid_t            did     = H5I_INVALID_HID;
-    hid_t            fapl    = H5I_INVALID_HID;
-    hid_t            dxpl    = H5I_INVALID_HID;
+    hid_t            fid  = H5I_INVALID_HID;
+    hid_t            sid  = H5I_INVALID_HID;
+    hid_t            did  = H5I_INVALID_HID;
+    hid_t            fapl = H5I_INVALID_HID;
+    hid_t            dxpl = H5I_INVALID_HID;
     H5FD_mpio_xfer_t xfer_mode;
     hsize_t          dims[2] = {100, 100};
     hsize_t          i, j;
