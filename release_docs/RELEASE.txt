@@ -1170,7 +1170,15 @@ Known Problems
     Since these tests pass with an optimization level of -O1 (and -O0) and it is
     currently unclear whether the test failures are due to issues in HDF5 or issues
     in the 'nvc' compiler, the maximum optimization level for NVHPC has been set
-    to -O1 until the test failures can be resolved.
+    to -O1 until the test failures can be resolved. Note that even at -O1 optimization
+    level, there still appears to be a sporadic test failure in the Java JUnit tests
+    that has occasionally been seen in JUnit-TestH5Pfapl and JUnit-TestH5D. It is also
+    unclear whether this is an issue in HDF5 or with the 'nvc' compiler. Finally, note
+    that NVHPC 23.9 will fail to compile the test/tselect.c test file with a compiler
+    error of 'use of undefined value' when the optimization level is -O2 or higher.
+    Nvidia is aware of this issue and has suggested lowering the optimization level to
+    -O1 for the time being:
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
 
     IEEE standard arithmetic enables software to raise exceptions such as overflow,
     division by zero, and other illegal operations without interrupting or halting
