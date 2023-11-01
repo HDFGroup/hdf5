@@ -82,7 +82,7 @@
       "hidden": true,
       "inherits": ["ci-base-plugins", "ci-PluginsVars", "ci-base-tgz"],
       "cacheVariables": {
-        "PLUGIN_USE_LOCALCONTENT": "OFF"
+        "PLUGIN_USE_LOCALCONTENT": "OFF",
         "H5PL_VERS_MAJOR": "1",
         "H5PL_VERS_MINOR": "12",
         "H5PL_VERS_RELEASE": "3"
