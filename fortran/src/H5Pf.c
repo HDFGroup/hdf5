@@ -2252,52 +2252,6 @@ h5pget_hyper_vector_size_c(hid_t_f *prp_id, size_t_f *size)
     return ret_value;
 }
 
-/****if* H5Pf/h5pcreate_class_c
- * NAME
- *  h5pcreate_class_c
- * PURPOSE
- *  Call H5Pcreate_class ito create a new property class
- * INPUTS
- *  parent - property list class identifier
- *  name   - name of the new class
- *  name_len - length of the "name" buffer
- * OUTPUTS
- *  class - new class identifier
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pcreate_class_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls, H5P_cls_create_func_t create,
-                  void *create_data, H5P_cls_copy_func_t copy, void *copy_data, H5P_cls_close_func_t close,
-                  void *close_data)
-/******/
-{
-    int   ret_value = -1;
-    hid_t c_class;
-    char *c_name;
-
-    c_name = (char *)HD5f2cstring(name, (size_t)*name_len);
-    if (c_name == NULL)
-        goto DONE;
-
-    /*
-     * Call H5Pcreate_class function.
-     */
-    c_class =
-        H5Pcreate_class((hid_t)*parent, c_name, create, create_data, copy, copy_data, close, close_data);
-
-    if (c_class < 0)
-        goto DONE;
-    *cls      = (hid_t_f)c_class;
-    ret_value = 0;
-
-DONE:
-    if (c_name != NULL)
-        free(c_name);
-    return ret_value;
-}
-
 /****if* H5Pf/h5pregister_c
  * NAME
  *  h5pregister_c
