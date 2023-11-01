@@ -10817,8 +10817,8 @@ error:
  * then read correctly when the selection used in a chunked
  * dataset's file dataspace is a point selection.
  */
-#define FIXED_DIMSIZE       25
-#define FIXED_CHUNK_DIMSIZE 10
+/* #define FIXED_DIMSIZE       25 */
+/* #define FIXED_CHUNK_DIMSIZE 10 */
 static int
 test_read_partial_chunk_point_selection(void)
 {
@@ -10827,8 +10827,8 @@ test_read_partial_chunk_point_selection(void)
 
     return 1;
 }
-#undef FIXED_DIMSIZE
-#undef FIXED_CHUNK_DIMSIZE
+/* #undef FIXED_DIMSIZE */
+/* #undef FIXED_CHUNK_DIMSIZE */
 
 /*
  * A test to verify that H5Dvlen_get_buf_size returns

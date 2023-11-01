@@ -125,11 +125,17 @@ test_h5s_basic(void)
     hsize_t  tdims[4]; /* Dimension array to test with */
     hsize_t  tmax[4];
     hssize_t n; /* Number of dataspace elements */
+    bool     vol_is_native;
     bool     driver_is_default_compatible;
     herr_t   ret; /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Manipulation\n"));
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, max2);
     CHECK(sid1, FAIL, "H5Screate_simple");
@@ -194,10 +200,13 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenerating the th5s.h5 file.
      */
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
+    /* Check if VFD used is native file format compatible */
     ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
     CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
 
-    if (driver_is_default_compatible) {
+    if (vol_is_native && driver_is_default_compatible) {
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
 
         fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -602,6 +611,11 @@ test_h5s_zero_dim(void)
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace with zero dimension size\n"));
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Initialize the data */
     for (i = 0; i < SPACE1_DIM2; i++)
@@ -3353,7 +3367,8 @@ test_versionbounds(void)
     hsize_t      dim[1];                       /* Dataset dimensions */
     H5F_libver_t low, high;                    /* File format bounds */
     H5S_t       *spacep = NULL;                /* Pointer to internal dataspace */
-    herr_t       ret    = 0;                   /* Generic return value */
+    bool         vol_is_native;
+    herr_t       ret = 0; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Version Bounds\n"));
@@ -3361,6 +3376,9 @@ test_versionbounds(void)
     /* Create a file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(fapl, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
 
     /* Create dataspace */
     dim[0] = 10;
@@ -3389,11 +3407,14 @@ test_versionbounds(void)
         /* Get the internal dataspace pointer */
         dset_space = H5Dget_space(dset);
         CHECK(dset_space, FAIL, "H5Dget_space");
-        spacep = (H5S_t *)H5I_object(dset_space);
-        CHECK_PTR(spacep, "H5I_object");
 
-        /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
-        VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
+        if (vol_is_native) {
+            spacep = (H5S_t *)H5I_object(dset_space);
+            CHECK_PTR(spacep, "H5I_object");
+
+            /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
+            VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
+        }
 
         /* Close dataspace */
         ret = H5Sclose(dset_space);
@@ -3426,11 +3447,14 @@ test_versionbounds(void)
     /* Get the internal dataspace pointer */
     dset_space = H5Dget_space(dset);
     CHECK(dset_space, FAIL, "H5Dget_space");
-    spacep = (H5S_t *)H5I_object(dset_space);
-    CHECK_PTR(spacep, "H5I_object");
 
-    /* Verify the dataspace version */
-    VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");
+    if (vol_is_native) {
+        spacep = (H5S_t *)H5I_object(dset_space);
+        CHECK_PTR(spacep, "H5I_object");
+
+        /* Verify the dataspace version */
+        VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");
+    }
 
     /* Close everything */
     ret = H5Sclose(dset_space);

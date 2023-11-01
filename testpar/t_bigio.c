@@ -1,3 +1,14 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
 #include "testphdf5.h"
@@ -1854,7 +1865,8 @@ main(int argc, char **argv)
 {
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
+    hsize_t oldsize   = H5_mpi_set_bigio_count(newsize);
+    hid_t   acc_plist = H5I_INVALID_HID;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1879,6 +1891,30 @@ main(int argc, char **argv)
     /* set alarm. */
     TestAlarmOn();
 
+    acc_plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+
+    /* Get the capability flag of the VOL connector being used */
+    if (H5Pget_vol_cap_flags(acc_plist, &vol_cap_flags_g) < 0) {
+        if (MAIN_PROCESS)
+            printf("Failed to get the capability flag of the VOL connector being used\n");
+
+        MPI_Finalize();
+        return -1;
+    }
+
+    /* Make sure the connector supports the API functions being tested.  This test only
+     * uses a few API functions, such as H5Fcreate/open/close/delete, H5Dcreate/write/read/close,
+     * and H5Dget_space. */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAIN_PROCESS)
+            printf(
+                "API functions for basic file, dataset basic or more aren't supported with this connector\n");
+
+        MPI_Finalize();
+        return 0;
+    }
+
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -1899,9 +1935,6 @@ main(int argc, char **argv)
      */
     H5_mpi_set_bigio_count(oldsize);
     single_rank_independent_io();
-
-    /* turn off alarm */
-    TestAlarmOff();
 
     if (mpi_rank_g == 0) {
         hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1925,6 +1958,11 @@ main(int argc, char **argv)
             printf("Parallel big IO tests finished with no errors\n");
         printf("==================================================\n");
     }
+
+    H5Pclose(acc_plist);
+
+    /* turn off alarm */
+    TestAlarmOff();
 
     /* close HDF5 library */
     H5close();
