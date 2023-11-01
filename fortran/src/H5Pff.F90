@@ -400,15 +400,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pclose_c(prp_id) &
-            BIND(C,NAME='h5pclose_c')
+       INTEGER(C_INT) FUNCTION H5Pclose(prp_id) &
+            BIND(C,NAME='H5Pclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-       END FUNCTION h5pclose_c
+         INTEGER(HID_T), VALUE :: prp_id
+       END FUNCTION H5Pclose
     END INTERFACE
 
-    hdferr = h5pclose_c(prp_id)
+    hdferr = INT(H5Pclose(prp_id))
   END SUBROUTINE h5pclose_f
 
 !>

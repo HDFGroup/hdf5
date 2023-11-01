@@ -69,30 +69,6 @@ done:
     return ret_value;
 }
 
-/****if* H5Pf/h5pclose_c
- * NAME
- *  h5pclose_c
- * PURPOSE
- *  Call H5Pclose to close property lis
- * INPUTS
- *  prp_id - identifier of the property list to be closed
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-
-int_f
-h5pclose_c(hid_t_f *prp_id)
-/******/
-{
-    int_f ret_value = 0;
-
-    if (H5Pclose((hid_t)*prp_id) < 0)
-        ret_value = -1;
-
-    return ret_value;
-}
-
 /****if* H5Pf/h5pcopy_c
  * NAME
  *  h5pcopy_c

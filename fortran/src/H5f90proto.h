@@ -368,7 +368,6 @@ H5_FCDLL int_f h5otoken_cmp_c(hid_t_f *loc_id, H5O_token_t *token1, H5O_token_t 
  * Functions from H5Pf.c
  */
 H5_FCDLL int_f h5pcreate_c(hid_t_f *cls, hid_t_f *prp_id);
-H5_FCDLL int_f h5pclose_c(hid_t_f *prp_id);
 H5_FCDLL int_f h5pcopy_c(hid_t_f *prp_id, hid_t_f *new_prp_id);
 H5_FCDLL int_f h5pequal_c(hid_t_f *plist1_id, hid_t_f *plist2_id, int_f *c_flag);
 H5_FCDLL int_f h5pget_class_c(hid_t_f *prp_id, hid_t_f *classtype);
