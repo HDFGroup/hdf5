@@ -2500,7 +2500,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
             H5T_g.asoft = na;
             H5T_g.soft  = x;
         } /* end if */
-        strncpy(H5T_g.soft[H5T_g.nsoft].name, name, (size_t)H5T_NAMELEN);
+        strncpy(H5T_g.soft[H5T_g.nsoft].name, name, (size_t)H5T_NAMELEN - 1);
         H5T_g.soft[H5T_g.nsoft].name[H5T_NAMELEN - 1] = '\0';
         H5T_g.soft[H5T_g.nsoft].src                   = src->shared->type;
         H5T_g.soft[H5T_g.nsoft].dst                   = dst->shared->type;
@@ -2549,7 +2549,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
             /* Create a new conversion path */
             if (NULL == (new_path = H5FL_CALLOC(H5T_path_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            strncpy(new_path->name, name, (size_t)H5T_NAMELEN);
+            strncpy(new_path->name, name, (size_t)H5T_NAMELEN - 1);
             new_path->name[H5T_NAMELEN - 1] = '\0';
             if (NULL == (new_path->src = H5T_copy(old_path->src, H5T_COPY_ALL)) ||
                 NULL == (new_path->dst = H5T_copy(old_path->dst, H5T_COPY_ALL)))
@@ -4952,7 +4952,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         if (NULL == (path = H5FL_CALLOC(H5T_path_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for type conversion path");
         if (name && *name) {
-            strncpy(path->name, name, (size_t)H5T_NAMELEN);
+            strncpy(path->name, name, (size_t)H5T_NAMELEN - 1);
             path->name[H5T_NAMELEN - 1] = '\0';
         } /* end if */
         else

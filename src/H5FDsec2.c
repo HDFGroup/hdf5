@@ -368,7 +368,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     }
 
     /* Retain a copy of the name used to open the file, for possible error reporting */
-    strncpy(file->filename, name, sizeof(file->filename));
+    strncpy(file->filename, name, sizeof(file->filename) - 1);
     file->filename[sizeof(file->filename) - 1] = '\0';
 
     /* Check for non-default FAPL */
