@@ -438,6 +438,13 @@ set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
+# Set variables needed for installation
+#-----------------------------------------------------------------------------
+set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
+set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
+set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
+
+#-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (${HDF_RESOURCES_DIR}/HDFMacros.cmake)
@@ -474,6 +481,12 @@ set (EXTERNAL_LIBRARYDLL_LIST "")
 include (${HDF_RESOURCES_DIR}/ConfigureChecks.cmake)
 
 set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+
+#-----------------------------------------------------------------------------
+# Include directories in the source or build tree should come before other
+# directories to prioritize headers in the sources over installed ones.
+#-----------------------------------------------------------------------------
+set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
 #-----------------------------------------------------------------------------
 # Mac OS X Options
@@ -803,13 +816,6 @@ option (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   if (HDF5_PACKAGE_EXTLIBS)
     set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
-    if (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND AND NOT BUILD_ZLIB_WITH_FETCHCONTENT)
-      PACKAGE_ZLIB_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
-
-    if (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND AND NOT BUILD_SZIP_WITH_FETCHCONTENT)
-      PACKAGE_SZIP_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-    endif ()
   endif ()
 endif ()
 
@@ -821,7 +827,7 @@ if (HDF5_ENABLE_THREADSAFE)
   # check for unsupported options
   if (WIN32)
     if (BUILD_STATIC_LIBS)
-        message (FATAL_ERROR " **** thread-safety option not supported with static library **** ")
+      message (FATAL_ERROR " **** thread-safety option not supported with static library **** ")
     endif ()
   endif ()
   if (HDF5_ENABLE_PARALLEL)
