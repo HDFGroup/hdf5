@@ -181,7 +181,7 @@ test_fapl_mpio_dup(void)
 /*-------------------------------------------------------------------------
  * Function:    test_get_dxpl_mpio
  *
- * Purpose:     Test that H5Pget_fxpl_mpio will properly return the data
+ * Purpose:     Test that H5Pget_dxpl_mpio will properly return the data
  *              transfer mode of collective and independent I/O access
  *              after setting it and writing some data.
  *
@@ -206,7 +206,7 @@ test_get_dxpl_mpio(void)
     herr_t           ret;
 
     if (VERBOSE_MED)
-        printf("Verify get_fxpl_mpio correctly gets the data transfer mode"
+        printf("Verify get_dxpl_mpio correctly gets the data transfer mode"
                "set in the data transfer property list after a write\n");
 
     /* Set up MPI for VRFY macro */
@@ -286,10 +286,10 @@ test_get_dxpl_mpio(void)
     ret = H5Dclose(did);
     VRFY((ret >= 0), "H5Dclose succeeded");
 
-    ret = H5Sclose(sid) < 0;
+    ret = H5Sclose(sid);
     VRFY((ret >= 0), "H5Sclose succeeded");
 
-    ret = H5Fclose(fid) < 0;
+    ret = H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded");
 
 } /* end test_get_dxpl_mpio() */
