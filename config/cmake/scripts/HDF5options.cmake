@@ -26,7 +26,6 @@
 
 #############################################################################################
 ### use a toolchain file (supported everywhere)       ####
-
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/intel.cmake")
 
 #############################################################################################
