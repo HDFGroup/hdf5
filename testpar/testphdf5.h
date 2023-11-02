@@ -233,6 +233,8 @@ void zero_dim_dset(void);
 void test_file_properties(void);
 void test_delete(void);
 void test_invalid_libver_bounds_file_close_assert(void);
+void test_evict_on_close_parallel_unsupp(void);
+void test_fapl_preserve_hints(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
@@ -296,6 +298,7 @@ void test_partial_no_selection_coll_md_read(void);
 void test_multi_chunk_io_addrmap_issue(void);
 void test_link_chunk_io_sort_chunk_issue(void);
 void test_collective_global_heap_write(void);
+void test_coll_io_ind_md_write(void);
 void test_oflush(void);
 
 /* commonly used prototypes */

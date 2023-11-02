@@ -906,7 +906,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
             /* copy over each hint */
             for (i = 0; i < nkeys; i++) {
-                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL];
+                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL + 1];
                 int  valuelen, flag;
 
                 /* retrieve the nth hint */
@@ -916,7 +916,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
                 if (MPI_SUCCESS != (mpi_code = MPI_Info_get_valuelen(info_used, key, &valuelen, &flag)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Info_get_valuelen failed", mpi_code)
                 /* retrieve the value of nth hint */
-                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen + 1, value, &flag)))
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen, value, &flag)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Info_get failed", mpi_code)
 
                 /* copy the hint into info */
