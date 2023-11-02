@@ -254,7 +254,7 @@ test_get_dxpl_mpio(void)
 
     /* Read the data */
     ret = H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
-    VRFY((ret >=0), "H5Dread succeeded");
+    VRFY((ret >= 0), "H5Dread succeeded");
 
     /* Check to make sure the property is still correct */
     ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
@@ -286,7 +286,7 @@ test_get_dxpl_mpio(void)
 
     /* Read the data */
     ret = H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
-    VRFY((ret >=0), "H5Dread succeeded");
+    VRFY((ret >= 0), "H5Dread succeeded");
 
     /* Check to make sure the property is still correct */
     ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
