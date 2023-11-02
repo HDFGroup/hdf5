@@ -5547,14 +5547,14 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
 {
     H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
     bool             have_xfer_mode = false; /* Whether the previous xffer mode has been retrieved */
-    size_t           i;                   /* Local index variable */
-    uint32_t     io_count = 0;
-    haddr_t     *io_addrs    = NULL;
-    size_t      *io_sizes    = NULL;
-    const void **io_wbufs = NULL;
-    H5FD_mem_t   io_types[2];
-    bool         all_same_block_len = true;
-    size_t       io_2sizes[2];
+    size_t           i;                      /* Local index variable */
+    uint32_t         io_count = 0;
+    haddr_t         *io_addrs = NULL;
+    size_t          *io_sizes = NULL;
+    const void     **io_wbufs = NULL;
+    H5FD_mem_t       io_types[2];
+    bool             all_same_block_len = true;
+    size_t           io_2sizes[2];
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -5573,7 +5573,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     if (all_same_block_len) {
         io_2sizes[0] = chunk_fill_info->chunk_info[0].chunk_size;
         io_2sizes[1] = 0;
-    } else {
+    }
+    else {
         if (NULL == (io_sizes = H5MM_malloc(io_count * sizeof(*io_sizes))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector");
     }
@@ -5582,12 +5583,10 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     io_types[1] = H5FD_MEM_NOLIST;
 
     if (NULL == (io_addrs = H5MM_malloc(io_count * sizeof(*io_addrs))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "couldn't allocate space for I/O addresses vector");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O addresses vector");
 
     if (NULL == (io_wbufs = H5MM_malloc(io_count * sizeof(*io_wbufs))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "couldn't allocate space for I/O buffers vector");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O buffers vector");
 
     for (i = 0; i < io_count; i++) {
         io_addrs[i] = chunk_fill_info->chunk_info[i].addr;
@@ -5610,7 +5609,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     if (H5CX_set_io_xfer_mode(H5FD_MPIO_COLLECTIVE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode");
 
-    if (H5F_shared_vector_write(H5F_SHARED(dset->oloc.file), io_count, io_types, io_addrs, all_same_block_len ? io_2sizes : io_sizes, io_wbufs) < 0)
+    if (H5F_shared_vector_write(H5F_SHARED(dset->oloc.file), io_count, io_types, io_addrs,
+                                all_same_block_len ? io_2sizes : io_sizes, io_wbufs) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "vector write call failed");
 
 done:

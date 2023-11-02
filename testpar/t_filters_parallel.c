@@ -561,14 +561,16 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                 if (did_alloc && (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED)) {
                     VRFY((H5D_VECTOR_IO | H5D_SCALAR_IO) == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was vector and scalar I/O");
-                } else if (did_alloc) {
+                }
+                else if (did_alloc) {
                     VRFY(H5D_VECTOR_IO == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was vector I/O");
-                } 
+                }
                 else if (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
                     VRFY(H5D_SCALAR_IO == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was scalar I/O");
-                } else
+                }
+                else
                     VRFY(0 == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was 0 (no I/O)");
             }
