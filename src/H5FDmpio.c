@@ -2473,8 +2473,13 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
         /* Compute max address written to */
-        if (count > 0)
-            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
+        /* Bug: need to account for fixed size optimization */
+        if (count > 0) {
+            uint32_t idx = count - 1;
+            if (s_sizes[0] != 0 && s_sizes[1] == 0)
+                idx = 0;
+            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[idx]);
+        }
 
         /* free sorted vectors if they exist */
         if (!vector_was_sorted) {

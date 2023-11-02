@@ -556,11 +556,19 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
              * elements (because no elements were raw data), which is what happens when performing I/O on a
              * filtered dataset with no selection. Vector I/O does report an I/O call was made if passed a raw
              * data element of size 0, so this is consistent. */
+            /* Changes: for allocation, the reported I/O is vector I/O */
             if (!any_io) {
-                if (did_alloc || (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED))
+                if (did_alloc && (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED)) {
+                    VRFY((H5D_VECTOR_IO | H5D_SCALAR_IO) == actual_sel_io_mode_reduced,
+                         "verified actual selection I/O mode was vector and scalar I/O");
+                } else if (did_alloc) {
+                    VRFY(H5D_VECTOR_IO == actual_sel_io_mode_reduced,
+                         "verified actual selection I/O mode was vector I/O");
+                } 
+                else if (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED) {
                     VRFY(H5D_SCALAR_IO == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was scalar I/O");
-                else
+                } else
                     VRFY(0 == actual_sel_io_mode_reduced,
                          "verified actual selection I/O mode was 0 (no I/O)");
             }
@@ -592,15 +600,14 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                          * should be scalar I/O for allocation in addition to vector I/O for the actual data.
                          * If we're reading from an unallocated dataset then there should be no actual I/O.
                          * Otherwise there should only be vector I/O. */
-                        if (did_alloc)
-                            VRFY((H5D_SCALAR_IO | H5D_VECTOR_IO) == actual_sel_io_mode_reduced,
-                                 "verified actual selection I/O mode was scalar and vector I/O");
-                        else if (unalloc_read)
+                        /* Changes: for allocation, the reported I/O is vector I/O */
+                        if (unalloc_read)
                             VRFY(0 == actual_sel_io_mode_reduced,
                                  "verified actual selection I/O mode was 0 (no I/O)");
-                        else
+                        else { /* did_alloc || !unalloc_read */
                             VRFY(H5D_VECTOR_IO == actual_sel_io_mode_reduced,
                                  "verified actual selection I/O mode was vector I/O");
+                        }
                         break;
 
                     case USE_MULTIPLE_DATASETS_MIXED_FILTERED:
