@@ -252,6 +252,16 @@ test_get_dxpl_mpio(void)
     VRFY((xfer_mode == H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
                                               " successfully");
 
+    /* Read the data */
+    ret = H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
+    VRFY((ret >=0), "H5Dread succeeded");
+
+    /* Check to make sure the property is still correct */
+    ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode == H5FD_MPIO_COLLECTIVE), "Xfer_mode retrieved"
+                                              " successfully");
+
     /* Check it does nothing on receiving NULL */
     ret = H5Pget_dxpl_mpio(dxpl, NULL);
     VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded on NULL input");
@@ -267,6 +277,16 @@ test_get_dxpl_mpio(void)
 
     ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
     VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* Check to make sure the property is still correct */
+    ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+    VRFY((ret >= 0), "H5Pget_dxpl_mpio succeeded");
+    VRFY((xfer_mode == H5FD_MPIO_INDEPENDENT), "Xfer_mode retrieved"
+                                               " successfully");
+
+    /* Read the data */
+    ret = H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl, data);
+    VRFY((ret >=0), "H5Dread succeeded");
 
     /* Check to make sure the property is still correct */
     ret = H5Pget_dxpl_mpio(dxpl, &xfer_mode);
