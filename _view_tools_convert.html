@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.64e239c</span>
+   &#160;<span id="projectnumber">1.15.0.61982b6</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -252,7 +252,7 @@ Export from h5dump and Import into HDF5</h1>
 <div class="line">   }</div>
 <div class="line">}</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>The second example imports string data. The example program that creates this file can be downloaded from the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page.</p>
+</div><!-- fragment --><p>The second example imports string data. The example program that creates this file can be downloaded from the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page.</p>
 <p>Note that string data requires use of the <code style="background-color:whitesmoke;">h5dump -y</code> option to exclude indexes and the <code style="background-color:whitesmoke;">h5dump &ndash;width=1</code> option to generate a single column of strings. The <code style="background-color:whitesmoke;">-o</code> option outputs the data into an ASCII file. </p><div class="fragment"><div class="line">h5dump -p -d <span class="stringliteral">&quot;/DS1&quot;</span> -O vlstring.dmp -o vlstring.ascii -y --width=1 h5ex_t_vlstring.h5</div>
 <div class="line">h5import vlstring.ascii -c vlstring.dmp -o <span class="keyword">new</span>-vlstring.h5</div>
 </div><!-- fragment --><p>The output before and after running these commands is shown below: </p><div class="fragment"><div class="line">$ h5dump h5ex_t_vlstring.h5</div>

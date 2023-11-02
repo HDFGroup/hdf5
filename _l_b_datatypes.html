@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.64e239c</span>
+   &#160;<span id="projectnumber">1.15.0.61982b6</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -282,8 +282,8 @@ Change the datatype. </li>
 <p>Refer to the <a class="el" href="group___h5_t.html">Datatypes (H5T)</a> in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>. Example functions are <a class="el" href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c" title="Sets size for a datatype.">H5Tset_size</a> and <a class="el" href="group___a_t_o_m.html#gab0f4dccfc2fb47bf2c7e06c9bf84c1f7" title="Sets the precision of an atomic datatype.">H5Tset_precision</a>.</p>
 <h1><a class="anchor" id="secLBDtypeSpec"></a>
 Specific Datatypes</h1>
-<p>On the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page under <a href="https://confluence.hdfgroup.org/display/HDF5/Examples+by+API#ExamplesbyAPI-datatypes">Datatypes</a> you will find many example programs for creating and reading datasets with different datatypes.</p>
-<p>Below is additional information on some of the datatypes. See the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page for examples of these datatypes.</p>
+<p>On the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page under <a class="el" href="_ex_a_p_i.html#sec_exapi_dtypes">Datatypes</a> you will find many example programs for creating and reading datasets with different datatypes.</p>
+<p>Below is additional information on some of the datatypes. See the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page for examples of these datatypes.</p>
 <h2><a class="anchor" id="subsecLBDtypeSpec"></a>
 Array Datatype vs Array Dataspace</h2>
 <p><a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a547a4451911e912127f300ab15113854">H5T_ARRAY</a> is a datatype, and it should not be confused with the dataspace of a dataset. The dataspace of a dataset can consist of a regular array of elements. For example, the datatype for a dataset could be an atomic datatype like integer, and the dataset could be an N-dimensional appendable array, as specified by the dataspace. See <a class="el" href="group___h5_s.html#gabee514327cba34ca9951b24fa14fb083" title="Creates a new dataspace of a specified type.">H5Screate</a> and <a class="el" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae" title="Creates a new simple dataspace and opens it for access.">H5Screate_simple</a> for details.</p>

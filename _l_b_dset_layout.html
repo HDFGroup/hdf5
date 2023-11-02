@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.64e239c</span>
+   &#160;<span id="projectnumber">1.15.0.61982b6</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -172,9 +172,9 @@ Programming Model to Modify the Storage Layout</h1>
 <li>Create a Dataset Creation Property list. (See <a class="el" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa" title="Creates a new property list as an instance of a property list class.">H5Pcreate</a>) </li>
 <li>Modify the property list. To use chunked storage layout, call: <a class="el" href="group___d_c_p_l.html#ga3584d592e377da3604b7604e266dcf5b" title="Sets the size of the chunks used to store a chunked layout dataset.">H5Pset_chunk</a> To use the compact storage layout, call: <a class="el" href="group___d_c_p_l.html#ga75d80991a8f467e0d454c53a383ae7f9" title="Sets the type of storage used to store the raw data for a dataset.">H5Pset_layout</a> </li>
 <li>Create a dataset with the modified property list. (See <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a>) </li>
-<li>Close the property list. (See <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose</a>) For example code, see the <a class="el" href="_h_d_f5_examples.html">HDF5 Examples</a> page. Specifically look at the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>. There are examples for different languages.</li>
+<li>Close the property list. (See <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose</a>) For example code, see the <a class="el" href="_h_d_f5_examples.html">HDF5 Examples</a> page. Specifically look at the <a class="el" href="_ex_a_p_i.html">Examples by API</a>. There are examples for different languages.</li>
 </ul>
-<p>The C example to create a chunked dataset is: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a> The C example to create a compact dataset is: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a></p>
+<p>The C example to create a chunked dataset is: <a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a> The C example to create a compact dataset is: <a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a></p>
 <h1><a class="anchor" id="secLBDsetLayoutChange"></a>
 Changing the Layout after Dataset Creation</h1>
 <p>The dataset layout is a Dataset Creation Property List. This means that once the dataset has been created the dataset layout cannot be changed. The h5repack utility can be used to write a file to a new with a new layout.</p>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.64e239c</span>
+   &#160;<span id="projectnumber">1.15.0.61982b6</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -317,7 +317,7 @@ Example 5</h3>
 <div class="ttc" id="a_h5_dpublic_8h_html_aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72"><div class="ttname"><a href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72">H5D_FILL_TIME_IFSET</a></div><div class="ttdeci">@ H5D_FILL_TIME_IFSET</div><div class="ttdef"><b>Definition:</b> H5Dpublic.h:104</div></div>
 <div class="ttc" id="a_h5_dpublic_8h_html_aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636"><div class="ttname"><a href="_h5_dpublic_8h.html#aab70b464cf3c5fc931dce0c4fe98b3d2ac898a96931fd3402d9e5646690c77636">H5D_ALLOC_TIME_INCR</a></div><div class="ttdeci">@ H5D_ALLOC_TIME_INCR</div><div class="ttdef"><b>Definition:</b> H5Dpublic.h:79</div></div>
 <div class="ttc" id="agroup___p_d_t_s_t_d_html_ga8db8c9c2bcc457f9f8526c8fcb81218b"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div><div class="ttdeci">#define H5T_STD_I32LE</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:310</div></div>
-</div><!-- fragment --><p>You can obtain the <code style="background-color:whitesmoke;">h5ex_d_gzip.c</code> program that created this file, as well as the file created, from the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page.</p>
+</div><!-- fragment --><p>You can obtain the <code style="background-color:whitesmoke;">h5ex_d_gzip.c</code> program that created this file, as well as the file created, from the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page.</p>
 <h2><a class="anchor" id="subsecViewToolsViewDset_h5ls"></a>
 h5ls</h2>
 <p>Specific datasets can be specified with <code style="background-color:whitesmoke;">h5ls</code> by simply adding the dataset path and dataset after the file name. As an example, this command displays dataset <code style="background-color:whitesmoke;">dset2</code> in the <code style="background-color:whitesmoke;">groups.h5</code> file used in <a class="el" href="_view_tools_view.html#subsubsecViewToolsViewDset_h5dumpEx4">Example 4</a> : </p><div class="fragment"><div class="line">h5ls groups.h5/MyGroup/Group_A/dset2</div>
@@ -566,7 +566,7 @@ h5dump</h2>
 Datatypes</h1>
 <h2><a class="anchor" id="subsecViewToolsViewDtypes_h5dump"></a>
 h5dump</h2>
-<p>The following datatypes are discussed, using the output of <code style="background-color:whitesmoke;">h5dump</code> with HDF5 files from the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page: </p><ul>
+<p>The following datatypes are discussed, using the output of <code style="background-color:whitesmoke;">h5dump</code> with HDF5 files from the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page: </p><ul>
 <li>
 <a class="el" href="_view_tools_view.html#subsubsecViewToolsViewDtypes_array">Array</a> </li>
 <li>
@@ -651,7 +651,7 @@ Object Reference</h3>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsecViewToolsViewDtypes_regref"></a>
 Region Reference</h3>
 <p>A Region Reference is a reference to a selection within a dataset. A selection can be either individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with the elements or slab that is selected. A dataset with a Region Reference datatype consists of one or more Region References.</p>
-<p>An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page, under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a Region Reference dataset as indicated by its datatype, highlighted in bold below: </p><div class="fragment"><div class="line">$ h5dump  h5ex_t_regref.h5</div>
+<p>An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the <a class="el" href="_ex_a_p_i.html">Examples by API</a> page, under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a Region Reference dataset as indicated by its datatype, highlighted in bold below: </p><div class="fragment"><div class="line">$ h5dump  h5ex_t_regref.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;h5ex_t_regref.h5&quot;</span> {</div>
 <div class="line">GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
 <div class="line">   DATASET <span class="stringliteral">&quot;DS1&quot;</span> {</div>
