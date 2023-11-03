@@ -62,7 +62,8 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Added Fortran APIs:
+      h5vlnative_addr_to_token_f and h5vlnative_token_to_address_f
 
 
     C++ Library:
