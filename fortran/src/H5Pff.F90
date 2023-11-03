@@ -400,15 +400,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pclose_c(prp_id) &
-            BIND(C,NAME='h5pclose_c')
+       INTEGER(C_INT) FUNCTION H5Pclose(prp_id) &
+            BIND(C,NAME='H5Pclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-       END FUNCTION h5pclose_c
+         INTEGER(HID_T), VALUE :: prp_id
+       END FUNCTION H5Pclose
     END INTERFACE
 
-    hdferr = h5pclose_c(prp_id)
+    hdferr = INT(H5Pclose(prp_id))
   END SUBROUTINE h5pclose_f
 
 !>
@@ -5005,31 +5006,32 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER         , INTENT(OUT) :: hdferr
     TYPE(C_PTR)     , OPTIONAL, INTENT(IN) :: create_data, copy_data, close_data
     TYPE(C_FUNPTR)  , OPTIONAL, INTENT(IN) :: create, copy, close
-    INTEGER :: name_len
-    TYPE(C_PTR) :: create_data_default, copy_data_default, close_data_default
+    TYPE(C_PTR)    :: create_data_default, copy_data_default, close_data_default
     TYPE(C_FUNPTR) :: create_default, copy_default, close_default
-    INTERFACE
-       INTEGER FUNCTION h5pcreate_class_c(parent, name, name_len, class, &
-            create, create_data, copy, copy_data, close, close_data) &
-            BIND(C, NAME='h5pcreate_class_c')
-         IMPORT :: c_char, c_ptr, c_funptr
-         IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN) :: parent
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         INTEGER(HID_T), INTENT(OUT) :: class
-         TYPE(C_PTR), VALUE :: create_data, copy_data, close_data
-         TYPE(C_FUNPTR), VALUE :: create, copy, close
-       END FUNCTION h5pcreate_class_c
-    END INTERFACE
-    name_len = LEN(name)
 
-    create_default = c_null_funptr     !fix:scot
-    create_data_default = c_null_ptr
-    copy_default = c_null_funptr    !fix:scot
-    copy_data_default = c_null_ptr
-    close_default = c_null_funptr   !fix:scot
-    close_data_default = c_null_ptr
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Pcreate_class(parent, name, &
+            create, create_data, copy, copy_data, close, close_data) &
+            BIND(C, NAME='H5Pcreate_class')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
+         IMPORT :: HID_T
+         INTEGER(HID_T), VALUE :: parent
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR), VALUE    :: create_data, copy_data, close_data
+         TYPE(C_FUNPTR), VALUE  :: create, copy, close
+       END FUNCTION H5Pcreate_class
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    create_default = C_NULL_FUNPTR
+    create_data_default = C_NULL_PTR
+    copy_default = C_NULL_FUNPTR
+    copy_data_default = C_NULL_PTR
+    close_default = C_NULL_FUNPTR
+    close_data_default = C_NULL_PTR
 
     IF(PRESENT(create)) create_default = create
     IF(PRESENT(create_data)) create_data_default = create_data
@@ -5038,10 +5040,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IF(PRESENT(close)) close_default = close
     IF(PRESENT(close_data)) close_data_default = close_data
 
-    hdferr = h5pcreate_class_c(parent, name , name_len, class, &
+    class = H5Pcreate_class(parent, c_name, &
          create_default, create_data_default, &
          copy_default, copy_data_default, &
          close_default, close_data_default)
+
+    hdferr = 0
+    IF(class.LT.0) hdferr = -1
 
   END SUBROUTINE h5pcreate_class_f
 
