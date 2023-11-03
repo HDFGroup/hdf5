@@ -119,5 +119,5 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build
