@@ -17,27 +17,29 @@ permissions:
 jobs:
   # Build and test individual VOL connectors by using HDF5's
   # CMake FetchContent functionality. 
-  #fetchcontent_hdf5_vol_daos:
+  #hdf5_vol_daos_fetchcontent:
   #  uses: ./.github/workflows/vol_daos.yml
 
-  #fetchcontent_hdf5_vol_rest:
+  #hdf5_vol_rest_fetchcontent:
   #  uses: ./.github/workflows/vol_rest.yml
 
-  fetchcontent_hdf5_vol_ext_passthru:
+  hdf5_vol_ext_passthru_fetchcontent:
     uses: ./.github/workflows/vol_ext_passthru.yml
     with:
       build_mode: "Release"
 
-  #fetchcontent_hdf5_vol_async:
-  #  uses: ./.github/workflows/vol_async.yml
+  hdf5_vol_async_fetchcontent:
+    uses: ./.github/workflows/vol_async.yml
+    with:
+      build_mode: "Release"
 
-  #fetchcontent_hdf5_vol_cache:
+  #hdf5_vol_cache_fetchcontent:
   #  uses: ./.github/workflows/vol_cache.yml
 
-  #fetchcontent_hdf5_vol_adios2:
+  #hdf5_vol_adios2_fetchcontent:
   #  uses: ./.github/workflows/vol_adios2.yml
 
-  #fetchcontent_hdf5_vol_log:
+  #hdf5_vol_log_fetchcontent:
   #  uses: ./.github/workflows/vol_log.yml
 
   # Build and install HDF5 and test individual VOL connectors

@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt-get install ninja-build automake autoconf libtool libtool-bin libopenmpi-dev
+          sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
 
       # TODO
       #- name: Checkout HDF5
@@ -69,7 +69,7 @@ jobs:
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
 
-      - name: Test HDF5 external passthrough VOL connector
+      - name: Test HDF5 external passthrough VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
           ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-external-passthrough" .
