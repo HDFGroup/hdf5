@@ -5621,8 +5621,7 @@ done:
 
     H5MM_xfree(io_addrs);
     H5MM_xfree(io_wbufs);
-    if (!all_same_block_len)
-        H5MM_xfree(io_sizes);
+    H5MM_xfree(io_sizes);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_fill() */
