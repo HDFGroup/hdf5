@@ -1,6 +1,0 @@
-<map id="DSetAccPropList" name="DSetAccPropList">
-<area shape="rect" id="node1" title="Class DSetAccPropList inherits from LinkAccPropList and provides wrappers for the HDF5 dataset access..." alt="" coords="5,233,133,260"/>
-<area shape="rect" id="node2" href="$class_h5_1_1_link_acc_prop_list.html" title="Class LinkAccPropList inherits from PropList and provides wrappers for the HDF5 link access property ..." alt="" coords="7,157,131,184"/>
-<area shape="rect" id="node3" href="$class_h5_1_1_prop_list.html" title="Class PropList inherits from IdComponent and provides wrappers for the HDF5 generic property list." alt="" coords="32,81,107,108"/>
-<area shape="rect" id="node4" href="$class_h5_1_1_id_component.html" title="Class IdComponent provides wrappers of the C functions that operate on an HDF5 identifier." alt="" coords="15,5,124,32"/>
-</map>
