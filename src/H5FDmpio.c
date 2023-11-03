@@ -1717,7 +1717,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
     /* Get bio I/O transition point (may be lower than 2G for testing) */
     bigio_count = H5_mpi_get_bigio_count();
 
-    /* Start wiht s_sizes_len at count */
+    /* Start with s_sizes_len at count */
     if (s_sizes_len)
         *s_sizes_len = count;
 
