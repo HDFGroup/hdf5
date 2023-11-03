@@ -16,12 +16,12 @@ on:
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
-  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
   cancel-in-progress: true
 
 permissions:
   contents: read
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,24 +42,31 @@ jobs:
           which clang
           which flang
           clang -v
-      - name: Install OpenMPI 4.1.5
+      - name: Cache OpenMPI 4.1.5 installation
+        id: cache-openmpi-4_1_5
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/work/hdf5/hdf5/openmpi-4.1.5-install
+          key: ${{ runner.os }}-${{ runner.arch }}-openmpi-4_1_5-cache
+      - if: ${{ steps.cache-openmpi-4_1_5.outputs.cache-hit != 'true' }}
+        name: Install OpenMPI 4.1.5
         run: |
           export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/usr/local/lib
           wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
           tar zxvf openmpi-4.1.5.tar.gz
           cd openmpi-4.1.5
-          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/bin/flang --prefix=/usr/local
+          ./configure CC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/bin/clang FC=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/bin/flang --prefix=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install
           make
-          sudo make install
+          make install
       - name: Install HDF5
         env:
-          NPROCS: 2      
+          NPROCS: 2
         run: |
-          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/usr/local/lib/openmpi:/usr/local/lib
-          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/usr/local/lib/openmpi:/usr/local/lib
-          export PATH=/usr/local/bin:$PATH
+          export LD_LIBRARY_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/lib:/usr/local/lib
+          export LD_RUN_PATH=/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib:/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/lib:/usr/local/lib
+          export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
           ./autogen.sh
-          ./configure --prefix=/tmp  --enable-parallel --enable-shared CC=/usr/local/bin/mpicc LDFLAGS="-L/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib -L/usr/local/lib/openmpi"
+          ./configure --prefix=/tmp  --enable-parallel --enable-shared CC=mpicc LDFLAGS="-L/home/runner/work/hdf5/hdf5/aocc-compiler-4.1.0/lib -L/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/lib"
           make -j
           make check -j
           make install

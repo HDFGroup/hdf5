@@ -2551,6 +2551,12 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
             **((MPI_Comm **)output) = file->ext_comm;
             break;
 
+        case H5FD_CTL_GET_MPI_INFO_OPCODE:
+            assert(output);
+            assert(*output);
+            **((MPI_Info **)output) = file->info;
+            break;
+
         case H5FD_CTL_GET_MPI_RANK_OPCODE:
             assert(output);
             assert(*output);

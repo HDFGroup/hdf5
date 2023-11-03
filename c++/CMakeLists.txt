@@ -13,6 +13,6 @@ endif ()
 #-----------------------------------------------------------------------------
 # Build the CPP unit tests
 #-----------------------------------------------------------------------------
-if (BUILD_TESTING)
+if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
   add_subdirectory (test)
 endif ()

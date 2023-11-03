@@ -23,6 +23,12 @@
 #undef H5_HAVE_SUBFILING_VFD
 #endif
 
+! Define if on APPLE
+#cmakedefine01 H5_HAVE_DARWIN
+#if H5_HAVE_DARWIN == 0
+#undef H5_HAVE_DARWIN
+#endif
+
 ! Define if the intrinsic function STORAGE_SIZE exists
 #cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
 

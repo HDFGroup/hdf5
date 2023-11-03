@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: Public, shared definitions for Mirror VFD & remote Writer.
+ * Purpose:	The public header file for the mirror virtual file driver (VFD)
  */
 
 #ifndef H5FDmirror_H
@@ -19,7 +19,10 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-#define H5FD_MIRROR       (H5FDperform_init(H5FD_mirror_init))
+/** Initializer for the mirror VFD */
+#define H5FD_MIRROR (H5FDperform_init(H5FD_mirror_init))
+
+/** Identifier for the mirror VFD */
 #define H5FD_MIRROR_VALUE H5_VFD_MIRROR
 
 #ifdef __cplusplus
@@ -62,6 +65,10 @@ typedef struct H5FD_mirror_fapl_t {
     char     remote_ip[H5FD_MIRROR_MAX_IP_LEN + 1];
 } H5FD_mirror_fapl_t;
 
+/** @private
+ *
+ * \brief Private initializer for the mirror VFD
+ */
 H5_DLL hid_t H5FD_mirror_init(void);
 
 /**

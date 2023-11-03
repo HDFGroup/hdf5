@@ -380,9 +380,9 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
             /* Allocate buffers for iteration */
             if (NULL == (key = (char *)H5MM_malloc(MPI_MAX_INFO_KEY * sizeof(char))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL == (value1 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
+            if (NULL == (value1 = (char *)H5MM_malloc((MPI_MAX_INFO_VAL + 1) * sizeof(char))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL == (value2 = (char *)H5MM_malloc(MPI_MAX_INFO_VAL * sizeof(char))))
+            if (NULL == (value2 = (char *)H5MM_malloc((MPI_MAX_INFO_VAL + 1) * sizeof(char))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Iterate over the keys, comparing them */

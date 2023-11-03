@@ -43,6 +43,9 @@
  */
 #define ROS3_STATS 0
 
+/* Max size of the cache, in bytes */
+#define ROS3_MAX_CACHE_SIZE 16777216
+
 /* The driver identification number, initialized at runtime
  */
 static hid_t H5FD_ROS3_g = 0;
@@ -189,6 +192,8 @@ typedef struct H5FD_ros3_t {
     H5FD_ros3_fapl_t fa;
     haddr_t          eoa;
     s3r_t           *s3r_handle;
+    uint8_t         *cache;
+    size_t           cache_size;
 #if ROS3_STATS
     ros3_statsbin meta[ROS3_STATS_BIN_COUNT + 1];
     ros3_statsbin raw[ROS3_STATS_BIN_COUNT + 1];
@@ -1000,6 +1005,18 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif /* ROS3_STATS */
 
+    /* Cache the initial bytes of the file */
+    {
+        size_t filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
+
+        file->cache_size = (filesize < ROS3_MAX_CACHE_SIZE) ? filesize : ROS3_MAX_CACHE_SIZE;
+
+        if (NULL == (file->cache = (uint8_t *)H5MM_calloc(file->cache_size)))
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate cache memory");
+        if (H5FD_s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) == FAIL)
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, NULL, "unable to execute read");
+    }
+
     ret_value = (H5FD_t *)file;
 
 done:
@@ -1007,8 +1024,10 @@ done:
         if (handle != NULL)
             if (FAIL == H5FD_s3comms_s3r_close(handle))
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
-        if (file != NULL)
+        if (file != NULL) {
+            H5MM_xfree(file->cache);
             file = H5FL_FREE(H5FD_ros3_t, file);
+        }
         curl_global_cleanup(); /* early cleanup because open failed */
     }                          /* end if null return value (error) */
 
@@ -1335,6 +1354,7 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
 #endif /* ROS3_STATS */
 
     /* Release the file info */
+    H5MM_xfree(file->cache);
     file = H5FL_FREE(H5FD_ros3_t, file);
 
 done:
@@ -1666,41 +1686,50 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     fprintf(stdout, "H5FD__ros3_read() called.\n");
 #endif
 
-    assert(file != NULL);
-    assert(file->s3r_handle != NULL);
-    assert(buf != NULL);
+    assert(file);
+    assert(file->cache);
+    assert(file->s3r_handle);
+    assert(buf);
 
     filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
 
     if ((addr > filesize) || ((addr + size) > filesize))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address");
 
-    if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) == FAIL)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
+    /* Copy from the cache when accessing the first N bytes of the file.
+     * Saves network I/O operations when opening files.
+     */
+    if (addr + size < file->cache_size) {
+        memcpy(buf, file->cache + addr, size);
+    }
+    else {
+        if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) == FAIL)
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #if ROS3_STATS
 
-    /* Find which "bin" this read fits in. Can be "overflow" bin.  */
-    for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++)
-        if ((unsigned long long)size < ros3_stats_boundaries[bin_i])
-            break;
-    bin = (type == H5FD_MEM_DRAW) ? &file->raw[bin_i] : &file->meta[bin_i];
+        /* Find which "bin" this read fits in. Can be "overflow" bin.  */
+        for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++)
+            if ((unsigned long long)size < ros3_stats_boundaries[bin_i])
+                break;
+        bin = (type == H5FD_MEM_DRAW) ? &file->raw[bin_i] : &file->meta[bin_i];
 
-    /* Store collected stats in appropriate bin */
-    if (bin->count == 0) {
-        bin->min = size;
-        bin->max = size;
-    }
-    else {
-        if (size < bin->min)
+        /* Store collected stats in appropriate bin */
+        if (bin->count == 0) {
             bin->min = size;
-        if (size > bin->max)
             bin->max = size;
-    }
-    bin->count++;
-    bin->bytes += (unsigned long long)size;
+        }
+        else {
+            if (size < bin->min)
+                bin->min = size;
+            if (size > bin->max)
+                bin->max = size;
+        }
+        bin->count++;
+        bin->bytes += (unsigned long long)size;
 
 #endif /* ROS3_STATS */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

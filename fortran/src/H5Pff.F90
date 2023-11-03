@@ -400,15 +400,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5pclose_c(prp_id) &
-            BIND(C,NAME='h5pclose_c')
+       INTEGER(C_INT) FUNCTION H5Pclose(prp_id) &
+            BIND(C,NAME='H5Pclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-       END FUNCTION h5pclose_c
+         INTEGER(HID_T), VALUE :: prp_id
+       END FUNCTION H5Pclose
     END INTERFACE
 
-    hdferr = h5pclose_c(prp_id)
+    hdferr = INT(H5Pclose(prp_id))
   END SUBROUTINE h5pclose_f
 
 !>
@@ -5005,31 +5006,32 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER         , INTENT(OUT) :: hdferr
     TYPE(C_PTR)     , OPTIONAL, INTENT(IN) :: create_data, copy_data, close_data
     TYPE(C_FUNPTR)  , OPTIONAL, INTENT(IN) :: create, copy, close
-    INTEGER :: name_len
-    TYPE(C_PTR) :: create_data_default, copy_data_default, close_data_default
+    TYPE(C_PTR)    :: create_data_default, copy_data_default, close_data_default
     TYPE(C_FUNPTR) :: create_default, copy_default, close_default
-    INTERFACE
-       INTEGER FUNCTION h5pcreate_class_c(parent, name, name_len, class, &
-            create, create_data, copy, copy_data, close, close_data) &
-            BIND(C, NAME='h5pcreate_class_c')
-         IMPORT :: c_char, c_ptr, c_funptr
-         IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN) :: parent
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER, INTENT(IN)         :: name_len
-         INTEGER(HID_T), INTENT(OUT) :: class
-         TYPE(C_PTR), VALUE :: create_data, copy_data, close_data
-         TYPE(C_FUNPTR), VALUE :: create, copy, close
-       END FUNCTION h5pcreate_class_c
-    END INTERFACE
-    name_len = LEN(name)
 
-    create_default = c_null_funptr     !fix:scot
-    create_data_default = c_null_ptr
-    copy_default = c_null_funptr    !fix:scot
-    copy_data_default = c_null_ptr
-    close_default = c_null_funptr   !fix:scot
-    close_data_default = c_null_ptr
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Pcreate_class(parent, name, &
+            create, create_data, copy, copy_data, close, close_data) &
+            BIND(C, NAME='H5Pcreate_class')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
+         IMPORT :: HID_T
+         INTEGER(HID_T), VALUE :: parent
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR), VALUE    :: create_data, copy_data, close_data
+         TYPE(C_FUNPTR), VALUE  :: create, copy, close
+       END FUNCTION H5Pcreate_class
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    create_default = C_NULL_FUNPTR
+    create_data_default = C_NULL_PTR
+    copy_default = C_NULL_FUNPTR
+    copy_data_default = C_NULL_PTR
+    close_default = C_NULL_FUNPTR
+    close_data_default = C_NULL_PTR
 
     IF(PRESENT(create)) create_default = create
     IF(PRESENT(create_data)) create_data_default = create_data
@@ -5038,10 +5040,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IF(PRESENT(close)) close_default = close
     IF(PRESENT(close_data)) close_data_default = close_data
 
-    hdferr = h5pcreate_class_c(parent, name , name_len, class, &
+    class = H5Pcreate_class(parent, c_name, &
          create_default, create_data_default, &
          copy_default, copy_data_default, &
          close_default, close_data_default)
+
+    hdferr = 0
+    IF(class.LT.0) hdferr = -1
 
   END SUBROUTINE h5pcreate_class_f
 
@@ -6405,7 +6410,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !! \brief Gets the file space handling strategy and persisting free-space values for a file creation property list.
 !!
 !! \param plist_id  File creation property list identifier
-!! \param strategy  The file space handling strategy to be used.
+!! \param strategy  The file space handling strategy to be used
 !! \param persist   Indicate whether free space should be persistent or not
 !! \param threshold The free-space section size threshold value
 !! \param hdferr    \fortran_error
@@ -6507,6 +6512,42 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     hdferr = INT(h5pget_file_space_page_size(prp_id, fsp_size))
 
   END SUBROUTINE h5pget_file_space_page_size_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+!!        during the last I/O call.
+!!
+!! \param plist_id                 File creation property list identifier
+!! \param actual_selection_io_mode A bitwise set value indicating the type(s) of I/O performed
+!! \param hdferr                   \fortran_error
+!!
+!! See C API: @ref H5Pget_actual_selection_io_mode()
+!!
+  SUBROUTINE h5pget_actual_selection_io_mode_f(plist_id, actual_selection_io_mode, hdferr)
+
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: plist_id
+    INTEGER       , INTENT(OUT) :: actual_selection_io_mode
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT32_T) :: c_actual_selection_io_mode
+
+    INTERFACE
+        INTEGER(C_INT) FUNCTION H5Pget_actual_selection_io_mode(plist_id, actual_selection_io_mode) &
+             BIND(C, NAME='H5Pget_actual_selection_io_mode')
+          IMPORT :: HID_T, C_INT32_T, C_INT
+          IMPLICIT NONE
+          INTEGER(HID_T), VALUE :: plist_id
+          INTEGER(C_INT32_T)    :: actual_selection_io_mode
+        END FUNCTION H5Pget_actual_selection_io_mode
+     END INTERFACE
+
+     hdferr = INT(H5Pget_actual_selection_io_mode(plist_id, c_actual_selection_io_mode))
+
+     actual_selection_io_mode = INT(c_actual_selection_io_mode)
+
+   END SUBROUTINE h5pget_actual_selection_io_mode_f
 
 END MODULE H5P
 

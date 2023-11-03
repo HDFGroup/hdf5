@@ -906,7 +906,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
             /* copy over each hint */
             for (i = 0; i < nkeys; i++) {
-                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL];
+                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL + 1];
                 int  valuelen, flag;
 
                 /* retrieve the nth hint */
@@ -916,7 +916,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
                 if (MPI_SUCCESS != (mpi_code = MPI_Info_get_valuelen(info_used, key, &valuelen, &flag)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Info_get_valuelen failed", mpi_code)
                 /* retrieve the value of nth hint */
-                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen + 1, value, &flag)))
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen, value, &flag)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Info_get failed", mpi_code)
 
                 /* copy the hint into info */
@@ -3795,6 +3795,7 @@ done:
  *              At present, the supported op codes are:
  *
  *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL_GET_MPI_INFO_OPCODE
  *                  H5FD_CTL_GET_MPI_RANK_OPCODE
  *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
  *                  H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE
@@ -3825,6 +3826,12 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
             assert(output);
             assert(*output);
             **((MPI_Comm **)output) = file->comm;
+            break;
+
+        case H5FD_CTL_GET_MPI_INFO_OPCODE:
+            assert(output);
+            assert(*output);
+            **((MPI_Info **)output) = file->info;
             break;
 
         case H5FD_CTL_GET_MPI_RANK_OPCODE:

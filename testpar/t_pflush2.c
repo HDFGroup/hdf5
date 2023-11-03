@@ -20,7 +20,8 @@
 
 #include "h5test.h"
 
-static const char *FILENAME[] = {"flush", "noflush", NULL};
+static const char *FLUSH_FILENAME[]   = {"flush", NULL};
+static const char *NOFLUSH_FILENAME[] = {"noflush", NULL};
 
 static int *data_g = NULL;
 
@@ -173,7 +174,7 @@ main(int argc, char *argv[])
         goto error;
 
     /* Check the case where the file was flushed */
-    h5_fixname(FILENAME[0], fapl_id1, name, sizeof(name));
+    h5_fixname(FLUSH_FILENAME[0], fapl_id1, name, sizeof(name));
     if (check_test_file(name, sizeof(name), fapl_id1)) {
         H5_FAILED();
         goto error;
@@ -190,7 +191,7 @@ main(int argc, char *argv[])
     H5Eget_auto2(H5E_DEFAULT, &func, NULL);
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-    h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
+    h5_fixname(NOFLUSH_FILENAME[0], fapl_id2, name, sizeof(name));
     if (check_test_file(name, sizeof(name), fapl_id2)) {
         if (mpi_rank == 0)
             PASSED();
@@ -202,8 +203,8 @@ main(int argc, char *argv[])
 
     H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
-    h5_clean_files(&FILENAME[0], fapl_id1);
-    h5_clean_files(&FILENAME[1], fapl_id2);
+    h5_clean_files(FLUSH_FILENAME, fapl_id1);
+    h5_clean_files(NOFLUSH_FILENAME, fapl_id2);
 
     if (data_g) {
         free(data_g);
