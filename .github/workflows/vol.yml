@@ -1,0 +1,45 @@
+name: hdf5 VOL connectors CI
+
+# Run VOL connector CI daily at 06:00 CDT (11:00 UTC)
+on:
+  workflow_dispatch:
+  # Only for now
+  push:
+  # Only for now
+  # Not yet
+  #schedule:
+  #  - cron: "0 11 * * *"
+  # Not yet
+
+permissions:
+  contents: read
+
+jobs:
+  # Build and test individual VOL connectors by using HDF5's
+  # CMake FetchContent functionality. 
+  #fetchcontent_hdf5_vol_daos:
+  #  uses: ./.github/workflows/vol_daos.yml
+
+  #fetchcontent_hdf5_vol_rest:
+  #  uses: ./.github/workflows/vol_rest.yml
+
+  fetchcontent_hdf5_vol_ext_passthru:
+    uses: ./.github/workflows/vol_ext_passthru.yml
+    with:
+      build_mode: "Release"
+
+  #fetchcontent_hdf5_vol_async:
+  #  uses: ./.github/workflows/vol_async.yml
+
+  #fetchcontent_hdf5_vol_cache:
+  #  uses: ./.github/workflows/vol_cache.yml
+
+  #fetchcontent_hdf5_vol_adios2:
+  #  uses: ./.github/workflows/vol_adios2.yml
+
+  #fetchcontent_hdf5_vol_log:
+  #  uses: ./.github/workflows/vol_log.yml
+
+  # Build and install HDF5 and test individual VOL connectors
+  # against the installed API test executables
+  

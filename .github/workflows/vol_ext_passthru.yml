@@ -1,0 +1,75 @@
+name: Test HDF5 external pass-through VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    name: Test HDF5 external passthrough VOL connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install ninja-build automake autoconf libtool libtool-bin libopenmpi-dev
+
+      # TODO
+      #- name: Checkout HDF5
+      #  uses: actions/checkout@v4
+      #  with:
+      #    repository: HDFGroup/hdf5
+      #    path: hdf5
+      # TODO
+
+      # TODO
+      - name: Checkout HDF5
+        uses: actions/checkout@v4
+        with:
+          repository: jhendersonHDF/hdf5
+          path: hdf5
+          ref: api_tests_dev
+      # TODO
+
+      - name: Checkout vol-external-passthrough
+        uses: actions/checkout@v4
+        with:
+          repository: hpc-io/vol-external-passthrough
+          path: vol-external-passthrough
+
+      - name: Configure HDF5 with external passthrough VOL connector
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_VOL_ALLOW_EXTERNAL:STRING="GIT" \
+            -DHDF5_VOL_URL01:STRING="https://github.com/hpc-io/vol-external-passthrough.git" \
+            -DHDF5_VOL_VOL-EXTERNAL-PASSTHROUGH_BRANCH:STRING="develop" \
+            -DHDF5_VOL_VOL-EXTERNAL-PASSTHROUGH_NAME:STRING="pass_through_ext under_vol=0\;under_info={}\;" \
+            -DHDF5_VOL_VOL-EXTERNAL-PASSTHROUGH_TEST_PARALLEL:BOOL=ON \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build HDF5 and external passthrough VOL connector
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+
+      - name: Test HDF5 external passthrough VOL connector
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-external-passthrough" .
