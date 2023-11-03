@@ -640,6 +640,7 @@ H5_DLL herr_t H5F_eoa_dirty(H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL int      H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
+H5_DLL MPI_Info H5F_mpi_get_info(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
