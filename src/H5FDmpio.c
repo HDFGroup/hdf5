@@ -1674,8 +1674,9 @@ done:
  */
 static herr_t
 H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
-                              H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[], uint32_t *s_sizes_len,
-                              H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted, MPI_Offset *mpi_off,
+                              H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[],
+                              uint32_t *s_sizes_len, H5_flexible_const_ptr_t *s_bufs[],
+                              bool *vector_was_sorted, MPI_Offset *mpi_off,
                               H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
                               bool *buf_type_created, MPI_Datatype *file_type, bool *file_type_created,
                               char *unused)
@@ -2477,13 +2478,15 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
-                                          &s_addrs, &s_sizes, &s_sizes_len, (H5_flexible_const_ptr_t **)&s_bufs,
-                                          &vector_was_sorted, &mpi_off,
+                                          &s_addrs, &s_sizes, &s_sizes_len,
+                                          (H5_flexible_const_ptr_t **)&s_bufs, &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
-        /* Compute max address written to.  Note s_sizes is indexed according to the length of that array as reported by H5FD__mpio_vector_build_types(), which may be shorter if using the compressed arrays feature. */
+        /* Compute max address written to.  Note s_sizes is indexed according to the length of that array as
+         * reported by H5FD__mpio_vector_build_types(), which may be shorter if using the compressed arrays
+         * feature. */
         if (count > 0)
             max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[s_sizes_len - 1]);
 
