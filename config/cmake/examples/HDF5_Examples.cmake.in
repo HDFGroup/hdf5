@@ -29,6 +29,7 @@ set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 #INSTALLDIR - HDF5 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5Examples
+#CTEST_TOOLCHAIN_FILE - name and path in source of toolchain file
 if(DEFINED CTEST_SCRIPT_ARG)
   # transform ctest script arguments of the form
   # script.ctest,var1=value1,var2=value2
