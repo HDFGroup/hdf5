@@ -147,15 +147,15 @@ tar2zip()
 #    Note: do this in a temporary directory to avoid changing
 #    the original source directory which may be around.
 # 2. add build-unix.sh script.
-# 3. add LIBAEC.tar.gz, ZLib.tar.gz and cmake files to top level directory.
+# 3. add libaec-1.0.6.tar.gz, zlib-1.3.tar.gz and cmake files to top level directory.
 # 4. create gzipped tar file with these contents:
 #        build-unix.sh          script
 #        hdf5-<version>         source code directory extracted from tar file
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        libaec-1.0.6.tar.gz    copied from /mnt/scr1/pre-release/hdf5/CMake
+#        zlib-1.3.tar.gz        copied from /mnt/scr1/pre-release/hdf5/CMake
 
 
 # Parameters:
@@ -167,8 +167,8 @@ tar2zip()
 #
  # need function to create another temporary directory, extract the
             # $tmpdir/$HDF5_VERS.tar into it, create build-VS*.bat files,
-            # add CTestScript.cmake, HDF5config.cmake, LIBAEC.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then zip it.
+            # add CTestScript.cmake, HDF5config.cmake, libaec-1.0.6.tar.gz
+            # zlib-1.3.tar.gz, HDF5 examples, and then zip it.
 tar2cmakezip()
 {
     if [ $# -ne 3 ]; then
@@ -202,9 +202,9 @@ tar2cmakezip()
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2022 -C Release -V -O hdf5.log" > build-VS2022-32.bat; chmod 755 build-VS2022-32.bat)
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -V -O hdf5.log" > build-VS2022-64.bat; chmod 755 build-VS2022-64.bat)
 
-    # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
+    # step 3: add libaec-1.0.6.tar.gz, zlib-1.3.tar.gz and cmake files
+    cp /mnt/scr1/pre-release/hdf5/CMake/libaec-1.0.6.tar.gz $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/zlib-1.3.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.zip $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
@@ -245,15 +245,15 @@ tar2cmakezip()
 #    Note: do this in a temporary directory to avoid changing
 #    the original source directory which may be around.
 # 2. add build-unix.sh script.
-# 3. add LIBAEC.tar.gz, ZLib.tar.gz and cmake files to top level directory.
+# 3. add libaec-1.0.6.tar.gz, zlib-1.3.tar.gz and cmake files to top level directory.
 # 4. create gzipped tar file with these contents:
 #        build-unix.sh          script
 #        hdf5-<version>         source code directory extracted from tar file
 #        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
 #        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
-#        LIBAEC.tar.gz          copied from /mnt/scr1/pre-release/hdf5/CMake
-#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        libaec-1.0.6.tar.gz    copied from /mnt/scr1/pre-release/hdf5/CMake
+#        zlib-1.3.tar.gz        copied from /mnt/scr1/pre-release/hdf5/CMake
 
 
 # Parameters:
@@ -265,8 +265,8 @@ tar2cmakezip()
 #
  # need function to create another temporary directory, extract the
             # $tmpdir/$HDF5_VERS.tar into it, create build-unix.sh,
-            # add CTestScript.cmake, HDF5config.cmake, LIBAEC.tar.gz
-            # ZLib.tar.gz, HDF5 examples, and then tar.gz it.
+            # add CTestScript.cmake, HDF5config.cmake, libaec-1.0.6.tar.gz
+            # zlib-1.3.tar.gz, HDF5 examples, and then tar.gz it.
 tar2cmaketgz()
 {
     if [ $# -ne 3 ]; then
@@ -294,9 +294,9 @@ tar2cmaketgz()
     # step 2: add build-unix.sh script
     (cd $cmgztmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
 
-    # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
-    cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
+    # step 3: add libaec-1.0.6.tar.gz, zlib-1.3.tar.gz and cmake files
+    cp /mnt/scr1/pre-release/hdf5/CMake/libaec-1.0.6.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/zlib-1.3.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5-examples-master.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-master.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
