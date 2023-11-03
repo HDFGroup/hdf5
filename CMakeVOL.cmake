@@ -26,14 +26,10 @@ function (get_generated_cmake_targets out_var dir)
   set (${out_var} "${dir_targets}" PARENT_SCOPE)
 endfunction ()
 
-# For now, only support building of external VOL connectors with FetchContent
-option (HDF5_VOL_ALLOW_EXTERNAL "Allow building of external HDF5 VOL connectors with FetchContent" "NO")
+set (HDF5_VOL_ALLOW_EXTERNAL "NO" CACHE STRING "Allow building of external HDF5 VOL connectors with FetchContent")
+set_property (CACHE HDF5_VOL_ALLOW_EXTERNAL PROPERTY STRINGS NO GIT LOCAL_DIR)
 mark_as_advanced (HDF5_VOL_ALLOW_EXTERNAL)
-if (HDF5_VOL_ALLOW_EXTERNAL)
-  if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "NO" OR (NOT HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" AND NOT HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR"))
-    message (FATAL_ERROR "HDF5_VOL_ALLOW_EXTERNAL must be set to 'GIT' or 'LOCAL_DIR' to allow building of external HDF5 VOL connectors")
-  endif()
-
+if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
   # For compatibility, set some variables that projects would
   # typically look for after calling find_package(HDF5)
   set (HDF5_FOUND 1)
