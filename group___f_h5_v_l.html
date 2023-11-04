@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.61982b6</span>
+   &#160;<span id="projectnumber">1.15.0.6a3c859</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -143,6 +143,12 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga72912d28971789e5f6264129dfcfc395"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_v_l.html#ga72912d28971789e5f6264129dfcfc395">h5vlunregister_connector_f</a> (plugin_id, hdferr)</td></tr>
 <tr class="memdesc:ga72912d28971789e5f6264129dfcfc395"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a VOL connector ID from the library.  <a href="group___f_h5_v_l.html#ga72912d28971789e5f6264129dfcfc395">More...</a><br /></td></tr>
 <tr class="separator:ga72912d28971789e5f6264129dfcfc395"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga46e6e7ea94f1f2af8bf89802a8834eea"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_v_l.html#ga46e6e7ea94f1f2af8bf89802a8834eea">h5vlnative_addr_to_token_f</a> (loc_id, addr, token, hdferr)</td></tr>
+<tr class="memdesc:ga46e6e7ea94f1f2af8bf89802a8834eea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the token representation from an address for a location identifier.  <a href="group___f_h5_v_l.html#ga46e6e7ea94f1f2af8bf89802a8834eea">More...</a><br /></td></tr>
+<tr class="separator:ga46e6e7ea94f1f2af8bf89802a8834eea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga78c70182a1e00d734026daa176759c6a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_v_l.html#ga78c70182a1e00d734026daa176759c6a">h5vlnative_token_to_addr_f</a> (loc_id, token, addr, hdferr)</td></tr>
+<tr class="memdesc:ga78c70182a1e00d734026daa176759c6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the object address from a token representation for a location identifier.  <a href="group___f_h5_v_l.html#ga78c70182a1e00d734026daa176759c6a">More...</a><br /></td></tr>
+<tr class="separator:ga78c70182a1e00d734026daa176759c6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -607,6 +613,110 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <p>See C API: <a class="el" href="group___h5_v_l.html#ga83ba8986ed68f67c41b492dfd273804b">H5VLis_connector_registered_by_value()</a> </p>
+
+</div>
+</div>
+<a id="ga46e6e7ea94f1f2af8bf89802a8834eea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga46e6e7ea94f1f2af8bf89802a8834eea">&#9670;&nbsp;</a></span>h5vlnative_addr_to_token_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5vl::h5vlnative_addr_to_token_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>loc_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(<a class="el" href="structh5global_1_1h5o__token__t__f.html">h5o_token_t_f</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>token</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the token representation from an address for a location identifier. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loc_id</td><td>Specifies a location identifier </td></tr>
+    <tr><td class="paramname">addr</td><td>Address for object in the file </td></tr>
+    <tr><td class="paramname">token</td><td>Token representing the object in the file </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_v_l_n_a_t.html#ga09ca3912386a8c8c66edbcbbe2c10c1f">H5VLnative_addr_to_token()</a> </p>
+
+</div>
+</div>
+<a id="ga78c70182a1e00d734026daa176759c6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga78c70182a1e00d734026daa176759c6a">&#9670;&nbsp;</a></span>h5vlnative_token_to_addr_f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine h5vl::h5vlnative_token_to_addr_f </td>
+          <td>(</td>
+          <td class="paramtype">integer(<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>loc_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">type(<a class="el" href="structh5global_1_1h5o__token__t__f.html">h5o_token_t_f</a>), intent(in)&#160;</td>
+          <td class="paramname"><em>token</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(<a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>), intent(out)&#160;</td>
+          <td class="paramname"><em>addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer, intent(out)&#160;</td>
+          <td class="paramname"><em>hdferr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the object address from a token representation for a location identifier. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">loc_id</td><td>Specifies a location identifier </td></tr>
+    <tr><td class="paramname">token</td><td>Token representing the object in the file </td></tr>
+    <tr><td class="paramname">addr</td><td>Address for object in the file </td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See C API: <a class="el" href="group___h5_v_l_n_a_t.html#ga7136f48f79f4b88d87002d5c218ceb40">H5VLnative_token_to_addr()</a> </p>
 
 </div>
 </div>
