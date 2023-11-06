@@ -21,13 +21,19 @@ set (testphdf5_SOURCES
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_oflush.c
 )
 
+#################################################################################
+# Set private compile-time definitions added when
+# compiling test source files
+#################################################################################
+set (HDF5_TESTPAR_COMPILE_DEFS_PRIVATE
+    "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
+    "$<$<BOOL:HDF5_TEST_API>:H5_HAVE_TEST_API>"
+)
+
 #-- Adding test for testhdf5
 add_executable (testphdf5 ${testphdf5_SOURCES})
 target_compile_options(testphdf5 PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_compile_definitions(testphdf5
-    PRIVATE
-        "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
-)
+target_compile_definitions(testphdf5 PRIVATE "${HDF5_TESTPAR_COMPILE_DEFS_PRIVATE}")
 target_include_directories (testphdf5
     PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
@@ -54,10 +60,7 @@ endif ()
 macro (ADD_H5P_EXE file)
   add_executable (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
   target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_compile_definitions(${file}
-      PRIVATE
-          "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
-  )
+  target_compile_definitions(${file} PRIVATE "${HDF5_TESTPAR_COMPILE_DEFS_PRIVATE}")
   target_include_directories (${file}
       PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
   )
