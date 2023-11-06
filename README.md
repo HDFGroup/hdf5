@@ -1,5 +1,6 @@
 HDF5 version 1.12.3 released on 2023-11-06
 
+
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
 [![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
