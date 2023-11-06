@@ -33,8 +33,10 @@ jobs:
     with:
       build_mode: "Release"
 
-  #hdf5_vol_cache_fetchcontent:
-  #  uses: ./.github/workflows/vol_cache.yml
+  hdf5_vol_cache_fetchcontent:
+    uses: ./.github/workflows/vol_cache.yml
+    with:
+      build_mode: "Release"
 
   #hdf5_vol_adios2_fetchcontent:
   #  uses: ./.github/workflows/vol_adios2.yml

@@ -124,6 +124,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
         FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
         GIT_REPOSITORY "${HDF5_VOL_SOURCE}"
         GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
+        FIND_PACKAGE_ARGS NAMES ${hdf5_vol_name_lower}
         )
       elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
         FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
@@ -155,6 +156,16 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
           file (READ "${hdf5_vol_${hdf5_vol_name_lower}_SOURCE_DIR}/src/CMakeLists.txt" vol_cmake_contents)
           string (REGEX REPLACE "[ \t]*find_package[ \t]*\\([ \t]*HDF5[^\r\n\\)]*\\)[ \t]*[\r\n]+" "" vol_cmake_contents "${vol_cmake_contents}")
           file (WRITE "${hdf5_vol_${hdf5_vol_name_lower}_SOURCE_DIR}/src/CMakeLists.txt" "${vol_cmake_contents}")
+        endif ()
+
+        # Work around issue with Cache VOL's CMake code related
+        # to its Async VOL dependency
+        if ("${hdf5_vol_name_lower}" MATCHES "vol-cache")
+          if (EXISTS "${hdf5_vol_${hdf5_vol_name_lower}_SOURCE_DIR}/CMakeLists.txt")
+            file (READ "${hdf5_vol_${hdf5_vol_name_lower}_SOURCE_DIR}/CMakeLists.txt" vol_cmake_contents)
+            string (REGEX REPLACE "[ \t]*find_package[ \t]*\\([ \t]*ASYNC[^\r\n\\)]*\\)[ \t]*[\r\n]+" "find_package\(vol-async\)\n" vol_cmake_contents "${vol_cmake_contents}")
+            file (WRITE "${hdf5_vol_${hdf5_vol_name_lower}_SOURCE_DIR}/CMakeLists.txt" "${vol_cmake_contents}")
+          endif ()
         endif ()
 
         add_subdirectory (${hdf5_vol_${hdf5_vol_name_lower}_SOURCE_DIR} ${hdf5_vol_${hdf5_vol_name_lower}_BINARY_DIR})

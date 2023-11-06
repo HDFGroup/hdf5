@@ -45,7 +45,7 @@ jobs:
           path: vol-async
 
       - name: Checkout Argobots
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: pmodels/argobots
           path: abt
@@ -69,6 +69,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DALLOW_UNSUPPORTED:BOOL=ON \
