@@ -9880,6 +9880,7 @@ external_set_elink_cb(hid_t fapl, bool new_format)
     set_elink_cb_t       op_data, *op_data_p;
     H5L_elink_traverse_t cb;
     char                 filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE];
+    bool                 driver_is_parallel;
     unsigned             flags;
 
     if (new_format)
@@ -9890,16 +9891,21 @@ external_set_elink_cb(hid_t fapl, bool new_format)
     /* Build user data for callback */
     op_data.parent_file = filename1;
     op_data.target_file = filename2;
+
+    /* Check if using a parallel file driver */
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
+        TEST_ERROR;
+
+    base_driver = H5Pget_driver(fapl);
+
     /* Core file driver has issues when used as the member file driver for a family file */
     /* Family file driver cannot be used with family or multi drivers for member files */
     /* Also disable parallel member drivers, because H5F_HAS_FEATURE(H5FD_FEAT_HAS_MPI)
        would report false, causing problems */
-    base_driver = H5Pget_driver(fapl);
-    op_data.base_fapl =
-        (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI || base_driver == H5FD_MPIO ||
-         base_driver == H5FD_CORE || base_driver == H5FD_DIRECT || base_driver == H5FD_SUBFILING)
-            ? H5P_DEFAULT
-            : fapl;
+    op_data.base_fapl = fapl;
+    if (base_driver == H5FD_CORE || base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI ||
+        base_driver == H5FD_DIRECT || driver_is_parallel)
+        op_data.base_fapl = H5P_DEFAULT;
     op_data.fam_size = ELINK_CB_FAM_SIZE;
     op_data.code     = 0;
 
@@ -18434,14 +18440,12 @@ link_info_by_idx_old(hid_t fapl)
 {
     hid_t       file_id  = H5I_INVALID_HID;                              /* File ID */
     hid_t       group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
-    H5F_t      *f = NULL;
-    unsigned    hard_link;               /* Create hard or soft link? */
-    H5L_info2_t linfo;                   /* Link info struct */
-    char        objname[NAME_BUF_SIZE];  /* Object name */
-    char        valname[NAME_BUF_SIZE];  /* Link value name */
-    char        filename[NAME_BUF_SIZE]; /* File name */
+    unsigned    hard_link;                                               /* Create hard or soft link? */
+    H5L_info2_t linfo;                                                   /* Link info struct */
+    char        objname[NAME_BUF_SIZE];                                  /* Object name */
+    char        valname[NAME_BUF_SIZE];                                  /* Link value name */
+    char        filename[NAME_BUF_SIZE];                                 /* File name */
     H5O_token_t objtoken[CORDER_NLINKS]; /* Tokens (Addresses) of the objects created */
-    void       *vol_obj_file = NULL;     /* Object of file_id */
     char        tmpname[NAME_BUF_SIZE];  /* Temporary link name */
     char        tmpval[NAME_BUF_SIZE];   /* Temporary link value */
     unsigned    u;                       /* Local index variable */
@@ -18459,14 +18463,6 @@ link_info_by_idx_old(hid_t fapl)
         /* Create file */
         h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
         if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            TEST_ERROR;
-
-        /* Need the file struct to address encoding */
-        /* Retrieve VOL object */
-        if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
-            TEST_ERROR;
-        /* Retrieve file from VOL object */
-        if (NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
             TEST_ERROR;
 
         /* Create group to operate on */
@@ -19066,12 +19062,10 @@ delete_by_idx_old(hid_t fapl)
 {
     hid_t           file_id  = H5I_INVALID_HID;                              /* File ID */
     hid_t           group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
-    H5F_t          *f = NULL;
-    H5L_info2_t     linfo;                   /* Link info struct */
-    H5_iter_order_t order;                   /* Order within in the index */
-    void           *vol_obj_file = NULL;     /* Object of file_id */
-    char            objname[NAME_BUF_SIZE];  /* Object name */
-    char            filename[NAME_BUF_SIZE]; /* File name */
+    H5L_info2_t     linfo;                                                   /* Link info struct */
+    H5_iter_order_t order;                                                   /* Order within in the index */
+    char            objname[NAME_BUF_SIZE];                                  /* Object name */
+    char            filename[NAME_BUF_SIZE];                                 /* File name */
     H5O_token_t     objtoken[CORDER_NLINKS]; /* Tokens (Addresses) of the objects created */
     char            tmpname[NAME_BUF_SIZE];  /* Temporary link name */
     unsigned        u;                       /* Local index variable */
@@ -19089,14 +19083,6 @@ delete_by_idx_old(hid_t fapl)
         /* Create file */
         h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
         if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            TEST_ERROR;
-
-        /* Need the file struct to address encoding */
-        /* Retrieve VOL object */
-        if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
-            TEST_ERROR;
-        /* Retrieve file from VOL object */
-        if (NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
             TEST_ERROR;
 
         /* Create group to operate on */

@@ -753,6 +753,9 @@ CONTAINS
     hdferr = 0
     IF(link_exists_c.LT.0_C_INT) hdferr = -1
 
+    hdferr = 0
+    IF(link_exists_c.LT.0) hdferr = -1
+
   END SUBROUTINE h5lexists_f
 
 !>

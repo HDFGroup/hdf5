@@ -152,13 +152,13 @@ To use the compact storage layout, call: #H5Pset_layout
 \li Create a dataset with the modified property list. (See #H5Dcreate)
 \li Close the property list. (See #H5Pclose)
 For example code, see the \ref HDF5Examples page.
-Specifically look at the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>.
+Specifically look at the \ref ExAPI.
 There are examples for different languages.
 
 The C example to create a chunked dataset is:
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
 The C example to create a compact dataset is:
-<a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
+<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
 
 \section secLBDsetLayoutChange Changing the Layout after Dataset Creation
 The dataset layout is a Dataset Creation Property List. This means that once the dataset has been
@@ -290,7 +290,7 @@ is met, at a certain point in the future.)
 
 \subsection subsecLBContentsProgUsing Using #H5Literate, #H5Lvisit and #H5Ovisit
 For example code, see the \ref HDF5Examples page.
-Specifically look at the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>.
+Specifically look at the \ref ExAPI.
 There are examples for different languages, where examples of using #H5Literate and #H5Ovisit/#H5Lvisit are included.
 
 The h5ex_g_traverse example traverses a file using H5Literate:

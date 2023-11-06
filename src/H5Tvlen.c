@@ -503,7 +503,7 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     if (seq_len) {
         size_t len = seq_len * base_size; /* Sequence size */
 
-        /* Use the user's memory allocation routine is one is defined */
+        /* Use the user's memory allocation routine if one is defined */
         if (vl_alloc_info->alloc_func != NULL) {
             if (NULL == (vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,

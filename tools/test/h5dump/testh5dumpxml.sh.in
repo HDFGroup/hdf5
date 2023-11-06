@@ -49,7 +49,7 @@ SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5DUMP_OUTFILES="$SRC_TOOLS/test/h5dump/expected"
 
 TEST_P_DIR=./testfiles
-TESTDIR=./testfiles/xml
+TESTDIR=./tmpxml
 test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir -p $TESTDIR
 

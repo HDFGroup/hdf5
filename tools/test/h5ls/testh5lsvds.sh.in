@@ -51,7 +51,7 @@ SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5LS_OUTFILES="$SRC_TOOLS/test/h5ls/expected"
 
 TEST_P_DIR=./testfiles
-TESTDIR=./testfiles/vds
+TESTDIR=./tmpvds
 test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir $TESTDIR
 
@@ -145,7 +145,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=$SRC_H5LS_TESTFILES/vds
+    SDIR=$SRC_H5LS_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then

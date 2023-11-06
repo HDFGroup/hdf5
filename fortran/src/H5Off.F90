@@ -110,12 +110,6 @@ MODULE H5O
      TYPE(mesg_t)   :: mesg
   END TYPE c_hdr_t
 
-!> @brief Extra metadata storage for obj & attributes
-  TYPE, BIND(C) :: H5_ih_info_t
-     INTEGER(hsize_t) :: index_size !<  btree and/or list
-     INTEGER(hsize_t) :: heap_size  !<  heap
-  END TYPE H5_ih_info_t
-
 !> @brief meta_size_t derived type
   TYPE, BIND(C) :: meta_size_t
      TYPE(H5_ih_info_t) :: obj  !<  v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
@@ -1269,7 +1263,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_idx_c(loc_id, group_name, namelen, &
             index_field, order, n, lapl_id_default, object_info, fields) BIND(C, NAME='h5oget_info_by_idx_c')
-         IMPORT :: c_char, c_ptr, c_funptr
+         IMPORT :: c_char, c_ptr
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name

@@ -92,10 +92,12 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
     /*
      * call H5TBmake_table function.
      */
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
     if (H5TBmake_table(c_name1, (hid_t)*loc_id, c_name, c_nfields, (hsize_t)*nrecords, (size_t)*type_size,
                        (const char **)c_field_names, c_field_offset, c_field_types, (hsize_t)*chunk_size,
                        NULL, *compress, NULL) < 0)
         HGOTO_DONE(FAIL);
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 done:
     if (c_name)
@@ -193,10 +195,12 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
     /*
      * call H5TBmake_table function.
      */
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
     if (H5TBmake_table(c_name1, (hid_t)*loc_id, c_name, c_nfields, (hsize_t)*nrecords, (size_t)*type_size,
                        (const char **)c_field_names, c_field_offset, c_field_types, (hsize_t)*chunk_size,
                        fill_data, *compress, data) < 0)
         HGOTO_DONE(FAIL);
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 done:
     if (c_name)

@@ -457,7 +457,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     const char *suffix = _suffix;
     size_t      i, j;
     hid_t       driver     = H5I_INVALID_HID;
-    int         isppdriver = 0; /* if the driver is MPI parallel */
+    bool        isppdriver = false; /* if the driver is MPI parallel */
 
     if (!base_name || !fullname || size < 1)
         return NULL;
@@ -516,10 +516,8 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
         }
     }
 
-    /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
-     * could be of value -1 if it is not defined.
-     */
-    isppdriver = ((H5P_DEFAULT != fapl) || driver_env_var) && (H5FD_MPIO == driver);
+    if (h5_using_parallel_driver(fapl, &isppdriver) < 0)
+        return NULL;
 
     /* Check HDF5_NOCLEANUP environment setting.
      * (The #ifdef is needed to prevent compile failure in case MPI is not
@@ -864,22 +862,23 @@ h5_show_hostname(void)
     WSADATA wsaData;
     int     err;
 #endif
+#ifdef H5_HAVE_PARALLEL
+    int mpi_rank, mpi_initialized, mpi_finalized;
+#endif
 
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
-    {
-        int mpi_rank, mpi_initialized, mpi_finalized;
+    MPI_Initialized(&mpi_initialized);
+    MPI_Finalized(&mpi_finalized);
 
-        MPI_Initialized(&mpi_initialized);
-        MPI_Finalized(&mpi_finalized);
-
-        if (mpi_initialized && !mpi_finalized) {
-            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-            printf("MPI-process %d.", mpi_rank);
-        }
-        else
-            printf("thread 0.");
+    if (mpi_initialized && !mpi_finalized) {
+        /* Prevent output here from getting mixed with later output */
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+        printf("MPI-process %d.", mpi_rank);
     }
+    else
+        printf("thread 0.");
 #else
     printf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
@@ -914,6 +913,11 @@ h5_show_hostname(void)
 #endif
 #ifdef H5_HAVE_WIN32_API
     WSACleanup();
+#endif
+#ifdef H5_HAVE_PARALLEL
+    /* Prevent output here from getting mixed with later output */
+    if (mpi_initialized && !mpi_finalized)
+        MPI_Barrier(MPI_COMM_WORLD);
 #endif
 }
 

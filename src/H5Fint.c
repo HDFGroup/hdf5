@@ -410,11 +410,11 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &mpi_comm) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI communicator");
 
-        /* Retrieve and set MPI info object */
-        if (H5P_get(old_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &mpi_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get MPI info object");
+        /* Retrieve and set MPI info */
+        if (MPI_INFO_NULL == (mpi_info = H5F_mpi_get_info(f)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get MPI info");
         if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &mpi_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI info object");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI info");
     }
 #endif /* H5_HAVE_PARALLEL */
     if (H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <
@@ -1968,6 +1968,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum raw data fraction of page buffer");
     } /* end if */
 
+    /* Get the evict on close setting */
+    if (H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value");
+
+#ifdef H5_HAVE_PARALLEL
+    /* Check for evict on close in parallel (currently unsupported) */
+    assert(file->shared);
+    if (H5F_SHARED_HAS_FEATURE(file->shared, H5FD_FEAT_HAS_MPI)) {
+        int mpi_size = H5F_shared_mpi_get_size(file->shared);
+
+        if ((mpi_size > 1) && evict_on_close)
+            HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL,
+                        "evict on close is currently not supported in parallel HDF5");
+    }
+#endif
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -2046,8 +2062,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * or later, verify that the access property list value matches the value
      * in shared file structure.
      */
-    if (H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value");
     if (shared->nrefs == 1)
         shared->evict_on_close = evict_on_close;
     else if (shared->nrefs > 1) {
