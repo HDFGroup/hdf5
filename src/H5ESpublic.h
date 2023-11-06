@@ -32,10 +32,10 @@
  * Asynchronous operation status
  */
 typedef enum H5ES_status_t {
-    H5ES_STATUS_IN_PROGRESS, /**< Operation(s) have not yet completed         */
-    H5ES_STATUS_SUCCEED,     /**< Operation(s) have completed, successfully   */
-    H5ES_STATUS_FAIL         /**< An operation has completed, but failed      */
-    H5ES_STATUS_CANCELED,    /**< Operation(s) has been canceled              */
+    H5ES_STATUS_IN_PROGRESS,  /**< Operation(s) have not yet completed         */
+    H5ES_STATUS_SUCCEED,      /**< Operation(s) have completed, successfully   */
+    H5ES_STATUS_FAIL          /**< An operation has completed, but failed      */
+        H5ES_STATUS_CANCELED, /**< Operation(s) has been canceled              */
 } H5ES_status_t;
 
 /********************/
