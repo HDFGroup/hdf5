@@ -34,8 +34,6 @@
 /* ANY new test needs to have a prototype in testhdf5.h */
 #include "testhdf5.h"
 
-uint64_t vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
-
 int
 main(int argc, char *argv[])
 {
