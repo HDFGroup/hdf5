@@ -461,9 +461,16 @@ H5T__init_native_float_types(void)
 {
     H5T_fpoint_det_t det;
     H5T_t           *dt        = NULL;
+    int              fpe_flags = 0;
     herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+    /* Turn off floating-point exceptions while initializing to avoid
+     * tripping over signalling NaNs while looking at "don't care" bits.
+     */
+    fpe_flags = fegetexcept();
+    fedisableexcept(FE_INVALID);
 
     /* H5T_NATIVE_FLOAT */
 
@@ -564,6 +571,9 @@ H5T__init_native_float_types(void)
     H5T_native_order_g = det.order;
 
 done:
+    /* Restore the original exceptions */
+    feenableexcept(fpe_flags);
+
     if (ret_value < 0) {
         if (dt != NULL) {
             dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
