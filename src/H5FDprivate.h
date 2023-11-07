@@ -214,6 +214,7 @@ H5_DLL herr_t H5FD_get_mpio_atomicity(H5FD_t *file, bool *flag);
 H5_DLL int      H5FD_mpi_get_rank(H5FD_t *file);
 H5_DLL int      H5FD_mpi_get_size(H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(H5FD_t *file);
+H5_DLL MPI_Info H5FD_mpi_get_info(H5FD_t *file);
 H5_DLL herr_t   H5FD_mpi_get_file_sync_required(H5FD_t *file, bool *file_sync_required);
 #endif /* H5_HAVE_PARALLEL */
 

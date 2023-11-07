@@ -335,6 +335,10 @@ New Features
 
     Fortran Library:
     ----------------
+
+    - Added Fortran APIs:
+      h5vlnative_addr_to_token_f and h5vlnative_token_to_address_f
+
     - Fixed an uninitialized error return value for hdferr
       to return the error state of the h5aopen_by_idx_f API.
 

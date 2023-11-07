@@ -69,30 +69,6 @@ done:
     return ret_value;
 }
 
-/****if* H5Pf/h5pclose_c
- * NAME
- *  h5pclose_c
- * PURPOSE
- *  Call H5Pclose to close property lis
- * INPUTS
- *  prp_id - identifier of the property list to be closed
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-
-int_f
-h5pclose_c(hid_t_f *prp_id)
-/******/
-{
-    int_f ret_value = 0;
-
-    if (H5Pclose((hid_t)*prp_id) < 0)
-        ret_value = -1;
-
-    return ret_value;
-}
-
 /****if* H5Pf/h5pcopy_c
  * NAME
  *  h5pcopy_c
@@ -2249,52 +2225,6 @@ h5pget_hyper_vector_size_c(hid_t_f *prp_id, size_t_f *size)
     if (H5Pget_hyper_vector_size(c_prp_id, &c_size) < 0)
         ret_value = -1;
     *size = (size_t_f)c_size;
-    return ret_value;
-}
-
-/****if* H5Pf/h5pcreate_class_c
- * NAME
- *  h5pcreate_class_c
- * PURPOSE
- *  Call H5Pcreate_class ito create a new property class
- * INPUTS
- *  parent - property list class identifier
- *  name   - name of the new class
- *  name_len - length of the "name" buffer
- * OUTPUTS
- *  class - new class identifier
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pcreate_class_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls, H5P_cls_create_func_t create,
-                  void *create_data, H5P_cls_copy_func_t copy, void *copy_data, H5P_cls_close_func_t close,
-                  void *close_data)
-/******/
-{
-    int   ret_value = -1;
-    hid_t c_class;
-    char *c_name;
-
-    c_name = (char *)HD5f2cstring(name, (size_t)*name_len);
-    if (c_name == NULL)
-        goto DONE;
-
-    /*
-     * Call H5Pcreate_class function.
-     */
-    c_class =
-        H5Pcreate_class((hid_t)*parent, c_name, create, create_data, copy, copy_data, close, close_data);
-
-    if (c_class < 0)
-        goto DONE;
-    *cls      = (hid_t_f)c_class;
-    ret_value = 0;
-
-DONE:
-    if (c_name != NULL)
-        free(c_name);
     return ret_value;
 }
 
