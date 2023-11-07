@@ -314,6 +314,7 @@ static herr_t   H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, bool new_unfilt
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_fill_info,
                                          const void *fill_buf, const void *partial_chunk_fill_buf);
+static int    H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Debugging helper routine callback */
@@ -5545,15 +5546,23 @@ static herr_t
 H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_fill_info,
                            const void *fill_buf, const void *partial_chunk_fill_buf)
 {
-    H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
-    bool             have_xfer_mode = false; /* Whether the previous xffer mode has been retrieved */
-    size_t           i;                      /* Local index variable */
-    uint32_t         io_count = 0;
+    MPI_Comm         mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
+    int              mpi_rank = (-1);          /* This process's rank  */
+    int              mpi_size = (-1);          /* MPI Comm size  */
+    int              mpi_code;                 /* MPI return code */
+    size_t           num_blocks;               /* Number of blocks between processes. */
+    size_t           leftover_blocks;          /* Number of leftover blocks to handle */
+    int              blocks;                   /* converted to int for MPI */
+    int              leftover;                 /* converted to int for MPI */
+    H5FD_mpio_xfer_t prev_xfer_mode;          /* Previous data xfer mode */
+    bool             have_xfer_mode = false;  /* Whether the previous xffer mode has been retrieved */
+    size_t           i;                        /* Local index variable */
     haddr_t         *io_addrs = NULL;
     size_t          *io_sizes = NULL;
     const void     **io_wbufs = NULL;
     H5FD_mem_t       io_types[2];
     bool             all_same_block_len = true;
+    bool             need_sort      = false;
     size_t           io_2sizes[2];
     herr_t           ret_value = SUCCEED; /* Return value */
 
@@ -5561,43 +5570,109 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
 
     assert(chunk_fill_info->num_chunks != 0);
 
-    io_count = (uint32_t)chunk_fill_info->num_chunks;
+    /*
+     * If a separate fill buffer is provided for partial chunks, ensure
+     * that the "don't filter partial edge chunks" flag is set.
+     */
+    if (partial_chunk_fill_buf)
+        assert(dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
-    for (i = 1; i < io_count; i++) {
-        if (chunk_fill_info->chunk_info[i].chunk_size != chunk_fill_info->chunk_info[i - 1].chunk_size) {
-            all_same_block_len = false;
-            break;
-        }
+    /* Get the MPI communicator */
+    if (MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(dset->oloc.file)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
+
+    /* Get the MPI rank */
+    if ((mpi_rank = H5F_mpi_get_rank(dset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+
+    /* Get the MPI size */
+    if ((mpi_size = H5F_mpi_get_size(dset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+    /* Distribute evenly the number of blocks between processes. */
+    if (mpi_size == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero");
+
+    num_blocks =
+        (size_t)(chunk_fill_info->num_chunks / (size_t)mpi_size); /* value should be the same on all procs */
+
+    /* After evenly distributing the blocks between processes, are there any
+     * leftover blocks for each individual process (round-robin)?
+     */
+    leftover_blocks = (size_t)(chunk_fill_info->num_chunks % (size_t)mpi_size);
+
+    /* Cast values to types needed by MPI */
+    H5_CHECKED_ASSIGN(blocks, int, num_blocks, size_t);
+    H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
+
+     /* Check if we have any chunks to write on this rank */
+    if (num_blocks > 0 || (leftover  && leftover > mpi_rank)) {
+
+        if (NULL == (io_addrs = H5MM_malloc((size_t)(blocks + 1) * sizeof(*io_addrs))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O addresses vector");
+
+        if (NULL == (io_wbufs = H5MM_malloc((size_t)(blocks + 1) * sizeof(*io_wbufs))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O buffers vector");
+
     }
+
+    /*
+     * Perform initial scan of chunk info list to:
+     *  - make sure that chunk addresses are monotonically non-decreasing
+     *  - check if all blocks have the same length
+     */
+    for (i = 1; i < chunk_fill_info->num_chunks; i++) {
+        if (chunk_fill_info->chunk_info[i].addr < chunk_fill_info->chunk_info[i - 1].addr)
+            need_sort = true;
+
+        if (chunk_fill_info->chunk_info[i].chunk_size != chunk_fill_info->chunk_info[i - 1].chunk_size)
+            all_same_block_len = false;
+    }
+
+    if (need_sort)
+        qsort(chunk_fill_info->chunk_info, chunk_fill_info->num_chunks,
+              sizeof(struct chunk_coll_fill_info), H5D__chunk_cmp_coll_fill_info);
 
     if (all_same_block_len) {
         io_2sizes[0] = chunk_fill_info->chunk_info[0].chunk_size;
         io_2sizes[1] = 0;
     }
     else {
-        if (NULL == (io_sizes = H5MM_malloc(io_count * sizeof(*io_sizes))))
+        if (NULL == (io_sizes = H5MM_malloc((size_t)(blocks + 1) * sizeof(*io_sizes))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector");
     }
 
     io_types[0] = H5FD_MEM_DRAW;
     io_types[1] = H5FD_MEM_NOLIST;
 
-    if (NULL == (io_addrs = H5MM_malloc(io_count * sizeof(*io_addrs))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O addresses vector");
+    for (i = 0; i < (size_t)blocks; i++) {
+        size_t idx = i + (size_t)(mpi_rank * blocks);
 
-    if (NULL == (io_wbufs = H5MM_malloc(io_count * sizeof(*io_wbufs))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O buffers vector");
-
-    for (i = 0; i < io_count; i++) {
-        io_addrs[i] = chunk_fill_info->chunk_info[i].addr;
+        io_addrs[i] = chunk_fill_info->chunk_info[idx].addr;
 
         if (!all_same_block_len)
-            io_sizes[i] = chunk_fill_info->chunk_info[i].chunk_size;
+            io_sizes[i] = chunk_fill_info->chunk_info[idx].chunk_size;
 
-        if (chunk_fill_info->chunk_info[i].unfiltered_partial_chunk)
+        if (chunk_fill_info->chunk_info[idx].unfiltered_partial_chunk)
             io_wbufs[i] = partial_chunk_fill_buf;
         else
             io_wbufs[i] = fill_buf;
+    }
+
+    if (leftover && leftover > mpi_rank) {
+        io_addrs[blocks] =
+            chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].addr;
+
+        if (!all_same_block_len)
+            io_sizes[blocks] = chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].chunk_size;
+
+        if (chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].unfiltered_partial_chunk) {
+            assert(partial_chunk_fill_buf);
+            io_wbufs[blocks] = partial_chunk_fill_buf;
+        } else
+            io_wbufs[blocks] = fill_buf;
+
+        blocks++;
     }
 
     /* Get current transfer mode */
@@ -5609,9 +5684,14 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     if (H5CX_set_io_xfer_mode(H5FD_MPIO_COLLECTIVE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode");
 
-    if (H5F_shared_vector_write(H5F_SHARED(dset->oloc.file), io_count, io_types, io_addrs,
+    /* Barrier so processes don't race ahead */
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(mpi_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+    if (H5F_shared_vector_write(H5F_SHARED(dset->oloc.file), (uint32_t)blocks, io_types, io_addrs,
                                 all_same_block_len ? io_2sizes : io_sizes, io_wbufs) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "vector write call failed");
+
 
 done:
     if (have_xfer_mode)
@@ -5625,6 +5705,20 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_fill() */
+
+static int
+H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
+{
+    const struct chunk_coll_fill_info *entry1;
+    const struct chunk_coll_fill_info *entry2;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    entry1 = (const struct chunk_coll_fill_info *)_entry1;
+    entry2 = (const struct chunk_coll_fill_info *)_entry2;
+
+    FUNC_LEAVE_NOAPI(H5_addr_cmp(entry1->addr, entry2->addr))
+} /* end H5D__chunk_cmp_coll_fill_info() */
 
 #endif /* H5_HAVE_PARALLEL */
 
