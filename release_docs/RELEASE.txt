@@ -920,6 +920,12 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+
+    - Renamed h5fuse.sh to h5fuse
+
+      Addresses Discussion #3791
+
+
     - Fixed an issue with unmatched MPI messages in ph5diff
 
       The "manager" MPI rank in ph5diff was unintentionally sending "program end"
