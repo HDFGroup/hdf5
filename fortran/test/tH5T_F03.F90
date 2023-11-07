@@ -984,7 +984,7 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
 
 ! Check if C has quad precision extension
-#if H5_HAVE_FLOAT128!=0
+#ifdef H5_HAVE_FLOAT128
 ! Check if Fortran supports quad precision
 # if H5_PAC_FC_MAX_REAL_PRECISION > 26
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
@@ -3400,7 +3400,7 @@ SUBROUTINE multiple_dset_rw(total_error)
 !-------------------------------------------------------------------------
 ! Subroutine: multiple_dset_rw
 !
-! Purpose:  Tests the reading and writing of multiple datasets 
+! Purpose:  Tests the reading and writing of multiple datasets
 !           using H5Dread_multi and H5Dwrite_multi
 !
 ! Return: Success:      0
@@ -3408,10 +3408,10 @@ SUBROUTINE multiple_dset_rw(total_error)
 !-------------------------------------------------------------------------
 !
   IMPLICIT NONE
-  
+
   INTEGER, INTENT(INOUT) :: total_error   ! number of errors
   INTEGER :: error                        ! HDF hdferror flag
-  
+
   INTEGER(SIZE_T), PARAMETER :: ndset = 5 ! Number of data sets
   INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: dset_id
   INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: mem_type_id
@@ -3424,9 +3424,9 @@ SUBROUTINE multiple_dset_rw(total_error)
   INTEGER, PARAMETER :: sdim=2  ! length of character string
   INTEGER, PARAMETER :: ddim=2  ! size of derived type array
   INTEGER  :: i,j,k
-  
+
   TYPE(C_PTR), ALLOCATABLE, DIMENSION(:) :: buf_md ! array to hold the multi-datasets
-  
+
   INTEGER, DIMENSION(1:idim), TARGET :: wbuf_int             ! integer write buffer
   INTEGER, DIMENSION(1:idim,idim2,idim3), TARGET :: wbuf_intmd
   REAL, DIMENSION(1:rdim), TARGET :: wbuf_real               ! real write buffer
@@ -3535,7 +3535,7 @@ SUBROUTINE multiple_dset_rw(total_error)
   CALL check("h5tinsert_f", error, total_error)
   CALL h5tcopy_f(H5T_NATIVE_CHARACTER, strtype, error)
   CALL check("h5tcopy_f", error, total_error)
-  CALL h5tset_size_f(strtype, INT(sdim,size_t), error)  
+  CALL h5tset_size_f(strtype, INT(sdim,size_t), error)
   CALL check("h5tset_size_f", error, total_error)
   CALL h5tinsert_f(mem_type_id(4), "chr", &
        H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%c(1:1))), strtype, error)
