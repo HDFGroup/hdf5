@@ -225,7 +225,7 @@
         "ci-Release",
         "ci-Intel"
       ]
-    }
+    },
     {
       "name": "ci-x64-Debug-MSVC-asan",
       "description": "x64-Debug-MSVC with /fsanitize=address",
@@ -348,7 +348,7 @@
         "ci-base"
       ],
       "configuration": "RelWithDebInfo"
-    }
+    },
     {
       "name": "ci-x64-Debug-MSVC-asan",
       "configurePreset": "ci-x64-Debug-MSVC-asan",
@@ -470,8 +470,8 @@
       "hidden": true,
       "inherits": [
         "ci-base"
-      ],
-    }
+      ]
+    },
     {
       "name": "ci-x64-Debug-MSVC-asan",
       "configurePreset": "ci-x64-Debug-MSVC-asan",

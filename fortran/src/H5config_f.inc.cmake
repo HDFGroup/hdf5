@@ -15,18 +15,24 @@
 #cmakedefine01 CMAKE_H5_HAVE_PARALLEL
 #if CMAKE_H5_HAVE_PARALLEL == 0
 #undef H5_HAVE_PARALLEL
+#else
+#define H5_HAVE_PARALLEL
 #endif
 
 ! Define if there is subfiling support
 #cmakedefine01 CMAKE_H5_HAVE_SUBFILING_VFD
 #if CMAKE_H5_HAVE_SUBFILING_VFD == 0
 #undef H5_HAVE_SUBFILING_VFD
+#else
+#define H5_HAVE_SUBFILING_VFD
 #endif
 
 ! Define if on APPLE
 #cmakedefine01 H5_HAVE_DARWIN
 #if H5_HAVE_DARWIN == 0
 #undef H5_HAVE_DARWIN
+#else
+#define H5_HAVE_DARWIN
 #endif
 
 ! Define if the intrinsic function STORAGE_SIZE exists
@@ -87,4 +93,6 @@
 #cmakedefine01 CMAKE_NO_DEPRECATED_SYMBOLS
 #if CMAKE_NO_DEPRECATED_SYMBOLS == 0
 #undef H5_NO_DEPRECATED_SYMBOLS
+#else
+#define H5_NO_DEPRECATED_SYMBOLS
 #endif

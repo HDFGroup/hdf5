@@ -258,7 +258,7 @@ jobs:
   # Parallel Linux (Ubuntu) w/ gcc + Autotools
   #
   CMake_build_parallel:
-    name: "Parallel GCC-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}d"
+    name: "Parallel GCC-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
