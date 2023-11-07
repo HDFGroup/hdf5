@@ -169,6 +169,11 @@ jobs:
           cp bin/test_write_multi.exe ./_deps/vol-cache-build/tests
           cp bin/test_multdset.exe ./_deps/vol-cache-build/tests
 
+      - name: Set environment variables for testing
+        run: |
+          echo "HDF5_PLUGIN_PATH=${{ github.workspace }}/hdf5/build/bin/" >> $GITHUB_ENV
+          echo "HDF5_VOL_CONNECTOR=cache_ext config=$GITHUB_WORKSPACE/config1.cfg;under_vol=0;under_info={};" >> $GITHUB_ENV
+
       # Until cache VOL tests are namespaced properly, run them directly
       - name: Test HDF5 cache VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build
@@ -184,6 +189,11 @@ jobs:
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
           ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" .
+
+      - name: Set environment variables for testing
+        run: |
+          echo "HDF5_PLUGIN_PATH=${{ github.workspace }}/hdf5/build/bin/" >> $GITHUB_ENV
+          echo "HDF5_VOL_CONNECTOR=cache_ext config=$GITHUB_WORKSPACE/config2.cfg;under_vol=512;under_info={under_vol=0;under_info={}};" >> $GITHUB_ENV
 
       # Until cache VOL tests are namespaced properly, run them directly
       - name: Test HDF5 cache VOL connector atop async VOL connector with external tests

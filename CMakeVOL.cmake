@@ -35,9 +35,35 @@ function (apply_connector_workarounds connector_name source_dir)
   # but for now we have to hack around this until the async and
   # cache VOLs create CMake .config files
   if ("${connector_name}" MATCHES "vol-cache")
+    # Remove find_package(ASYNC) call from connector's CMake code
     file (READ "${source_dir}/CMakeLists.txt" vol_cmake_contents)
     string (REGEX REPLACE "[ \t]*find_package[ \t]*\\([ \t]*ASYNC[^\r\n\\)]*\\)[ \t]*[\r\n]+" "" vol_cmake_contents "${vol_cmake_contents}")
     file (WRITE "${source_dir}/CMakeLists.txt" "${vol_cmake_contents}")
+
+    # Remove setting of HDF5_VOL_CONNECTOR and HDF5_PLUGIN_PATH
+    # in connector's external tests CMake code
+    file (STRINGS "${source_dir}/tests/CMakeLists.txt" file_lines)
+    file (WRITE "${source_dir}/tests/CMakeLists.txt" "")
+    foreach (line IN LISTS file_lines)
+      set (stripped_line "${line}")
+      string (REGEX MATCH "^[ \t]*set_tests_properties\\([ \t]*[\r\n]?" match_string "${line}")
+      if (NOT "${match_string}" STREQUAL "")
+        string (REGEX REPLACE "^[ \t]*set_tests_properties\\([ \t]*[\r\n]?" "" stripped_line "${line}")
+      endif ()
+      string (REGEX MATCH "^[ \t]*.\\{test\\}[ \t]*[\r\n]?" match_string "${line}")
+      if (NOT "${match_string}" STREQUAL "")
+        string (REGEX REPLACE "^[ \t]*.\\{[A-Za-z]*\\}[ \t]*[\r\n]?" "" stripped_line "${line}")
+      endif ()
+      string (REGEX MATCH "^[ \t]*PROPERTIES[ \t]*[\r\n]?" match_string "${line}")
+      if (NOT "${match_string}" STREQUAL "")
+        string (REGEX REPLACE "^[ \t]*PROPERTIES[ \t]*[\r\n]?" "" stripped_line "${line}")
+      endif ()
+      string (REGEX MATCH "^[ \t]*ENVIRONMENT[ \t]*.*[\r\n]?" match_string "${line}")
+      if (NOT "${match_string}" STREQUAL "")
+        string (REGEX REPLACE "^[ \t]*ENVIRONMENT[ \t]*.*[\r\n]?" "" stripped_line "${line}")
+      endif ()
+      file (APPEND "${source_dir}/tests/CMakeLists.txt" "${stripped_line}\n")
+    endforeach ()
   endif ()
 endfunction ()
 
