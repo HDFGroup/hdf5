@@ -459,9 +459,9 @@ H5T__set_precision(H5T_fpoint_det_t *d)
 herr_t H5_NO_UBSAN
 H5T__init_native_float_types(void)
 {
+    fenv_t           saved_fenv;
     H5T_fpoint_det_t det;
     H5T_t           *dt        = NULL;
-    int              fpe_flags = 0;
     herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -469,8 +469,8 @@ H5T__init_native_float_types(void)
     /* Turn off floating-point exceptions while initializing to avoid
      * tripping over signalling NaNs while looking at "don't care" bits.
      */
-    fpe_flags = fegetexcept();
-    fedisableexcept(FE_INVALID);
+    if (feholdexcept(&saved_fenv) != 0)
+        HSYS_GOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't save floating-point environment");
 
     /* H5T_NATIVE_FLOAT */
 
@@ -571,8 +571,13 @@ H5T__init_native_float_types(void)
     H5T_native_order_g = det.order;
 
 done:
-    /* Restore the original exceptions */
-    feenableexcept(fpe_flags);
+    /* Clear any FE_INVALID exceptions from NaN handling */
+    if (feclearexcept(FE_INVALID) != 0)
+        HSYS_GOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't clear floating-point exceptions");
+
+    /* Restore the original environment */
+    if (feupdateenv(&saved_fenv) != 0)
+        HSYS_GOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't restore floating-point environment");
 
     if (ret_value < 0) {
         if (dt != NULL) {
