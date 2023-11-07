@@ -1184,12 +1184,6 @@ Known Problems
     -O1 for the time being:
     https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
 
-    IEEE standard arithmetic enables software to raise exceptions such as overflow,
-    division by zero, and other illegal operations without interrupting or halting
-    the program flow. The HDF5 C library intentionally performs these exceptions.
-    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
-    to avoid stopping on an exception.
-
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
