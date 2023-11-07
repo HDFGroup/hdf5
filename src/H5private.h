@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <fenv.h>
 #include <float.h>
 #include <math.h>
 #include <setjmp.h>
