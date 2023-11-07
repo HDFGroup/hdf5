@@ -26,6 +26,21 @@ function (get_generated_cmake_targets out_var dir)
   set (${out_var} "${dir_targets}" PARENT_SCOPE)
 endfunction ()
 
+# Function to apply connector-specify workarounds to build
+# code once a connector has been populated through FetchContent
+function (apply_connector_workarounds connector_name source_dir)
+  # For the cache VOL, remove the call to find_package(ASYNC).
+  # Eventually, the FetchContent OVERRIDE_FIND_PACKAGE should be
+  # able to fulfill this dependency when building the cache VOL,
+  # but for now we have to hack around this until the async and
+  # cache VOLs create CMake .config files
+  if ("${connector_name}" MATCHES "vol-cache")
+    file (READ "${source_dir}/CMakeLists.txt" vol_cmake_contents)
+    string (REGEX REPLACE "[ \t]*find_package[ \t]*\\([ \t]*ASYNC[^\r\n\\)]*\\)[ \t]*[\r\n]+" "" vol_cmake_contents "${vol_cmake_contents}")
+    file (WRITE "${source_dir}/CMakeLists.txt" "${vol_cmake_contents}")
+  endif ()
+endfunction ()
+
 set (HDF5_VOL_ALLOW_EXTERNAL "NO" CACHE STRING "Allow building of external HDF5 VOL connectors with FetchContent")
 set_property (CACHE HDF5_VOL_ALLOW_EXTERNAL PROPERTY STRINGS NO GIT LOCAL_DIR)
 mark_as_advanced (HDF5_VOL_ALLOW_EXTERNAL)
@@ -182,15 +197,8 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
           file (WRITE "${hdf5_vol_depname_source_dir}/src/CMakeLists.txt" "${vol_cmake_contents}")
         endif ()
 
-        # Work around issue with Cache VOL's CMake code related
-        # to its Async VOL dependency
-        if ("${hdf5_vol_name_lower}" MATCHES "vol-cache")
-          if (EXISTS "${hdf5_vol_depname_source_dir}/CMakeLists.txt")
-            file (READ "${hdf5_vol_depname_source_dir}/CMakeLists.txt" vol_cmake_contents)
-            string (REGEX REPLACE "[ \t]*find_package[ \t]*\\([ \t]*ASYNC[^\r\n\\)]*\\)[ \t]*[\r\n]+" "find_package\(vol-async\)\n" vol_cmake_contents "${vol_cmake_contents}")
-            file (WRITE "${hdf5_vol_depname_source_dir}/CMakeLists.txt" "${vol_cmake_contents}")
-          endif ()
-        endif ()
+        # Apply any connector-specific workarounds
+        apply_connector_workarounds ("${hdf5_vol_name_lower}" "${hdf5_vol_depname_source_dir}")
 
         add_subdirectory (${hdf5_vol_depname_source_dir} ${hdf5_vol_depname_binary_dir})
 
@@ -248,8 +256,30 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
             HDF5_VOL_TEST_PARALLEL ${HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL}
         )
 
-        # Add this connector's target to the list of external connector targets
+        # Add this VOL connector's target to the list of external connector targets
         list (APPEND HDF5_EXTERNAL_VOL_TARGETS "HDF5_VOL_${hdf5_vol_name_lower}")
+
+        # Get the list of library targets from this VOL connector
+        unset (connector_lib_targets)
+        foreach (connector_target ${connector_targets})
+          get_target_property (target_type ${connector_target} TYPE)
+          if (target_type STREQUAL "SHARED_LIBRARY" OR target_type STREQUAL "STATIC_LIBRARY")
+            list (APPEND connector_lib_targets "${connector_target}")
+          endif ()
+        endforeach ()
+
+        # Add all of the previous VOL connector's library targets as
+        # dependencies for the current VOL connector to ensure that
+        # VOL connectors get built serially in case there are dependencies
+        if (DEFINED last_vol_lib_targets)
+          foreach (connector_target ${connector_targets})
+            add_dependencies (${connector_target} ${last_vol_lib_targets})
+          endforeach ()
+        endif ()
+
+        # Use this connector's library targets as dependencies
+        # for the next connector that is built
+        set (last_vol_lib_targets "${connector_lib_targets}")
       endif ()
     endif ()
   endforeach ()

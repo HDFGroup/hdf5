@@ -89,11 +89,15 @@ jobs:
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
           echo "LD_LIBRARY_PATH=/usr/local/lib:${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
 
+      # Workaround for asynchronous I/O VOL CMake issue
+      - name: Copy testing files
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cp bin/async_test* ./_deps/vol-async-build/test
+
       - name: Test HDF5 asynchronous I/O VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
-          # Workaround for vol-async CMake issue
-          cp bin/async_test* ./_deps/hdf5_vol_vol-async-build/test
           ctest --build-config ${{ inputs.build_mode }} -VV -R "async_test" .
 
       - name: Test HDF5 asynchronous I/O VOL connector with HDF5 API tests

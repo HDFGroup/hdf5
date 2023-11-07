@@ -66,24 +66,11 @@ jobs:
           make -j2
           sudo make -j2 install
 
-      # TODO: It should be possible to build both the async VOL
-      # and cache VOL at the same time, but the cache VOL looks
-      # for the async VOL by a different name than 'vol-async'
-      # and there are dependency issues where the cache VOL tries
-      # to link to a built async VOL. CMake's FetchContent
-      # OVERRIDE_FIND_PACKAGE may come in handy here, but our
-      # current CMake code declares VOL connector targets with
-      # a prefixed name (HDF5_VOL_vol_name_lower), so this also
-      # doesn't work yet. For now, just install the async VOL
-      # manually.
-#      - name: Install vol-async
-#        working-directory: ${{ github.workspace }}/vol-async
-#        run: |
-#          mkdir build
-#          cd build
-#          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
-#          sudo make -j2 install
-
+      # Define ASYNC_INCLUDE_DIR, ASYNC_INCLUDE_DIRS and ASYNC_LIBRARIES to
+      # patch around having the cache VOL find the async VOL when they're built
+      # at the same time. Once the Async and Cache VOLs create CMake .config
+      # files, this should no longer be needed with CMake 3.24 and newer (see
+      # FetchContent's OVERRIDE_FIND_PACKAGE)
       - name: Configure HDF5 with cache VOL connector
         shell: bash
         run: |
@@ -107,9 +94,17 @@ jobs:
             -DHDF5_VOL_VOL-CACHE_BRANCH:STRING="develop" \
             -DHDF5_VOL_VOL-CACHE_NAME:STRING="cache_ext config=$GITHUB_WORKSPACE/config1.cfg\;under_vol=0\;under_info={}\;" \
             -DHDF5_VOL_VOL-CACHE_TEST_PARALLEL:BOOL=ON \
+            -DASYNC_INCLUDE_DIR=${{ github.workspace }}/hdf5/build/_deps/vol-async-src/src \
+            -DASYNC_INCLUDE_DIRS=${{ github.workspace }}/hdf5/build/_deps/vol-async-src/src \
+            -DASYNC_LIBRARIES=${{ github.workspace }}/hdf5/build/bin/libasynchdf5.a\;${{ github.workspace }}/hdf5/build/bin/libh5async.so \
             ${{ github.workspace }}/hdf5
           cat src/libhdf5.settings
 
+      # Define ASYNC_INCLUDE_DIR, ASYNC_INCLUDE_DIRS and ASYNC_LIBRARIES to
+      # patch around having the cache VOL find the async VOL when they're built
+      # at the same time. Once the Async and Cache VOLs create CMake .config
+      # files, this should no longer be needed with CMake 3.24 and newer (see
+      # FetchContent's OVERRIDE_FIND_PACKAGE)
       - name: Configure HDF5 with cache VOL connector stacked atop async VOL connector
         shell: bash
         run: |
@@ -133,6 +128,9 @@ jobs:
             -DHDF5_VOL_VOL-CACHE_BRANCH:STRING="develop" \
             -DHDF5_VOL_VOL-CACHE_NAME:STRING="cache_ext config=$GITHUB_WORKSPACE/config2.cfg\;under_vol=512\;under_info={under_vol=0\;under_info={}}\;" \
             -DHDF5_VOL_VOL-CACHE_TEST_PARALLEL:BOOL=ON \
+            -DASYNC_INCLUDE_DIR=${{ github.workspace }}/hdf5/build/_deps/vol-async-src/src \
+            -DASYNC_INCLUDE_DIRS=${{ github.workspace }}/hdf5/build/_deps/vol-async-src/src \
+            -DASYNC_LIBRARIES=${{ github.workspace }}/hdf5/build/bin/libasynchdf5.a\;${{ github.workspace }}/hdf5/build/bin/libh5async.so \
             ${{ github.workspace }}/hdf5
           cat src/libhdf5.settings
 
@@ -160,20 +158,43 @@ jobs:
           echo "HDF5_CACHE_STORAGE_TYPE: SSD" >> $GITHUB_WORKSPACE/config2.cfg
           echo "HDF5_CACHE_REPLACEMENT_POLICY: LRU" >> $GITHUB_WORKSPACE/config2.cfg
 
+      # Workaround for cache VOL CMake issue
+      - name: Copy testing files
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cp bin/test_file.exe ./_deps/vol-cache-build/tests
+          cp bin/test_group.exe ./_deps/vol-cache-build/tests
+          cp bin/test_dataset.exe ./_deps/vol-cache-build/tests
+          cp bin/test_dataset_async_api.exe ./_deps/vol-cache-build/tests
+          cp bin/test_write_multi.exe ./_deps/vol-cache-build/tests
+          cp bin/test_multdset.exe ./_deps/vol-cache-build/tests
+
+      # Until cache VOL tests are namespaced properly, run them directly
       - name: Test HDF5 cache VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "test_*.exe$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_file$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_group$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset_async_api$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_write_multi$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_multdset$" .
 
       - name: Test HDF5 cache VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
           ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" .
 
+      # Until cache VOL tests are namespaced properly, run them directly
       - name: Test HDF5 cache VOL connector atop async VOL connector with external tests
         working-directory: ${{ github.workspace }}/hdf5/build2
         run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "test_*.exe$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_file$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_group$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset_async_api$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_write_multi$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_multdset$" .
 
       - name: Test HDF5 cache VOL connector atop async VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build2
