@@ -2194,7 +2194,7 @@ test_swmr_write_big(bool newest_format)
         ZeroMemory(&pi, sizeof(pi));
 
         if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, false, 0, NULL, NULL, &si, &pi)) {
-            printf("CreateProcess failed (%d).\n", GetLastError());
+            printf("CreateProcess failed (%lu).\n", GetLastError());
             FAIL_STACK_ERROR;
         }
 
