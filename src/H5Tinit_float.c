@@ -467,7 +467,7 @@ H5T__init_native_float_types(void)
     FUNC_ENTER_PACKAGE
 
     /* Turn off floating-point exceptions while initializing to avoid
-     * tripping over signalling NaNs while looking at "don't care" bits.
+     * tripping over signaling NaNs while looking at "don't care" bits.
      */
     if (feholdexcept(&saved_fenv) != 0)
         HSYS_GOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't save floating-point environment");
