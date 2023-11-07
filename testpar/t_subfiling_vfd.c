@@ -1898,7 +1898,7 @@ test_subfiling_h5fuse(void)
     if (MAINPROCESS) {
         FILE *h5fuse_script;
 
-        h5fuse_script = fopen("h5fuse.sh", "r");
+        h5fuse_script = fopen("h5fuse", "r");
         if (h5fuse_script)
             fclose(h5fuse_script);
         else
@@ -2014,7 +2014,7 @@ test_subfiling_h5fuse(void)
                      SUBF_FILENAME, file_inode);
 
             args[0] = strdup("env");
-            args[1] = strdup("./h5fuse.sh");
+            args[1] = strdup("./h5fuse");
             args[2] = strdup("-q");
             args[3] = strdup("-f");
             args[4] = tmp_filename;

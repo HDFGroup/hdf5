@@ -4231,10 +4231,10 @@ AC_CONFIG_FILES([Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
-AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
+AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse], [chmod +x utils/subfiling_vfd/h5fuse])
 if test -n "$TESTPARALLEL"; then
   if test "X$SUBFILING_VFD" = "Xyes"; then
-    AC_CONFIG_LINKS([testpar/h5fuse.sh:utils/subfiling_vfd/h5fuse.sh])
+    AC_CONFIG_LINKS([testpar/h5fuse:utils/subfiling_vfd/h5fuse])
   fi
 fi
 

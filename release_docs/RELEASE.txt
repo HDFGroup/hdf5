@@ -143,7 +143,9 @@ Bug Fixes since HDF5-1.14.3 release
 
     Tools
     -----
-    -
+    - Renamed h5fuse.sh to h5fuse
+
+      Addresses Discussion #3791
 
 
     Performance
