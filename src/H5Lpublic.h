@@ -261,8 +261,11 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  *
  *          \p cur_name and \p dst_name are interpreted relative to \p cur_loc
  *          and \p dst_loc, respectively. If a given name begins with \c \,
- *          then it will be interpreted as absolute path in the file. If
- *          \p cur_loc and \p dst_loc are the same location, the HDF5 macro
+ *          then it will be interpreted as absolute path in the file.
+ *          The names of the created links will be the last element of
+ *          each provided path. Prior elements in each path are used to
+ *          locate the parent groups of each new link. If \p cur_loc and
+ *          \p dst_loc are the same location, the HDF5 macro
  *          #H5L_SAME_LOC can be used for either parameter (but not both).
  *
  *          \p lcpl_id and \p lapl_id are the link creation and access property
@@ -323,7 +326,9 @@ H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t
  *          \p link_loc_id and \p link_name specify the location and name,
  *          respectively, of the new soft link. \p link_name is interpreted
  *          as a path relative to \p link_loc_id, or an absolute path if it
- *          begins with \c /.
+ *          begins with \c /. The name of the created link will be the last
+ *          element of the provided path. Prior elements in the path are
+ *          used to locate the parent group of the new link.
  *
  *          If \p link_loc_id is a group identifier, the object pointed to by
  *          \p link_name will be accessed as a member of that group. If
@@ -1193,7 +1198,9 @@ H5_DLL herr_t H5Lvisit_by_name2(hid_t loc_id, const char *group_name, H5_index_t
  *
  *          \p link_name is interpreted relative to \p link_loc_id. If
  *          \p link_name begins with \c \, then it will be interpreted as
- *          an absolute path in the file.
+ *          an absolute path in the file. The name of the created link
+ *          will be the last element of the provided path. Prior elements
+ *          in the path are used to locate the parent group of the new link.
  *
  *          Valid values for the link class of the new link, \p link_type,
  *          include #H5L_TYPE_EXTERNAL and any user-defined link classes that
@@ -1311,7 +1318,9 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  *          \p link_loc_id and \p link_name specify the location and name,
  *          respectively, of the new link. \p link_name is interpreted relative
  *          to \p link_loc_id. If \p link_name begins with \c \, then it is
- *          interpreted as an absolute path in the file.
+ *          interpreted as an absolute path in the file. The name of the created
+ *          link will be the last element of the provided path. Prior elements in
+ *          the path are used to locate the parent group of the new link.
  *
  *          \p lcpl_id is the link creation property list used in creating the
  *          new link.
