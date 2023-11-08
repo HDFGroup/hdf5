@@ -38,12 +38,6 @@ jobs:
           ref: api_tests_dev
       # TODO
 
-      - name: Checkout vol-async
-        uses: actions/checkout@v4
-        with:
-          repository: hpc-io/vol-async
-          path: vol-async
-
       - name: Checkout Argobots
         uses: actions/checkout@v4
         with:
