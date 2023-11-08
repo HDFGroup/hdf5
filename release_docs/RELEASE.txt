@@ -408,6 +408,22 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Suppressed floating-point exceptions in H5T init code
+
+      The floating-point datatype initialization code in H5Tinit_float.c
+      could raise FE_INVALID exceptions while munging bits and performing
+      comparisons that might involve NaN. This was not a problem when the
+      initialization code was executed in H5detect at compile time (prior
+      to 1.14.3), but now that the code is executed at library startup
+      (1.14.3+), these exceptions can be caught by user code, as is the
+      default in the NAG Fortran compiler.
+
+      Starting in 1.14.4, we now suppress floating-point exceptions while
+      initializing the floating-point types and clear FE_INVALID before
+      restoring the original environment.
+
+      Fixes GitHub #3831
+
     - Fixed a file handle leak in the core VFD
 
       When opening a file with the core VFD and a file image, if the file
@@ -920,6 +936,12 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+
+    - Renamed h5fuse.sh to h5fuse
+
+      Addresses Discussion #3791
+
+
     - Fixed an issue with unmatched MPI messages in ph5diff
 
       The "manager" MPI rank in ph5diff was unintentionally sending "program end"
@@ -1183,12 +1205,6 @@ Known Problems
     Nvidia is aware of this issue and has suggested lowering the optimization level to
     -O1 for the time being:
     https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
-
-    IEEE standard arithmetic enables software to raise exceptions such as overflow,
-    division by zero, and other illegal operations without interrupting or halting
-    the program flow. The HDF5 C library intentionally performs these exceptions.
-    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
-    to avoid stopping on an exception.
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
