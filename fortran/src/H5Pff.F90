@@ -5191,68 +5191,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_fapl_mpio_f
 
-!>
-!! \ingroup FH5P
-!!
-!! \brief Sets data transfer mode.
-!!
-!! \param prp_id         Data transfer property list identifier.
-!! \param data_xfer_mode Transfer mode; possible values are:
-!!                       \li H5FD_MPIO_INDEPENDENT_F
-!!                       \li H5FD_MPIO_COLLECTIVE_F
-!! \param hdferr         \fortran_error
-!!
-!! See C API: @ref H5Pset_dxpl_mpio()
-!!
-  SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, INTENT(IN) :: data_xfer_mode
-    INTEGER, INTENT(OUT) :: hdferr
-    INTERFACE
-       INTEGER FUNCTION h5pset_dxpl_mpio_c(prp_id, data_xfer_mode) &
-            BIND(C,NAME='h5pset_dxpl_mpio_c')
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN)  :: prp_id
-         INTEGER       , INTENT(IN) :: data_xfer_mode
-       END FUNCTION h5pset_dxpl_mpio_c
-    END INTERFACE
-
-    hdferr = h5pset_dxpl_mpio_c(prp_id, data_xfer_mode)
-  END SUBROUTINE h5pset_dxpl_mpio_f
-
-!>
-!! \ingroup FH5P
-!!
-!! \brief Returns the data transfer mode.
-!!
-!! \param prp_id         Data transfer property list identifier.
-!! \param data_xfer_mode Transfer mode; possible values are:
-!!                       \li H5FD_MPIO_INDEPENDENT_F
-!!                       \li H5FD_MPIO_COLLECTIVE_F
-!! \param hdferr         \fortran_error
-!!
-!! See C API: @ref H5Pget_dxpl_mpio()
-!!
-  SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, INTENT(OUT) :: data_xfer_mode
-    INTEGER, INTENT(OUT) :: hdferr
-    INTERFACE
-       INTEGER FUNCTION h5pget_dxpl_mpio_c(prp_id, data_xfer_mode) &
-            BIND(C,NAME='h5pget_dxpl_mpio_c')
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN)  :: prp_id
-         INTEGER       , INTENT(OUT) :: data_xfer_mode
-       END FUNCTION h5pget_dxpl_mpio_c
-    END INTERFACE
-
-    hdferr = h5pget_dxpl_mpio_c(prp_id, data_xfer_mode)
-  END SUBROUTINE h5pget_dxpl_mpio_f
-
 #ifdef H5_HAVE_SUBFILING_VFD
 !>
 !! \ingroup FH5P
@@ -5505,6 +5443,68 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = H5Pget_mpi_params_c(prp_id, comm, info)
 
   END SUBROUTINE H5Pget_mpi_params_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets data transfer mode.
+!!
+!! \param prp_id         Data transfer property list identifier.
+!! \param data_xfer_mode Transfer mode; possible values are:
+!!                       \li H5FD_MPIO_INDEPENDENT_F
+!!                       \li H5FD_MPIO_COLLECTIVE_F
+!! \param hdferr         \fortran_error
+!!
+!! See C API: @ref H5Pset_dxpl_mpio()
+!!
+  SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER, INTENT(IN) :: data_xfer_mode
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER FUNCTION h5pset_dxpl_mpio_c(prp_id, data_xfer_mode) &
+            BIND(C,NAME='h5pset_dxpl_mpio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)  :: prp_id
+         INTEGER       , INTENT(IN) :: data_xfer_mode
+       END FUNCTION h5pset_dxpl_mpio_c
+    END INTERFACE
+
+    hdferr = h5pset_dxpl_mpio_c(prp_id, data_xfer_mode)
+  END SUBROUTINE h5pset_dxpl_mpio_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Returns the data transfer mode.
+!!
+!! \param prp_id         Data transfer property list identifier.
+!! \param data_xfer_mode Transfer mode; possible values are:
+!!                       \li H5FD_MPIO_INDEPENDENT_F
+!!                       \li H5FD_MPIO_COLLECTIVE_F
+!! \param hdferr         \fortran_error
+!!
+!! See C API: @ref H5Pget_dxpl_mpio()
+!!
+  SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER, INTENT(OUT) :: data_xfer_mode
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER FUNCTION h5pget_dxpl_mpio_c(prp_id, data_xfer_mode) &
+            BIND(C,NAME='h5pget_dxpl_mpio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)  :: prp_id
+         INTEGER       , INTENT(OUT) :: data_xfer_mode
+       END FUNCTION h5pget_dxpl_mpio_c
+    END INTERFACE
+
+    hdferr = h5pget_dxpl_mpio_c(prp_id, data_xfer_mode)
+  END SUBROUTINE h5pget_dxpl_mpio_f
 
 !>
 !! \ingroup FH5P
