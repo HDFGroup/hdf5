@@ -70,7 +70,7 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
 
   Intel_oneapi_windows:
