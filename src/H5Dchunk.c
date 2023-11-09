@@ -5629,17 +5629,17 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             all_same_block_len = false;
     }
 
-    /* 
-     * Note that we sort all of the chunks here, and not just a subset 
+    /*
+     * Note that we sort all of the chunks here, and not just a subset
      * corresponding to this rank. We do this since we have found MPI I/O to work
-     * better when each rank writes blocks that are contiguous in the file, 
+     * better when each rank writes blocks that are contiguous in the file,
      * and by sorting the full list we maximize the chance of that happening.
      */
     if (need_sort)
         qsort(chunk_fill_info->chunk_info, chunk_fill_info->num_chunks, sizeof(struct chunk_coll_fill_info),
               H5D__chunk_cmp_coll_fill_info);
 
-    /* 
+    /*
      * If all the chunks have the same length, use the compressed feature
      * to store the size.
      * Otherwise, allocate the array of sizes for storing chunk sizes.
@@ -5653,15 +5653,15 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector");
     }
 
-    /* 
-     * Since the type of all chunks is raw data, use the compressed feature 
+    /*
+     * Since the type of all chunks is raw data, use the compressed feature
      * to store the chunk type.
      */
     io_types[0] = H5FD_MEM_DRAW;
     io_types[1] = H5FD_MEM_NOLIST;
 
-    /* 
-     * For the chunks corresponding to this rank, fill in the 
+    /*
+     * For the chunks corresponding to this rank, fill in the
      * address, size and buf pointer for each chunk.
      */
     for (i = 0; i < (size_t)blocks; i++) {
@@ -5678,8 +5678,8 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             io_wbufs[i] = fill_buf;
     }
 
-    /* 
-     * For the leftover chunk corresponding to this rank, fill in the 
+    /*
+     * For the leftover chunk corresponding to this rank, fill in the
      * address, size and buf pointer for the chunk.
      */
     if (leftover > mpi_rank) {

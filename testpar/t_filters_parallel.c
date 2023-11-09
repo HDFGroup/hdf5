@@ -547,8 +547,8 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
 
         /* Verify selection I/O mode on rank 0 */
         if (mpi_rank == 0) {
-            /* No actual I/O performed, the only reported I/O will be from allocation which is vector I/O, 
-             * even if "no" datasets were involved (num_dsets == 0 implies the call was expected to fail, 
+            /* No actual I/O performed, the only reported I/O will be from allocation which is vector I/O,
+             * even if "no" datasets were involved (num_dsets == 0 implies the call was expected to fail,
              * but it fails after allocation).
              * Also if the test mode is mixed filtered and unfiltered and the call did not fail, then there
              * will always be an I/O callback made with raw data. This is because unfiltered datasets fall
@@ -598,8 +598,8 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                 switch (test_mode) {
                     case USE_SINGLE_DATASET:
                     case USE_MULTIPLE_DATASETS:
-                        /* Collective case with only filtered datasets. 
-                         * If we're reading from an unallocated dataset then there 
+                        /* Collective case with only filtered datasets.
+                         * If we're reading from an unallocated dataset then there
                          * should be no actual I/O.
                          * Otherwise, only vector I/O is reported whether or not
                          * allocation happened. */
