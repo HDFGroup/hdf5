@@ -104,7 +104,7 @@ jobs:
             -DHDF5_ROOT=${{ runner.workspace }}/hdf5_build/ \
             ..
           make -j2
-          sudo make -j2 install
+          make -j2 install
 
       - name: Cache ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }}) installation
         uses: actions/cache/save@v3

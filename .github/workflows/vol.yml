@@ -38,13 +38,15 @@ jobs:
 #    with:
 #      build_mode: "Release"
 
-  hdf5_vol_adios2:
-    uses: ./.github/workflows/vol_adios2.yml
+#  hdf5_vol_adios2:
+#    uses: ./.github/workflows/vol_adios2.yml
+#    with:
+#      build_mode: "Release"
+
+  hdf5_vol_log:
+    uses: ./.github/workflows/vol_log.yml
     with:
       build_mode: "Release"
-
-  #hdf5_vol_log_fetchcontent:
-  #  uses: ./.github/workflows/vol_log.yml
 
   # Build and install HDF5 and test individual VOL connectors
   # against the installed API test executables

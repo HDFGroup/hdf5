@@ -1,0 +1,95 @@
+name: Test HDF5 Log-based VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    name: Test HDF5 Log-based VOL connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev zlib1g-dev
+          #mpich
+
+      # TODO
+      #- name: Checkout HDF5
+      #  uses: actions/checkout@v4
+      #  with:
+      #    repository: HDFGroup/hdf5
+      #    path: hdf5
+      # TODO
+
+      # TODO
+      - name: Checkout HDF5
+        uses: actions/checkout@v4
+        with:
+          repository: jhendersonHDF/hdf5
+          path: hdf5
+          ref: api_tests_dev
+      # TODO
+
+      # Log-based VOL currently doesn't have CMake support
+      - name: Configure HDF5
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DALLOW_UNSUPPORTED:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build and install HDF5
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          cmake --install .
+          echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
+          echo "PATH=${{ runner.workspace }}/hdf5_build/bin:${PATH}" >> $GITHUB_ENV
+
+      - name: Checkout Log-based VOL
+        uses: actions/checkout@v4
+        with:
+          repository: DataLib-ECP/vol-log-based
+          path: vol-log-based
+
+      - name: Build HDF5 Log-based VOL connector and test with external tests 
+        env:
+          CXX: mpic++
+          CC: mpicc
+          LD_LIBRARY_PATH: ${{ runner.workspace }}/hdf5_build/lib
+        run: |
+          cd vol-log-based
+          autoreconf -i
+          ./configure --prefix=${{ runner.workspace }}/vol-log-based-build --with-hdf5=${{ runner.workspace }}/hdf5_build/ --enable-shared --enable-zlib
+          make -j2 && make install
+          export HDF5_PLUGIN_PATH="${{ runner.workspace }}/vol-log-based-build/lib"
+          export HDF5_VOL_CONNECTOR="LOG under_vol=0;under_info={}"
+          make check
+          echo "HDF5_PLUGIN_PATH=${HDF5_PLUGIN_PATH}" >> $GITHUB_ENV
+          echo "HDF5_VOL_CONNECTOR=${HDF5_VOL_CONNECTOR}" >> $GITHUB_ENV
+
+      # Skip parallel testing for now as it appears to hang
+      - name: Test HDF5 Log-based VOL connector with HDF5 API tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api" -E "parallel" .
