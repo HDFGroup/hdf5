@@ -183,10 +183,7 @@ case $FC_BASENAME in
     nagfor)
 
         F9XSUFFIXFLAG=""
-        # NOTE: The default is -ieee=stop, which will cause problems
-        #       when the H5T module performs floating-point type
-        #       introspection
-        AM_FCFLAGS="$AM_FCFLAGS -ieee=full"
+        AM_FCFLAGS="$AM_FCFLAGS"
         FSEARCH_DIRS=""
 
         # Production
