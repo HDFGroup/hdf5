@@ -20,8 +20,10 @@ jobs:
   #hdf5_vol_daos_fetchcontent:
   #  uses: ./.github/workflows/vol_daos.yml
 
-  #hdf5_vol_rest_fetchcontent:
-  #  uses: ./.github/workflows/vol_rest.yml
+  hdf5_vol_rest_fetchcontent:
+    uses: ./.github/workflows/vol_rest.yml
+    with:
+      build_mode: "Release"
 
 #  hdf5_vol_ext_passthru_fetchcontent:
 #    uses: ./.github/workflows/vol_ext_passthru.yml
@@ -43,10 +45,10 @@ jobs:
 #    with:
 #      build_mode: "Release"
 
-  hdf5_vol_log:
-    uses: ./.github/workflows/vol_log.yml
-    with:
-      build_mode: "Release"
+#  hdf5_vol_log:
+#    uses: ./.github/workflows/vol_log.yml
+#    with:
+#      build_mode: "Release"
 
   # Build and install HDF5 and test individual VOL connectors
   # against the installed API test executables
