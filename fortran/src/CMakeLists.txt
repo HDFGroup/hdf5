@@ -9,6 +9,7 @@ if (WIN32)
       if (NOT H5_HAVE_PARALLEL)
         set (H5_NOPAREXP ";")
       endif ()
+      set (H5_NOSUBFILING ";") # Subfiling is not supported on Windows
       set (H5_F03EXP ";")
       if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
         set (H5_DBL_NOT_UNIQUE_EXP ";")
