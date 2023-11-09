@@ -5538,7 +5538,7 @@ done:
  *
  * Purpose:     Use MPIO selection vector I/O for writing fill chunks
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -5606,7 +5606,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
 
     /* Check if we have any chunks to write on this rank */
-    if (num_blocks > 0 || (leftover && leftover > mpi_rank)) {
+    if (num_blocks > 0 || leftover > mpi_rank) {
 
         if (NULL == (io_addrs = H5MM_malloc((size_t)(blocks + 1) * sizeof(*io_addrs))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -5629,10 +5629,21 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             all_same_block_len = false;
     }
 
+    /* 
+     * Note that we sort all of the chunks here, and not just a subset 
+     * corresponding to this rank. We do this since we have found MPI I/O to work
+     * better when each rank writes blocks that are contiguous in the file, 
+     * and by sorting the full list we maximize the chance of that happening.
+     */
     if (need_sort)
         qsort(chunk_fill_info->chunk_info, chunk_fill_info->num_chunks, sizeof(struct chunk_coll_fill_info),
               H5D__chunk_cmp_coll_fill_info);
 
+    /* 
+     * If all the chunks have the same length, use the compressed feature
+     * to store the size.
+     * Otherwise, allocate the array of sizes for storing chunk sizes.
+     */
     if (all_same_block_len) {
         io_2sizes[0] = chunk_fill_info->chunk_info[0].chunk_size;
         io_2sizes[1] = 0;
@@ -5642,9 +5653,17 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate space for I/O sizes vector");
     }
 
+    /* 
+     * Since the type of all chunks is raw data, use the compressed feature 
+     * to store the chunk type.
+     */
     io_types[0] = H5FD_MEM_DRAW;
     io_types[1] = H5FD_MEM_NOLIST;
 
+    /* 
+     * For the chunks corresponding to this rank, fill in the 
+     * address, size and buf pointer for each chunk.
+     */
     for (i = 0; i < (size_t)blocks; i++) {
         size_t idx = i + (size_t)(mpi_rank * blocks);
 
@@ -5659,7 +5678,11 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             io_wbufs[i] = fill_buf;
     }
 
-    if (leftover && leftover > mpi_rank) {
+    /* 
+     * For the leftover chunk corresponding to this rank, fill in the 
+     * address, size and buf pointer for the chunk.
+     */
+    if (leftover > mpi_rank) {
         io_addrs[blocks] = chunk_fill_info->chunk_info[(blocks * mpi_size) + mpi_rank].addr;
 
         if (!all_same_block_len)
@@ -5688,13 +5711,14 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(mpi_comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
+    /* Perform the selection vector I/O for the chunks */
     if (H5F_shared_vector_write(H5F_SHARED(dset->oloc.file), (uint32_t)blocks, io_types, io_addrs,
                                 all_same_block_len ? io_2sizes : io_sizes, io_wbufs) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "vector write call failed");
 
 done:
     if (have_xfer_mode)
-        /* Set transfer mode */
+        /* Restore transfer mode */
         if (H5CX_set_io_xfer_mode(prev_xfer_mode) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode");
 

@@ -547,8 +547,9 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
 
         /* Verify selection I/O mode on rank 0 */
         if (mpi_rank == 0) {
-            /* No actual I/O performed, only reported I/O will be from allocation, even if "no" datasets were
-             * involved (num_dsets == 0 implies the call was expected to fail, but it fails after allocation).
+            /* No actual I/O performed, the only reported I/O will be from allocation which is vector I/O, 
+             * even if "no" datasets were involved (num_dsets == 0 implies the call was expected to fail, 
+             * but it fails after allocation).
              * Also if the test mode is mixed filtered and unfiltered and the call did not fail, then there
              * will always be an I/O callback made with raw data. This is because unfiltered datasets fall
              * back to scalar I/O when mixed with filtered, and scalar I/O reports an I/O call was made even
@@ -556,7 +557,6 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
              * elements (because no elements were raw data), which is what happens when performing I/O on a
              * filtered dataset with no selection. Vector I/O does report an I/O call was made if passed a raw
              * data element of size 0, so this is consistent. */
-            /* Changes: for allocation, the reported I/O is vector I/O */
             if (!any_io) {
                 if (did_alloc && (num_dsets > 0 && test_mode == USE_MULTIPLE_DATASETS_MIXED_FILTERED)) {
                     VRFY((H5D_VECTOR_IO | H5D_SCALAR_IO) == actual_sel_io_mode_reduced,
@@ -598,11 +598,11 @@ verify_chunk_opt_status(size_t num_dsets, test_mode_t test_mode, bool any_io, bo
                 switch (test_mode) {
                     case USE_SINGLE_DATASET:
                     case USE_MULTIPLE_DATASETS:
-                        /* Collective case with only filtered datasets. If we performed allocation then there
-                         * should be scalar I/O for allocation in addition to vector I/O for the actual data.
-                         * If we're reading from an unallocated dataset then there should be no actual I/O.
-                         * Otherwise there should only be vector I/O. */
-                        /* Changes: for allocation, the reported I/O is vector I/O */
+                        /* Collective case with only filtered datasets. 
+                         * If we're reading from an unallocated dataset then there 
+                         * should be no actual I/O.
+                         * Otherwise, only vector I/O is reported whether or not
+                         * allocation happened. */
                         if (unalloc_read)
                             VRFY(0 == actual_sel_io_mode_reduced,
                                  "verified actual selection I/O mode was 0 (no I/O)");
