@@ -363,7 +363,6 @@ if (BUILD_STATIC_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SOURCES_SHARED})
   if(WIN32)
       set(DLLDEF ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def)
   else()
