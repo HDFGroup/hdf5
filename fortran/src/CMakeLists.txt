@@ -361,6 +361,8 @@ endif ()
 if (BUILD_SHARED_LIBS)
   if(MSVC)
       set(DLLDEF ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def)
+  else()
+      set(DLLDEF "")
   endif()
   add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${DLLDEF} ${f90_F_SOURCES_SHARED})
   target_include_directories (${HDF5_F90_LIBSH_TARGET}
