@@ -100,6 +100,15 @@ typedef enum dtype_t {
     OTHER
 } dtype_t; /* This doesn't seem to be used anywhere... -BMR */
 
+typedef struct src_cmpd_t {
+    uint32_t a;
+    float    b;
+} src_cmpd_t;
+
+typedef struct dst_cmpd_t {
+    float b;
+} dst_cmpd_t;
+
 typedef enum { E1_RED, E1_GREEN, E1_BLUE, E1_ORANGE, E1_YELLOW } color_t;
 
 /* Constant for size of conversion buffer for int <-> float exception test */
@@ -158,6 +167,28 @@ reset_hdf5(void)
     SET_ALIGNMENT(DOUBLE, H5_SIZEOF_DOUBLE);
     SET_ALIGNMENT(LDOUBLE, H5_SIZEOF_LONG_DOUBLE);
 #endif
+}
+
+/* Conversion function to test user compound conversion functions */
+static herr_t
+user_compound_convert(hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id, H5T_cdata_t *cdata,
+                      size_t nelmts, size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                      void *buf, void H5_ATTR_UNUSED *bkg, hid_t H5_ATTR_UNUSED dxpl)
+{
+    herr_t retval = EXIT_SUCCESS;
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            break;
+        case H5T_CONV_CONV:
+            for (size_t i = 0; i < nelmts; ++i)
+                ((dst_cmpd_t *)buf)[i].b = ((src_cmpd_t *)buf)[i].b;
+            break;
+        case H5T_CONV_FREE:
+            break;
+        default:
+            break;
+    }
+    return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -3789,6 +3820,109 @@ error:
 } /* end test_compound_18() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_user_compound_conversion
+ *
+ * Purpose:     Tests that library fails correctly when opening a dataset
+ *              a compound datatype with zero fields.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_user_compound_conversion(void)
+{
+    hid_t             file_id = H5I_INVALID_HID;
+    hid_t             dset_id = H5I_INVALID_HID;
+    hid_t             src = H5I_INVALID_HID, dst = H5I_INVALID_HID;
+    hid_t             space_id = H5I_INVALID_HID;
+    struct src_cmpd_t buf[]    = {{1, 1.0}};
+
+    hsize_t dim = 1;
+    char    filename[1024];
+
+    TESTING("compound conversion via user conversion callback");
+
+    /* Create the source compound datatype */
+    if ((src = H5Tcreate(H5T_COMPOUND, sizeof(struct src_cmpd_t))) < 0) {
+        FAIL_PUTS_ERROR("couldn't create compound datatype");
+    }
+
+    if (H5Tinsert(src, "a", HOFFSET(struct src_cmpd_t, a), H5T_NATIVE_UINT32) < 0) {
+        FAIL_PUTS_ERROR("couldn't insert field into compound datatype");
+    }
+
+    if (H5Tinsert(src, "b", HOFFSET(struct src_cmpd_t, b), H5T_NATIVE_FLOAT) < 0) {
+        FAIL_PUTS_ERROR("couldn't insert field into compound datatype");
+    }
+
+    /* Create the destination compound datatype */
+    if ((dst = H5Tcreate(H5T_COMPOUND, sizeof(struct dst_cmpd_t))) < 0) {
+        FAIL_PUTS_ERROR("couldn't create compound datatype");
+    }
+
+    if (H5Tinsert(dst, "b", HOFFSET(struct dst_cmpd_t, b), H5T_IEEE_F32LE) < 0) {
+        FAIL_PUTS_ERROR("couldn't insert field into compound datatype");
+    }
+
+    if (H5Tregister(H5T_PERS_SOFT, "src_cmpd_t->dst_cmpd_t", src, dst, &user_compound_convert) < 0) {
+        FAIL_PUTS_ERROR("couldn't register compound conversion function");
+    }
+
+    /* Create File */
+    h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        FAIL_PUTS_ERROR("couldn't create file");
+    }
+
+    /* Create a dataspace to use */
+    space_id = H5Screate_simple(1, &dim, NULL);
+    assert(space_id > 0);
+
+    /* Create a dataset with the destination compound datatype */
+    if ((dset_id = H5Dcreate2(file_id, "dataset", dst, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0) {
+        FAIL_PUTS_ERROR("couldn't create dataset with compound datatype");
+    }
+
+    if (H5Dwrite(dset_id, src, space_id, H5S_ALL, H5P_DEFAULT, buf) < 0) {
+        FAIL_PUTS_ERROR("couldn't write to dataset with user compound conversion function");
+    }
+
+    /* Close IDs */
+    if (H5Tunregister(H5T_PERS_SOFT, "src_cmpd_t->dst_cmpd_t", src, dst, &user_compound_convert) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Tclose(src) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Tclose(dst) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(space_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Fclose(file_id) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tunregister(H5T_PERS_SOFT, "src_cmpd_t->dst_cmpd_t", src, dst, &user_compound_convert);
+        H5Tclose(src);
+        H5Tclose(dst);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY;
+
+    return 1;
+} /* end test_user_compound_conversion() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_query
  *
  * Purpose:     Tests query functions of compound and enumeration types.
@@ -6639,7 +6773,7 @@ test_int_float_except(void)
 {
 #if H5_SIZEOF_INT == 4 && H5_SIZEOF_FLOAT == 4
     float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0F, (float)INT_MAX - 32.0F, (float)INT_MAX - 68.0F,
-                               (float)4.5F};
+                                      (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
     float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
     int   *intp; /* Pointer to buffer, as integers */
@@ -8499,7 +8633,7 @@ test_versionbounds(void)
     hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
     int          low, high;                         /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
-                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
+                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
     int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
     color_t      enum_val;           /* Enum type index */
@@ -8786,6 +8920,7 @@ main(void)
     nerrors += test_compound_16();
     nerrors += test_compound_17();
     nerrors += test_compound_18();
+    nerrors += test_user_compound_conversion();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();
