@@ -22780,7 +22780,7 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    ext_link_path_handling
+ * Function:    ud_link_path_handling
  *
  * Purpose:     Create user-defined links by relative and absolute paths
  *
