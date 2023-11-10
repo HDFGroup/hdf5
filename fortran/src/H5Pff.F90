@@ -5342,7 +5342,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \brief Retrieves local and global causes that broke collective I/O on the last parallel I/O call.
 !!
 !! \param plist_id                   Dataset transfer property list identifier
-!! \param local_no_collective_cause  An enumerated set value indicating the causes that prevented collective I/O in the local process 
+!! \param local_no_collective_cause  An enumerated set value indicating the causes that prevented collective I/O in the local process
 !! \param global_no_collective_cause An enumerated set value indicating the causes across all processes that prevented collective I/O
 !! \param hdferr                     \fortran_error
 !!
