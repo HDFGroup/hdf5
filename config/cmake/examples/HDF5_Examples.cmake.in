@@ -78,6 +78,7 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDN
 
 ###############################################################################################################
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ROOT:PATH=${INSTALLDIR}")
+set (ENV{HDF5_ROOT} "${INSTALLDIR}")
 if(WIN32)
   set(SITE_OS_NAME "Windows")
   set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}\\build)
@@ -98,11 +99,11 @@ endif()
 set(ENV{HDF5_PLUGIN_PATH} "${INSTALLDIR}/lib/plugin")
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 ### use a toolchain file (supported everywhere)       ####
-if(NOT DEFINED CTEST_TOOLCHAIN_FILE)
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=@CTEST_TOOLCHAIN_FILE@")
-else()
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=${CTEST_TOOLCHAIN_FILE}")
-endif()
+#if(NOT DEFINED CTEST_TOOLCHAIN_FILE)
+#  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=@CTEST_TOOLCHAIN_FILE@")
+#else()
+#  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=${CTEST_TOOLCHAIN_FILE}")
+#endif()
 
 ###############################################################################################################
 # For any comments please contact cdashhelp@hdfgroup.org
