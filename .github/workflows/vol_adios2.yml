@@ -25,22 +25,11 @@ jobs:
           sudo apt update
           sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
 
-      # TODO
-      #- name: Checkout HDF5
-      #  uses: actions/checkout@v4
-      #  with:
-      #    repository: HDFGroup/hdf5
-      #    path: hdf5
-      # TODO
-
-      # TODO
       - name: Checkout HDF5
         uses: actions/checkout@v4
         with:
-          repository: jhendersonHDF/hdf5
+          repository: HDFGroup/hdf5
           path: hdf5
-          ref: api_tests_dev
-      # TODO
 
       - name: Configure HDF5
         shell: bash
