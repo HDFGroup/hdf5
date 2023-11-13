@@ -36,7 +36,7 @@
 #endif
 
 ! Define if the intrinsic function STORAGE_SIZE exists
-#cmakedefine CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE
+#cmakedefine01 CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE
 #if CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE == 0
 #undef H5_FORTRAN_HAVE_STORAGE_SIZE
 #else
@@ -44,7 +44,7 @@
 #endif
 
 ! Define if the intrinsic function SIZEOF exists
-#cmakedefine CMAKE_H5_FORTRAN_HAVE_SIZEOF
+#cmakedefine01 CMAKE_H5_FORTRAN_HAVE_SIZEOF
 #if CMAKE_H5_FORTRAN_HAVE_SIZEOF == 0
 #undef H5_FORTRAN_HAVE_SIZEOF
 #else
@@ -52,7 +52,7 @@
 #endif
 
 ! Define if the intrinsic function C_SIZEOF exists
-#cmakedefine CMAKE_H5_FORTRAN_HAVE_C_SIZEOF
+#cmakedefine01 CMAKE_H5_FORTRAN_HAVE_C_SIZEOF
 #if CMAKE_H5_FORTRAN_HAVE_C_SIZEOF == 0
 #undef H5_FORTRAN_HAVE_C_SIZEOF
 #else
