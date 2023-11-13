@@ -165,5 +165,11 @@ jobs:
 
       - name: Test HDF5 cache VOL connector with HDF5 API tests
         working-directory: ${{ github.workspace }}/hdf5/build
+        # Don't test the Cache VOL connector with the HDF5 API tests yet
+        # when it's stacked on top of the Async connector, as it doesn't
+        # currently pass all the tests due to the Async connector not passing
+        # all the tests. Leave the step in, but skip it to leave an indication
+        # that this should be re-enabled in the future.
+        if: ${{ ! matrix.async }}
         run: |
           ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" .
