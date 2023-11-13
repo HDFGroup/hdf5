@@ -996,7 +996,7 @@ CONTAINS
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
 #if H5_PAC_FC_MAX_REAL_PRECISION > 28
-#if H5_HAVE_FLOAT128 == 1
+#ifdef H5_HAVE_FLOAT128
        ELSE
           h5_type = H5T_NATIVE_FLOAT_128
 #endif

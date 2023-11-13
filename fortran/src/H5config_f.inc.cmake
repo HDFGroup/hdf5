@@ -36,13 +36,28 @@
 #endif
 
 ! Define if the intrinsic function STORAGE_SIZE exists
-#cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
+#cmakedefine01 CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE
+#if CMAKE_H5_FORTRAN_HAVE_STORAGE_SIZE == 0
+#undef H5_FORTRAN_HAVE_STORAGE_SIZE
+#else
+#define H5_FORTRAN_HAVE_STORAGE_SIZE
+#endif
 
 ! Define if the intrinsic function SIZEOF exists
-#cmakedefine H5_FORTRAN_HAVE_SIZEOF @H5_FORTRAN_HAVE_SIZEOF@
+#cmakedefine01 CMAKE_H5_FORTRAN_HAVE_SIZEOF
+#if CMAKE_H5_FORTRAN_HAVE_SIZEOF == 0
+#undef H5_FORTRAN_HAVE_SIZEOF
+#else
+#define H5_FORTRAN_HAVE_SIZEOF
+#endif
 
 ! Define if the intrinsic function C_SIZEOF exists
-#cmakedefine H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@
+#cmakedefine01 CMAKE_H5_FORTRAN_HAVE_C_SIZEOF
+#if CMAKE_H5_FORTRAN_HAVE_C_SIZEOF == 0
+#undef H5_FORTRAN_HAVE_C_SIZEOF
+#else
+#define H5_FORTRAN_HAVE_C_SIZEOF
+#endif
 
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
@@ -63,7 +78,12 @@
 #define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 ! If C has quad precision
-#cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
+#cmakedefine01 CMAKE_H5_HAVE_FLOAT128
+#if CMAKE_H5_HAVE_FLOAT128 == 0
+#undef H5_HAVE_FLOAT128
+#else
+#define H5_HAVE_FLOAT128
+#endif
 
 ! Define if INTEGER*16 is available
 #define H5_HAVE_Fortran_INTEGER_SIZEOF_16 @H5_HAVE_Fortran_INTEGER_SIZEOF_16@
