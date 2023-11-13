@@ -12,33 +12,39 @@
 ! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
 
 ! Define if there is parallel support
-#cmakedefine01 H5_HAVE_PARALLEL
-#if H5_HAVE_PARALLEL == 0
+#cmakedefine01 CMAKE_H5_HAVE_PARALLEL
+#if CMAKE_H5_HAVE_PARALLEL == 0
 #undef H5_HAVE_PARALLEL
+#else
+#define H5_HAVE_PARALLEL
 #endif
 
 ! Define if there is subfiling support
-#cmakedefine01 H5_HAVE_SUBFILING_VFD
-#if H5_HAVE_SUBFILING_VFD == 0
+#cmakedefine01 CMAKE_H5_HAVE_SUBFILING_VFD
+#if CMAKE_H5_HAVE_SUBFILING_VFD == 0
 #undef H5_HAVE_SUBFILING_VFD
+#else
+#define H5_HAVE_SUBFILING_VFD
 #endif
 
 ! Define if on APPLE
 #cmakedefine01 H5_HAVE_DARWIN
 #if H5_HAVE_DARWIN == 0
 #undef H5_HAVE_DARWIN
+#else
+#define H5_HAVE_DARWIN
 #endif
 
 ! Define if the intrinsic function STORAGE_SIZE exists
-#define H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
+#cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
 
 ! Define if the intrinsic function SIZEOF exists
-#define H5_FORTRAN_HAVE_SIZEOF @H5_FORTRAN_HAVE_SIZEOF@
+#cmakedefine H5_FORTRAN_HAVE_SIZEOF @H5_FORTRAN_HAVE_SIZEOF@
 
 ! Define if the intrinsic function C_SIZEOF exists
-#define H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@
+#cmakedefine H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@
 
-! Define if the intrinsic C_LONG_DOUBLE exists
+! Define if the intrinsic function C_LONG_DOUBLE exists
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
@@ -47,17 +53,17 @@
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #define H5_HAVE_ISO_FORTRAN_ENV @H5_HAVE_ISO_FORTRAN_ENV@
 
-! should this be ${HDF_PREFIX} instead of H5 MSB
+! Define the size of C's double
 #define H5_SIZEOF_DOUBLE @H5_SIZEOF_DOUBLE@
 
-! should this be ${HDF_PREFIX} instead of H5 MSB
+! Define the size of C's long double
 #define H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
 
 ! Define the maximum decimal precision for reals
 #define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 ! If C has quad precision
-#define H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
+#cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
 ! Define if INTEGER*16 is available
 #define H5_HAVE_Fortran_INTEGER_SIZEOF_16 @H5_HAVE_Fortran_INTEGER_SIZEOF_16@
@@ -84,7 +90,9 @@
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
 
 ! Define if deprecated public API symbols are disabled
-#cmakedefine01 H5_NO_DEPRECATED_SYMBOLS
-#if H5_NO_DEPRECATED_SYMBOLS == 0
+#cmakedefine01 CMAKE_NO_DEPRECATED_SYMBOLS
+#if CMAKE_NO_DEPRECATED_SYMBOLS == 0
 #undef H5_NO_DEPRECATED_SYMBOLS
+#else
+#define H5_NO_DEPRECATED_SYMBOLS
 #endif
