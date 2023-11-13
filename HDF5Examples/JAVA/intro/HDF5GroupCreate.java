@@ -14,26 +14,6 @@
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-/**
- * <p>
- * Title: HDF Native Package (Java) Example
- * </p>
- * <p>
- * Description: this example shows how to create HDF5 groups using the
- * "HDF Native Package (Java)". The example created the group structure:
- *
- * <pre>
- *     "/" (root)
- *         g1
- *             g11
- *             g12
- *         g2
- *             g21
- *             g22
- * </pre>
- *
- * </p>
- */
 public class HDF5GroupCreate {
     private static String fname = "HDF5GroupCreate.h5";
 

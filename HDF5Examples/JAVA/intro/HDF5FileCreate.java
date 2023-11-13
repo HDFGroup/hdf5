@@ -14,16 +14,6 @@
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-/**
- * <p>
- * Title: HDF Native Package (Java) Example
- * </p>
- * <p>
- * Description: This example shows how to create an empty HDF5 file using the
- * "HDF Native Package (Java)". If the file (H5FileCreate.h5) already exists, it
- * will be truncated to zero length.
- * </p>
- */
 public class HDF5FileCreate {
     // The name of the file we'll create.
     private static String fname = "HDF5FileCreate.h5";

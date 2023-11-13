@@ -14,23 +14,6 @@
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
-/**
- * <p>
- * Title: HDF Native Package (Java) Example
- * </p>
- * <p>
- * Description: this example shows how to create/read/write HDF attribute using
- * the "HDF Native Package (Java)". The example creates an attribute and, read
- * and write the attribute value:
- *
- * <pre>
- *     "/" (root)
- *             2D 32-bit integer 20x10
- *             (attribute: name="data range", value=[0, 10000])
- * </pre>
- *
- * </p>
- */
 public class HDF5AttributeCreate {
     private static String fname    = "HDF5AttributeCreate.h5";
     private static String dsname   = "2D 32-bit integer 20x10";
