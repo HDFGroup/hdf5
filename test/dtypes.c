@@ -3822,8 +3822,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_user_compound_conversion
  *
- * Purpose:     Tests that library fails correctly when opening a dataset
- *              a compound datatype with zero fields.
+ * Purpose:     Tests that library correctly handles a user-defined
+ *              conversion function between two compound types.
  *
  * Return:      Success:        0
  *              Failure:        number of errors
