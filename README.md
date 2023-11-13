@@ -7,6 +7,7 @@ HDF5 version 1.15.0 currently under development
 [![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![HDF5 VOL connectors build status](https://github.com/jhendersonHDF/hdf5/actions/workflows/vol.yml/badge.svg)](https://github.com/jhendersonHDF/hdf5/actions/workflows/vol.yml)
 [![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 

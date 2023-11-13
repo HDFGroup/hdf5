@@ -1,7 +1,5 @@
 # HDF5 API Tests
 
-[![HDF5 VOL connectors CI](https://github.com/jhendersonHDF/hdf5/actions/workflows/vol.yml/badge.svg)](https://github.com/jhendersonHDF/hdf5/actions/workflows/vol.yml)
-
 This directory contains several test applications that exercise HDF5's
 public API and serve as regression tests for HDF5 [VOL Connectors](https://portal.hdfgroup.org/display/HDF5/Virtual+Object+Layer).
 
