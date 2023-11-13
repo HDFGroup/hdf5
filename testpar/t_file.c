@@ -71,6 +71,18 @@ test_split_comm_access(void)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     is_old = mpi_rank % 2;
     mrc    = MPI_Comm_split(MPI_COMM_WORLD, is_old, mpi_rank, &comm);
     VRFY((mrc == MPI_SUCCESS), "");
@@ -771,13 +783,25 @@ test_file_properties(void)
     int         mpi_ret; /* MPI return value */
     int         cmp;     /* Compare value */
 
-    filename = (const char *)GetTestParameters();
-
     /* set up MPI parameters */
     mpi_ret = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     VRFY((mpi_ret >= 0), "MPI_Comm_size succeeded");
     mpi_ret = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     VRFY((mpi_ret >= 0), "MPI_Comm_rank succeeded");
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
+    filename = (const char *)GetTestParameters();
+
     mpi_ret = MPI_Info_create(&info);
     VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
     mpi_ret = MPI_Info_set(info, "hdf_info_prop1", "xyz");
@@ -963,6 +987,18 @@ test_delete(void)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or file more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     /* setup file access plist */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);

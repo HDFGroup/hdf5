@@ -290,6 +290,7 @@ H5TEST_DLL const char    *h5_get_version_string(H5F_libver_t libver);
 H5TEST_DLL int            h5_compare_file_bytes(char *fname1, char *fname2);
 H5TEST_DLL int            h5_duplicate_file_by_bytes(const char *orig, const char *dest);
 H5TEST_DLL herr_t         h5_check_if_file_locking_enabled(bool *are_enabled);
+H5TEST_DLL herr_t         h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol);
 H5TEST_DLL bool           h5_using_default_driver(const char *drv_name);
 H5TEST_DLL herr_t         h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel);
 H5TEST_DLL herr_t         h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
