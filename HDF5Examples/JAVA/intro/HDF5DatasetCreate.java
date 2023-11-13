@@ -14,6 +14,27 @@
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
+/**
+ * <p>
+ * Title: HDF Native Package (Java) Example
+ * </p>
+ * <p>
+ * Description: this example shows how to create HDF5 datasets using the
+ * "HDF Native Package (Java)". The example created the group structure and
+ * datasets:
+ *
+ * <pre>
+ *     "/" (root)
+ *         integer arrays
+ *             2D 32-bit integer 20x10
+ *             3D 16-bit integer 20x10x5
+ *         float arrays
+ *             2D 64-bit double 20x10
+ *             3D 32-bit float  20x10x5
+ * </pre>
+ *
+ * </p>
+ */
 public class HDF5DatasetCreate {
     private static String fname  = "HDF5DatasetCreate.h5";
     private static long[] dims2D = {20, 10};

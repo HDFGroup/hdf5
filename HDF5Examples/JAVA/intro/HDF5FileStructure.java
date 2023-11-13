@@ -18,10 +18,31 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
+/**
+ * <p>
+ * Title: HDF Native Package (Java) Example
+ * </p>
+ * <p>
+ * Description: this example shows how to retrieve HDF file structure using the
+ * "HDF Native Package (Java)". The example created the group structure and
+ * datasets, and print out the file structure:
+ *
+ * <pre>
+ *     "/" (root)
+ *         integer arrays
+ *             2D 32-bit integer 20x10
+ *             3D unsigned 8-bit integer 20x10x5
+ *         float arrays
+ *             2D 64-bit double 20x10
+ *             3D 32-bit float  20x10x5
+ * </pre>
+ *
+ * </p>
+ */
 public class HDF5FileStructure {
-    private static String fname  = "HDF5FileStructure.h5";
-    private static long[] dims2D = {20, 10};
-    private static long[] dims3D = {20, 10, 5};
+    private static String fname = "HDF5FileStructure.h5";
+    private long[] dims2D       = {20, 10};
+    private long[] dims3D       = {20, 10, 5};
 
     private static void FileStructure()
     {
