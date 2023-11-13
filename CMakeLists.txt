@@ -1041,10 +1041,12 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to build examples
 #-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
+if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
   option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
   if (HDF5_BUILD_EXAMPLES)
-    add_subdirectory (examples)
+    include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
+    set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
+    add_subdirectory (HDF5Examples)
   endif ()
 endif ()
 
@@ -1060,7 +1062,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to build Fortran bindings/tests/examples
+# Option to build Fortran bindings/tests
 # Make sure this appears before the CONFIGURE_FILE step
 # so that fortran name mangling is detected before writing H5pubconf.h
 #-----------------------------------------------------------------------------

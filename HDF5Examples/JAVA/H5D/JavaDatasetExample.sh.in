@@ -1,0 +1,493 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
+top_builddir=@top_builddir@
+top_srcdir=@top_srcdir@
+srcdir=@srcdir@
+IS_DARWIN="@H5_IS_DARWIN@"
+
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
+TESTNAME=EX_Datasets
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+# Set up default variable values if not supplied by the user.
+RM='rm -rf'
+CMP='cmp'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+BASENAME='basename'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+
+# where the libs exist
+HDFLIB_HOME="$top_srcdir/java/lib"
+BLDDIR="."
+BLDLIBDIR="$BLDDIR/testlibs"
+HDFTEST_HOME="$top_srcdir/java/examples/datasets"
+JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
+TESTJARFILE=jar@PACKAGE_TARNAME@datasets.jar
+test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
+
+######################################################################
+# library files
+# --------------------------------------------------------------------
+# All the library files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_LIBRARY_FILES="
+$top_builddir/src/.libs/libhdf5.*
+$top_builddir/java/src/jni/.libs/libhdf5_java.*
+$top_builddir/java/src/$JARFILE
+"
+LIST_DATA_FILES="
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Alloc.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Checksum.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Chunk.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Compact.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_External.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_FillValue.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Gzip.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Hyperslab.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_ReadWrite.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Shuffle.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Szip.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_UnlimitedAdd.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_UnlimitedGzip.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_UnlimitedMod.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Nbit.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Transform.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Sofloat.txt
+$HDFTEST_HOME/../tfiles/examples.datasets.H5Ex_D_Soint.txt
+"
+
+#
+# copy files from source dirs to test dir
+#
+COPY_LIBFILES="$LIST_LIBRARY_FILES"
+COPY_JARTESTFILES="$LIST_JAR_TESTFILES"
+
+COPY_LIBFILES_TO_BLDLIBDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_LIBFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -fR $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+                BNAME=`$BASENAME $tstfile`
+                if [ "$BNAME" = "libhdf5_java.dylib" ]; then
+                    COPIED_LIBHDF5_JAVA=1
+                fi
+            fi
+        fi
+    done
+    if [[ "$IS_DARWIN" = "yes" ]] && [[ $COPIED_LIBHDF5_JAVA -eq 1 ]]; then
+       (cd $BLDLIBDIR; \
+         install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
+         exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
+         echo $exist_path; \
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib)
+    fi
+    # copy jar files. Used -f to make sure get a new copy
+    for tstfile in $COPY_JARTESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -fR $tstfile $BLDLIBDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_LIBFILES_AND_BLDLIBDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$HDFLIB_HOME
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM -rf $BLDLIBDIR
+    fi
+}
+
+COPY_DATAFILES="$LIST_DATA_FILES"
+
+COPY_DATAFILES_TO_BLDDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_DATAFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $BLDDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_DATAFILES_AND_BLDDIR()
+{
+        $RM $BLDDIR/examples.datasets.H5Ex_D_*.txt
+        $RM $BLDDIR/H5Ex_D_*.out
+        $RM $BLDDIR/H5Ex_D_*.h5
+        $RM $BLDDIR/H5Ex_D_External.data
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# where Java is installed (requires jdk1.7.x)
+JAVAEXE=@JAVA@
+JAVAEXEFLAGS=@H5_JAVAFLAGS@
+
+###############################################################################
+#            DO NOT MODIFY BELOW THIS LINE
+###############################################################################
+
+# prepare for test
+COPY_LIBFILES_TO_BLDLIBDIR
+COPY_DATAFILES_TO_BLDDIR
+
+CPATH=".:"$BLDLIBDIR"/"$JARFILE":"$TESTJARFILE""
+
+TEST=/usr/bin/test
+if [ ! -x /usr/bin/test ]
+then
+TEST=`which test`
+fi
+
+if $TEST -z "$CLASSPATH"; then
+        CLASSPATH=""
+fi
+CLASSPATH=$CPATH":"$CLASSPATH
+export CLASSPATH
+
+if $TEST -n "$JAVAPATH" ; then
+        PATH=$JAVAPATH":"$PATH
+        export PATH
+fi
+
+if $TEST -e /bin/uname; then
+   os_name=`/bin/uname -s`
+elif $TEST -e /usr/bin/uname; then
+   os_name=`/usr/bin/uname -s`
+else
+   os_name=unknown
+fi
+
+if $TEST -z "$LD_LIBRARY_PATH" ; then
+        LD_LIBRARY_PATH=""
+fi
+
+case  $os_name in
+    *)
+    LD_LIBRARY_PATH=$BLDLIBDIR:$LD_LIBRARY_PATH
+    ;;
+esac
+
+export LD_LIBRARY_PATH
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Alloc"
+TESTING examples.datasets.H5Ex_D_Alloc
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Alloc > H5Ex_D_Alloc.out
+)
+if diff H5Ex_D_Alloc.out examples.datasets.H5Ex_D_Alloc.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Alloc"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Alloc"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Checksum"
+TESTING examples.datasets.H5Ex_D_Checksum
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Checksum > H5Ex_D_Checksum.out
+)
+if diff H5Ex_D_Checksum.out examples.datasets.H5Ex_D_Checksum.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Checksum"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Checksum"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Chunk"
+TESTING examples.datasets.H5Ex_D_Chunk
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Chunk > H5Ex_D_Chunk.out
+)
+if diff H5Ex_D_Chunk.out examples.datasets.H5Ex_D_Chunk.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Chunk"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Chunk"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Compact"
+TESTING examples.datasets.H5Ex_D_Compact
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Compact > H5Ex_D_Compact.out
+)
+if diff H5Ex_D_Compact.out examples.datasets.H5Ex_D_Compact.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Compact"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Compact"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_External"
+TESTING examples.datasets.H5Ex_D_External
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_External > H5Ex_D_External.out
+)
+if diff H5Ex_D_External.out examples.datasets.H5Ex_D_External.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_External"
+else
+    echo "**FAILED**    datasets.H5Ex_D_External"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_FillValue"
+TESTING examples.datasets.H5Ex_D_FillValue
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_FillValue > H5Ex_D_FillValue.out
+)
+if diff H5Ex_D_FillValue.out examples.datasets.H5Ex_D_FillValue.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_FillValue"
+else
+    echo "**FAILED**    datasets.H5Ex_D_FillValue"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+if test $USE_FILTER_DEFLATE = "yes"; then
+    echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Gzip"
+    TESTING examples.datasets.H5Ex_D_Gzip
+    (
+    $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Gzip > H5Ex_D_Gzip.out
+    )
+    if diff H5Ex_D_Gzip.out examples.datasets.H5Ex_D_Gzip.txt > /dev/null; then
+        echo "  PASSED      datasets.H5Ex_D_Gzip"
+    else
+        echo "**FAILED**    datasets.H5Ex_D_Gzip"
+        nerrors="`expr $nerrors + 1`"
+    fi
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Hyperslab"
+TESTING examples.datasets.H5Ex_D_Hyperslab
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Hyperslab > H5Ex_D_Hyperslab.out
+)
+if diff H5Ex_D_Hyperslab.out examples.datasets.H5Ex_D_Hyperslab.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Hyperslab"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Hyperslab"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_ReadWrite"
+TESTING examples.datasets.H5Ex_D_ReadWrite
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_ReadWrite > H5Ex_D_ReadWrite.out
+)
+if diff H5Ex_D_ReadWrite.out examples.datasets.H5Ex_D_ReadWrite.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_ReadWrite"
+else
+    echo "**FAILED**    datasets.H5Ex_D_ReadWrite"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+if test $USE_FILTER_DEFLATE = "yes"; then
+    echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Shuffle"
+    TESTING examples.datasets.H5Ex_D_Shuffle
+    (
+    $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Shuffle > H5Ex_D_Shuffle.out
+    )
+    if diff H5Ex_D_Shuffle.out examples.datasets.H5Ex_D_Shuffle.txt > /dev/null; then
+        echo "  PASSED      datasets.H5Ex_D_Shuffle"
+    else
+        echo "**FAILED**    datasets.H5Ex_D_Shuffle"
+        nerrors="`expr $nerrors + 1`"
+    fi
+fi
+
+if test $USE_FILTER_SZIP = "yes"; then
+    echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Szip"
+    TESTING examples.datasets.H5Ex_D_Szip
+    (
+    $RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Szip > H5Ex_D_Szip.out
+    )
+    if diff H5Ex_D_Szip.out examples.datasets.H5Ex_D_Szip.txt > /dev/null; then
+        echo "  PASSED      datasets.H5Ex_D_Szip"
+    else
+        echo "**FAILED**    datasets.H5Ex_D_Szip"
+        nerrors="`expr $nerrors + 1`"
+    fi
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedAdd"
+TESTING examples.datasets.H5Ex_D_UnlimitedAdd
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedAdd > H5Ex_D_UnlimitedAdd.out
+)
+if diff H5Ex_D_UnlimitedAdd.out examples.datasets.H5Ex_D_UnlimitedAdd.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_UnlimitedAdd"
+else
+    echo "**FAILED**    datasets.H5Ex_D_UnlimitedAdd"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedGzip"
+TESTING examples.datasets.H5Ex_D_UnlimitedGzip
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedGzip > H5Ex_D_UnlimitedGzip.out
+)
+if diff H5Ex_D_External.out examples.datasets.H5Ex_D_External.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_UnlimitedGzip"
+else
+    echo "**FAILED**    datasets.H5Ex_D_UnlimitedGzip"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedMod"
+TESTING examples.datasets.H5Ex_D_UnlimitedMod
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_UnlimitedMod > H5Ex_D_UnlimitedMod.out
+)
+if diff H5Ex_D_UnlimitedMod.out examples.datasets.H5Ex_D_UnlimitedMod.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_UnlimitedMod"
+else
+    echo "**FAILED**    datasets.H5Ex_D_UnlimitedMod"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Nbit"
+TESTING examples.datasets.H5Ex_D_Nbit
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Nbit > H5Ex_D_Nbit.out
+)
+if diff H5Ex_D_Nbit.out examples.datasets.H5Ex_D_Nbit.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Nbit"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Nbit"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Transform"
+TESTING examples.datasets.H5Ex_D_Transform
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Transform > H5Ex_D_Transform.out
+)
+if diff H5Ex_D_Transform.out examples.datasets.H5Ex_D_Transform.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Transform"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Transform"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Sofloat"
+TESTING examples.datasets.H5Ex_D_Sofloat
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Sofloat > H5Ex_D_Sofloat.out
+)
+if diff H5Ex_D_Sofloat.out examples.datasets.H5Ex_D_Sofloat.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Sofloat"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Sofloat"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Soint"
+TESTING examples.datasets.H5Ex_D_Soint
+(
+$RUNSERIAL $JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH examples.datasets.H5Ex_D_Soint > H5Ex_D_Soint.out
+)
+if diff H5Ex_D_Soint.out examples.datasets.H5Ex_D_Soint.txt > /dev/null; then
+    echo "  PASSED      datasets.H5Ex_D_Soint"
+else
+    echo "**FAILED**    datasets.H5Ex_D_Soint"
+    nerrors="`expr $nerrors + 1`"
+fi
+
+# Clean up temporary files/directories
+CLEAN_LIBFILES_AND_BLDLIBDIR
+CLEAN_DATAFILES_AND_BLDDIR
+
+# Report test results and exit
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi
