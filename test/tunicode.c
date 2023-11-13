@@ -382,24 +382,30 @@ test_objnames(hid_t fid, const char *string)
     hsize_t    dims = 1;
     hobj_ref_t obj_ref;
     ssize_t    size;
+    bool       vol_is_native;
     herr_t     ret;
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid, &vol_is_native), FAIL, "h5_using_native_vol");
 
     /* Create a group with a UTF-8 name */
     grp_id = H5Gcreate2(fid, string, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(grp_id, FAIL, "H5Gcreate2");
 
-    /* Set a comment on the group to test that we can access the group
-     * Also test that UTF-8 comments can be read.
-     */
-    ret = H5Oset_comment_by_name(fid, string, string, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oset_comment_by_name");
-    size = H5Oget_comment_by_name(fid, string, read_buf, (size_t)MAX_STRING_LENGTH, H5P_DEFAULT);
-    CHECK(size, FAIL, "H5Oget_comment_by_name");
+    if (vol_is_native) {
+        /* Set a comment on the group to test that we can access the group
+         * Also test that UTF-8 comments can be read.
+         */
+        ret = H5Oset_comment_by_name(fid, string, string, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oset_comment_by_name");
+        size = H5Oget_comment_by_name(fid, string, read_buf, (size_t)MAX_STRING_LENGTH, H5P_DEFAULT);
+        CHECK(size, FAIL, "H5Oget_comment_by_name");
+
+        VERIFY(strcmp(string, read_buf), 0, "strcmp");
+    }
 
     ret = H5Gclose(grp_id);
     CHECK(ret, FAIL, "H5Gclose");
-
-    VERIFY(strcmp(string, read_buf), 0, "strcmp");
 
     /* Create a new dataset with a UTF-8 name */
     grp1_id = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -441,34 +447,35 @@ test_objnames(hid_t fid, const char *string)
 
     /* Don't close the group -- use it to test that object references
      * can refer to objects named in UTF-8 */
+    if (vol_is_native) {
+        space_id = H5Screate_simple(RANK, &dims, NULL);
+        CHECK(space_id, FAIL, "H5Screate_simple");
+        dset_id =
+            H5Dcreate2(grp2_id, DSET3_NAME, H5T_STD_REF_OBJ, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Dcreate2");
 
-    space_id = H5Screate_simple(RANK, &dims, NULL);
-    CHECK(space_id, FAIL, "H5Screate_simple");
-    dset_id =
-        H5Dcreate2(grp2_id, DSET3_NAME, H5T_STD_REF_OBJ, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dcreate2");
+        /* Create reference to named datatype */
+        ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, (hid_t)-1);
+        CHECK(ret, FAIL, "H5Rcreate");
+        /* Write selection and read it back*/
+        ret = H5Dwrite(dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &obj_ref);
+        CHECK(ret, FAIL, "H5Dwrite");
+        ret = H5Dread(dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &obj_ref);
+        CHECK(ret, FAIL, "H5Dread");
 
-    /* Create reference to named datatype */
-    ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, (hid_t)H5I_INVALID_HID);
-    CHECK(ret, FAIL, "H5Rcreate");
-    /* Write selection and read it back*/
-    ret = H5Dwrite(dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &obj_ref);
-    CHECK(ret, FAIL, "H5Dwrite");
-    ret = H5Dread(dset_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &obj_ref);
-    CHECK(ret, FAIL, "H5Dread");
+        /* Ensure that we can open named datatype using object reference */
+        type_id = H5Rdereference2(dset_id, H5P_DEFAULT, H5R_OBJECT, &obj_ref);
+        CHECK(type_id, FAIL, "H5Rdereference2");
+        ret = H5Tcommitted(type_id);
+        VERIFY(ret, 1, "H5Tcommitted");
 
-    /* Ensure that we can open named datatype using object reference */
-    type_id = H5Rdereference2(dset_id, H5P_DEFAULT, H5R_OBJECT, &obj_ref);
-    CHECK(type_id, FAIL, "H5Rdereference2");
-    ret = H5Tcommitted(type_id);
-    VERIFY(ret, 1, "H5Tcommitted");
-
-    ret = H5Tclose(type_id);
-    CHECK(type_id, FAIL, "H5Tclose");
-    ret = H5Dclose(dset_id);
-    CHECK(ret, FAIL, "H5Dclose");
-    ret = H5Sclose(space_id);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Tclose(type_id);
+        CHECK(type_id, FAIL, "H5Tclose");
+        ret = H5Dclose(dset_id);
+        CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Sclose(space_id);
+        CHECK(ret, FAIL, "H5Sclose");
+    }
 
     ret = H5Gclose(grp2_id);
     CHECK(ret, FAIL, "H5Gclose");

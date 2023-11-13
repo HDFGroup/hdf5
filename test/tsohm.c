@@ -3711,9 +3711,17 @@ void
 test_sohm(void)
 {
     const char *env_h5_drvr;
+    bool        vol_is_native;
     bool        default_driver;
 
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Get the VFD to use */
     env_h5_drvr = getenv(HDF5_DRIVER);

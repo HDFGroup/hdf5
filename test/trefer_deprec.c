@@ -1815,9 +1815,17 @@ void
 test_reference_deprec(void)
 {
     H5F_libver_t low, high; /* Low and high bounds */
+    bool         vol_is_native;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deprecated References\n"));
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     test_reference_params(); /* Test for correct parameter checking */
     test_reference_obj();    /* Test basic H5R object reference code */
