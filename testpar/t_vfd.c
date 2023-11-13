@@ -4162,14 +4162,13 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
 } /* vector_write_test_7() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    vector_write_test_8()
  *
  * Purpose:     This test is to verify the fix for the following problem
  *              in H5FD__mpio_write_vector when calculating max_addr:
- *              --illegal reference occurs when referencing the s_sizes array 
- *                with <count - 1> due to <count> exceeding the length of the 
+ *              --illegal reference occurs when referencing the s_sizes array
+ *                with <count - 1> due to <count> exceeding the length of the
  *                size array which uses the compressed feature.
  *
  *              1) Open the test file with the specified VFD, and set
@@ -4230,8 +4229,8 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     size_t      sizes[4];
     H5FD_mem_t  types[2];
 
-    haddr_t *tt_addrs = NULL;       /* For storing addrs */
-    const void **tt_bufs = NULL;    /* For storing buf pointers */
+    haddr_t     *tt_addrs = NULL; /* For storing addrs */
+    const void **tt_bufs  = NULL; /* For storing buf pointers */
 
     pass = true;
 
@@ -4268,8 +4267,8 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     if (pass) {
 
         tt_addrs = (haddr_t *)malloc((INTS_PER_RANK) * sizeof(haddr_t *));
-        tt_bufs = (const void **)malloc((INTS_PER_RANK) * sizeof(void *));
-    
+        tt_bufs  = (const void **)malloc((INTS_PER_RANK) * sizeof(void *));
+
         if (tt_addrs == NULL || tt_bufs == NULL) {
             pass         = false;
             failure_mssg = "Can't allocate local addrs and bufs buffers.";
@@ -4278,8 +4277,8 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         if (pass) {
             eoa = (haddr_t)mpi_size * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
 
-            setup_vfd_test_file(file_name_id, filename, mpi_size, xfer_mode, coll_opt_mode, vfd_name, eoa, &lf,
-                                &fapl_id, &dxpl_id);
+            setup_vfd_test_file(file_name_id, filename, mpi_size, xfer_mode, coll_opt_mode, vfd_name, eoa,
+                                &lf, &fapl_id, &dxpl_id);
         }
     }
 
@@ -4325,7 +4324,7 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         base_index = (mpi_rank * INTS_PER_RANK);
         base_addr  = (haddr_t)base_index * (haddr_t)sizeof(int32_t);
 
-        count    = INTS_PER_RANK - 1;
+        count = INTS_PER_RANK - 1;
 
         types[0] = H5FD_MEM_DRAW;
         types[1] = H5FD_MEM_NOLIST;
@@ -4337,14 +4336,14 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         tt_addrs[0] = base_addr;
         tt_bufs[0]  = (const void *)(&(increasing_fi_buf[base_index]));
-        
+
         tt_addrs[0] = base_addr;
         base_index += 2;
-        base_addr  = (haddr_t)base_index * (haddr_t)sizeof(int32_t);
+        base_addr = (haddr_t)base_index * (haddr_t)sizeof(int32_t);
 
         for (i = 1; i < (INTS_PER_RANK - 1); i++) {
 
-            tt_addrs[i]  = base_addr + ((haddr_t)(i - 1) * (haddr_t)sizeof(int32_t));
+            tt_addrs[i] = base_addr + ((haddr_t)(i - 1) * (haddr_t)sizeof(int32_t));
             tt_bufs[i]  = (const void *)(&(increasing_fi_buf[base_index + (i - 1)]));
         }
 
@@ -4436,7 +4435,6 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     return (!pass);
 
 } /* vector_write_test_8() */
-
 
 static void
 test_vector_io(int mpi_rank, int mpi_size)
