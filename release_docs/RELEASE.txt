@@ -835,6 +835,16 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Removed an Autotools configure hack that causes problems on MacOS
+
+      A sed line in configure.ac was added in the past to paper over some
+      problems with older versions of the Autotools that would add incorrect
+      linker flags. This hack is not needed with recent versions of the
+      Autotools and the sed line errors on MacOS (though this was a silent
+      error that didn't break the build) so the hack has been removed.
+
+      Fixes GitHub issue #3843
+
     - Fixed an issue where the h5tools_test_utils test program was being
       installed on the system for Autotools builds of HDF5
 
