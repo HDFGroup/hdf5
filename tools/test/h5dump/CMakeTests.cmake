@@ -426,7 +426,7 @@
     configure_file(${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
-    #HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   else ()
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
