@@ -426,7 +426,7 @@
     configure_file(${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
+    #HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   else ()
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tfloatsattrs.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
@@ -1027,7 +1027,7 @@
     ADD_H5_TEST (tbitnopaque_le 0 --enable-error-stack tbitnopaque.h5)
   endif ()
 
-  #test for the nested compound type
+  # test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
@@ -1056,7 +1056,7 @@
   ADD_H5_TEST (tvldtypes4 0 --enable-error-stack tvldtypes4.h5)
   ADD_H5_TEST (tvldtypes5 0 --enable-error-stack tvldtypes5.h5)
 
-  #test for file with variable length string data
+  # test for file with variable length string data
   ADD_H5_TEST (tvlstr 0 --enable-error-stack tvlstr.h5)
   ADD_H5_TEST (tvlenstr_array 0 --enable-error-stack tvlenstr_array.h5)
 
