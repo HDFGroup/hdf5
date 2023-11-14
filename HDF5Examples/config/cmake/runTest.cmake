@@ -122,6 +122,10 @@ if (NOT TEST_RESULT EQUAL TEST_EXPECT)
       file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
       message (STATUS "Output :\n${TEST_STREAM}")
     endif ()
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+      file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+      message (STATUS "Error Output :\n${TEST_STREAM}")
+    endif ()
   endif ()
   message (FATAL_ERROR "Failed: Test program ${TEST_PROGRAM} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
 endif ()
@@ -214,19 +218,11 @@ if (NOT TEST_SKIP_COMPARE)
     file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
-      if (WIN32)
-        configure_file(${TEST_FOLDER}/${TEST_REFERENCE} ${TEST_FOLDER}/${TEST_REFERENCE}.tmp NEWLINE_STYLE CRLF)
-        if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}.tmp")
-          file(RENAME ${TEST_FOLDER}/${TEST_REFERENCE}.tmp ${TEST_FOLDER}/${TEST_REFERENCE})
-        endif ()
-        #file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-        #file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-      endif ()
 
       if (NOT TEST_SORT_COMPARE)
         # now compare the output with the reference
         execute_process (
-            COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
             RESULT_VARIABLE TEST_COMPARE_RESULT
         )
       else ()
@@ -289,18 +285,10 @@ if (NOT TEST_SKIP_COMPARE)
     file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
-      if (WIN32)
-        configure_file(${TEST_FOLDER}/${TEST_ERRREF} ${TEST_FOLDER}/${TEST_ERRREF}.tmp NEWLINE_STYLE CRLF)
-        if (EXISTS "${TEST_FOLDER}/${TEST_ERRREF}.tmp")
-          file(RENAME ${TEST_FOLDER}/${TEST_ERRREF}.tmp ${TEST_FOLDER}/${TEST_ERRREF})
-        endif ()
-        #file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
-        #file (WRITE ${TEST_FOLDER}/${TEST_ERRREF} "${TEST_STREAM}")
-      endif ()
 
       # now compare the error output with the error reference
       execute_process (
-          COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
+          COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
           RESULT_VARIABLE TEST_ERRREF_RESULT
       )
       if (TEST_ERRREF_RESULT)
@@ -376,6 +364,22 @@ if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
       COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
       RESULT_VARIABLE TEST_RESULT
   )
+endif ()
+
+if (NOT DEFINED ENV{HDF5_NOCLEANUP})
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
+  endif ()
+
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+  endif ()
+
+  if (TEST_DELETE_LIST)
+    foreach (dfile in ${TEST_DELETE_LIST})
+      file (REMOVE ${dfile})
+    endforeach ()
+  endif ()
 endif ()
 
 # everything went fine...

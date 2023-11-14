@@ -49,6 +49,7 @@ endif ()
 # run the test program, capture the stdout/stderr and the result var
 execute_process (
     COMMAND ${TEST_TESTER} -Xmx1024M
+    -Dorg.slf4j.simpleLogger.defaultLogLevel=${LOG_LEVEL}
     -Djava.library.path=${TEST_LIBRARY_DIRECTORY}
     -cp "${TEST_CLASSPATH}" ${TEST_ARGS} ${TEST_PROGRAM}
     ${ARGN}
@@ -133,7 +134,7 @@ if (NOT TEST_SKIP_COMPARE)
       if (NOT TEST_SORT_COMPARE)
         # now compare the output with the reference
         execute_process (
-            COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
             RESULT_VARIABLE TEST_COMPARE_RESULT
         )
       else ()
@@ -203,7 +204,7 @@ if (NOT TEST_SKIP_COMPARE)
 
       # now compare the error output with the error reference
       execute_process (
-          COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
+          COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
           RESULT_VARIABLE TEST_ERRREF_RESULT
       )
       if (TEST_ERRREF_RESULT)
@@ -280,6 +281,22 @@ if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
         COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
         RESULT_VARIABLE TEST_RESULT
     )
+  endif ()
+endif ()
+
+if (NOT DEFINED ENV{HDF5_NOCLEANUP})
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
+  endif ()
+
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+  endif ()
+
+  if (TEST_DELETE_LIST)
+    foreach (dfile in ${TEST_DELETE_LIST})
+      file (REMOVE ${dfile})
+    endforeach ()
   endif ()
 endif ()
 
