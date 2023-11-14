@@ -360,7 +360,7 @@
       "generators": [
         "ZIP"
       ],
-      "configurations": ["Release"]
+      "configurations": ["RelWithDebInfo"]
     },
     {
       "name": "ci-x64-Release-Clang",
