@@ -24,7 +24,7 @@
      CHARACTER(LEN=8), PARAMETER :: dsetname = "IntArray" ! Dataset name
 
      CHARACTER(LEN=100) :: filename  ! File name
-     INTEGER        :: fnamelen	     ! File name length
+     INTEGER        :: fnamelen      ! File name length
      INTEGER(HID_T) :: file_id       ! File identifier
      INTEGER(HID_T) :: dset_id       ! Dataset identifier
      INTEGER(HID_T) :: filespace     ! Dataspace identifier in file
@@ -76,9 +76,9 @@
      CALL get_environment_variable("HDF5_PARAPREFIX", filename)
      fnamelen = LEN_TRIM(filename)
      if ( fnamelen == 0 ) then
-	filename = default_fname
+        filename = default_fname
      else
-	filename = filename(1:fnamelen) // "/" // default_fname
+        filename = filename(1:fnamelen) // "/" // default_fname
      endif
      print *, "Using filename = ", filename
 

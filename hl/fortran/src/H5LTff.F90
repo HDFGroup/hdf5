@@ -1115,7 +1115,7 @@ CONTAINS
 
     f_ptr = C_LOC(buf(1:1))
 
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf_type = SIZEOF(buf(1))
@@ -1165,7 +1165,7 @@ CONTAINS
     INTEGER(size_t) :: SizeOf_buf_type
 
     f_ptr = C_LOC(buf(1))
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf_type = SIZEOF(buf(1))
@@ -1216,7 +1216,7 @@ CONTAINS
 
     f_ptr = C_LOC(buf(1))
 
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf_type = SIZEOF(buf(1))
@@ -1264,7 +1264,7 @@ CONTAINS
 
     f_ptr = C_LOC(buf(1)(1:1))
 
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf_type = STORAGE_SIZE(buf(1)(1:1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf_type = SIZEOF(buf(1:1)(1:1))
@@ -1363,7 +1363,7 @@ CONTAINS
 
     f_ptr = C_LOC(buf(1))
 
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf = SIZEOF(buf(1))
@@ -1407,7 +1407,7 @@ CONTAINS
     INTEGER(size_t) :: SizeOf_buf
 
     f_ptr = C_LOC(buf(1))
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf = SIZEOF(buf(1))
@@ -1451,7 +1451,7 @@ CONTAINS
     INTEGER(size_t) :: SizeOf_buf
 
     f_ptr = C_LOC(buf(1))
-#if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
     SizeOf_buf = SIZEOF(buf(1))

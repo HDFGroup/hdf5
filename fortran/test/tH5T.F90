@@ -819,8 +819,6 @@ CONTAINS
 
     SUBROUTINE enumtest(cleanup, total_error)
 
-    USE HDF5
-    USE TH5_MISC
     IMPLICIT NONE
 
     LOGICAL, INTENT(IN)  :: cleanup

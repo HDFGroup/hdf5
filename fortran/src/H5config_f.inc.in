@@ -20,6 +20,9 @@
 ! Define if we have subfiling support
 #undef HAVE_SUBFILING_VFD
 
+! Define if on APPLE
+#undef HAVE_DARWIN
+
 ! Define if the intrinsic function STORAGE_SIZE exists
 #undef FORTRAN_HAVE_STORAGE_SIZE
 
@@ -38,7 +41,7 @@
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #undef HAVE_ISO_FORTRAN_ENV
 
-! Define the size of C's long double
+! Define the size of C's double
 #undef SIZEOF_DOUBLE
 
 ! Define the size of C's long double

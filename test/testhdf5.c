@@ -37,6 +37,15 @@
 int
 main(int argc, char *argv[])
 {
+    hid_t fapl_id = H5I_INVALID_HID;
+
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    CHECK(H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g), FAIL, "H5Pget_vol_cap_flags");
+
+    H5Pclose(fapl_id);
+
     /* Initialize testing framework */
     TestInit(argv[0], NULL, NULL);
 

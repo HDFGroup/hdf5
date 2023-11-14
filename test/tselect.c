@@ -1875,8 +1875,8 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
 **
 ****************************************************************/
 static void
-verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf, size_t H5_ATTR_NDEBUG_UNUSED cube_size,
-                                        unsigned edge_size, unsigned cube_rank)
+verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf, size_t cube_size, unsigned edge_size,
+                                        unsigned cube_rank)
 {
     const uint16_t *cube_ptr;       /* Pointer into the cube buffer */
     uint16_t        expected_value; /* Expected value in dataset */
@@ -1902,7 +1902,9 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf, size_t H5_ATTR
                     m = 0;
                     do {
                         /* Sanity check */
-                        assert(s < cube_size);
+                        if (s >= cube_size)
+                            TestErrPrintf("s should not be >= cube_size! s = %zu, cube_size = %zu\n", s,
+                                          cube_size);
 
                         /* Check for correct value */
                         if (*cube_ptr != expected_value)

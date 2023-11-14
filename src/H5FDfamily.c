@@ -1427,7 +1427,8 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    assert(filename);
+    if (!filename)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid filename pointer");
 
     /* Get the driver info (for the member fapl)
      * The family_open call accepts H5P_DEFAULT, so we'll accept that here, too.

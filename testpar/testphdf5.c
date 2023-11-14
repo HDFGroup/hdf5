@@ -234,7 +234,7 @@ parse_options(int argc, char **argv)
                 nerrors++;
                 return (1);
             }
-        if (mpi_rank == 0) {
+        if (MAINPROCESS) {
             printf("Test filenames are:\n");
             for (i = 0; i < n; i++)
                 printf("    %s\n", filenames[i]);
@@ -346,11 +346,21 @@ main(int argc, char **argv)
         }
     }
 
+    /* Set up file access property list with parallel I/O access */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl >= 0), "H5Pcreate succeeded");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+
+    /* Get the capability flag of the VOL connector being used */
+    VRFY((H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g) >= 0), "H5Pget_vol_cap_flags succeeded");
+
     /* Initialize testing framework */
     TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("mpiodup", test_fapl_mpio_dup, NULL, "fapl_mpio duplicate", NULL);
+    AddTest("getdxplmpio", test_get_dxpl_mpio, NULL, "dxpl_mpio get", PARATESTFILE);
 
     AddTest("split", test_split_comm_access, NULL, "dataset using split communicators", PARATESTFILE);
     AddTest("h5oflusherror", test_oflush, NULL, "H5Oflush failure", PARATESTFILE);
@@ -365,6 +375,11 @@ main(int argc, char **argv)
 
     AddTest("invlibverassert", test_invalid_libver_bounds_file_close_assert, NULL,
             "Invalid libver bounds assertion failure", PARATESTFILE);
+
+    AddTest("evictparassert", test_evict_on_close_parallel_unsupp, NULL, "Evict on close in parallel failure",
+            PARATESTFILE);
+    AddTest("fapl_preserve", test_fapl_preserve_hints, NULL, "preserve MPI I/O hints after fapl closed",
+            PARATESTFILE);
 
     AddTest("idsetw", dataset_writeInd, NULL, "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL, "dataset independent read", PARATESTFILE);
@@ -521,12 +536,13 @@ main(int argc, char **argv)
             "Collective MD read with link chunk I/O (H5D__sort_chunk)", PARATESTFILE);
     AddTest("GH_coll_MD_wr", test_collective_global_heap_write, NULL,
             "Collective MD write of global heap data", PARATESTFILE);
+    AddTest("COLLIO_INDMDWR", test_coll_io_ind_md_write, NULL,
+            "Collective I/O with Independent metadata writes", PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);
 
     /* setup file access property list */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* Parse command line arguments */
@@ -552,6 +568,8 @@ main(int argc, char **argv)
 
     /* Clean up test files */
     h5_clean_files(FILENAME, fapl);
+
+    H5Pclose(fapl);
 
     nerrors += GetTestNumErrs();
 

@@ -25,14 +25,14 @@
 !*****
 MODULE TH5Z
 
+   USE HDF5 ! This module contains all necessary modules
+   USE TH5_MISC
+
 CONTAINS
 
     SUBROUTINE filters_test(total_error)
 
 !   This subroutine tests following functionalities: h5zfilter_avail_f, h5zunregister_f
-
-   USE HDF5 ! This module contains all necessary modules
-   USE TH5_MISC
 
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
@@ -164,8 +164,6 @@ CONTAINS
      END SUBROUTINE filters_test
 
         SUBROUTINE szip_test(szip_flag, cleanup, total_error)
-        USE HDF5 ! This module contains all necessary modules
-        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(OUT) :: szip_flag

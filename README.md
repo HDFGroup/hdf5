@@ -2,13 +2,12 @@ HDF5 version 1.15.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
-[![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
-[![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
+[![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml?query=branch%3Adevelop)
+[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions/workflows/hdfeos5.yml?query=branch%3Adevelop)
+[![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions/workflows/netcdf.yml?query=branch%3Adevelop)
+[![h5py build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/h5py.yml?branch=develop&label=h5py)](https://github.com/HDFGroup/hdf5/actions/workflows/h5py.yml?query=branch%3Adevelop)
+[![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
+[![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml?query=branch%3Ahdf5_1_14)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
@@ -87,8 +86,6 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
-| 1.14.3 | CVE-free!, better cross-compile support |
 | 1.14.4 | S3 VFD improvements |
 | TBD | VFD SWMR |
 | 2.0.0 | TBD |

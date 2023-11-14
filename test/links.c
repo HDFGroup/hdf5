@@ -9880,6 +9880,7 @@ external_set_elink_cb(hid_t fapl, bool new_format)
     set_elink_cb_t       op_data, *op_data_p;
     H5L_elink_traverse_t cb;
     char                 filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE];
+    bool                 driver_is_parallel;
     unsigned             flags;
 
     if (new_format)
@@ -9890,16 +9891,21 @@ external_set_elink_cb(hid_t fapl, bool new_format)
     /* Build user data for callback */
     op_data.parent_file = filename1;
     op_data.target_file = filename2;
+
+    /* Check if using a parallel file driver */
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
+        TEST_ERROR;
+
+    base_driver = H5Pget_driver(fapl);
+
     /* Core file driver has issues when used as the member file driver for a family file */
     /* Family file driver cannot be used with family or multi drivers for member files */
     /* Also disable parallel member drivers, because H5F_HAS_FEATURE(H5FD_FEAT_HAS_MPI)
        would report false, causing problems */
-    base_driver = H5Pget_driver(fapl);
-    op_data.base_fapl =
-        (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI || base_driver == H5FD_MPIO ||
-         base_driver == H5FD_CORE || base_driver == H5FD_DIRECT || base_driver == H5FD_SUBFILING)
-            ? H5P_DEFAULT
-            : fapl;
+    op_data.base_fapl = fapl;
+    if (base_driver == H5FD_CORE || base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI ||
+        base_driver == H5FD_DIRECT || driver_is_parallel)
+        op_data.base_fapl = H5P_DEFAULT;
     op_data.fam_size = ELINK_CB_FAM_SIZE;
     op_data.code     = 0;
 
@@ -18434,14 +18440,12 @@ link_info_by_idx_old(hid_t fapl)
 {
     hid_t       file_id  = H5I_INVALID_HID;                              /* File ID */
     hid_t       group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
-    H5F_t      *f = NULL;
-    unsigned    hard_link;               /* Create hard or soft link? */
-    H5L_info2_t linfo;                   /* Link info struct */
-    char        objname[NAME_BUF_SIZE];  /* Object name */
-    char        valname[NAME_BUF_SIZE];  /* Link value name */
-    char        filename[NAME_BUF_SIZE]; /* File name */
+    unsigned    hard_link;                                               /* Create hard or soft link? */
+    H5L_info2_t linfo;                                                   /* Link info struct */
+    char        objname[NAME_BUF_SIZE];                                  /* Object name */
+    char        valname[NAME_BUF_SIZE];                                  /* Link value name */
+    char        filename[NAME_BUF_SIZE];                                 /* File name */
     H5O_token_t objtoken[CORDER_NLINKS]; /* Tokens (Addresses) of the objects created */
-    void       *vol_obj_file = NULL;     /* Object of file_id */
     char        tmpname[NAME_BUF_SIZE];  /* Temporary link name */
     char        tmpval[NAME_BUF_SIZE];   /* Temporary link value */
     unsigned    u;                       /* Local index variable */
@@ -18459,14 +18463,6 @@ link_info_by_idx_old(hid_t fapl)
         /* Create file */
         h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
         if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            TEST_ERROR;
-
-        /* Need the file struct to address encoding */
-        /* Retrieve VOL object */
-        if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
-            TEST_ERROR;
-        /* Retrieve file from VOL object */
-        if (NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
             TEST_ERROR;
 
         /* Create group to operate on */
@@ -19066,12 +19062,10 @@ delete_by_idx_old(hid_t fapl)
 {
     hid_t           file_id  = H5I_INVALID_HID;                              /* File ID */
     hid_t           group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID; /* Group IDs */
-    H5F_t          *f = NULL;
-    H5L_info2_t     linfo;                   /* Link info struct */
-    H5_iter_order_t order;                   /* Order within in the index */
-    void           *vol_obj_file = NULL;     /* Object of file_id */
-    char            objname[NAME_BUF_SIZE];  /* Object name */
-    char            filename[NAME_BUF_SIZE]; /* File name */
+    H5L_info2_t     linfo;                                                   /* Link info struct */
+    H5_iter_order_t order;                                                   /* Order within in the index */
+    char            objname[NAME_BUF_SIZE];                                  /* Object name */
+    char            filename[NAME_BUF_SIZE];                                 /* File name */
     H5O_token_t     objtoken[CORDER_NLINKS]; /* Tokens (Addresses) of the objects created */
     char            tmpname[NAME_BUF_SIZE];  /* Temporary link name */
     unsigned        u;                       /* Local index variable */
@@ -19089,14 +19083,6 @@ delete_by_idx_old(hid_t fapl)
         /* Create file */
         h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
         if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            TEST_ERROR;
-
-        /* Need the file struct to address encoding */
-        /* Retrieve VOL object */
-        if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
-            TEST_ERROR;
-        /* Retrieve file from VOL object */
-        if (NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
             TEST_ERROR;
 
         /* Create group to operate on */
@@ -22638,6 +22624,253 @@ error:
 } /* end timestamps() */
 
 /*-------------------------------------------------------------------------
+ * Function:    link_path_handling
+ *
+ * Purpose:     Create hard and soft links by relative and absolute paths
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+link_path_handling(hid_t fapl, bool new_format)
+{
+
+    hid_t file_id = (H5I_INVALID_HID);
+    hid_t grp1 = (H5I_INVALID_HID), grp2 = (H5I_INVALID_HID);
+    char  filename[NAME_BUF_SIZE];
+
+    if (new_format)
+        TESTING("H5Lcreate path handling (w/new group format)");
+    else
+        TESTING("H5Lcreate path handling");
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create two groups */
+    if ((grp1 = H5Gcreate2(file_id, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((grp2 = H5Gcreate2(grp1, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create hard link to grp1 that resides in grp2 by relative path */
+    if (H5Lcreate_hard(file_id, "grp1", grp1, "grp2/relative_hard_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_hard_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create soft link to grp1 that resides in grp2 by relative path */
+    if (H5Lcreate_soft("/grp1", grp1, "grp2/relative_soft_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_soft_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create hard link to grp1 that resides in grp2 by absolute path */
+    if (H5Lcreate_hard(file_id, "grp1", grp1, "/grp1/grp2/absolute_hard_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "absolute_hard_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create soft link to grp1 that resides in grp2 by absolute path */
+    if (H5Lcreate_soft("/grp1", grp1, "/grp1/grp2/absolute_soft_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "absolute_soft_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Close groups and file */
+    if (H5Gclose(grp1) < 0)
+        TEST_ERROR;
+    if (H5Gclose(grp2) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp1);
+        H5Gclose(grp2);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    ext_link_path_handling
+ *
+ * Purpose:     Create external links by relative and absolute paths
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+ext_link_path_handling(hid_t fapl, bool new_format)
+{
+
+    hid_t file_id = (H5I_INVALID_HID);
+    hid_t grp1 = (H5I_INVALID_HID), grp2 = (H5I_INVALID_HID);
+    char  filename[NAME_BUF_SIZE];
+
+    if (new_format)
+        TESTING("H5Lcreate external link path handling (w/new group format)");
+    else
+        TESTING("H5Lcreate external link path handling");
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create two groups */
+    if ((grp1 = H5Gcreate2(file_id, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((grp2 = H5Gcreate2(grp1, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create external link to nonexistent object by relative path */
+    if (H5Lcreate_external("nonexistent_file", "nonexistent_object", grp1, "grp2/relative_ext_link",
+                           H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_ext_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create external link to nonexistent object by absolute path */
+    if (H5Lcreate_external("nonexistent_file", "nonexistent_object", grp1, "/grp1/grp2/relative_soft_link",
+                           H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_soft_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Close groups and file */
+    if (H5Gclose(grp1) < 0)
+        TEST_ERROR;
+    if (H5Gclose(grp2) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp1);
+        H5Gclose(grp2);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    ud_link_path_handling
+ *
+ * Purpose:     Create user-defined links by relative and absolute paths
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+ud_link_path_handling(hid_t fapl, bool new_format)
+{
+
+    hid_t       file_id = (H5I_INVALID_HID);
+    hid_t       grp1 = (H5I_INVALID_HID), grp2 = (H5I_INVALID_HID);
+    char        filename[NAME_BUF_SIZE];
+    H5L_info2_t li;
+
+    if (new_format)
+        TESTING("H5Lcreate ud link path handling (w/new group format)");
+    else
+        TESTING("H5Lcreate ud link path handling");
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create two groups */
+    if ((grp1 = H5Gcreate2(file_id, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((grp2 = H5Gcreate2(grp1, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Check that UD hard links are not registered */
+    if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != false)
+        TEST_ERROR;
+
+    /* Register "user-defined hard links" with the library */
+    if (H5Lregister(UD_hard_class) < 0)
+        TEST_ERROR;
+
+    /* Check that UD hard links are registered */
+    if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != true)
+        TEST_ERROR;
+
+    if (H5Lget_info2(file_id, "grp1", &li, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Create user-defined (hard) link to grp1 by relative path */
+    if (H5Lcreate_ud(grp1, "grp2/relative_ud_link", (H5L_type_t)UD_HARD_TYPE, &(li.u.token),
+                     sizeof(li.u.token), H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_ud_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create user-defined (hard) link to grp1 by absolute path */
+    if (H5Lcreate_ud(grp1, "/grp1/grp2/absolute_ud_link", (H5L_type_t)UD_HARD_TYPE, &(li.u.token),
+                     sizeof(li.u.token), H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "absolute_ud_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Close groups and file */
+    if (H5Gclose(grp1) < 0)
+        TEST_ERROR;
+    if (H5Gclose(grp2) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp1);
+        H5Gclose(grp2);
+        H5Fclose(file_id);
+        H5Lunregister((H5L_type_t)UD_HARD_TYPE);
+    }
+    H5E_END_TRY
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test links
@@ -22711,6 +22944,7 @@ main(void)
             nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += link_path_handling(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* Test new H5L link creation routine */
             nerrors += test_lcpl(my_fapl, new_format);
@@ -22818,6 +23052,7 @@ main(void)
                     nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_public_macros(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += ext_link_path_handling(my_fapl, new_format) < 0 ? 1 : 0;
                 } /* with/without external file cache */
             }
 
@@ -22840,6 +23075,7 @@ main(void)
             nerrors += ud_callbacks_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
             nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += ud_link_path_handling(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += lapl_nlinks(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS

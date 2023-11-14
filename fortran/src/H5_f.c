@@ -477,6 +477,10 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5d_flags[55] = (int_f)H5D_MPIO_LINK_CHUNK;
     h5d_flags[56] = (int_f)H5D_MPIO_MULTI_CHUNK;
 
+    h5d_flags[57] = (int_f)H5D_SCALAR_IO;
+    h5d_flags[58] = (int_f)H5D_VECTOR_IO;
+    h5d_flags[59] = (int_f)H5D_SELECTION_IO;
+
     /*
      *  H5E flags
      */

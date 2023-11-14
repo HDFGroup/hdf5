@@ -249,3 +249,63 @@ jobs:
       #
       # INSTALL (note that this runs even when we don't run the tests)
       #
+
+  #
+  # The GitHub runners are inadequate for running parallel HDF5 tests,
+  # so we catch most issues in daily testing. What we have here is just
+  # a compile check to make sure nothing obvious is broken.
+  # A workflow that builds the library
+  # Parallel Linux (Ubuntu) w/ gcc + Autotools
+  #
+  CMake_build_parallel:
+    name: "Parallel GCC-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # SETUP
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt install libaec0 libaec-dev
+           sudo apt install openmpi-bin openmpi-common mpi-default-dev
+           echo "CC=mpicc" >> $GITHUB_ENV
+           echo "FC=mpif90" >> $GITHUB_ENV
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4
+
+      # CMAKE CONFIGURE
+      - name: CMake Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN=ON \
+            -DHDF5_BUILD_JAVA=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build

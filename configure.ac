@@ -1207,6 +1207,30 @@ AC_ARG_ENABLE([doxygen],
 
 AC_MSG_RESULT([$HDF5_DOXYGEN])
 
+## Check if they would like to enable doxygen warnings as errors
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_DOXY_WARNINGS])
+
+## Default is to consider doxygen warnings as errors
+DOXY_ERR=yes
+
+AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
+
+AC_ARG_ENABLE([doxygen-errors],
+              [AS_HELP_STRING([--enable-doxygen-errors],
+                              [Error on HDF5 doxygen warnings [default=yes]])],
+              [DOXY_ERR=$enableval])
+
+if test "X$DOXY_ERR" = "Xyes"; then
+    HDF5_DOXY_WARNINGS="FAIL_ON_WARNINGS"
+else
+    HDF5_DOXY_WARNINGS="NO"
+
+fi
+AC_MSG_RESULT([$HDF5_DOXY_WARNINGS])
+
 if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DX_DOXYGEN_FEATURE(ON)
   DX_DOT_FEATURE(OFF)
@@ -1269,6 +1293,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
   DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD H5_HAVE_MIRROR_VFD'
+  DOXYGEN_WARN_AS_ERROR=${HDF5_DOXY_WARNINGS}
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 fi
@@ -4211,10 +4236,10 @@ AC_CONFIG_FILES([Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
-AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
+AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse], [chmod +x utils/subfiling_vfd/h5fuse])
 if test -n "$TESTPARALLEL"; then
   if test "X$SUBFILING_VFD" = "Xyes"; then
-    AC_CONFIG_LINKS([testpar/h5fuse.sh:utils/subfiling_vfd/h5fuse.sh])
+    AC_CONFIG_LINKS([testpar/h5fuse:utils/subfiling_vfd/h5fuse])
   fi
 fi
 
@@ -4259,12 +4284,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 fi
-
-## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
-## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
-## This sed script corrects "-l <libname>" first and then "-l " with no library name.
-## If the order is not preserved, all instances of "-l " will be removed.
-sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' -i libtool
 
 ## show the configure settings
 cat src/libhdf5.settings

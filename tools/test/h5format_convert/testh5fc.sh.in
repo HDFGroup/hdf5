@@ -62,7 +62,7 @@ SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5FORMCONV_TESTFILES="$SRC_TOOLS/test/h5format_convert/testfiles"
 SRC_H5FORMCONV_OUTFILES="$SRC_TOOLS/test/h5format_convert/expected"
 
-TESTDIR=./testfiles
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 # Copy the testfile to a temporary file for testing as h5format_convert is changing the file in place
@@ -419,8 +419,15 @@ H5DUMP_CHECK() {
     actual="$TESTDIR/`basename $2 .ddl`.out"
     actual_err="$TESTDIR/`basename $2 .ddl`.err"
     testfile="`basename $2 .ddl`-tmp.h5"
-    $RUNSERIAL $H5DUMP_BIN -BH $TESTDIR/$testfile > $actual 2>$actual_err
+    # Run test.
+    (
+    cd $TESTDIR
+    $RUNSERIAL $H5DUMP_BIN -BH $testfile 
+    ) >$actual 2>$actual_err
     cat $actual_err >> $actual
+    cp $actual $actual_sav
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
 
     # Compare output
     COMPARE_OUT $expect $actual

@@ -11,20 +11,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Read-Only S3 Virtual File Driver (VFD)
- *
- * Purpose:    The public header file for the ros3 driver.
+ * Purpose:	The public header file for the read-only S3 (ros3) virtual file driver (VFD)
  */
 #ifndef H5FDros3_H
 #define H5FDros3_H
 
 #ifdef H5_HAVE_ROS3_VFD
-#define H5FD_ROS3       (H5FDperform_init(H5FD_ros3_init))
+/** Initializer for the ros3 VFD */
+#define H5FD_ROS3 (H5FDperform_init(H5FD_ros3_init))
+
+/** Identifier for the ros3 VFD */
 #define H5FD_ROS3_VALUE H5_VFD_ROS3
 #else
+/** Initializer for the ros3 VFD (disabled) */
 #define H5FD_ROS3       (H5I_INVALID_HID)
+
+/** Identifier for the ros3 VFD (disabled) */
 #define H5FD_ROS3_VALUE H5_VFD_INVALID
-#endif /* H5_HAVE_ROS3_VFD */
+#endif
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -139,9 +143,9 @@ typedef struct H5FD_ros3_fapl_t {
 extern "C" {
 #endif
 
-/**
- * \brief Internal routine to initialize #H5FD_ROS3 driver. Not meant to be
- *        called directly by an HDF5 application.
+/** @private
+ *
+ * \brief Private initializer for the ros3 VFD
  */
 H5_DLL hid_t H5FD_ros3_init(void);
 

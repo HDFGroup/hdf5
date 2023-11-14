@@ -11,18 +11,29 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:    The public header file for the hdfs driver.
+ * Purpose: The public header file for the Hadoop Distributed File System
+ *          (hdfs) virtual file driver (VFD)
  */
 
 #ifndef H5FDhdfs_H
 #define H5FDhdfs_H
 
 #ifdef H5_HAVE_LIBHDFS
-#define H5FD_HDFS       (H5FDperform_init(H5FD_hdfs_init))
+
+/** Initializer for the hdfs VFD */
+#define H5FD_HDFS (H5FDperform_init(H5FD_hdfs_init))
+
+/** Identifier for the hdfs VFD */
 #define H5FD_HDFS_VALUE H5_VFD_HDFS
-#else /* H5_HAVE_LIBHDFS */
+
+#else
+
+/** Initializer for the hdfs VFD (disabled) */
 #define H5FD_HDFS       (H5I_INVALID_HID)
+
+/** Identifier for the hdfs VFD (disabled) */
 #define H5FD_HDFS_VALUE H5_VFD_INVALID
+
 #endif /* H5_HAVE_LIBHDFS */
 
 #ifdef H5_HAVE_LIBHDFS
@@ -104,6 +115,10 @@ typedef struct H5FD_hdfs_fapl_t {
     int32_t stream_buffer_size;
 } H5FD_hdfs_fapl_t;
 
+/** @private
+ *
+ * \brief Private initializer for the hdfs VFD
+ */
 H5_DLL hid_t H5FD_hdfs_init(void);
 
 /**

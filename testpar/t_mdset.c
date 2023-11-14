@@ -84,6 +84,17 @@ zero_dim_dset(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     filename = GetTestParameters();
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -155,6 +166,17 @@ multiple_dset_write(void)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     outme = malloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "malloc succeeded for outme");
@@ -234,6 +256,17 @@ compact_dataset(void)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     outme = malloc((size_t)((size_t)size * (size_t)size * sizeof(double)));
     VRFY((outme != NULL), "malloc succeeded for outme");
@@ -357,6 +390,19 @@ null_dataset(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset, or attribute aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     filename = GetTestParameters();
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -456,11 +502,23 @@ big_dataset(void)
     hsize_t     file_dims[4];        /* Dimensions of dataspace */
     char        dname[] = "dataset"; /* Name of dataset */
     MPI_Offset  file_size;           /* Size of file on disk */
-    herr_t      ret;                 /* Generic return value */
+    bool        vol_is_native;
+    herr_t      ret; /* Generic return value */
     const char *filename;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     /* Verify MPI_Offset can handle larger than 2GB sizes */
     VRFY((sizeof(MPI_Offset) > 4), "sizeof(MPI_Offset)>4");
@@ -475,6 +533,9 @@ big_dataset(void)
      */
     iof = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((iof >= 0), "H5Fcreate succeeded");
+
+    /* Check if native VOL is being used */
+    VRFY((h5_using_native_vol(H5P_DEFAULT, iof, &vol_is_native) >= 0), "h5_using_native_vol");
 
     /* Define dataspace for 2GB dataspace */
     file_dims[0] = 2;
@@ -495,9 +556,11 @@ big_dataset(void)
     ret = H5Fclose(iof);
     VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* Check that file of the correct size was created */
-    file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 2147485696ULL), "File is correct size(~2GB)");
+    if (vol_is_native) {
+        /* Check that file of the correct size was created */
+        file_size = h5_get_file_size(filename, fapl);
+        VRFY((file_size == 2147485696ULL), "File is correct size(~2GB)");
+    }
 
     /*
      * Create >4GB HDF5 file
@@ -524,9 +587,11 @@ big_dataset(void)
     ret = H5Fclose(iof);
     VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* Check that file of the correct size was created */
-    file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 4294969344ULL), "File is correct size(~4GB)");
+    if (vol_is_native) {
+        /* Check that file of the correct size was created */
+        file_size = h5_get_file_size(filename, fapl);
+        VRFY((file_size == 4294969344ULL), "File is correct size(~4GB)");
+    }
 
     /*
      * Create >8GB HDF5 file
@@ -553,9 +618,11 @@ big_dataset(void)
     ret = H5Fclose(iof);
     VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* Check that file of the correct size was created */
-    file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 8589936640ULL), "File is correct size(~8GB)");
+    if (vol_is_native) {
+        /* Check that file of the correct size was created */
+        file_size = h5_get_file_size(filename, fapl);
+        VRFY((file_size == 8589936640ULL), "File is correct size(~8GB)");
+    }
 
     /* Close fapl */
     ret = H5Pclose(fapl);
@@ -593,6 +660,17 @@ dataset_fillvalue(void)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     filename = GetTestParameters();
 
@@ -842,6 +920,19 @@ collective_group_write(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf(
+                "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     size = get_size();
 
     chunk_size[0] = (hsize_t)(size / 2);
@@ -934,6 +1025,19 @@ independent_group_read(void)
     ngroups  = pt->count;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf(
+                "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     H5Pset_all_coll_metadata_ops(plist, false);
@@ -1054,6 +1158,19 @@ multiple_group_write(void)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, group, dataset, or attribute aren't supported with "
+                   "this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     size = get_size();
 
@@ -1209,6 +1326,19 @@ multiple_group_read(void)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, group, dataset, or attribute aren't supported with "
+                   "this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     size = get_size();
 
@@ -1526,6 +1656,19 @@ io_mode_confusion(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset, or dataset more aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     /*
      * Set up file access property list with parallel I/O access
      */
@@ -1774,6 +1917,20 @@ rr_obj_hdr_flush_confusion(void)
      */
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file, dataset, attribute, dataset more, attribute more, or "
+                   "file flush aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     assert(mpi_size > 2);
 
@@ -2551,11 +2708,23 @@ chunk_align_bug_1(void)
     hid_t          file_id, dset_id, fapl_id, dcpl_id, space_id;
     hsize_t        dims = CHUNK_SIZE * NCHUNKS, cdims = CHUNK_SIZE;
     h5_stat_size_t file_size;
-    hsize_t        align;
+    hsize_t        align = 1;
+    bool           vol_is_native;
     herr_t         ret;
     const char    *filename;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
 
     filename = (const char *)GetTestParameters();
 
@@ -2565,18 +2734,23 @@ chunk_align_bug_1(void)
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
+    /* Check if native VOL is being used */
+    VRFY((h5_using_native_vol(H5P_DEFAULT, file_id, &vol_is_native) >= 0), "h5_using_native_vol");
+
     /* Close file */
     ret = H5Fclose(file_id);
     VRFY((ret >= 0), "H5Fclose succeeded");
 
-    /* Get file size */
-    file_size = h5_get_file_size(filename, fapl_id);
-    VRFY((file_size >= 0), "h5_get_file_size succeeded");
+    if (vol_is_native) {
+        /* Get file size */
+        file_size = h5_get_file_size(filename, fapl_id);
+        VRFY((file_size >= 0), "h5_get_file_size succeeded");
 
-    /* Calculate alignment value, set to allow a chunk to squeak in between the
-     * original EOF and the aligned location of the aggregator.  Add some space
-     * for the dataset metadata */
-    align = (hsize_t)file_size + CHUNK_SIZE + EXTRA_ALIGN;
+        /* Calculate alignment value, set to allow a chunk to squeak in between the
+         * original EOF and the aligned location of the aggregator.  Add some space
+         * for the dataset metadata */
+        align = (hsize_t)file_size + CHUNK_SIZE + EXTRA_ALIGN;
+    }
 
     /* Set aggregator size and alignment, disable metadata aggregator */
     assert(AGGR_SIZE > CHUNK_SIZE);

@@ -393,10 +393,14 @@ typedef int (*H5D_chunk_cb_func_t)(const H5D_chunk_rec_t *chunk_rec, void *udata
 typedef herr_t (*H5D_chunk_init_func_t)(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
                                         haddr_t dset_ohdr_addr);
 typedef herr_t (*H5D_chunk_create_func_t)(const H5D_chk_idx_info_t *idx_info);
+typedef herr_t (*H5D_chunk_open_func_t)(const H5D_chk_idx_info_t *idx_info);
+typedef herr_t (*H5D_chunk_close_func_t)(const H5D_chk_idx_info_t *idx_info);
+typedef herr_t (*H5D_chunk_is_open_func_t)(const H5D_chk_idx_info_t *idx_info, bool *is_open);
 typedef bool (*H5D_chunk_is_space_alloc_func_t)(const H5O_storage_chunk_t *storage);
 typedef herr_t (*H5D_chunk_insert_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                           const H5D_t *dset);
 typedef herr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
+typedef herr_t (*H5D_chunk_load_metadata_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_resize_func_t)(H5O_layout_chunk_t *layout);
 typedef int (*H5D_chunk_iterate_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                         void *chunk_udata);
@@ -413,13 +417,18 @@ typedef herr_t (*H5D_chunk_dest_func_t)(const H5D_chk_idx_info_t *idx_info);
 
 /* Typedef for grouping chunk I/O routines */
 typedef struct H5D_chunk_ops_t {
-    bool                    can_swim; /* Flag to indicate that the index supports SWMR access */
-    H5D_chunk_init_func_t   init;     /* Routine to initialize indexing information in memory */
-    H5D_chunk_create_func_t create;   /* Routine to create chunk index */
+    bool                     can_swim; /* Flag to indicate that the index supports SWMR access */
+    H5D_chunk_init_func_t    init;     /* Routine to initialize indexing information in memory */
+    H5D_chunk_create_func_t  create;   /* Routine to create chunk index */
+    H5D_chunk_open_func_t    open;     /* Routine to open chunk index */
+    H5D_chunk_close_func_t   close;    /* Routine to close chunk index */
+    H5D_chunk_is_open_func_t is_open;  /* Query routine to determine if index is open or not */
     H5D_chunk_is_space_alloc_func_t
-                                is_space_alloc; /* Query routine to determine if storage/index is allocated */
-    H5D_chunk_insert_func_t     insert;         /* Routine to insert a chunk into an index */
-    H5D_chunk_get_addr_func_t   get_addr;       /* Routine to retrieve address of chunk in file */
+                              is_space_alloc; /* Query routine to determine if storage/index is allocated */
+    H5D_chunk_insert_func_t   insert;         /* Routine to insert a chunk into an index */
+    H5D_chunk_get_addr_func_t get_addr;       /* Routine to retrieve address of chunk in file */
+    H5D_chunk_load_metadata_func_t
+        load_metadata; /* Routine to load additional chunk index metadata, such as fixed array data blocks */
     H5D_chunk_resize_func_t     resize;     /* Routine to update chunk index info after resizing dataset */
     H5D_chunk_iterate_func_t    iterate;    /* Routine to iterate over chunks */
     H5D_chunk_remove_func_t     remove;     /* Routine to remove a chunk from an index */

@@ -11,16 +11,22 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the "multi" driver.
+ * Purpose:	The public header file for the multi virtual file driver (VFD)
  */
 #ifndef H5FDmulti_H
 #define H5FDmulti_H
 
+/** Initializer for the multi VFD */
 #define H5FD_MULTI (H5FDperform_init(H5FD_multi_init))
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** @private
+ *
+ * \brief Private initializer for the multi VFD
+ */
 H5_DLL hid_t H5FD_multi_init(void);
 
 /**

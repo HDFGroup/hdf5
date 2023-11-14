@@ -67,6 +67,26 @@ New Features
 
       Fixes GitHub #3585
 
+    - Improved support for Intel oneAPI
+
+      * Separates the old 'classic' Intel compiler settings and warnings
+        from the oneAPI settings
+      * Uses `-check nouninit` in debug builds to avoid false positives
+        when building H5_buildiface with `-check all`
+      * Both Autotools and CMake
+
+    - Added new options for CMake and Autotools to control the Doxygen
+      warnings as errors setting.
+
+        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: ON)
+        * --enable-doxygen-errors: enable/disable (Default: enable)
+
+      The default will fail compile if the doxygen parsing generates warnings.
+      The option can be disabled if certain versions of doxygen have parsing
+      issues. i.e. 1.9.5, 1.9.8.
+
+      Addresses GitHub issue #3398
+
     - Added support for AOCC and classic Flang w/ the Autotools
 
       * Adds a config/clang-fflags options file to support Flang
@@ -93,6 +113,7 @@ New Features
       Removed HDF options for using FETCH_CONTENT explicitly:
           BUILD_SZIP_WITH_FETCHCONTENT:BOOL
           BUILD_ZLIB_WITH_FETCHCONTENT:BOOL
+
     - Thread-safety + static library disabled on Windows w/ CMake
 
       The thread-safety feature requires hooks in DllMain(), which is only
@@ -235,6 +256,22 @@ New Features
 
     Library:
     --------
+    - Added a simple cache to the read-only S3 (ros3) VFD
+
+      The read-only S3 VFD now caches the first N bytes of a file stored
+      in S3 to avoid a lot of small I/O operations when opening files.
+      This cache is per-file and created when the file is opened.
+
+      N is currently 16 MiB or the size of the file, whichever is smaller.
+
+      Addresses GitHub issue #3381
+
+    - Added new API function H5Pget_actual_selection_io_mode()
+
+      This function allows the user to determine if the library performed
+      selection I/O, vector I/O, or scalar (legacy) I/O during the last HDF5
+      operation performed with the provided DXPL.
+
     - Added support for in-place type conversion in most cases
 
       In-place type conversion allows the library to perform type conversion
@@ -303,9 +340,24 @@ New Features
       performing I/O on all the filtered datasets at once and then performing
       I/O on all the unfiltered datasets at once.
 
+    - Changed H5Pset_evict_on_close so that it can be called with a parallel
+      build of HDF5
+
+      Previously, H5Pset_evict_on_close would always fail when called from a
+      parallel build of HDF5, stating that the feature is not supported with
+      parallel HDF5. This failure would occur even if a parallel build of HDF5
+      was used with a serial HDF5 application. H5Pset_evict_on_close can now
+      be called regardless of the library build type and the library will
+      instead fail during H5Fcreate/H5Fopen if the "evict on close" property
+      has been set to true and the file is being opened for parallel access
+      with more than 1 MPI process.
+
 
     Fortran Library:
     ----------------
+
+    - Added Fortran APIs:
+      h5vlnative_addr_to_token_f and h5vlnative_token_to_address_f
 
     - Fixed an uninitialized error return value for hdferr
       to return the error state of the h5aopen_by_idx_f API.
@@ -316,7 +368,8 @@ New Features
     - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
-      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_selection_io_f, h5pget_selection_io_f,
+      h5pget_actual_selection_io_mode_f,
       h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
     - Added Fortran APIs:
@@ -375,6 +428,88 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Suppressed floating-point exceptions in H5T init code
+
+      The floating-point datatype initialization code in H5Tinit_float.c
+      could raise FE_INVALID exceptions while munging bits and performing
+      comparisons that might involve NaN. This was not a problem when the
+      initialization code was executed in H5detect at compile time (prior
+      to 1.14.3), but now that the code is executed at library startup
+      (1.14.3+), these exceptions can be caught by user code, as is the
+      default in the NAG Fortran compiler.
+
+      Starting in 1.14.4, we now suppress floating-point exceptions while
+      initializing the floating-point types and clear FE_INVALID before
+      restoring the original environment.
+
+      Fixes GitHub #3831
+
+    - Fixed a file handle leak in the core VFD
+
+      When opening a file with the core VFD and a file image, if the file
+      already exists, the file check would leak the POSIX file handle.
+
+      Fixes GitHub issue #635
+
+    - Fixed some issues with chunk index metadata not getting read
+      collectively when collective metadata reads are enabled
+
+      When looking up dataset chunks during I/O, the parallel library
+      temporarily disables collective metadata reads since it's generally
+      unlikely that the application will read the same chunks from all
+      MPI ranks. Leaving collective metadata reads enabled during
+      chunk lookups can lead to hangs or other bad behavior depending
+      on the chunk indexing structure used for the dataset in question.
+      However, due to the way that dataset chunk index metadata was
+      previously loaded in a deferred manner, this could mean that
+      the metadata for the main chunk index structure or its
+      accompanying pieces of metadata (e.g., fixed array data blocks)
+      could end up being read independently if these chunk lookup
+      operations are the first chunk index-related operation that
+      occurs on a dataset. This behavior is generally observed when
+      opening a dataset for which the metadata isn't in the metadata
+      cache yet and then immediately performing I/O on that dataset.
+      This behavior is not generally observed when creating a dataset
+      and then performing I/O on it, as the relevant metadata will
+      usually be in the metadata cache as a side effect of creating
+      the chunk index structures during dataset creation. 
+
+      This issue has been fixed by adding callbacks to the different
+      chunk indexing structure classes that allow more explicit control
+      over when chunk index metadata gets loaded. When collective
+      metadata reads are enabled, the necessary index metadata will now
+      get loaded collectively by all MPI ranks at the start of dataset
+      I/O to ensure that the ranks don't unintentionally read this
+      metadata independently further on. These changes fix collective
+      loading of the main chunk index structure, as well as v2 B-tree
+      root nodes, extensible array index blocks and fixed array data
+      blocks. There are still pieces of metadata that cannot currently
+      be loaded collectively, however, such as extensible array data
+      blocks, data block pages and super blocks, as well as fixed array
+      data block pages. These pieces of metadata are not necessarily
+      read in by all MPI ranks since this depends on which chunks the
+      ranks have selected in the dataset. Therefore, reading of these
+      pieces of metadata remains an independent operation.
+
+    - Fixed potential hangs in parallel library during collective I/O with
+      independent metadata writes
+
+      When performing collective parallel writes to a dataset where metadata
+      writes are requested as (or left as the default setting of) independent,
+      hangs could potentially occur during metadata cache sync points. This
+      was due to incorrect management of the internal state tracking whether
+      an I/O operation should be collective or not, causing the library to
+      attempt collective writes of metadata when they were meant to be
+      independent writes. During the metadata cache sync points, if the number
+      of cache entries being flushed was a multiple of the number of MPI ranks
+      in the MPI communicator used to access the HDF5 file, an equal amount of
+      collective MPI I/O calls were made and the dataset write call would be
+      successful. However, when the number of cache entries being flushed was
+      NOT a multiple of the number of MPI ranks, the ranks with more entries
+      than others would get stuck in an MPI_File_set_view call, while other
+      ranks would get stuck in a post-write MPI_Barrier call. This issue has
+      been fixed by correctly switching to independent I/O temporarily when
+      writing metadata independently during collective dataset I/O.
 
     - Dropped support for MPI-2
 
@@ -720,6 +855,26 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Removed an Autotools configure hack that causes problems on MacOS
+
+      A sed line in configure.ac was added in the past to paper over some
+      problems with older versions of the Autotools that would add incorrect
+      linker flags. This hack is not needed with recent versions of the
+      Autotools and the sed line errors on MacOS (though this was a silent
+      error that didn't break the build) so the hack has been removed.
+
+      Fixes GitHub issue #3843
+
+    - Fixed an issue where the h5tools_test_utils test program was being
+      installed on the system for Autotools builds of HDF5
+
+      The h5tools_test_utils test program was mistakenly added to bin_PROGRAMS
+      in its Makefile.am configuration file, causing the executable to be
+      installed on the system. The executable is now added to noinst_PROGRAMS
+      instead and will no longer be installed on the system for Autotools builds
+      of HDF5. The CMake configuration code already avoids installing the
+      executable on the system.
+
     - Fixed a configuration issue that prevented building of the Subfiling VFD on macOS
 
       Checks were added to the CMake and Autotools code to verify that CLOCK_MONOTONIC_COARSE,
@@ -811,6 +966,25 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+
+    - Renamed h5fuse.sh to h5fuse
+
+      Addresses Discussion #3791
+
+
+    - Fixed an issue with unmatched MPI messages in ph5diff
+
+      The "manager" MPI rank in ph5diff was unintentionally sending "program end"
+      messages to its workers twice, leading to an error from MPICH similar to the
+      following:
+
+      Abort(810645519) on node 1 (rank 1 in comm 0): Fatal error in internal_Finalize: Other MPI error, error stack:
+      internal_Finalize(50)...........: MPI_Finalize failed
+      MPII_Finalize(394)..............:
+      MPIR_Comm_delete_internal(1224).: Communicator (handle=44000000) being freed has 1 unmatched message(s)
+      MPIR_Comm_release_always(1250)..:
+      MPIR_finalize_builtin_comms(154):
+
     - Fixed an issue in h5repack for variable-length typed datasets
 
       When repacking datasets into a new file, h5repack tries to determine whether
@@ -850,6 +1024,7 @@ Bug Fixes since HDF5-1.14.0 release
     Fortran API
     -----------
     -
+
 
     High-Level Library
     ------------------
@@ -1027,25 +1202,39 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
+    Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
                                     Visual Studio 2022 w/ clang 15.0.1
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
 Known Problems
 ==============
 
-    IEEE standard arithmetic enables software to raise exceptions such as overflow,
-    division by zero, and other illegal operations without interrupting or halting
-    the program flow. The HDF5 C library intentionally performs these exceptions.
-    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
-    to avoid stopping on an exception.
+    When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
+    also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
+    in the following tests:
+
+        H5PLUGIN-filter_plugin
+        H5TEST-flush2
+        H5TEST-testhdf5-base
+        MPI_TEST_t_filters_parallel
+
+    Since these tests pass with an optimization level of -O1 (and -O0) and it is
+    currently unclear whether the test failures are due to issues in HDF5 or issues
+    in the 'nvc' compiler, the maximum optimization level for NVHPC has been set
+    to -O1 until the test failures can be resolved. Note that even at -O1 optimization
+    level, there still appears to be a sporadic test failure in the Java JUnit tests
+    that has occasionally been seen in JUnit-TestH5Pfapl and JUnit-TestH5D. It is also
+    unclear whether this is an issue in HDF5 or with the 'nvc' compiler. Finally, note
+    that NVHPC 23.9 will fail to compile the test/tselect.c test file with a compiler
+    error of 'use of undefined value' when the optimization level is -O2 or higher.
+    Nvidia is aware of this issue and has suggested lowering the optimization level to
+    -O1 for the time being:
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces

@@ -319,9 +319,6 @@ CONTAINS
 
   SUBROUTINE test_select_element(cleanup, total_error)
 
-    USE HDF5 ! This module contains all necessary modules
-    USE TH5_MISC
-
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(INOUT) :: total_error

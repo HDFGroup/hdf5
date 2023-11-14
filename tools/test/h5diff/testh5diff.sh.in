@@ -49,7 +49,7 @@ SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
 SRC_H5DIFF_OUTFILES="$SRC_TOOLS/test/h5diff/expected"
 
-TESTDIR=./testfiles
+TESTDIR=./tmp
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
