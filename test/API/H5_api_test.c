@@ -136,15 +136,6 @@ main(int argc, char **argv)
         }
     }
 
-#ifdef H5_HAVE_PARALLEL
-    /* If HDF5 was built with parallel enabled, go ahead and call MPI_Init before
-     * running these tests. Even though these are meant to be serial tests, they will
-     * likely be run using mpirun (or similar) and we cannot necessarily expect HDF5 or
-     * an HDF5 VOL connector to call MPI_Init.
-     */
-    MPI_Init(&argc, &argv);
-#endif
-
     H5open();
 
     n_tests_run_g     = 0;
@@ -303,10 +294,6 @@ done:
     }
 
     H5close();
-
-#ifdef H5_HAVE_PARALLEL
-    MPI_Finalize();
-#endif
 
     exit(((err_occurred || n_tests_failed_g > 0) ? EXIT_FAILURE : EXIT_SUCCESS));
 }

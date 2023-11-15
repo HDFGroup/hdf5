@@ -141,7 +141,7 @@ target_compile_options (
 target_compile_definitions (
   h5_api_test
   PRIVATE
-    "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
+    "${HDF5_TEST_COMPILE_DEFS_PRIVATE}"
 )
 # Always prefer linking the shared HDF5 library by default
 if (BUILD_SHARED_LIBS)

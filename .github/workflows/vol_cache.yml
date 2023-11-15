@@ -1,0 +1,164 @@
+name: Test HDF5 cache VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        name:
+          - "Test HDF5 cache VOL connector"
+          - "Test HDF5 cache VOL connector atop async VOL connector"
+        async: [false, true]
+        exclude:
+          - name: "Test HDF5 cache VOL connector"
+            async: true
+
+          - name: "Test HDF5 cache VOL connector atop async VOL connector"
+            async: false
+
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
+
+      - name: Checkout HDF5
+        uses: actions/checkout@v4
+        with:
+          repository: HDFGroup/hdf5
+          path: hdf5
+
+      - name: Checkout Argobots
+        uses: actions/checkout@v4
+        with:
+          repository: pmodels/argobots
+          path: abt
+
+      # Argobots builds and installs fairly quickly,
+      # so no caching is currently performed here
+      - name: Install Argobots
+        working-directory: ${{ github.workspace }}/abt
+        run: |
+          ./autogen.sh
+          ./configure --prefix=/usr/local
+          make -j2
+          sudo make -j2 install
+
+      - name: Set environment variables for configuration (cache VOL only)
+        run: |
+          echo "HDF5_VOL_CACHE_TEST_NAME=cache_ext config=$GITHUB_WORKSPACE/config1.cfg\;under_vol=0\;under_info={}\;" >> $GITHUB_ENV
+        if: ${{ ! matrix.async }}
+
+      - name: Set environment variables for configuration (cache VOL atop async VOL)
+        run: |
+          echo "HDF5_VOL_CACHE_TEST_NAME=cache_ext config=$GITHUB_WORKSPACE/config1.cfg\;under_vol=512\;under_info={under_vol=0\;under_info={}}\;" >> $GITHUB_ENV
+        if: ${{ matrix.async }}
+
+      # Define ASYNC_INCLUDE_DIR, ASYNC_INCLUDE_DIRS and ASYNC_LIBRARIES to
+      # patch around having the cache VOL find the async VOL when they're built
+      # at the same time. Once the Async and Cache VOLs create CMake .config
+      # files, this should no longer be needed with CMake 3.24 and newer (see
+      # FetchContent's OVERRIDE_FIND_PACKAGE)
+      - name: Configure HDF5 with cache VOL connector
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+          cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_TEST_API_ENABLE_ASYNC:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DALLOW_UNSUPPORTED:BOOL=ON \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            -DHDF5_VOL_ALLOW_EXTERNAL:STRING="GIT" \
+            -DHDF5_VOL_URL01:STRING="https://github.com/hpc-io/vol-async.git" \
+            -DHDF5_VOL_VOL-ASYNC_BRANCH:STRING="develop" \
+            -DHDF5_VOL_VOL-ASYNC_NAME:STRING="async under_vol=0\;under_info={}" \
+            -DHDF5_VOL_VOL-ASYNC_TEST_PARALLEL:BOOL=ON \
+            -DHDF5_VOL_URL02:STRING="https://github.com/HDFGroup/vol-cache.git" \
+            -DHDF5_VOL_VOL-CACHE_BRANCH:STRING="develop" \
+            -DHDF5_VOL_VOL-CACHE_NAME:STRING="$HDF5_VOL_CACHE_TEST_NAME" \
+            -DHDF5_VOL_VOL-CACHE_TEST_PARALLEL:BOOL=ON \
+            -DASYNC_INCLUDE_DIR=${{ github.workspace }}/hdf5/build/_deps/vol-async-src/src \
+            -DASYNC_INCLUDE_DIRS=${{ github.workspace }}/hdf5/build/_deps/vol-async-src/src \
+            -DASYNC_LIBRARIES=${{ github.workspace }}/hdf5/build/bin/libasynchdf5.a\;${{ github.workspace }}/hdf5/build/bin/libh5async.so \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build HDF5 and cache VOL connector
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+          echo "LD_LIBRARY_PATH=/usr/local/lib:${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
+
+      - name: Create cache VOL connector configuration file for testing
+        shell: bash
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/scratch
+          touch $GITHUB_WORKSPACE/config1.cfg
+          echo "HDF5_CACHE_STORAGE_SCOPE: LOCAL" >> $GITHUB_WORKSPACE/config1.cfg
+          echo "HDF5_CACHE_STORAGE_PATH: $GITHUB_WORKSPACE/scratch" >> $GITHUB_WORKSPACE/config1.cfg
+          echo "HDF5_CACHE_STORAGE_SIZE: 4294967296" >> $GITHUB_WORKSPACE/config1.cfg
+          echo "HDF5_CACHE_STORAGE_TYPE: SSD" >> $GITHUB_WORKSPACE/config1.cfg
+          echo "HDF5_CACHE_REPLACEMENT_POLICY: LRU" >> $GITHUB_WORKSPACE/config1.cfg
+
+      # Workaround for cache VOL CMake issue
+      - name: Copy testing files
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cp bin/test_file.exe ./_deps/vol-cache-build/tests
+          cp bin/test_group.exe ./_deps/vol-cache-build/tests
+          cp bin/test_dataset.exe ./_deps/vol-cache-build/tests
+          cp bin/test_dataset_async_api.exe ./_deps/vol-cache-build/tests
+          cp bin/test_write_multi.exe ./_deps/vol-cache-build/tests
+          cp bin/test_multdset.exe ./_deps/vol-cache-build/tests
+
+      - name: Set environment variables for external tests (cache VOL only)
+        run: |
+          echo "HDF5_PLUGIN_PATH=${{ github.workspace }}/hdf5/build/bin/" >> $GITHUB_ENV
+          echo "HDF5_VOL_CONNECTOR=cache_ext config=$GITHUB_WORKSPACE/config1.cfg;under_vol=0;under_info={};" >> $GITHUB_ENV
+        if: ${{ ! matrix.async }}
+
+      - name: Set environment variables for external tests (cache VOL atop async VOL)
+        run: |
+          echo "HDF5_PLUGIN_PATH=${{ github.workspace }}/hdf5/build/bin/" >> $GITHUB_ENV
+          echo "HDF5_VOL_CONNECTOR=cache_ext config=$GITHUB_WORKSPACE/config1.cfg;under_vol=512;under_info={under_vol=0;under_info={}};" >> $GITHUB_ENV
+        if: ${{ matrix.async }}
+
+      # Until cache VOL tests are namespaced properly, run them directly
+      - name: Test HDF5 cache VOL connector with external tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_file$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_group$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_dataset_async_api$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_write_multi$" .
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "^test_multdset$" .
+
+      - name: Test HDF5 cache VOL connector with HDF5 API tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        # Don't test the Cache VOL connector with the HDF5 API tests yet
+        # when it's stacked on top of the Async connector, as it doesn't
+        # currently pass all the tests due to the Async connector not passing
+        # all the tests. Leave the step in, but skip it to leave an indication
+        # that this should be re-enabled in the future.
+        if: ${{ ! matrix.async }}
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" .
