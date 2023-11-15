@@ -2,7 +2,7 @@
 
 This document describes current HDF5 branches. 
 
-Branches are tested nightly and testing results are available at https://cdash-internal.hdfgroup.org/ and https://cdash.hdfgroup.org/. 
+Branches are tested nightly and testing results are available at https://cdash.hdfgroup.org/. 
 Commits that break daily testing should be fixed by 3:00 pm Central time or reverted.  
 We encourage code contributors to check the status of their commits. If you have any questions, please contact help@hdfgroup.org.
  
