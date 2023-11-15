@@ -22624,6 +22624,253 @@ error:
 } /* end timestamps() */
 
 /*-------------------------------------------------------------------------
+ * Function:    link_path_handling
+ *
+ * Purpose:     Create hard and soft links by relative and absolute paths
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+link_path_handling(hid_t fapl, bool new_format)
+{
+
+    hid_t file_id = (H5I_INVALID_HID);
+    hid_t grp1 = (H5I_INVALID_HID), grp2 = (H5I_INVALID_HID);
+    char  filename[NAME_BUF_SIZE];
+
+    if (new_format)
+        TESTING("H5Lcreate path handling (w/new group format)");
+    else
+        TESTING("H5Lcreate path handling");
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create two groups */
+    if ((grp1 = H5Gcreate2(file_id, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((grp2 = H5Gcreate2(grp1, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create hard link to grp1 that resides in grp2 by relative path */
+    if (H5Lcreate_hard(file_id, "grp1", grp1, "grp2/relative_hard_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_hard_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create soft link to grp1 that resides in grp2 by relative path */
+    if (H5Lcreate_soft("/grp1", grp1, "grp2/relative_soft_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_soft_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create hard link to grp1 that resides in grp2 by absolute path */
+    if (H5Lcreate_hard(file_id, "grp1", grp1, "/grp1/grp2/absolute_hard_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "absolute_hard_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create soft link to grp1 that resides in grp2 by absolute path */
+    if (H5Lcreate_soft("/grp1", grp1, "/grp1/grp2/absolute_soft_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "absolute_soft_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Close groups and file */
+    if (H5Gclose(grp1) < 0)
+        TEST_ERROR;
+    if (H5Gclose(grp2) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp1);
+        H5Gclose(grp2);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    ext_link_path_handling
+ *
+ * Purpose:     Create external links by relative and absolute paths
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+ext_link_path_handling(hid_t fapl, bool new_format)
+{
+
+    hid_t file_id = (H5I_INVALID_HID);
+    hid_t grp1 = (H5I_INVALID_HID), grp2 = (H5I_INVALID_HID);
+    char  filename[NAME_BUF_SIZE];
+
+    if (new_format)
+        TESTING("H5Lcreate external link path handling (w/new group format)");
+    else
+        TESTING("H5Lcreate external link path handling");
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create two groups */
+    if ((grp1 = H5Gcreate2(file_id, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((grp2 = H5Gcreate2(grp1, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create external link to nonexistent object by relative path */
+    if (H5Lcreate_external("nonexistent_file", "nonexistent_object", grp1, "grp2/relative_ext_link",
+                           H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_ext_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create external link to nonexistent object by absolute path */
+    if (H5Lcreate_external("nonexistent_file", "nonexistent_object", grp1, "/grp1/grp2/relative_soft_link",
+                           H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_soft_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Close groups and file */
+    if (H5Gclose(grp1) < 0)
+        TEST_ERROR;
+    if (H5Gclose(grp2) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp1);
+        H5Gclose(grp2);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    ud_link_path_handling
+ *
+ * Purpose:     Create user-defined links by relative and absolute paths
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+ud_link_path_handling(hid_t fapl, bool new_format)
+{
+
+    hid_t       file_id = (H5I_INVALID_HID);
+    hid_t       grp1 = (H5I_INVALID_HID), grp2 = (H5I_INVALID_HID);
+    char        filename[NAME_BUF_SIZE];
+    H5L_info2_t li;
+
+    if (new_format)
+        TESTING("H5Lcreate ud link path handling (w/new group format)");
+    else
+        TESTING("H5Lcreate ud link path handling");
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create two groups */
+    if ((grp1 = H5Gcreate2(file_id, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((grp2 = H5Gcreate2(grp1, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Check that UD hard links are not registered */
+    if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != false)
+        TEST_ERROR;
+
+    /* Register "user-defined hard links" with the library */
+    if (H5Lregister(UD_hard_class) < 0)
+        TEST_ERROR;
+
+    /* Check that UD hard links are registered */
+    if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != true)
+        TEST_ERROR;
+
+    if (H5Lget_info2(file_id, "grp1", &li, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Create user-defined (hard) link to grp1 by relative path */
+    if (H5Lcreate_ud(grp1, "grp2/relative_ud_link", (H5L_type_t)UD_HARD_TYPE, &(li.u.token),
+                     sizeof(li.u.token), H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "relative_ud_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Create user-defined (hard) link to grp1 by absolute path */
+    if (H5Lcreate_ud(grp1, "/grp1/grp2/absolute_ud_link", (H5L_type_t)UD_HARD_TYPE, &(li.u.token),
+                     sizeof(li.u.token), H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lexists(grp2, "absolute_ud_link", H5P_DEFAULT) <= 0)
+        TEST_ERROR;
+
+    /* Close groups and file */
+    if (H5Gclose(grp1) < 0)
+        TEST_ERROR;
+    if (H5Gclose(grp2) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp1);
+        H5Gclose(grp2);
+        H5Fclose(file_id);
+        H5Lunregister((H5L_type_t)UD_HARD_TYPE);
+    }
+    H5E_END_TRY
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test links
@@ -22697,6 +22944,7 @@ main(void)
             nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += link_path_handling(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* Test new H5L link creation routine */
             nerrors += test_lcpl(my_fapl, new_format);
@@ -22804,6 +23052,7 @@ main(void)
                     nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_public_macros(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += ext_link_path_handling(my_fapl, new_format) < 0 ? 1 : 0;
                 } /* with/without external file cache */
             }
 
@@ -22826,6 +23075,7 @@ main(void)
             nerrors += ud_callbacks_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
             nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += ud_link_path_handling(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += lapl_nlinks(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
