@@ -49,7 +49,7 @@
  * The <em>Abstract Data Model</em> is a conceptual model of data, data types, and data organization. The
  * abstract data model is independent of storage medium or programming environment. The
  * <em>Storage Model</em> is a standard representation for the objects of the abstract data model. The
- * <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a>
  * defines the storage model.
  *
  * The <em>Programming Model</em> is a model of the computing environment and includes platforms from
@@ -100,7 +100,7 @@
  * model, and stored in a storage medium. The stored objects include header blocks, free lists, data
  * blocks, B-trees, and other objects. Each group or dataset is stored as one or more header and data
  * blocks.
- * @see <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * @see <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a>
  * for more information on how these objects are organized. The HDF5 library can also use other
  * libraries and modules such as compression.
  *
@@ -125,7 +125,7 @@
  * HDF5 abstract data model is up to the application developer. The application program only
  * needs to deal with the library and the abstract data model. Most applications need not consider
  * any details of the
- * <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a>
  * or the details of how objects of abstract data model are translated to and from storage.
  *
  * \subsection subsec_data_model_abstract The Abstract Data Model
@@ -408,7 +408,7 @@
  *
  * \subsection subsec_data_model_storage The HDF5 Storage Model
  * \subsubsection subsubsec_data_model_storage_spec The Abstract Storage Model: the HDF5 Format Specification
- * The <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * The <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a>
  * defines how HDF5 objects and data are mapped to a linear
  * address space. The address space is assumed to be a contiguous array of bytes stored on some
  * random access medium. The format defines the standard for how the objects of the abstract data

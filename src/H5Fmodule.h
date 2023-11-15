@@ -705,7 +705,7 @@
  * If the application opens an HDF5 file without both determining the driver used to create the file
  * and setting up the use of that driver, the HDF5 Library will examine the superblock and the
  * driver definition block to identify the driver.
- * See the <a href="https://docs.hdfgroup.org/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * See the <a href="https://hdfgroup.github.io/hdf5/v1_14/_s_p_e_c.html">HDF5 File Format Specification</a>
  * for detailed descriptions of the superblock and the driver definition block.
  *
  * \subsubsection subsubsec_file_alternate_drivers_sec2 The POSIX (aka SEC2) Driver
