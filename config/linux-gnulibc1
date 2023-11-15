@@ -47,6 +47,9 @@ fi
 # Figure out Clang C compiler flags
 . $srcdir/config/clang-flags
 
+# Figure out NVHPC C compiler flags
+. $srcdir/config/nvidia-flags
+
 # Use default Fortran 90 compiler according to what C compiler is used.
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
@@ -57,6 +60,10 @@ if test "X-" = "X-$FC"; then
         pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
+            ;;
+        nvc*)
+            FC=nvfortran
+            FC_BASENAME=nvfortran
             ;;
         icx*)
             FC=ifx
@@ -79,7 +86,7 @@ if test "X-" = "X-$FC"; then
 else
     case $FC in
         # The PGI and Intel compilers are automatically detected below
-        ifc*|ifort*|pgf90*)
+        ifc*|ifort*|pgf90*|nvfortran*)
             ;;
 
         *f95*)
@@ -135,6 +142,9 @@ fi
 # Figure out Clang FC compiler flags
 . $srcdir/config/clang-fflags
 
+# Figure out NVHPC FC compiler flags
+. $srcdir/config/nvidia-fflags
+
 case $FC_BASENAME in
     #
     # Absoft compiler
@@ -173,10 +183,7 @@ case $FC_BASENAME in
     nagfor)
 
         F9XSUFFIXFLAG=""
-        # NOTE: The default is -ieee=stop, which will cause problems
-        #       when the H5T module performs floating-point type
-        #       introspection
-        AM_FCFLAGS="$AM_FCFLAGS -ieee=full"
+        AM_FCFLAGS="$AM_FCFLAGS"
         FSEARCH_DIRS=""
 
         # Production
@@ -226,6 +233,9 @@ fi
 # Figure out Clang CXX compiler flags
 . $srcdir/config/clang-cxxflags
 
+# Figure out NVHPC CXX compiler flags
+. $srcdir/config/nvidia-cxxflags
+
 # compiler version strings
 
 # check if the compiler_version_info is already set
@@ -248,7 +258,11 @@ case $CC in
             sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         cc_version_info=`echo $cc_version_info`
-        ;; 
+        ;;
+
+    *nvc*)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS -V 2>&1 | grep 'nvc'`
+        ;;
 
     *icx*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -V 2>&1 | grep 'Version' |\
@@ -320,6 +334,10 @@ case $FC in
 
     *pgf90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'pgf90'`
+        ;;
+
+    *nvfortran*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'nvfortran'`
         ;;
 
     *nagfor*|*nagftn*)
