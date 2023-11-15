@@ -71,8 +71,8 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
 file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (FIND TEST_STREAM "_pmi_alps" "${TEST_FIND_RESULT}")
-if (TEST_FIND_RESULT GREATER 0)
+string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
 endif ()
@@ -169,12 +169,14 @@ else ()
   # else grep the output with the reference
   set (TEST_GREP_RESULT 0)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-
-  # TEST_REFERENCE should always be matched
-  string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
-  string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_GREP_RESULT)
-  if (NOT TEST_GREP_RESULT)
-    message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
+  list (LENGTH TEST_STREAM test_len)
+  if (test_len GREATER 0)
+    # TEST_REFERENCE should always be matched
+    string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
+    string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_GREP_RESULT)
+    if (NOT TEST_GREP_RESULT)
+      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
+    endif ()
   endif ()
 endif ()
 

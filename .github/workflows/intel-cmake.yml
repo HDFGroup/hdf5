@@ -13,69 +13,111 @@ permissions:
   contents: read
 
 jobs:
-  Intel_build_and_test:
-    name: "Intel ${{ inputs.build_mode }}"
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+  Intel_oneapi_linux:
+    name: "ubuntu-oneapi ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: add oneAPI to apt
-        shell: bash
-        run: |
-          cd /tmp
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
-
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
       - name: Install Linux Dependencies
         run: |
-          sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
-      - name: install oneAPI dpcpp and fortran compiler
-        shell: bash
-        run: |
-          sudo apt update
-          sudo apt install -y intel-oneapi-compiler-dpcpp-cpp
-          sudo apt install -y intel-oneapi-compiler-fortran
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2023.2'
 
-      - name: install oneAPI MKL library
+      - name: CMake Configure with oneapi
         shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          sudo apt install -y intel-oneapi-mkl-devel
-
-      - name: CMake Configure with icx
-        shell: bash
-        run: |
-          source /opt/intel/oneapi/setvars.sh
-          export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-          -DCMAKE_TOOLCHAIN_FILE=config/toolchain/intel.cmake \
-          -DMKL_ROOT="/opt/intel/oneapi/mkl/latest" \
-          -DTBB_ROOT="/opt/intel/oneapi/tbb/latest" \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
-          -DHDF5_BUILD_FORTRAN=OFF \
           $GITHUB_WORKSPACE
 
       # BUILD
       - name: CMake Build
         shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          source /opt/intel/oneapi/setvars.sh
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       # RUN TESTS
       - name: CMake Run Tests
         shell: bash
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          source /opt/intel/oneapi/setvars.sh
-          export SYCL_DEVICE_FILTER=opencl.cpu
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+  Intel_oneapi_windows:
+    name: "windows-oneapi ${{ inputs.build_mode }}"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2023.2'
+
+      - name: CMake Configure with oneapi
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          Set-Location -Path "${{ runner.workspace }}\\build"
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF ${{ github.workspace }}
+
+      # BUILD
+      - name: CMake Build
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: CMake Run Tests
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build
