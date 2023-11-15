@@ -47,7 +47,25 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Added defaults to CMake for long double conversion checks
+
+      HDF5 performs a couple of checks at build time to see if long double
+      values can be converted correctly (IBM's Power architecture uses a
+      special format for long doubles). These checks were performed using
+      TRY_RUN, which is a problem when cross-compiling.
+
+      These checks now use default values appropriate for most non-Power
+      systems when cross-compiling. The cache values can be pre-set if
+      necessary, which will preempt both the TRY_RUN and the default.
+
+      Affected values:
+        H5_LDOUBLE_TO_LONG_SPECIAL      (default no)
+        H5_LONG_TO_LDOUBLE_SPECIAL      (default no)
+        H5_LDOUBLE_TO_LLONG_ACCURATE    (default yes)
+        H5_LLONG_TO_LDOUBLE_CORRECT     (default yes)
+        H5_DISABLE_SOME_LDOUBLE_CONV    (default no)
+
+      Fixes GitHub #3585
 
 
     Library:
