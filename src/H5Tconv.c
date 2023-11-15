@@ -2156,23 +2156,16 @@ done:
 H5T_subset_info_t *
 H5T__conv_struct_subset(const H5T_cdata_t *cdata)
 {
-    H5T_conv_struct_t *priv      = NULL;
-    H5T_subset_info_t *ret_value = NULL;
+    H5T_conv_struct_t *priv = NULL;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(cdata);
+    assert(cdata->priv);
 
-    if (cdata->priv) {
-        priv      = (H5T_conv_struct_t *)(cdata->priv);
-        ret_value = &priv->subset_info;
-    }
-    else {
-        ret_value = (H5T_subset_info_t *)NULL;
-    }
+    priv = (H5T_conv_struct_t *)(cdata->priv);
 
-    FUNC_LEAVE_NOAPI(ret_value)
-
+    FUNC_LEAVE_NOAPI((H5T_subset_info_t *)&priv->subset_info)
 } /* end H5T__conv_struct_subset() */
 
 /*-------------------------------------------------------------------------
