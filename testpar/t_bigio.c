@@ -1854,7 +1854,13 @@ main(int argc, char **argv)
 {
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
+    hsize_t oldsize   = H5_mpi_set_bigio_count(newsize);
+    hid_t   acc_plist = H5I_INVALID_HID;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
+    int mpi_code;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1864,9 +1870,37 @@ main(int argc, char **argv)
     if (newsize != oldsize)
         bigcount = newsize * 2;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank_g);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank_g))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAIN_PROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g))) {
+        if (MAIN_PROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     /* Attempt to turn off atexit post processing so that in case errors
      * happen during the test and the process is aborted, it will not get
