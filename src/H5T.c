@@ -5173,10 +5173,10 @@ H5T_path_noop(const H5T_path_t *p)
 /*-------------------------------------------------------------------------
  * Function:  H5T_path_compound_subset
  *
- * Purpose:   Checks if the source and destination types are both compound.
- *            Tells whether whether the source members are a subset of
- *            destination, and the order is the same, and no conversion
- *            is needed.  For example:
+ * Purpose:   Checks if the library's compound conversion function
+ *            is in use. Tells whether whether the source members are 
+ *            a subset of destination, and the order is the same, and 
+ *            no conversion is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
  *                      TYPE2 B;      -->          TYPE2 B;
@@ -5185,8 +5185,9 @@ H5T_path_noop(const H5T_path_t *p)
  *                                                 TYPE5 E;
  *                                             };
  *
- * Return:    A pointer to the subset info struct in p, or NULL if there are
- *            no compounds.  Points directly into the H5T_path_t structure.
+ * Return:    A pointer to the subset info struct in p, or NULL if the
+ *            library's compound conversion function is not in use.  
+ *            Points directly into the H5T_path_t structure.
  *
  *-------------------------------------------------------------------------
  */
@@ -5199,7 +5200,9 @@ H5T_path_compound_subset(const H5T_path_t *p)
 
     assert(p);
 
-    if (p->are_compounds)
+    /* Only retrieve private info if the library compound conversion
+     * function is in use */
+    if (!p->conv.is_app && (p->conv.u.lib_func == H5T__conv_struct))
         ret_value = H5T__conv_struct_subset(&(p->cdata));
 
     FUNC_LEAVE_NOAPI(ret_value)
