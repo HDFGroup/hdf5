@@ -106,7 +106,7 @@ static herr_t H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, co
 /* Other functions */
 static herr_t H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
                                             size_t sizes[], H5_flexible_const_ptr_t bufs[],
-                                            haddr_t *s_addrs[], size_t *s_sizes[],
+                                            haddr_t *s_addrs[], size_t *s_sizes[], uint32_t *s_sizes_len,
                                             H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted,
                                             MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base,
                                             int *size_i, MPI_Datatype *buf_type, bool *buf_type_created,
@@ -1675,7 +1675,8 @@ done:
 static herr_t
 H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                               H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[],
-                              H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted, MPI_Offset *mpi_off,
+                              uint32_t *s_sizes_len, H5_flexible_const_ptr_t *s_bufs[],
+                              bool *vector_was_sorted, MPI_Offset *mpi_off,
                               H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
                               bool *buf_type_created, MPI_Datatype *file_type, bool *file_type_created,
                               char *unused)
@@ -1715,6 +1716,10 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
     /* Get bio I/O transition point (may be lower than 2G for testing) */
     bigio_count = H5_mpi_get_bigio_count();
+
+    /* Start with s_sizes_len at count */
+    if (s_sizes_len)
+        *s_sizes_len = count;
 
     if (count == 1) {
         /* Single block.  Just use a series of MPI_BYTEs for the file view.
@@ -1808,8 +1813,13 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
                     assert(vector_was_sorted);
+                    assert(i > 0);
                     fixed_size = true;
                     size       = sizes[i - 1];
+
+                    /* Return the used length of the s_sizes buffer */
+                    if (s_sizes_len)
+                        *s_sizes_len = (uint32_t)i;
                 }
                 else {
                     size = (*s_sizes)[i];
@@ -2098,7 +2108,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
-                                          &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
+                                          &s_addrs, &s_sizes, NULL, (H5_flexible_const_ptr_t **)&s_bufs,
                                           &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
@@ -2464,17 +2474,21 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+        uint32_t s_sizes_len;
+
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
-                                          &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
-                                          &vector_was_sorted, &mpi_off,
+                                          &s_addrs, &s_sizes, &s_sizes_len,
+                                          (H5_flexible_const_ptr_t **)&s_bufs, &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
-        /* Compute max address written to */
+        /* Compute max address written to.  Note s_sizes is indexed according to the length of that array as
+         * reported by H5FD__mpio_vector_build_types(), which may be shorter if using the compressed arrays
+         * feature. */
         if (count > 0)
-            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
+            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[s_sizes_len - 1]);
 
         /* free sorted vectors if they exist */
         if (!vector_was_sorted) {
