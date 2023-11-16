@@ -1,0 +1,6 @@
+<map id="UserData4Visit" name="UserData4Visit">
+<area shape="rect" id="node1" title=" " alt="" coords="5,261,125,288"/>
+<area shape="rect" id="node2" href="$class_h5_1_1_h5_object.html" title="Class H5Object is a bridge between H5Location and DataSet, DataType, and Group." alt="" coords="24,157,107,184"/>
+<area shape="rect" id="node3" href="$class_h5_1_1_h5_location.html" title="H5Location is an abstract base class, added in version 1.8.12." alt="" coords="18,81,113,108"/>
+<area shape="rect" id="node4" href="$class_h5_1_1_id_component.html" title="Class IdComponent provides wrappers of the C functions that operate on an HDF5 identifier." alt="" coords="11,5,120,32"/>
+</map>
