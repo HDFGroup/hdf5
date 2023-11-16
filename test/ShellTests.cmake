@@ -104,20 +104,32 @@ elseif (UNIX)
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
+    if ("H5SHELL-test_flush_refresh" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5SHELL-test_flush_refresh PROPERTIES DISABLED true)
+    endif ()
     add_test (H5SHELL-test_use_cases ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_use_cases.sh)
     set_tests_properties (H5SHELL-test_use_cases PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
+    if ("H5SHELL-test_use_cases" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5SHELL-test_use_cases PROPERTIES DISABLED true)
+    endif ()
     add_test (H5SHELL-test_swmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_swmr.sh)
     set_tests_properties (H5SHELL-test_swmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
+    if ("H5SHELL-test_swmr" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5SHELL-test_swmr PROPERTIES DISABLED true)
+    endif ()
     add_test (H5SHELL-test_vds_swmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_vds_swmr.sh)
     set_tests_properties (H5SHELL-test_vds_swmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
+    if ("H5SHELL-test_vds_swmr" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5SHELL-test_vds_swmr PROPERTIES DISABLED true)
+    endif ()
   endif ()
 endif ()
