@@ -169,6 +169,9 @@
     set_tests_properties (H5LS-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
+    if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
@@ -197,6 +200,9 @@
     set_tests_properties (H5LS-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
+    if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -219,6 +225,9 @@
       set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
+      if ("H5LS_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 

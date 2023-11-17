@@ -879,6 +879,7 @@ if (BUILD_TESTING)
     if (HDF5_TEST_VFD)
         HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"                       ON
     TEST_SHELL_SCRIPTS             "Enable shell script tests"                                    ON
+    HDF5_DISABLE_TESTS_REGEX       "Pattern to set tests to DISABLED"                             ""
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"

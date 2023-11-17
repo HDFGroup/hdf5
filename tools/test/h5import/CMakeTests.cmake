@@ -118,6 +118,9 @@
         DEPENDS H5IMPORT-${testname}-clear-objects
         FIXTURES_REQUIRED set_h5importtest
     )
+    if ("H5IMPORT-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5IMPORT-${testname} PROPERTIES DISABLED true)
+    endif ()
     # If using memchecker skip macro based tests
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -138,6 +141,9 @@
           DEPENDS H5IMPORT-${testname}
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT-${testname}-H5DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT-${testname}-H5DMP PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5IMPORT-${testname}-H5DMP_CMP
           COMMAND "${CMAKE_COMMAND}"
@@ -155,6 +161,9 @@
           DEPENDS H5IMPORT-${testname}-H5DMP
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT-${testname}-H5DMP_CMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES DISABLED true)
+      endif ()
     endif ()
 
     add_test (
@@ -217,6 +226,9 @@
           DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects"
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT-DUMP-${testname}-H5DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES DISABLED true)
+      endif ()
 
       add_test (
           NAME H5IMPORT-DUMP-${testname}
@@ -234,6 +246,9 @@
           DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP"
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT-DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT-DUMP-${testname} PROPERTIES DISABLED true)
+      endif ()
 
       add_test (
           NAME H5IMPORT-DUMP-${testname}-H5DFF
@@ -252,6 +267,9 @@
           DEPENDS "H5IMPORT-DUMP-${testname}"
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT-DUMP-${testname}-H5DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES DISABLED true)
+      endif ()
     endif ()
 
     add_test (
@@ -298,6 +316,9 @@
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-clear-objects"
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT_SUB-DUMP-${testname}-H5DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5DMP PROPERTIES DISABLED true)
+      endif ()
 
       add_test (
           NAME H5IMPORT_SUB-DUMP-${testname}-H5IMP
@@ -315,6 +336,9 @@
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5DMP"
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT_SUB-DUMP-${testname}-H5IMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5IMP PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5IMPORT_SUB-DUMP-${testname}-CMP
           COMMAND "${CMAKE_COMMAND}"
@@ -331,6 +355,9 @@
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5IMP"
           FIXTURES_REQUIRED set_h5importtest
       )
+      if ("H5IMPORT_SUB-DUMP-${testname}-CMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-CMP PROPERTIES DISABLED true)
+      endif ()
     endif ()
 
     add_test (
@@ -352,7 +379,7 @@
           NAME H5IMPORT-DUMP-${testname}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
       )
-      set_property(TEST H5IMPORT-DUMP-${testname} PROPERTY DISABLED)
+      set_property(TEST H5IMPORT-DUMP-${testname} PROPERTY DISABLED true)
     endif ()
   endmacro ()
 

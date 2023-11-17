@@ -460,6 +460,9 @@
     set_tests_properties (H5DUMP-${testname} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
+    if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
@@ -469,7 +472,7 @@
             NAME H5DUMP-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
         )
-        set_property(TEST H5DUMP-${skipresultfile} PROPERTY DISABLED)
+        set_property(TEST H5DUMP-${skipresultfile} PROPERTY DISABLED true)
       endif ()
     else ()
       ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
@@ -503,6 +506,9 @@
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
+    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_TEST_N resultfile resultcode)
@@ -521,7 +527,6 @@
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
-          DEPENDS H5DUMP-N-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
     else ()
@@ -541,6 +546,9 @@
     set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
         DEPENDS H5DUMP-N-${resultfile}-clear-objects
     )
+    if ("H5DUMP-N-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DISABLED true)
+    endif ()
     add_test (
         NAME H5DUMP-N-${resultfile}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
@@ -568,7 +576,6 @@
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-          DEPENDS H5DUMP-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
     else ()
@@ -587,6 +594,9 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           DEPENDS H5DUMP-${resultfile}-clear-objects
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-${resultfile}-output-cmp
           COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
@@ -596,6 +606,9 @@
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
       set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
+      if ("H5DUMP-${resultfile}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DISABLED true)
+      endif ()
     endif ()
     add_test (
         NAME H5DUMP-${resultfile}-clean-objects
@@ -652,6 +665,9 @@
           DEPENDS H5DUMP-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-${resultfile}-output-cmp
           COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
@@ -668,6 +684,9 @@
           DEPENDS H5DUMP-${resultfile}-output-cmp
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}-output-cmp-ddl" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DISABLED true)
+      endif ()
     endif ()
     add_test (
         NAME H5DUMP-${resultfile}-clean-objects
@@ -706,6 +725,9 @@
           DEPENDS H5DUMP-output-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-output-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-output-cmp-${resultfile}
           COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${resultfile}.txt ${resultfile}.exp
@@ -714,6 +736,9 @@
           DEPENDS H5DUMP-output-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-output-cmp-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-output-${resultfile}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -744,6 +769,9 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -764,6 +792,9 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -785,6 +816,9 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -808,6 +842,9 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -836,6 +873,9 @@
       set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-BIN_EXPORT-${conffile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-BIN_EXPORT-${conffile}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -876,16 +916,25 @@
           DEPENDS H5DUMP-IMPORT-${resultfile}-clear-objects
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-IMPORT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import${tgt_file_ext}> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES
           DEPENDS H5DUMP-IMPORT-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-IMPORT-h5import-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES
           DEPENDS H5DUMP-IMPORT-h5import-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP-IMPORT-h5diff-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5DUMP-IMPORT-${resultfile}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -919,6 +968,9 @@
       set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
+      if ("H5DUMP_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
