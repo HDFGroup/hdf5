@@ -172,7 +172,7 @@ target_link_libraries (${LIBAEC_LIB_TARGET} PRIVATE ${LINK_LIBS})
 H5_SET_LIB_OPTIONS (${LIBAEC_LIB_TARGET} ${LIBAEC_LIB_NAME} STATIC 0)
 set_target_properties (${LIBAEC_LIB_TARGET} PROPERTIES
     VERSION 0.0.12 SOVERSION 0
-    PUBLIC_HEADER "${LIBAEC_PUBLIC_HEADERS}"
+    PUBLIC_HEADER ""
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -194,7 +194,7 @@ target_link_libraries (${SZIP_LIB_TARGET} PRIVATE ${LIBAEC_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${SZIP_LIB_TARGET} ${SZIP_LIB_NAME} STATIC 0)
 set_target_properties (${SZIP_LIB_TARGET} PROPERTIES
     VERSION 2.0.1 SOVERSION 2
-    PUBLIC_HEADER "${SZIP_PUBLIC_HEADERS}"
+    PUBLIC_HEADER ""
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -233,17 +233,6 @@ if (WIN32)
   endif ()
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
 endif ()
-
-#-----------------------------------------------------------------------------
-# Add file(s) to CMake Install
-#-----------------------------------------------------------------------------
-#if (NOT LIBAEC_INSTALL_NO_DEVELOPMENT)
-#  install (
-#      FILES ${PROJECT_BINARY_DIR}/aec_config.h
-#      DESTINATION ${LIBAEC_INSTALL_INCLUDE_DIR}
-#      COMPONENT headers
-#  )
-#endif ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -330,20 +319,6 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
       FILES ${LIBAEC_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${LIBAEC_PACKAGE}${LIBAEC_PACKAGE_EXT}-config-version.cmake
       DESTINATION ${LIBAEC_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
-  )
-endif ()
-
-#-----------------------------------------------------------------------------
-# Add Document File(s) to CMake Install
-#-----------------------------------------------------------------------------
-if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
-  install (
-      FILES
-          ${LIBAEC_SOURCE_DIR}/README.md
-          ${LIBAEC_SOURCE_DIR}/INSTALL.md
-          ${LIBAEC_SOURCE_DIR}/CHANGELOG.md
-      DESTINATION ${LIBAEC_INSTALL_DATA_DIR}
-      COMPONENT documents
   )
 endif ()
 
@@ -464,7 +439,6 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
   include (InstallRequiredSystemLibraries)
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;libraries;/")
-  set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;headers;/")
   set (CPACK_INSTALL_CMAKE_PROJECTS "${LIBAEC_BINARY_DIR};LIBAEC;configinstall;/")
 
   set (CPACK_ALL_INSTALL_TYPES Full Developer User)
@@ -476,32 +450,11 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
 
   cpack_add_component_group(Runtime)
 
-  cpack_add_component_group(Documents
-      EXPANDED
-      DESCRIPTION "Release notes for libaec"
-  )
-
-  cpack_add_component_group(Development
-      EXPANDED
-      DESCRIPTION "All of the tools you'll need to develop applications"
-  )
-
   cpack_add_component (libraries
       DISPLAY_NAME "LIBAEC Libraries"
       REQUIRED
       GROUP Runtime
       INSTALL_TYPES Full Developer User
-  )
-  cpack_add_component (headers
-      DISPLAY_NAME "LIBAEC Headers"
-      DEPENDS libraries
-      GROUP Development
-      INSTALL_TYPES Full Developer
-  )
-  cpack_add_component (documents
-      DISPLAY_NAME "LIBAEC Documents"
-      GROUP Documents
-      INSTALL_TYPES Full Developer
   )
   cpack_add_component (configinstall
       DISPLAY_NAME "LIBAEC CMake files"
