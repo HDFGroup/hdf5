@@ -5175,8 +5175,8 @@ H5T_path_noop(const H5T_path_t *p)
  * Function:  H5T_path_compound_subset
  *
  * Purpose:   Checks if the library's compound conversion function
- *            is in use. Tells whether whether the source members are 
- *            a subset of destination, and the order is the same, and 
+ *            is in use. Tells whether whether the source members are
+ *            a subset of destination, and the order is the same, and
  *            no conversion is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -5187,7 +5187,7 @@ H5T_path_noop(const H5T_path_t *p)
  *                                             };
  *
  * Return:    A pointer to the subset info struct in p, or NULL if the
- *            library's compound conversion function is not in use.  
+ *            library's compound conversion function is not in use.
  *            Points directly into the H5T_path_t structure.
  *
  *-------------------------------------------------------------------------
