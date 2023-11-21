@@ -3845,64 +3845,54 @@ test_user_compound_conversion(void)
     TESTING("compound conversion via user conversion callback");
 
     /* Create the source compound datatype */
-    if ((src = H5Tcreate(H5T_COMPOUND, sizeof(struct src_cmpd_t))) < 0) {
-        FAIL_PUTS_ERROR("couldn't create compound datatype");
-    }
+    if ((src = H5Tcreate(H5T_COMPOUND, sizeof(struct src_cmpd_t))) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(src, "a", HOFFSET(struct src_cmpd_t, a), H5T_NATIVE_UINT32) < 0) {
-        FAIL_PUTS_ERROR("couldn't insert field into compound datatype");
-    }
+    if (H5Tinsert(src, "a", HOFFSET(struct src_cmpd_t, a), H5T_NATIVE_UINT32) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(src, "b", HOFFSET(struct src_cmpd_t, b), H5T_NATIVE_FLOAT) < 0) {
-        FAIL_PUTS_ERROR("couldn't insert field into compound datatype");
-    }
+    if (H5Tinsert(src, "b", HOFFSET(struct src_cmpd_t, b), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
 
     /* Create the destination compound datatype */
-    if ((dst = H5Tcreate(H5T_COMPOUND, sizeof(struct dst_cmpd_t))) < 0) {
-        FAIL_PUTS_ERROR("couldn't create compound datatype");
-    }
+    if ((dst = H5Tcreate(H5T_COMPOUND, sizeof(struct dst_cmpd_t))) < 0)
+        TEST_ERROR;
 
-    if (H5Tinsert(dst, "b", HOFFSET(struct dst_cmpd_t, b), H5T_IEEE_F32LE) < 0) {
-        FAIL_PUTS_ERROR("couldn't insert field into compound datatype");
-    }
+    if (H5Tinsert(dst, "b", HOFFSET(struct dst_cmpd_t, b), H5T_IEEE_F32LE) < 0)
+        TEST_ERROR;
 
-    if (H5Tregister(H5T_PERS_SOFT, "src_cmpd_t->dst_cmpd_t", src, dst, &user_compound_convert) < 0) {
-        FAIL_PUTS_ERROR("couldn't register compound conversion function");
-    }
+    if (H5Tregister(H5T_PERS_SOFT, "src_cmpd_t->dst_cmpd_t", src, dst, &user_compound_convert) < 0)
+        TEST_ERROR;
 
     /* Create File */
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        FAIL_PUTS_ERROR("couldn't create file");
-    }
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
     /* Create a dataspace to use */
-    space_id = H5Screate_simple(1, &dim, NULL);
-    assert(space_id > 0);
+    if ((space_id = H5Screate_simple(1, &dim, NULL)) < 0)
+        TEST_ERROR;
 
     /* Create a dataset with the destination compound datatype */
-    if ((dset_id = H5Dcreate2(file_id, "dataset", dst, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
-        0) {
-        FAIL_PUTS_ERROR("couldn't create dataset with compound datatype");
-    }
+    if ((dset_id = H5Dcreate2(file_id, "dataset", dst, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-    if (H5Dwrite(dset_id, src, space_id, H5S_ALL, H5P_DEFAULT, buf) < 0) {
-        FAIL_PUTS_ERROR("couldn't write to dataset with user compound conversion function");
-    }
+    if (H5Dwrite(dset_id, src, space_id, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        TEST_ERROR;
 
     /* Close IDs */
     if (H5Tunregister(H5T_PERS_SOFT, "src_cmpd_t->dst_cmpd_t", src, dst, &user_compound_convert) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(src) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(dst) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(space_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(dset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -6773,7 +6763,7 @@ test_int_float_except(void)
 {
 #if H5_SIZEOF_INT == 4 && H5_SIZEOF_FLOAT == 4
     float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0F, (float)INT_MAX - 32.0F, (float)INT_MAX - 68.0F,
-                               (float)4.5F};
+                                      (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
     float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
     int   *intp; /* Pointer to buffer, as integers */
@@ -8633,7 +8623,7 @@ test_versionbounds(void)
     hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
     int          low, high;                         /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
-                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
+                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
     int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
     color_t      enum_val;           /* Enum type index */
