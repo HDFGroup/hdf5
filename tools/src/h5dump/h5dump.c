@@ -1089,7 +1089,7 @@ parse_start:
                  * for subsetting: "--start", "--stride", "--count", and "--block"
                  * which can come in any order. If we run out of parameters (EOF)
                  * or run into one which isn't a subsetting parameter (NOT s, S,
-                 * c, or K), then we exit the do-while look, set the subset_info
+                 * c, or K), then we exit the do-while loop, set the subset_info
                  * to the structure we've been filling. If we've reached the end
                  * of the options, we exit the parsing (goto parse_end) otherwise,
                  * since we've "read" the next option, we need to parse it. So we
