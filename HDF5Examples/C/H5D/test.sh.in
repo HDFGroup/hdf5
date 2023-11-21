@@ -104,11 +104,12 @@ done
 
 #######Non-standard tests#######
 USE_ALT=""
+### Set default tfiles directory for tests
+nbitdir="18"
 version_compare "$H5_LIBVER" "1.8.23"
 # check if HDF5 version is < 1.8.23
 if [ "$version_lt" = 1 ]; then
     USE_ALT="22"
-    nbitdir="18"
 else
 # check if HDF5 version is < 1.10.8
   version_compare "$H5_LIBVER" "1.10.8"
@@ -132,8 +133,15 @@ do
         if [[ $fname == "h5ex_d_nbit"]]
         then
             tdir=$nbitdir
+            if [[ $USE_ALT == "" ]]
+            then
+                ### set USE_ALT=07 if not set above
+                USE_ALT="07"
+            fi
         else
             tdir=18
+            ### unset USE_ALT for the other topics
+            USE_ALT=""
         fi
         cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
         status=$?

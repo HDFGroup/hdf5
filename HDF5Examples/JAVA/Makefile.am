@@ -23,6 +23,6 @@
 include $(top_srcdir)/config/commence.am
 
 ## Only recurse into subdirectories if the Java (JNI) interface is enabled.
-   SUBDIRS=intro groups datasets datatypes
+   SUBDIRS=H5J H5G H5D H5T
 
 include $(top_srcdir)/config/conclude.am

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDFJAVA_EXAMPLES_GROUPS Java)
+project (HDF5Examples_JAVA_GROUPS Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
@@ -50,7 +50,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_PROGRAM=${resultfile}"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}_${resultfile}_JAR_FILE}"
-            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
             -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_GROUPS_BINARY_DIR}"
             -D "TEST_OUTPUT=${HDFJAVA_EXAMPLES_GROUPS_BINARY_DIR}/${resultfile}.out"
             -D "TEST_REFERENCE=${resultfile}.txt"

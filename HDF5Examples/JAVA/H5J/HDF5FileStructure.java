@@ -41,8 +41,6 @@ import hdf.hdf5lib.structs.H5O_token_t;
  */
 public class HDF5FileStructure {
     private static String fname = "HDF5FileStructure.h5";
-    private long[] dims2D       = {20, 10};
-    private long[] dims3D       = {20, 10, 5};
 
     private static void FileStructure()
     {
@@ -162,6 +160,8 @@ public class HDF5FileStructure {
      */
     private static void createFile() throws Exception
     {
+        long[] dims2D      = {20, 10};
+        long[] dims3D      = {20, 10, 5};
         long file_id       = HDF5Constants.H5I_INVALID_HID;
         long dataset_id    = HDF5Constants.H5I_INVALID_HID;
         long dataspace_id1 = HDF5Constants.H5I_INVALID_HID;

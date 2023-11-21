@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
-project (HDFJAVA_EXAMPLES_DATATYPES Java)
+project (HDF5Examples_JAVA_H5T Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
