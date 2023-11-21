@@ -129,19 +129,19 @@ do
         echo "  Unsupported feature"
         status=0
     else
-        if "fname"=="h5ex_d_nbit"
+        if [[ $fname == "h5ex_d_nbit"]]
         then
             tdir=$nbitdir
         else
             tdir=18
         fi
-        cmp -s tmp.test $srcdir/tfiles/$tdir/$fname.tst
+        cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
         status=$?
         if test $status -ne 0
         then
             echo "  FAILED!"
         else
-          if "fname"=="h5ex_d_transform"
+          if [[ $fname == "h5ex_d_transform" ]]
           then
               targ="-n"
           else
