@@ -1,4 +1,4 @@
-name: netCDF
+name: netCDF dev
 
 on:
   workflow_dispatch:

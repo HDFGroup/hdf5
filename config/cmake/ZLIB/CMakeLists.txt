@@ -247,7 +247,7 @@ TARGET_C_PROPERTIES (${ZLIB_LIB_TARGET} STATIC)
 target_link_libraries (${ZLIB_LIB_TARGET} PRIVATE ${LINK_LIBS})
 H5_SET_LIB_OPTIONS (${ZLIB_LIB_TARGET} ${ZLIB_LIB_NAME} STATIC 0)
 set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES
-    PUBLIC_HEADER "${ZLIB_PUBLIC_HEADERS}"
+    PUBLIC_HEADER ""
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -285,17 +285,6 @@ if (WIN32)
     file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
   endif ()
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
-endif ()
-
-#-----------------------------------------------------------------------------
-# Add file(s) to CMake Install
-#-----------------------------------------------------------------------------
-if (NOT ZLIB_INSTALL_NO_DEVELOPMENT)
-  install (
-      FILES ${PROJECT_BINARY_DIR}/zconf.h
-      DESTINATION ${ZLIB_INSTALL_INCLUDE_DIR}
-      COMPONENT headers
-  )
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -383,20 +372,6 @@ if (NOT ZLIB_EXTERNALLY_CONFIGURED)
       FILES ${ZLIB_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${ZLIB_PACKAGE}${ZLIB_PACKAGE_EXT}-config-version.cmake
       DESTINATION ${ZLIB_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
-  )
-endif ()
-
-#-----------------------------------------------------------------------------
-# Add Document File(s) to CMake Install
-#-----------------------------------------------------------------------------
-if (NOT ZLIB_EXTERNALLY_CONFIGURED)
-  install (
-      FILES
-          ${ZLIB_SOURCE_DIR}/FAQ
-          ${ZLIB_SOURCE_DIR}/README
-          ${ZLIB_SOURCE_DIR}/INDEX
-      DESTINATION ${ZLIB_INSTALL_DATA_DIR}
-      COMPONENT documents
   )
 endif ()
 
@@ -523,7 +498,6 @@ if (NOT ZLIB_EXTERNALLY_CONFIGURED)
   include (InstallRequiredSystemLibraries)
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${ZLIB_BINARY_DIR};ZLIB;libraries;/")
-  set (CPACK_INSTALL_CMAKE_PROJECTS "${ZLIB_BINARY_DIR};ZLIB;headers;/")
   set (CPACK_INSTALL_CMAKE_PROJECTS "${ZLIB_BINARY_DIR};ZLIB;configinstall;/")
 
   set (CPACK_ALL_INSTALL_TYPES Full Developer User)
@@ -535,32 +509,11 @@ if (NOT ZLIB_EXTERNALLY_CONFIGURED)
 
   cpack_add_component_group(Runtime)
 
-  cpack_add_component_group(Documents
-      EXPANDED
-      DESCRIPTION "Release notes for zlib"
-  )
-
-  cpack_add_component_group(Development
-      EXPANDED
-      DESCRIPTION "All of the tools you'll need to develop applications"
-  )
-
   cpack_add_component (libraries
       DISPLAY_NAME "ZLIB Libraries"
       REQUIRED
       GROUP Runtime
       INSTALL_TYPES Full Developer User
-  )
-  cpack_add_component (headers
-      DISPLAY_NAME "ZLIB Headers"
-      DEPENDS libraries
-      GROUP Development
-      INSTALL_TYPES Full Developer
-  )
-  cpack_add_component (documents
-      DISPLAY_NAME "ZLIB Documents"
-      GROUP Documents
-      INSTALL_TYPES Full Developer
   )
   cpack_add_component (configinstall
       DISPLAY_NAME "ZLIB CMake files"

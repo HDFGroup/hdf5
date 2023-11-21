@@ -1027,7 +1027,7 @@
     ADD_H5_TEST (tbitnopaque_le 0 --enable-error-stack tbitnopaque.h5)
   endif ()
 
-  #test for the nested compound type
+  # test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
@@ -1056,7 +1056,7 @@
   ADD_H5_TEST (tvldtypes4 0 --enable-error-stack tvldtypes4.h5)
   ADD_H5_TEST (tvldtypes5 0 --enable-error-stack tvldtypes5.h5)
 
-  #test for file with variable length string data
+  # test for file with variable length string data
   ADD_H5_TEST (tvlstr 0 --enable-error-stack tvlstr.h5)
   ADD_H5_TEST (tvlenstr_array 0 --enable-error-stack tvlenstr_array.h5)
 

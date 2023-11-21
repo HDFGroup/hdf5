@@ -1,4 +1,4 @@
-name: linux autotools aocc ompi
+name:  hdf5 dev autotools aocc ompi
 
 on:
   push:
