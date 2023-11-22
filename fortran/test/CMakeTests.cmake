@@ -94,6 +94,9 @@ endif ()
 set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES
     FIXTURES_REQUIRED clear_testhdf5_fortran
 )
+if ("FORTRAN_testhdf5_fortran" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES DISABLED true)
+endif ()
 
 #-- Adding test for testhdf5_fortran_1_8
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -118,6 +121,9 @@ set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES
     DEPENDS FORTRAN_testhdf5_fortran
     FIXTURES_REQUIRED clear_testhdf5_fortran
 )
+if ("FORTRAN_testhdf5_fortran_1_8" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES DISABLED true)
+endif ()
 
 #-- Adding test for fortranlib_test_F03
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -142,6 +148,9 @@ set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES
     DEPENDS FORTRAN_testhdf5_fortran_1_8
     FIXTURES_REQUIRED clear_testhdf5_fortran
 )
+if ("FORTRAN_fortranlib_test_F03" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES DISABLED true)
+endif ()
 
 #-- Adding test for vol_connector
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -164,6 +173,9 @@ endif ()
 set_tests_properties (FORTRAN_vol_connector PROPERTIES
     FIXTURES_REQUIRED clear_testhdf5_fortran
 )
+if ("FORTRAN_vol_connector" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (FORTRAN_vol_connector PROPERTIES DISABLED true)
+endif ()
 
 #-- Adding test for fflush1
 add_test (
@@ -177,6 +189,9 @@ add_test (
 set_tests_properties (FORTRAN_fflush1 PROPERTIES
     DEPENDS FORTRAN_flush1-clear-objects
 )
+if ("FORTRAN_fflush1" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (FORTRAN_fflush1 PROPERTIES DISABLED true)
+endif ()
 
 #-- Adding test for fflush2
 add_test (
@@ -186,6 +201,9 @@ add_test (
 set_tests_properties (FORTRAN_fflush2 PROPERTIES
     DEPENDS FORTRAN_fflush1
 )
+if ("FORTRAN_fflush2" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (FORTRAN_fflush2 PROPERTIES DISABLED true)
+endif ()
 add_test (
     NAME FORTRAN_flush1-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove flush.h5

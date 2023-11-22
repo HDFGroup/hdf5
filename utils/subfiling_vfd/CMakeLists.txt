@@ -5,11 +5,8 @@ configure_file (${HDF5_UTILS_SUBFILINGVFD_SOURCE_DIR}/h5fuse.in ${HDF5_UTILS_SUB
 
 # Copy h5fuse to testpar directory for subfiling tests
 if (HDF5_ENABLE_PARALLEL AND HDF5_TEST_PARALLEL)
-  file (
-    COPY
-    ${HDF5_UTILS_SUBFILINGVFD_BINARY_DIR}/h5fuse
-    DESTINATION
-    ${HDF5_TEST_PAR_BINARY_DIR}
+  file (COPY ${HDF5_UTILS_SUBFILINGVFD_BINARY_DIR}/h5fuse
+        DESTINATION ${HDF5_TEST_PAR_BINARY_DIR}
   )
 endif ()
 

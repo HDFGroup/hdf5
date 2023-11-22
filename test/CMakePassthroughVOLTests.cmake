@@ -107,10 +107,14 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
               ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
               WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
           )
+          if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+            set_tests_properties (VOL-${volname}-${voltest} PROPERTIES DISABLED true)
+          endif ()
         else ()
           add_test (NAME VOL-${volname}-${voltest}
               COMMAND ${CMAKE_COMMAND} -E echo "SKIP VOL-${volname}-${voltest}"
           )
+          set_tests_properties (VOL-${volname}-${voltest} PROPERTIES DISABLED true)
         endif ()
       else ()
         add_test (NAME VOL-${volname}-${voltest}
@@ -128,6 +132,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
         )
+        if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+          set_tests_properties (VOL-${volname}-${voltest} PROPERTIES DISABLED true)
+        endif ()
       endif ()
     else ()
       add_test (NAME VOL-${volname}-${voltest}
@@ -145,6 +152,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
+      if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (VOL-${volname}-${voltest} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -165,6 +175,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
+      if ("VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (VOL-${volname}-${voltest} PROPERTIES DISABLED true)
+      endif ()
   endmacro ()
 
   macro (ADD_VOL_TEST volname volinfo resultcode)
@@ -202,6 +215,9 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
+      if ("VOL-${volname}-fheap" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (VOL-${volname}-fheap PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 

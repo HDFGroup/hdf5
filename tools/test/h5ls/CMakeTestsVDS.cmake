@@ -103,6 +103,9 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
@@ -131,6 +134,9 @@
               -D "TEST_ENV_VALUE=\${ORIGIN}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+    endif ()
+    if ("H5LS_PREFIX-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES DISABLED true)
     endif ()
   endmacro ()
 

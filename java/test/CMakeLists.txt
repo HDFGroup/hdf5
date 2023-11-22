@@ -175,6 +175,9 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
         FIXTURES_REQUIRED clear_JUnit
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test
     )
+    if ("JUnit-${test_file}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (JUnit-${test_file} PROPERTIES DISABLED true)
+    endif ()
   endforeach ()
 
 
@@ -208,6 +211,9 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}
     )
+    if ("JUnit-VOL-${volname}-${voltest}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (JUnit-VOL-${volname}-${voltest} PROPERTIES DISABLED true)
+    endif ()
     add_test (
         NAME JUnit-VOL-${volname}-${voltest}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
