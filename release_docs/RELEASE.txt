@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Added new option for CMake to mark tests as SKIPPED.
+
+      HDF5_DISABLE_TESTS_REGEX is a REGEX string that will be checked with
+      test names and if there is a match then that test's property will be
+      set to DISABLED. HDF5_DISABLE_TESTS_REGEX can be initialized on the
+      command line: "-DHDF5_DISABLE_TESTS_REGEX:STRING=<regex>"
+      See CMake documentation for regex-specification.
+
     - Added defaults to CMake for long double conversion checks
 
       HDF5 performs a couple of checks at build time to see if long double

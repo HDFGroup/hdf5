@@ -69,6 +69,9 @@ if (HDF5_TEST_SERIAL)
       TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_h5perf_serial" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_h5perf_serial PROPERTIES DISABLED true)
+  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_chunk COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:chunk>)
@@ -88,6 +91,9 @@ if (HDF5_TEST_SERIAL)
   set_tests_properties (PERFORM_chunk PROPERTIES
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_chunk" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_chunk PROPERTIES DISABLED true)
+  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_iopipe COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:iopipe>)
@@ -107,6 +113,9 @@ if (HDF5_TEST_SERIAL)
   set_tests_properties (PERFORM_iopipe PROPERTIES
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_iopipe" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_iopipe PROPERTIES DISABLED true)
+  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_overhead COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:overhead>)
@@ -126,6 +135,9 @@ if (HDF5_TEST_SERIAL)
   set_tests_properties (PERFORM_overhead PROPERTIES
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_overhead" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_overhead PROPERTIES DISABLED true)
+  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_perf_meta COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:perf_meta>)
@@ -145,6 +157,9 @@ if (HDF5_TEST_SERIAL)
   set_tests_properties (PERFORM_perf_meta PROPERTIES
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_perf_meta" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_perf_meta PROPERTIES DISABLED true)
+  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_zip_perf_help COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:zip_perf> "-h")
@@ -164,6 +179,9 @@ if (HDF5_TEST_SERIAL)
   set_tests_properties (PERFORM_zip_perf_help PROPERTIES
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_zip_perf_help" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_zip_perf_help PROPERTIES DISABLED true)
+  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_zip_perf COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:zip_perf> tfilters.h5)
@@ -184,6 +202,9 @@ if (HDF5_TEST_SERIAL)
       DEPENDS "PERFORM_zip_perf_help"
       FIXTURES_REQUIRED clear_perform
   )
+  if ("PERFORM_zip_perf" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (PERFORM_zip_perf PROPERTIES DISABLED true)
+  endif ()
 endif ()
 
 if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)

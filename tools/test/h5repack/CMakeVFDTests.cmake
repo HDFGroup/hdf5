@@ -83,6 +83,9 @@ macro (ADD_VFD_TEST vfdname resultcode)
           DEPENDS H5REPACK_VFD-${vfdname}-h5repacktest-clear-objects
           TIMEOUT ${CTEST_SHORT_TIMEOUT}
       )
+      if ("H5REPACK_VFD-${vfdname}-h5repacktest" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_VFD-${vfdname}-h5repacktest PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5REPACK_VFD-${vfdname}-h5repacktest-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove

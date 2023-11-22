@@ -23,6 +23,9 @@
   math (EXPR CTEST_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 2")
   math (EXPR CTEST_VERY_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 3")
 
+  option (HDF5_DISABLE_TESTS_REGEX "Regex pattern to set execution of specific tests to DISABLED" "")
+  mark_as_advanced (HDF5_DISABLE_TESTS_REGEX)
+
   option (HDF5_TEST_API "Execute HDF5 API tests" OFF)
   mark_as_advanced (HDF5_TEST_API)
   if (HDF5_TEST_API)

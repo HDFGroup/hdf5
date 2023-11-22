@@ -6,10 +6,10 @@ project (HDF5_UTILS_MIRRORVFD C)
 #-----------------------------------------------------------------------------
 
 set (mirror_server_SOURCES
-        ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_remote.c
-        ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_server.c
-        ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_writer.c
-        ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_remote.h
+    ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_remote.c
+    ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_server.c
+    ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_writer.c
+    ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_remote.h
 )
 add_executable (mirror_server ${mirror_server_SOURCES})
 target_include_directories (mirror_server PRIVATE "${HDF5_UTILS_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -71,10 +71,8 @@ if (HDF5_EXPORTED_TARGETS)
   endforeach ()
 
   install (
-      TARGETS
-          ${H5_DEP_EXECUTABLES}
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
+      TARGETS ${H5_DEP_EXECUTABLES}
+      EXPORT ${HDF5_EXPORTED_TARGETS}
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT utilsapplications
   )
 endif ()

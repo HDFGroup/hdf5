@@ -86,6 +86,9 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
       )
+      if ("H5WATCH_ARGS-h5watch-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
     endif ()
   endmacro ()
@@ -109,6 +112,9 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
       )
+      if ("H5WATCH_ARGS-h5watch-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
     endif ()
   endmacro ()
@@ -131,6 +137,9 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
       )
+      if ("H5WATCH-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5WATCH-${resultfile} PROPERTIES DISABLED true)
+      endif ()
       set (last_test "H5WATCH-${resultfile}")
     endif ()
   endmacro ()

@@ -16,5 +16,16 @@
 ##############################################################################
 ##############################################################################
 add_test (NAME MPI_TEST_FORT_parallel_test COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:parallel_test> ${MPIEXEC_POSTFLAGS})
+if ("MPI_TEST_FORT_parallel_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (MPI_TEST_FORT_parallel_test PROPERTIES DISABLED true)
+endif ()
+
 add_test (NAME MPI_TEST_FORT_subfiling_test COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:subfiling_test> ${MPIEXEC_POSTFLAGS})
+if ("MPI_TEST_FORT_subfiling_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (MPI_TEST_FORT_subfiling_test PROPERTIES DISABLED true)
+endif ()
+
 add_test (NAME MPI_TEST_FORT_async_test COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:async_test> ${MPIEXEC_POSTFLAGS})
+if ("MPI_TEST_FORT_async_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (MPI_TEST_FORT_async_test PROPERTIES DISABLED true)
+endif ()

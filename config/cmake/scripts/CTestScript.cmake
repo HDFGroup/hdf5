@@ -184,6 +184,11 @@ list (APPEND CTEST_NOTES_FILES
     "${CMAKE_CURRENT_LIST_FILE}"
     "${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake"
 )
+if (EXISTS "${CTEST_SCRIPT_DIRECTORY}/SkipTests.log")
+    list(APPEND CTEST_NOTES_FILES
+      "${CTEST_SCRIPT_DIRECTORY}/SkipTests.log"
+    )
+endif ()
 
 #-----------------------------------------------------------------------------
 # Check for required variables.

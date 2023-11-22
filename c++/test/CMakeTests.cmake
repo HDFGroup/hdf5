@@ -35,6 +35,9 @@ endif ()
 set_tests_properties (CPP_testhdf5 PROPERTIES
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
+if ("CPP_testhdf5" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (CPP_testhdf5 PROPERTIES DISABLED true)
+endif ()
 
 ##############################################################################
 ##############################################################################

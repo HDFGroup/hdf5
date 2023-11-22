@@ -44,6 +44,9 @@ else ()
   )
 endif ()
 set_tests_properties (HL_CPP_ptableTest PROPERTIES DEPENDS HL_CPP_ptableTest-clear-objects)
+if ("HL_CPP_ptableTest" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+  set_tests_properties (HL_CPP_ptableTest PROPERTIES DISABLED true)
+endif ()
 add_test (
     NAME HL_CPP_ptableTest-clean-objects
     COMMAND    ${CMAKE_COMMAND}
@@ -53,3 +56,4 @@ set_tests_properties (HL_CPP_ptableTest-clean-objects PROPERTIES
     DEPENDS HL_CPP_ptableTest
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
+
