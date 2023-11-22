@@ -989,7 +989,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
                              &type_list, 0, op_gen) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type");
     if (MPI_SUCCESS != (mpi_code = MPI_Type_dup(span_type, new_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_dup failed", mpi_code)
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
