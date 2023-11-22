@@ -191,7 +191,7 @@ if (HDF5_TEST_SERIAL)
       if ("h5_api_test_${api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (h5_api_test_${api_test} PROPERTIES DISABLED true)
       endif ()
-      set_tests_properties (h5_api_test_${api_test} PROPERTIES DEPENDS ${last_api_test})
+      set_tests_properties (h5_api_test_${api_test} PROPERTIES DEPENDS "${last_api_test}")
 
       set (last_api_test "h5_api_test_${api_test}")
     endforeach ()
@@ -251,7 +251,7 @@ if (HDF5_TEST_SERIAL)
               PROPERTIES
                 ENVIRONMENT "${vol_test_env}"
                 WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}
-                DEPENDS ${last_api_test}
+                DEPENDS "${last_api_test}"
           )
           if ("${external_vol_tgt}-h5_api_test_${api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
             set_tests_properties (${external_vol_tgt}-h5_api_test_${api_test} PROPERTIES DISABLED true)
@@ -308,7 +308,7 @@ if (HDF5_TEST_SERIAL)
       if ("h5_api_test_${api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (h5_api_test_${api_test} PROPERTIES DISABLED true)
       endif ()
-      set_tests_properties (h5_api_test_${api_test} PROPERTIES DEPENDS ${last_api_test})
+      set_tests_properties (h5_api_test_${api_test} PROPERTIES DEPENDS "${last_api_test}")
 
       set (last_api_test "h5_api_test_${api_test}")
     endforeach ()
@@ -360,7 +360,7 @@ if (HDF5_TEST_SERIAL)
               PROPERTIES
                 ENVIRONMENT "${vol_test_env}"
                 WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}
-                DEPENDS ${last_api_test}
+                DEPENDS "${last_api_test}"
           )
           if ("${external_vol_tgt}-h5_api_test_${api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
             set_tests_properties (${external_vol_tgt}-h5_api_test_${api_test} PROPERTIES DISABLED true)
