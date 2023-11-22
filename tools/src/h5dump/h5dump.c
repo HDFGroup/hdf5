@@ -1357,7 +1357,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    /* Enable error reporting if -E command line option is specified */
+    /* Enable error reporting if --enable-error-stack command line option is specified */
     h5tools_error_report();
 
     /* Initialize indexing options */
