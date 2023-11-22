@@ -59,7 +59,7 @@ if [ "$FORTRAN_2003_CONDITIONAL_F" = "Xyes" ]; then
     topics="arrayatt_F03 array_F03 bitatt_F03 bit_F03 cmpdatt_F03 cmpd_F03 \
             Cstring_F03 enumatt_F03 enum_F03 floatatt_F03 float_F03 \
             intatt_F03 int_F03 opaqueatt_F03 opaque_F03 \
-            string_F03 vlenatt_F03 vlen_F03 $topics"
+            string_F03 $topics"
 fi
 
 return_val=0
@@ -75,16 +75,22 @@ do
     then
         echo "  FAILED!"
     else
-        dumpout $fname.h5 >tmp.test
-      rm -f $fname.h5
-      cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
-      status=$?
-      if test $status -ne 0
-      then
-          echo "  FAILED!"
-      else
-          echo "  Passed"
-      fi
+        if [[ $fname == "h5ex_t_cpxcmpd_F03" || $fname == "h5ex_t_cpxcmpdatt_F03" ]]
+        then
+            targ="-n"
+        else
+            targ=""
+        fi
+        dumpout $targ $fname.h5 >tmp.test
+        rm -f $fname.h5
+        cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+        status=$?
+        if test $status -ne 0
+        then
+            echo "  FAILED!"
+        else
+            echo "  Passed"
+        fi
     fi
     return_val=`expr $status + $return_val`
 done
@@ -93,13 +99,7 @@ done
 #######Non-standard tests#######
 
 USE_ALT=""
-if [ "$H5_LIBVER_DIR" = "114" ]; then
-   # check if HDF5 version is < 1.14.3
-   version_compare "$H5_LIBVER" "1.10.3"
-   if [ "$version_lt" = 1 ]; then
-      USE_ALT="02"
-   fi
-elif [ "$H5_LIBVER_DIR" = "110" ]; then
+if [ "$H5_LIBVER_DIR" = "110" ]; then
    # check if HDF5 version is < 1.10.7
    version_compare "$H5_LIBVER" "1.10.7"
    if [ "$version_lt" = 1 ]; then
@@ -156,56 +156,43 @@ do
     return_val=`expr $status + $return_val`
 done
 
-#fname=h5ex_t_cpxcmpd
-#$ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
-#exout ./$fname >tmp.test
-#cmp -s tmp.test $srcdir/tfiles/$H5_LIBVER_DIR/$fname.tst
-#status=$?
-#if test $status -ne 0
-#then
-#    echo "  FAILED!"
-#else
-#  dumpout -n $fname.h5 >tmp.test
-#rm -f $fname.h5
-#  cmp -s tmp.test $srcdir/tfiles/$H5_LIBVER_DIR/$fname.ddl
-#status=$?
-#if test $status -ne 0
-#then
-#    echo "  FAILED!"
-#else
-#    echo "  Passed"
-#fi
-#fi
-#return_val=`expr $status + $return_val`
+topics=" vlenatt_F03 vlen_F03"
 
-
-#fname=h5ex_t_cpxcmpdatt
-#$ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
-#exout ./$fname >tmp.test
-#cmp -s tmp.test $srcdir/tfiles/$H5_LIBVER_DIR/$fname.tst
-#status=$?
-#if test $status -ne 0
-#then
-#    echo "  FAILED!"
-#else
-#  dumpout -n $fname.h5 >tmp.test
-#rm -f $fname.h5
-#  cmp -s tmp.test $srcdir/tfiles/$H5_LIBVER_DIR/$fname.ddl
-#status=$?
-#if test $status -ne 0
-#then
-#    echo "  FAILED!"
-#else
-#    echo "  Passed"
-#fi
-#fi
-#return_val=`expr $status + $return_val`
+for topic in $topics
+do
+    fname=h5ex_t_$topic
+    $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
+    exout ./$fname >tmp.test
+    cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
+    status=$?
+    if test $status -ne 0
+    then
+        echo "  FAILED!"
+    else
+        dumpout $fname.h5 >tmp.test
+        rm -f $fname.h5
+        version_compare "$H5_LIBVER" "1.14.3"
+        if [ "$version_lt" = 1 ]; then
+            cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+        else
+            cmp -s tmp.test $srcdir/tfiles/114/$fname.ddl
+        fi
+        status=$?
+        if test $status -ne 0
+        then
+            echo "  FAILED!"
+        else
+            echo "  Passed"
+        fi
+    fi
+    return_val=`expr $status + $return_val`
+done
 
 
 #fname=h5ex_t_convert
 #$ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
 #exout ./$fname >tmp.test
-#cmp -s tmp.test $srcdir/tfiles/$H5_LIBVER_DIR/$fname.test
+#cmp -s tmp.test $srcdir/tfiles/18/$fname.test
 #status=$?
 #if test $status -ne 0
 #then

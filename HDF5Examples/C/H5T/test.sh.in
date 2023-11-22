@@ -69,16 +69,22 @@ do
     then
         echo "  FAILED!"
     else
-        dumpout $fname.h5 >tmp.test
-      rm -f $fname.h5
-      cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
-      status=$?
-      if test $status -ne 0
-      then
-          echo "  FAILED!"
-      else
-          echo "  Passed"
-      fi
+        if [[ $fname == "h5ex_t_cpxcmpd" || $fname == "h5ex_t_cpxcmpdatt" ]]
+        then
+            targ="-n"
+        else
+            targ=""
+        fi
+        dumpout $targ $fname.h5 >tmp.test
+        rm -f $fname.h5
+        cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+        status=$?
+        if test $status -ne 0
+        then
+            echo "  FAILED!"
+        else
+            echo "  Passed"
+        fi
     fi
     return_val=`expr $status + $return_val`
 done
@@ -87,13 +93,7 @@ done
 #######Non-standard tests#######
 
 USE_ALT=""
-if [ "$H5_LIBVER_DIR" = "114" ]; then
-   # check if HDF5 version is < 1.14.3
-   version_compare "$H5_LIBVER" "1.10.3"
-   if [ "$version_lt" = 1 ]; then
-      USE_ALT="02"
-   fi
-elif [ "$H5_LIBVER_DIR" = "110" ]; then
+if [ "$H5_LIBVER_DIR" = "110" ]; then
    # check if HDF5 version is < 1.10.7
    version_compare "$H5_LIBVER" "1.10.7"
    if [ "$version_lt" = 1 ]; then
@@ -159,13 +159,14 @@ do
     then
         echo "  FAILED!"
     else
-        dumpout -n $fname.h5 >tmp.test
+        dumpout $fname.h5 >tmp.test
         rm -f $fname.h5
-        version_compare "$H5_LIBVER" "1.14.0"
+        version_compare "$H5_LIBVER" "1.14.3"
         if [ "$version_lt" = 1 ]; then
             cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
         else
-            cmp -s tmp.test $srcdir/tfiles/114/$fname$USE_ALT.ddl
+            cmp -s tmp.test $srcdir/tfiles/114/$fname.ddl
+        fi
         status=$?
         if test $status -ne 0
         then

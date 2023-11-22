@@ -50,7 +50,7 @@ $ECHO_N "Testing C/H5G/h5ex_g_create...$ECHO_C"
 ./h5ex_g_create
 dumpout h5ex_g_create.h5 >tmp.test
 rm -f h5ex_g_create.h5
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_create.ddl
+cmp -s tmp.test $srcdir/tfiles/16/h5ex_g_create.ddl
 status=$?
 if test $status -ne 0
 then
@@ -70,7 +70,7 @@ else
     exout ./h5ex_g_iterate >tmp.test
     rm  -f h5ex_g_iterate.h5
 fi
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_iterate.tst
+cmp -s tmp.test $srcdir/tfiles/16/h5ex_g_iterate.tst
 status=$?
 if test $status -ne 0
 then
@@ -90,7 +90,7 @@ else
     exout ./h5ex_g_traverse >tmp.test
     rm  -f h5ex_g_traverse.h5
 fi
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_traverse.tst
+cmp -s tmp.test $srcdir/tfiles/16/h5ex_g_traverse.tst
 status=$?
 if test $status -ne 0
 then

@@ -115,8 +115,8 @@ else
   version_compare "$H5_LIBVER" "1.10.8"
   if [ "$version_lt" = 1 ]; then
     USE_ALT="07"
+    nbitdir="110"
   fi
-  nbitdir="110"
 fi
 
 for topic in $topics18
@@ -130,7 +130,7 @@ do
         echo "  Unsupported feature"
         status=0
     else
-        if [[ $fname == "h5ex_d_nbit"]]
+        if [[ $fname == "h5ex_d_nbit" ]]
         then
             tdir=$nbitdir
             if [[ $USE_ALT == "" ]]
