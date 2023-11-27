@@ -111,11 +111,14 @@ version_compare "$H5_LIBVER" "1.8.23"
 if [ "$version_lt" = 1 ]; then
     USE_ALT="22"
 else
-# check if HDF5 version is < 1.10.8
-  version_compare "$H5_LIBVER" "1.10.8"
-  if [ "$version_lt" = 1 ]; then
-    USE_ALT="07"
-    nbitdir="110"
+# check if HDF5 version is >= 1.10.0 and < 1.10.8
+  version_compare "$H5_LIBVER" "1.10.0"
+  if [ "$version_lt" = 0 ]; then
+    version_compare "$H5_LIBVER" "1.10.8"
+    if [ "$version_lt" = 1 ]; then
+      USE_ALT="07"
+      nbitdir="110"
+    fi
   fi
 fi
 

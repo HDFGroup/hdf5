@@ -126,6 +126,7 @@ do
                 echo "  FAILED!"
              else
                 echo "  *Inconsequential difference* ... Passed"
+                status=0
              fi
           else
               echo "  Passed"

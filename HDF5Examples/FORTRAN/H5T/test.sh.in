@@ -140,7 +140,12 @@ do
         else
             version_compare "$H5_LIBVER" "1.12.0"
             if [ "$version_lt" = 1 ]; then
-                cmp -s tmp.test $srcdir/tfiles/110/$fname$USE_ALT.ddl
+               version_compare "$H5_LIBVER" "1.10.7"
+               if [ "$version_lt" = 1 ]; then
+                  cmp -s tmp.test $srcdir/tfiles/110/$fname$USE_ALT.ddl
+               else
+                  cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+               fi
             else
                 cmp -s tmp.test $srcdir/tfiles/112/$fname.ddl
             fi
@@ -156,7 +161,11 @@ do
     return_val=`expr $status + $return_val`
 done
 
-topics=" vlenatt_F03 vlen_F03"
+topics=""
+version_compare "$H5_LIBVER" "1.10.0"
+if [ "$version_lt" = 0 ]; then
+  topics=" vlenatt_F03 vlen_F03"
+fi
 
 for topic in $topics
 do

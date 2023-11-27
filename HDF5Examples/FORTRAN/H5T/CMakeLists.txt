@@ -177,7 +177,7 @@ if (HDF5_BUILD_TOOLS)
                     TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
                     POST_BUILD
                     COMMAND    ${CMAKE_COMMAND}
-                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/18/112/${example_name}.ddl ${example_name}.ddl
+                    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/112/${example_name}.ddl ${example_name}.ddl
                 )
             else ()
               add_custom_command (
