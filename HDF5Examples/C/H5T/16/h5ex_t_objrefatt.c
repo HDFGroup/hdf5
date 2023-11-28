@@ -27,6 +27,7 @@ main(void)
     hid_t       space; /* Dataspace Handle */
     hid_t       dset;  /* Dataset Handle */
     hid_t       obj;   /* Object Handle */
+    hid_t       attr;  /* Attribute Handle */
     herr_t      status;
     hsize_t     dims[1] = {DIM0};
     hobj_ref_t  wdata[DIM0];  /* Write buffer */

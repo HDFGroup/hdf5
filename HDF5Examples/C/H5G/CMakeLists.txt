@@ -139,7 +139,7 @@ if (HDF5_BUILD_TOOLS)
     endif ()
   endforeach ()
 
-  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
+  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${${EXAMPLE_VARNAME}_USE_16_API})
     add_custom_command (
         TARGET     ${EXAMPLE_VARNAME}_h5ex_g_compact
         POST_BUILD

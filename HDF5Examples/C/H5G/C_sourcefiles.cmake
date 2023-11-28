@@ -9,10 +9,14 @@ set (common_examples
     h5ex_g_traverse
   )
 
-set (1_8_examples
-    h5ex_g_compact
-    h5ex_g_corder
-    h5ex_g_phase
-    h5ex_g_intermediate
-    h5ex_g_visit
-)
+if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${${EXAMPLE_VARNAME}_USE_16_API})
+  set (1_8_examples
+      h5ex_g_compact
+      h5ex_g_corder
+      h5ex_g_phase
+      h5ex_g_intermediate
+      h5ex_g_visit
+  )
+else ()
+  set (1_8_examples)
+endif ()
