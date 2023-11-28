@@ -1234,7 +1234,7 @@ end_collect:
     }
 
     /* If the file uses the onion VFD, get the revision number */
-    if (vfd_info_g.u.name && !strcmp(vfd_info_g.u.name, "onion")) {
+    if (vfd_info_g.type == VFD_BY_NAME && vfd_info_g.u.name && !strcmp(vfd_info_g.u.name, "onion")) {
 
         if (vfd_info_g.info) {
             if (!strcmp(vfd_info_g.info, "revision_count"))
