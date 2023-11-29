@@ -30,9 +30,14 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
   )
 endif ()
 
-set (1_8_examples
-    h5ex_d_nbit
-    h5ex_d_sofloat
-    h5ex_d_soint
-    h5ex_d_transform
-)
+if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${${EXAMPLE_VARNAME}_USE_16_API})
+  set (1_8_examples
+      h5ex_d_nbit
+      h5ex_d_sofloat
+      h5ex_d_soint
+      h5ex_d_transform
+  )
+else ()
+  set (1_8_examples)
+endif ()
+
