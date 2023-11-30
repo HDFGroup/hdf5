@@ -330,7 +330,7 @@ usage(const char *prog)
     PRINTVALSTREAM(
         rawoutstream,
         "      \"sec2\", \"family\", \"split\", \"multi\", \"direct\", \"stream\", and \"subfiling\".\n");
-    PRINTVALSTREAM(rawoutstream, "      Without the file driver flag, the file will be opened with each driver in\n");    
+    PRINTVALSTREAM(rawoutstream, "      Without the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
     PRINTVALSTREAM(rawoutstream, "      in opening the file.\n");
     PRINTVALSTREAM(rawoutstream,
