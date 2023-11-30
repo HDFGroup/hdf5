@@ -597,6 +597,9 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                     if (H5Pset_fapl_subfiling(fapl_id, (const H5FD_subfiling_config_t *)vfd_info->info) < 0)
                         H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_subfiling() failed");
                 }
+                else {
+                    H5TOOLS_GOTO_ERROR(FAIL, "MPI is not available for Subfiling VFD");
+                }
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "The Subfiling VFD is not enabled");
 #endif
@@ -626,6 +629,12 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
              *
              * Currently, driver configuration strings are unsupported.
              */
+#if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_SUBFILING_VFD)
+            if (vfd_info->u.value == H5_VFD_SUBFILING) {
+                if (H5Pset_fapl_subfiling(fapl_id, (const H5FD_subfiling_config_t *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_subfiling() failed");
+            }
+#endif
             if (H5Pset_driver_by_value(fapl_id, vfd_info->u.value, (const char *)vfd_info->info) < 0)
                 H5TOOLS_GOTO_ERROR(FAIL, "can't load VFD plugin by driver value '%ld'",
                                    (long int)vfd_info->u.value);
