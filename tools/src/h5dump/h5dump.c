@@ -326,11 +326,13 @@ usage(const char *prog)
                    "      (Alternate compact form of subsetting is described in the Reference Manual)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Option Argument Conventions ---------------\n");
-    PRINTVALSTREAM(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values are\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  D - is the file driver to use in opening the file. Acceptable values are\n");
     PRINTVALSTREAM(
         rawoutstream,
         "      \"sec2\", \"family\", \"split\", \"multi\", \"direct\", \"stream\", and \"subfiling\".\n");
-    PRINTVALSTREAM(rawoutstream, "      Without the file driver flag, the file will be opened with each driver in\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      Without the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
     PRINTVALSTREAM(rawoutstream, "      in opening the file.\n");
     PRINTVALSTREAM(rawoutstream,
