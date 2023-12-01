@@ -24,7 +24,25 @@ set (HDF5_VFD_H5DUMP_FILES
   packedbits
 )
 
+set (HDF5_SF_VFD_H5DUMP_FILES
+  test_subfiling_stripe_sizes.h5
+)
+
 foreach (vfdtest ${VFD_LIST})
+  if (vfdtest STREQUAL "subfiling")
+    foreach (h5_tfile ${HDF5_SF_VFD_H5DUMP_FILES})       
+      file(COPY "${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}" DESTINATION "${PROJECT_BINARY_DIR}/${vfdtest}")
+      execute_process(
+        COMMAND ls -i ${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}
+        OUTPUT_VARIABLE OUTPUT_VALUE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+      string(REGEX MATCH "^ *([0-9]+) *" INODE_VALUE "${OUTPUT_VALUE}")
+      string(STRIP ${INODE_VALUE} INODE_STR)      
+      HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}.subfile_1_of_1" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_1_of_1" "HDF5_SF_VFD_H5DUMP_files")
+      HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}.subfile.config" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}.config" "HDF5_SF_VFD_H5DUMP_files")
+    endforeach ()
+  endif ()
   foreach (h5_tfile ${HDF5_VFD_H5DUMP_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_tfile}.h5" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.h5" "HDF5_VFD_H5DUMP_files")
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_tfile}.ddl" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.ddl" "HDF5_VFD_H5DUMP_files")
@@ -32,6 +50,7 @@ foreach (vfdtest ${VFD_LIST})
 endforeach ()
 
 add_custom_target(HDF5_VFD_H5DUMP_files ALL COMMENT "Copying files needed by HDF5_VFD_H5DUMP tests" DEPENDS ${HDF5_VFD_H5DUMP_files_list})
+add_custom_target(HDF5_SF_VFD_H5DUMP_files ALL COMMENT "Copying files needed by HDF5_SF_VFD_H5DUMP tests" DEPENDS ${HDF5_SF_VFD_H5DUMP_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -69,6 +88,11 @@ endmacro ()
 
 # Run test with different Virtual File Driver
 foreach (vfd ${VFD_LIST})
-  # test for signed/unsigned datasets
+  if (vfd STREQUAL "subfiling")
+    ADD_VFD_H5DUMP_TEST (${vfd} filedriver_subfiling 0 --enable-error-stack=2 --filedriver=subfiling test_subfiling_stripe_sizes.h5)
+    ADD_VFD_H5DUMP_TEST (${vfd} vfd_name_subfiling 0 --enable-error-stack=2 --vfd-name=subfiling test_subfiling_stripe_sizes.h5)
+    ADD_VFD_H5DUMP_TEST (${vfd} vfd_value_subfiling 0 --enable-error-stack=2 --vfd-value=12 test_subfiling_stripe_sizes.h5)
+  endif ()
+  # test for signed/unsigned datasets  
   ADD_VFD_H5DUMP_TEST (${vfd} packedbits 0 --enable-error-stack packedbits.h5)
 endforeach ()
