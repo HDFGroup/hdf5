@@ -59,8 +59,8 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
         -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/grepTest.cmake"
     )
-    set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-    set (last_test "${EXAMPLE_VARNAME}_${testname}")
+    set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+    set (last_test "${EXAMPLE_VARNAME}_f90_${testname}")
   endmacro ()
 
   # Ensure that 24 is a multiple of the number of processes.
