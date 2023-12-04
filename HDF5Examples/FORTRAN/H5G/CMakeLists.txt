@@ -10,7 +10,7 @@ project (HDF5Examples_FORTRAN_H5G C CXX Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (
-    ${CMAKE_Fortran_MODULE_DIRECTORY}
+    ${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT}
     ${PROJECT_BINARY_DIR}
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
@@ -35,7 +35,7 @@ foreach (example_name ${common_examples})
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
   endif ()
-  target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${LINK_Fortran_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
   set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
   if (H5EX_BUILD_TESTING)
     if (NOT ${example_name} STREQUAL "h5ex_g_create" AND NOT ${example_name} STREQUAL "h5ex_g_compact")
@@ -64,7 +64,7 @@ endforeach ()
 #    if (H5_HAVE_PARALLEL)
 #      target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
 #    endif ()
-#    target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_HDF5_LINK_LIBS})
+#    target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
 #    if (H5EX_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
