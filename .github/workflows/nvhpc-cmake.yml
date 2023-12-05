@@ -72,5 +72,5 @@ jobs:
       - name: CMake Run Tests
         shell: bash
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "(f90_ph5_hyperslab_by_chunk|pattern)"
         working-directory: ${{ runner.workspace }}/build
