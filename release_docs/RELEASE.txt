@@ -57,7 +57,7 @@ New Features
 
       However to maintain the ability to use the HDF5Examples with an installed
       library, it is necessary to translate or synch the option names from those
-      used by the library to those used by the examples. The typical pateern is:
+      used by the library to those used by the examples. The typical pattern is:
             <example option> = <library option>
             HDF_BUILD_FORTRAN = ${HDF5_BUILD_FORTRAN}
 
