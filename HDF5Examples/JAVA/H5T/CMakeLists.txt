@@ -3,10 +3,9 @@ project (HDF5Examples_JAVA_H5T Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
-INCLUDE_DIRECTORIES (
-    ${HDFJAVA_LIB_DIR}
-    ${JAVA_INCLUDE_PATH}
-    ${JAVA_INCLUDE_PATH2}
+set_directory_properties(PROPERTIES
+    INCLUDE_DIRECTORIES 
+        "${HDFJAVA_LIB_DIR};${JAVA_INCLUDE_PATH};${JAVA_INCLUDE_PATH2}"
 )
 
 #-----------------------------------------------------------------------------
@@ -34,13 +33,18 @@ endforeach ()
 
 foreach (example ${HDF_JAVA_EXAMPLES})
   get_filename_component (example_name ${example} NAME_WE)
-  file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
+  file (WRITE ${PROJECT_BINARY_DIR}/${example_name}_Manifest.txt
   "Main-Class: ${example_name}
 Class-Path: ${HDFJAVA_CLASSJARS}
 "
   )
-  add_jar (${EXAMPLE_VARNAME}_${example_name} SOURCES ${example} MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt)
+  add_jar (${EXAMPLE_VARNAME}_${example_name}
+      SOURCES ${example}
+      MANIFEST ${PROJECT_BINARY_DIR}/${example_name}_Manifest.txt
+  )
   get_target_property (${EXAMPLE_VARNAME}_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}_${example_name} JAR_FILE)
+  get_target_property (${EXAMPLE_VARNAME}_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}_${example_name} CLASSDIR)
+  add_dependencies (${EXAMPLE_VARNAME}_${example_name} ${HDF5_JAVA_LIBRARY})
 endforeach ()
 
 if (H5EX_BUILD_TESTING)
@@ -48,7 +52,7 @@ if (H5EX_BUILD_TESTING)
     add_test (
         NAME ${EXAMPLE_VARNAME}_jnative-h5-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_TESTER=${CMAKE_Java_RUNTIME}"
+            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_PROGRAM=${resultfile}"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}_${resultfile}_JAR_FILE}"

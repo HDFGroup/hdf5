@@ -3,10 +3,9 @@ project (HDF5Examples_JAVA_H5D Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
-INCLUDE_DIRECTORIES (
-    ${HDFJAVA_LIB_DIR}
-    ${JAVA_INCLUDE_PATH}
-    ${JAVA_INCLUDE_PATH2}
+set_directory_properties(PROPERTIES
+    INCLUDE_DIRECTORIES 
+        "${HDFJAVA_LIB_DIR};${JAVA_INCLUDE_PATH};${JAVA_INCLUDE_PATH2}"
 )
 
 #-----------------------------------------------------------------------------
@@ -39,8 +38,13 @@ foreach (example ${HDF_JAVA_EXAMPLES})
 Class-Path: ${HDFJAVA_CLASSJARS}
 "
   )
-  add_jar (${EXAMPLE_VARNAME}_${example_name} SOURCES ${example} MANIFEST ${PROJECT_BINARY_DIR}/${example_name}_Manifest.txt)
+  add_jar (${EXAMPLE_VARNAME}_${example_name}
+      SOURCES ${example}
+      MANIFEST ${PROJECT_BINARY_DIR}/${example_name}_Manifest.txt
+  )
   get_target_property (${EXAMPLE_VARNAME}_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}_${example_name} JAR_FILE)
+  get_target_property (${EXAMPLE_VARNAME}_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}_${example_name} CLASSDIR)
+  add_dependencies (${EXAMPLE_VARNAME}_${example_name} ${HDF5_JAVA_LIBRARY})
 endforeach ()
 
 if (H5EX_BUILD_TESTING)
