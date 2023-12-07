@@ -51,7 +51,7 @@
  * Function:    DETECT_F
  *
  * Purpose:     This macro takes a floating point type like `double' and
- *              and detects byte order, mantissa location, exponent location,
+ *              detects byte order, mantissa location, exponent location,
  *              sign bit location, presence or absence of implicit mantissa
  *              bit, and exponent bias and initializes a detected_t structure
  *              with those properties.
