@@ -911,7 +911,8 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
             case H5D_MPIO_COLLECTIVE:
             case H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE:
             default:
-                assert(0 && "invalid no collective cause reason");
+                cause_str = "invalid or unknown no collective cause reason";
+                assert(0 && "invalid or unknown no collective cause reason");
                 break;
         }
 
@@ -3781,6 +3782,10 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
     if (all_ranks_involved) {
         counts_disps_array = H5MM_xfree(counts_disps_array);
     }
+
+    /* No useful work to do - exit */
+    if (coll_chunk_list_num_entries == 0)
+        HGOTO_DONE(SUCCEED);
 
     /*
      * Phase 2 - Involved ranks now redistribute any shared chunks to new

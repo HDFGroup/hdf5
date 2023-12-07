@@ -1089,7 +1089,7 @@ parse_start:
                  * for subsetting: "--start", "--stride", "--count", and "--block"
                  * which can come in any order. If we run out of parameters (EOF)
                  * or run into one which isn't a subsetting parameter (NOT s, S,
-                 * c, or K), then we exit the do-while look, set the subset_info
+                 * c, or K), then we exit the do-while loop, set the subset_info
                  * to the structure we've been filling. If we've reached the end
                  * of the options, we exit the parsing (goto parse_end) otherwise,
                  * since we've "read" the next option, we need to parse it. So we
@@ -1234,7 +1234,7 @@ end_collect:
     }
 
     /* If the file uses the onion VFD, get the revision number */
-    if (vfd_info_g.u.name && !strcmp(vfd_info_g.u.name, "onion")) {
+    if (vfd_info_g.type == VFD_BY_NAME && vfd_info_g.u.name && !strcmp(vfd_info_g.u.name, "onion")) {
 
         if (vfd_info_g.info) {
             if (!strcmp(vfd_info_g.info, "revision_count"))
@@ -1357,7 +1357,7 @@ main(int argc, char *argv[])
         goto done;
     }
 
-    /* enable error reporting if command line option */
+    /* Enable error reporting if --enable-error-stack command line option is specified */
     h5tools_error_report();
 
     /* Initialize indexing options */

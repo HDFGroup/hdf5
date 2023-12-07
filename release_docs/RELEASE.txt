@@ -47,7 +47,33 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Added new option for CMake to mark tests as SKIPPED.
+
+      HDF5_DISABLE_TESTS_REGEX is a REGEX string that will be checked with
+      test names and if there is a match then that test's property will be
+      set to DISABLED. HDF5_DISABLE_TESTS_REGEX can be initialized on the
+      command line: "-DHDF5_DISABLE_TESTS_REGEX:STRING=<regex>"
+      See CMake documentation for regex-specification.
+
+    - Added defaults to CMake for long double conversion checks
+
+      HDF5 performs a couple of checks at build time to see if long double
+      values can be converted correctly (IBM's Power architecture uses a
+      special format for long doubles). These checks were performed using
+      TRY_RUN, which is a problem when cross-compiling.
+
+      These checks now use default values appropriate for most non-Power
+      systems when cross-compiling. The cache values can be pre-set if
+      necessary, which will preempt both the TRY_RUN and the default.
+
+      Affected values:
+        H5_LDOUBLE_TO_LONG_SPECIAL      (default no)
+        H5_LONG_TO_LDOUBLE_SPECIAL      (default no)
+        H5_LDOUBLE_TO_LLONG_ACCURATE    (default yes)
+        H5_LLONG_TO_LDOUBLE_CORRECT     (default yes)
+        H5_DISABLE_SOME_LDOUBLE_CONV    (default no)
+
+      Fixes GitHub #3585
 
 
     Library:
@@ -62,7 +88,8 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Added Fortran APIs:
+      h5vlnative_addr_to_token_f and h5vlnative_token_to_address_f
 
 
     C++ Library:
@@ -109,6 +136,29 @@ Bug Fixes since HDF5-1.14.3 release
 ===================================
     Library
     -------
+    - Suppressed floating-point exceptions in H5T init code
+
+      The floating-point datatype initialization code in H5Tinit_float.c
+      could raise FE_INVALID exceptions while munging bits and performing
+      comparisons that might involve NaN. This was not a problem when the
+      initialization code was executed in H5detect at compile time (prior
+      to 1.14.3), but now that the code is executed at library startup
+      (1.14.3+), these exceptions can be caught by user code, as is the
+      default in the NAG Fortran compiler.
+
+      Starting in 1.14.4, we now suppress floating-point exceptions while
+      initializing the floating-point types and clear FE_INVALID before
+      restoring the original environment.
+
+      Fixes GitHub #3831
+
+    - Fixed a file handle leak in the core VFD
+
+      When opening a file with the core VFD and a file image, if the file
+      already exists, the file check would leak the POSIX file handle.
+
+      Fixes GitHub issue #635
+
     - Dropped support for MPI-2
 
       The MPI-2 supporting artifacts have been removed due to the cessation
@@ -122,12 +172,32 @@ Bug Fixes since HDF5-1.14.3 release
 
     Configuration
     -------------
-    -
+    - Removed an Autotools configure hack that causes problems on MacOS
+
+      A sed line in configure.ac was added in the past to paper over some
+      problems with older versions of the Autotools that would add incorrect
+      linker flags. This hack is not needed with recent versions of the
+      Autotools and the sed line errors on MacOS (though this was a silent
+      error that didn't break the build) so the hack has been removed.
+
+      Fixes GitHub issue #3843
+
+    - Fixed an issue where the h5tools_test_utils test program was being
+      installed on the system for Autotools builds of HDF5
+
+      The h5tools_test_utils test program was mistakenly added to bin_PROGRAMS
+      in its Makefile.am configuration file, causing the executable to be
+      installed on the system. The executable is now added to noinst_PROGRAMS
+      instead and will no longer be installed on the system for Autotools builds
+      of HDF5. The CMake configuration code already avoids installing the
+      executable on the system.
 
 
     Tools
     -----
-    -
+    - Renamed h5fuse.sh to h5fuse
+
+      Addresses Discussion #3791
 
 
     Performance
@@ -299,11 +369,27 @@ Platforms Tested
 Known Problems
 ==============
 
-    IEEE standard arithmetic enables software to raise exceptions such as overflow,
-    division by zero, and other illegal operations without interrupting or halting
-    the program flow. The HDF5 C library intentionally performs these exceptions.
-    Therefore, the "-ieee=full" nagfor switch is necessary when compiling a program
-    to avoid stopping on an exception.
+    When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
+    also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
+    in the following tests:
+
+        H5PLUGIN-filter_plugin
+        H5TEST-flush2
+        H5TEST-testhdf5-base
+        MPI_TEST_t_filters_parallel
+
+    Since these tests pass with an optimization level of -O1 (and -O0) and it is
+    currently unclear whether the test failures are due to issues in HDF5 or issues
+    in the 'nvc' compiler, the maximum optimization level for NVHPC has been set
+    to -O1 until the test failures can be resolved. Note that even at -O1 optimization
+    level, there still appears to be a sporadic test failure in the Java JUnit tests
+    that has occasionally been seen in JUnit-TestH5Pfapl and JUnit-TestH5D. It is also
+    unclear whether this is an issue in HDF5 or with the 'nvc' compiler. Finally, note
+    that NVHPC 23.9 will fail to compile the test/tselect.c test file with a compiler
+    error of 'use of undefined value' when the optimization level is -O2 or higher.
+    Nvidia is aware of this issue and has suggested lowering the optimization level to
+    -O1 for the time being:
+    https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045.
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces

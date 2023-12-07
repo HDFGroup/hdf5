@@ -94,6 +94,9 @@
   set_tests_properties (H5REPART-h5repart_20K PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
+  if ("H5REPART-h5repart_20K" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5REPART-h5repart_20K PROPERTIES DISABLED true)
+  endif ()
 
   # repartition family member size to 5 KB.
   add_test (
@@ -103,6 +106,9 @@
   set_tests_properties (H5REPART-h5repart_5K PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
+  if ("H5REPART-h5repart_5K" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5REPART-h5repart_5K PROPERTIES DISABLED true)
+  endif ()
 
   # convert family file to sec2 file of 20,000 bytes
   add_test (
@@ -112,6 +118,9 @@
   set_tests_properties (H5REPART-h5repart_single PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
+  if ("H5REPART-h5repart_single" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5REPART-h5repart_single PROPERTIES DISABLED true)
+  endif ()
 
   # convert family file to sec2 file of 20,000 bytes (old argument)
   add_test (
@@ -121,6 +130,9 @@
   set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES
       FIXTURES_REQUIRED clear_testrepart
   )
+  if ("H5REPART-h5repart_sec2" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5REPART-h5repart_sec2 PROPERTIES DISABLED true)
+  endif ()
 
   # test the output files repartitioned above.
   add_test (
@@ -131,6 +143,9 @@
       DEPENDS "H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_single;H5REPART-h5repart_sec2"
       FIXTURES_REQUIRED clear_testrepart
   )
+  if ("H5REPART-h5repart_test" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5REPART-h5repart_test PROPERTIES DISABLED true)
+  endif ()
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test

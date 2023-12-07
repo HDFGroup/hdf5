@@ -102,6 +102,9 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
+      endif ()
       if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
@@ -124,6 +127,9 @@
               -D "TEST_ERRREF=${resultfile}.err"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
+      endif ()
       if (last_test)
         set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
@@ -160,6 +166,9 @@
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
           DEPENDS H5CLEAR_CMP-copy_${testname}
       )
+      if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -193,6 +202,9 @@
       set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES
           DEPENDS H5CLEAR_CMP-copy_${testname}
       )
+      if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -206,6 +218,9 @@
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           WILL_FAIL "${resultcode}"
       )
+      if ("H5CLEAR_RET-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_RET-${testname} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -238,6 +253,9 @@
       set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_before_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_TEST-copy_${testname}
       )
+      if ("H5CLEAR_FILESIZE_CMP-${testname}_before_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_before_size PROPERTIES DISABLED true)
+      endif ()
       if (NOT ${incr_size} MATCHES "NONE")
           add_test (
               NAME H5CLEAR_FILESIZE_INCR-${testname}
@@ -254,6 +272,9 @@
           WILL_FAIL "${resultcode}"
           DEPENDS H5CLEAR_FILESIZE_CMP-${testname}_before_size
       )
+      if ("H5CLEAR_FILESIZE_INCR-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_INCR-${testname} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5CLEAR_FILESIZE_CMP-${testname}_after_size
           COMMAND "${CMAKE_COMMAND}"
@@ -269,6 +290,9 @@
       set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_after_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_INCR-${testname}
       )
+      if ("H5CLEAR_FILESIZE_CMP-${testname}_after_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_CMP-${testname}_after_size PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -286,6 +310,9 @@
       set_tests_properties (H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname} PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_FAIL_TEST-${testname}-clear-objects
       )
+      if ("H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size
           COMMAND "${CMAKE_COMMAND}"
@@ -301,6 +328,9 @@
       set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_FAIL_TEST-copy_${testname}
       )
+      if ("H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size PROPERTIES DISABLED true)
+      endif ()
       if (NOT ${incr_size} MATCHES "NONE")
           add_test (
               NAME H5CLEAR_FILESIZE_FAIL_INCR-${testname}
@@ -316,6 +346,9 @@
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5CLEAR_FILESIZE_FAIL_CMP-${testname}_before_size
       )
+      if ("H5CLEAR_FILESIZE_FAIL_INCR-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_FAIL_INCR-${testname} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size
           COMMAND "${CMAKE_COMMAND}"
@@ -331,6 +364,9 @@
       set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size PROPERTIES
           DEPENDS H5CLEAR_FILESIZE_FAIL_INCR-${testname}
       )
+      if ("H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR_FILESIZE_FAIL_CMP-${testname}_after_size PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 
@@ -353,6 +389,9 @@
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
           DEPENDS H5CLEAR-clr_open_chk-copy_${testname}.h5
       )
+      if ("H5CLEAR-clr_open_chk-${testname}_${resultcode}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR-clr_open_chk-${testname}_${resultcode} PROPERTIES DISABLED true)
+      endif ()
 
       # After "h5clear" the file, the subsequent file open succeeds
       add_test (
@@ -363,6 +402,9 @@
           DEPENDS H5CLEAR-clr_open_chk-${testname}_${resultcode}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
+      if ("H5CLEAR-h5clr-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR-h5clr-${testname} PROPERTIES DISABLED true)
+      endif ()
       add_test (
           NAME H5CLEAR-clr_open_chk-${testname}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:clear_open_chk> ${testfile}.h5
@@ -371,6 +413,9 @@
           DEPENDS H5CLEAR-h5clr-${testname}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
+      if ("H5CLEAR-clr_open_chk-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5CLEAR-clr_open_chk-${testname} PROPERTIES DISABLED true)
+      endif ()
     endif ()
   endmacro ()
 

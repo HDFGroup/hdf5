@@ -4089,7 +4089,8 @@ parse_options(int argc, char **argv)
                 case 'h': /* print help message--return with nerrors set */
                     return (1);
                 default:
-                    printf("Illegal option(%s)\n", *argv);
+                    if (MAINPROCESS)
+                        printf("Illegal option(%s)\n", *argv);
                     nerrors++;
                     return (1);
             }
@@ -4098,12 +4099,14 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0) {
-        printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+        if (MAINPROCESS)
+            printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
         nerrors++;
         return (1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0) {
-        printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+        if (MAINPROCESS)
+            printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
         nerrors++;
         return (1);
     }
@@ -4128,9 +4131,11 @@ parse_options(int argc, char **argv)
                 nerrors++;
                 return (1);
             }
-        printf("Test filenames are:\n");
-        for (i = 0; i < n; i++)
-            printf("    %s\n", filenames[i]);
+        if (MAINPROCESS) {
+            printf("Test filenames are:\n");
+            for (i = 0; i < n; i++)
+                printf("    %s\n", filenames[i]);
+        }
     }
 
     return (0);
@@ -4249,6 +4254,11 @@ int
 main(int argc, char **argv)
 {
     int mpi_size, mpi_rank; /* mpi variables */
+    int mpi_code;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
 
 #ifndef H5_HAVE_WIN32_API
     /* Un-buffer the stdout and stderr */
@@ -4256,9 +4266,37 @@ main(int argc, char **argv)
     HDsetbuf(stdout, NULL);
 #endif
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAINPROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size))) {
+        if (MAINPROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     mpi_rank_framework_g = mpi_rank;
 

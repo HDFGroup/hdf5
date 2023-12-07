@@ -4231,10 +4231,10 @@ AC_CONFIG_FILES([Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
-AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
+AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse], [chmod +x utils/subfiling_vfd/h5fuse])
 if test -n "$TESTPARALLEL"; then
   if test "X$SUBFILING_VFD" = "Xyes"; then
-    AC_CONFIG_LINKS([testpar/h5fuse.sh:utils/subfiling_vfd/h5fuse.sh])
+    AC_CONFIG_LINKS([testpar/h5fuse:utils/subfiling_vfd/h5fuse])
   fi
 fi
 
@@ -4279,12 +4279,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       ;;
   esac
 fi
-
-## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
-## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
-## This sed script corrects "-l <libname>" first and then "-l " with no library name.
-## If the order is not preserved, all instances of "-l " will be removed.
-sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' -i libtool
 
 ## show the configure settings
 cat src/libhdf5.settings

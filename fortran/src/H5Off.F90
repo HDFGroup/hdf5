@@ -1263,7 +1263,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_idx_c(loc_id, group_name, namelen, &
             index_field, order, n, lapl_id_default, object_info, fields) BIND(C, NAME='h5oget_info_by_idx_c')
-         IMPORT :: c_char, c_ptr, c_funptr
+         IMPORT :: c_char, c_ptr
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name

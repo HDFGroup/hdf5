@@ -172,7 +172,7 @@
             NAME H5DUMP_XML-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
-        set_property(TEST H5DUMP_XML-${skipresultfile} PROPERTY DISABLED)
+        set_property(TEST H5DUMP_XML-${skipresultfile} PROPERTY DISABLED true)
       endif ()
     else ()
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
@@ -202,6 +202,9 @@
     set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
     )
+    if ("H5DUMP_XML-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
 ##############################################################################

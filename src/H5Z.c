@@ -485,19 +485,30 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5Z__check_unregister_group_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
-    hid_t         ocpl_id         = -1;
-    H5Z_object_t *object          = (H5Z_object_t *)key;
-    htri_t        filter_in_pline = false;
-    int           ret_value       = false; /* Return value */
+    hid_t                 ocpl_id = -1;
+    H5Z_object_t         *object  = (H5Z_object_t *)key;
+    H5VL_object_t        *vol_obj;     /* Object for loc_id */
+    H5VL_group_get_args_t vol_cb_args; /* Arguments to VOL callback */
+    htri_t                filter_in_pline = false;
+    int                   ret_value       = false; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    assert(obj_ptr);
-
     /* Get the group creation property */
-    if ((ocpl_id = H5G_get_create_plist((H5G_t *)obj_ptr)) < 0)
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid group identifier");
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type               = H5VL_GROUP_GET_GCPL;
+    vol_cb_args.args.get_gcpl.gcpl_id = H5I_INVALID_HID;
+
+    /* Get the group creation property list */
+    if (H5VL_group_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, H5I_INVALID_HID, "unable to get group creation properties");
+
+    if ((ocpl_id = vol_cb_args.args.get_gcpl.gcpl_id) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get group creation property list");
 
     /* Check if the filter is in the group creation property list */
@@ -535,19 +546,30 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5Z__check_unregister_dset_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
-    hid_t         ocpl_id         = -1;
-    H5Z_object_t *object          = (H5Z_object_t *)key;
-    htri_t        filter_in_pline = false;
-    int           ret_value       = false; /* Return value */
+    hid_t                   ocpl_id = -1;
+    H5Z_object_t           *object  = (H5Z_object_t *)key;
+    H5VL_object_t          *vol_obj;     /* Object for loc_id */
+    H5VL_dataset_get_args_t vol_cb_args; /* Arguments to VOL callback */
+    htri_t                  filter_in_pline = false;
+    int                     ret_value       = false; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    assert(obj_ptr);
-
     /* Get the dataset creation property */
-    if ((ocpl_id = H5D_get_create_plist((H5D_t *)obj_ptr)) < 0)
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid dataset identifier");
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type               = H5VL_DATASET_GET_DCPL;
+    vol_cb_args.args.get_dcpl.dcpl_id = H5I_INVALID_HID;
+
+    /* Get the dataset creation property list */
+    if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataset creation properties");
+
+    if ((ocpl_id = vol_cb_args.args.get_dcpl.dcpl_id) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get dataset creation property list");
 
     /* Check if the filter is in the dataset creation property list */
@@ -581,51 +603,83 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARALLEL_USED *key)
+H5Z__flush_file_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void H5_ATTR_PARALLEL_USED *key)
 {
-    H5F_t *f = (H5F_t *)obj_ptr; /* File object for operations */
+
 #ifdef H5_HAVE_PARALLEL
     H5Z_object_t *object = (H5Z_object_t *)key;
-#endif                     /* H5_HAVE_PARALLEL */
-    int ret_value = false; /* Return value */
+#endif                                              /* H5_HAVE_PARALLEL */
+    int                       ret_value = false;    /* Return value */
+    H5VL_file_specific_args_t vol_cb_args_specific; /* Arguments to VOL callback */
+    H5VL_object_t            *vol_obj;              /* File for file_id */
+    H5VL_file_get_args_t      vol_cb_args;          /* Arguments to VOL callback */
+    bool                      is_native_vol_obj = true;
+    unsigned int              intent            = 0;
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    assert(obj_ptr);
     assert(key);
 
+    /* Get the internal file structure */
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
+
+    /* Get intent */
+    vol_cb_args.op_type               = H5VL_FILE_GET_INTENT;
+    vol_cb_args.args.get_intent.flags = &intent;
+
+    /* Get the flags */
+    if (H5VL_file_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file's intent flags");
+
+    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
+                    "can't determine if VOL object is native connector object");
+
     /* Do a global flush if the file is opened for write */
-    if (H5F_ACC_RDWR & H5F_INTENT(f)) {
+    if (H5F_ACC_RDWR & intent) {
 
 #ifdef H5_HAVE_PARALLEL
-        /* Check if MPIO driver is used */
-        if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-            /* Sanity check for collectively calling H5Zunregister, if requested */
-            /* (Sanity check assumes that a barrier on one file's comm
-             *  is sufficient (i.e. that there aren't different comms for
-             *  different files).  -QAK, 2018/02/14)
-             */
-            if (H5_coll_api_sanity_check_g && !object->sanity_checked) {
-                MPI_Comm mpi_comm; /* File's communicator */
+        /* Checking MPI flag requires native VOL */
+        if (is_native_vol_obj) {
+            H5F_t *f = (H5F_t *)obj_ptr; /* File object for native VOL operation */
 
-                /* Retrieve the file communicator */
-                if (MPI_COMM_NULL == (mpi_comm = H5F_mpi_get_comm(f)))
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get MPI communicator");
+            /* Check if MPIO driver is used */
+            if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
 
-                /* Issue the barrier */
-                if (mpi_comm != MPI_COMM_NULL)
-                    MPI_Barrier(mpi_comm);
+                /* Sanity check for collectively calling H5Zunregister, if requested */
+                /* (Sanity check assumes that a barrier on one file's comm
+                 *  is sufficient (i.e. that there aren't different comms for
+                 *  different files).  -QAK, 2018/02/14)
+                 */
+                if (H5_coll_api_sanity_check_g && !object->sanity_checked) {
+                    MPI_Comm mpi_comm; /* File's communicator */
 
-                /* Set the "sanity checked" flag */
-                object->sanity_checked = true;
-            } /* end if */
-        }     /* end if */
-#endif        /* H5_HAVE_PARALLEL */
+                    /* Retrieve the file communicator */
+                    if (H5F_mpi_retrieve_comm(obj_id, H5P_DEFAULT, &mpi_comm) < 0)
+                        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get MPI communicator");
+
+                    /* Issue the barrier */
+                    if (mpi_comm != MPI_COMM_NULL)
+                        MPI_Barrier(mpi_comm);
+
+                    /* Set the "sanity checked" flag */
+                    object->sanity_checked = true;
+                } /* end if */
+            }     /* end if */
+        }
+#endif /* H5_HAVE_PARALLEL */
 
         /* Call the flush routine for mounted file hierarchies */
-        if (H5F_flush_mounts((H5F_t *)obj_ptr) < 0)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy");
+        vol_cb_args_specific.op_type             = H5VL_FILE_FLUSH;
+        vol_cb_args_specific.args.flush.obj_type = H5I_FILE;
+        vol_cb_args_specific.args.flush.scope    = H5F_SCOPE_GLOBAL;
+
+        /* Flush the object */
+        if (H5VL_file_specific(vol_obj, &vol_cb_args_specific, H5P_DATASET_XFER_DEFAULT, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy");
+
     } /* end if */
 
 done:

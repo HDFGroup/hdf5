@@ -437,6 +437,9 @@
     set_tests_properties (H5DIFF-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
+    if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_PH5_TEST resultfile resultcode)
@@ -469,6 +472,9 @@
     set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
     )
+    if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
@@ -507,6 +513,9 @@
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
+      endif ()
+      if ("H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DISABLED true)
       endif ()
     endif ()
   endmacro ()

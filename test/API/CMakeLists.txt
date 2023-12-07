@@ -21,8 +21,8 @@ if (HDF5_TEST_API_ENABLE_ASYNC)
 endif ()
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_test_config.h.in
-  ${HDF5_TEST_BINARY_DIR}/H5_api_test_config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_test_config.h.in
+    ${HDF5_TEST_BINARY_DIR}/H5_api_test_config.h
 )
 
 #------------------------------------------------------------------------------
@@ -37,20 +37,20 @@ endif ()
 #------------------------------------------------------------------------------
 
 set (HDF5_API_TESTS
-  attribute
-  dataset
-  datatype
-  file
-  group
-  link
-  misc
-  object
+    attribute
+    dataset
+    datatype
+    file
+    group
+    link
+    misc
+    object
 )
 
 if (HDF5_TEST_API_ENABLE_ASYNC)
   set (HDF5_API_TESTS
-    ${HDF5_API_TESTS}
-    async
+      ${HDF5_API_TESTS}
+      async
   )
 endif ()
 
@@ -105,26 +105,25 @@ set (HDF5_API_TESTS_FILES
 #-----------------------------------------------------------------------------
 foreach (api_test ${HDF5_API_TESTS})
   set (HDF5_API_TEST_SRCS
-    ${HDF5_API_TEST_SRCS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_${api_test}_test.c
+      ${HDF5_API_TEST_SRCS}
+      ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_${api_test}_test.c
   )
 endforeach ()
 
 set (HDF5_API_TEST_SRCS
-  ${HDF5_API_TEST_SRCS}
-  ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_test.c
-  ${HDF5_TEST_API_SRC_DIR}/H5_api_test_util.c
+    ${HDF5_API_TEST_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_test.c
+    ${HDF5_TEST_API_SRC_DIR}/H5_api_test_util.c
 )
 
 add_executable (h5_api_test ${HDF5_API_TEST_SRCS})
-target_include_directories (
-  h5_api_test
-  PRIVATE
-    "${HDF5_SRC_INCLUDE_DIRS}"
-    "${HDF5_TEST_SRC_DIR}"
-    "${HDF5_TEST_API_SRC_DIR}"
-    "${HDF5_SRC_BINARY_DIR}"
-    "${HDF5_TEST_BINARY_DIR}"
+target_include_directories (h5_api_test
+    PRIVATE
+      "${HDF5_SRC_INCLUDE_DIRS}"
+      "${HDF5_TEST_SRC_DIR}"
+      "${HDF5_TEST_API_SRC_DIR}"
+      "${HDF5_SRC_BINARY_DIR}"
+      "${HDF5_TEST_BINARY_DIR}"
 )
 target_compile_options (
   h5_api_test
@@ -138,24 +137,12 @@ target_compile_definitions (
 )
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (h5_api_test STATIC)
-  target_link_libraries (
-    h5_api_test
-    PRIVATE
-      ${HDF5_TEST_LIB_TARGET}
-  )
+  target_link_libraries (h5_api_test PRIVATE ${HDF5_TEST_LIB_TARGET})
 else ()
   TARGET_C_PROPERTIES (h5_api_test SHARED)
-  target_link_libraries (
-    h5_api_test
-    PRIVATE
-      ${HDF5_TEST_LIBSH_TARGET}
-  )
+  target_link_libraries (h5_api_test PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
-set_target_properties (
-  h5_api_test
-  PROPERTIES
-    FOLDER test/API
-)
+set_target_properties (h5_api_test PROPERTIES FOLDER test/API)
 # Add Target to clang-format
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_h5_api_test_FORMAT h5_api_test)
@@ -284,27 +271,29 @@ if (HDF5_TEST_SERIAL)
     endif ()
     if (HDF5_TEST_API_CLIENT_HELPER)
       set (HDF5_TEST_API_DRIVER_EXTRA_FLAGS ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
-        --client-helper ${HDF5_TEST_API_CLIENT_HELPER}
+          --client-helper ${HDF5_TEST_API_CLIENT_HELPER}
       )
     endif ()
     if (HDF5_TEST_API_CLIENT_INIT)
       set (HDF5_TEST_API_DRIVER_EXTRA_FLAGS ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
-        --client-init ${HDF5_TEST_API_CLIENT_INIT}
+          --client-init ${HDF5_TEST_API_CLIENT_INIT}
       )
     endif ()
 
     set (last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
-        NAME "h5_api_test_${api_test}"
-        COMMAND $<TARGET_FILE:h5_api_test_driver>
-        --server ${HDF5_TEST_API_SERVER}
-        --client $<TARGET_FILE:h5_api_test> "${api_test}"
-        --serial
-        ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
+          NAME h5_api_test_${api_test}
+          COMMAND $<TARGET_FILE:h5_api_test_driver>
+              --server ${HDF5_TEST_API_SERVER}
+              --client $<TARGET_FILE:h5_api_test> ${api_test}
+              --serial
+              ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
       )
-
-      set_tests_properties ("h5_api_test_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+      if ("h5_api_test_${api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (h5_api_test_${api_test} PROPERTIES DISABLED true)
+      endif ()
+      set_tests_properties (h5_api_test_${api_test} PROPERTIES DEPENDS ${last_api_test})
 
       set (last_api_test "h5_api_test_${api_test}")
     endforeach ()
@@ -323,13 +312,16 @@ if (HDF5_TEST_SERIAL)
     # Hook external tests to same test suite
     foreach (ext_api_test ${HDF5_API_EXT_SERIAL_TESTS})
       add_test (
-        NAME "h5_api_ext_test_${ext_api_test}"
-        COMMAND $<TARGET_FILE:h5_api_test_driver>
-        --server ${HDF5_TEST_API_SERVER}
-        --client $<TARGET_FILE:${ext_api_test}>
-        --serial
-        ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
+          NAME h5_api_ext_test_${ext_api_test}
+          COMMAND $<TARGET_FILE:h5_api_test_driver>
+              --server ${HDF5_TEST_API_SERVER}
+              --client $<TARGET_FILE:${ext_api_test}>
+              --serial
+              ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
       )
+      if ("h5_api_ext_test_${ext_api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (h5_api_ext_test_${ext_api_test} PROPERTIES DISABLED true)
+      endif ()
     endforeach ()
 
     # Add tests for each external VOL connector that was built
@@ -422,11 +414,13 @@ if (HDF5_TEST_SERIAL)
     set (last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
-        NAME "h5_api_test_${api_test}"
-        COMMAND $<TARGET_FILE:h5_api_test> "${api_test}"
+          NAME h5_api_test_${api_test}
+          COMMAND $<TARGET_FILE:h5_api_test> ${api_test}
       )
-
-      set_tests_properties ("h5_api_test_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+      if ("h5_api_test_${api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (h5_api_test_${api_test} PROPERTIES DISABLED true)
+      endif ()
+      set_tests_properties (h5_api_test_${api_test} PROPERTIES DEPENDS ${last_api_test})
 
       set (last_api_test "h5_api_test_${api_test}")
     endforeach ()
@@ -436,6 +430,9 @@ if (HDF5_TEST_SERIAL)
         NAME "h5_api_test_${hdf5_test}"
         COMMAND $<TARGET_FILE:h5_api_test_${hdf5_test}>
       )
+      if ("h5_api_ext_test_${ext_api_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (h5_api_ext_test_${ext_api_test} PROPERTIES DISABLED true)
+      endif ()
     endforeach ()
 
     # Add tests for each external VOL connector that was built

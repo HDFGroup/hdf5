@@ -41,10 +41,43 @@ main(int argc, char **argv)
     hsize_t   stride[RANK];
     hsize_t   block[RANK];
     DATATYPE *data_array = NULL; /* data buffer */
+    int       mpi_code;
+#ifdef H5_HAVE_TEST_API
+    int required = MPI_THREAD_MULTIPLE;
+    int provided;
+#endif
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);
+#ifdef H5_HAVE_TEST_API
+    /* Attempt to initialize with MPI_THREAD_MULTIPLE if possible */
+    if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(&argc, &argv, required, &provided))) {
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Init(&argc, &argv))) {
+        printf("MPI_Init failed with error code %d\n", mpi_code);
+        return -1;
+    }
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank))) {
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
+
+#ifdef H5_HAVE_TEST_API
+    /* Warn about missing MPI_THREAD_MULTIPLE support */
+    if ((provided < required) && MAINPROCESS)
+        printf("** MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE **\n");
+#endif
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size))) {
+        if (MAINPROCESS)
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code);
+        MPI_Finalize();
+        return -1;
+    }
 
     if (MAINPROCESS)
         TESTING("proper shutdown of HDF5 library");

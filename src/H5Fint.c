@@ -410,11 +410,11 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
         if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &mpi_comm) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI communicator");
 
-        /* Retrieve and set MPI info object */
-        if (H5P_get(old_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &mpi_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get MPI info object");
+        /* Retrieve and set MPI info */
+        if (MPI_INFO_NULL == (mpi_info = H5F_mpi_get_info(f)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get MPI info");
         if (H5P_set(new_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &mpi_info) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI info object");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set MPI info");
     }
 #endif /* H5_HAVE_PARALLEL */
     if (H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) <

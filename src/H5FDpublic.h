@@ -179,6 +179,7 @@
 #define H5FD_CTL_INVALID_OPCODE              0
 #define H5FD_CTL_TEST_OPCODE                 1
 #define H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE 2
+#define H5FD_CTL_GET_MPI_INFO_OPCODE         9
 #define H5FD_CTL_GET_MPI_RANK_OPCODE         3
 #define H5FD_CTL_GET_MPI_SIZE_OPCODE         4
 #define H5FD_CTL_MEM_ALLOC                   5

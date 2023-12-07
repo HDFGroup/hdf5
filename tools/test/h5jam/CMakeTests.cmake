@@ -74,6 +74,9 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    if ("H5JAM-${expectfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5JAM-${expectfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   # ============================================================
@@ -101,6 +104,9 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    if ("H5JAM-UNJAM-${expectfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5JAM-UNJAM-${expectfile} PROPERTIES DISABLED true)
+    endif ()
   endmacro ()
 
   macro (CHECKFILE testname testdepends expected actual)
@@ -119,6 +125,9 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if ("H5JAM-${testname}-CHECKFILE-H5DMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP PROPERTIES DISABLED true)
+      endif ()
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP PROPERTIES DEPENDS ${testdepends})
       add_test (
           NAME H5JAM-${testname}-CHECKFILE-H5DMP_CMP
@@ -133,6 +142,9 @@
               -D "TEST_REFERENCE=${actual}.new"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
+      if ("H5JAM-${testname}-CHECKFILE-H5DMP_CMP" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP_CMP PROPERTIES DISABLED true)
+      endif ()
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP_CMP PROPERTIES DEPENDS H5JAM-${testname}-CHECKFILE-H5DMP)
     endif ()
   endmacro()
@@ -184,6 +196,9 @@
           set (compare_test "")
         endif ()
       endif ()
+      if ("H5JAM-${testname}-UNJAM" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}-UNJAM PROPERTIES DISABLED true)
+      endif ()
       if (${compare_test})
         add_test (
             NAME H5JAM-${testname}-UNJAM-CHECK_UB_1-clear-objects
@@ -208,6 +223,9 @@
                 -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
         )
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-CHECK_UB_1-clear-objects)
+        if ("H5JAM-${testname}-UNJAM-CHECK_UB_1" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+          set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_UB_1 PROPERTIES DISABLED true)
+        endif ()
       endif ()
 
       add_test (
@@ -229,6 +247,9 @@
       else ()
         set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_NOUB PROPERTIES DEPENDS H5JAM-${testname}-UNJAM)
       endif ()
+      if ("H5JAM-${testname}-UNJAM-CHECK_NOUB" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}-UNJAM-CHECK_NOUB PROPERTIES DISABLED true)
+      endif ()
 
       CHECKFILE (${testname} "H5JAM-${testname}-UNJAM-CHECK_NOUB" ${chkfile} ${outfile})
     endif ()
@@ -242,6 +263,9 @@
       )
     endif ()
     add_test (NAME H5JAM-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jam${tgt_file_ext}> -u testfiles/${jamfile} -i testfiles/${infile} -o ${outfile} ${ARGN})
+    if ("H5JAM-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5JAM-${testname} PROPERTIES DISABLED true)
+    endif ()
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       set_tests_properties (H5JAM-${testname} PROPERTIES DEPENDS H5JAM-${testname}-clear-objects)
       set (compare_test ${outfile})
@@ -273,6 +297,9 @@
               -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}-CHECK_UB_1-clear-objects)
+      if ("H5JAM-${testname}-CHECK_UB_1" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}-CHECK_UB_1 PROPERTIES DISABLED true)
+      endif ()
       CHECKFILE (${testname} "H5JAM-${testname}-CHECK_UB_1" ${chkfile} ${outfile})
     endif ()
   endmacro ()
@@ -295,9 +322,15 @@
           COMMAND ${CMAKE_COMMAND} -E copy_if_different ${chkfile} ${chkfile}.cpy.h5
       )
       set_tests_properties (H5JAM-${testname}_NONE_COPY PROPERTIES DEPENDS H5JAM-${testname}_NONE-SETUP)
+      if ("H5JAM-${testname}_NONE_COPY" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}_NONE_COPY PROPERTIES DISABLED true)
+      endif ()
 
       add_test (NAME H5JAM-${testname}_NONE COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jam${tgt_file_ext}> -u testfiles/${jamfile} -i ${chkfile} ${ARGN})
       set_tests_properties (H5JAM-${testname}_NONE PROPERTIES DEPENDS H5JAM-${testname}_NONE_COPY)
+      if ("H5JAM-${testname}_NONE" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}_NONE PROPERTIES DISABLED true)
+      endif ()
 
       set (compare_test ${chkfile})
       set (compare_orig ${chkfile}.cpy.h5)
@@ -328,6 +361,9 @@
               -P "${HDF_RESOURCES_DIR}/userblockTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}_NONE-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}_NONE-CHECK_UB_1-clear-objects)
+      if ("H5JAM-${testname}_NONE-CHECK_UB_1" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5JAM-${testname}_NONE-CHECK_UB_1 PROPERTIES DISABLED true)
+      endif ()
       CHECKFILE (${testname} "H5JAM-${testname}_NONE-CHECK_UB_1" ${infile} ${chkfile})
     endif ()
   endmacro ()
