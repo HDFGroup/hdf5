@@ -1854,8 +1854,7 @@ main(int argc, char **argv)
 {
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
-    hsize_t oldsize   = H5_mpi_set_bigio_count(newsize);
-    hid_t   acc_plist = H5I_INVALID_HID;
+    hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
 #ifdef H5_HAVE_TEST_API
     int required = MPI_THREAD_MULTIPLE;
     int provided;
