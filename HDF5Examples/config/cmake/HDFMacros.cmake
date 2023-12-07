@@ -203,9 +203,7 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
 
   SET_HDF_BUILD_TYPE()
-#-----------------------------------------------------------------------------
-# Setup output Directories
-#-----------------------------------------------------------------------------
+
   SET_HDF_OUTPUT_DIRS(${package_prefix})
 
   include (FetchContent)
