@@ -20,6 +20,7 @@ else ()
 endif ()
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_INCLUDE_DIRS}")
+set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${H5EX_JAVA_LIBRARY}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
@@ -44,7 +45,7 @@ Class-Path: ${HDFJAVA_CLASSJARS}
   )
   get_target_property (${EXAMPLE_VARNAME}_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}_${example_name} JAR_FILE)
   get_target_property (${EXAMPLE_VARNAME}_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}_${example_name} CLASSDIR)
-  add_dependencies (${EXAMPLE_VARNAME}_${example_name} ${H5EX_JAVA_LIBRARY})
+  add_dependencies (${EXAMPLE_VARNAME}_${example_name} ${H5EX_JAVA_LIBRARIES})
 endforeach ()
 
 if (H5EX_BUILD_TESTING)
@@ -54,7 +55,7 @@ if (H5EX_BUILD_TESTING)
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_PROGRAM=${resultfile}"
-            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_ARGS:STRING=${ARGN};${CMD_ARGS}"
             -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}_${resultfile}_JAR_FILE}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
