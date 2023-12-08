@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.4.af8c1d1</span>
+   &#160;<span id="projectnumber">1.14.4.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -109,15 +109,13 @@ $(document).ready(function(){initNavTree('_h5_f_dfamily_8h.html',''); initResiza
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:adbf24f060712550a2a9649589a6060c6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dfamily_8h.html#adbf24f060712550a2a9649589a6060c6">H5FD_FAMILY</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dfamily_8h.html#a646833bd24a034ecabe75c559e4885cb">H5FD_family_init</a>))</td></tr>
+<tr class="memitem:adbf24f060712550a2a9649589a6060c6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dfamily_8h.html#adbf24f060712550a2a9649589a6060c6">H5FD_FAMILY</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_family_init))</td></tr>
 <tr class="separator:adbf24f060712550a2a9649589a6060c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a775be690fa1777bfce3b253aa23a7dc3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dfamily_8h.html#a775be690fa1777bfce3b253aa23a7dc3">H5FD_FAMILY_VALUE</a>&#160;&#160;&#160;<a class="el" href="_h5_f_dpublic_8h.html#a84db4e6fd3b7b135648de7ee97c92d6c">H5_VFD_FAMILY</a></td></tr>
 <tr class="separator:a775be690fa1777bfce3b253aa23a7dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a646833bd24a034ecabe75c559e4885cb"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dfamily_8h.html#a646833bd24a034ecabe75c559e4885cb">H5FD_family_init</a> (void)</td></tr>
-<tr class="separator:a646833bd24a034ecabe75c559e4885cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga95d19da25f196ce1ace10af00f49ab53"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53">H5Pset_fapl_family</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> memb_size, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> memb_fapl_id)</td></tr>
 <tr class="memdesc:ga95d19da25f196ce1ace10af00f49ab53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file access property list to use the family driver.  <a href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53">More...</a><br /></td></tr>
 <tr class="separator:ga95d19da25f196ce1ace10af00f49ab53"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,10 +131,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_FAMILY&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dfamily_8h.html#a646833bd24a034ecabe75c559e4885cb">H5FD_family_init</a>))</td>
+          <td class="memname">#define H5FD_FAMILY&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_family_init))</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Initializer for the family VFD </p>
 
 </div>
 </div>
@@ -151,25 +150,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a646833bd24a034ecabe75c559e4885cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a646833bd24a034ecabe75c559e4885cb">&#9670;&nbsp;</a></span>H5FD_family_init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> H5FD_family_init </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Identifier for the family VFD </p>
 
 </div>
 </div>

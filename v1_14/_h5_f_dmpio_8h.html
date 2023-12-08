@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.4.af8c1d1</span>
+   &#160;<span id="projectnumber">1.14.4.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -123,13 +123,11 @@ $(document).ready(function(){initNavTree('_h5_f_dmpio_8h.html',''); initResizabl
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a7a231bc1d78744088a4e1d297284cabf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dmpio_8h.html#a30d8b5df3a3c859b41fc5f1bc7682019">H5FD_mpio_init</a>))</td></tr>
+<tr class="memitem:a7a231bc1d78744088a4e1d297284cabf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmpio_8h.html#a7a231bc1d78744088a4e1d297284cabf">H5FD_MPIO</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_mpio_init))</td></tr>
 <tr class="separator:a7a231bc1d78744088a4e1d297284cabf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a30d8b5df3a3c859b41fc5f1bc7682019"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmpio_8h.html#a30d8b5df3a3c859b41fc5f1bc7682019">H5FD_mpio_init</a> (void)</td></tr>
-<tr class="separator:a30d8b5df3a3c859b41fc5f1bc7682019"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa0204810c1fea1667d62cf7c176416ff"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff">H5Pset_fapl_mpio</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, MPI_Comm comm, MPI_Info info)</td></tr>
 <tr class="memdesc:gaa0204810c1fea1667d62cf7c176416ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores MPI IO communicator information to the file access property list.  <a href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff">More...</a><br /></td></tr>
 <tr class="separator:gaa0204810c1fea1667d62cf7c176416ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,29 +166,11 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_MPIO&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dmpio_8h.html#a30d8b5df3a3c859b41fc5f1bc7682019">H5FD_mpio_init</a>))</td>
+          <td class="memname">#define H5FD_MPIO&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_mpio_init))</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a30d8b5df3a3c859b41fc5f1bc7682019"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a30d8b5df3a3c859b41fc5f1bc7682019">&#9670;&nbsp;</a></span>H5FD_mpio_init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> H5FD_mpio_init </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Initializer for the mpio VFD </p>
 
 </div>
 </div>

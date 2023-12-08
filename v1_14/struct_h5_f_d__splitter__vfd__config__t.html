@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.4.af8c1d1</span>
+   &#160;<span id="projectnumber">1.14.4.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -107,7 +107,9 @@ $(document).ready(function(){initNavTree('struct_h5_f_d__splitter__vfd__config__
 <div class="contents">
 
 <p><code>#include &lt;src/H5FDsplitter.h&gt;</code></p>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Configuration options for setting up the Splitter VFD </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:ab02e1379607f25554688c500f4a73409"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html#ab02e1379607f25554688c500f4a73409">magic</a></td></tr>
@@ -137,6 +139,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Whether to ignore errors on the write-only channel </p>
 
 </div>
 </div>
@@ -151,6 +154,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Path to the log file, which will be created on HDF5 file open (existing files will be clobbered). Can be NULL, in which case no logging output is generated. </p>
 
 </div>
 </div>
@@ -165,6 +169,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Magic number to identify this struct. Must be <code>H5FD_SPLITTER_MAGIC</code>. </p>
 
 </div>
 </div>
@@ -179,6 +184,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>File-access property list for setting up the read/write channel. Can be <code>H5P_DEFAULT</code>. </p>
 
 </div>
 </div>
@@ -193,6 +199,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Version number of this struct. Currently must be <code>H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION</code>. </p>
 
 </div>
 </div>
@@ -207,6 +214,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>File-access property list for setting up the read-only channel. The selected VFD must support the <code>H5FD_FEAT_DEFAULT_VFD_COMPATIBLE</code> flag. Can be <code>H5P_DEFAULT</code>. </p>
 
 </div>
 </div>
@@ -221,6 +229,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Path to the write-only file </p>
 
 </div>
 </div>

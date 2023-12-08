@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.14.4.af8c1d1</span>
+   &#160;<span id="projectnumber">1.14.4.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -109,13 +109,11 @@ $(document).ready(function(){initNavTree('_h5_f_dmulti_8h.html',''); initResizab
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a754e05ae5e0f2d86f64002b338c0fd5c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmulti_8h.html#a754e05ae5e0f2d86f64002b338c0fd5c">H5FD_MULTI</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dmulti_8h.html#aacc278872e6caeef5342c06bb24a0371">H5FD_multi_init</a>))</td></tr>
+<tr class="memitem:a754e05ae5e0f2d86f64002b338c0fd5c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmulti_8h.html#a754e05ae5e0f2d86f64002b338c0fd5c">H5FD_MULTI</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_multi_init))</td></tr>
 <tr class="separator:a754e05ae5e0f2d86f64002b338c0fd5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aacc278872e6caeef5342c06bb24a0371"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmulti_8h.html#aacc278872e6caeef5342c06bb24a0371">H5FD_multi_init</a> (void)</td></tr>
-<tr class="separator:aacc278872e6caeef5342c06bb24a0371"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga296bd22cc1e462351f8f0a00a46baf58"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga296bd22cc1e462351f8f0a00a46baf58">H5Pset_fapl_multi</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> *memb_map, const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> *memb_fapl, const char *const *memb_name, const <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *memb_addr, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> relax)</td></tr>
 <tr class="memdesc:ga296bd22cc1e462351f8f0a00a46baf58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up use of the multi-file driver.  <a href="group___f_a_p_l.html#ga296bd22cc1e462351f8f0a00a46baf58">More...</a><br /></td></tr>
 <tr class="separator:ga296bd22cc1e462351f8f0a00a46baf58"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,29 +132,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_MULTI&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(<a class="el" href="_h5_f_dmulti_8h.html#aacc278872e6caeef5342c06bb24a0371">H5FD_multi_init</a>))</td>
+          <td class="memname">#define H5FD_MULTI&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_multi_init))</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="aacc278872e6caeef5342c06bb24a0371"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aacc278872e6caeef5342c06bb24a0371">&#9670;&nbsp;</a></span>H5FD_multi_init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">H5_DLL <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> H5FD_multi_init </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Initializer for the multi VFD </p>
 
 </div>
 </div>
