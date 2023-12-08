@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (HDF5Examples_FORTRAN_H5G C CXX Fortran)
+project (HDF5Examples_FORTRAN_H5G Fortran)
 
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed

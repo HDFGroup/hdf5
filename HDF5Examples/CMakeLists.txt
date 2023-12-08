@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (H5EXAMPLES C CXX)
+project (H5EXAMPLES C)
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
