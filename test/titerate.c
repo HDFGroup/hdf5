@@ -90,6 +90,13 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
     static int count  = 0;
     static int count2 = 0;
 
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
+        SKIPPED();
+        printf("    API functions for iterate aren't "
+               "supported with this connector\n");
+        return 1;
+    }
+
     strcpy(info->name, name);
 
     switch (info->command) {
@@ -137,6 +144,14 @@ test_iter_group(hid_t fapl, bool new_format)
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Group Iteration Functionality\n"));
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Create the test file with the datasets */
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -306,6 +321,7 @@ test_iter_group(hid_t fapl, bool new_format)
     info.command = RET_TWO;
     i            = 0;
     idx          = 0;
+    memset(info.name, 0, NAMELEN);
     while ((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 2, "H5Literate2");
@@ -315,11 +331,13 @@ test_iter_group(hid_t fapl, bool new_format)
 
         /* Verify that the index is the correct value */
         VERIFY(idx, (hsize_t)i, "H5Literate2");
+        if (idx != (hsize_t)i)
+            break;
         if (idx > (NDATASETS + 2))
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if (strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if (strncmp(info.name, lnames[(size_t)(idx - 1)], NAMELEN) != 0)
             TestErrPrintf(
                 "Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n",
                 (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
@@ -335,6 +353,7 @@ test_iter_group(hid_t fapl, bool new_format)
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
     i            = 0;
     idx          = 0;
+    memset(info.name, 0, NAMELEN);
     while ((ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) >= 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 1, "H5Literate2");
@@ -344,11 +363,13 @@ test_iter_group(hid_t fapl, bool new_format)
 
         /* Verify that the index is the correct value */
         VERIFY(idx, (hsize_t)(i + 10), "H5Literate2");
+        if (idx != (hsize_t)(i + 10))
+            break;
         if (idx > (NDATASETS + 2))
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if (strcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+        if (strncmp(info.name, lnames[(size_t)(idx - 1)], NAMELEN) != 0)
             TestErrPrintf(
                 "Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n",
                 (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
@@ -423,6 +444,14 @@ test_iter_attr(hid_t fapl, bool new_format)
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Iteration Functionality\n"));
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+
+    memset(&info, 0, sizeof(iter_info));
 
     /* Create the test file with the datasets */
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -509,10 +538,14 @@ test_iter_attr(hid_t fapl, bool new_format)
         /* Don't check name when new format is used */
         if (!new_format) {
             /* Verify that the correct name is retrieved */
-            if (strcmp(info.name, anames[(size_t)idx - 1]) != 0)
-                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = "
-                              "'%s', anames[%u] = '%s'!\n",
-                              __LINE__, info.name, (unsigned)(idx - 1), anames[(size_t)idx - 1]);
+            if (idx > 0) {
+                if (strcmp(info.name, anames[(size_t)idx - 1]) != 0)
+                    TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = "
+                                  "'%s', anames[%u] = '%s'!\n",
+                                  __LINE__, info.name, (unsigned)(idx - 1), anames[(size_t)idx - 1]);
+            }
+            else
+                TestErrPrintf("%u: 'idx' was not set correctly!\n", __LINE__);
         } /* end if */
     }     /* end while */
     VERIFY(ret, -1, "H5Aiterate2");
@@ -538,10 +571,14 @@ test_iter_attr(hid_t fapl, bool new_format)
         /* Don't check name when new format is used */
         if (!new_format) {
             /* Verify that the correct name is retrieved */
-            if (strcmp(info.name, anames[(size_t)idx - 1]) != 0)
-                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = "
-                              "'%s', anames[%u] = '%s'!\n",
-                              __LINE__, info.name, (unsigned)(idx - 1), anames[(size_t)idx - 1]);
+            if (idx > 0) {
+                if (strcmp(info.name, anames[(size_t)idx - 1]) != 0)
+                    TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = "
+                                  "'%s', anames[%u] = '%s'!\n",
+                                  __LINE__, info.name, (unsigned)(idx - 1), anames[(size_t)idx - 1]);
+            }
+            else
+                TestErrPrintf("%u: 'idx' was not set correctly!\n", __LINE__);
         } /* end if */
     }     /* end while */
     VERIFY(ret, -1, "H5Aiterate2");
@@ -583,6 +620,13 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     const iter_info *test_info = (const iter_info *)opdata;
     H5O_info2_t      oinfo;
     herr_t           ret; /* Generic return value        */
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
+        SKIPPED();
+        printf("    API functions for iterate and basic links aren't "
+               "supported with this connector\n");
+        return 1;
+    }
 
     if (strcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
@@ -637,6 +681,13 @@ test_iter_group_large(hid_t fapl)
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Create file */
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -1008,6 +1059,7 @@ test_corrupted_attnamelen(void)
     searched_err_t err_caught;            /* Data to be passed to callback func */
     int            err_status;            /* Status returned by H5Aiterate2 */
     herr_t         ret;                   /* Return value */
+    bool           vol_is_native;
     bool           driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
@@ -1020,11 +1072,18 @@ test_corrupted_attnamelen(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing the Handling of Corrupted Attribute's Name Length\n"));
 
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, H5I_INVALID_HID, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+
     ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        printf("-- SKIPPED --\n");
+        MESSAGE(5, (" -- SKIPPED --\n"));
         return;
     }
 
@@ -1078,6 +1137,7 @@ test_links_deprec(hid_t fapl)
     hid_t      gid, gid1;
     H5G_info_t ginfo; /* Buffer for querying object's info */
     hsize_t    i;
+    bool       vol_is_native;
     herr_t     ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -1086,6 +1146,14 @@ test_links_deprec(hid_t fapl)
     /* Create the test file with the datasets */
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(fapl, file, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(file), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* create groups */
     gid = H5Gcreate2(file, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

@@ -1918,6 +1918,7 @@ test_compat(void)
     size_t      off;                  /* Offset of compound field         */
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
+    bool        vol_is_native;
     bool        driver_is_default_compatible;
     herr_t      ret; /* Generic return value             */
 
@@ -1934,16 +1935,25 @@ test_compat(void)
      *  the tarrold.h5 file.
      */
 
-    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
-        TestErrPrintf("can't check if VFD is default VFD compatible\n");
-    if (!driver_is_default_compatible) {
-        printf(" -- SKIPPED --\n");
-        return;
-    }
-
     /* Open the testfile */
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, fid1, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(fid1), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+    /* Check if VFD used is native file format compatible */
+    CHECK(h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible), FAIL,
+          "h5_driver_is_default_vfd_compatible");
+    if (!driver_is_default_compatible) {
+        CHECK(H5Fclose(fid1), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
 
     /* Only try to proceed if the file is around */
     if (fid1 >= 0) {

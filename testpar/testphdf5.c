@@ -234,7 +234,7 @@ parse_options(int argc, char **argv)
                 nerrors++;
                 return (1);
             }
-        if (mpi_rank == 0) {
+        if (MAINPROCESS) {
             printf("Test filenames are:\n");
             for (i = 0; i < n; i++)
                 printf("    %s\n", filenames[i]);
@@ -378,6 +378,15 @@ main(int argc, char **argv)
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
     }
+
+    /* Set up file access property list with parallel I/O access */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl >= 0), "H5Pcreate succeeded");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+
+    /* Get the capability flag of the VOL connector being used */
+    VRFY((H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g) >= 0), "H5Pget_vol_cap_flags succeeded");
 
     /* Initialize testing framework */
     TestInit(argv[0], usage, parse_options);
@@ -567,7 +576,6 @@ main(int argc, char **argv)
     TestInfo(argv[0]);
 
     /* setup file access property list */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* Parse command line arguments */
@@ -593,6 +601,8 @@ main(int argc, char **argv)
 
     /* Clean up test files */
     h5_clean_files(FILENAME, fapl);
+
+    H5Pclose(fapl);
 
     nerrors += GetTestNumErrs();
 

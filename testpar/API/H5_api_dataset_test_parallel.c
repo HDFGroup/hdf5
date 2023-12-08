@@ -82,7 +82,6 @@ static int (*par_dataset_tests[])(void) = {
  * hyperslab selections and point selections.
  */
 #define DATASET_WRITE_DATA_VERIFY_TEST_SPACE_RANK 3
-#define DATASET_WRITE_DATA_VERIFY_TEST_NUM_POINTS 10
 #define DATASET_WRITE_DATA_VERIFY_TEST_DSET_DTYPE H5T_NATIVE_INT
 #define DATASET_WRITE_DATA_VERIFY_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_DATA_VERIFY_TEST_GROUP_NAME "dataset_write_data_verification_test"
@@ -2142,11 +2141,13 @@ error:
  *
  * XXX: Currently pulls from invalid memory locations.
  */
+#ifdef BROKEN
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_SPACE_RANK 2
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DSET_DTYPE H5T_NATIVE_INT
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_GROUP_NAME "hyper_sel_file_all_sel_mem_write_test"
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DSET_NAME  "hyper_sel_file_all_sel_mem_dset"
+#endif
 static int
 test_write_dataset_hyper_file_all_mem(void)
 {

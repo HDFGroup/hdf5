@@ -2067,6 +2067,86 @@ error:
 } /* end h5_check_if_file_locking_enabled() */
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_using_native_vol
+ *
+ * Purpose:     Checks if the VOL connector being used is (or the VOL
+ *              connector stack being used resolves to) the native VOL
+ *              connector. Either or both of fapl_id and obj_id may be
+ *              provided, but checking of obj_id takes precedence.
+ *              H5I_INVALID_HID should be specified for the parameter that
+ *              is not provided.
+ *
+ *              obj_id must be the ID of an HDF5 object that is accessed
+ *              with the VOL connector to check. If obj_id is provided, the
+ *              entire VOL connector stack is checked to see if it resolves
+ *              to the native VOL connector. If only fapl_id is provided,
+ *              only the top-most VOL connector set on fapl_id is checked
+ *              against the native VOL connector.
+ *
+ *              The HDF5_VOL_CONNECTOR environment variable is not checked
+ *              here, as that only overrides the setting for the default
+ *              File Access Property List, which may not be the File Access
+ *              Property List used for accessing obj_id. There is also
+ *              complexity in determining whether the connector stack
+ *              resolves to the native VOL connector when the only
+ *              information available is a string.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol)
+{
+    hbool_t is_native = false;
+    hid_t   native_id = H5I_INVALID_HID;
+    hid_t   vol_id    = H5I_INVALID_HID;
+    herr_t  ret_value = SUCCEED;
+
+    assert((fapl_id >= 0) || (obj_id >= 0));
+    assert(is_native_vol);
+
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    if (obj_id >= 0) {
+        if (H5VLobject_is_native(obj_id, &is_native) < 0) {
+            ret_value = FAIL;
+            goto done;
+        }
+    }
+    else {
+        if (true != H5VLis_connector_registered_by_value(H5VL_NATIVE_VALUE)) {
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if ((native_id = H5VLget_connector_id_by_value(H5VL_NATIVE_VALUE)) < 0) {
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (H5Pget_vol_id(fapl_id, &vol_id) < 0) {
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (vol_id == native_id)
+            is_native = true;
+    }
+
+    *is_native_vol = is_native;
+
+done:
+    if (vol_id != H5I_INVALID_HID)
+        H5VLclose(vol_id);
+    if (native_id != H5I_INVALID_HID)
+        H5VLclose(native_id);
+
+    return ret_value;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    h5_using_default_driver
  *
  * Purpose:     Checks if the specified VFD name matches the library's
@@ -2103,7 +2183,7 @@ h5_using_default_driver(const char *drv_name)
  *              which are not currently supported for parallel HDF5, such
  *              as writing of VL or region reference datatypes.
  *
- * Return:      true/false
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
