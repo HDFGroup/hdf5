@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (HDF5Examples_C_H5FLT)
+project (HDF5Examples_C_H5FLT C)
 
 set (dyn_examples)
 

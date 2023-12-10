@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (HDF5Examples_C_H5D)
+project (HDF5Examples_C_H5D C)
 
 #-----------------------------------------------------------------------------
 # Define Sources

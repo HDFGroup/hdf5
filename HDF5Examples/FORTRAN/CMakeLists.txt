@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-PROJECT (HDF5Examples_F90 C CXX Fortran)
+PROJECT (HDF5Examples_F90 Fortran)
 
 #-----------------------------------------------------------------------------
 # Build the Fortran Examples
