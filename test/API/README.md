@@ -84,4 +84,4 @@ following will appear in the test output:
 
 ### Help and Support
 
-For help with building or using the HDF5 API tests, please contact the [HDF Help Desk](https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk).
+For help with building or using the HDF5 API tests, please contact the [HDF Help Desk](https://help.hdfgroup.org).
