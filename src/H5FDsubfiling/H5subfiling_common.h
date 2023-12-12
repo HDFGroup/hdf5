@@ -284,7 +284,10 @@ H5_DLL herr_t H5_subfiling_validate_config(const H5FD_subfiling_params_t *subf_c
 
 H5_DLL herr_t H5_subfiling_terminate(void);
 
+#ifdef H5_SUBFILING_DEBUG
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
+H5_DLL void H5_subfiling_log_nonewline(int64_t sf_context_id, const char *fmt, ...);
+#endif
 
 #ifdef __cplusplus
 }

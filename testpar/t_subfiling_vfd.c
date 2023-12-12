@@ -40,7 +40,7 @@
 #define PATH_MAX 4096
 #endif
 
-#define DEFAULT_DEFLATE_LEVEL 9
+#define DEFAULT_DEFLATE_LEVEL 4
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
@@ -2360,11 +2360,33 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         puts("");
 
+    if (MAINPROCESS)
+        printf(" Re-running tests with compression enabled\n");
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    enable_compression = true;
+    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
+        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
+            (*tests[i])();
+        }
+        else {
+            if (MAINPROCESS)
+                MESG("MPI_Barrier failed");
+            nerrors++;
+        }
+    }
+    enable_compression = false;
+#else
+    if (MAINPROCESS)
+        SKIPPED();
+#endif
+
     /*
      * Set any unset Subfiling environment variables and re-run
      * the tests as a quick smoke check of whether those are
      * working correctly
      */
+
     if (stripe_size_g < 0) {
         int64_t stripe_size;
         char    tmp[64];
@@ -2488,26 +2510,6 @@ main(int argc, char **argv)
         num_iocs_g = mpi_size;
 
     if (MAINPROCESS)
-        printf(" Re-running tests with compression enabled\n");
-
-#ifdef H5_HAVE_FILTER_DEFLATE
-    enable_compression = true;
-    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
-        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
-            (*tests[i])();
-        }
-        else {
-            if (MAINPROCESS)
-                MESG("MPI_Barrier failed");
-            nerrors++;
-        }
-    }
-    enable_compression = false;
-#else
-    if (MAINPROCESS)
-        SKIPPED();
-#endif
-    if (MAINPROCESS)
         printf("\nRe-running tests with environment variables set\n");
 
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -2523,6 +2525,7 @@ main(int argc, char **argv)
 
     if (MAINPROCESS)
         printf("\n Re-running tests with compression enabled\n");
+
 #ifdef H5_HAVE_FILTER_DEFLATE
     enable_compression = true;
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -2540,6 +2543,7 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         SKIPPED();
 #endif
+
     if (nerrors)
         goto exit;
 
