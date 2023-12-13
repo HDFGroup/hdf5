@@ -163,7 +163,7 @@ jobs:
     
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
 
       #
       # CMAKE CONFIGURE
@@ -281,7 +281,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
 
       # CMAKE CONFIGURE
       - name: CMake Configure
