@@ -20,11 +20,11 @@ DOCUMENTATION
 -------------
 This release is fully functional for the API described in the documentation.
 
-   https://portal.hdfgroup.org/display/HDF5/The+HDF5+API
+   https://docs.hdfgroup.org/hdf5/develop/_l_b_a_p_i.html
 
 Full Documentation and Programming Resources for this release can be found at
 
-   https://portal.hdfgroup.org/display/HDF5
+   https://docs.hdfgroup.org/hdf5/develop/index.html
 
 The latest doxygen documentation generated on changes to develop is available at:
 
@@ -47,7 +47,7 @@ HELP AND SUPPORT
 ----------------
 Information regarding Help Desk and Support services is available at
 
-   https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+   https://help.hdfgroup.org 
 
 
 
@@ -77,7 +77,7 @@ Periodically development code snapshots are provided at the following URL:
 
 Source packages for current and previous releases are located at:
     
-   https://portal.hdfgroup.org/display/support/Downloads
+   https://portal.hdfgroup.org/Downloads
 
 Development code is available at our Github location:
     
