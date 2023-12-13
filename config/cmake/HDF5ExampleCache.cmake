@@ -1,4 +1,4 @@
-# CMake cache file for external HDF5 filter plugins
+# CMake cache file for examples
 
 #########################
 # EXTERNAL cache entries
