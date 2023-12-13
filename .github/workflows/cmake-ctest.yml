@@ -72,7 +72,7 @@ jobs:
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/ci-StdShar-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
-          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip hdf5
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
         shell: pwsh
 
       - name: List files in the space (Windows)
@@ -85,8 +85,8 @@ jobs:
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v3
         with:
-              name: zip-vs2022-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              name: zip-vs2022_cl-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_linux:
@@ -135,7 +135,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux)
@@ -147,8 +147,8 @@ jobs:
       - name: Save published binary (Linux)
         uses: actions/upload-artifact@v3
         with:
-              name: tgz-ubuntu-2204-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              name: tgz-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Save doxygen files created by ctest script
@@ -373,7 +373,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
-          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu_intel-2204.tar.gz hdf5
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz hdf5
         shell: bash
 
       - name: List files in the space (Linux_intel)
@@ -385,6 +385,6 @@ jobs:
       - name: Save published binary (Linux_intel)
         uses: actions/upload-artifact@v3
         with:
-              name: tgz-ubuntu_intel-2204-binary
-              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu_intel-2204.tar.gz
+              name: tgz-ubuntu-2204_intel-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

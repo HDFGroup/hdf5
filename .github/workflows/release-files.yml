@@ -99,7 +99,7 @@ jobs:
       - name: Get published binary (Windows)
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
-              name: zip-vs2022-binary
+              name: zip-vs2022_cl-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)
@@ -111,7 +111,7 @@ jobs:
       - name: Get published binary (Linux)
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
-              name: tgz-ubuntu-2204-binary
+              name: tgz-ubuntu-2204_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Windows_intel)
@@ -123,7 +123,7 @@ jobs:
       - name: Get published binary (Linux_intel)
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
-              name: tgz-ubuntu_intel-2204-binary
+              name: tgz-ubuntu-2204_intel-binary
               path: ${{ github.workspace }}
 
       - name: Store snapshot name
@@ -143,9 +143,9 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu_intel-2204.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
@@ -162,9 +162,9 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu_intel-2204.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
