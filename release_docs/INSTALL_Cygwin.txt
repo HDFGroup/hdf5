@@ -266,4 +266,4 @@ Build, Test and Install HDF5 on Cygwin
 -----------------------------------------------------------------------
 
     HDF Forum:     https://forum.hdfgroup.org/
-    HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+    HDF Helpdesk:  https://help.hdfgroup.org/
