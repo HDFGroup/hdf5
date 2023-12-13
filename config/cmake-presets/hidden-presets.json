@@ -97,8 +97,20 @@
       }
     },
     {
+      "name": "ci-Fortran",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_FORTRAN": "ON"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
       "name": "ci-Fortran-Clang",
       "hidden": true,
+      "inherits": "ci-Fortran",
       "cacheVariables": {
         "CMAKE_Fortran_COMPILER":  {"type": "FILEPATH", "value": "gfortran"}
       },
@@ -106,18 +118,6 @@
         "type": "matches",
         "string": "${presetName}",
         "regex": ".*-Clang"
-      }
-    },
-    {
-      "name": "ci-Fortran",
-      "hidden": true,
-      "inherits": "ci-Fortran-Clang",
-      "cacheVariables": {
-        "HDF5_BUILD_FORTRAN": "ON"
-      },
-      "toolset": {
-        "value": "host=x64",
-        "strategy": "external"
       }
     },
     {
