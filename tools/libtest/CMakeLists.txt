@@ -6,7 +6,7 @@ project (HDF5_TOOLS_LIBTEST C)
 #-----------------------------------------------------------------------------
 add_executable (h5tools_test_utils ${HDF5_TOOLS_LIBTEST_SOURCE_DIR}/h5tools_test_utils.c)
 target_compile_options(h5tools_test_utils PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories(h5tools_test_utils PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories(h5tools_test_utils PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (BUILD_STATIC_LIBS)
   TARGET_C_PROPERTIES (h5tools_test_utils STATIC)
   target_link_libraries (h5tools_test_utils PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})

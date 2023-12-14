@@ -11,6 +11,55 @@
 #
 
 #-------------------------------------------------------------------------------
+# Setup output Directories
+#-----------------------------------------------------------------------------
+macro (SET_HDF_OUTPUT_DIRS package_prefix)
+  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
+    )
+    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
+    )
+    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
+    )
+    set (CMAKE_Fortran_MODULE_DIRECTORY
+        ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
+    )
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(_isMultiConfig)
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
+      set (CMAKE_PDB_OUTPUT_DIRECTORY
+          ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
+      )
+    else ()
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endif ()
+  else ()
+    # if we are externally configured, but the project uses old cmake scripts
+    # this may not be set and utilities like H5detect will fail
+    if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+      set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+    endif ()
+  endif ()
+
+  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    if (CMAKE_HOST_UNIX)
+      set (CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+        CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+    else ()
+      GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+      set (CMAKE_INSTALL_PREFIX
+        "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
+        CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+      set (CMAKE_GENERIC_PROGRAM_FILES)
+    endif ()
+    set (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 0 CACHE PATH "" FORCE)
+  endif ()
+endmacro ()
+
+#-------------------------------------------------------------------------------
 macro (SET_HDF_BUILD_TYPE)
   get_property (_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if (_isMultiConfig)
@@ -433,53 +482,10 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
 
   SET_HDF_BUILD_TYPE()
-
 #-----------------------------------------------------------------------------
 # Setup output Directories
 #-----------------------------------------------------------------------------
-  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
-    )
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
-    )
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
-    )
-    set (CMAKE_Fortran_MODULE_DIRECTORY
-        ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
-    )
-    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if(_isMultiConfig)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
-      set (CMAKE_PDB_OUTPUT_DIRECTORY
-          ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
-      )
-    else ()
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endif ()
-  else ()
-    # if we are externally configured, but the project uses old cmake scripts
-    # this may not be set and utilities like H5detect will fail
-    if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-      set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-    endif ()
-  endif ()
-
-  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    if (CMAKE_HOST_UNIX)
-      set (CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-        CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-    else ()
-      GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
-      set (CMAKE_INSTALL_PREFIX
-        "${CMAKE_GENERIC_PROGRAM_FILES}/HDF_Group/${HDF5_PACKAGE_NAME}/${HDF5_PACKAGE_VERSION}"
-        CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-      set (CMAKE_GENERIC_PROGRAM_FILES)
-    endif ()
-    set (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 0 CACHE PATH "" FORCE)
-  endif ()
+  SET_HDF_OUTPUT_DIRS(${package_prefix})
 
   include (FetchContent)
 endmacro ()

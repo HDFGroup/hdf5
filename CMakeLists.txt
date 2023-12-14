@@ -220,7 +220,7 @@ set (HDF5_CPP_TST_DIR          ${HDF5_SOURCE_DIR}/c++/test)
 set (HDF5_HL_SRC_DIR           ${HDF5_SOURCE_DIR}/hl)
 set (HDF5_HL_CPP_SRC_DIR       ${HDF5_SOURCE_DIR}/hl/c++)
 set (HDF5_HL_TOOLS_DIR         ${HDF5_SOURCE_DIR}/hl/tools)
-set (HDF5_TOOLS_DIR            ${HDF5_SOURCE_DIR}/tools)
+set (HDF5_TOOLS_ROOT_DIR            ${HDF5_SOURCE_DIR}/tools)
 set (HDF5_TOOLS_SRC_DIR        ${HDF5_SOURCE_DIR}/tools/src)
 set (HDF5_TOOLS_TST_DIR        ${HDF5_SOURCE_DIR}/tools/test)
 set (HDF5_PERFORM_SRC_DIR      ${HDF5_SOURCE_DIR}/tools/src/perform)
@@ -1039,18 +1039,6 @@ if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to build examples
-#-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
-  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
-  if (HDF5_BUILD_EXAMPLES)
-    include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
-    set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
-    add_subdirectory (HDF5Examples)
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Option to build High Level API's
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
@@ -1157,6 +1145,18 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
   option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
   if (HDF5_BUILD_JAVA)
     add_subdirectory (java)
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build examples
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
+  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
+  if (HDF5_BUILD_EXAMPLES)
+    include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
+    set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
+    add_subdirectory (HDF5Examples)
   endif ()
 endif ()
 

@@ -1,3 +1,15 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
 #-------------------------------------------------------------------------------
 macro (BASIC_SETTINGS varname)
   string (TOUPPER ${varname} EXAMPLE_PACKAGE_VARNAME)
@@ -17,35 +29,7 @@ macro (BASIC_SETTINGS varname)
   #-----------------------------------------------------------------------------
   # Setup output Directories
   #-----------------------------------------------------------------------------
-  if (NOT ${EXAMPLE_PACKAGE_NAME}_EXTERNALLY_CONFIGURED)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
-    )
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
-    )
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
-    )
-    set (CMAKE_Fortran_MODULE_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
-    )
-    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if(_isMultiConfig)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
-      set (CMAKE_PDB_OUTPUT_DIRECTORY
-          ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
-      )
-    else ()
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endif ()
-  else ()
-    # if we are externally configured, but the project uses old cmake scripts
-    # this may not be set
-    if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-      set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-    endif ()
-  endif ()
+  SET_HDF_OUTPUT_DIRS(${EXAMPLE_PACKAGE_NAME})
 
   #-----------------------------------------------------------------------------
   # Option to use Shared/Static libs, default is static
@@ -63,9 +47,13 @@ macro (BASIC_SETTINGS varname)
   set (CMAKE_C_STANDARD 99)
   set (CMAKE_C_STANDARD_REQUIRED TRUE)
 
-  set (CMAKE_CXX_STANDARD 98)
-  set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
-  set (CMAKE_CXX_EXTENSIONS OFF)
+  if (HDF_BUILD_CPP_LIB)
+    ENABLE_LANGUAGE (CXX)
+
+    set (CMAKE_CXX_STANDARD 98)
+    set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
+    set (CMAKE_CXX_EXTENSIONS OFF)
+  endif ()
 
   #-----------------------------------------------------------------------------
   # Compiler specific flags : Shouldn't there be compiler tests for these
@@ -73,7 +61,7 @@ macro (BASIC_SETTINGS varname)
   if (CMAKE_COMPILER_IS_GNUCC)
     set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
   endif ()
-  if (CMAKE_COMPILER_IS_GNUCXX)
+  if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
     set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS}")
   endif ()
 
@@ -84,7 +72,7 @@ macro (BASIC_SETTINGS varname)
   if (CMAKE_COMPILER_IS_GNUCC)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
   endif ()
-  if (CMAKE_COMPILER_IS_GNUCXX)
+  if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
   endif ()
 
@@ -99,8 +87,10 @@ macro (BASIC_SETTINGS varname)
       set (HDF_WARNINGS_BLOCKED 1)
       string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
-      string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+      if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
+        string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+      endif ()
     endif ()
     if (WIN32)
       add_definitions (-D_CRT_SECURE_NO_WARNINGS)
@@ -114,7 +104,9 @@ macro (BASIC_SETTINGS varname)
     # Most compilers use -w to suppress warnings.
     if (NOT HDF_WARNINGS_BLOCKED)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+      if (CMAKE_CXX_COMPILER_LOADED AND CMAKE_COMPILER_IS_GNUCXX)
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+      endif ()
     endif ()
   endif ()
 
@@ -233,7 +225,9 @@ macro (HDF5_SUPPORT)
         if (HDF_BUILD_JAVA)
           if (${HDF5_BUILD_JAVA} AND HDF5_Java_FOUND)
             set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH};${HDF5_JAVA_INCLUDE_DIRS}")
-            message (STATUS "HDF5 jars:${HDF5_JAVA_INCLUDE_DIRS}}")
+            set (H5EX_JAVA_LIBRARY ${HDF5_JAVA_LIBRARY})
+            set (H5EX_JAVA_LIBRARIES ${HDF5_JAVA_LIBRARY})
+            message (STATUS "HDF5 lib:${H5EX_JAVA_LIBRARY} jars:${HDF5_JAVA_INCLUDE_DIRS}}")
           else ()
             set (HDF_BUILD_JAVA OFF CACHE BOOL "Build Java support" FORCE)
             message (STATUS "HDF5 Java libs not found - disable build of Java examples")
@@ -285,11 +279,6 @@ macro (HDF5_SUPPORT)
   else ()
     set (H5_LIB_TYPE STATIC)
   endif ()
-
-  #-----------------------------------------------------------------------------
-  # Option to build filter examples
-  #-----------------------------------------------------------------------------
-  option (HDF_BUILD_FILTERS "Test filter support" OFF)
 endmacro ()
 
 #-------------------------------------------------------------------------------

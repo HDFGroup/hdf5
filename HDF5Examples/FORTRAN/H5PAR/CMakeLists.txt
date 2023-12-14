@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (HDF5Examples_FORTRAN_H5PAR C CXX Fortran)
+project (HDF5Examples_FORTRAN_H5PAR Fortran)
 
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
@@ -10,7 +10,7 @@ project (HDF5Examples_FORTRAN_H5PAR C CXX Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (
-    ${CMAKE_Fortran_MODULE_DIRECTORY}
+    ${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT}
     ${PROJECT_BINARY_DIR}
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
@@ -33,7 +33,7 @@ foreach (example_name ${examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
   )
   target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
-  target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${LINK_Fortran_LIBS})
+  target_link_libraries (${EXAMPLE_VARNAME}_f90_${example_name} ${H5EX_LINK_Fortran_LIBS})
   set_target_properties (${EXAMPLE_VARNAME}_f90_${example_name} PROPERTIES LINKER_LANGUAGE Fortran)
 endforeach ()
 
@@ -59,8 +59,8 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
         -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/grepTest.cmake"
     )
-    set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-    set (last_test "${EXAMPLE_VARNAME}_${testname}")
+    set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
+    set (last_test "${EXAMPLE_VARNAME}_f90_${testname}")
   endmacro ()
 
   # Ensure that 24 is a multiple of the number of processes.

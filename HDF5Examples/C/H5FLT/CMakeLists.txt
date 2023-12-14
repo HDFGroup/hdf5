@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (HDF5Examples_C_H5FLT)
+project (HDF5Examples_C_H5FLT C)
 
 set (dyn_examples)
 
@@ -190,6 +190,8 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_MASK_ERROR=true"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_REFERENCE=${testname}.tst"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
               -D "TEST_SKIP_COMPARE=1"
               -D "TEST_ERRREF=1"
               -D "GREP_ERRREF=Filter present but encoding disabled"
@@ -214,6 +216,8 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_EXPECT=0"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_REFERENCE=${testname}.tst"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
               -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
       )
@@ -233,6 +237,8 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_FILTER_REPLACE=PARAMS { \\1 XXXX \\2 }\n"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
                 -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
         )
@@ -248,6 +254,8 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_FILTER_REPLACE:STRING=PARAMS { XXXX }"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
                 -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
         )

@@ -11,6 +11,9 @@ be found in the USING_HDF5_CMake.txt file found in this folder.
 
 NOTE: Building applications with the dynamic/shared hdf5 libraries requires
       that the "H5_BUILT_AS_DYNAMIC_LIB" compile definition be used.
+      Go to "Project" and select "Properties", find "Configuration Properties",
+      and then "C/C+±"and then "Preprocessor".
+      Add H5_BUILT_AS_DYNAMIC_LIB to Preprocessor definitions.
 
 The following two sections are helpful if you do not use CMake to build
 your applications.

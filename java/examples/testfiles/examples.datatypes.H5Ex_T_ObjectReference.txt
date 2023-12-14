@@ -1,4 +1,0 @@
-DS1[0]:
-  ->H5G_GROUP: /G1
-DS1[1]:
-  ->H5G_DATASET: /DS2

@@ -715,7 +715,7 @@ When the library is built, the following compile scripts are included:
 \li h5fc:  compile script for HDF5 F90 programs
 \li h5c++: compile script for HDF5 C++ programs
 
-These scripts are easilye used to compile single file applications, such as those included in the tutorial.
+These scripts are easily used to compile single file applications, such as those included in the tutorial.
 <table>
 <tr>
 <th><strong>Warning</strong>

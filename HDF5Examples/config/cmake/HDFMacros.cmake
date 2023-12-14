@@ -1,3 +1,50 @@
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+
+#-------------------------------------------------------------------------------
+# Setup output Directories
+#-----------------------------------------------------------------------------
+macro (SET_HDF_OUTPUT_DIRS package_prefix)
+  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
+    )
+    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
+    )
+    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
+    )
+    set (CMAKE_Fortran_MODULE_DIRECTORY
+        ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
+    )
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(_isMultiConfig)
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
+      set (CMAKE_PDB_OUTPUT_DIRECTORY
+          ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
+      )
+    else ()
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endif ()
+  else ()
+    # if we are externally configured, but the project uses old cmake scripts
+    # this may not be set and utilities like H5detect will fail
+    if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+      set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+    endif ()
+  endif ()
+endmacro ()
+
 #-------------------------------------------------------------------------------
 macro (SET_HDF_BUILD_TYPE)
   get_property (_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -157,38 +204,7 @@ macro (HDF_DIR_PATHS package_prefix)
 
   SET_HDF_BUILD_TYPE()
 
-#-----------------------------------------------------------------------------
-# Setup output Directories
-#-----------------------------------------------------------------------------
-  if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Executables."
-    )
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all Libraries"
-    )
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
-    )
-    set (CMAKE_Fortran_MODULE_DIRECTORY
-        ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
-    )
-    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if(_isMultiConfig)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
-      set (CMAKE_PDB_OUTPUT_DIRECTORY
-          ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
-      )
-    else ()
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    endif ()
-  else ()
-    # if we are externally configured, but the project uses old cmake scripts
-    # this may not be set and utilities like H5detect will fail
-    if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-      set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-    endif ()
-  endif ()
+  SET_HDF_OUTPUT_DIRS(${package_prefix})
 
   include (FetchContent)
 endmacro ()
