@@ -332,7 +332,7 @@ usage(const char *prog)
     PRINTVALSTREAM(
         rawoutstream,
         "      "
-        "https://portal.hdfgroup.org/documentation/hdf5-docs/registered_virtual_file_drivers_vfds.html.\n");    
+        "https://portal.hdfgroup.org/documentation/hdf5-docs/registered_virtual_file_drivers_vfds.html.\n");
     PRINTVALSTREAM(rawoutstream,
                    "      Without the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
