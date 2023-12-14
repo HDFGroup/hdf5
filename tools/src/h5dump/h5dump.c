@@ -326,11 +326,13 @@ usage(const char *prog)
                    "      (Alternate compact form of subsetting is described in the Reference Manual)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Option Argument Conventions ---------------\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "  D - is the file driver to use in opening the file. Acceptable values are\n");
     PRINTVALSTREAM(
         rawoutstream,
-        "      \"sec2\", \"family\", \"split\", \"multi\", \"direct\", \"stream\", and \"subfiling\".\n");
+        "  D - is the file driver to use in opening the file. Acceptable values are available from\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "      "
+        "https://portal.hdfgroup.org/documentation/hdf5-docs/registered_virtual_file_drivers_vfds.html.\n");    
     PRINTVALSTREAM(rawoutstream,
                    "      Without the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
