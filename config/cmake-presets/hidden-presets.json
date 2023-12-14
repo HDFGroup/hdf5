@@ -88,9 +88,6 @@
     {
       "name": "ci-Intel",
       "hidden": true,
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "config/toolchain/intel.cmake"
-      },
       "toolset": {
         "value": "host=x64",
         "strategy": "external"
