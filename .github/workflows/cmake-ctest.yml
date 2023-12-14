@@ -234,7 +234,7 @@ jobs:
   build_and_test_win_intel:
   # Windows w/ OneAPI + CMake
   #
-    name: "Windows MSVC CTest"
+    name: "Windows Intel CTest"
     runs-on: windows-latest
     steps:
       - name: Install Dependencies (Windows_intel)
@@ -287,7 +287,7 @@ jobs:
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
           cmake --workflow --preset=ci-StdShar-Intel --fresh
-        shell: bash
+        shell: pwsh
 
       - name: Publish binary (Windows_intel)
         id: publish-ctest-binary
@@ -319,7 +319,7 @@ jobs:
   build_and_test_linux_intel:
   # Linux (Ubuntu) w/ OneAPI + CMake
   #
-    name: "Ubuntu gcc CMake"
+    name: "Ubuntu Intel CMake"
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux_intel)
