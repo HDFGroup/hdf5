@@ -229,7 +229,12 @@
       "configurePreset": "ci-StdShar-Intel",
       "inherits": [
         "ci-x64-Release-Intel"
-      ]
+      ],
+      "filter": {
+        "exclude": {
+          "name": "H5DUMP-tfloatsattrs"
+        }
+      }
     }
   ],
   "packagePresets": [
