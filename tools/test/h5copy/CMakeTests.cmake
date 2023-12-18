@@ -163,8 +163,8 @@
         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy${tgt_file_ext}> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
     )
     set_tests_properties (H5COPY-${testname}-prefill PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
-    if ("" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties ( PROPERTIES DISABLED true)
+    if ("H5COPY-${testname}-prefill" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5COPY-${testname}-prefill PROPERTIES DISABLED true)
     endif ()
 
     add_test (

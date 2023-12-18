@@ -1,16 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-project (H5EXAMPLES C CXX)
-
-#-----------------------------------------------------------------------------
-# Basic HDF5Examples stuff here
-#-----------------------------------------------------------------------------
-include (${H5EXAMPLES_SOURCE_DIR}/config/cmake/HDFMacros.cmake)
-include (${H5EXAMPLES_SOURCE_DIR}/config/cmake/HDFExampleMacros.cmake)
-set (CMAKE_JAVA_INCLUDE_PATH "")
-
-SET_HDF_BUILD_TYPE()
-
-BASIC_SETTINGS (EXAMPLES)
+project (H5EXAMPLES C)
 
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
@@ -18,6 +7,18 @@ BASIC_SETTINGS (EXAMPLES)
 set (HDF5EX_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
 set (HDF5EX_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
 set (HDF5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
+set (HDF5EX_RESOURCES_DIR      ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
+
+#-----------------------------------------------------------------------------
+# Basic HDF5Examples stuff here
+#-----------------------------------------------------------------------------
+include (${HDF5EX_RESOURCES_DIR}/HDFMacros.cmake)
+include (${HDF5EX_RESOURCES_DIR}/HDFExampleMacros.cmake)
+set (CMAKE_JAVA_INCLUDE_PATH "")
+
+SET_HDF_BUILD_TYPE()
+
+BASIC_SETTINGS (EXAMPLES)
 
 #-----------------------------------------------------------------------------
 # HDF5 support
@@ -37,7 +38,7 @@ if(NOT DEFINED _h5public_h_contents)
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
       "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
-     "\\1" H5_VERS_MINOR ${_h5public_h_contents})
+      "\\1" H5_VERS_MINOR ${_h5public_h_contents})
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
       "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
   string (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._-]*)\".*$"
@@ -119,11 +120,6 @@ if (H5EX_BUILD_TESTING)
   configure_file (${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif ()
 
-#-----------------------------------------------------------------------------
-# Build examples
-#-----------------------------------------------------------------------------
-add_subdirectory (C)
-
 if (${H5_LIBVER_DIR} GREATER 16)
   #-----------------------------------------------------------------------------
   # Option to build Fortran examples
@@ -136,19 +132,22 @@ if (${H5_LIBVER_DIR} GREATER 16)
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/FORTRAN" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/FORTRAN")
     option (HDF_BUILD_FORTRAN "Build FORTRAN support" OFF)
     if (HDF_BUILD_FORTRAN AND HDF5_BUILD_FORTRAN)
-      set (LINK_Fortran_LIBS ${H5EX_HDF5_LINK_LIBS})
+      set (H5EX_LINK_Fortran_LIBS ${H5EX_HDF5_LINK_LIBS})
 
       # Parallel IO usage requires MPI to be Linked and Included
       if (H5_HAVE_PARALLEL)
-        set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
+        set (H5EX_LINK_Fortran_LIBS ${H5EX_LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
         if (MPI_Fortran_LINK_FLAGS)
           set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
         endif ()
       endif ()
 
-      add_subdirectory (FORTRAN)
       configure_file (${HDF5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
+    else ()
+      set (HDF_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
     endif ()
+  else ()
+    set (HDF_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
   endif ()
 
   if (${H5_LIBVER_DIR} GREATER 18)
@@ -157,16 +156,49 @@ if (${H5_LIBVER_DIR} GREATER 16)
     #-----------------------------------------------------------------------------
     if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/JAVA" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/JAVA")
       option (HDF_BUILD_JAVA "Build JAVA support" OFF)
-      if (HDF_BUILD_JAVA AND HDF5_BUILD_JAVA)
-        add_subdirectory (JAVA)
-      endif ()
+    else ()
+      set (HDF_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
     endif ()
+  else ()
+    set (HDF_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
   endif ()
 
   #-----------------------------------------------------------------------------
   # Option to build filter examples
   #-----------------------------------------------------------------------------
-  if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/C/H5F" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/C/H5F")
+  if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT")
     option (HDF_BUILD_FILTERS "Test filter support" OFF)
+    if (HDF_BUILD_FILTERS AND HDF5_ENABLE_PLUGIN_SUPPORT)
+      if(DEFINED ENV{HDF5_PLUGIN_PATH})
+        message (STATUS "ENV PATH=$ENV{HDF5_PLUGIN_PATH}")
+        set (H5EX_HDF5_PLUGIN_PATH $ENV{HDF5_PLUGIN_PATH})
+      else ()
+        if(NOT DEFINED H5EX_HDF5_PLUGIN_PATH)
+          message (STATUS "LIBRARY PATH=${HDF5_LIBRARY_PATH}/plugin")
+          set (H5EX_HDF5_PLUGIN_PATH ${HDF5_LIBRARY_PATH}/plugin)
+        endif ()
+      endif ()
+      message (STATUS "H5EX_HDF5_PLUGIN_PATH=${H5EX_HDF5_PLUGIN_PATH}")
+    else ()
+      set (HDF_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
+    endif ()
+  else ()
+    set (HDF_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
   endif ()
+else ()
+  set (HDF_BUILD_FORTRAN OFF} CACHE BOOL "Build examples FORTRAN support" FORCE)
+  set (HDF_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
+  set (HDF_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
 endif ()
+
+#-----------------------------------------------------------------------------
+# Build examples
+#-----------------------------------------------------------------------------
+add_subdirectory (C)
+if (HDF_BUILD_FORTRAN AND HDF5_BUILD_FORTRAN)
+  add_subdirectory (FORTRAN)
+endif ()
+if (HDF_BUILD_JAVA AND HDF5_BUILD_JAVA)
+  add_subdirectory (JAVA)
+endif ()
+

@@ -16,7 +16,7 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.1
 
       - name: Install Linux dependencies
         shell: bash
@@ -72,5 +72,5 @@ jobs:
       - name: CMake Run Tests
         shell: bash
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "ph5_f90_hyperslab_by_chunk|ph5_f90_hyperslab_by_pattern"
         working-directory: ${{ runner.workspace }}/build

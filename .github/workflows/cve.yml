@@ -27,7 +27,7 @@ jobs:
     name: CVE regression
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.1
 
       - name: Install Autotools Dependencies (Linux)
         run: |
@@ -40,7 +40,7 @@ jobs:
           make
           sudo make install
       - name: Checkout CVE test repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: HDFGroup/cve_hdf5
           path: cve_hdf5

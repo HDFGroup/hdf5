@@ -26,7 +26,7 @@ jobs:
           sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: HDFGroup/hdf5
           path: hdf5
@@ -73,7 +73,7 @@ jobs:
 
       - if: ${{ steps.cache-adios2.outputs.cache-hit != 'true' }}
         name: Checkout ADIOS2 (${{ env.ADIOS2_COMMIT_SHORT }})
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: ornladios/ADIOS2
           ref: ${{ env.ADIOS2_COMMIT }}

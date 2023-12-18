@@ -31,7 +31,7 @@ jobs:
         sudo apt update
         sudo apt install -y libaec-dev zlib1g-dev automake autoconf libcurl4-openssl-dev libjpeg-dev wget curl bzip2 m4 flex bison cmake libzip-dev doxygen openssl libtool libtool-bin
     - name: Checkout HDF5
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.1.1
     - name: Install HDF5
       run: |
         ./autogen.sh
@@ -39,7 +39,7 @@ jobs:
         make -j
         sudo make install -j
     - name: Checkout netCDF
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.1.1
       with:
         repository: unidata/netcdf-c
         path: netcdf-c

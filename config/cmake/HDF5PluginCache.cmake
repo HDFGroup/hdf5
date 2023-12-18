@@ -22,12 +22,17 @@ if (NOT DEFINED H5PL_ALLOW_EXTERNAL_SUPPORT)
   set (H5PL_ALLOW_EXTERNAL_SUPPORT "${HDF5_ALLOW_EXTERNAL_SUPPORT}" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 endif ()
 
+if (H5PL_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+  set (ENABLE_JPEG OFF CACHE BOOL "" FORCE)
+  set (ENABLE_LZF OFF CACHE BOOL "" FORCE)
+endif ()
+
 if (NOT DEFINED H5PL_TGZPATH)
   set (H5PL_TGZPATH "${TGZPATH}" CACHE PATH "PATH for finding plugin tgz file" FORCE)
 endif ()
 
-set (H5PL_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING "Use plugins from HDF Group repository" FORCE)
-set (H5PL_GIT_BRANCH "master" CACHE STRING "" FORCE)
+set (H5PL_GIT_URL "${PLUGIN_GIT_URL}" CACHE STRING "Use plugins from HDF Group repository" FORCE)
+set (H5PL_GIT_BRANCH "${PLUGIN_GIT_BRANCH}" CACHE STRING "" FORCE)
 
 set (H5PL_TGZ_NAME "${PLUGIN_TGZ_NAME}" CACHE STRING "Use plugins from compressed file" FORCE)
 

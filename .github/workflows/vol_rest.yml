@@ -42,7 +42,7 @@ jobs:
           sudo apt-get install automake autoconf libtool libtool-bin libcurl4-openssl-dev libyajl-dev
 
       - name: Checkout HDF5
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: HDFGroup/hdf5
           path: hdf5
@@ -78,12 +78,12 @@ jobs:
           echo "LD_LIBRARY_PATH=${{ github.workspace }}/hdf5/build/bin" >> $GITHUB_ENV
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Checkout HSDS
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: HDFGroup/hsds
           path: ${{github.workspace}}/hsds
