@@ -57,13 +57,6 @@ set (HDF5_INCLUDES_BUILD_TIME
 )
 
 #-----------------------------------------------------------------------------
-# Set variables needed for installation
-#-----------------------------------------------------------------------------
-set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
-set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
-set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
-
-#-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the build directory
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})

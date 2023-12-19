@@ -19,15 +19,18 @@ else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
 endif ()
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_INCLUDE_DIRS}")
+set (CMAKE_JAVA_INCLUDE_PATH ".")
+foreach (CMAKE_JINCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
+  set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_JINCLUDE_PATH}")
+endforeach ()
 set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${H5EX_JAVA_LIBRARY}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
 set (CMAKE_JAVA_CLASSPATH ".")
-foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
+foreach (CMAKE_INCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
 endforeach ()
 
-foreach (HCP_JAR ${CMAKE_JAVA_INCLUDE_PATH})
+foreach (HCP_JAR ${HDF5_JAVA_INCLUDE_DIRS})
   get_filename_component (_HCP_FILE ${HCP_JAR} NAME)
   set (HDFJAVA_CLASSJARS "${_HCP_FILE} ${HDFJAVA_CLASSJARS}")
 endforeach ()
@@ -63,7 +66,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.txt"
             -D "TEST_EXPECT=${resultcode}"
             -D "TEST_SKIP_COMPARE=TRUE"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/jrunTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/jrunTest.cmake"
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${resultfile} PROPERTIES DEPENDS ${last_test})
