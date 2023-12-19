@@ -627,10 +627,11 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                 H5TOOLS_GOTO_ERROR(FAIL, "The Subfiling VFD is not enabled");
 #endif
             }
-
-            if (H5Pset_driver_by_value(fapl_id, vfd_info->u.value, (const char *)vfd_info->info) < 0)
-                H5TOOLS_GOTO_ERROR(FAIL, "can't load VFD plugin by driver value '%ld'",
-                                   (long int)vfd_info->u.value);
+            else {
+                if (H5Pset_driver_by_value(fapl_id, vfd_info->u.value, (const char *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "can't load VFD plugin by driver value '%ld'",
+                                       (long int)vfd_info->u.value);
+            }
             break;
 
         default:
