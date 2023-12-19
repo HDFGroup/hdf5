@@ -8,6 +8,7 @@
     <tab type="user" url="@ref RM" title="Reference Manual" />
     <tab type="user" url="@ref GLS" title="Glossary" />
     <tab type="user" url="https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide" title="Application Developer's Guide" />
+    <tab type="user" url="https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf" title="HDF5 Library Architecture Overview" />
     <tab type="user" url="@ref SPEC" title="Specifications" />
     <tab type="user" url="@ref Cookbook" title="Cookbook" />
     <tab type="user" url="@ref TN" title="Technical Notes" />
