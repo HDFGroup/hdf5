@@ -54,7 +54,7 @@ main(void)
     hsize_t      vdsdims[3] = {VDSDIM0, VDSDIM1, VDSDIM2};
     hsize_t      ldims[3]   = {LDIM0, LDIM1, LDIM2};
     hsize_t      ndims[3]   = {NDIM0, NDIM1, NDIM2};
-    hsize_t      start[3], count[3], block[3];    /* Hyperslab parameters */
+    hsize_t      start[3], count[3], block[3]; /* Hyperslab parameters */
     hsize_t      start_out[3], stride_out[3], count_out[3], block_out[3];
     int          rdata[VDSDIM0][VDSDIM1][VDSDIM2]; /* Read buffer for virtual dataset */
     int          l = 2;

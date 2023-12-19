@@ -38,21 +38,21 @@
 int
 main(void)
 {
-    hid_t        file       = H5I_INVALID_HID;
-    hid_t        space      = H5I_INVALID_HID;
-    hid_t        dset       = H5I_INVALID_HID;
-    hid_t        src_space  = H5I_INVALID_HID;
-    hid_t        vspace     = H5I_INVALID_HID;
-    hid_t        dcpl       = H5I_INVALID_HID;
+    hid_t        file      = H5I_INVALID_HID;
+    hid_t        space     = H5I_INVALID_HID;
+    hid_t        dset      = H5I_INVALID_HID;
+    hid_t        src_space = H5I_INVALID_HID;
+    hid_t        vspace    = H5I_INVALID_HID;
+    hid_t        dcpl      = H5I_INVALID_HID;
     herr_t       status;
     hsize_t      vdsdims[2] = {DIM0, DIM1}; /* Virtual dataset dimension */
     hsize_t      dims[2]    = {DIM0, DIM1}; /* Source dataset dimensions */
     int          wdata[DIM0][DIM1];         /* Write buffer for source dataset */
     int          rdata[DIM0][DIM1];         /* Read buffer for virtual dataset */
     int          i, j;
-    H5D_layout_t layout;                    /* Storage layout */
-    size_t       num_map;                   /* Number of mappings */
-    ssize_t      len;                       /* Length of the string; also a return value */
+    H5D_layout_t layout;  /* Storage layout */
+    size_t       num_map; /* Number of mappings */
+    ssize_t      len;     /* Length of the string; also a return value */
     char        *filename = NULL;
     char        *dsetname = NULL;
 

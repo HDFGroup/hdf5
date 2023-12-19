@@ -23,11 +23,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_vds-percival.h5"
-#define DATASET "VDS-Percival"
-#define VDSDIM0 40
-#define VDSDIM1 10
-#define VDSDIM2 10
+#define FILE         "h5ex_vds-percival.h5"
+#define DATASET      "VDS-Percival"
+#define VDSDIM0      40
+#define VDSDIM1      10
+#define VDSDIM2      10
 #define DIM0         10
 #define DIM1         10
 #define DIM2         10
@@ -41,22 +41,22 @@ const char *SRC_DATASET[] = {"A", "B", "C", "D"};
 int
 main(void)
 {
-    hid_t        file       = H5I_INVALID_HID;
-    hid_t        space      = H5I_INVALID_HID;
-    hid_t        dset       = H5I_INVALID_HID;
-    hid_t        src_space  = H5I_INVALID_HID;
-    hid_t        vspace     = H5I_INVALID_HID;
-    hid_t        dcpl       = H5I_INVALID_HID;
-    herr_t       status;
-    hsize_t      vdsdims[3]     = {VDSDIM0, VDSDIM1, VDSDIM2};
-    hsize_t      vdsdims_max[3] = {VDSDIM0, VDSDIM1, VDSDIM2};
-    hsize_t      dims[3]        = {DIM0, DIM1, DIM2};
-    hsize_t      dims_max[3]    = {DIM0, DIM1, DIM2};
-    hsize_t      start[3], stride[3], count[3], src_count[3], block[3];   /* Hyperslab start parameter for VDS */
-    hsize_t      start_out[3], stride_out[3], count_out[3], block_out[3]; /* Hyperslab parameter out */
-    int          wdata[DIM0 * DIM1 * DIM2];
-    int          rdata[VDSDIM0][VDSDIM1][VDSDIM2]; /* Read buffer for virtual dataset */
-    int          i, j, k;
+    hid_t   file      = H5I_INVALID_HID;
+    hid_t   space     = H5I_INVALID_HID;
+    hid_t   dset      = H5I_INVALID_HID;
+    hid_t   src_space = H5I_INVALID_HID;
+    hid_t   vspace    = H5I_INVALID_HID;
+    hid_t   dcpl      = H5I_INVALID_HID;
+    herr_t  status;
+    hsize_t vdsdims[3]     = {VDSDIM0, VDSDIM1, VDSDIM2};
+    hsize_t vdsdims_max[3] = {VDSDIM0, VDSDIM1, VDSDIM2};
+    hsize_t dims[3]        = {DIM0, DIM1, DIM2};
+    hsize_t dims_max[3]    = {DIM0, DIM1, DIM2};
+    hsize_t start[3], stride[3], count[3], src_count[3], block[3];   /* Hyperslab start parameter for VDS */
+    hsize_t start_out[3], stride_out[3], count_out[3], block_out[3]; /* Hyperslab parameter out */
+    int     wdata[DIM0 * DIM1 * DIM2];
+    int     rdata[VDSDIM0][VDSDIM1][VDSDIM2]; /* Read buffer for virtual dataset */
+    int     i, j, k;
     H5D_layout_t layout;  /* Storage layout */
     size_t       num_map; /* Number of mappings */
     ssize_t      len;     /* Length of the string; also a return value */

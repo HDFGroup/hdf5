@@ -43,24 +43,25 @@ const char *SRC_DATASET[] = {"A", "B", "C", "D"};
 int
 main(void)
 {
-    hid_t        file       = H5I_INVALID_HID;
-    hid_t        vfile      = H5I_INVALID_HID;
-    hid_t        space      = H5I_INVALID_HID;
-    hid_t        dset       = H5I_INVALID_HID;
-    hid_t        vdset      = H5I_INVALID_HID;
-    hid_t        src_space  = H5I_INVALID_HID;
-    hid_t        mem_space  = H5I_INVALID_HID;
-    hid_t        vspace     = H5I_INVALID_HID;
-    hid_t        dcpl       = H5I_INVALID_HID;
-    herr_t       status;
-    hsize_t      vdsdims[3]     = {4 * DIM0_1, VDSDIM1, VDSDIM2};
-    hsize_t      vdsdims_max[3] = {VDSDIM0, VDSDIM1, VDSDIM2};
-    hsize_t      dims[3]        = {DIM0_1, DIM1, DIM2};
-    hsize_t      extdims[3]     = {2 * DIM0_1, DIM1, DIM2};
-    hsize_t      chunk_dims[3]  = {DIM0_1, DIM1, DIM2};
-    hsize_t      dims_max[3]    = {DIM0, DIM1, DIM2};
-    hsize_t      vdsdims_out[3];
-    hsize_t      vdsdims_max_out[3], start[3], stride[3], count[3], src_count[3], block[3]; /* Hyperslab parameters */
+    hid_t   file      = H5I_INVALID_HID;
+    hid_t   vfile     = H5I_INVALID_HID;
+    hid_t   space     = H5I_INVALID_HID;
+    hid_t   dset      = H5I_INVALID_HID;
+    hid_t   vdset     = H5I_INVALID_HID;
+    hid_t   src_space = H5I_INVALID_HID;
+    hid_t   mem_space = H5I_INVALID_HID;
+    hid_t   vspace    = H5I_INVALID_HID;
+    hid_t   dcpl      = H5I_INVALID_HID;
+    herr_t  status;
+    hsize_t vdsdims[3]     = {4 * DIM0_1, VDSDIM1, VDSDIM2};
+    hsize_t vdsdims_max[3] = {VDSDIM0, VDSDIM1, VDSDIM2};
+    hsize_t dims[3]        = {DIM0_1, DIM1, DIM2};
+    hsize_t extdims[3]     = {2 * DIM0_1, DIM1, DIM2};
+    hsize_t chunk_dims[3]  = {DIM0_1, DIM1, DIM2};
+    hsize_t dims_max[3]    = {DIM0, DIM1, DIM2};
+    hsize_t vdsdims_out[3];
+    hsize_t vdsdims_max_out[3], start[3], stride[3], count[3], src_count[3],
+        block[3];                                                         /* Hyperslab parameters */
     hsize_t      start_out[3], stride_out[3], count_out[3], block_out[3]; /* Hyperslab parameter out */
     int          wdata[DIM0_1 * DIM1 * DIM2];
     int          rdata[8 * DIM0_1][VDSDIM1][VDSDIM2];
@@ -91,12 +92,12 @@ main(void)
         src_space = H5Screate_simple(RANK, dims, dims_max);
         dcpl      = H5Pcreate(H5P_DATASET_CREATE);
         status    = H5Pset_chunk(dcpl, RANK, chunk_dims);
-        dset      = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-        status    = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-        status    = H5Sclose(src_space);
-        status    = H5Pclose(dcpl);
-        status    = H5Dclose(dset);
-        status    = H5Fclose(file);
+        dset   = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        status = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+        status = H5Sclose(src_space);
+        status = H5Pclose(dcpl);
+        status = H5Dclose(dset);
+        status = H5Fclose(file);
     }
 
     vfile = H5Fcreate(VFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

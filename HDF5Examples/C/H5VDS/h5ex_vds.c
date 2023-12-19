@@ -47,12 +47,12 @@ const char *SRC_DATASET[] = {"A", "B", "C"};
 int
 main(void)
 {
-    hid_t        file       = H5I_INVALID_HID;
-    hid_t        space      = H5I_INVALID_HID;
-    hid_t        dset       = H5I_INVALID_HID;
-    hid_t        src_space  = H5I_INVALID_HID;
-    hid_t        vspace     = H5I_INVALID_HID;
-    hid_t        dcpl       = H5I_INVALID_HID;
+    hid_t        file      = H5I_INVALID_HID;
+    hid_t        space     = H5I_INVALID_HID;
+    hid_t        dset      = H5I_INVALID_HID;
+    hid_t        src_space = H5I_INVALID_HID;
+    hid_t        vspace    = H5I_INVALID_HID;
+    hid_t        dcpl      = H5I_INVALID_HID;
     herr_t       status;
     hsize_t      vdsdims[2] = {VDSDIM0, VDSDIM1}; /* Virtual datasets dimension */
     hsize_t      dims[1]    = {DIM0};             /* Source datasets dimensions */
@@ -61,11 +61,11 @@ main(void)
     int          wdata[DIM0];             /* Write buffer for source dataset */
     int          rdata[VDSDIM0][VDSDIM1]; /* Read buffer for virtual dataset */
     int          i, j, k, l, block_inc;
-    int          fill_value = -1;         /* Fill value for VDS */
-    H5D_layout_t layout;                  /* Storage layout */
-    size_t       num_map;                 /* Number of mappings */
-    ssize_t      len;                     /* Length of the string; also a return value */
-    hsize_t     *buf      = NULL;         /* Buffer to hold hyperslab coordinates */
+    int          fill_value = -1; /* Fill value for VDS */
+    H5D_layout_t layout;          /* Storage layout */
+    size_t       num_map;         /* Number of mappings */
+    ssize_t      len;             /* Length of the string; also a return value */
+    hsize_t     *buf      = NULL; /* Buffer to hold hyperslab coordinates */
     char        *filename = NULL;
     char        *dsetname = NULL;
     hsize_t      nblocks;
@@ -85,9 +85,9 @@ main(void)
          * close all resources.
          */
 
-        file   = H5Fcreate(SRC_FILE[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-        space  = H5Screate_simple(RANK1, dims, NULL);
-        dset   = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        file  = H5Fcreate(SRC_FILE[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        space = H5Screate_simple(RANK1, dims, NULL);
+        dset = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         status = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
         status = H5Sclose(space);
         status = H5Dclose(dset);

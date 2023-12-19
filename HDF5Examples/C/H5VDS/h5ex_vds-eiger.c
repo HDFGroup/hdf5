@@ -35,12 +35,12 @@
 int
 main(void)
 {
-    hid_t        file       = H5I_INVALID_HID;
-    hid_t        space      = H5I_INVALID_HID;
-    hid_t        dset       = H5I_INVALID_HID;
-    hid_t        src_space  = H5I_INVALID_HID;
-    hid_t        vspace     = H5I_INVALID_HID;
-    hid_t        dcpl       = H5I_INVALID_HID;
+    hid_t        file      = H5I_INVALID_HID;
+    hid_t        space     = H5I_INVALID_HID;
+    hid_t        dset      = H5I_INVALID_HID;
+    hid_t        src_space = H5I_INVALID_HID;
+    hid_t        vspace    = H5I_INVALID_HID;
+    hid_t        dcpl      = H5I_INVALID_HID;
     herr_t       status;
     hsize_t      vdsdims[3]     = {VDSDIM0, VDSDIM1, VDSDIM2};
     hsize_t      vdsdims_max[3] = {H5S_UNLIMITED, VDSDIM1, VDSDIM1};
@@ -49,9 +49,9 @@ main(void)
     hsize_t      start_out[3], stride_out[3], count_out[3], block_out[3]; /* Hyperslab parameter out */
     int          rdata[VDSDIM0][VDSDIM1][VDSDIM2]; /* Read buffer for virtual dataset */
     int          i, j, k;
-    H5D_layout_t layout;          /* Storage layout */
-    size_t       num_map;         /* Number of mappings */
-    ssize_t      len;             /* Length of the string; also a return value */
+    H5D_layout_t layout;  /* Storage layout */
+    size_t       num_map; /* Number of mappings */
+    ssize_t      len;     /* Length of the string; also a return value */
     char        *filename = NULL;
     char        *dsetname = NULL;
 
