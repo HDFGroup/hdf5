@@ -8,6 +8,7 @@ set (common_examples
     h5ex_g_corder
     h5ex_g_phase
     h5ex_g_create
+    h5ex_g_visit_F03
 )
 
 #set (f03_examples

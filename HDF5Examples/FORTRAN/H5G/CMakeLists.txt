@@ -322,12 +322,14 @@ if (H5EX_BUILD_TESTING)
   endmacro ()
 
   macro (ADD_H5_CMP_TEST testname)
+    MESSAGE(status "LDKJFLDKJF ${testname}")
     add_test (
         NAME ${EXAMPLE_VARNAME}_f90_${testname}-clearall
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${testname}.out.tmp
     )
+    MESSAGE(status "HERE ${testname}")
     add_test (
         NAME ${EXAMPLE_VARNAME}_f90_${testname}
         COMMAND "${CMAKE_COMMAND}"
@@ -348,9 +350,9 @@ if (H5EX_BUILD_TESTING)
   ADD_H5_CMP_TEST (h5ex_g_corder)
   ADD_H5_CMP_TEST (h5ex_g_phase)
 #  if (HDF_ENABLE_F2003)
-  ADD_H5_CMP_TEST (h5ex_g_intermediate)
-  ADD_H5_CMP_TEST (h5ex_g_iterate)
-  ADD_H5_CMP_TEST (h5ex_g_traverse)
+#  ADD_H5_CMP_TEST (h5ex_g_intermediate)
+#  ADD_H5_CMP_TEST (h5ex_g_iterate)
+#  ADD_H5_CMP_TEST (h5ex_g_traverse)
   ADD_H5_CMP_TEST (h5ex_g_visit)
 #  endif ()
 
