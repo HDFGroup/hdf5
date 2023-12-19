@@ -2211,7 +2211,7 @@ done:
  *
  * Purpose:     Releases the external file cache associated with the
  *              provided file, potentially closing any cached files
- *              unless they are held open from somewhere\ else.
+ *              unless they are held open from somewhere else.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
