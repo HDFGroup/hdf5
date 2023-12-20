@@ -173,19 +173,19 @@ endif ()
 
 if (H5EX_BUILD_TESTING)
 #  if (HDF_ENABLE_F2003)
-#    set (exfiles
-#        h5ex_g_iterate
-#        h5ex_g_traverse
-#        h5ex_g_visit
-#    )
-#    foreach (example ${exfiles})
-#      add_custom_command (
-#          TARGET     ${EXAMPLE_VARNAME}_f90_${example}
-#          POST_BUILD
-#          COMMAND    ${CMAKE_COMMAND}
-#          ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${example}.h5 ${PROJECT_BINARY_DIR}/${example}.h5
-#      )
-#    endforeach ()
+    set (exfiles
+        h5ex_g_iterate
+        h5ex_g_traverse
+        h5ex_g_visit
+    )
+    foreach (example ${exfiles})
+      add_custom_command (
+          TARGET     ${EXAMPLE_VARNAME}_f90_${example}
+          POST_BUILD
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${example}.h5 ${PROJECT_BINARY_DIR}/${example}.h5
+      )
+    endforeach ()
 #  endif ()
 
   macro (ADD_DUMP_TEST testname)
@@ -322,14 +322,12 @@ if (H5EX_BUILD_TESTING)
   endmacro ()
 
   macro (ADD_H5_CMP_TEST testname)
-    MESSAGE(status "LDKJFLDKJF ${testname}")
     add_test (
         NAME ${EXAMPLE_VARNAME}_f90_${testname}-clearall
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${testname}.out.tmp
     )
-    MESSAGE(status "HERE ${testname}")
     add_test (
         NAME ${EXAMPLE_VARNAME}_f90_${testname}
         COMMAND "${CMAKE_COMMAND}"
