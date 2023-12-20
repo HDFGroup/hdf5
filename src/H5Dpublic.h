@@ -423,7 +423,7 @@ H5_DLL hid_t  H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id, hid_t
  *          A dataspace identifier returned from this function should
  *          be released with H5Sclose() when the identifier is no longer
  *          needed so that resource leaks will not occur.
- * 
+ *
  * \since 1.0.0
  *
  * \par Example
@@ -495,7 +495,7 @@ H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
  *          If a dataset has a named datatype, then an identifier to the
  *          opened datatype is returned. Otherwise, the returned datatype
  *          is read-only.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -518,7 +518,7 @@ H5_DLL hid_t H5Dget_type(hid_t dset_id);
  *
  *          The creation property list identifier should be released with
  *          H5Pclose() to prevent resource leaks.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -878,7 +878,7 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  *
  * \par Example
  * \snippet H5D_examples.c read
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -1072,7 +1072,7 @@ H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_
  * \since 1.0.0
  *
  * \see H5Pset_fill_time(), H5Pset_alloc_time()
- * 
+ *
  */
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                        hid_t dxpl_id, const void *buf);
@@ -1859,7 +1859,7 @@ H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
  *          creating memory leaks.
  *
  * \version 1.12.0 Function was deprecated
- * 
+ *
  * \since 1.2.0
  *
  */
