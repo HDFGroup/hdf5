@@ -969,10 +969,10 @@ test_iovec_translation(void)
 
         /*
          * Test the case where the index value of the last subfile
-         * touched by I/O is greather than or equal to the index
+         * touched by I/O is greater than or equal to the index
          * value of the first subfile touched by I/O, and this results
          * in "thin" I/O segments directed to the subfiles with index
-         * values greather than the index values of the first and
+         * values greater than the index values of the first and
          * last subfiles. This might appear as the following I/O
          * pattern:
          *
@@ -1075,7 +1075,7 @@ test_iovec_translation(void)
 
         /*
          * Test the case where the index value of the last subfile
-         * touched by I/O is greather than or equal to the index
+         * touched by I/O is greater than or equal to the index
          * value of the first subfile touched by I/O, and this results
          * in "thin" I/O segments directed to the subfiles with index
          * values less than the index values of the first and
