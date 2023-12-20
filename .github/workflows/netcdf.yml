@@ -47,7 +47,7 @@ jobs:
       run: |
         cd netcdf-c
         autoreconf -if
-        CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ./configure --enable-hdf5 --enable-dap --disable-dap-remote-tests  --enable-doxygen --disable-doxygen-errors --enable-external-server-tests
+        CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ./configure --enable-hdf5 --enable-dap --disable-dap-remote-tests --enable-external-server-tests
         cat config.log
         cat libnetcdf.settings
         CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make -j
