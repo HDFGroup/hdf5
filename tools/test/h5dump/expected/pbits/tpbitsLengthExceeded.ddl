@@ -103,8 +103,8 @@ usage: h5dump [OPTIONS] files
       (Alternate compact form of subsetting is described in the Reference Manual)
 
 --------------- Option Argument Conventions ---------------
-  D - is the file driver to use in opening the file. Acceptable values are
-      "sec2", "family", "split", "multi", "direct", "stream", and "subfiling".
+  D - is the file driver to use in opening the file. Acceptable values are available from
+      https://portal.hdfgroup.org/documentation/hdf5-docs/registered_virtual_file_drivers_vfds.html.
       Without the file driver flag, the file will be opened with each driver in
       turn and in the order specified above until one driver succeeds
       in opening the file.
