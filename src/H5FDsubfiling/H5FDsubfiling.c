@@ -2400,6 +2400,13 @@ H5FD__subfiling_mirror_writes_to_stub(H5FD_subfiling_t *file_ptr, uint32_t count
             some_super_writes = true;
         else
             all_super_writes = false;
+
+        /*
+         * If we find H5FD_MEM_NOLIST, we don't need to
+         * keep looking through the array entries
+         */
+        if (extend_types)
+            break;
     }
 
     if (all_super_writes) {
@@ -2832,14 +2839,13 @@ get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count, haddr_t file_o
             cur_max_num_subfiles = 2;
         }
         else {
-            cur_max_num_subfiles = data_size / stripe_size;
-
             /*
-             * Add one to the max value if the file offset is not
-             * aligned to a stripe boundary
+             * I/O of a size smaller than the block size, but larger
+             * than or equal to the stripe size must touch at least
+             * (data_size / stripe_size) subfiles, but could touch
+             * an additional subfile, depending on the file offset.
              */
-            if (cur_file_offset % stripe_size)
-                cur_max_num_subfiles++;
+            cur_max_num_subfiles = (((cur_file_offset % stripe_size) + data_size - 1) / stripe_size) + 1;
         }
 
         loc_max_num_subfiles = MAX((size_t)cur_max_num_subfiles, loc_max_num_subfiles);
@@ -3142,23 +3148,39 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
 
             if (last_subfile_idx >= first_subfile_idx) {
                 /*
-                 * When a subfile has an index value that is greater
-                 * than both the starting subfile and ending subfile
-                 * indices, it is a "thinner" section with a smaller
-                 * I/O vector depth.
+                 * In the case where the subfile with the final data
+                 * segment has an index value greater than or equal
+                 * to the subfile with the first data segment, I/O
+                 * vectors directed to a subfile with an index value
+                 * that is greater than the last subfile or less than
+                 * the first subfile will be "thin", or rather will
+                 * have a vector depth of 1 less than normal, which
+                 * will be accounted for below. This can be visualized
+                 * with the following I/O pattern:
+                 *
+                 *   SUBFILE 0   SUBFILE 1   SUBFILE 2   SUBFILE 3
+                 *  _______________________________________________
+                 * |           |   XXXXX   |   XXXXX   |   XXXXX   | ROW 0
+                 * |   XXXXX   |   XXXXX   |   XXXXX   |           | ROW 1
+                 * |           |           |           |           | ROW 2
+                 * |           |           |           |           | ROW ...
+                 * |           |           |           |           |
+                 * |           |           |           |           |
+                 * |           |           |           |           |
+                 * |___________|___________|___________|___________|
+                 *    (thin)                               (thin)
                  */
-                thin_uniform_section = (subfile_idx > first_subfile_idx) && (subfile_idx > last_subfile_idx);
+                thin_uniform_section = (subfile_idx > last_subfile_idx) || (subfile_idx < first_subfile_idx);
             }
-
-            if (last_subfile_idx < first_subfile_idx) {
+            else { /* last_subfile_idx < first_subfile_idx */
                 /*
                  * This can also happen when the subfile with the final
                  * data segment has a smaller subfile index than the
                  * subfile with the first data segment and the current
                  * subfile index falls between the two.
                  */
-                thin_uniform_section = thin_uniform_section || ((last_subfile_idx < subfile_idx) &&
-                                                                (subfile_idx < first_subfile_idx));
+                thin_uniform_section =
+                    ((last_subfile_idx < subfile_idx) && (subfile_idx < first_subfile_idx));
             }
 
             if (thin_uniform_section) {
