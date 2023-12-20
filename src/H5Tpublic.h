@@ -1068,7 +1068,7 @@ H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
  *
  *          The returned datatype identifier should be released with H5Tclose()
  *          to prevent resource leaks.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -1085,7 +1085,7 @@ H5_DLL hid_t H5Tcopy(hid_t type_id);
  * \details H5Tclose() releases the datatype \p dtype_id. Further access
  *          through this datatype identifier is illegal. Failure to release
  *          a datatype with this call will result in resource leaks.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -1094,7 +1094,7 @@ H5_DLL herr_t H5Tclose(hid_t type_id);
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Tclose().
- * 
+ *
  * \since 1.12.0
  *
  */
@@ -1135,7 +1135,7 @@ H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
  *          the library for predefined datatypes so the application does not
  *          inadvertently change or delete a predefined type. Once a datatype
  *          is locked it can never be unlocked.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -1192,7 +1192,7 @@ H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lc
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Tcommit2().
- * 
+ *
  * \since 1.12.0
  *
  */
@@ -1234,7 +1234,7 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  * \brief Asynchronous version of H5Topen2().
  *
  * \since 1.12.0
- * 
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
@@ -1393,7 +1393,7 @@ H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
  *          resource leaks will not develop.
  *
  * \since 1.2.0
- * 
+ *
  */
 H5_DLL hid_t H5Tdecode(const void *buf);
 /**
@@ -1646,7 +1646,7 @@ H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name, void *value /*out*/)
  *            To create a variable-length string datatype, see \ref_vlen_strings.
  *
  * \since 1.2.0
- * 
+ *
  */
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
 
@@ -1734,7 +1734,7 @@ H5_DLL int H5Tget_array_dims2(hid_t type_id, hsize_t dims[]);
  * \version 1.6.5 The #H5T_OPAQUE_TAG_MAX macro constant, specifying the
  *                maximum size of an opaque datatype tag, was added in
  *                H5Tpublic.h.
- * 
+ *
  * \since 1.2.0
  *
  */
@@ -1754,7 +1754,7 @@ H5_DLL herr_t H5Tset_tag(hid_t type, const char *tag);
  *
  * \attention The tag is returned via a pointer to an allocated string, which
  *            the caller must free.
- * 
+ *
  * \since 1.2.0
  *
  */
@@ -1777,7 +1777,7 @@ H5_DLL char *H5Tget_tag(hid_t type);
  *          The datatype identifier returned by this function must be released
  *          with H5Tclose()  when the identifier is no longer needed so that
  *          resource leaks will not develop.
- * 
+ *
  * \since 1.2.0
  *
  */
@@ -1804,7 +1804,7 @@ H5_DLL hid_t H5Tget_super(hid_t type);
  *       platform; it will not be portable to other platforms.
  *
  * \since 1.0.0
- * 
+ *
  */
 H5_DLL H5T_class_t H5Tget_class(hid_t type_id);
 /**
@@ -2731,7 +2731,7 @@ H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
  *
  * \version 1.6.3 \p nelmts parameter type changed to size_t.
  * \version 1.4.0 \p nelmts parameter type changed to hsize_t.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -2919,7 +2919,7 @@ H5_DLL hid_t H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndi
  *
  * \version 1.8.0 Function H5Tarray_create() renamed to H5Tarray_create1()
  *          and deprecated in this release.
- * 
+ *
  * \since 1.4.0
  *
  */
