@@ -304,7 +304,7 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  *          such as H5Pset_szip(), that might require a particular filter
  *          configuration.
  *
- * \since 1.6.3
+ * \since 1.6.0
  */
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
