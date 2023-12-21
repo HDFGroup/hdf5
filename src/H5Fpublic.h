@@ -357,8 +357,8 @@ H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_
  * \async_variant_of{H5Fcreate}
  *
  * \since 1.12.0
+ *
  */
-* /
 #ifndef H5_DOXYGEN
     H5_DLL hid_t H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
                                  const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
