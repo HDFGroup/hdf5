@@ -3370,7 +3370,7 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *          file driver remains registered.
  *
  *
- * \since 1.4.0
+ * \since 1.2.0
  *
  */
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
@@ -3410,6 +3410,8 @@ H5_DLL hid_t H5Pget_driver(hid_t plist_id);
  *                described this function only in the virtual file driver
  *                documentation.
  *
+ * \since 1.4.0
+ *
  */
 H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
 /**
@@ -3436,7 +3438,7 @@ H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
  *          string is simply returned. The caller can then allocate a buffer
  *          of the appropriate size and call this routine again.
  *
- * \version 1.14.0 Function publicized in this release.
+ * \since 1.14.0
  *
  */
 H5_DLL ssize_t H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size);
@@ -4274,6 +4276,8 @@ H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size
  *                described this function only in the virtual file driver
  *                documentation.
  *
+ * \since 1.4.0
+ *
  */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info);
 /**
@@ -4297,7 +4301,7 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_
  *          registered, an attempt will be made to load the driver as a
  *          plugin.
  *
- * \version 1.14.0 Function publicized in this release.
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *driver_config);
@@ -4322,7 +4326,7 @@ H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, con
  *          registered, an attempt will be made to load the driver as a
  *          plugin.
  *
- * \version 1.14.0 Function publicized in this release.
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value,
@@ -4795,6 +4799,8 @@ H5_DLL herr_t H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool
  *          reference structures to 0 or risk heap corruption.
  *
  *          The default value for garbage collecting references is off.
+ *
+ * \since 1.2.0
  *
  */
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
@@ -5669,8 +5675,7 @@ H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
  * \details H5Pget_mpi_params() gets the MPI communicator and info stored in
  *          the file access property list \p fapl_id.
  *
- * \todo When was this introduced?
- *
+ * \since 1.12.0
  */
 H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 
@@ -5687,7 +5692,7 @@ H5_DLL herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
  * \details H5Pset_mpi_params() sets the MPI communicator and info stored in
  *          the file access property list \p fapl_id.
  *
- * \todo When was this introduced?
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Pset_mpi_params(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
@@ -7231,7 +7236,7 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots /*out*/, siz
  *       file location behavior and for notes on the use of the
  *       HDF5_EXTFILE_PREFIX environment variable.
  *
- * \since 1.10.0, 1.8.17
+ * \since 1.8.17
  *
  */
 H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char *prefix /*out*/, size_t size);
@@ -7576,7 +7581,7 @@ H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_
  * \note On Windows, the prefix must be an ASCII string since the Windows
  *       standard C library's I/O functions cannot handle UTF-8 file names.
  *
- * \since 1.10.0, 1.8.17
+ * \since 1.8.17
  *
  */
 H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char *prefix);
@@ -7703,6 +7708,8 @@ H5_DLL herr_t H5Pset_virtual_view(hid_t dapl_id, H5D_vds_view_t view);
  *          \p left, \p middle, and \p right, as set by the H5Pset_btree_ratios()
  *          function.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *middle /*out*/,
                                   double *right /*out*/);
@@ -7724,6 +7731,8 @@ H5_DLL herr_t H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *
  *
  * \version 1.6.0 The return type changed from \p hsize_t to \p size_t.
  * \version 1.4.0 The return type changed to \p hsize_t.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*out*/);
@@ -7915,6 +7924,8 @@ H5_DLL herr_t H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_fun
  *
  *          All ratios are real numbers between 0 and 1, inclusive.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right);
 
@@ -7955,6 +7966,8 @@ H5_DLL herr_t H5Pset_btree_ratios(hid_t plist_id, double left, double middle, do
  *
  * \version 1.6.0 The \p size parameter has changed from type hsize_t to \c size_t.
  * \version 1.4.0 The \p size parameter has changed to type hsize_t.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg);
@@ -8667,7 +8680,7 @@ H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_int
  *
  * \details H5Pset_create_intermediate_group()
  *
- * \since
+ * \since 1.8.0
  *
  */
 H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intmd);
@@ -10007,6 +10020,8 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
+ * \since 1.4.0
+ *
  */
 
 /* Function prototypes */
@@ -10121,6 +10136,8 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
+ * \since 1.4.0
+ *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
@@ -10220,6 +10237,8 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *                deprecated in this release.
  * \version 1.6.4 \p filter parameter type changed to unsigned.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int *flags /*out*/,
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
@@ -10274,7 +10293,9 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
  *                lists.
  * \version 1.8.0 Function H5Pget_filter_by_id() renamed to
  *                H5Pget_filter_by_id1() and deprecated in this release.
- * \version 1.6.0 Function introduced in this release.
+ *
+ * \since 1.6.0
+ *
  */
 H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*/,
                                    size_t *cd_nelmts /*out*/, unsigned cd_values[] /*out*/, size_t namelen,
@@ -10303,6 +10324,8 @@ H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int
  * \version 1.6.4 \p boot, \p freelist, \p stab, \p shhdr parameter types
  *                changed to unsigned.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
                              unsigned *stab /*out*/, unsigned *shhdr /*out*/);
@@ -10324,6 +10347,8 @@ H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *f
  *
  * \details Maps to the function H5Pset_file_space_strategy().
  *
+ * \since 1.10.0
+ *
  */
 H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
 /**
@@ -10342,6 +10367,7 @@ H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, 
  *
  * \details Maps to the function H5Pget_file_space_strategy()
  *
+ * \since 1.10.0
  *
  */
 H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
