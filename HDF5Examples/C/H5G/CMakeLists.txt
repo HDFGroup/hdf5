@@ -212,7 +212,7 @@ if (H5EX_BUILD_TESTING)
       h5ex_g_iterate
       h5ex_g_traverse
   )
-  if (NOT ${H5_LIBVER_DIR} EQUAL 16)
+  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
     set (exfiles ${exfiles}
         h5ex_g_visit
     )
@@ -243,7 +243,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_SKIP_COMPARE=TRUE"
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
     if (HDF5_BUILD_TOOLS)
@@ -257,7 +257,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${testname}.ddl"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname})
     endif ()
@@ -274,7 +274,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_REFERENCE=${testname}.tst"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     if (HDF5_BUILD_TOOLS)
       add_test (
@@ -287,7 +287,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${testname}.ddl"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname})
     endif ()
@@ -311,7 +311,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_REFERENCE=${testname}.tst"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
     if (HDF5_BUILD_TOOLS)
@@ -325,7 +325,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${testname}1.ddl"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname}1 PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname})
       add_test (
@@ -338,7 +338,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${testname}2.ddl"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname}2 PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_H5DUMP-${testname}1)
     endif ()
@@ -361,7 +361,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_REFERENCE=${testname}.tst"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
   endmacro ()

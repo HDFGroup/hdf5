@@ -41,7 +41,7 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_OUTPUT=${testname}.out"
         -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-        -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/grepTest.cmake"
+        -P "${H5EX_RESOURCES_DIR}/grepTest.cmake"
     )
     set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
     set (last_test "${EXAMPLE_VARNAME}_${testname}")

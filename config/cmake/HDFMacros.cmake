@@ -482,9 +482,7 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
 
   SET_HDF_BUILD_TYPE()
-#-----------------------------------------------------------------------------
-# Setup output Directories
-#-----------------------------------------------------------------------------
+
   SET_HDF_OUTPUT_DIRS(${package_prefix})
 
   include (FetchContent)
@@ -510,4 +508,3 @@ macro (ADD_H5_FLAGS h5_flag_var infile)
   endif ()
   #message (TRACE "h5_flag_var=${${h5_flag_var}}")
 endmacro ()
-
