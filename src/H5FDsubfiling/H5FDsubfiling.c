@@ -2942,7 +2942,6 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
     int64_t row_stripe_idx_final = 0;
     int64_t cur_stripe_idx       = 0;
     int64_t max_iovec_depth      = 0;
-    int64_t cur_max_iovec_depth  = 0;
     int64_t mem_offset           = 0;
     size_t  total_bytes          = 0;
     int     num_subfiles         = 0;
@@ -2993,17 +2992,22 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
      *      subfiles
      *  final_offset
      *    - the last offset in the virtual file covered by this I/O
-     *      request. Simply the I/O size added to the starting file
-     *      offset.
+     *      request. Simply the I/O size minus one byte added to the
+     *      starting file offset.
      */
     stripe_idx       = file_offset / stripe_size;
     offset_in_stripe = file_offset % stripe_size;
     offset_in_block  = file_offset % block_size;
-    final_offset     = file_offset + (int64_t)io_size;
+    final_offset     = file_offset + (int64_t)(io_size > 0 ? io_size - 1 : 0);
 
     /* Determine the size of data written to the first and last stripes */
     start_length = MIN((int64_t)io_size, (stripe_size - offset_in_stripe));
-    final_length = (start_length == (int64_t)io_size ? 0 : final_offset % stripe_size);
+    if (start_length == (int64_t)io_size)
+        final_length = 0;
+    else if (((final_offset + 1) % stripe_size) == 0)
+        final_length = stripe_size;
+    else
+        final_length = (final_offset + 1) % stripe_size;
     assert(start_length <= stripe_size);
     assert(final_length <= stripe_size);
 
@@ -3096,8 +3100,7 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
      * vector components for each. Subfiles whose data size is
      * zero will not have I/O requests passed to them.
      */
-    cur_stripe_idx      = stripe_idx;
-    cur_max_iovec_depth = max_iovec_depth;
+    cur_stripe_idx = stripe_idx;
     for (int i = 0, subfile_idx = (int)first_subfile_idx; i < num_subfiles; i++) {
         H5_flexible_const_ptr_t *_io_bufs_ptr;
         H5FD_mem_t              *_io_types_ptr;
@@ -3112,7 +3115,7 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
         if (total_bytes >= io_size)
             break;
 
-        iovec_depth      = cur_max_iovec_depth;
+        iovec_depth      = max_iovec_depth;
         num_full_stripes = iovec_depth;
 
         if (subfile_idx == first_subfile_idx) {
@@ -3295,9 +3298,8 @@ translate_io_req_to_iovec(subfiling_context_t *sf_context, size_t iovec_idx, siz
         cur_stripe_idx++;
 
         if (subfile_idx == num_subfiles) {
-            subfile_idx         = 0;
-            offset_in_block     = 0;
-            cur_max_iovec_depth = ((final_stripe_idx - cur_stripe_idx) / num_subfiles) + 1;
+            subfile_idx     = 0;
+            offset_in_block = 0;
 
             row_offset += block_size;
         }
