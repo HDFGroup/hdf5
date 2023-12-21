@@ -143,6 +143,8 @@ extern "C" {
  *          H5Rdestroy() should be used to release the resource from the
  *          reference.
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
 
@@ -178,6 +180,8 @@ H5_DLL herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5
  *
  *          H5Rdestroy() should be used to release the resource from the
  *          reference.
+ *
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id,
@@ -216,6 +220,8 @@ H5_DLL herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, h
  *          H5Rdestroy() should be used to release the resource from the
  *          reference.
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL herr_t H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl_id,
                              H5R_ref_t *ref_ptr);
@@ -236,6 +242,8 @@ H5_DLL herr_t H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_na
  *
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
+ *
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
@@ -265,6 +273,8 @@ H5_DLL herr_t H5Rdestroy(H5R_ref_t *ref_ptr);
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL H5R_type_t H5Rget_type(const H5R_ref_t *ref_ptr);
 
@@ -287,6 +297,8 @@ H5_DLL H5R_type_t H5Rget_type(const H5R_ref_t *ref_ptr);
  *          \ref H5R_ref_t is defined in H5Rpublic.h as:
  *          \snippet this H5R_ref_t_snip
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
 
@@ -304,6 +316,8 @@ H5_DLL htri_t H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr);
  * \details H5Rcopy() creates a copy of an existing reference.
  *          \p src_ref_ptr points to the reference to copy, and \p dst_ref_ptr is the
  *          pointer to the destination reference.
+ *
+ * \since 1.12.0
  *
  */
 H5_DLL herr_t H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
@@ -339,6 +353,8 @@ H5_DLL herr_t H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr);
  *          the appropriate close function, such as H5Oclose() or H5Dclose()
  *          for datasets.
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 
@@ -346,6 +362,9 @@ H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Ropen_object}
+ *
+ * \since 1.14.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line,
@@ -385,6 +404,8 @@ H5_DLL hid_t H5Ropen_object_async(unsigned app_line, H5R_ref_t *ref_ptr, hid_t r
  *          Use H5Sclose() to release the dataspace identifier returned by
  *          this function when the identifier is no longer needed.
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 
@@ -392,6 +413,9 @@ H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Ropen_region}
+ *
+ * \since 1.14.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL hid_t H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line,
@@ -427,6 +451,8 @@ H5_DLL hid_t H5Ropen_region_async(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_
  *          The attribute opened with this function should be closed with
  *          H5Aclose() when it is no longer needed.
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
 
@@ -434,6 +460,8 @@ H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Ropen_attr}
+ *
+ * \since 1.14.0
  */
 #ifndef H5_DOXYGEN
 H5_DLL hid_t H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line,
@@ -469,6 +497,8 @@ H5_DLL hid_t H5Ropen_attr_async(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id
  *          referenced object type are as followed (defined in H5Opublic.h):
  *          \snippet H5Opublic.h H5O_type_t_snip
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
 
@@ -497,6 +527,8 @@ H5_DLL herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *ob
  *          call will be the size of the file name. That value can then be
  *          passed in for size in the second call to H5Rget_file_name(),
  *          which will retrieve the actual name.
+ *
+ * \since 1.12.0
  *
  */
 H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t size);
@@ -544,6 +576,8 @@ H5_DLL ssize_t H5Rget_file_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *          if there are multiple links pointing to it. This function may
  *          return any one of these paths.
  *
+ * \since 1.12.0
+ *
  */
 H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, size_t size);
 
@@ -570,6 +604,8 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  *          call will be the size of the attribute name. That value can then
  *          be passed in for size in the second call to H5Rget_attr_name(),
  *          which will retrieve the actual name.
+ *
+ * \since 1.12.0
  *
  */
 H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t size);
@@ -663,7 +699,8 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
  *
  * \version 1.8.0 Function H5Rget_obj_type() renamed to H5Rget_obj_type1() and
  *                deprecated in this release.
- * \since 1.6.0
+ *
+ * \since 1.2.0
  *
  */
 H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref);
@@ -705,7 +742,7 @@ H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref
  *
  * \version 1.10.0 Function H5Rdereference() renamed to H5Rdereference1() and
  *                 deprecated in this release.
- * \since 1.8.0
+ * \since 1.0.0
  *
  */
 H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref);
@@ -742,7 +779,7 @@ H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
  *          dataset region references and should be set to -1 if the reference
  *          is an object reference, #H5R_OBJECT.
  *
- * \since 1.8.0
+ * \since 1.0.0
  */
 H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id);
 
@@ -872,6 +909,8 @@ H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, c
  *
  *          Use H5Sclose() to release the dataspace identifier returned by this
  *          function when the identifier is no longer needed.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
