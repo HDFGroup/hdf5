@@ -127,7 +127,7 @@ CONTAINS
 !              H5Odecr_refcount.
 !        
 
-       i = group_check(od, infobuf%token)
+       i = group_check(loc_id, od, infobuf%token)
 
        IF(i.EQ.1)THEN
           WRITE(*,'(A)') space(1:spaces)//"  Warning: Loop detected!"
@@ -164,24 +164,33 @@ END FUNCTION op_func
 !
 ! ************************************************************/
 
-  INTEGER RECURSIVE FUNCTION group_check(od, target_token) result(g_c)
+  INTEGER RECURSIVE FUNCTION group_check(loc_id, od, target_token) result(g_c)
 
     IMPLICIT NONE
     INTEGER :: i
     TYPE(opdata), POINTER :: od
-#if H5_VERSION_GE(1, 12, 0)
+    INTEGER(HID_T) :: loc_id
+    INTEGER :: cmp_value
+#if H5_VERSION_GE(1, 14, 3)
     TYPE(H5O_TOKEN_T_F) :: target_token
+    INTEGER :: status
+    CALL h5otoken_cmp_f(loc_id, od%token, target_token, cmp_value, status)
+#else
+#if H5_VERSION_GE(1, 12, 0)
+#error "example only supports HDF5 versions < 1.12.0 and > 1.14.2"
 #else
     INTEGER(haddr_t) :: target_token
+    cmp_value = -1
+    IF(od%token .EQ. target_token) cmp_value = 0
 #endif
-
-    IF (od%token%token(1) .EQ. target_token%token(1))THEN
+#endif
+    IF (cmp_value.EQ.0)THEN
        g_c = 1       ! Addresses/token match
     ELSE IF (od%recurs.EQ.0)THEN
        g_c = 0       ! Root group reached with no matches
     ELSE
        ! Recursively examine the next node
-       g_c = group_check(od%prev, target_token)
+       g_c = group_check(loc_id, od%prev, target_token)
     END IF
   END FUNCTION group_check
 
