@@ -15,6 +15,10 @@ if (${H5_LIBVER_DIR} GREATER 16)
   endif ()
 endif ()
 
+if (${H5_LIBVER_DIR} GREATER 110)
+  add_subdirectory (${PROJECT_SOURCE_DIR}/H5VDS)
+endif ()
+
 if (H5_HAVE_PARALLEL AND HDF5_ENABLE_PARALLEL)
   add_subdirectory (${PROJECT_SOURCE_DIR}/H5PAR)
 endif ()

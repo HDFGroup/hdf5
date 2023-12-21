@@ -19,15 +19,18 @@ else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
 endif ()
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_INCLUDE_DIRS}")
+set (CMAKE_JAVA_INCLUDE_PATH ".")
+foreach (CMAKE_JINCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
+  set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_JINCLUDE_PATH}")
+endforeach ()
 set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${H5EX_JAVA_LIBRARY}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
 set (CMAKE_JAVA_CLASSPATH ".")
-foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
+foreach (CMAKE_INCLUDE_PATH ${HDF5_JAVA_INCLUDE_DIRS})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
 endforeach ()
 
-foreach (HCP_JAR ${CMAKE_JAVA_INCLUDE_PATH})
+foreach (HCP_JAR ${HDF5_JAVA_INCLUDE_DIRS})
   get_filename_component (_HCP_FILE ${HCP_JAR} NAME)
   set (HDFJAVA_CLASSJARS "${_HCP_FILE} ${HDFJAVA_CLASSJARS}")
 endforeach ()
@@ -39,13 +42,13 @@ foreach (example ${HDF_JAVA_EXAMPLES})
 Class-Path: ${HDFJAVA_CLASSJARS}
 "
   )
-  add_jar (${EXAMPLE_VARNAME}_${example_name}
+  add_jar (${EXAMPLE_VARNAME}J_${example_name}
       SOURCES ${example}
       MANIFEST ${PROJECT_BINARY_DIR}/${example_name}_Manifest.txt
   )
-  get_target_property (${EXAMPLE_VARNAME}_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}_${example_name} JAR_FILE)
-  get_target_property (${EXAMPLE_VARNAME}_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}_${example_name} CLASSDIR)
-  add_dependencies (${EXAMPLE_VARNAME}_${example_name} ${H5EX_JAVA_LIBRARIES})
+  get_target_property (${EXAMPLE_VARNAME}J_${example_name}_JAR_FILE ${EXAMPLE_VARNAME}J_${example_name} JAR_FILE)
+  get_target_property (${EXAMPLE_VARNAME}J_${example_name}_CLASSPATH ${EXAMPLE_VARNAME}J_${example_name} CLASSDIR)
+  add_dependencies (${EXAMPLE_VARNAME}J_${example_name} ${H5EX_JAVA_LIBRARIES})
 endforeach ()
 
 if (H5EX_BUILD_TESTING)
@@ -56,14 +59,14 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_PROGRAM=${resultfile}"
             -D "TEST_ARGS:STRING=${ARGN};${CMD_ARGS}"
-            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}_${resultfile}_JAR_FILE}"
+            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}J_${resultfile}_JAR_FILE}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
             -D "TEST_OUTPUT=${PROJECT_BINARY_DIR}/${resultfile}.out"
             -D "TEST_REFERENCE=${resultfile}.txt"
             -D "TEST_EXPECT=${resultcode}"
             -D "TEST_SKIP_COMPARE=TRUE"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/jrunTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/jrunTest.cmake"
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${resultfile} PROPERTIES DEPENDS ${last_test})

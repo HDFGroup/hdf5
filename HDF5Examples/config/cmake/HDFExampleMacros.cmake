@@ -21,23 +21,10 @@ macro (BASIC_SETTINGS varname)
   set (CMAKE_NO_SYSTEM_FROM_IMPORTED 1)
 
   #-----------------------------------------------------------------------------
-  # Define some CMake variables for use later in the project
-  #-----------------------------------------------------------------------------
-  set (${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR           ${${EXAMPLE_PACKAGE_NAME}_SOURCE_DIR}/config/cmake)
-  set (${EXAMPLE_PACKAGE_NAME}_SRC_DIR                 ${${EXAMPLE_PACKAGE_NAME}_SOURCE_DIR}/src)
-
-  #-----------------------------------------------------------------------------
   # Setup output Directories
   #-----------------------------------------------------------------------------
   SET_HDF_OUTPUT_DIRS(${EXAMPLE_PACKAGE_NAME})
 
-  #-----------------------------------------------------------------------------
-  # Option to use Shared/Static libs, default is static
-  #-----------------------------------------------------------------------------
-  set (LIB_TYPE STATIC)
-  if (BUILD_SHARED_LIBS)
-    set (LIB_TYPE SHARED)
-  endif ()
   set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
   if (MSVC)
@@ -116,24 +103,10 @@ macro (BASIC_SETTINGS varname)
   set (${EXAMPLE_PACKAGE_NAME}_INCLUDES_BUILD_TIME
       ${${EXAMPLE_PACKAGE_NAME}_SRC_DIR} ${${EXAMPLE_PACKAGE_NAME}_BINARY_DIR}
   )
-
-  #-----------------------------------------------------------------------------
-  # Option to build JAVA examples
-  #-----------------------------------------------------------------------------
-  option (HDF_BUILD_JAVA "Build JAVA support" OFF)
-  if (HDF_BUILD_JAVA)
-    find_package (Java)
-    INCLUDE_DIRECTORIES (
-        ${JAVA_INCLUDE_PATH}
-        ${JAVA_INCLUDE_PATH2}
-    )
-
-    include (${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/UseJava.cmake)
-  endif ()
 endmacro ()
 
 macro (HDF5_SUPPORT)
-  set (CMAKE_MODULE_PATH ${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+  set (CMAKE_MODULE_PATH ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
   option (USE_SHARED_LIBS "Use Shared Libraries" ON)
 
   if (NOT H5EX_HDF5_HEADER)
@@ -273,12 +246,6 @@ macro (HDF5_SUPPORT)
     list (APPEND H5EX_HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR_FORTRAN})
   endif ()
   message (STATUS "HDF5 link libs: ${H5EX_HDF5_LINK_LIBS} Includes: ${H5EX_HDF5_INCLUDE_DIRS}")
-
-  if (USE_SHARED_LIBS)
-    set (H5_LIB_TYPE SHARED)
-  else ()
-    set (H5_LIB_TYPE STATIC)
-  endif ()
 endmacro ()
 
 #-------------------------------------------------------------------------------

@@ -141,6 +141,11 @@ else ()
   set (ZSTD_AVAILABLE 0)
 endif ()
 
+set (LIB_TYPE STATIC)
+if (BUILD_SHARED_LIBS)
+  set (LIB_TYPE SHARED)
+endif ()
+
 #run-time loadable library examples
 foreach (example ${dyn_examples})
   add_executable (${EXAMPLE_VARNAME}_${example} ${PROJECT_SOURCE_DIR}/${example}.c)
@@ -196,7 +201,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_ERRREF=1"
               -D "GREP_ERRREF=Filter present but encoding disabled"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname}-ERR PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
       add_test (
@@ -219,7 +224,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
     endif ()
@@ -240,7 +245,7 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-                -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (
@@ -257,7 +262,7 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-                -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname})

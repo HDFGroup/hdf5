@@ -255,7 +255,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_REFERENCE=${testname}.tst"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-            -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname}-clearall)
     if (HDF5_BUILD_TOOLS)
@@ -269,7 +269,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${testname}.ddl"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-              -P "${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/runTest.cmake"
+              -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-f90_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_f90_${testname})
     endif ()

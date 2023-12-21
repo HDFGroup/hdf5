@@ -4,29 +4,45 @@ project (H5EXAMPLES C)
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
 #-----------------------------------------------------------------------------
-set (HDF5EX_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
-set (HDF5EX_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
-set (HDF5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
-set (HDF5EX_RESOURCES_DIR      ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
-
+set (H5EX_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
+set (H5EX_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
+set (H5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
 #-----------------------------------------------------------------------------
 # Basic HDF5Examples stuff here
 #-----------------------------------------------------------------------------
-include (${HDF5EX_RESOURCES_DIR}/HDFMacros.cmake)
-include (${HDF5EX_RESOURCES_DIR}/HDFExampleMacros.cmake)
-set (CMAKE_JAVA_INCLUDE_PATH "")
+if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
+  set (H5EX_RESOURCES_DIR      ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
 
-SET_HDF_BUILD_TYPE()
+  include (${H5EX_RESOURCES_DIR}/HDFMacros.cmake)
+  include (${H5EX_RESOURCES_DIR}/HDFExampleMacros.cmake)
+  set (CMAKE_JAVA_INCLUDE_PATH "")
 
-BASIC_SETTINGS (EXAMPLES)
+  SET_HDF_BUILD_TYPE()
 
-#-----------------------------------------------------------------------------
-# HDF5 support
-#-----------------------------------------------------------------------------
-HDF5_SUPPORT (TRUE)
+  BASIC_SETTINGS (EX)
+
+  #-----------------------------------------------------------------------------
+  # HDF5 support
+  #-----------------------------------------------------------------------------
+  HDF5_SUPPORT (TRUE)
+  APIVersion(${HDF5_VERSION} H5_LIBVER_DIR)
+endif ()
 message (STATUS "HDF5 link libs: ${H5EX_HDF5_LINK_LIBS}")
-APIVersion(${HDF5_VERSION} H5_LIBVER_DIR)
-message (STATUS "HDF5 H5_LIBVER_DIR: ${H5_LIBVER_DIR}")
+message (STATUS "HDF5 H5_LIBVER_DIR: ${H5_LIBVER_DIR} HDF5_VERSION_MAJOR: ${HDF5_VERSION_MAJOR}")
+
+#-----------------------------------------------------------------------------
+# Option to build JAVA examples
+#-----------------------------------------------------------------------------
+option (HDF_BUILD_JAVA "Build JAVA support" OFF)
+if (HDF_BUILD_JAVA)
+  find_package (Java)
+  INCLUDE_DIRECTORIES (
+      ${JAVA_INCLUDE_PATH}
+      ${JAVA_INCLUDE_PATH2}
+  )
+
+  include (${H5EX_RESOURCES_DIR}/UseJava.cmake)
+endif ()
 
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
@@ -54,7 +70,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH ${H5EXAMPLES_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+set (CMAKE_MODULE_PATH ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 option (HDF_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (HDF_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
@@ -117,7 +133,7 @@ if (H5EX_BUILD_TESTING)
   enable_testing ()
   include (CTest)
   include (${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${${EXAMPLE_PACKAGE_NAME}_RESOURCES_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
+  configure_file (${H5EX_RESOURCES_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif ()
 
 if (${H5_LIBVER_DIR} GREATER 16)
@@ -142,7 +158,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
         endif ()
       endif ()
 
-      configure_file (${HDF5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
+      configure_file (${H5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
     else ()
       set (HDF_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
     endif ()
