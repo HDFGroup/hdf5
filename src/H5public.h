@@ -429,7 +429,7 @@ extern "C" {
  *          H5open() before an application issues any other function calls to
  *          the HDF5 library, as there are no damaging side effects in calling
  *          it more than once.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -471,7 +471,7 @@ H5_DLL herr_t H5atclose(H5_atclose_func_t func, void *ctx);
  *          generally called when the application calls exit(), but may be
  *          called earlier in the event of an emergency shutdown or out of a
  *          desire to free all resources used by the HDF5 library.
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -493,7 +493,7 @@ H5_DLL herr_t H5close(void);
  *            before any other HDF5 function calls, and must be called each
  *            time the library is loaded/linked into the application (the first
  *            time and after it's been unloaded).
- * 
+ *
  * \since 1.0.0
  *
  */
@@ -516,7 +516,7 @@ H5_DLL herr_t H5dont_atexit(void);
  *
  * \note The library automatically garbage collects all the free lists when the
  *       application ends.
- * 
+ *
  * \since 1.4.0
  *
  */
@@ -691,7 +691,7 @@ H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
  *          data structures with a mutex. In certain circumstances, it may be
  *          useful to determine, at run-time, whether the linked HDF5 library
  *          was built with the thread-safety feature enabled.
- * 
+ *
  * \since 1.10.0
  *
  */
