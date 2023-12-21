@@ -158,7 +158,7 @@
      ! Close FORTRAN interfaces and HDF5 library.
      !
      CALL h5close_f(error)
-
+     IF(mpi_rank.EQ.0) WRITE(*,'(A)') "PHDF5 example finished with no errors"
 100  continue
      CALL MPI_FINALIZE(mpierror)
 

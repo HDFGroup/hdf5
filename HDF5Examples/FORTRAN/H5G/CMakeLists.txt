@@ -172,7 +172,6 @@ endif ()
 #endif ()
 
 if (H5EX_BUILD_TESTING)
-#  if (HDF_ENABLE_F2003)
     set (exfiles
         h5ex_g_iterate
         h5ex_g_traverse
@@ -186,7 +185,6 @@ if (H5EX_BUILD_TESTING)
           ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${example}.h5 ${PROJECT_BINARY_DIR}/${example}.h5
       )
     endforeach ()
-#  endif ()
 
   macro (ADD_DUMP_TEST testname)
     add_test (

@@ -53,7 +53,7 @@
      ! Close FORTRAN interface
      !
      CALL h5close_f(error)
-
+     IF(mpi_rank.EQ.0) WRITE(*,'(A)') "PHDF5 example finished with no errors"
      CALL MPI_FINALIZE(mpierror)
 
      END PROGRAM FILE_CREATE
