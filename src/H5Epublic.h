@@ -697,6 +697,9 @@ typedef struct H5E_error1_t {
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.0.0
+ *
  */
 typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
 //! <!-- [H5E_walk1_t_snip] -->
@@ -708,6 +711,9 @@ typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.0.0
+ *
  */
 typedef herr_t (*H5E_auto1_t)(void *client_data);
 //! <!-- [H5E_auto1_t_snip] -->
@@ -727,6 +733,8 @@ typedef herr_t (*H5E_auto1_t)(void *client_data);
  * \details H5Eclear1() clears the error stack for the current thread.\n
  *          The stack is also cleared whenever an API function is called, with
  *          certain exceptions (for instance, H5Eprint1()).
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Eclear1(void);
@@ -771,6 +779,8 @@ H5_DLL herr_t H5Eclear1(void);
  *          the traversal functions are the library's default H5Eprint1() or
  *          H5Eprint2(), mixing H5Eset_auto1() and H5Eget_auto2() or mixing
  *          H5Eset_auto2() and H5Eget_auto1() does not fail.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Eget_auto1(H5E_auto1_t *func, void **client_data);
@@ -826,6 +836,8 @@ H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line, H5E_ma
  *          that prints error messages. Users are encouraged to write their own
  *          more specific error handlers.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Eprint1(FILE *stream);
 /**
@@ -856,6 +868,8 @@ H5_DLL herr_t H5Eprint1(FILE *stream);
  *
  *          Automatic stack traversal is always in the #H5E_WALK_DOWNWARD
  *          direction.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Eset_auto1(H5E_auto1_t func, void *client_data);
@@ -890,6 +904,8 @@ H5_DLL herr_t H5Eset_auto1(H5E_auto1_t func, void *client_data);
  *          is as follows:
  *          \snippet this H5E_walk1_t_snip
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data);
 /**
@@ -910,6 +926,8 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  * \attention This function returns a dynamically allocated string (\c char
  *            array). An application calling this function must free the memory
  *            associated with the return value to prevent a memory leak.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL char *H5Eget_major(H5E_major_t maj);
@@ -933,6 +951,8 @@ H5_DLL char *H5Eget_major(H5E_major_t maj);
  *            function from an HDF5 library of Release 1.8.0 or later must free
  *            the memory associated with the return value to prevent a memory
  *            leak. This is a change from the 1.6.x release series.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL char *H5Eget_minor(H5E_minor_t min);
