@@ -20,8 +20,7 @@
 
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsf = (/4,8/) ! Dataset dimensions
                                                        ! in the file.
-!     INTEGER, DIMENSION(7) :: dimsfi = (/4,8,0,0,0,0,0/)
-     INTEGER(HSIZE_T), DIMENSION (2) :: dimsfi = (/4,8/)
+     INTEGER(HSIZE_T), DIMENSION(2) :: dimsfi = (/4,8/)
      INTEGER(HSIZE_T), DIMENSION(2) :: chunk_dims = (/2,4/) ! Chunks dimensions
 
      INTEGER(HSIZE_T),  DIMENSION(2) :: count
@@ -163,7 +162,7 @@
      ! Close FORTRAN interfaces and HDF5 library.
      !
      CALL h5close_f(error)
-
+     IF(mpi_rank.EQ.0) WRITE(*,'(A)') "PHDF5 example finished with no errors"
 100  continue
      CALL MPI_FINALIZE(mpierror)
 
