@@ -26,16 +26,22 @@
 int
 main(void)
 {
-    hid_t        file, space, dset, dcpl; /* Handles */
+    hid_t        file  = H5I_INVALID_HID;
+    hid_t        space = H5I_INVALID_HID;
+    hid_t        dset  = H5I_INVALID_HID;
+    hid_t        dcpl  = H5I_INVALID_HID;
     herr_t       status;
     htri_t       avail;
     H5Z_filter_t filter_type;
-    hsize_t      dims[2] = {DIM0, DIM1}, chunk[2] = {CHUNK0, CHUNK1};
+    hsize_t      dims[2]  = {DIM0, DIM1};
+    hsize_t      chunk[2] = {CHUNK0, CHUNK1};
     size_t       nelmts;
-    unsigned int flags, filter_info;
-    int          wdata[DIM0][DIM1], /* Write buffer */
-        rdata[DIM0][DIM1],          /* Read buffer */
-        max, i, j;
+    unsigned int flags;
+    unsigned int filter_info;
+    int          wdata[DIM0][DIM1]; /* Write buffer */
+    int          rdata[DIM0][DIM1]; /* Read buffer */
+    int          max;
+    hsize_t      i, j;
 
     /*
      * Check if gzip compression is available and can be used for both

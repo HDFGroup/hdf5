@@ -7,7 +7,7 @@ project (HDF5Examples_C_H5T C)
 include (C_sourcefiles.cmake)
 
 foreach (example_name ${common_examples})
-  if (${H5_LIBVER_DIR} EQUAL 16)
+  if (${H5_LIBVER_DIR} EQUAL 16 OR ${EXAMPLE_VARNAME}_USE_16_API)
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/16/${example_name}.c)
   else ()
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)

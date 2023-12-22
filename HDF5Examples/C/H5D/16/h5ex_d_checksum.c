@@ -27,7 +27,10 @@
 int
 main(void)
 {
-    hid_t file, space, dset, dcpl;
+    hid_t file  = H5I_INVALID_HID;
+    hid_t space = H5I_INVALID_HID;
+    hid_t dset  = H5I_INVALID_HID;
+    hid_t dcpl  = H5I_INVALID_HID;
     /* Handles */
     herr_t       status;
     htri_t       avail;
@@ -35,9 +38,10 @@ main(void)
     hsize_t      dims[2] = {DIM0, DIM1}, chunk[2] = {CHUNK0, CHUNK1};
     size_t       nelmts;
     unsigned int flags, filter_info;
-    int          wdata[DIM0][DIM1], /* Write buffer */
-        rdata[DIM0][DIM1],          /* Read buffer */
-        max, i, j;
+    int          wdata[DIM0][DIM1]; /* Write buffer */
+    int          rdata[DIM0][DIM1]; /* Read buffer */
+    int          max;
+    hsize_t      i, j;
 
     /*
      * Check if the Fletcher32 filter is available and can be used for
