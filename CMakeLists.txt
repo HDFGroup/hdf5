@@ -418,6 +418,7 @@ set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
 set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
+set (H5_LIBVER_DIR       ${HDF5_PACKAGE_VERSION_MAJOR}${HDF5_PACKAGE_VERSION_MINOR})
 
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
