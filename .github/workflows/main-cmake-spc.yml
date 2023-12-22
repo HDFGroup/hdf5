@@ -70,14 +70,14 @@ jobs:
       # BUILD
       #
       - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       #
       # RUN TESTS
       #
       - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_10:
@@ -131,14 +131,14 @@ jobs:
       # BUILD
       #
       - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       #
       # RUN TESTS
       #
       - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_12:
@@ -192,14 +192,14 @@ jobs:
       # BUILD
       #
       - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       #
       # RUN TESTS
       #
       - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
   build_v1_14:
@@ -253,12 +253,12 @@ jobs:
       # BUILD
       #
       - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
       #
       # RUN TESTS
       #
       - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
