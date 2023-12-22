@@ -37,7 +37,7 @@ foreach (example_name ${common_examples})
   endif ()
 endforeach ()
 
-if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
+if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${EXAMPLE_VARNAME}_USE_16_API)
   foreach (example_name ${1_8_examples})
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
     target_compile_options(${EXAMPLE_VARNAME}_${example_name}
@@ -212,7 +212,7 @@ if (H5EX_BUILD_TESTING)
       h5ex_g_iterate
       h5ex_g_traverse
   )
-  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
+  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${EXAMPLE_VARNAME}_USE_16_API)
     set (exfiles ${exfiles}
         h5ex_g_visit
     )
