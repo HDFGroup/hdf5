@@ -29,15 +29,22 @@
 int
 main(void)
 {
-    hid_t   file, space, dset, dcpl; /* Handles */
+    hid_t   file  = H5I_INVALID_HID;
+    hid_t   space = H5I_INVALID_HID;
+    hid_t   dset  = H5I_INVALID_HID;
+    hid_t   dcpl  = H5I_INVALID_HID;
     herr_t  status;
-    hsize_t dims[2] = {DIM0, DIM1}, extdims[2] = {EDIM0, EDIM1}, maxdims[2], chunk[2] = {CHUNK0, CHUNK1},
-            start[2], count[2];
-    int wdata[DIM0][DIM1],    /* Write buffer */
-        wdata2[EDIM0][EDIM1], /* Write buffer for
-                                 extension */
-        **rdata,              /* Read buffer */
-        ndims, i, j;
+    hsize_t dims[2]    = {DIM0, DIM1};
+    hsize_t extdims[2] = {EDIM0, EDIM1};
+    hsize_t maxdims[2];
+    hsize_t chunk[2] = {CHUNK0, CHUNK1};
+    hsize_t start[2];
+    hsize_t count[2];
+    int     wdata[DIM0][DIM1];    /* Write buffer */
+    int     wdata2[EDIM0][EDIM1]; /* Write buffer for extension */
+    int   **rdata = NULL;         /* Read buffer */
+    int     ndims;
+    hsize_t i, j;
 
     /*
      * Initialize data.

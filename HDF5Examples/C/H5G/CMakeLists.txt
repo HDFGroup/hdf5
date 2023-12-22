@@ -7,7 +7,7 @@ project (HDF5Examples_C_H5G C)
 include (C_sourcefiles.cmake)
 
 foreach (example_name ${common_examples})
-  if (${H5_LIBVER_DIR} EQUAL 16)
+  if (${H5_LIBVER_DIR} EQUAL 16 OR ${EXAMPLE_VARNAME}_USE_16_API)
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/16/${example_name}.c)
   else ()
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
@@ -37,7 +37,7 @@ foreach (example_name ${common_examples})
   endif ()
 endforeach ()
 
-if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
+if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${EXAMPLE_VARNAME}_USE_16_API)
   foreach (example_name ${1_8_examples})
     add_executable (${EXAMPLE_VARNAME}_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
     target_compile_options(${EXAMPLE_VARNAME}_${example_name}
@@ -212,7 +212,7 @@ if (H5EX_BUILD_TESTING)
       h5ex_g_iterate
       h5ex_g_traverse
   )
-  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
+  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${EXAMPLE_VARNAME}_USE_16_API)
     set (exfiles ${exfiles}
         h5ex_g_visit
     )
@@ -369,7 +369,7 @@ if (H5EX_BUILD_TESTING)
   ADD_DUMP_TEST (h5ex_g_create)
   ADD_H5_CMP_TEST (h5ex_g_iterate)
   ADD_H5_CMP_TEST (h5ex_g_traverse)
-  if (NOT ${H5_LIBVER_DIR} EQUAL 16)
+  if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8" AND NOT ${EXAMPLE_VARNAME}_USE_16_API)
     ADD_H5_DUMP2_TEST (h5ex_g_compact)
     ADD_H5_CMP_TEST (h5ex_g_corder)
     ADD_H5_CMP_TEST (h5ex_g_phase)

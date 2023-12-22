@@ -26,13 +26,18 @@
 int
 main(void)
 {
-    hid_t file, space, dset1, dset2, dcpl;
+    hid_t file  = H5I_INVALID_HID;
+    hid_t space = H5I_INVALID_HID;
+    hid_t dset1 = H5I_INVALID_HID;
+    hid_t dset2 = H5I_INVALID_HID;
+    hid_t dcpl  = H5I_INVALID_HID;
     /* Handles */
     herr_t             status;
     H5D_space_status_t space_status;
-    hsize_t            dims[2] = {DIM0, DIM1}, storage_size;
-    int                wdata[DIM0][DIM1], /* Write buffer */
-        i, j;
+    hsize_t            dims[2] = {DIM0, DIM1};
+    hsize_t            storage_size;
+    int                wdata[DIM0][DIM1]; /* Write buffer */
+    hsize_t            i, j;
 
     /*
      * Initialize data.

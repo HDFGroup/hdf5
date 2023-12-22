@@ -30,15 +30,20 @@
 int
 main(void)
 {
-    hid_t   file, space, dset, dcpl; /* Handles */
+    hid_t   file  = H5I_INVALID_HID;
+    hid_t   space = H5I_INVALID_HID;
+    hid_t   dset  = H5I_INVALID_HID;
+    hid_t   dcpl  = H5I_INVALID_HID;
     herr_t  status;
-    hsize_t dims[2] = {DIM0, DIM1}, extdims[2] = {EDIM0, EDIM1}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED},
-            chunk[2] = {CHUNK0, CHUNK1};
-    int wdata[DIM0][DIM1],    /* Write buffer */
-        rdata[DIM0][DIM1],    /* Read buffer */
-        rdata2[EDIM0][EDIM1], /* Read buffer for
-                                 extension */
-        fillval, i, j;
+    hsize_t dims[2]    = {DIM0, DIM1};
+    hsize_t extdims[2] = {EDIM0, EDIM1};
+    hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk[2]   = {CHUNK0, CHUNK1};
+    int     wdata[DIM0][DIM1];    /* Write buffer */
+    int     rdata[DIM0][DIM1];    /* Read buffer */
+    int     rdata2[EDIM0][EDIM1]; /* Read buffer for extension */
+    int     fillval;
+    hsize_t i, j;
 
     /*
      * Initialize data.
