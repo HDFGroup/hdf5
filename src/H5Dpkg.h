@@ -255,13 +255,13 @@ typedef struct H5D_piece_info_t {
     bool     in_place_tconv; /* Whether to perform type conversion in-place */
     size_t   buf_off;        /* Buffer offset for in-place type conversion */
     bool     filtered_dset;  /* Whether the dataset this chunk is in has filters applied */
-    struct H5D_dset_io_info_t *dset_info; /* Pointer to dset_info */
-    bool entire_chunk;           /* Whether whole chunk is selected */
-    bool in_cache;
-    void *buf;
-    unsigned    idx_hint;         /* Index of chunk in cache, if present */
-    H5F_block_t chunk_block;      /* Offset/length of chunk in file */
-    hsize_t     chunk_idx;        /* Chunk index for EA, FA indexing */
+    struct H5D_dset_io_info_t *dset_info;    /* Pointer to dset_info */
+    bool                       entire_chunk; /* Whether whole chunk is selected */
+    bool                       in_cache;
+    void                      *buf;
+    unsigned                   idx_hint;    /* Index of chunk in cache, if present */
+    H5F_block_t                chunk_block; /* Offset/length of chunk in file */
+    hsize_t                    chunk_idx;   /* Chunk index for EA, FA indexing */
 } H5D_piece_info_t;
 
 /* I/O info for a single dataset */
@@ -279,14 +279,14 @@ typedef struct H5D_dset_io_info_t {
     H5S_t *file_space; /* Pointer to the file dataspace */
     H5S_t *mem_space;  /* Pointer to the memory dataspace */
 
-    size_t                  num_sel_cache_chks;   /* Number of pieces found in cache */
-    size_t                  num_unsel_cache_chks; /* Number of pieces NOT found in cache */
-    size_t                  num_chks_to_load;     /* # of chunks not found in cache that needs to be loaded */
-    size_t                  num_ents_to_evict;    /* # of non selected cache entries to be evicted */
-    size_t                  free_cache_slots;   /* # of free slots in the cache */
-    size_t                  max_cache_chunks;   /* max # of chunks in the cache */
-    H5SL_t *chunks_to_load;                     /* Skip list containing information for chunks to load to cache */
-    H5SL_t *entries_to_evict;                   /* Skip list containing information for entries to evict from cache */
+    size_t  num_sel_cache_chks;   /* Number of pieces found in cache */
+    size_t  num_unsel_cache_chks; /* Number of pieces NOT found in cache */
+    size_t  num_chks_to_load;     /* # of chunks not found in cache that needs to be loaded */
+    size_t  num_ents_to_evict;    /* # of non selected cache entries to be evicted */
+    size_t  free_cache_slots;     /* # of free slots in the cache */
+    size_t  max_cache_chunks;     /* max # of chunks in the cache */
+    H5SL_t *chunks_to_load;       /* Skip list containing information for chunks to load to cache */
+    H5SL_t *entries_to_evict;     /* Skip list containing information for entries to evict from cache */
 
     union {
         struct H5D_chunk_map_t *chunk_map;         /* Chunk specific I/O info */
