@@ -39,6 +39,10 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
+<th>Files (H5FD)</th><td>@ref H5FD "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>Manage HDF5 file drivers.
+</td>
+</tr>
+<tr>
 <th>Filters (H5Z)</th><td>@ref H5Z "C"</td><td>"C++"</td><td>@ref FH5Z "Fortran"</td><td>@ref JH5Z "Java"</td><td>Manage HDF5 user-defined filters.
 </td>
 </tr>
@@ -131,6 +135,16 @@ The functions provided by the HDF5 API are grouped into the following
 <tr>
 <td>@ref ERRORS</td><td>The class HDF5Exception returns errors from the Java HDF5 Interface.
 </td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<table>
+<caption>HDF5 Tools</caption>
+<tr>
+<td>@ref h5tools</td><td>HDF5 Tools Library</td>
 </tr>
 </table>
 </td>

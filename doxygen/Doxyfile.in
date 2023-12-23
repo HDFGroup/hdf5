@@ -693,7 +693,7 @@ FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
                  H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h \
                  H5FloatType.h H5Group.h H5IdComponent.h H5Include.h H5IntType.h H5LcreatProp.h \
                  H5LaccProp.h H5Library.h H5Location.h H5Object.h H5PredType.h H5PropList.h H5StrType.h \
-                 H5ArrayType.h H5VarLenType.h
+                 H5ArrayType.h H5VarLenType.h h5tools.h h5tools.c
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
