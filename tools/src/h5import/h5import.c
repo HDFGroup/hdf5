@@ -62,12 +62,12 @@ static int allocateUIntegerStorage(struct Input *in);
 static int validateConfigurationParameters(struct Input *in);
 static int processStrData(FILE *strm, struct Input *in, hid_t file_id);
 static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id);
-uint16_t   swap_uint16(uint16_t val);
-int16_t    swap_int16(int16_t val);
-uint32_t   swap_uint32(uint32_t val);
-int32_t    swap_int32(int32_t val);
-int64_t    swap_int64(int64_t val);
-uint64_t   swap_uint64(uint64_t val);
+H5_ATTR_CONST uint16_t   swap_uint16(uint16_t val);
+H5_ATTR_CONST int16_t    swap_int16(int16_t val);
+H5_ATTR_CONST uint32_t   swap_uint32(uint32_t val);
+H5_ATTR_CONST int32_t    swap_int32(int32_t val);
+H5_ATTR_CONST int64_t    swap_int64(int64_t val);
+H5_ATTR_CONST uint64_t   swap_uint64(uint64_t val);
 
 int
 main(int argc, char *argv[])

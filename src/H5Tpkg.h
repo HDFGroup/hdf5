@@ -870,7 +870,7 @@ H5_DLL herr_t H5T__enum_insert(const H5T_t *dt, const char *name, const void *va
 H5_DLL herr_t H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value);
 
 /* Field functions (for both compound & enumerated types) */
-H5_DLL char  *H5T__get_member_name(H5T_t const *dt, unsigned membno);
+H5_DLL char  *H5T__get_member_name(H5T_t const *dt, unsigned membno) H5_ATTR_MALLOC;
 H5_DLL herr_t H5T__sort_value(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
 

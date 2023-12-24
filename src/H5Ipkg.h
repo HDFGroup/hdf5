@@ -59,7 +59,10 @@ typedef struct H5I_id_info_t {
     hid_t       id;        /* ID for this info */
     unsigned    count;     /* Ref. count for this ID */
     unsigned    app_count; /* Ref. count of application visible IDs */
-    const void *object;    /* Pointer associated with the ID */
+    union {
+        const void *c_object;   /* Const pointer associated with the ID */
+        void *object;           /* Pointer associated with the ID */
+    } u;
 
     /* Future ID info */
     bool                      is_future;  /* Whether this ID represents a future object */
