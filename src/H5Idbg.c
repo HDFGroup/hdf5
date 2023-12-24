@@ -110,7 +110,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             H5T_t *dt = info->u.object;
 
             object = H5T_get_actual_type((H5T_t *)dt);
-            path = H5T_nameof(object);
+            path   = H5T_nameof(object);
             break;
         }
 
