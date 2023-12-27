@@ -297,9 +297,13 @@ ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements
      * unpredictable order. However, if some IOCs own more than
      * 1 subfile, we need to associate each read with a unique
      * message tag to make sure the data is received in the
-     * correct order.
+     * correct order. We also need a unique message tag in the
+     * case where only 1 subfile is used in total. In this case,
+     * vector I/O calls are passed directly down to this VFD without
+     * being split up into multiple I/O requests, so we need the
+     * tag to distinguish each I/O request.
      */
-    need_data_tag = num_subfiles != num_io_concentrators;
+    need_data_tag = (num_subfiles == 1) || (num_subfiles != num_io_concentrators);
     if (!need_data_tag)
         data_tag = READ_INDEP_DATA;
 
