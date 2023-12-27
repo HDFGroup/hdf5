@@ -40,7 +40,7 @@
 #define PATH_MAX 4096
 #endif
 
-#define DEFAULT_DEFLATE_LEVEL 9
+#define DEFAULT_DEFLATE_LEVEL 4
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
@@ -99,6 +99,7 @@ static void test_create_and_close(void);
 static void test_ioc_only_fail(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
+static void test_iovec_translation(void);
 static void test_selection_strategies(void);
 static void test_read_different_stripe_size(void);
 static void test_subfiling_precreate_rank_0(void);
@@ -111,6 +112,7 @@ static test_func tests[] = {
     test_ioc_only_fail,
     test_config_file,
     test_stripe_sizes,
+    test_iovec_translation,
     test_selection_strategies,
     test_read_different_stripe_size,
     test_subfiling_precreate_rank_0,
@@ -886,6 +888,697 @@ test_stripe_sizes(void)
 }
 #undef SUBF_FILENAME
 #undef SUBF_NITER
+
+/*
+ * Test the I/O vector translation code by writing with some
+ * different specific I/O patterns
+ */
+#define SUBF_FILENAME "test_subfiling_iovec_translation.h5"
+static void
+test_iovec_translation(void)
+{
+    H5FD_subfiling_params_t cfg;
+    const void             *c_write_buf;
+    h5_stat_t               file_info;
+    int64_t                 stripe_size;
+    haddr_t                 write_addr;
+    size_t                  nbytes;
+    size_t                  buf_size;
+    herr_t                  status;
+    hid_t                   file_id;
+    H5FD_t                 *file_ptr     = NULL;
+    FILE                   *subfile_ptr  = NULL;
+    void                   *write_buf    = NULL;
+    void                   *read_buf     = NULL;
+    char                   *tmp_filename = NULL;
+    hid_t                   dxpl_id      = H5I_INVALID_HID;
+    hid_t                   fapl_id      = H5I_INVALID_HID;
+    bool                    skip         = false;
+    int                     num_subfiles;
+    int                     num_digits;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("I/O vector translation");
+
+    /*
+     * Don't run this test if subfiling configuration
+     * environment variables have been set since we
+     * want to use fixed configurations for testing.
+     */
+    if (getenv(H5FD_SUBFILING_STRIPE_SIZE) || getenv(H5FD_SUBFILING_IOC_PER_NODE))
+        skip = true;
+
+    /* I/O only needs to be done from a single rank */
+    if (MAINPROCESS && !skip) {
+
+        /* Use a fixed configuration for these tests */
+        stripe_size  = 1048576;
+        num_subfiles = 4;
+        num_digits   = (int)(log10(num_subfiles) + 1);
+
+        /* Allocate enough buffer space for up to 2 "subfile blocks" of I/O */
+        buf_size  = (size_t)(2 * stripe_size * num_subfiles);
+        write_buf = malloc(buf_size);
+        VRFY(write_buf, "malloc succeeded");
+        read_buf = malloc(buf_size);
+        VRFY(read_buf, "malloc succeeded");
+
+        c_write_buf = write_buf;
+
+        tmp_filename = malloc(PATH_MAX);
+        VRFY(tmp_filename, "malloc succeeded");
+
+        dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+        VRFY((dxpl_id >= 0), "DXPL creation succeeded");
+
+        /* Set selection I/O mode on DXPL */
+        VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
+
+        cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+        cfg.stripe_size   = stripe_size;
+        cfg.stripe_count  = 4;
+
+        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, true, &cfg,
+                                            H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+        VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+        /* Set independent I/O on DXPL */
+        VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
+
+        /*
+         * Test the case where the index value of the last subfile
+         * touched by I/O is greater than or equal to the index
+         * value of the first subfile touched by I/O, and this results
+         * in "thin" I/O segments directed to the subfiles with index
+         * values greater than the index values of the first and
+         * last subfiles. This might appear as the following I/O
+         * pattern:
+         *
+         *   SUBFILE 0   SUBFILE 1   SUBFILE 2   SUBFILE 3
+         *  _______________________________________________
+         * |   XXXXX   |   XXXXX   |   XXXXX   |   XXXXX   | ROW 0
+         * |   XXXXX   |   XXXXX   |           |           | ROW 1
+         * |           |           |           |           | ROW 2
+         * |           |           |           |           | ROW ...
+         * |           |           |           |           |
+         * |           |           |           |           |
+         * |           |           |           |           |
+         * |___________|___________|___________|___________|
+         */
+
+        /* Create/truncate the file */
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Fcreate succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+        /* Retrieve file info to get the file inode for later use */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        /* Re-open file through H5FDopen for direct writes */
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        nbytes = (size_t)(6 * stripe_size);
+        memset(write_buf, 255, nbytes);
+        memset(read_buf, 0, buf_size);
+
+        write_addr = 0;
+
+        /* Set EOA for following write call */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Write according to the above pattern */
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        /* Close and re-open the file */
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        /*
+         * Set EOA for following read call (since we wrote over any
+         * superblock information in the file)
+         */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Read the written bytes and verify */
+        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
+
+        /* Verify the size of each subfile */
+        for (int i = 0; i < num_subfiles; i++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            if (i <= 1) {
+                /*
+                 * Subfiles with index values <= 1 should have full
+                 * I/O segments (2 * stripe size) written to them.
+                 */
+                VRFY((subfile_size == 2 * cfg.stripe_size), "File size verification succeeded");
+            }
+            else {
+                /*
+                 * Subfiles with index values > 1 should have "thin"
+                 * I/O segments (1 * stripe size) written to them.
+                 */
+                VRFY((subfile_size == cfg.stripe_size), "File size verification succeeded");
+            }
+        }
+
+        /* Verify that there aren't too many subfiles */
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+        /*
+         * Test the case where the index value of the last subfile
+         * touched by I/O is greater than or equal to the index
+         * value of the first subfile touched by I/O, and this results
+         * in "thin" I/O segments directed to the subfiles with index
+         * values less than the index values of the first and
+         * last subfiles. This might appear as the following I/O
+         * pattern:
+         *
+         *   SUBFILE 0   SUBFILE 1   SUBFILE 2   SUBFILE 3
+         *  _______________________________________________
+         * |           |   XXXXX   |   XXXXX   |   XXXXX   | ROW 0
+         * |   XXXXX   |   XXXXX   |   XXXXX   |   XXXXX   | ROW 1
+         * |           |           |           |           | ROW 2
+         * |           |           |           |           | ROW ...
+         * |           |           |           |           |
+         * |           |           |           |           |
+         * |           |           |           |           |
+         * |___________|___________|___________|___________|
+         */
+
+        /* Create/truncate the file */
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Fcreate succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+        /* Retrieve file info to get the file inode for later use */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        /* Re-open file through H5FDopen for direct writes */
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        nbytes = (size_t)(7 * stripe_size);
+        memset(write_buf, 255, nbytes);
+        memset(read_buf, 0, buf_size);
+
+        write_addr = (haddr_t)stripe_size;
+
+        /* Set EOA for following write call */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Write according to the above pattern */
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        /* Close and re-open the file */
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        /*
+         * Set EOA for following read call (since we wrote over any
+         * superblock information in the file)
+         */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Read the written bytes and verify */
+        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
+
+        /* Verify the size of each subfile */
+        for (int i = 0; i < num_subfiles; i++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            /*
+             * Every subfile should be (2 * stripe size) bytes due to
+             * space allocated in the file for subfile index 0
+             */
+            VRFY((subfile_size == 2 * cfg.stripe_size), "File size verification succeeded");
+        }
+
+        /* Verify that there aren't too many subfiles */
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+        /*
+         * Test the case where the index value of the last subfile
+         * touched by I/O is less than the index value of the first
+         * subfile touched by I/O, and this results in "thin" I/O
+         * segments directed to the subfiles with index values that
+         * fall between the values of the first and last subfiles.
+         * This might appear as the following I/O pattern:
+         *
+         *   SUBFILE 0   SUBFILE 1   SUBFILE 2   SUBFILE 3
+         *  _______________________________________________
+         * |           |           |   XXXXX   |   XXXXX   | ROW 0
+         * |   XXXXX   |   XXXXX   |   XXXXX   |   XXXXX   | ROW 1
+         * |   XXXXX   |           |           |           | ROW 2
+         * |           |           |           |           | ROW ...
+         * |           |           |           |           |
+         * |           |           |           |           |
+         * |           |           |           |           |
+         * |___________|___________|___________|___________|
+         */
+
+        /* Create/truncate the file */
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Fcreate succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+        /* Retrieve file info to get the file inode for later use */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        /* Re-open file through H5FDopen for direct writes */
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        nbytes = (size_t)(7 * stripe_size);
+        memset(write_buf, 255, nbytes);
+        memset(read_buf, 0, buf_size);
+
+        write_addr = (haddr_t)(2 * stripe_size);
+
+        /* Set EOA for following write call */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Write according to the above pattern */
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        /* Close and re-open the file */
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        /*
+         * Set EOA for following read call (since we wrote over any
+         * superblock information in the file)
+         */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Read the written bytes and verify */
+        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
+
+        /* Verify the size of each subfile */
+        for (int i = 0; i < num_subfiles; i++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            /*
+             * Subfile index 0 should be (3 * stripe size) bytes due to
+             * space allocated in the file, while others should be
+             * (2 * stripe size) bytes.
+             */
+            if (i == 0) {
+                VRFY((subfile_size == 3 * cfg.stripe_size), "File size verification succeeded");
+            }
+            else {
+                VRFY((subfile_size == 2 * cfg.stripe_size), "File size verification succeeded");
+            }
+        }
+
+        /* Verify that there aren't too many subfiles */
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+        /*
+         * Test the case where I/O is 2 stripe sizes in total, but
+         * is offset from a stripe boundary by a single byte, causing
+         * the I/O to cross 3 subfiles.
+         */
+
+        /* Create/truncate the file */
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Fcreate succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+        /* Retrieve file info to get the file inode for later use */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        /* Re-open file through H5FDopen for direct writes */
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        nbytes = (size_t)(2 * stripe_size);
+        memset(write_buf, 255, nbytes);
+        memset(read_buf, 0, buf_size);
+
+        write_addr = (haddr_t)1;
+
+        /* Set EOA for following write call */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Write according to the above pattern */
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        /* Close and re-open the file */
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        /*
+         * Set EOA for following read call (since we wrote over any
+         * superblock information in the file)
+         */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Read the written bytes and verify */
+        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
+
+        /* Verify the size of each subfile */
+        for (int i = 0; i < num_subfiles; i++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            /*
+             * Subfiles indexed 0 and 1 should both be (1 * stripe size)
+             * bytes (Subfile index 0 was written to with an offset of 1
+             * byte, but that space will still be allocated in the file).
+             * Subfile index 2 should have a single byte written to it and
+             * Subfile index 3 should have nothing written to it.
+             */
+            if (i == 2) {
+                VRFY((subfile_size == 1), "File size verification succeeded");
+            }
+            else if (i == 3) {
+                VRFY((subfile_size == 0), "File size verification succeeded");
+            }
+            else {
+                VRFY((subfile_size == cfg.stripe_size), "File size verification succeeded");
+            }
+        }
+
+        /* Verify that there aren't too many subfiles */
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+        /*
+         * Test the case where I/O is 2 stripe sizes in total, but
+         * is offset from a stripe boundary by (stripe size - 1) bytes,
+         * causing the I/O to start at the last byte of a subfile and
+         * cross 3 subfiles.
+         */
+
+        /* Create/truncate the file */
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Fcreate succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+        /* Retrieve file info to get the file inode for later use */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        /* Re-open file through H5FDopen for direct writes */
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        nbytes = (size_t)(2 * stripe_size);
+        memset(write_buf, 255, nbytes);
+        memset(read_buf, 0, buf_size);
+
+        write_addr = (haddr_t)(stripe_size - 1);
+
+        /* Set EOA for following write call */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Write according to the above pattern */
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        /* Close and re-open the file */
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        /*
+         * Set EOA for following read call (since we wrote over any
+         * superblock information in the file)
+         */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Read the written bytes and verify */
+        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
+
+        /* Verify the size of each subfile */
+        for (int i = 0; i < num_subfiles; i++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            /*
+             * Subfiles indexed 0 and 1 should both be (1 * stripe size)
+             * bytes (Subfile index 0 was written to with an offset of
+             * stripe size - 1 bytes, but that space will still be allocated
+             * in the file). Subfile index 2 should be (1 * stripe size) - 1
+             * bytes. Subfile index 3 should have nothing written to it.
+             */
+            if (i == 2) {
+                VRFY((subfile_size == cfg.stripe_size - 1), "File size verification succeeded");
+            }
+            else if (i == 3) {
+                VRFY((subfile_size == 0), "File size verification succeeded");
+            }
+            else {
+                VRFY((subfile_size == cfg.stripe_size), "File size verification succeeded");
+            }
+        }
+
+        /* Verify that there aren't too many subfiles */
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+        /*
+         * Test the case where I/O is 2 stripe sizes + 1 byte in total
+         * and starts aligned to a stripe boundary, causing the I/O
+         * to cross 3 subfiles.
+         */
+
+        /* Create/truncate the file */
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+        VRFY((file_id >= 0), "H5Fcreate succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
+        /* Retrieve file info to get the file inode for later use */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        /* Re-open file through H5FDopen for direct writes */
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        nbytes = (size_t)((2 * stripe_size) + 1);
+        memset(write_buf, 255, nbytes);
+        memset(read_buf, 0, buf_size);
+
+        write_addr = (haddr_t)0;
+
+        /* Set EOA for following write call */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Write according to the above pattern */
+        status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        /* Close and re-open the file */
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+        file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
+        VRFY(file_ptr, "H5FDopen succeeded");
+
+        /*
+         * Set EOA for following read call (since we wrote over any
+         * superblock information in the file)
+         */
+        VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, write_addr + nbytes) >= 0), "H5FDset_eoa succeeded");
+
+        /* Read the written bytes and verify */
+        status = H5FDread(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, read_buf);
+        VRFY((status >= 0), "H5FDwrite succeeded");
+
+        VRFY((0 == memcmp(write_buf, read_buf, nbytes)), "memcmp succeeded");
+
+        /* Verify the size of each subfile */
+        for (int i = 0; i < num_subfiles; i++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                     (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            /*
+             * Subfiles indexed 0 and 1 should both be (1 * stripe size)
+             * bytes. Subfile index 2 should have a single byte written to
+             * it and Subfile index 3 should have nothing written to it.
+             */
+            if (i == 2) {
+                VRFY((subfile_size == 1), "File size verification succeeded");
+            }
+            else if (i == 3) {
+                VRFY((subfile_size == 0), "File size verification succeeded");
+            }
+            else {
+                VRFY((subfile_size == cfg.stripe_size), "File size verification succeeded");
+            }
+        }
+
+        /* Verify that there aren't too many subfiles */
+        snprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                 (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
+
+        free(write_buf);
+        write_buf = NULL;
+        free(read_buf);
+        write_buf = NULL;
+
+        free(tmp_filename);
+
+        VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(SUBF_FILENAME, fapl_id);
+        }
+        H5E_END_TRY
+
+        VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+    }
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    if (skip) {
+        if (MAINPROCESS)
+            SKIPPED();
+    }
+    else
+        CHECK_PASSED();
+}
+#undef SUBF_FILENAME
 
 /*
  * Test the different I/O Concentator selection strategies
@@ -2360,11 +3053,33 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         puts("");
 
+    if (MAINPROCESS)
+        printf(" Re-running tests with compression enabled\n");
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    enable_compression = true;
+    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
+        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
+            (*tests[i])();
+        }
+        else {
+            if (MAINPROCESS)
+                MESG("MPI_Barrier failed");
+            nerrors++;
+        }
+    }
+    enable_compression = false;
+#else
+    if (MAINPROCESS)
+        SKIPPED();
+#endif
+
     /*
      * Set any unset Subfiling environment variables and re-run
      * the tests as a quick smoke check of whether those are
      * working correctly
      */
+
     if (stripe_size_g < 0) {
         int64_t stripe_size;
         char    tmp[64];
@@ -2488,26 +3203,6 @@ main(int argc, char **argv)
         num_iocs_g = mpi_size;
 
     if (MAINPROCESS)
-        printf(" Re-running tests with compression enabled\n");
-
-#ifdef H5_HAVE_FILTER_DEFLATE
-    enable_compression = true;
-    for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
-        if (MPI_SUCCESS == (mpi_code_g = MPI_Barrier(comm_g))) {
-            (*tests[i])();
-        }
-        else {
-            if (MAINPROCESS)
-                MESG("MPI_Barrier failed");
-            nerrors++;
-        }
-    }
-    enable_compression = false;
-#else
-    if (MAINPROCESS)
-        SKIPPED();
-#endif
-    if (MAINPROCESS)
         printf("\nRe-running tests with environment variables set\n");
 
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -2523,6 +3218,7 @@ main(int argc, char **argv)
 
     if (MAINPROCESS)
         printf("\n Re-running tests with compression enabled\n");
+
 #ifdef H5_HAVE_FILTER_DEFLATE
     enable_compression = true;
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -2540,6 +3236,7 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         SKIPPED();
 #endif
+
     if (nerrors)
         goto exit;
 

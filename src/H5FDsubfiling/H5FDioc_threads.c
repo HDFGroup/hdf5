@@ -456,8 +456,9 @@ translate_opcode(io_op_t op)
         case LOGGING_OP:
             return "LOGGING_OP";
             break;
+        default:
+            return "unknown";
     }
-    return "unknown";
 }
 #endif
 
@@ -873,9 +874,14 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
      * unpredictable order. However, if some IOCs own more than
      * 1 subfile, we need to associate each read with a unique
      * message tag to make sure the data is received in the
-     * correct order.
+     * correct order. We also need a unique message tag in the
+     * case where only 1 subfile is used in total. In this case,
+     * vector I/O calls are passed directly down to this VFD without
+     * being split up into multiple I/O requests, so we need the
+     * tag to distinguish each I/O request.
      */
-    need_data_tag = sf_context->sf_num_subfiles != sf_context->topology->n_io_concentrators;
+    need_data_tag = (sf_context->sf_num_subfiles == 1) ||
+                    (sf_context->sf_num_subfiles != sf_context->topology->n_io_concentrators);
     if (!need_data_tag)
         send_tag = READ_INDEP_DATA;
 
