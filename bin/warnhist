@@ -22,8 +22,13 @@ use warnings;
 # Perl modules/settings
 use strict;
 use Getopt::Std;
+use File::Find;
+use File::Basename;
+use Cwd;
+#use Data::Dumper;
 
 # Global variables, for accumulating information
+my %options=();
 my $totalcount = 0;
 my $notecount = 0;
 my $dupcount = 0;
@@ -54,11 +59,25 @@ my $last_fort_name;
 my $last_fort_line;
 my $last_fort_offset;
 
+# Info about source files
+my %c_files;
+my %c_files_counted;
+my %cpp_files;
+my %cpp_files_counted;
+my %fort_files;
+my %fort_files_counted;
+my $c_lines = 0;
+my $cpp_lines = 0;
+my $fort_lines = 0;
+
 # Display usage
 sub do_help {
-    print "Usage: 'warnhist [-h, --help] [-t <prefix>] [-w <n>] [-W] [-f <n>] [-F] [-s <warning string list>] [-S <file string list] [-l] [-u] [-i <name list>] [file]'\n";
-    print "\t-h, --help\tDisplay this usage\n";
-    print "\t-t <prefix>\tTrim pathname prefix from filenames, <prefix>\n";
+    print "Usage: 'warnhist [-h, --help] [-t <prefix>] [-w <n>] [-W] [-f <n>] [-F]\n";
+    print "\t[-s <warning string list>] [-S <file string list] [-l] [-u]'\n";
+    print "\t[-i <name list>] [-d] [-p <path list] [-q] [file]'\n\n";
+    print "Options:\n";
+    print "\t-h, --help  Display this usage\n";
+    print "\t-t <prefix>  Trim pathname prefix from filenames, <prefix>\n";
     print "\t-w <n>\tDisplay files for a given warning index list, <n>\n";
     print "\t\t<n> can be a single value, a range, or a comma separated list\n";
     print "\t\tFor example: '0' or '0,4' or '8-10' or '0,2-4,8-10,13'\n";
@@ -67,10 +86,13 @@ sub do_help {
     print "\t\t<n> can be a single value, a range, or a comma separated list\n";
     print "\t\tFor example: '0' or '0,4' or '8-10' or '0,2-4,8-10,13'\n";
     print "\t-F\tDisplay warnings for all files\n";
-    print "\t-s <warning string list>\tDisplay files for warnings which contain a string, <warning string list>\n";
+    print "\t-s <warning string list>  Display files for warnings which contain a\n";
+    print "\t\tstring, <warning string list>\n";
     print "\t\t<warning string list> is a comma separated list, with no spaces\n";
-    print "\t\tFor example: 'Wunused-dummy-argument' or 'Wunused-dummy-argument,Wunused-variable'\n";
-    print "\t-S <file string list>\tDisplay warnings for files which contain a string, <file string list>\n";
+    print "\t\tFor example: 'Wunused-dummy-argument' or\n";
+    print "\t\t'Wunused-dummy-argument,Wunused-variable'\n";
+    print "\t-S <file string list>  Display warnings for files which contain a\n";
+    print "\t\tstring, <file string list>\n";
     print "\t\t<file string list> is a comma separated list, with no spaces\n";
     print "\t\tFor example: 'H5Fint' or 'H5Fint,H5Gnode'\n";
     print "\t-l\tDisplay line numbers for file/warning\n";
@@ -78,18 +100,182 @@ sub do_help {
     print "\t-i <name list>\tIgnore named files, <name list>\n";
     print "\t\t<name list> is a comma separated list, with no spaces\n";
     print "\t\tFor example: 'H5LTparse' or 'H5LTparse,H5LTanalyze'\n";
+    print "\t-d\tCompute warning density for compiled source files.  Paths to the\n";
+    print "\t\troot of a directory containing source may be provided with the\n";
+    print "\t\t'-p <path list>' option.  If the path list is given, only those\n";
+    print "\t\tdirectories are scanned for source files.  If the path list\n";
+    print "\t\toption is not given, the current working directory is scanned.\n";
+    print "\t-p <path list>\tPaths to search for compiled files.  Compiled files\n";
+    print "\t\tare only used when computing warning density and are not\n";
+    print "\t\tnecessary for just analyzing warnings in build output.\n";
+    print "\t\t<path list> is a comma separated list, with no spaces\n";
+    print "\t\tFor example: '/home/koziol/hdf5' or '.,~/dev/hdf5,~/dev/build'\n";
+    print "\t-q\tSuppress warning output\n";
     print "\tfile\tFilename containing build output\n";
     print "\t\tIf no file is given, standard input is used.\n";
     exit;
 }
+
+# Count # of lines in a file
+sub line_count {
+    my ($name) = @_;
+#print "name = '$name'\n";
+    my $tmp;
+    my $lines = 0;
+
+    open (FILE, $name) or die "Can't open '$name': $!";
+    $lines++ while ($tmp = <FILE>);
+    close FILE;
+#print "$lines\n";
+
+    return $lines;
+}
+
+# Recursively search a directory hierarchy for source files
+# Adds results to the global %c_files, %cpp_files, and %fort_files hashes
+sub parse_tree {
+    my ($root_path) = @_;
+#print "root_path = $root_path\n";
+
+    my $path_checker = sub {
+        my $name = $File::Find::name;
+        if (-f $name) {
+	    my $bn = basename($name);
+
+	    # Check for different kinds of source files
+	    # Use lists here: https://gist.github.com/ppisarczyk/43962d06686722d26d176fad46879d41#file-programming_languages_extensions-json
+
+            # FORTRAN source file
+	    if($bn =~ /.*(\.f90)|(\.f)|(\.f03)|(\.f08)|(\.f77)|(\.f95)|(\.for)|(\.fpp)$/i) {
+		$bn =~ s/(\.f90)|(\.f)|(\.f03)|(\.f08)|(\.f77)|(\.f95)|(\.for)|(\.fpp)$//ig;
+		if(!exists $fort_files{$bn}) {
+		    $fort_files{$bn} = [ $name ];
+		} else {
+		    push @{ $fort_files{$bn} }, $name;
+		}
+            # C++ source file
+	    } elsif($bn =~ /.*(\.cpp)|(\.c\+\+)|(\.cc)|(\.cp)|(\.cxx)$/i) {
+		$bn =~ s/(\.cpp)|(\.c\+\+)|(\.cc)|(\.cp)|(\.cxx)$//ig;
+		if(!exists $cpp_files{$bn}) {
+		    $cpp_files{$bn} = [ $name ];
+		} else {
+		    push @{ $cpp_files{$bn} }, $name;
+		}
+            # C source file
+	    } elsif($bn =~ /.*(\.c)$/i) {
+		$bn =~ s/(\.c)$//g;
+		if(!exists $c_files{$bn}) {
+		    $c_files{$bn} = [ $name ];
+		} else {
+		    push @{ $c_files{$bn} }, $name;
+		}
+	    }
+      }
+    };
+    find($path_checker, $root_path);
+
+#print Dumper \%c_files;
+#print Dumper \%cpp_files;
+#print Dumper \%fort_files;
+}
+
+sub count_file_loc {
+    my ($filename, $typename, $file_paths, $files_counted, $count) = @_;
+
+    # Attempt to detect and handle object file name mangling by Automake
+    if(!exists $file_paths->{$filename} && $filename =~ /\-/) {
+        my ($bn) = $filename =~ /\S+\-(\S+)$/x;
+        if(exists $file_paths->{$bn}) {
+            if(!exists $options{q}) {
+                warn "No path for $typename source file '$filename', but '$bn' has path, assuming automake generated object file name";
+            }
+            $filename = $bn;
+        }
+    }
+
+    if(exists $file_paths->{$filename}) {
+        my $filecount = 0;
+
+        # Attempt to count LOC for files with same name
+        if(scalar(@{$file_paths->{$filename}}) > 1) {
+            $filecount = $files_counted->{$filename}++;
+
+            # Issue warning about multiple source files with same name
+            if($filecount == 0 && !exists $options{q}) {
+                local $" = ', ';        # '$"' is documented in https://perldoc.perl.org/perlvar
+                warn "Multiple paths for $typename source file named '$filename', assuming each is compiled once, paths: [@{$file_paths->{$filename}}]\n";
+            }
+
+            # Sanity check for too many compiles of a file
+            if($filecount >= scalar(@{$file_paths->{$filename}})) {
+                if(!exists $options{q}) {
+                    local $" = ', ';        # '$"' is documented in https://perldoc.perl.org/perlvar
+                    warn "Too many compiles of $typename source file named '$filename' with paths: [@{$file_paths->{$filename}}], disabling warning density calculations\n";
+                }
+                delete $options{d};
+            }
+        }
+
+        # Increment the # of lines of code (if not too many)
+        if($filecount < scalar(@{$file_paths->{$filename}})) {
+            ${$count} += line_count($file_paths->{$filename}[$filecount]);
+        }
+    } else {
+        if(!exists $options{q}) {
+            warn "No path for $typename source file '$filename', e '-p' option to specify, disabling warning density calculations\n";
+        }
+        delete $options{d};
+    }
+}
+
+# Compute LOC for compiled source file
+sub count_source_loc {
+    my ($compile_line) = @_;
+#print "compile_line = $compile_line\n";
+    my $filetype;
+    my $filename;
+
+    ($filetype, $filename) = $compile_line =~ /^\s+(CC|FC|CXX|PPFC)\s+(\S*)\.l*o$/x;
+    if($filename =~ /\//) {
+        $filename = basename($filename);
+    }
+#print "filetype = '$filetype'\n";
+#print "filename = '$filename'\n";
+
+    if($filetype =~ /FC|PPFC/) {        # FORTRAN source file
+        count_file_loc($filename, "FORTRAN", \%fort_files, \%fort_files_counted, \$fort_lines);
+    } elsif($filetype =~ /CXX/) {       # C++ source file
+        count_file_loc($filename, "C++", \%cpp_files, \%cpp_files_counted, \$cpp_lines);
+    } elsif($filetype =~ /CC/) {        # C source file
+        count_file_loc($filename, "C", \%c_files, \%c_files_counted, \$c_lines);
+    }
+}
+
+sub sanity_check_loc {
+    my ($typename, $file_paths, $files_counted) = @_;
+
+    if(scalar keys %{$files_counted} > 0) {
+        for my $x (keys(%{$files_counted})) {
+#print "x = $x, # of compiles = ${$files_counted}{$x}, # of paths = ", scalar(@{$file_paths->{$x}}), "\n";
+            if($files_counted->{$x} != scalar(@{$file_paths->{$x}})) {
+                if(!exists $options{q}) {
+                    warn "# of compiles of C source file '$x' ($files_counted->{$x}) != # of paths (", scalar(@{$file_paths->{$x}}), "), disabling warning density calculation\n";
+                }
+                # Don't print warning density, it's not accurate
+                delete $options{d};
+                last;
+            }
+        }
+    }
+}
+
 
 sub main::HELP_MESSAGE {
     do_help();
 }
 
 # declare the Perl command line flags/options we want to allow
-my %options=();
-getopts("FWhut:w:f:s:S:i:l", \%options);
+getopts("FWhut:w:f:s:S:i:ldp:q", \%options);
 
 # Display usage, if requested
 if($options{h}) {
@@ -185,6 +371,20 @@ if($options{u}) {
     $genericize = 0;
 }
 
+# Scan source files, if warning density requested
+if(exists $options{d}) {
+    if(exists $options{p}) {
+        my @pathnames = split /,/, $options{p};
+#print STDERR @pathnames;
+        for my $path (@pathnames) {
+            parse_tree($path);
+        }
+    } else {
+        # Scan the current working directory
+        parse_tree(getcwd);
+    }
+}
+
 PARSE_LINES:
 while (<>) {
     my $name;
@@ -197,7 +397,7 @@ while (<>) {
     my $extra2;
 
     # Retain last FORTRAN compile line, which comes a few lines before warning
-    if($_ =~ /.*\.[fF]90:.*/) {
+    if($_ =~ /.*((\.inc)|(\.f90)|(\.f)|(\.f03)|(\.f08)|(\.f77)|(\.f95)|(\.for)|(\.fpp))\:.*/i) {
         ($last_fort_name, $last_fort_line, $last_fort_offset) = split /\:/, $_;
         ($last_fort_line, $toss) = split /\./, $last_fort_line;
     }
@@ -212,17 +412,30 @@ while (<>) {
         $last_c_name = $_;
     }
 
+    # Compute LOC for compiled source files, if warning density requested
+    if(exists $options{d}) {
+        # Check for compilation line
+        if($_ =~ /^\s+(CC|FC|CXX|PPFC)\s+/) {
+            count_source_loc($_);
+        }
+    }
+
     # Skip lines that don't have the word "warning"
     next if $_ !~ /[Ww]arning/;
 
     # Skip warnings from linker
     next if $_ =~ /ld: warning:/;
 
+    # Skip warnings from make
+    next if $_ =~ /^Makefile:[\d]*: warning:/;
+
     # Skip warnings from build_py and install_lib
     next if $_ =~ /warning: (build_py|install_lib)/;
 
-    # Skip variables with the word 'warning' in them
-    next if $_ =~ /_warning_/;
+    # Skip variables with the word 'warning' (case insensitively) in them
+    next if $_ =~ /_warning_/i;
+    next if $_ =~ /_warning/i;
+    next if $_ =~ /warning_/i;
 
     # Skip AMD Optimizing Compiler (aocc) lines "<#> warning(s) generated."
     next if $_ =~ / warnings? generated\./;
@@ -235,13 +448,9 @@ while (<>) {
     # Check for weird formatting of warning message
     $line = "??";
     $offset = "??";
-    if($_ =~ /^cc1: warning:.*/) {
+    if($_ =~ /^(cc1|<command-line>): warning:.*/) {
         $name = $last_c_name;
         ($toss, $toss, $warning, $extra, $extra2) = split /\:/, $_;
-    # Check for CMAKE build with warning on first line and no filename
-    } elsif($_ =~ /^\s*[Ww]arning:.*/) {
-        $name = $last_c_name;
-        ($toss, $warning, $extra, $extra2) = split /\:/, $_;
     # Check for file-scope gcc Fortran warning output
     } elsif($_ =~ /f\d\d\d: Warning:/) {
         # These are interspersed with the "compiling a file" output
@@ -274,9 +483,9 @@ while (<>) {
     } elsif($_ =~ /^\".*, line [0-9]+: *[Ww]arning:.*/) {
         ($name, $toss, $warning, $extra, $extra2) = split /\:/, $_;
         ($name, $line) = split /\,/, $name;
-	    $name =~ s/^\"//g;
-	    $name =~ s/\"$//g;
-	    $line =~ s/^\s*line\s*//g;
+        $name =~ s/^\"//g;
+        $name =~ s/\"$//g;
+        $line =~ s/^\s*line\s*//g;
     # Check for Intel icc warning
     } elsif($_ =~ /.*[A-Za-z0-9_]\.[chC]\(.*[0-9]\):.*#.*/) {
         ($last_c_name, $toss, $warning) = split /\:/, $last_c_name;
@@ -294,17 +503,11 @@ while (<>) {
 
     # Check for extra ':' followed by more text in original warning string,
     #  and append the ':' and text back onto the parsed warning
-    #  (Use 'length $extra' idiom to avoid warning when $extra is undefined)
-    if(length $extra ) {
+    if(defined $extra) {
         $warning = join ':', $warning, $extra;
     }
-    if(length $extra2 ) {
+    if(defined $extra2) {
         $warning = join ':', $warning, $extra2;
-    }
-
-    # Restore the C++ '::' symbol now that we've parsed out the parts of the line
-    while($warning =~ /@@@@/) {
-        $warning =~ s/@@@@/\:\:/g;
     }
 
     # Trim leading '..' paths from filename
@@ -334,6 +537,11 @@ while (<>) {
     if(!defined $warning) {
         print "Warning Undefined! Input line is: '$_'";
         next
+    }
+
+    # Restore the C++ '::' symbol now that we've parsed out the parts of the line
+    while($warning =~ /@@@@/) {
+        $warning =~ s/@@@@/\:\:/g;
     }
 
     # Get rid of leading & trailing whitespace
@@ -383,8 +591,8 @@ while (<>) {
 	if($warning =~ /'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=\ ]*'/) {
 	    $warning =~ s/'[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=]+[A-Za-z_0-9\(\)\*\,\[\]\.\<\>\&\:\+\#\-\=\ ]*'/'-'/g;
 	}
-	if($warning =~ /'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinosuxX]'/) {
-	    $warning =~ s/'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinosuxX]'/'-'/g;
+	if($warning =~ /'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinopsuxX]'/) {
+	    $warning =~ s/'%[\#0\-\ \+]*[,;\:_]?[0-9\*]*\.?[0-9\*]*[hjltzL]*[aAcdeEfFgGinopsuxX]'/'-'/g;
 	}
 
 	# Genericize C/C++ "<macro>" warnings into "-"
@@ -395,6 +603,11 @@ while (<>) {
 	# Genericize [GCC?] C/C++ warning text about suggested attribute
 	if($warning =~ /attribute=[A-Za-z_0-9]*\]/) {
 	    $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
+	}
+
+	# Genericize C/C++ "No such file or directory" warnings into "-"
+	if($warning =~ /^[A-Za-z_0-9\/]*: No such file or directory/) {
+	    $warning =~ s/^[A-Za-z_0-9\/]*:/'-':/g;
 	}
 
 	# Genericize FORTRAN "at (<n>)" into "at (-)", "REAL(<n>)" into "REAL(-)",
@@ -449,7 +662,31 @@ while (<>) {
 #    print STDERR "warning = \"$warning\"\n";
 }
 
-print "Total unique [non-ignored] warnings: $totalcount\n";
+# Sanity check compiled source files with multiple paths when computing
+# warning density
+# (Check $options{d} each time, because any of the sanity checks could disable
+#       displaying the warning density)
+if(exists $options{d}) {
+    sanity_check_loc("C", \%c_files, \%c_files_counted);
+}
+if(exists $options{d}) {
+    sanity_check_loc("FORTRAN", \%fort_files, \%fort_files_counted);
+}
+if(exists $options{d}) {
+    sanity_check_loc("C++", \%cpp_files, \%cpp_files_counted);
+}
+
+
+#
+# Display results
+#
+
+print "\nTotal unique [non-ignored] warnings: $totalcount\n";
+# Display warning density, if requested
+if(exists $options{d}) {
+    print "Lines of code compiled: <total> (C/C++/FORTRAN): ", ($c_lines + $cpp_lines + $fort_lines), " ($c_lines/$cpp_lines/$fort_lines)\n";
+    printf "Warning density (<# of warnings> / <# of LOC compiled>): %10.10f\n", $totalcount / ($c_lines + $cpp_lines + $fort_lines);
+}
 print "Ignored notes / supplemental warning lines [not counted in unique warnings]: $notecount\n";
 print "Duplicated warning lines [not counted in unique warnings]: $dupcount\n";
 print "Total ignored warnings: $ignorecount\n";
@@ -484,7 +721,7 @@ for my $x (sort {$warn_count{$b} <=> $warn_count{$a}} keys(%warn_count)) {
 	    $match = 1;
 	}
 
-        if($match) {
+        if($match || exists $options{W}) {
             for my $y (sort {$warn_file{$x}{$b} <=> $warn_file{$x}{$a}} keys(%{$warn_file{$x}})) {
                 printf ("\t%4d - %s\n", $warn_file{$x}{$y}, $y);
                 if(exists $options{l}) {
@@ -522,7 +759,7 @@ for my $x (sort {$file_count{$b} <=> $file_count{$a}} keys(%file_count)) {
 	    $match = 1;
 	}
 
-        if($match) {
+        if($match || exists $options{F}) {
             for my $y (sort {$file_warn{$x}{$b} <=> $file_warn{$x}{$a}} keys(%{$file_warn{$x}})) {
                 printf ("\t%4d - %s\n", $file_warn{$x}{$y}, $y);
                 if(exists $options{l}) {
