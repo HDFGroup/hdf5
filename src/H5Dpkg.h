@@ -727,7 +727,7 @@ H5_DLL herr_t H5D__chunk_allocated(const H5D_t *dset, hsize_t *nbytes);
 H5_DLL herr_t H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_dim[]);
 H5_DLL herr_t H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                     H5F_block_t *new_chunk, bool *need_insert, const hsize_t *scaled);
-H5_DLL void  *H5D__chunk_mem_alloc(size_t size, void *pline);
+H5_DLL void  *H5D__chunk_mem_alloc(size_t size, void *pline) H5_ATTR_MALLOC;
 H5_DLL void   H5D__chunk_mem_free(void *chk, void *pline);
 H5_DLL void  *H5D__chunk_mem_xfree(void *chk, const void *pline);
 H5_DLL void  *H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
