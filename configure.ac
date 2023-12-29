@@ -2312,6 +2312,45 @@ case "X-$DEV_WARNINGS" in
 esac
 
 ## ----------------------------------------------------------------------
+## Check if they would like suppessed compiler diagnostics displayed
+## (i.e. not suppressed)
+##
+## NOTE: Compiler diagnostics (i.e. warnings) are suppressed for some
+##	"noisy" warnings that are harmless (in the opinion of the primary
+##	HDF5 development team), but this option is provided to allow
+##	developers to see those warnings.
+##
+AC_MSG_CHECKING([whether showing all compiler warnings is enabled])
+AC_ARG_ENABLE([show-all-warnings],
+              [AS_HELP_STRING([--enable-show-all-warnings],
+                              [Enable showing all compiler warnings (for developer debugging).
+                               [default=no]
+                              ])],
+              [SHOW_ALL_WARNINGS=$enableval])
+
+## Set the default level.
+if test "X-$SHOW_ALL_WARNINGS" = X- ; then
+  SHOW_ALL_WARNINGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([SHOW_ALL_WARNINGS])
+
+case "X-$SHOW_ALL_WARNINGS" in
+  X-yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([SHOW_ALL_WARNINGS], [1], [Define if showing all warnings is desired (i.e. not suppressed internally with H5_DIAG_OFF)])
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $SHOW_ALL_WARNINGS])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Check if the compiler should use profiling flags/settings
 ##
 AC_MSG_CHECKING([profiling])

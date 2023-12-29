@@ -22,8 +22,8 @@ static const char *FILENAME[] = {"event_set_1", NULL};
 
 static hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
 
-herr_t fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
-herr_t fake_wait_request_free(void *req);
+herr_t               fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
+H5_ATTR_CONST herr_t fake_wait_request_free(void *req);
 
 /* A VOL class struct that describes a VOL class with no
  * functionality, other than a wait that returns success.

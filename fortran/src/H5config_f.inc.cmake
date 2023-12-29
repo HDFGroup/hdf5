@@ -28,8 +28,8 @@
 #endif
 
 ! Define if on APPLE
-#cmakedefine01 H5_HAVE_DARWIN
-#if H5_HAVE_DARWIN == 0
+#cmakedefine01 CMAKE_H5_HAVE_DARWIN
+#if CMAKE_H5_HAVE_DARWIN == 0
 #undef H5_HAVE_DARWIN
 #else
 #define H5_HAVE_DARWIN

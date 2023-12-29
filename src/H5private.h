@@ -497,8 +497,16 @@
 #define H5_DIAG_DO_PRAGMA(x)  _Pragma(#x)
 #define H5_DIAG_PRAGMA(x)     H5_DIAG_DO_PRAGMA(GCC diagnostic x)
 
+/* Allow suppression of compiler diagnostics unless H5_SHOW_ALL_WARNINGS is
+ *      defined (enabled with '--enable-show-all-warnings' configure option).
+ */
+#ifndef H5_SHOW_ALL_WARNINGS
 #define H5_DIAG_OFF(x) H5_DIAG_PRAGMA(push) H5_DIAG_PRAGMA(ignored H5_DIAG_JOINSTR("-W", x))
 #define H5_DIAG_ON(x)  H5_DIAG_PRAGMA(pop)
+#else
+#define H5_DIAG_OFF(x)
+#define H5_DIAG_ON(x)
+#endif
 
 /* Macros for enabling/disabling particular GCC-only warnings.
  * These pragmas are only implemented usefully in gcc 4.6+
