@@ -176,6 +176,304 @@ CONTAINS
 
   END SUBROUTINE subfiling_write_default
 
+  !
+  ! An example of using the HDF5 Subfiling VFD with
+  ! custom settings
+  !
+
+  SUBROUTINE subfiling_write_custom(fapl_id, mpi_size, mpi_rank)
+
+    IMPLICIT NONE
+    INTEGER(HID_T) :: fapl_id
+    INTEGER :: mpi_size
+    INTEGER :: mpi_rank
+
+    INTEGER, DIMENSION(:), ALLOCATABLE, TARGET  :: wdata
+
+    TYPE(H5FD_subfiling_config_t) :: subf_config
+    TYPE(H5FD_ioc_config_t)       :: ioc_config
+    INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: dset_dims
+    INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: start
+    INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: count
+    INTEGER(hid_t) :: file_id
+    INTEGER(hid_t) :: subfiling_fapl
+    INTEGER(hid_t) :: dset_id
+    INTEGER(hid_t) :: filespace
+    CHARACTER(LEN=512) :: filename, par_prefix
+    INTEGER :: status
+    INTEGER(SIZE_T) :: i
+    TYPE(C_PTR) :: f_ptr
+
+    ! Make a copy of the FAPL so we don't disturb
+    ! it for the other examples
+
+    CALL H5Pcopy_f(fapl_id, subfiling_fapl, status)
+
+    ! Get a default Subfiling and IOC configuration
+    CALL h5pget_fapl_subfiling_f(subfiling_fapl, subf_config, status)
+    CALL h5pget_fapl_ioc_f(subfiling_fapl,ioc_config, status)
+
+    ! Set Subfiling configuration to use a 1MiB
+    ! stripe size and the SELECT_IOC_EVERY_NTH_RANK
+    ! selection method. By default, without a setting
+    ! in the H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+    ! environment variable, this will use every MPI
+    ! rank as an I/O concentrator.
+     
+    subf_config%shared_cfg%stripe_size   = 1048576
+    subf_config%shared_cfg%ioc_selection = SELECT_IOC_EVERY_NTH_RANK_F
+
+    ! Set IOC configuration to use 2 worker threads
+    ! per IOC instead of the default setting and
+    ! update IOC configuration with new subfiling
+    ! configuration.
+     
+    ioc_config%thread_pool_size = 2
+
+    ! Set our new configuration on the IOC
+    ! FAPL used for Subfiling
+     
+    CALL H5Pset_fapl_ioc_f(subf_config%ioc_fapl_id, status, ioc_config)
+    
+    ! Finally, set our new Subfiling configuration
+    ! on the original FAPL
+     
+    CALL H5Pset_fapl_subfiling_f(subfiling_fapl, status, subf_config)
+    !
+    ! OPTIONAL: Set alignment of objects in HDF5 file to
+    !           be equal to the Subfiling stripe size.
+    !           Choosing a Subfiling stripe size and HDF5
+    !           object alignment value that are some
+    !           multiple of the disk block size can
+    !           generally help performance by ensuring
+    !           that I/O is well-aligned and doesn't
+    !           excessively cross stripe boundaries.
+    !
+    !           Note that this option can substantially
+    !           increase the size of the resulting HDF5
+    !           files, so it is a good idea to keep an eye
+    !           on this.
+    !
+
+    CALL H5Pset_alignment_f(subfiling_fapl, 0_HSIZE_T, 33554432_HSIZE_T, status) ! ALIGN to default 32MiB stripe size
+
+    ! Parse any parallel prefix and create filename
+    par_prefix(:) = ""
+    CALL get_environment_variable("HDF5_PARAPREFIX", VALUE=par_prefix, STATUS=status)
+    filename = TRIM(par_prefix)//EXAMPLE_FILE
+
+    ! Create a new file collectively
+    CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, status, access_prp = subfiling_fapl)
+
+    ! Create the dataspace for the dataset. The second
+    ! dimension varies with the number of MPI ranks
+    ! while the first dimension is fixed.
+
+    dset_dims(1) = EXAMPLE_DSET_NY
+    dset_dims(2) = mpi_size
+    CALL H5Screate_simple_f(EXAMPLE_DSET_DIMS, dset_dims, filespace, status)
+
+    ! Create the dataset with default properties
+     
+    CALL H5Dcreate_f(file_id, EXAMPLE_DSET_NAME, H5T_NATIVE_INTEGER, filespace, dset_id, status)
+    ! Each MPI rank writes from a contiguous memory
+    ! region to the hyperslab in the file
+     
+    start(1) = 0
+    start(2) = mpi_rank
+    count(1) = dset_dims(1)
+    count(2) = 1
+    CALL H5Sselect_hyperslab_f(filespace, H5S_SELECT_SET_F, start, count, status)
+
+    ! Initialize data buffer
+    ALLOCATE(wdata(COUNT(1)*COUNT(2)))
+    DO i = 1, COUNT(1)*COUNT(2)
+       wdata(i) = mpi_rank
+    ENDDO
+
+    ! Write to dataset
+    f_ptr = C_LOC(wdata)
+    CALL H5Dwrite_f(dset_id, H5T_NATIVE_INTEGER, f_ptr, status, mem_space_id=H5S_BLOCK_F, file_space_id=filespace)
+
+    ! Close/release resources.
+    DEALLOCATE(wdata)
+    CALL H5Dclose_f(dset_id, status)
+    CALL H5Sclose_f(filespace, status)
+
+    CALL H5Fclose_f(file_id, status)
+
+    CALL cleanup(EXAMPLE_FILE, subfiling_fapl)
+
+    CALL H5Pclose_f(subfiling_fapl, status)
+
+  END SUBROUTINE subfiling_write_custom
+
+  !
+  ! An example of pre-creating an HDF5 file on MPI rank
+  ! 0 when using the HDF5 Subfiling VFD. In this case,
+  ! the subfiling stripe count must be set so that rank
+  ! 0 knows how many subfiles to pre-create.
+
+  SUBROUTINE subfiling_write_precreate(fapl_id, mpi_size, mpi_rank)
+
+    IMPLICIT NONE
+    INTEGER(HID_T) :: fapl_id
+    INTEGER :: mpi_size
+    INTEGER :: mpi_rank
+
+    INTEGER, DIMENSION(:), ALLOCATABLE, TARGET  :: wdata
+    TYPE(H5FD_subfiling_config_t) :: subf_config
+    INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: dset_dims
+    INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: start
+    INTEGER(hsize_t), DIMENSION(1:EXAMPLE_DSET_DIMS) :: count
+    INTEGER(hid_t) :: file_id
+    INTEGER(hid_t) :: subfiling_fapl
+    INTEGER(hid_t) :: dset_id
+    INTEGER(hid_t) :: filespace
+    CHARACTER(LEN=512) :: filename, par_prefix
+    INTEGER :: status
+    INTEGER(SIZE_T) :: i
+    TYPE(C_PTR) :: f_ptr
+
+    ! Make a copy of the FAPL so we don't disturb
+    ! it for the other examples
+
+    CALL H5Pcopy_f(fapl_id, subfiling_fapl, status)
+
+    ! Get a default Subfiling and IOC configuration
+    CALL h5pget_fapl_subfiling_f(subfiling_fapl, subf_config, status)
+
+    !
+    ! Set the Subfiling stripe count so that rank
+    ! 0 knows how many subfiles the logical HDF5
+    ! file should consist of. In this case, use
+    ! 5 subfiles with a default stripe size of
+    ! 32MiB.
+
+    subf_config%shared_cfg%stripe_count = 5
+    !
+    ! OPTIONAL: Set alignment of objects in HDF5 file to
+    !           be equal to the Subfiling stripe size.
+    !           Choosing a Subfiling stripe size and HDF5
+    !           object alignment value that are some
+    !           multiple of the disk block size can
+    !           generally help performance by ensuring
+    !           that I/O is well-aligned and doesn't
+    !           excessively cross stripe boundaries.
+    !
+    !           Note that this option can substantially
+    !           increase the size of the resulting HDF5
+    !           files, so it is a good idea to keep an eye
+    !           on this.
+    !
+
+    CALL H5Pset_alignment_f(subfiling_fapl, 0_HSIZE_T, 1048576_HSIZE_T, status) ! Align to custom 1MiB stripe size
+
+    ! Parse any parallel prefix and create filename
+    par_prefix(:) = ""
+    CALL get_environment_variable("HDF5_PARAPREFIX", VALUE=par_prefix, STATUS=status)
+    filename = TRIM(par_prefix)//EXAMPLE_FILE
+
+    ! Set dataset dimensionality
+    dset_dims(1) = EXAMPLE_DSET_NY
+    dset_dims(2) = mpi_size
+
+    IF (mpi_rank .EQ. 0) THEN
+       !
+       ! Make sure only this rank opens the file
+       !
+       CALL H5Pset_mpi_params_f(subfiling_fapl, MPI_COMM_SELF, MPI_INFO_NULL, status)
+
+       !
+       ! Set the Subfiling VFD on our FAPL using
+       ! our custom configuration
+       !
+       CALL H5Pset_fapl_subfiling_f(subfiling_fapl, status, subf_config);
+
+       !
+       ! Create a new file on rank 0
+       !
+       CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, status, access_prp = subfiling_fapl)
+
+       ! Create the dataspace for the dataset. The second
+       ! dimension varies with the number of MPI ranks
+       ! while the first dimension is fixed.
+       !
+       CALL H5Screate_simple_f(EXAMPLE_DSET_DIMS, dset_dims, filespace, status)
+
+       ! Create the dataset with default properties
+     
+       CALL H5Dcreate_f(file_id, EXAMPLE_DSET_NAME, H5T_NATIVE_INTEGER, filespace, dset_id, status)
+
+       ! Initialize data buffer
+       ALLOCATE(wdata(dset_dims(1)*dset_dims(2)))
+       DO i = 1, dset_dims(1)*dset_dims(2)
+          wdata(i) = i
+       ENDDO
+
+       !
+       ! Rank 0 writes to the whole dataset
+       !
+       f_ptr = C_LOC(wdata)
+       CALL H5Dwrite_f(dset_id, H5T_NATIVE_INTEGER, f_ptr, status, mem_space_id=H5S_BLOCK_F, file_space_id=filespace)
+
+       !
+       ! Close/release resources.
+       !
+       DEALLOCATE(wdata)
+       CALL H5Dclose_f(dset_id, status)
+       CALL H5Sclose_f(filespace, status)
+
+       CALL H5Fclose_f(file_id, status)
+    ENDIF
+
+    CALL MPI_Barrier(MPI_COMM_WORLD, status)
+
+    !
+    ! Use all MPI ranks to re-open the file and
+    ! read back the dataset that was created
+    !
+    CALL H5Pset_mpi_params_f(subfiling_fapl, MPI_COMM_WORLD, MPI_INFO_NULL, status)
+
+    !
+    ! Use the same subfiling configuration as rank 0
+    ! used to create the file
+    !
+    CALL H5Pset_fapl_subfiling_f(subfiling_fapl, status, subf_config)
+
+    !
+    ! Re-open the file on all ranks
+    !
+
+    CALL H5Fopen_f(filename, H5F_ACC_RDONLY_F, file_id, status, access_prp=subfiling_fapl)
+
+    !
+    ! Open the dataset that was created
+    !
+    CALL H5Dopen_f(file_id, EXAMPLE_DSET_NAME, dset_id, status)
+
+    !
+    ! Initialize data buffer
+    !
+
+    ALLOCATE(wdata(dset_dims(1)*dset_dims(2)))
+    !
+    ! Read the dataset on all ranks
+    !
+    f_ptr = C_LOC(wdata)
+    CALL H5Dread_f(dset_id, H5T_NATIVE_INTEGER, f_ptr, status, mem_space_id=H5S_BLOCK_F, file_space_id=H5S_ALL_F)
+
+    DEALLOCATE(wdata)
+
+    CALL H5Dclose_f(dset_id, status)
+    CALL H5Fclose_f(file_id, status)
+
+    CALL cleanup(EXAMPLE_FILE, subfiling_fapl)
+
+    CALL H5Pclose_f(subfiling_fapl, status)
+
+  END SUBROUTINE subfiling_write_precreate
+
 END MODULE subf
 
 PROGRAM main
@@ -219,10 +517,10 @@ PROGRAM main
   CALL subfiling_write_default(fapl_id, mpi_size, mpi_rank)
 
   ! Use Subfiling VFD with custom settings
-  ! call subfiling_write_custom(fapl_id, mpi_size, mpi_rank)
+  CALL subfiling_write_custom(fapl_id, mpi_size, mpi_rank)
 
   ! Use Subfiling VFD to precreate the HDF5 file on MPI rank
-  ! call subfiling_write_precreate(fapl_id, mpi_size, mpi_rank)
+  CALL subfiling_write_precreate(fapl_id, mpi_size, mpi_rank)
 
   CALL H5Pclose_f(fapl_id, status)
   !
