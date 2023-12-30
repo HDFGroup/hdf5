@@ -8,4 +8,5 @@ set (examples
   ph5_f90_hyperslab_by_col
   ph5_f90_hyperslab_by_pattern
   ph5_f90_hyperslab_by_chunk
+  ph5_f90_subfiling
 )

@@ -4,10 +4,10 @@
      PROGRAM DATASET_BY_ROW
 
      USE HDF5 ! This module contains all necessary modules
+     USE MPI
 
      IMPLICIT NONE
 
-     include 'mpif.h'
      CHARACTER(LEN=10), PARAMETER :: filename = "sds_row.h5"  ! File name
      CHARACTER(LEN=8), PARAMETER :: dsetname = "IntArray" ! Dataset name
 

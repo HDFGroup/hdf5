@@ -75,6 +75,7 @@ install-data-local:
 	fi
 	$(CP) $(top_builddir)/$(subdir)/H5f90i_gen.h $(DESTDIR)$(includedir)/.
 	$(CP) $(top_srcdir)/fortran/src/H5f90i.h $(DESTDIR)$(includedir)/.
+	$(CP) $(top_builddir)/$(subdir)/H5config_f.inc $(DESTDIR)$(includedir)/.
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
@@ -84,6 +85,7 @@ uninstall-local:
 	fi;								\
 	$(RM) $(DESTDIR)$(bindir)/$(H5FC_NAME)
 	$(RM) $(DESTDIR)$(includedir)/H5f90i*.h
+	$(RM) $(DESTDIR)$(includedir)/H5config_f.inc
 
 # Also install and uninstall (uninstall-local above) h5fc script
 install-exec-local:
