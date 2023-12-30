@@ -389,6 +389,9 @@ New Features
     ----------------
 
     - Added Fortran APIs:
+      h5fdelete_f
+
+    - Added Fortran APIs:
       h5vlnative_addr_to_token_f and h5vlnative_token_to_address_f
 
     - Fixed an uninitialized error return value for hdferr
