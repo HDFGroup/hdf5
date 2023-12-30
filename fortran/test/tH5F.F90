@@ -479,6 +479,11 @@ CONTAINS
        total_error = total_error + 1
     ENDIF
 
+    IF(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+    IF(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+
     RETURN
   END SUBROUTINE mountingtest
 
