@@ -942,6 +942,7 @@ CONTAINS
     CALL check("h5fis_accessible_f",error,total_error)
     IF ( .NOT. status ) THEN
        WRITE(*,*) "ERROR: File ", filename2, " is not accessible as hdf5"
+       total_error=total_error + 1
     END IF
 
     CALL h5fdelete_f(filename2, error)
@@ -950,6 +951,7 @@ CONTAINS
     INQUIRE(FILE=filename2, EXIST=status)
     IF ( status ) THEN
        WRITE(*,*) "ERROR: File ", filename2, " was not removed by H5Fdelete_f"
+       total_error=total_error + 1
     END IF
 
     RETURN
