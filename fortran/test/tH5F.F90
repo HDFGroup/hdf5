@@ -479,10 +479,11 @@ CONTAINS
        total_error = total_error + 1
     ENDIF
 
-    if(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
+    IF(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
     CALL check("h5_cleanup_f", error, total_error)
-    if(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
+    IF(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
     CALL check("h5_cleanup_f", error, total_error)
+
     RETURN
   END SUBROUTINE mountingtest
 
@@ -853,7 +854,9 @@ CONTAINS
     INTEGER(HID_T) :: access_id  ! File Access property list identifier
 
     !flag to check operation success
-    INTEGER     ::   error
+    INTEGER     :: error
+    !file status
+    LOGICAL     :: status
 
     !
     !Create a file1 using default properties.
@@ -920,10 +923,37 @@ CONTAINS
     CALL h5fclose_f(file2_id, error)
     CALL check("h5fclose_f",error,total_error)
 
-    if(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
-    CALL check("h5_cleanup_f", error, total_error)
-    if(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
-    CALL check("h5_cleanup_f", error, total_error)
+    ! Test file deletion
+    CALL h5fis_accessible_f(filename1, status, error)
+    CALL check("h5fis_accessible_f",error,total_error)
+    IF ( .NOT. status ) THEN
+       WRITE(*,*) "ERROR: File ", filename1, " is not accessible as hdf5"
+    END IF
+
+    CALL h5fdelete_f(filename1, error, H5P_DEFAULT_F)
+    CALL check("h5fdelete_f", error, total_error)
+
+    INQUIRE(FILE=filename1, EXIST=status)
+    IF ( status ) THEN
+       WRITE(*,*) "ERROR: File ", filename1, " was not removed by H5Fdelete_f"
+    END IF
+
+    CALL h5fis_accessible_f(filename2, status, error)
+    CALL check("h5fis_accessible_f",error,total_error)
+    IF ( .NOT. status ) THEN
+       WRITE(*,*) "ERROR: File ", filename2, " is not accessible as hdf5"
+       total_error=total_error + 1
+    END IF
+
+    CALL h5fdelete_f(filename2, error)
+    CALL check("h5fdelete_f", error, total_error)
+
+    INQUIRE(FILE=filename2, EXIST=status)
+    IF ( status ) THEN
+       WRITE(*,*) "ERROR: File ", filename2, " was not removed by H5Fdelete_f"
+       total_error=total_error + 1
+    END IF
+
     RETURN
 
   END SUBROUTINE plisttest
@@ -1320,6 +1350,7 @@ CONTAINS
     TYPE(C_PTR) :: f_ptr            ! Pointer
     INTEGER(hid_t) :: fapl          ! File access property
     INTEGER :: error                ! Error flag
+    CHARACTER(LEN=18), PARAMETER :: filename="tget_file_image.h5"
 
     ! Create new properties for file access
     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
@@ -1330,7 +1361,7 @@ CONTAINS
     CALL check("h5pset_fapl_stdio_f", error, total_error)
 
     ! Create the file
-    CALL h5fcreate_f("tget_file_image.h5", H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl)
+    CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl)
     CALL check("h5fcreate_f", error, total_error)
 
     ! Set up data space for new data set
@@ -1357,7 +1388,7 @@ CONTAINS
     CALL check("h5fflush_f",error, total_error)
 
     ! Open the test file using standard I/O calls
-    OPEN(UNIT=10,FILE='tget_file_image.h5', ACCESS='STREAM')
+    OPEN(UNIT=10,FILE=filename, ACCESS='STREAM')
     ! Get the size of the test file
     !
     ! Since we use the eoa to calculate the image size, the file size
@@ -1406,7 +1437,7 @@ CONTAINS
     ALLOCATE(file_image_ptr(1:image_size))
 
     ! Open the test file using standard I/O calls
-    OPEN(UNIT=10,FILE='tget_file_image.h5', FORM='UNFORMATTED', ACCESS='STREAM')
+    OPEN(UNIT=10,FILE=filename, FORM='UNFORMATTED', ACCESS='STREAM')
 
     ! Read the test file from disk into the buffer
     DO i = 1, image_size
