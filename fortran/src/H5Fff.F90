@@ -256,6 +256,43 @@ CONTAINS
 !>
 !! \ingroup FH5F
 !!
+!! \brief Deletes an HDF5 file
+!!
+!! \param name       Name of the file to delete
+!! \param hdferr     \fortran_error
+!! \param access_prp File access property list identifier
+!!
+!! See C API: @ref H5Fdelete()
+!!
+  SUBROUTINE h5fdelete_f(name, hdferr, access_prp)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN)           :: name
+    INTEGER         , INTENT(OUT)          :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: access_prp
+
+    INTEGER(HID_T) :: access_prp_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Fdelete(name, access_prp_default) BIND(C,NAME='H5Fdelete')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: access_prp_default
+       END FUNCTION H5Fdelete
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    access_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(access_prp)) access_prp_default = access_prp
+
+    hdferr = INT(H5Fdelete(c_name, access_prp_default))
+
+  END SUBROUTINE h5fdelete_f
+!>
+!! \ingroup FH5F
+!!
 !! \brief Asynchronously flushes all buffers associated with a file to disk.
 !!
 !! \param object_id Identifier of object used to identify the file.
@@ -285,7 +322,7 @@ CONTAINS
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
-       INTEGER FUNCTION H5Fflush_async(file, func, line, object_id, scope, es_id) &
+       INTEGER(C_INT) FUNCTION H5Fflush_async(file, func, line, object_id, scope, es_id) &
             BIND(C,NAME='H5Fflush_async')
          IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
@@ -303,8 +340,8 @@ CONTAINS
     IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    hdferr = H5Fflush_async(file_default, func_default, line_default, &
-         object_id, INT(scope, C_INT), es_id)
+    hdferr = INT(H5Fflush_async(file_default, func_default, line_default, &
+         object_id, INT(scope, C_INT), es_id))
 
   END SUBROUTINE h5fflush_async_f
 !>
