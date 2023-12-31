@@ -22,12 +22,6 @@ INCLUDE_DIRECTORIES (
 #-----------------------------------------------------------------------------
 include (Fortran_sourcefiles.cmake)
 
-if (HDF5_ENABLE_SUBFILING_VFD)
-  set (examples $examples
-    ph5_f90_subfiling
-  )
-endif()
-
 foreach (example_name ${examples})
   add_executable (${EXAMPLE_VARNAME}_f90_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.F90)
   target_compile_options(${EXAMPLE_VARNAME}_f90_${example_name}
