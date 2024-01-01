@@ -25,7 +25,7 @@ jobs:
         run: choco install ninja
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.12.1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Set file base name (Windows)
         id: set-file-base
@@ -36,7 +36,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -106,7 +106,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -176,7 +176,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -248,7 +248,7 @@ jobs:
           version: '2023.2'
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.12.1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Set file base name (Windows_intel)
         id: set-file-base
@@ -259,7 +259,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -340,7 +340,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}

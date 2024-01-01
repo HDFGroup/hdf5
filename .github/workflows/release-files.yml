@@ -75,7 +75,7 @@ jobs:
 
       # Get files created by tarball script
       - name: Get doxygen (Linux)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: docs-doxygen
               path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
@@ -84,44 +84,44 @@ jobs:
         run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip ./${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
 
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: zip-vs2022_cl-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (MacOS)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-osx12-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-ubuntu-2204_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Windows_intel)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: zip-vs2022_intel-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux_intel)
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-ubuntu-2204_intel-binary
               path: ${{ github.workspace }}
