@@ -361,8 +361,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     } /* end if */
     else {
-        haddr_t prev_tag = HADDR_UNDEF;
-        size_t piece_count = 0;
+        haddr_t prev_tag    = HADDR_UNDEF;
+        size_t  piece_count = 0;
 
         if (H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.full_io_chks_to_mds > 0)
             piece_count = io_info.full_io_chks_to_mds;
@@ -389,8 +389,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for read buffer list");
             if (io_info.max_tconv_type_size > 0)
-                if (NULL ==
-                    (io_info.sel_pieces = H5MM_malloc(piece_count * sizeof(io_info.sel_pieces[0]))))
+                if (NULL == (io_info.sel_pieces = H5MM_malloc(piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "unable to allocate array of selected pieces");
         }
@@ -414,7 +413,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Make final selection I/O call if the multi_read callbacks did not perform the actual I/O
          * (if using selection I/O and either multi dataset or type conversion) */
-         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) ||
+        if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) ||
             (H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.full_io_chks_to_mds > 0)) {
             /* Check for type conversion */
             if (io_info.max_tconv_type_size > 0) {
@@ -795,8 +794,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     } /* end if */
     else {
-        haddr_t prev_tag = HADDR_UNDEF;
-        size_t piece_count = 0;
+        haddr_t prev_tag    = HADDR_UNDEF;
+        size_t  piece_count = 0;
 
         if (H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.full_io_chks_to_mds > 0)
             piece_count = io_info.full_io_chks_to_mds;
@@ -823,8 +822,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for write buffer list");
             if (io_info.max_tconv_type_size > 0)
-                if (NULL ==
-                    (io_info.sel_pieces = H5MM_malloc(piece_count * sizeof(io_info.sel_pieces[0]))))
+                if (NULL == (io_info.sel_pieces = H5MM_malloc(piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "unable to allocate array of selected pieces");
         }
@@ -846,7 +844,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Make final selection I/O call if the multi_write callbacks did not perform the actual I/O
          * (if using selection I/O and either multi dataset or type conversion) */
-         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) ||
+        if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) ||
             (H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.full_io_chks_to_mds > 0)) {
             /* Check for type conversion */
             if (io_info.max_tconv_type_size > 0) {
