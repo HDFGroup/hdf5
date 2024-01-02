@@ -55,7 +55,7 @@ if(NOT DEFINED INSTALLDIR)
   if(WIN32)
     set(INSTALLDIR "\"%ProgramFiles%/HDF_Group/@HDF5_PACKAGE_NAME@/@HDF5_PACKAGE_VERSION@\"")
   else()
-    set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
+    set(INSTALLDIR "/opt/HDF_Group/@HDF5_PACKAGE_NAME@/@HDF5_PACKAGE_VERSION@")
   endif()
 endif()
 

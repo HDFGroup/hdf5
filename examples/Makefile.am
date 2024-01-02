@@ -18,15 +18,6 @@
 
 include $(top_srcdir)/config/commence.am
 
-if BUILD_PARALLEL_CONDITIONAL
-  EXAMPLE_PROG_PARA = ph5example ph5_filtered_writes ph5_filtered_writes_no_sel
-
-if SUBFILING_VFD_CONDITIONAL
-  EXAMPLE_PROG_PARA += ph5_subfiling
-endif
-
-endif
-
 INSTALL_SCRIPT_FILES = run-c-ex.sh
 INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
 INSTALL_TOP_FILES = README
@@ -40,9 +31,7 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
             h5_crtatt h5_crtgrp h5_crtdat \
             h5_group h5_select h5_attribute h5_mount h5_drivers \
             h5_reference_deprec h5_ref_extern h5_ref_compat h5_ref2reg_deprec \
-            h5_extlink h5_elink_unix2win h5_shared_mesg h5_debug_trace \
-            h5_vds h5_vds-exc h5_vds-exclim h5_vds-eiger h5_vds-simpleIO \
-            h5_vds-percival h5_vds-percival-unlim h5_vds-percival-unlim-maxmin
+            h5_extlink h5_elink_unix2win h5_shared_mesg h5_debug_trace
 TEST_SCRIPT=testh5cc.sh
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
@@ -53,13 +42,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c h5_compou
             h5_crtatt.c h5_crtgrp.c h5_crtdat.c \
             h5_group.c h5_select.c h5_attribute.c h5_mount.c h5_drivers.c \
             h5_reference_deprec.c h5_ref_extern.c h5_ref_compat.c h5_ref2reg_deprec.c \
-            h5_extlink.c h5_elink_unix2win.c h5_shared_mesg.c h5_debug_trace.c \
-            ph5example.c ph5_filtered_writes.c ph5_filtered_writes_no_sel.c \
-            ph5_subfiling.c h5_vds.c h5_vds-exc.c h5_vds-exclim.c h5_vds-eiger.c \
-            h5_vds-simpleIO.c h5_vds-percival.c h5_vds-percival-unlim.c \
-            h5_vds-percival-unlim-maxmin.c
-
-
+            h5_extlink.c h5_elink_unix2win.c h5_shared_mesg.c h5_debug_trace.c
 
 # How to build examples, using installed version of h5cc
 if BUILD_PARALLEL_CONDITIONAL
@@ -123,22 +106,10 @@ h5_ref_extern: $(srcdir)/h5_ref_extern.c
 h5_reference_deprec: $(srcdir)/h5_reference_deprec.c
 h5_ref2reg_deprec: $(srcdir)/h5_ref2reg_deprec.c
 h5_drivers: $(srcdir)/h5_drivers.c
-ph5example: $(srcdir)/ph5example.c
-ph5_filtered_writes: $(srcdir)/ph5_filtered_writes.c
-ph5_filtered_writes_no_sel: $(srcdir)/ph5_filtered_writes_no_sel.c
-ph5_subfiling: $(srcdir)/ph5_subfiling.c
 h5_dtransform: $(srcdir)/h5_dtransform.c
 h5_extlink: $(srcdir)/h5_extlink.c $(EXTLINK_DIRS)
 h5_elink_unix2win: $(srcdir)/h5_elink_unix2win.c $(EXTLINK_DIRS)
 h5_shared_mesg: $(srcdir)/h5_shared_mesg.c
-h5_vds: $(srcdir)/h5_vds.c
-h5_vds-exc: $(srcdir)/h5_vds-exc.c
-h5_vds-exclim: $(srcdir)/h5_vds-exclim.c
-h5_vds-eiger: $(srcdir)/h5_vds-eiger.c
-h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
-h5_vds-percival: $(srcdir)/h5_vds-percival.c
-h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
-h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)

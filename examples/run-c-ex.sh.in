@@ -155,23 +155,7 @@ then
         HDF5_DEBUG=$OLD_DEBUG_STRING &&\
         rm h5_debug_trace &&\
         RunTest h5_shared_mesg &&\
-        rm h5_shared_mesg &&\
-        RunTest h5_vds-eiger &&\
-        rm h5_vds-eiger &&\
-        RunTest h5_vds-exclim &&\
-        rm h5_vds-exclim &&\
-        RunTest h5_vds-exc &&\
-        rm h5_vds-exc &&\
-        RunTest h5_vds-simpleIO &&\
-        rm h5_vds-simpleIO &&\
-        RunTest h5_vds-percival &&\
-        rm h5_vds-percival &&\
-        RunTest h5_vds-percival-unlim &&\
-        rm h5_vds-percival-unlim &&\
-        RunTest h5_vds-percival-unlim-maxmin&&\
-        rm h5_vds-percival-unlim-maxmin &&\
-        RunTest h5_vds &&\
-        rm h5_vds); then
+        rm h5_shared_mesg); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}

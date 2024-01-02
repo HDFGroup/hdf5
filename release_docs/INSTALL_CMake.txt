@@ -299,8 +299,11 @@ IV. Further considerations
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
             ZLIB_GIT_URL:STRING="https://some_location/zlib"
+            ZLIB_GIT_BRANCH="some_branch"
             SZIP_GIT_URL:STRING="https://some_location/szip"
-         where "some_location" is the URL to the GIT repository. Also set
+            SZIP_GIT_BRANCH="some_branch"
+         where "some_location" is the URL to the GIT repository and "some_branch" is
+         a branch in the repository, usually the default. Also set
          CMAKE_BUILD_TYPE to the configuration type.
 
       C. Use source packages from a compressed file by adding the following
@@ -338,7 +341,9 @@ IV. Further considerations
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
             PLUGIN_GIT_URL:STRING="http://some_location/plugins"
-         where "some_location" is the URL to the GIT repository. Also set
+            PLUGIN_GIT_BRANCH="some_branch"
+         where "some_location" is the URL to the GIT repository and "some_branch" is
+         a branch in the repository, usually the default. Also set
          CMAKE_BUILD_TYPE to the configuration type.
 
       B. Use source packages from a compressed file by adding the following
@@ -686,11 +691,15 @@ These five steps are described in detail below.
            configuration option:
                -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
 
-           The options to control the GIT URL (config/cmake/cacheinit.cmake file) are:
+           The options to control the GIT parameters (config/cmake/cacheinit.cmake file) are:
                ZLIB_GIT_URL:STRING="http://${git_url}/zlib"
+               ZLIB_GIT_BRANCH="${git_branch}"
                SZIP_GIT_URL:STRING="http://${git_url}/szip"
+               SZIP_GIT_BRANCH="${git_branch}"
                PLUGIN_GIT_URL:STRING="http://${git_url}/plugin"
-           ${git_url} should be changed to your location. Also define CMAKE_BUILD_TYPE
+               PLUGIN_GIT_BRANCH="${git_branch}"
+           ${git_url} should be changed to your location and ${git_branch} is
+           your branch in the repository. Also define CMAKE_BUILD_TYPE
            to be the configuration type.
 
       3.2.2  Or the external libraries (zlib, szip and plugins) can be configured
