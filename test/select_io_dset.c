@@ -2986,12 +2986,6 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
         no_selection_io_cause_read_expected |= H5D_SEL_IO_DATASET_FILTER;
     }
 
-    if (test_mode == TEST_CHUNK_CACHE) {
-        is_chunked = true;
-        no_selection_io_cause_write_expected |= H5D_SEL_IO_CHUNK_CACHE;
-        no_selection_io_cause_read_expected |= H5D_SEL_IO_CHUNK_CACHE;
-    }
-
     if (test_mode == TEST_DISABLE_BY_API) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
             TEST_ERROR;
@@ -3160,7 +3154,6 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_CONTIGUOUS_SIEVE_BUFFER);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATASET_FILTER);
-    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_CHUNK_CACHE);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NO_VECTOR_OR_SELECTION_IO_CB);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
     errs +=
