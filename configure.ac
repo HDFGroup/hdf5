@@ -548,6 +548,7 @@ AC_CHECK_SIZEOF([long double])
 
 ## HDF5 version from the first line of the README.md file.
 H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
+AC_SUBST([H5_VERSION])
 
 VERS_MAJOR=`echo $H5_VERSION | cut -d. -f1`
 VERS_MINOR=`echo $H5_VERSION | cut -d. -f2`
