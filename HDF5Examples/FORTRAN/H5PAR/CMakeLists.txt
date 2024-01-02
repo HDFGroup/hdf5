@@ -14,7 +14,6 @@ INCLUDE_DIRECTORIES (
     ${PROJECT_BINARY_DIR}
     ${HDF5_F90_BINARY_DIR}
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-
 )
 
 #-----------------------------------------------------------------------------

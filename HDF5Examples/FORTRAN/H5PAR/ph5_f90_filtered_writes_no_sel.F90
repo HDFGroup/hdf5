@@ -14,20 +14,6 @@
 ! example parses the HDF5_PARAPREFIX environment variable for a prefix,
 ! if one is needed.
 
-! An optional include  to determine the correct HDF5 version
-! for selecting the appropriate HDF5 API parameters. This is
-! not part of the HDF5 library and is generally unnecessary.
-! This information is now included in "H5config_f.inc" starting
-! with version 1.14.4.
-#include "h5_version.h"
-
-! An optional include for the configure definitions.
-#if H5_VERSION_GE(1, 14, 4)
-#include "H5config_f.inc"
-#endif
-
-#if defined(H5_HAVE_PARALLEL)
-
 MODULE filter
   USE HDF5
   USE MPI
@@ -366,11 +352,3 @@ CONTAINS
   CALL MPI_Finalize(status)
 
 END PROGRAM main
-
-#else
-
-PROGRAM main
-  WRITE(*,"(A)") "HDF5 not configured with parallel support or parallel filtered writes are disabled!"
-END PROGRAM main
-
-#endif
