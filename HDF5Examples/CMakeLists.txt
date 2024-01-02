@@ -160,7 +160,6 @@ if (${H5_LIBVER_DIR} GREATER 16)
 
       configure_file (${H5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5D/h5_version.h @ONLY)
       configure_file (${H5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5G/h5_version.h @ONLY)
-      configure_file (${H5EX_F90_SRC_DIR}/H5D/h5_version.h.in ${PROJECT_BINARY_DIR}/FORTRAN/H5PAR/h5_version.h @ONLY)
     else ()
       set (HDF_BUILD_FORTRAN OFF CACHE BOOL "Build examples FORTRAN support" FORCE)
     endif ()
