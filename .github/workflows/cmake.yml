@@ -11,6 +11,10 @@ permissions:
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
 jobs:
+    call-workflow-special-cmake:
+      name: "CMake Special Workflows"
+      uses: ./.github/workflows/main-cmake-spc.yml
+
     call-debug-thread-cmake:
         name: "CMake Debug Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml

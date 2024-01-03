@@ -85,22 +85,10 @@
       }
     },
     {
-      "name": "ci-ExamplesVars",
-      "hidden": true,
-      "cacheVariables": {
-        "HDF5_EXAMPLES_COMPRESSED": {"type": "STRING", "value": "hdf5-examples-master.tar.gz"},
-        "HDF5_EXAMPLES_COMPRESSED_DIR": {"type": "PATH", "value": "${sourceParentDir}/temp"},
-        "EXAMPLES_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5-examples/releases/download/snapshot"},
-        "EXAMPLES_TGZ_ORIGNAME": {"type": "STRING", "value": "hdf5-examples-2.0.4.tar.gz"}
-      }
-    },
-    {
       "name": "ci-StdExamples",
       "hidden": true,
-      "inherits": ["ci-base", "ci-ExamplesVars", "ci-base-tgz"],
+      "inherits": ["ci-base", "ci-base-tgz"],
       "cacheVariables": {
-        "EXAMPLES_USE_RELEASE_NAME": "ON",
-        "EXAMPLES_USE_LOCALCONTENT": "OFF",
         "HDF5_PACK_EXAMPLES": "ON",
         "EXAMPLES_DOWNLOAD": "ON"
       }
@@ -160,6 +148,17 @@
         "ci-Java",
         "ci-StdShar"
       ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "description": "Intel Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Intel",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar"
+      ]
     }
   ],
   "buildPresets": [
@@ -186,6 +185,15 @@
       "verbose": true,
       "inherits": [
         "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "description": "Intel Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-Intel",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Intel"
       ]
     }
   ],
@@ -215,6 +223,18 @@
       "inherits": [
         "ci-x64-Release-GNUC"
       ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "configurePreset": "ci-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ],
+      "filter": {
+        "exclude": {
+          "name": "H5DUMP-tfloatsattrs"
+        }
+      }
     }
   ],
   "packagePresets": [
@@ -232,6 +252,11 @@
       "name": "ci-StdShar-GNUC",
       "configurePreset": "ci-StdShar-GNUC",
       "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "configurePreset": "ci-StdShar-Intel",
+      "inherits": "ci-x64-Release-Intel"
     }
   ],
   "workflowPresets": [
@@ -261,6 +286,16 @@
         {"type": "test", "name": "ci-StdShar-GNUC"},
         {"type": "package", "name": "ci-StdShar-GNUC"}
       ]
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Intel"},
+        {"type": "build", "name": "ci-StdShar-Intel"},
+        {"type": "test", "name": "ci-StdShar-Intel"},
+        {"type": "package", "name": "ci-StdShar-Intel"}
+      ]
     }
   ]
 }
+

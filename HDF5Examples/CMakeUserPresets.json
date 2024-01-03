@@ -1,0 +1,244 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "my-HDF5114",
+      "hidden": true,
+      "environment": {
+        "HDF5_ROOT": "${sourceParentDir}/temp/HDF_Group/HDF5/1.14.3",
+        "HDF5_PLUGIN_PATH": "${sourceParentDir}/temp/HDF_Group/HDF5/1.14.3/lib/plugin"
+      },
+      "cacheVariables": {
+        "HDF5_ROOT": {"type": "STRING", "value": "${sourceParentDir}/temp/HDF_Group/HDF5/1.14.3"},
+        "HDF_BUILD_FORTRAN": "ON",
+        "HDF_BUILD_JAVA": "ON",
+        "HDF_BUILD_FILTERS": "ON",
+        "H5EX_BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "my-HDF5Dev",
+      "hidden": true,
+      "environment": {
+        "HDF5_ROOT": "${sourceParentDir}/temp/HDF_Group/HDF5/1.15.0",
+        "HDF5_PLUGIN_PATH": "${sourceParentDir}/temp/HDF_Group/HDF5/1.15.0/lib/plugin"
+      },
+      "cacheVariables": {
+        "HDF5_ROOT": {"type": "STRING", "value": "${sourceParentDir}/temp/HDF_Group/HDF5/1.15.0"},
+        "HDF_BUILD_FORTRAN": "ON",
+        "HDF_BUILD_JAVA": "ON",
+        "HDF_BUILD_FILTERS": "ON",
+        "H5EX_BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "my-StdShar",
+      "hidden": true,
+      "inherits": ["ci-base", "ci-base-examples", "ci-StdPlugins"],
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON",
+        "USE_SHARED_LIBS": "ON"
+      }
+    },
+    {
+      "name": "my-StdShar-MSVC",
+      "description": "MSVC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "my-StdShar",
+        "my-HDF5Dev"
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "description": "Clang Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "my-StdShar",
+        "my-HDF5Dev"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "description": "GNUC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "my-StdShar",
+        "my-HDF5Dev"
+      ]
+    },
+    {
+      "name": "my-114Shar-MSVC",
+      "description": "MSVC 1.14 Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "my-StdShar",
+        "my-HDF5114"
+      ]
+    },
+    {
+      "name": "my-114Shar-Clang",
+      "description": "Clang 1.14 Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "my-StdShar",
+        "my-HDF5114"
+      ]
+    },
+    {
+      "name": "my-114Shar-GNUC",
+      "description": "GNUC 1.14 Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "my-StdShar",
+        "my-HDF5114"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "description": "MSVC Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "description": "Clang Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "description": "GNUC Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-GNUC",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-114Shar-MSVC",
+      "description": "MSVC 1.14 Build for x64 (Release)",
+      "configurePreset": "my-114Shar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "my-114Shar-Clang",
+      "description": "Clang 1.14 Build for x64 (Release)",
+      "configurePreset": "my-114Shar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-114Shar-GNUC",
+      "description": "GNUC 1.14 Build for x64 (Release)",
+      "configurePreset": "my-114Shar-GNUC",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "configurePreset": "my-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "configurePreset": "my-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "configurePreset": "my-StdShar-GNUC",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-114Shar-MSVC",
+      "configurePreset": "my-114Shar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "my-114Shar-Clang",
+      "configurePreset": "my-114Shar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-114Shar-GNUC",
+      "configurePreset": "my-114Shar-GNUC",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-MSVC"},
+        {"type": "build", "name": "my-StdShar-MSVC"},
+        {"type": "test", "name": "my-StdShar-MSVC"}
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-Clang"},
+        {"type": "build", "name": "my-StdShar-Clang"},
+        {"type": "test", "name": "my-StdShar-Clang"}
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-GNUC"},
+        {"type": "build", "name": "my-StdShar-GNUC"},
+        {"type": "test", "name": "my-StdShar-GNUC"}
+      ]
+    },
+    {
+      "name": "my-114Shar-MSVC",
+      "steps": [
+        {"type": "configure", "name": "my-114Shar-MSVC"},
+        {"type": "build", "name": "my-114Shar-MSVC"},
+        {"type": "test", "name": "my-114Shar-MSVC"}
+      ]
+    },
+    {
+      "name": "my-114Shar-Clang",
+      "steps": [
+        {"type": "configure", "name": "my-114Shar-Clang"},
+        {"type": "build", "name": "my-114Shar-Clang"},
+        {"type": "test", "name": "my-114Shar-Clang"}
+      ]
+    },
+    {
+      "name": "my-114Shar-GNUC",
+      "steps": [
+        {"type": "configure", "name": "my-114Shar-GNUC"},
+        {"type": "build", "name": "my-114Shar-GNUC"},
+        {"type": "test", "name": "my-114Shar-GNUC"}
+      ]
+    }
+  ]
+}

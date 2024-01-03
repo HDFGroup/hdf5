@@ -156,9 +156,9 @@ Specifically look at the \ref ExAPI.
 There are examples for different languages.
 
 The C example to create a chunked dataset is:
-<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
+<a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
 The C example to create a compact dataset is:
-<a href="https://github.com/HDFGroup/hdf5-examples/blob/master/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
+<a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
 
 \section secLBDsetLayoutChange Changing the Layout after Dataset Creation
 The dataset layout is a Dataset Creation Property List. This means that once the dataset has been
@@ -715,7 +715,7 @@ When the library is built, the following compile scripts are included:
 \li h5fc:  compile script for HDF5 F90 programs
 \li h5c++: compile script for HDF5 C++ programs
 
-These scripts are easilye used to compile single file applications, such as those included in the tutorial.
+These scripts are easily used to compile single file applications, such as those included in the tutorial.
 <table>
 <tr>
 <th><strong>Warning</strong>

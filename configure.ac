@@ -4200,15 +4200,6 @@ AC_CONFIG_FILES([Makefile
                  java/src/jni/Makefile
                  java/test/Makefile
                  java/test/junit.sh
-                 java/examples/Makefile
-                 java/examples/intro/Makefile
-                 java/examples/intro/JavaIntroExample.sh
-                 java/examples/datasets/Makefile
-                 java/examples/datasets/JavaDatasetExample.sh
-                 java/examples/datatypes/Makefile
-                 java/examples/datatypes/JavaDatatypeExample.sh
-                 java/examples/groups/Makefile
-                 java/examples/groups/JavaGroupExample.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
@@ -4237,13 +4228,6 @@ if test -n "$TESTPARALLEL"; then
     AC_CONFIG_LINKS([testpar/h5fuse:utils/subfiling_vfd/h5fuse])
   fi
 fi
-
-AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
-                $MKDIR_P java/test/.classes;
-                $MKDIR_P java/examples/intro/.classes;
-                $MKDIR_P java/examples/datasets/.classes;
-                $MKDIR_P java/examples/datatypes/.classes;
-                $MKDIR_P java/examples/groups/.classes])
 
 AC_OUTPUT
 
