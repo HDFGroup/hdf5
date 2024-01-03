@@ -546,6 +546,17 @@ AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
+## HDF5 version from the first line of the README.md file.
+H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
+AC_SUBST([H5_VERSION])
+
+VERS_MAJOR=`echo $H5_VERSION | cut -d. -f1`
+VERS_MINOR=`echo $H5_VERSION | cut -d. -f2`
+VERS_RELEASE=`echo $H5_VERSION | cut -d. -f3`
+AC_DEFINE_UNQUOTED([VERS_MAJOR], $VERS_MAJOR, [Define major library version])
+AC_DEFINE_UNQUOTED([VERS_MINOR], $VERS_MINOR, [Define minor library version])
+AC_DEFINE_UNQUOTED([VERS_RELEASE], $VERS_RELEASE, [Define release library version])
+
 ## ----------------------------------------------------------------------
 ## Check if the Fortran interface should be enabled
 ##
@@ -3671,10 +3682,6 @@ fi
 ## Set some variables for general configuration information to be saved
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
-
-## HDF5 version from the first line of the README.md file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
-AC_SUBST([H5_VERSION])
 
 ## Configuration date
 AC_SUBST([CONFIG_DATE]) CONFIG_DATE="`date`"

@@ -388,6 +388,12 @@ New Features
     Fortran Library:
     ----------------
 
+    - Added Fortran Parameters:
+      H5S_BLOCK_F and H5S_PLIST_F
+
+    - The configuration definitions file, H5config_f.inc, is now installed
+      and the HDF5 version number has been added to it.
+
     - Added Fortran APIs:
       h5fdelete_f
 
