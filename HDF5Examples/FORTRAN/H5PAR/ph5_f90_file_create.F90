@@ -5,10 +5,10 @@
      PROGRAM FILE_CREATE
 
      USE HDF5 ! This module contains all necessary modules
+     USE MPI
 
      IMPLICIT NONE
 
-     INCLUDE 'mpif.h'
      CHARACTER(LEN=10), PARAMETER :: filename = "sds.h5"  ! File name
 
      INTEGER(HID_T) :: file_id       ! File identifier

@@ -771,6 +771,8 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
      *  H5S flags
      */
     h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
+    h5s_hid_flags[1] = (hid_t_f)H5S_BLOCK;
+    h5s_hid_flags[2] = (hid_t_f)H5S_PLIST;
 
     h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
 

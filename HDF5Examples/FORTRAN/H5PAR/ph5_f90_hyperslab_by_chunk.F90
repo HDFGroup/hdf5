@@ -4,11 +4,10 @@
      PROGRAM DATASET_BY_CHUNK
 
      USE HDF5 ! This module contains all necessary modules
-!     USE MPI
+     USE MPI
 
      IMPLICIT NONE
 
-     include 'mpif.h'
      CHARACTER(LEN=11), PARAMETER :: filename = "sds_chnk.h5"  ! File name
      CHARACTER(LEN=8), PARAMETER :: dsetname = "IntArray" ! Dataset name
 
