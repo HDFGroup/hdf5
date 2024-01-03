@@ -30,8 +30,6 @@ set (test_ex_CLEANFILES
     group.h5
     groups.h5
     hard_link.h5
-    h5_subfiling_default_example.h5
-    h5_subfiling_custom_example.h5
     mount1.h5
     mount2.h5
     one_index_file.h5
@@ -54,19 +52,6 @@ set (test_ex_CLEANFILES
     blue/prefix_target.h5
     red/prefix_target.h5
     u2w/u2w_target.h5
-    vds.h5
-    vds-exc.h5
-    vds-excalibur.h5
-    vds-exclim.h5
-    vds-percival.h5
-    vds-percival-unlim.h5
-    vds-percival-unlim-maxmin.h5
-    a.h5
-    b.h5
-    c.h5
-    d.h5
-    vds-simpleIO.h5
-    vds-eiger.h5
 )
 
 if (HDF5_TEST_SERIAL)
@@ -108,33 +93,5 @@ if (HDF5_TEST_SERIAL)
       set_tests_properties (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "EXAMPLES-${example}")
-  endforeach ()
-endif ()
-
-### Windows pops up a modal permission dialog on this test
-if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
-  # Ensure that 24 is a multiple of the number of processes.
-  # The number 24 corresponds to SPACE1_DIM1 and SPACE1_DIM2 defined in ph5example.c
-  math(EXPR NUMPROCS "24 / ((24 + ${MPIEXEC_MAX_NUMPROCS} - 1) / ${MPIEXEC_MAX_NUMPROCS})")
-
-  foreach (parallel_example ${parallel_examples})
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${parallel_example}> ${MPIEXEC_POSTFLAGS})
-    else ()
-      add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-          -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:${parallel_example}>;${MPIEXEC_POSTFLAGS}"
-          -D "TEST_EXPECT=0"
-          -D "TEST_SKIP_COMPARE=TRUE"
-          -D "TEST_OUTPUT=${parallel_example}.out"
-          -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
-          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
-      )
-    endif ()
-    if (last_test)
-      set_tests_properties (MPI_TEST_EXAMPLES-${parallel_example} PROPERTIES DEPENDS ${last_test})
-    endif ()
-    set (last_test "MPI_TEST_EXAMPLES-${parallel_example}")
   endforeach ()
 endif ()
