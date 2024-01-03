@@ -183,7 +183,6 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
           FetchContent_Declare (${hdf5_vol_depname}
             GIT_REPOSITORY "${HDF5_VOL_SOURCE}"
             GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
-            FIND_PACKAGE_ARGS NAMES ${hdf5_vol_name_lower}
           )
         endif ()
       elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
