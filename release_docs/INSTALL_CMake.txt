@@ -826,7 +826,7 @@ ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure opti
 HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                           ""
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                       OFF
 HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                             OFF
-HDF5_SHOW_ALL_WARNINGS         "Show all warnings (i.e. not suppress "noisy" ones internally)"         OFF
+HDF5_SHOW_ALL_WARNINGS         "Show all warnings (i.e. not suppress "noisy" ones internally)"   OFF
 HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)."    OFF
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"                 OFF
 HDF5_ENABLE_DEBUG_APIS         "Turn on extra debug output in all packages"                      OFF

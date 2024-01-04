@@ -42,7 +42,7 @@ Currently unsupported
 
 These API tests currently only support usage with the native HDF5 VOL connector and HDF5 VOL
 connectors that can be loaded dynamically as a plugin. For information on how to build a VOL
-connector in this manner, refer to section 2.3 of the [HDF5 VOL Connector Author Guide](https://docs.hdfgroup.org/hdf5/develop/_v_o_l__connector.html).
+connector in this manner, refer to section 2.3 of the [HDF5 VOL Connector Author Guide](https://docs.hdfgroup.org/hdf5/v1_14/_v_o_l__connector.html).
 
 TODO: section on building VOL connectors alongside HDF5 for use with tests
 

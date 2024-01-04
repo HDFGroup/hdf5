@@ -20,13 +20,13 @@ DOCUMENTATION
 -------------
 This release is fully functional for the API described in the documentation.
 
-   https://docs.hdfgroup.org/hdf5/develop/_l_b_a_p_i.html
+   https://docs.hdfgroup.org/hdf5/v1_14/_l_b_a_p_i.html
 
 Full Documentation and Programming Resources for this release can be found at
 
-   https://docs.hdfgroup.org/hdf5/develop/index.html
+   https://docs.hdfgroup.org/hdf5/v1_14/index.html
 
-The latest doxygen documentation generated on changes to develop is available at:
+The latest doxygen documentation generated on changes to HDF5 1.14.x is available at:
 
    https://hdfgroup.github.io/hdf5/
 
