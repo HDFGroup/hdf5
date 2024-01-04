@@ -4,10 +4,8 @@ project (HDF5Examples_FORTRAN_H5T Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (
-    ${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT}
-    ${PROJECT_BINARY_DIR}
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
+  "${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------

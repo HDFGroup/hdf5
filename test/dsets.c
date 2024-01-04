@@ -48,9 +48,6 @@
 #include "H5FDpkg.h"
 #include "H5VMprivate.h"
 #include "H5Zpkg.h"
-#ifdef H5_HAVE_SZLIB_H
-#include "szlib.h"
-#endif
 
 static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "compact_dataset",     /* 1 */
