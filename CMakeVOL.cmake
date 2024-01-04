@@ -172,20 +172,16 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
       set (hdf5_vol_depname "${HDF5_VOL_${hdf5_vol_name_upper}_CMAKE_PACKAGE_NAME}")
       string (TOLOWER "${hdf5_vol_depname}" hdf5_vol_depname_lower)
 
+      if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+        set("OVERRIDE_FIND_PACKAGE_OPT" "OVERRIDE_FIND_PACKAGE")
+      endif()
+
       if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
-        if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
-          FetchContent_Declare (${hdf5_vol_depname}
+        FetchContent_Declare (${hdf5_vol_depname}
             GIT_REPOSITORY "${HDF5_VOL_SOURCE}"
             GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
-            OVERRIDE_FIND_PACKAGE
-          )
-        else ()
-          FetchContent_Declare (${hdf5_vol_depname}
-            GIT_REPOSITORY "${HDF5_VOL_SOURCE}"
-            GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
-            FIND_PACKAGE_ARGS NAMES ${hdf5_vol_name_lower}
-          )
-        endif ()
+            "${OVERRIDE_FIND_PACKAGE_OPT}"
+        )
       elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
         FetchContent_Declare (${hdf5_vol_depname}
           SOURCE_DIR "${HDF5_VOL_SOURCE}"
