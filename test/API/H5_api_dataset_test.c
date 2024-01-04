@@ -4464,9 +4464,6 @@ test_read_multi_dataset_small_all(void)
         goto error;
     }
 
-    // TODO
-    fprintf(stderr, "H5Fopen complete");
-
     if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
@@ -4508,9 +4505,6 @@ test_read_multi_dataset_small_all(void)
             TEST_ERROR;
     }
 
-    // TODO
-    fprintf(stderr, "H5Dcreate complete");
-
     if (H5Dread_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_id_arr, fspace_id_arr, fspace_id_arr,
                       H5P_DEFAULT, read_buf_arr) < 0) {
         H5_FAILED();
@@ -4518,11 +4512,10 @@ test_read_multi_dataset_small_all(void)
         goto error;
     }
 
-    // TODO
-    fprintf(stderr, "H5Dread_multi complete");
-
-    for (i = 0; i < DATASET_MULTI_COUNT; i++)
+    for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         free(read_buf_arr[i]);
+        read_buf_arr[i] = NULL;
+    }
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
     for (i = 0; i < DATASET_MULTI_COUNT; i++)
@@ -4544,6 +4537,7 @@ error:
     {
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
             free(read_buf_arr[i]);
+            read_buf_arr[i] = NULL;
             H5Dclose(dset_id_arr[i]);
         }
         H5Sclose(fspace_id);
