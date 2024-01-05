@@ -200,12 +200,13 @@ H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_trav_obj_cnt_t *udata        = (H5F_trav_obj_cnt_t *)key;
     H5I_type_t          obj_type     = H5I_UNINIT;
+    H5T_t              *type         = NULL;
     htri_t              is_committed = FAIL;
     int                 ret_value    = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    if ((obj_type = H5Iget_type(obj_id)) < 0)
+    if ((obj_type = H5I_get_type(obj_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "object has invalid id type");
 
     if ((obj_type != H5I_DATATYPE)) {
@@ -213,7 +214,10 @@ H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
     }
     else {
         /* Only open committed datatypes should be counted as open datatype objects on the file */
-        if ((is_committed = H5Tcommitted(obj_id)) < 0)
+        if (NULL == (type = (H5T_t *)H5I_object_verify(obj_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a datatype");
+
+        if ((is_committed = H5T_is_named(type)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "bad datatype");
 
         if (is_committed)
@@ -323,6 +327,7 @@ H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_trav_obj_ids_t *udata        = (H5F_trav_obj_ids_t *)key;
     H5I_type_t          obj_type     = H5I_UNINIT;
+    H5T_t              *type         = NULL;
     htri_t              is_committed = FAIL;
     int                 ret_value    = H5_ITER_CONT; /* Return value */
 
@@ -331,7 +336,7 @@ H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
     if (udata->obj_count >= udata->max_objs)
         HGOTO_DONE(H5_ITER_STOP);
 
-    if ((obj_type = H5Iget_type(obj_id)) < 0)
+    if ((obj_type = H5I_get_type(obj_id)) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "object has invalid id type");
 
     if ((obj_type != H5I_DATATYPE)) {
@@ -341,7 +346,10 @@ H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
     }
     else {
         /* Only open committed datatypes should be counted as open datatype objects on the file */
-        if ((is_committed = H5Tcommitted(obj_id)) < 0)
+        if (NULL == (type = (H5T_t *)H5I_object_verify(obj_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a datatype");
+
+        if ((is_committed = H5T_is_named(type)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "bad datatype");
 
         if (is_committed) {
