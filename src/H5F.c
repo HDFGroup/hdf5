@@ -196,15 +196,31 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
+H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
-    H5F_trav_obj_cnt_t *udata     = (H5F_trav_obj_cnt_t *)key;
-    int                 ret_value = H5_ITER_CONT; /* Return value */
+    H5F_trav_obj_cnt_t *udata        = (H5F_trav_obj_cnt_t *)key;
+    H5I_type_t          obj_type     = H5I_UNINIT;
+    htri_t              is_committed = FAIL;
+    int                 ret_value    = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
-    udata->obj_count++;
+    if ((obj_type = H5Iget_type(obj_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "object has invalid id type");
 
+    if ((obj_type != H5I_DATATYPE)) {
+        udata->obj_count++;
+    }
+    else {
+        /* Only open committed datatypes should be counted as open datatype objects on the file */
+        if ((is_committed = H5Tcommitted(obj_id)) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "bad datatype");
+
+        if (is_committed)
+            udata->obj_count++;
+    }
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_all_count_cb */
 
@@ -305,17 +321,35 @@ done:
 static int
 H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
-    H5F_trav_obj_ids_t *udata     = (H5F_trav_obj_ids_t *)key;
-    int                 ret_value = H5_ITER_CONT; /* Return value */
+    H5F_trav_obj_ids_t *udata        = (H5F_trav_obj_ids_t *)key;
+    H5I_type_t          obj_type     = H5I_UNINIT;
+    htri_t              is_committed = FAIL;
+    int                 ret_value    = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     if (udata->obj_count >= udata->max_objs)
         HGOTO_DONE(H5_ITER_STOP);
 
-    /* Add the ID to the array */
-    udata->oid_list[udata->obj_count] = obj_id;
-    udata->obj_count++;
+    if ((obj_type = H5Iget_type(obj_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "object has invalid id type");
+
+    if ((obj_type != H5I_DATATYPE)) {
+        /* Add the ID to the array */
+        udata->oid_list[udata->obj_count] = obj_id;
+        udata->obj_count++;
+    }
+    else {
+        /* Only open committed datatypes should be counted as open datatype objects on the file */
+        if ((is_committed = H5Tcommitted(obj_id)) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5_ITER_ERROR, "bad datatype");
+
+        if (is_committed) {
+            /* Add the ID to the array */
+            udata->oid_list[udata->obj_count] = obj_id;
+            udata->obj_count++;
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

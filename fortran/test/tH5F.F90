@@ -164,9 +164,9 @@ CONTAINS
     INTEGER(HID_T) :: file1_id, file2_id
 
     !
-    ! Group identifier
+    ! Group identifiers
     !
-    INTEGER(HID_T) :: gid
+    INTEGER(HID_T) :: gid, g1, g2, g3, g4
 
     !
     ! dataset identifier
@@ -205,7 +205,6 @@ CONTAINS
 
     !number of objects
     INTEGER(SIZE_T) :: obj_count
-    INTEGER(HID_T) :: t1, t2, t3, t4
 
     ! File numbers
     INTEGER  :: file_num1
@@ -241,28 +240,28 @@ CONTAINS
     CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
     if(error .ne. 0) stop
 
-    ! Test object counts
-    CALL h5tcopy_f(H5T_NATIVE_CHARACTER, t1, error)
-    CALL check(" h5tcopy_f",error,total_error)
-    CALL h5tcopy_f(H5T_NATIVE_CHARACTER, t2, error)
-    CALL check(" h5tcopy_f",error,total_error)
-    CALL h5tcopy_f(H5T_NATIVE_CHARACTER, t3, error)
-    CALL check(" h5tcopy_f",error,total_error)
-    CALL h5tcopy_f(H5T_NATIVE_CHARACTER, t4, error)
-    CALL check(" h5tcopy_f",error,total_error)
-
-    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
-    CALL check(" h5fget_obj_count_f",error,total_error)
-
-    IF(obj_count.NE.4)THEN
-       total_error = total_error + 1
-    ENDIF
-
     !
     !Create first file "mount1.h5" using default properties.
     !
     CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
     CALL check("h5fcreate_f",error,total_error)
+
+    ! Test object counts
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
+    CALL check(" h5fget_obj_count_f",error,total_error)
+
+    IF(obj_count.NE.1)THEN
+       total_error = total_error + 1
+    ENDIF
+
+    CALL h5gcreate_f(file1_id, "/G1", g1, error)
+    CALL check(" h5gcopy_f",error, total_error)
+    CALL h5gcreate_f(file1_id, "/G2", g2, error)
+    CALL check(" h5gcopy_f",error, total_error)
+    CALL h5gcreate_f(file1_id, "/G3", g3, error)
+    CALL check(" h5gcopy_f",error, total_error)
+    CALL h5gcreate_f(file1_id, "/G4", g4, error)
+    CALL check(" h5gcopy_f",error, total_error)
 
     CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
     CALL check(" h5fget_obj_count_f",error,total_error)
@@ -271,14 +270,14 @@ CONTAINS
        total_error = total_error + 1
     ENDIF
 
-    CALL h5tclose_f(t1, error)
-    CALL check("h5tclose_f",error,total_error)
-    CALL h5tclose_f(t2, error)
-    CALL check("h5tclose_f",error,total_error)
-    CALL h5tclose_f(t3, error)
-    CALL check("h5tclose_f",error,total_error)
-    CALL h5tclose_f(t4, error)
-    CALL check("h5tclose_f",error,total_error)
+    CALL h5gclose_f(g1, error)
+    CALL check("h5gclose_f",error,total_error)
+    CALL h5gclose_f(g2, error)
+    CALL check("h5gclose_f",error,total_error)
+    CALL h5gclose_f(g3, error)
+    CALL check("h5gclose_f",error,total_error)
+    CALL h5gclose_f(g4, error)
+    CALL check("h5gclose_f",error,total_error)
 
     CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
     CALL check(" h5fget_obj_count_f",error,total_error)
