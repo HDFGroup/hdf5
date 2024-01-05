@@ -320,6 +320,12 @@ New Features
 
     Library:
     --------
+    - Fixed an issue where copies of transient datatypes were
+      considered open objects on a file by H5Fget_obj_count
+      and H5Fget_obj_ids
+
+      Addresses GitHub issue #3316
+
     - Implemented optimized support for vector I/O in the Subfiling VFD
 
       Previously, the Subfiling VFD would handle vector I/O requests by
