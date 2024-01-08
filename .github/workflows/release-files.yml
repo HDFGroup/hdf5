@@ -174,7 +174,7 @@ jobs:
               ls ${{ runner.workspace }}
 
       - name: branch-only-docs
-        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen

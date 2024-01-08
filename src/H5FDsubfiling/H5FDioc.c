@@ -1610,12 +1610,14 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
     H5FD_ioc_t          *file_ptr      = (H5FD_ioc_t *)_file;
     io_req_t           **sf_io_reqs    = NULL;
     int64_t              sf_context_id = -1;
+    size_t               io_size       = 0;
+    bool                 extend_sizes  = false;
     herr_t               ret_value     = SUCCEED;
 
     assert(_file);
-    assert(addrs);
-    assert(sizes);
-    assert(bufs);
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1648,12 +1650,22 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
     for (size_t i = 0; i < (size_t)count; i++) {
         herr_t write_status;
 
-        if (sizes[i] == 0)
+        if (!extend_sizes) {
+            if ((i > 0) && (sizes[i] == 0)) {
+                extend_sizes = true;
+                io_size      = sizes[i - 1];
+            }
+            else {
+                io_size = sizes[i];
+            }
+        }
+
+        if (io_size == 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "invalid size argument of 0");
 
         H5_CHECK_OVERFLOW(addrs[i], haddr_t, int64_t);
-        H5_CHECK_OVERFLOW(sizes[i], size_t, int64_t);
-        write_status = ioc__write_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)sizes[i],
+        H5_CHECK_OVERFLOW(io_size, size_t, int64_t);
+        write_status = ioc__write_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)io_size,
                                                     bufs[i], &sf_io_reqs[i]);
 
         if (write_status < 0)
@@ -1691,12 +1703,14 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
     H5FD_ioc_t          *file_ptr      = (H5FD_ioc_t *)_file;
     io_req_t           **sf_io_reqs    = NULL;
     int64_t              sf_context_id = -1;
+    size_t               io_size       = 0;
+    bool                 extend_sizes  = false;
     herr_t               ret_value     = SUCCEED;
 
     assert(_file);
-    assert(addrs);
-    assert(sizes);
-    assert(bufs);
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1720,12 +1734,22 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     for (size_t i = 0; i < (size_t)count; i++) {
-        int read_status;
+        herr_t read_status;
+
+        if (!extend_sizes) {
+            if ((i > 0) && (sizes[i] == 0)) {
+                extend_sizes = true;
+                io_size      = sizes[i - 1];
+            }
+            else {
+                io_size = sizes[i];
+            }
+        }
 
         H5_CHECK_OVERFLOW(addrs[i], haddr_t, int64_t);
-        H5_CHECK_OVERFLOW(sizes[i], size_t, int64_t);
-        read_status = ioc__read_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)sizes[i],
-                                                  bufs[i], &sf_io_reqs[i]);
+        H5_CHECK_OVERFLOW(io_size, size_t, int64_t);
+        read_status = ioc__read_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)io_size, bufs[i],
+                                                  &sf_io_reqs[i]);
 
         if (read_status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't queue read operation");

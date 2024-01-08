@@ -29,7 +29,6 @@
                             /* in detailed logging  */
 #define HEXDUMP_WRITEDATA 0 /* Toggle whether to print bytes to write */
                             /* in detailed logging  */
-#define LISTENQ 80          /* max pending Driver requests */
 
 #define MW_SESSION_MAGIC   0x88F36B32u
 #define MW_SOCK_COMM_MAGIC 0xDF10A157u

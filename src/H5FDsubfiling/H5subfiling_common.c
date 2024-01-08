@@ -3156,4 +3156,37 @@ done:
 
     return;
 }
+
+void
+H5_subfiling_log_nonewline(int64_t sf_context_id, const char *fmt, ...)
+{
+    subfiling_context_t *sf_context = NULL;
+    va_list              log_args;
+
+    va_start(log_args, fmt);
+
+    /* Retrieve the subfiling object for the newly-created context ID */
+    if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id))) {
+        printf("%s: couldn't get subfiling object from context ID\n", __func__);
+        goto done;
+    }
+
+    H5FD_ioc_begin_thread_exclusive();
+
+    if (sf_context->sf_logfile) {
+        vfprintf(sf_context->sf_logfile, fmt, log_args);
+        fflush(sf_context->sf_logfile);
+    }
+    else {
+        vprintf(fmt, log_args);
+        fflush(stdout);
+    }
+
+    H5FD_ioc_end_thread_exclusive();
+
+done:
+    va_end(log_args);
+
+    return;
+}
 #endif

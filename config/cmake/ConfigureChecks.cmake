@@ -595,6 +595,17 @@ endif ()
 MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 
 # ----------------------------------------------------------------------
+# Check if they would like to show all warnings (not suppressed internally)
+#-----------------------------------------------------------------------------
+option (HDF5_SHOW_ALL_WARNINGS "Show all warnings (not suppressed internally)." OFF)
+mark_as_advanced (HDF5_SHOW_ALL_WARNINGS)
+if (HDF5_SHOW_ALL_WARNINGS)
+  message (STATUS "....All warnings will be displayed")
+  set (${HDF_PREFIX}_SHOW_ALL_WARNINGS 1)
+endif ()
+MARK_AS_ADVANCED (HDF5_SHOW_ALL_WARNINGS)
+
+# ----------------------------------------------------------------------
 # Check if they would like to use file locking by default
 #-----------------------------------------------------------------------------
 option (HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" ON)

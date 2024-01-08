@@ -1044,7 +1044,7 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *
  * \see H5Tclose()
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
@@ -1069,6 +1069,8 @@ H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
  *          The returned datatype identifier should be released with H5Tclose()
  *          to prevent resource leaks.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL hid_t H5Tcopy(hid_t type_id);
 /**
@@ -1084,12 +1086,16 @@ H5_DLL hid_t H5Tcopy(hid_t type_id);
  *          through this datatype identifier is illegal. Failure to release
  *          a datatype with this call will result in resource leaks.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Tclose(hid_t type_id);
 /**
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Tclose().
+ *
+ * \since 1.12.0
  *
  */
 #ifndef H5_DOXYGEN
@@ -1111,7 +1117,7 @@ H5_DLL herr_t H5Tclose_async(hid_t type_id, hid_t es_id);
  * \details H5Tequal() determines whether two datatype identifiers refer to
  *          the same datatype.
  *
- * \since 1.6 or earlier
+ * \since 1.0.0
  *
  */
 H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
@@ -1129,6 +1135,8 @@ H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
  *          the library for predefined datatypes so the application does not
  *          inadvertently change or delete a predefined type. Once a datatype
  *          is locked it can never be unlocked.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tlock(hid_t type_id);
@@ -1185,6 +1193,8 @@ H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lc
  *
  * \brief Asynchronous version of H5Tcommit2().
  *
+ * \since 1.12.0
+ *
  */
 #ifndef H5_DOXYGEN
 H5_DLL herr_t H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
@@ -1222,6 +1232,8 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
  * \ingroup H5T
  *
  * \brief Asynchronous version of H5Topen2().
+ *
+ * \since 1.12.0
  *
  */
 #ifndef H5_DOXYGEN
@@ -1322,7 +1334,7 @@ H5_DLL hid_t H5Tget_create_plist(hid_t type_id);
  *
  * \version 1.8.0 Fortran API was added
  *
- * \since 1.6 or earlier
+ * \since 1.0.0
  *
  */
 H5_DLL htri_t H5Tcommitted(hid_t type_id);
@@ -1380,6 +1392,8 @@ H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
  *          with H5Tclose() when the identifier is no longer needed so that
  *          resource leaks will not develop.
  *
+ * \since 1.2.0
+ *
  */
 H5_DLL hid_t H5Tdecode(const void *buf);
 /**
@@ -1403,7 +1417,7 @@ H5_DLL hid_t H5Tdecode(const void *buf);
  *
  * \return \herr_t
  *
- * \since 1.10.0  C function introduced with this release.
+ * \since 1.10.0
  *
  * \see     H5Dflush()
  *          H5Drefresh()
@@ -1439,7 +1453,7 @@ H5_DLL herr_t H5Tflush(hid_t type_id);
  *          datatype. The reopened datatype is automatically re-registered
  *          with the same identifier.
  *
- * \since 1.2.0
+ * \since 1.10.0
  *
  */
 H5_DLL herr_t H5Trefresh(hid_t type_id);
@@ -1469,7 +1483,7 @@ H5_DLL herr_t H5Trefresh(hid_t type_id);
  *          datatypes; a compound datatype can have a member which is a
  *          compound datatype.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id);
@@ -1485,7 +1499,7 @@ H5_DLL herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t 
  * \details H5Tpack() recursively removes padding from within a compound
  *          datatype to make it more efficient (space-wise) to store that data.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tpack(hid_t type_id);
@@ -1631,6 +1645,8 @@ H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name, void *value /*out*/)
  *            the array being of the string or character base type.\n
  *            To create a variable-length string datatype, see \ref_vlen_strings.
  *
+ * \since 1.2.0
+ *
  */
 H5_DLL hid_t H5Tvlen_create(hid_t base_id);
 
@@ -1719,6 +1735,8 @@ H5_DLL int H5Tget_array_dims2(hid_t type_id, hsize_t dims[]);
  *                maximum size of an opaque datatype tag, was added in
  *                H5Tpublic.h.
  *
+ * \since 1.2.0
+ *
  */
 H5_DLL herr_t H5Tset_tag(hid_t type, const char *tag);
 /**
@@ -1736,6 +1754,8 @@ H5_DLL herr_t H5Tset_tag(hid_t type, const char *tag);
  *
  * \attention The tag is returned via a pointer to an allocated string, which
  *            the caller must free.
+ *
+ * \since 1.2.0
  *
  */
 H5_DLL char *H5Tget_tag(hid_t type);
@@ -1757,6 +1777,8 @@ H5_DLL char *H5Tget_tag(hid_t type);
  *          The datatype identifier returned by this function must be released
  *          with H5Tclose()  when the identifier is no longer needed so that
  *          resource leaks will not develop.
+ *
+ * \since 1.2.0
  *
  */
 H5_DLL hid_t H5Tget_super(hid_t type);
@@ -1780,6 +1802,8 @@ H5_DLL hid_t H5Tget_super(hid_t type);
  *       is not supported. If #H5T_TIME is used, the resulting data will
  *       be readable and modifiable only on the originating computing
  *       platform; it will not be portable to other platforms.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_class_t H5Tget_class(hid_t type_id);
@@ -1835,7 +1859,7 @@ H5_DLL htri_t H5Tdetect_class(hid_t type_id, H5T_class_t cls);
  *
  * \see H5Tset_size()
  *
- * \since 1.2.0
+ * \since 1.0.0
  */
 H5_DLL size_t H5Tget_size(hid_t type_id);
 /**
@@ -1860,7 +1884,7 @@ H5_DLL size_t H5Tget_size(hid_t type_id);
  *          but all other members have byte order #H5T_ORDER_LE,  H5Tget_order()
  *          will return #H5T_ORDER_LE for the compound datatype.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_order_t H5Tget_order(hid_t type_id);
@@ -1880,7 +1904,7 @@ H5_DLL H5T_order_t H5Tget_order(hid_t type_id);
  *          unless padding is present, is 8 times larger than the value
  *          returned by H5Tget_size().
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL size_t H5Tget_precision(hid_t type_id);
@@ -1909,7 +1933,7 @@ H5_DLL size_t H5Tget_precision(hid_t type_id);
  *          3:  [0x22]  [ pad]  [ pad]  [0x11]
  *          \endcode
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL int H5Tget_offset(hid_t type_id);
@@ -1928,7 +1952,7 @@ H5_DLL int H5Tget_offset(hid_t type_id);
  *          most-significant bit padding. Valid padding types are:
  *          \snippet this H5T_pad_t_snip
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out*/, H5T_pad_t *msb /*out*/);
@@ -1945,7 +1969,7 @@ H5_DLL herr_t H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out*/, H5T_pad_t *msb /
  *          Valid types are:
  *          \snippet this H5T_sign_t_snip
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_sign_t H5Tget_sign(hid_t type_id);
@@ -1969,7 +1993,7 @@ H5_DLL H5T_sign_t H5Tget_sign(hid_t type_id);
  *          datatype. Bits are numbered with the least significant bit number
  *          zero. Any (or even all) of the arguments can be null pointers.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*out*/, size_t *esize /*out*/,
@@ -1985,7 +2009,7 @@ H5_DLL herr_t H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*
  *
  * \details H5Tget_ebias() retrieves the exponent bias of a floating-point type.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL size_t H5Tget_ebias(hid_t type_id);
@@ -2004,7 +2028,7 @@ H5_DLL size_t H5Tget_ebias(hid_t type_id);
  *          floating-point datatype. Valid normalization types are:
  *          \snippet this H5T_norm_t_snip
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_norm_t H5Tget_norm(hid_t type_id);
@@ -2023,7 +2047,7 @@ H5_DLL H5T_norm_t H5Tget_norm(hid_t type_id);
  *          bits in floating-point datatypes. Valid padding types are:
  *          \snippet this H5T_pad_t_snip
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_pad_t H5Tget_inpad(hid_t type_id);
@@ -2044,7 +2068,7 @@ H5_DLL H5T_pad_t H5Tget_inpad(hid_t type_id);
  *          values returned are:
  * \str_pad_type
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
@@ -2061,7 +2085,7 @@ H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
  * \details H5Tget_nmembers() retrieves the number of fields in a compound
  *          datatype or the number of members of an enumeration datatype.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL int H5Tget_nmembers(hid_t type_id);
@@ -2088,7 +2112,7 @@ H5_DLL int H5Tget_nmembers(hid_t type_id);
  *          the field. The caller must subsequently free the buffer with
  *          H5free_memory().
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL char *H5Tget_member_name(hid_t type_id, unsigned membno);
@@ -2110,7 +2134,7 @@ H5_DLL char *H5Tget_member_name(hid_t type_id, unsigned membno);
  *          Fields are stored in no particular order with index values of 0
  *          through N-1, where N is the value returned by H5Tget_nmembers() .
  *
- * \since 1.2.0
+ * \since 1.4.0
  *
  */
 H5_DLL int H5Tget_member_index(hid_t type_id, const char *name);
@@ -2134,7 +2158,7 @@ H5_DLL int H5Tget_member_index(hid_t type_id, const char *name);
  *
  * \version 1.6.4 \p member_no parameter type changed to unsigned.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL size_t H5Tget_member_offset(hid_t type_id, unsigned membno);
@@ -2155,7 +2179,7 @@ H5_DLL size_t H5Tget_member_offset(hid_t type_id, unsigned membno);
  *          Valid class identifiers, as defined in H5Tpublic.h, are:
  *          \snippet this H5T_class_t_snip
  *
- * \since 1.2.0
+ * \since 1.4.0
  *
  */
 H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno);
@@ -2176,7 +2200,7 @@ H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno);
  *
  * \version 1.6.4 \p membno parameter type changed to unsigned.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL hid_t H5Tget_member_type(hid_t type_id, unsigned membno);
@@ -2203,7 +2227,7 @@ H5_DLL hid_t H5Tget_member_type(hid_t type_id, unsigned membno);
  *          of that base type. If the size is unknown, you can determine it
  *          with H5Tget_size().
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tget_member_value(hid_t type_id, unsigned membno, void *value /*out*/);
@@ -2221,7 +2245,7 @@ H5_DLL herr_t H5Tget_member_value(hid_t type_id, unsigned membno, void *value /*
  *          Valid character set types are:
  *          \csets
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL H5T_cset_t H5Tget_cset(hid_t type_id);
@@ -2378,7 +2402,7 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *
  * \see H5Tget_size()
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);
@@ -2417,7 +2441,7 @@ H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);
  *              have the same byte order.
  *          \li Opaque datatypes: Byte order can be set but has no effect.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
@@ -2447,7 +2471,7 @@ H5_DLL herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
  *          locations and sizes of the sign, mantissa, and exponent fields
  *          first.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
@@ -2481,7 +2505,7 @@ H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
  *
  *          The offset of an #H5T_STRING cannot be set to anything but zero.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_offset(hid_t type_id, size_t offset);
@@ -2517,7 +2541,7 @@ H5_DLL herr_t H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb);
  * \details H5Tset_sign() sets the sign property for an integer type:
  * \sign_prop
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_sign(hid_t type_id, H5T_sign_t sign);
@@ -2544,7 +2568,7 @@ H5_DLL herr_t H5Tset_sign(hid_t type_id, H5T_sign_t sign);
  *          Fields are not allowed to extend beyond the number of bits of
  *          precision, nor are they allowed to overlap with one another.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize);
@@ -2560,7 +2584,7 @@ H5_DLL herr_t H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esiz
  *
  * \details H5Tset_ebias() sets the exponent bias of a floating-point type.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_ebias(hid_t type_id, size_t ebias);
@@ -2578,7 +2602,7 @@ H5_DLL herr_t H5Tset_ebias(hid_t type_id, size_t ebias);
  *          datatype. Valid normalization types are:
  *          \snippet this H5T_norm_t_snip
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_norm(hid_t type_id, H5T_norm_t norm);
@@ -2599,7 +2623,7 @@ H5_DLL herr_t H5Tset_norm(hid_t type_id, H5T_norm_t norm);
  *          padding types are:
  *          \snippet this H5T_pad_t_snip
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_inpad(hid_t type_id, H5T_pad_t pad);
@@ -2632,7 +2656,7 @@ H5_DLL herr_t H5Tset_inpad(hid_t type_id, H5T_pad_t pad);
  *          string datatype while H5Pset_char_encoding()  sets the character
  *          set used for an HDF5 link or attribute name.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
@@ -2664,7 +2688,7 @@ H5_DLL herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
  *          When converting from a shorter string to a longer string, the
  *          longer string is padded on the end by appending nulls or spaces.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
@@ -2707,6 +2731,8 @@ H5_DLL herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
  *
  * \version 1.6.3 \p nelmts parameter type changed to size_t.
  * \version 1.4.0 \p nelmts parameter type changed to hsize_t.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background,
@@ -2829,7 +2855,7 @@ H5_DLL herr_t H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id);
  * \version 1.8.0 Function H5Topen() renamed to H5Topen1() and deprecated in
  *          this release.
  *
- * \since 1.2.0
+ * \since 1.0.0
  *
  */
 H5_DLL hid_t H5Topen1(hid_t loc_id, const char *name);
@@ -2864,6 +2890,7 @@ H5_DLL hid_t H5Topen1(hid_t loc_id, const char *name);
  *
  * \version 1.8.0 Function H5Tarray_create() renamed to H5Tarray_create1()
  *          and deprecated in this release.
+ *
  * \since 1.4.0
  *
  */
@@ -2892,7 +2919,8 @@ H5_DLL hid_t H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndi
  *
  * \version 1.8.0 Function H5Tarray_create() renamed to H5Tarray_create1()
  *          and deprecated in this release.
- * \since 1.2.0
+ *
+ * \since 1.4.0
  *
  */
 H5_DLL int H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int perm[]);

@@ -80,3 +80,21 @@
 ! Define if deprecated public API symbols are disabled
 #undef NO_DEPRECATED_SYMBOLS
 
+! For major interface/format changes
+#undef VERS_MAJOR_TMP
+
+! For minor interface/format changes
+#undef VERS_MINOR_TMP
+
+! For tweaks, bug-fixes, or development
+#undef VERS_RELEASE_TMP
+
+! macros for comparing versions
+#define VERSION_GE(Maj, Min, Rel)                                                      \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
+
+#define VERSION_LE(Maj, Min, Rel)                                                      \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
+

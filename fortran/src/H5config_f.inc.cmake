@@ -9,7 +9,7 @@
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
+! fortran/H5config_f.inc. Generated from fortran/src/H5config_f.inc.cmake by CMake
 
 ! Define if there is parallel support
 #cmakedefine01 CMAKE_H5_HAVE_PARALLEL
@@ -28,8 +28,8 @@
 #endif
 
 ! Define if on APPLE
-#cmakedefine01 H5_HAVE_DARWIN
-#if H5_HAVE_DARWIN == 0
+#cmakedefine01 CMAKE_H5_HAVE_DARWIN
+#if CMAKE_H5_HAVE_DARWIN == 0
 #undef H5_HAVE_DARWIN
 #else
 #define H5_HAVE_DARWIN
@@ -116,3 +116,22 @@
 #else
 #define H5_NO_DEPRECATED_SYMBOLS
 #endif
+
+! For major interface/format changes
+#define H5_VERS_MAJOR @H5_VERS_MAJOR@
+
+! For minor interface/format changes
+#define H5_VERS_MINOR @H5_VERS_MINOR@
+
+! For tweaks, bug-fixes, or development
+#define H5_VERS_RELEASE @H5_VERS_RELEASE@
+
+! macros for comparing versions
+#define H5_VERSION_GE(Maj, Min, Rel)                                                   \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
+
+#define H5_VERSION_LE(Maj, Min, Rel)                                                   \
+    (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) || \
+     ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
+

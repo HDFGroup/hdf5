@@ -139,7 +139,7 @@ MODULE H5LIB
   INTEGER, DIMENSION(1:H5S_FLAGS_LEN) :: H5S_flags
   INTEGER, PARAMETER :: H5S_HSIZE_FLAGS_LEN = 1
   INTEGER(HSIZE_T), DIMENSION(1:H5S_HSIZE_FLAGS_LEN) :: H5S_hsize_flags
-  INTEGER, PARAMETER :: H5S_HID_FLAGS_LEN = 1
+  INTEGER, PARAMETER :: H5S_HID_FLAGS_LEN = 3
   INTEGER(HSIZE_T), DIMENSION(1:H5S_HID_FLAGS_LEN)   :: H5S_hid_flags
   !
   ! H5T flags declaration
@@ -632,7 +632,9 @@ CONTAINS
     !
     ! H5S flags
     !
-    H5S_ALL_F = H5S_hid_flags(1)
+    H5S_ALL_F   = H5S_hid_flags(1)
+    H5S_BLOCK_F = H5S_hid_flags(2)
+    H5S_PLIST_F = H5S_hid_flags(3)
 
     H5S_UNLIMITED_F = H5S_hsize_flags(1)
 
