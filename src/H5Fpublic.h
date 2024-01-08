@@ -75,7 +75,7 @@
 #define H5F_OBJ_FILE     (0x0001u) /**< File objects */
 #define H5F_OBJ_DATASET  (0x0002u) /**< Dataset objects */
 #define H5F_OBJ_GROUP    (0x0004u) /**< Group objects */
-#define H5F_OBJ_DATATYPE (0x0008u) /**< Named datatype objects */
+#define H5F_OBJ_DATATYPE (0x0008u) /**< Datatype objects */
 #define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects */
 #define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
 #define H5F_OBJ_LOCAL                                                                                        \
