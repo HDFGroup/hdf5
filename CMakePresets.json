@@ -94,6 +94,14 @@
       }
     },
     {
+      "name": "ci-S3",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_ENABLE_ROS3_VFD": "ON",
+        "HDF5_ENABLE_HDFS": "OFF"
+      }
+    },
+    {
       "name": "ci-StdShar",
       "hidden": true,
       "inherits": ["ci-StdCompression", "ci-StdExamples", "ci-StdPlugins"],
@@ -150,6 +158,14 @@
       ]
     },
     {
+      "name": "ci-StdShar-GNUC-S3",
+      "description": "GNUC S3 Config for x64 (Release)",
+      "inherits": [
+        "ci-StdShar-GNUC",
+        "ci-S3"
+      ]
+    },
+    {
       "name": "ci-StdShar-Intel",
       "description": "Intel Standard Config for x64 (Release)",
       "inherits": [
@@ -182,6 +198,15 @@
       "name": "ci-StdShar-GNUC",
       "description": "GNUC Standard Build for x64 (Release)",
       "configurePreset": "ci-StdShar-GNUC",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-S3",
+      "description": "GNUC S3 Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-GNUC-S3",
       "verbose": true,
       "inherits": [
         "ci-x64-Release-GNUC"
@@ -225,6 +250,13 @@
       ]
     },
     {
+      "name": "ci-StdShar-GNUC-S3",
+      "configurePreset": "ci-StdShar-GNUC-S3",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
       "name": "ci-StdShar-Intel",
       "configurePreset": "ci-StdShar-Intel",
       "inherits": [
@@ -251,6 +283,11 @@
     {
       "name": "ci-StdShar-GNUC",
       "configurePreset": "ci-StdShar-GNUC",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "ci-StdShar-GNUC-S3",
+      "configurePreset": "ci-StdShar-GNUC-S3",
       "inherits": "ci-x64-Release-GNUC"
     },
     {
@@ -285,6 +322,15 @@
         {"type": "build", "name": "ci-StdShar-GNUC"},
         {"type": "test", "name": "ci-StdShar-GNUC"},
         {"type": "package", "name": "ci-StdShar-GNUC"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC-S3",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC-S3"},
+        {"type": "build", "name": "ci-StdShar-GNUC-S3"},
+        {"type": "test", "name": "ci-StdShar-GNUC-S3"},
+        {"type": "package", "name": "ci-StdShar-GNUC-S3"}
       ]
     },
     {
