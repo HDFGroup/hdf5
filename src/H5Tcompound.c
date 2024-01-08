@@ -425,11 +425,11 @@ done:
 herr_t
 H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
-    unsigned idx; /* Index of member to insert */
-    size_t   total_size;
-    unsigned i;                   /* Local index variable */
-    H5T_copy_t method = H5T_COPY_ALL;
-    herr_t   ret_value = SUCCEED; /* Return value */
+    unsigned   idx; /* Index of member to insert */
+    size_t     total_size;
+    unsigned   i; /* Local index variable */
+    H5T_copy_t method    = H5T_COPY_ALL;
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -476,7 +476,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     if (member->shared->state == H5T_STATE_OPEN || member->shared->state == H5T_STATE_NAMED)
         method = H5T_COPY_TRANSIENT;
-    parent->shared->u.compnd.memb[idx].type   = H5T_copy(member, method);
+    parent->shared->u.compnd.memb[idx].type = H5T_copy(member, method);
 
     parent->shared->u.compnd.sorted = H5T_SORT_NONE;
     parent->shared->u.compnd.nmembs++;
