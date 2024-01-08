@@ -36,7 +36,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -83,7 +83,7 @@ jobs:
 
       # Save files created by ctest script
       - name: Save published binary (Windows)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: zip-vs2022_cl-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
@@ -106,7 +106,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -145,7 +145,7 @@ jobs:
 
       # Save files created by ctest script
       - name: Save published binary (Linux)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: tgz-ubuntu-2204_gcc-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
@@ -153,7 +153,7 @@ jobs:
 
       # Save doxygen files created by ctest script
       - name: Save published doxygen (Linux)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: docs-doxygen
               path: ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/hdf5lib_docs/html
@@ -176,7 +176,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -224,7 +224,7 @@ jobs:
 
       # Save files created by ctest script
       - name: Save published binary (MacOS)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: tgz-osx12-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz
@@ -259,7 +259,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -310,7 +310,7 @@ jobs:
 
       # Save files created by ctest script
       - name: Save published binary (Windows_intel)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: zip-vs2022_intel-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
@@ -340,7 +340,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -383,7 +383,7 @@ jobs:
 
       # Save files created by ctest script
       - name: Save published binary (Linux_intel)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
               name: tgz-ubuntu-2204_intel-binary
               path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
