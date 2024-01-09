@@ -3,11 +3,6 @@ project (HDF5Examples_JAVA_H5T Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
-set_directory_properties(PROPERTIES
-    INCLUDE_DIRECTORIES 
-        "${HDFJAVA_LIB_DIR};${JAVA_INCLUDE_PATH};${JAVA_INCLUDE_PATH2}"
-)
-
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------

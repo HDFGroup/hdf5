@@ -462,7 +462,8 @@ set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 # Include directories in the source or build tree should come before other
 # directories to prioritize headers in the sources over installed ones.
 #-----------------------------------------------------------------------------
-set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
+set (CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
+set (HDF5_COMP_INCLUDE_DIRECTORIES)
 
 #-----------------------------------------------------------------------------
 # Mac OS X Options

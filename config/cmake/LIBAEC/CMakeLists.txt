@@ -146,7 +146,9 @@ configure_file (${LIBAEC_RESOURCES_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${LIBAEC_BINARY_DIR} ${LIBAEC_SOURCE_DIR}/src ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 
+    "${LIBAEC_BINARY_DIR};${LIBAEC_SOURCE_DIR}/src;${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
 
 #-----------------------------------------------------------------------------
 # Define LIBAEC Library
