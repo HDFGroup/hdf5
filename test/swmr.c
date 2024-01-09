@@ -4053,7 +4053,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
     hsize_t dims[2]       = {100, 0};             /* The dataset dimension sizes */
     hsize_t maxdims[2]    = {100, H5S_UNLIMITED}; /* The dataset maximum dimension sizes */
-    hsize_t chunk_dims[2] = {5, 2};               /* The chunk dimesion sizes */
+    hsize_t chunk_dims[2] = {5, 2};               /* The chunk dimension sizes */
 
     TESTING("H5Fget/set_append_flush() for a chunked dataset's access property list");
 
@@ -4497,7 +4497,7 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 
     hsize_t dims[2]       = {0, 0};                         /* The dataset dimension sizes */
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED}; /* The dataset maximum dimension sizes */
-    hsize_t chunk_dims[2] = {5, 2};                         /* The chunk dimesion sizes */
+    hsize_t chunk_dims[2] = {5, 2};                         /* The chunk dimension sizes */
 
     TESTING("H5Fget/set_append_flush() for multiple opens of a chunked dataset");
 

@@ -24,7 +24,7 @@
  *        support of a complete re-write of the metadata cache
  *        in H5AC.c  However, other uses for the cache code
  *        suggested themselves, and thus this file was created
- *        in an attempt to support re-use.
+ *        in an attempt to support reuse.
  *
  *        For a detailed overview of the cache, please see the
  *        header comment for H5C_t in H5Cpkg.h.

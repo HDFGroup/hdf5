@@ -2237,7 +2237,7 @@ H5_DLL herr_t H5CX_pop(void);
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for package-level functions which propgate errors, but don't issue them */
+/* Use this macro for package-level functions which propagate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
@@ -2262,14 +2262,14 @@ H5_DLL herr_t H5CX_pop(void);
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
+/* Use this macro for staticly-scoped functions which propagate errors, but don't issue them */
 #define FUNC_ENTER_STATIC_NOERR                                                                              \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
+/* Use this macro for staticly-scoped functions which propagate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
 #define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
     {                                                                                                        \

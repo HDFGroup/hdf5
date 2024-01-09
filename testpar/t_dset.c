@@ -2880,7 +2880,7 @@ none_selection_chunk(void)
  *
  *              TEST_ACTUAL_IO_RESET:
  *                  Performs collective and then independent I/O with hthe same dxpl to
- *                  make sure the peroperty is correctly reset to the default on each use.
+ *                  make sure the property is correctly reset to the default on each use.
  *                  Specifically, this test runs TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE
  *                  (The most complex case that works on all builds) and then performs
  *                  an independent read and write with the same dxpls.

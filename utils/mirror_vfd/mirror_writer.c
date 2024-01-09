@@ -57,7 +57,7 @@
  *      guard against commands from the wrong entity.
  *
  * xmit_count (uint32_t)
- *      Record of trasmissions received from the Driver. While the transmission
+ *      Record of transmissions received from the Driver. While the transmission
  *      protocol should be trustworthy, this serves as an additional guard.
  *      Starts a 0 and should be incremented for each one-way transmission.
  *
@@ -761,7 +761,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     addr = (haddr_t)xmit_write.offset;
     type = (H5FD_mem_t)xmit_write.type;
 
-    /* Allocate the buffer once -- re-use between loops.
+    /* Allocate the buffer once -- reuse between loops.
      */
     buf = (char *)HDmalloc(sizeof(char) * H5FD_MIRROR_DATA_BUFFER_MAX);
     if (NULL == buf) {

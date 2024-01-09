@@ -8548,7 +8548,7 @@ known issues if it is a new issue.
    The SWMR feature will only work if an HDF5 file under SWMR access resides
    on a file system that obeys POSIX write() ordering semantics. Because of
    this, SWMR will not work on  network file systems such as NFS or SMB/Windows
-   file shares since those systems do not guarantee write odering. SWMR
+   file shares since those systems do not guarantee write orering. SWMR
    regression tests are likely to fail if run on a network file system. SWMR
    is currently not tested on Windows though it can be tested manually
    (some of the SWMR test programs are built by CMake), and there are no
@@ -9188,7 +9188,7 @@ known issues if it is a new issue.
    The SWMR feature will only work if an HDF5 file under SWMR access resides
    on a file system that obeys POSIX write() ordering semantics. Because of
    this, SWMR will not work on  network file systems such as NFS or SMB/Windows
-   file shares since those systems do not guarantee write odering. SWMR
+   file shares since those systems do not guarantee write orering. SWMR
    regression tests are likely to fail if run on a network file system. SWMR
    is currently not tested on Windows though it can be tested manually
    (some of the SWMR test programs are built by CMake), and there are no

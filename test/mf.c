@@ -1977,7 +1977,7 @@ error:
  *-------------------------------------------------------------------------
  * To verify that an aggregator is absorbed into a section.
  *
- *    Test 1: To aborb the aggregator onto the beginning of the section
+ *    Test 1: To absorb the aggregator onto the beginning of the section
  *        Allocate block A from meta_aggr
  *        Create a free-space section node with an address that adjoins
  *            the end of meta_aggr and a size to make the aggregator

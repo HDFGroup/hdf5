@@ -249,7 +249,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         }
     }
 
-    /* conpare the cache's internal configuration with the expected value */
+    /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
         if (!resize_configs_are_equal(&default_auto_size_ctl, &cache_ptr->resize_ctl, TRUE)) {
@@ -393,7 +393,7 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         }
     }
 
-    /* conpare the cache's internal configuration with the expected value */
+    /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
         if (!resize_configs_are_equal(&mod_auto_size_ctl, &cache_ptr->resize_ctl, TRUE)) {

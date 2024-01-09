@@ -466,7 +466,7 @@ CONTAINS
 !!
 !! \brief Retrieves the version information of various objects for a file creation property list.
 !!
-!! \param prp_id   File createion property list identifier.
+!! \param prp_id   File creation property list identifier.
 !! \param boot     Super block version number.
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.

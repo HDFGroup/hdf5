@@ -1011,7 +1011,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     unsigned long long max_raw      = 0;
     unsigned long long bytes_raw    = 0;
     unsigned long long bytes_meta   = 0;
-    double             re_dub       = 0.0; /* re-usable double variable */
+    double             re_dub       = 0.0; /* reusable double variable */
     unsigned           suffix_i     = 0;
     const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
