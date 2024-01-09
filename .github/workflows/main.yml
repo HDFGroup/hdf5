@@ -34,3 +34,9 @@ jobs:
   workflow-cmake:
     name: "CMake Workflows"
     uses: ./.github/workflows/cmake.yml
+
+  workflow-msys2:
+    name: "CMake Workflows"
+    uses: ./.github/workflows/msys2-cmake.yml
+    with:
+        build_mode: "Release"
