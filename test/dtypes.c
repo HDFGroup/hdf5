@@ -7586,14 +7586,14 @@ error:
 static int
 test_named_indirect_reopen_file(hid_t fapl)
 {
-    hid_t file = H5I_INVALID_HID;
-    hid_t space = H5I_INVALID_HID; 
-    hid_t cmptype = H5I_INVALID_HID; 
-    hid_t reopened_cmptype = H5I_INVALID_HID;
-    hid_t strtype = H5I_INVALID_HID; 
-    hid_t reopened_strtype = H5I_INVALID_HID;
-    hid_t dset             = H5I_INVALID_HID;
-    static hsize_t dims[1] = {3};
+    hid_t          file             = H5I_INVALID_HID;
+    hid_t          space            = H5I_INVALID_HID;
+    hid_t          cmptype          = H5I_INVALID_HID;
+    hid_t          reopened_cmptype = H5I_INVALID_HID;
+    hid_t          strtype          = H5I_INVALID_HID;
+    hid_t          reopened_strtype = H5I_INVALID_HID;
+    hid_t          dset             = H5I_INVALID_HID;
+    static hsize_t dims[1]          = {3};
     size_t         strtype_size, cmptype_size;
     char           filename[1024];
 
@@ -7658,7 +7658,7 @@ test_named_indirect_reopen_file(hid_t fapl)
     if (cmptype_size != H5Tget_size(reopened_cmptype))
         TEST_ERROR;
     if (H5Tcommitted(reopened_cmptype) != 1)
-       TEST_ERROR;
+        TEST_ERROR;
 
     /* Indirectly reopen string type, verify that they report as NOT committed, and the size doesn't change */
     if ((reopened_strtype = H5Tget_member_type(reopened_cmptype, 0)) < 0)
@@ -7696,14 +7696,15 @@ test_named_indirect_reopen_file(hid_t fapl)
     if (cmptype_size != H5Tget_size(reopened_cmptype))
         TEST_ERROR;
     if (H5Tcommitted(reopened_cmptype) != 1)
-       TEST_ERROR;
+        TEST_ERROR;
 
     /* Indirectly reopen string type, verify that they report as NOT committed, and the size doesn't change */
     if ((reopened_strtype = H5Tget_member_type(reopened_cmptype, 0)) < 0)
         TEST_ERROR;
     if (strtype_size != H5Tget_size(reopened_strtype))
         TEST_ERROR;
-    if(H5Tcommitted(reopened_strtype) != 0) TEST_ERROR;
+    if (H5Tcommitted(reopened_strtype) != 0)
+        TEST_ERROR;
 
     /* Close types and dataset */
     if (H5Tclose(reopened_strtype) < 0)
