@@ -62,7 +62,7 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_TOOLCHAIN_FILE=config/toolchain/gcc.cmake \
+            -DCMAKE_TOOLCHAIN_FILE="" \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
