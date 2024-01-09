@@ -73,7 +73,6 @@ jobs:
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
             $GITHUB_WORKSPACE
-        shell: bash
 
       #
       # BUILD
