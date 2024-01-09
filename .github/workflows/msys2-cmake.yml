@@ -72,6 +72,8 @@ jobs:
             -DHDF5_BUILD_DOC=OFF \
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
+            -DH5_HAVE_ASPRINTF:INTERNAL=0 \
+            -DH5_HAVE_VASPRINTF:INTERNAL=0 \
             $GITHUB_WORKSPACE
 
       #
