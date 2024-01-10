@@ -18,10 +18,6 @@
 
 #include "testphdf5.h"
 
-#ifdef H5_HAVE_SZLIB_H
-#include "szlib.h"
-#endif
-
 static int mpi_size, mpi_rank;
 
 /* Chunk sizes */
