@@ -66,21 +66,20 @@ jobs:
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
-            -DHDF5_BUILD_CPP_LIB:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
             -DHDF5_BUILD_FORTRAN=OFF \
             -DHDF5_BUILD_JAVA=OFF \
             -DHDF5_BUILD_DOC=OFF \
             -DLIBAEC_USE_LOCALCONTENT=OFF \
             -DZLIB_USE_LOCALCONTENT=OFF \
-            -DH5_HAVE_ASPRINTF:INTERNAL=0 \
-            -DH5_HAVE_VASPRINTF:INTERNAL=0 \
             $GITHUB_WORKSPACE
 
       #
       # BUILD
       #
       - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       #
@@ -88,5 +87,6 @@ jobs:
       #
       # NORMAL
       - name: CMake Run Tests
-        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
