@@ -214,6 +214,15 @@ int H5_api_dataset_test(void);
 #define DATASET_DATA_BUILTIN_CONVERSION_TEST_GROUP_NAME      "dataset_builtin_conversion_verification_test"
 #define DATASET_DATA_BUILTIN_CONVERSION_TEST_DSET_NAME       "dataset_builtin_conversion_verification_dset"
 
+#define DATASET_DATA_REAL_CONVERSION_TEST_DSET_SPACE_RANK 3
+#define DATASET_DATA_REAL_CONVERSION_TEST_NUM_POINTS      10
+#define DATASET_DATA_REAL_CONVERSION_TEST_GROUP_NAME      "dataset_real_conversion_verification_test"
+#define DATASET_DATA_REAL_CONVERSION_TEST_DSET_NAME       "dataset_real_conversion_verification_dset"
+#define DATASET_DATA_REAL_CONVERSION_TEST_INT_DTYPESIZE   sizeof(int)
+#define DATASET_DATA_REAL_CONVERSION_TEST_INT_TYPE        H5T_NATIVE_INT
+#define DATASET_DATA_REAL_CONVERSION_TEST_REAL_DTYPESIZE  sizeof(double)
+#define DATASET_DATA_REAL_CONVERSION_TEST_REAL_TYPE       H5T_NATIVE_DOUBLE
+
 #define DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS            10
 #define DATASET_DATA_COMPOUND_PARTIAL_IO_TEST_GROUP_NAME "dataset_compound_partial_io_test"
 #define DATASET_DATA_COMPOUND_PARTIAL_IO_TEST_DSET_NAME  "dataset_compound_partial_io_test"
