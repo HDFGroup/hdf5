@@ -2058,6 +2058,7 @@ test_create_dataset_creation_properties(void)
     hid_t   dset_id = H5I_INVALID_HID, dcpl_id = H5I_INVALID_HID;
     hid_t   dset_dtype = H5I_INVALID_HID, compact_dtype = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID, compact_fspace_id = H5I_INVALID_HID;
+    void   *read_buf = NULL;
 
     TESTING_MULTIPART("dataset creation properties");
 
@@ -2390,7 +2391,275 @@ test_create_dataset_creation_properties(void)
         }
         PART_END(DCPL_fill_time_property_test);
 
-        /* TODO: Test the fill value property */
+        PART_BEGIN(DCPL_fill_value_test)
+        {
+            TESTING_2("fill values");
+
+            int    int_fill_value    = DATASET_FILL_VALUE_TEST_INT_FILL_VALUE;
+            double double_fill_value = DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE;
+
+            void  *val       = NULL;
+            size_t num_elems = 1;
+            hid_t  type_id   = H5I_INVALID_HID;
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILL_VALUES)) {
+                SKIPPED();
+                printf("    dataset fill values are not supported by this VOL connector\n");
+                PART_EMPTY(DCPL_fill_value_test);
+            }
+
+            /* Integer Fill Value */
+            if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+                H5_FAILED();
+                printf("    couldn't create DCPL\n");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Pset_fill_value(dcpl_id, DATASET_FILL_VALUE_TEST_INT_TYPE, (const void *)&int_fill_value) <
+                0) {
+                H5_FAILED();
+                printf("    couldn't set integer fill value in property list");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((dset_id =
+                     H5Dcreate(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME1, DATASET_FILL_VALUE_TEST_INT_TYPE,
+                               fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                printf("    couldn't create dataset with integer fill value");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((H5Sget_simple_extent_dims(fspace_id, dims, NULL)) < 0) {
+                H5_FAILED();
+                printf("    couldn't get dataspace dimensions");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            for (int i = 0; i < DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK; i++)
+                num_elems *= (size_t)dims[i];
+
+            if ((read_buf = calloc(num_elems, sizeof(DATASET_FILL_VALUE_TEST_INT_TYPE))) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Dread(dset_id, DATASET_FILL_VALUE_TEST_INT_TYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) <
+                0) {
+                H5_FAILED();
+                printf("    couldn't read from dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            for (size_t i = 0; i < num_elems; i++) {
+                val = (int *)(read_buf) + i;
+
+                if (*(int *)val != DATASET_FILL_VALUE_TEST_INT_FILL_VALUE) {
+                    H5_FAILED();
+                    printf("    incorrect value read from dataset");
+                    PART_ERROR(DCPL_fill_value_test);
+                }
+            }
+
+            if (H5Dclose(dset_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close integer fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Pclose(dcpl_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close dcpl");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            /* Re-open integer dataset */
+            if ((dset_id = H5Dopen2(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME1, H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                printf("    couldn't open integer fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Dclose(dset_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close opened integer fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            free(read_buf);
+            read_buf = NULL;
+
+            /* Double fill value */
+            if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) == H5I_INVALID_HID) {
+                H5_FAILED();
+                printf("    couldn't create dcpl");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((H5Pset_fill_value(dcpl_id, DATASET_FILL_VALUE_TEST_DOUBLE_TYPE,
+                                   (const void *)&double_fill_value)) < 0) {
+                H5_FAILED();
+                printf("    couldn't set double fill value in property list");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((dset_id = H5Dcreate2(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME2,
+                                      DATASET_FILL_VALUE_TEST_DOUBLE_TYPE, fspace_id, H5P_DEFAULT, dcpl_id,
+                                      H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                printf("    couldn't create dataset with double fill value");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((read_buf = calloc(num_elems, sizeof(DATASET_FILL_VALUE_TEST_DOUBLE_TYPE))) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Dread(dset_id, DATASET_FILL_VALUE_TEST_DOUBLE_TYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                        read_buf) < 0) {
+                H5_FAILED();
+                printf("    couldn't read from dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            for (size_t i = 0; i < num_elems; i++) {
+                val = (double *)(read_buf) + i;
+
+                if (!(VL_DBL_REL_EQUAL(*(double *)val, DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE,
+                                       0.0000001))) {
+                    H5_FAILED();
+                    printf("    incorrect value read from dataset");
+                    PART_ERROR(DCPL_fill_value_test);
+                }
+            }
+
+            if (H5Dclose(dset_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close double fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Pclose(dcpl_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close dcpl");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            /* Re-open double dataset */
+            if ((dset_id = H5Dopen2(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME2, H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                printf("    couldn't open double fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Dclose(dset_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close opened double fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            free(read_buf);
+            read_buf = NULL;
+
+            /* Fixed-length string fill value */
+            if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) == H5I_INVALID_HID) {
+                H5_FAILED();
+                printf("    couldn't create dcpl");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((type_id = H5Tcopy(H5T_C_S1)) < 0) {
+                H5_FAILED();
+                printf("    couldn't copy string datatype");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((H5Tset_size(type_id, DATASET_FILL_VALUE_TEST_STRING_SIZE)) < 0) {
+                H5_FAILED();
+                printf("    couldn't set size of string datatype");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((H5Pset_fill_value(dcpl_id, type_id,
+                                   (const void *)DATASET_FILL_VALUE_TEST_STRING_FILL_VALUE)) < 0) {
+                H5_FAILED();
+                printf("    couldn't set string fill value in property list");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((dset_id = H5Dcreate2(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME3, type_id, fspace_id,
+                                      H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                printf("    couldn't create dataset with string fill value");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if ((read_buf = calloc(num_elems, DATASET_FILL_VALUE_TEST_STRING_SIZE)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0) {
+                H5_FAILED();
+                printf("    couldn't read from dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            for (size_t i = 0; i < num_elems; i++) {
+                char val_str[DATASET_FILL_VALUE_TEST_STRING_SIZE + 1];
+
+                memcpy(val_str, ((char *)read_buf) + i * DATASET_FILL_VALUE_TEST_STRING_SIZE,
+                       DATASET_FILL_VALUE_TEST_STRING_SIZE);
+                val_str[DATASET_FILL_VALUE_TEST_STRING_SIZE] = '\0';
+
+                if (strcmp(val_str, DATASET_FILL_VALUE_TEST_STRING_FILL_VALUE)) {
+                    H5_FAILED();
+                    printf("    incorrect value read from string  dataset");
+                    PART_ERROR(DCPL_fill_value_test);
+                }
+            }
+
+            if (H5Dclose(dset_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close string fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Pclose(dcpl_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close dcpl");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Tclose(type_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close string type");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            free(read_buf);
+            read_buf = NULL;
+
+            /* Re-open string dataset */
+            if ((dset_id = H5Dopen2(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME3, H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                printf("    couldn't open string fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            if (H5Dclose(dset_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close opened string fill value dataset");
+                PART_ERROR(DCPL_fill_value_test);
+            }
+
+            PASSED();
+        }
+        PART_END(DCPL_fill_value_test);
 
         /* Test filters */
         PART_BEGIN(DCPL_filters_test)
@@ -2691,6 +2960,11 @@ test_create_dataset_creation_properties(void)
 
     TESTING_2("test cleanup");
 
+    if (read_buf) {
+        free(read_buf);
+        read_buf = NULL;
+    }
+
     if (H5Sclose(compact_fspace_id) < 0)
         TEST_ERROR;
     if (H5Sclose(fspace_id) < 0)
@@ -2713,19 +2987,23 @@ test_create_dataset_creation_properties(void)
 error:
     H5E_BEGIN_TRY
     {
-        H5Sclose(compact_fspace_id);
-        H5Sclose(fspace_id);
-        H5Tclose(compact_dtype);
-        H5Tclose(dset_dtype);
-        H5Dclose(dset_id);
-        H5Pclose(dcpl_id);
-        H5Gclose(group_id);
-        H5Gclose(container_group);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY
+        if (read_buf) {
+            free(read_buf);
 
-    return 1;
+            H5Sclose(compact_fspace_id);
+            H5Sclose(fspace_id);
+            H5Tclose(compact_dtype);
+            H5Tclose(dset_dtype);
+            H5Dclose(dset_id);
+            H5Pclose(dcpl_id);
+            H5Gclose(group_id);
+            H5Gclose(container_group);
+            H5Fclose(file_id);
+        }
+        H5E_END_TRY
+
+        return 1;
+    }
 }
 
 /*
@@ -3654,8 +3932,8 @@ test_dataset_property_lists(void)
         {
             TESTING_2("H5Dget_create_plist");
 
-            /* Try to receive copies of the two property lists, one which has the property set and one which
-             * does not */
+            /* Try to receive copies of the two property lists, one which has the property set and one
+             * which does not */
             if ((dcpl_id1 = H5Dget_create_plist(dset_id1)) < 0) {
                 H5_FAILED();
                 printf("    couldn't get property list\n");
@@ -3745,8 +4023,8 @@ test_dataset_property_lists(void)
                 dapl_id1 = H5I_INVALID_HID;
             }
 
-            /* Try to receive copies of the two property lists, one which has the property set and one which
-             * does not */
+            /* Try to receive copies of the two property lists, one which has the property set and one
+             * which does not */
             if ((dapl_id1 = H5Dget_access_plist(dset_id3)) < 0) {
                 H5_FAILED();
                 printf("    couldn't get property list\n");
@@ -5230,8 +5508,8 @@ test_dataset_io_point_selections(void)
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
-                    FAIL_PUTS_ERROR(
-                        "Incorrect data found after writing from hyperslab in memory to points in dataset");
+                    FAIL_PUTS_ERROR("Incorrect data found after writing from hyperslab in memory to "
+                                    "points in dataset");
 
         PASSED();
 
@@ -5304,8 +5582,8 @@ test_dataset_io_point_selections(void)
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
-                    FAIL_PUTS_ERROR(
-                        "Incorrect data found after writing from points in memory to hyperslab in dataset");
+                    FAIL_PUTS_ERROR("Incorrect data found after writing from points in memory to "
+                                    "hyperslab in dataset");
 
         if (!do_chunk)
             PASSED();
@@ -8917,8 +9195,8 @@ test_dataset_compound_partial_io(void)
     dataset_compount_partial_io_t fbuf[DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS];
     dataset_compount_partial_io_t erbuf[DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS];
 
-    TESTING_MULTIPART(
-        "verification of dataset data using H5Dwrite then H5Dread with partial element compound type I/O");
+    TESTING_MULTIPART("verification of dataset data using H5Dwrite then H5Dread with partial element "
+                      "compound type I/O");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
@@ -12543,10 +12821,10 @@ test_read_partial_chunk_all_selection(void)
         for (j = 0; j < FIXED_DIMSIZE; j++)
             if (read_buf[i][j] != (int)((i * FIXED_DIMSIZE) + j)) {
                 H5_FAILED();
-                printf(
-                    "    data verification failed for read buffer element %lld: expected %lld but was %lld\n",
-                    (long long)((i * FIXED_DIMSIZE) + j), (long long)((i * FIXED_DIMSIZE) + j),
-                    (long long)read_buf[i][j]);
+                printf("    data verification failed for read buffer element %lld: expected %lld but was "
+                       "%lld\n",
+                       (long long)((i * FIXED_DIMSIZE) + j), (long long)((i * FIXED_DIMSIZE) + j),
+                       (long long)read_buf[i][j]);
                 goto error;
             }
 
