@@ -2043,6 +2043,22 @@ error:
     return 1;
 }
 
+size_t
+filter(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned int H5_ATTR_UNUSED cd_values[],
+       size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    buf_size = 0;
+
+    if (flags & H5Z_FLAG_REVERSE) {
+        /* No-op */
+    }
+    else {
+        /* No-op */
+    }
+
+    return nbytes;
+}
+
 /*
  * A test to check the functionality of the different
  * dataset creation properties.
@@ -2050,16 +2066,21 @@ error:
 static int
 test_create_dataset_creation_properties(void)
 {
-    hsize_t dims[DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK];
-    hsize_t chunk_dims[DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK];
-    size_t  i;
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   dset_id = H5I_INVALID_HID, dcpl_id = H5I_INVALID_HID;
-    hid_t   dset_dtype = H5I_INVALID_HID, compact_dtype = H5I_INVALID_HID;
-    hid_t   fspace_id = H5I_INVALID_HID, compact_fspace_id = H5I_INVALID_HID;
-    void   *read_buf = NULL;
-
+    hsize_t      dims[DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK];
+    hsize_t      chunk_dims[DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK];
+    size_t       i;
+    hid_t        file_id         = H5I_INVALID_HID;
+    hid_t        container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t        dset_id = H5I_INVALID_HID, dcpl_id = H5I_INVALID_HID;
+    hid_t        dset_dtype = H5I_INVALID_HID, compact_dtype = H5I_INVALID_HID;
+    hid_t        fspace_id = H5I_INVALID_HID, compact_fspace_id = H5I_INVALID_HID;
+    void        *read_buf                                                             = NULL;
+    unsigned int filter_params[DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS] = {1, 2, 3};
+    unsigned int filter_params_out[DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS];
+    char         ud_filter_name[strlen(DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME)];
+    int          nfilters            = 0;
+    H5Z_filter_t retrieved_filter_id = H5I_INVALID_HID;
+    size_t       num_filter_params   = DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS;
     TESTING_MULTIPART("dataset creation properties");
 
     /* Make sure the connector supports the API functions being tested */
@@ -2760,6 +2781,120 @@ test_create_dataset_creation_properties(void)
             PASSED();
         }
         PART_END(DCPL_filters_test);
+
+        /* Test a user-defined filter */
+        PART_BEGIN(DCPL_user_defined_filter_test)
+        {
+            TESTING_2("user-defined dataset filters");
+            /* Create user-defined filter and register with library */
+            const H5Z_class2_t filter_cls[1] = {
+                {H5Z_CLASS_T_VERS, DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_ID, 1, 1,
+                 DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME, NULL, NULL, &filter}};
+
+            if (H5Zregister((const void *)&filter_cls) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't register filter\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't create DCPL\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            if (H5Pset_chunk(dcpl_id, DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK, chunk_dims) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't set chunking on DCPL\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            /* Set user-defined filter on the DCPL */
+            if (H5Pset_filter(dcpl_id, (H5Z_filter_t)DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_ID,
+                              H5Z_FLAG_MANDATORY, 3, filter_params) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't set user-defined filter on DCPL\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            /* Use a simple datatype, as not all filters support all datatypes. */
+            if ((dset_id = H5Dcreate2(group_id, DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME,
+                                      H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't create dataset '%s'\n",
+                         DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME);
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            if (dset_id >= 0) {
+                H5E_BEGIN_TRY
+                {
+                    H5Dclose(dset_id);
+                }
+                H5E_END_TRY;
+                dset_id = H5I_INVALID_HID;
+            }
+
+            if ((dset_id = H5Dopen2(group_id, DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME,
+                                    H5P_DEFAULT)) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't open dataset '%s'\n",
+                         DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME);
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            if (dcpl_id >= 0) {
+                H5E_BEGIN_TRY
+                {
+                    H5Pclose(dcpl_id);
+                }
+                H5E_END_TRY;
+                dcpl_id = H5I_INVALID_HID;
+            }
+
+            /* Test that parameters are preserved in the DCPL */
+            memset(filter_params_out, 0,
+                   sizeof(unsigned int) * DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS);
+
+            if ((dcpl_id = H5Dget_create_plist(dset_id)) < 0) {
+                H5_FAILED();
+                HDprintf("    couldn't retrieve DCPL\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            if ((nfilters = H5Pget_nfilters(dcpl_id)) != 1) {
+                H5_FAILED();
+                HDprintf("    retrieved incorrect number of filters from DCPL\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            if ((retrieved_filter_id = H5Pget_filter2(
+                     dcpl_id, 0, H5Z_FLAG_MANDATORY, &num_filter_params, filter_params_out,
+                     strlen(DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME), ud_filter_name, NULL)) < 0) {
+                H5_FAILED();
+                HDprintf("    retrieved incorrect user-defined filter ID\n");
+                PART_ERROR(DCPL_user_defined_filter_test);
+            }
+
+            for (int i = 0; i < DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS; i++)
+                if (filter_params[i] != filter_params_out[i]) {
+                    H5_FAILED();
+                    HDprintf("    retrieved incorrect parameter value from DCPL\n");
+                    PART_ERROR(DCPL_user_defined_filter_test);
+                }
+
+            if (dset_id >= 0) {
+                H5E_BEGIN_TRY
+                {
+                    H5Dclose(dset_id);
+                }
+                H5E_END_TRY;
+                dset_id = H5I_INVALID_HID;
+            }
+
+            PASSED();
+        }
+        PART_END(DCPL_user_defined_filter_test)
 
         /* Test the dataset storage layout property */
         PART_BEGIN(DCPL_storage_layout_test)
