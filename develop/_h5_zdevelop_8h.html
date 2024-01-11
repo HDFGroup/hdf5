@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -241,7 +241,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns the number of valid bytes of data contained in <code>buf</code>. In the case of failure, the return value is 0 (zero) and all pointer arguments are left unchanged.</dd></dl>
 <p>A filter gets definition flags and invocation flags (defined above), the client data array and size defined when the filter was added to the pipeline, the size in bytes of the data on which to operate, and pointers to a buffer and its allocated size.</p>
 <p>The filter should store the result in the supplied buffer if possible, otherwise it can allocate a new buffer, freeing the original. The allocated size of the new buffer should be returned through the <code>buf_size</code> pointer and the new buffer through the <code>buf</code> pointer.</p>
-<p>The return value from the filter is the number of bytes in the output buffer. If an error occurs then the function should return zero and leave all pointer arguments unchanged. </p>
+<p>The return value from the filter is the number of bytes in the output buffer. If an error occurs then the function should return zero and leave all pointer arguments unchanged.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>

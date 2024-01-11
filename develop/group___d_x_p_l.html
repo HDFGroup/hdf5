@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -375,7 +375,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___d_x_p_l.html#ga3f3df48ce44b6af7517654b23a37fa02" title="Gets B-tree split ratios for a dataset transfer property list.">H5Pget_btree_ratios()</a> returns the B-tree split ratios for a dataset transfer property list.</p>
-<p>The B-tree split ratios are returned through the non-NULL arguments <code>left</code>, <code>middle</code>, and <code>right</code>, as set by the <a class="el" href="group___d_x_p_l.html#ga51d126d64fa766d44160a95057a2c733" title="Sets B-tree split ratios for a dataset transfer property list.">H5Pset_btree_ratios()</a> function. </p>
+<p>The B-tree split ratios are returned through the non-NULL arguments <code>left</code>, <code>middle</code>, and <code>right</code>, as set by the <a class="el" href="group___d_x_p_l.html#ga51d126d64fa766d44160a95057a2c733" title="Sets B-tree split ratios for a dataset transfer property list.">H5Pset_btree_ratios()</a> function.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -424,7 +425,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___d_x_p_l.html#ga1278b9979cc833e77d699cc878c6dab4" title="Reads buffer settings.">H5Pget_buffer()</a> reads values previously set with <a class="el" href="group___d_x_p_l.html#ga777e8c171c9e462230a9fa40874b38ce" title="Sets type conversion and background buffers.">H5Pset_buffer()</a>.</p>
 <dl class="section version"><dt>Version</dt><dd>1.6.0 The return type changed from <code>hsize_t</code> to <code>size_t</code>. </dd>
 <dd>
-1.4.0 The return type changed to <code>hsize_t</code>. </dd></dl>
+1.4.0 The return type changed to <code>hsize_t</code>.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1121,7 +1123,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___d_x_p_l.html#ga51d126d64fa766d44160a95057a2c733" title="Sets B-tree split ratios for a dataset transfer property list.">H5Pset_btree_ratios()</a> sets the B-tree split ratios for a dataset transfer property list. The split ratios determine what percent of children go in the first node when a node splits.</p>
 <p>The ratio <code>left</code> is used when the splitting node is the left-most node at its level in the tree; the ratio <code>right</code> is used when the splitting node is the right-most node at its level; and the ratio <code>middle</code> is used for all other cases.</p>
 <p>A node that is the only node at its level in the tree uses the ratio <code>right</code> when it splits.</p>
-<p>All ratios are real numbers between 0 and 1, inclusive. </p>
+<p>All ratios are real numbers between 0 and 1, inclusive.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1180,7 +1183,8 @@ Functions</h2></td></tr>
 <p>The default value for the maximum buffer is 1 MiB.</p>
 <dl class="section version"><dt>Version</dt><dd>1.6.0 The <code>size</code> parameter has changed from type hsize_t to <code>size_t</code>. </dd>
 <dd>
-1.4.0 The <code>size</code> parameter has changed to type hsize_t. </dd></dl>
+1.4.0 The <code>size</code> parameter has changed to type hsize_t.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>

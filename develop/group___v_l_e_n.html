@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -211,7 +211,8 @@ Functions</h2></td></tr>
 <p>When necessary, use <a class="el" href="group___h5_t.html#ga331e8f7b388a50af77294018db788de3" title="Returns the base datatype from which a datatype is derived.">H5Tget_super()</a> to determine the base type of the VL datatype.</p>
 <p>The datatype identifier returned from this function should be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> or resource leaks will result. Under certain circumstances, <a class="el" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119" title="Reclaims variable-length (VL) datatype memory buffers.">H5Dvlen_reclaim()</a> must also be used.</p>
 <dl class="section attention"><dt>Attention</dt><dd><a class="el" href="group___v_l_e_n.html#ga6841355fa5b3c924876b121dedb8ed2f" title="Creates a new variable-length array datatype.">H5Tvlen_create()</a> cannot be used to create a variable-length string datatype. <a class="el" href="group___v_l_e_n.html#ga6841355fa5b3c924876b121dedb8ed2f" title="Creates a new variable-length array datatype.">H5Tvlen_create()</a> called with a string or character base type creates a variable-length sequence of strings (a variable-length, 1-dimensional array), with each element of the array being of the string or character base type.<br  />
- To create a variable-length string datatype, see <em>Creating variable-length string datatypes</em>. </dd></dl>
+ To create a variable-length string datatype, see <em>Creating variable-length string datatypes</em>.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>

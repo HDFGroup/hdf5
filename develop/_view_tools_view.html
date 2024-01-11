@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -684,7 +684,7 @@ Region Reference</h3>
 </ul>
 <p>If you look at the code that creates the dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.c</code>) you will see that the first reference is created with these calls: </p><div class="fragment"><div class="line">status = <a class="code" href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a> (space, <a class="code" href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a>, 4, coords[0]);</div>
 <div class="line">status = <a class="code" href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate</a> (&amp;wdata[0], file, DATASET2, <a class="code" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>, space);</div>
-<div class="ttc" id="a_h5_rpublic_8h_html_a2a28c48c03a4616a02f9157fca4b2df0"><div class="ttname"><a href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a></div><div class="ttdeci">#define H5R_DATASET_REGION</div><div class="ttdef"><b>Definition:</b> H5Rpublic.h:603</div></div>
+<div class="ttc" id="a_h5_rpublic_8h_html_a2a28c48c03a4616a02f9157fca4b2df0"><div class="ttname"><a href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a></div><div class="ttdeci">#define H5R_DATASET_REGION</div><div class="ttdef"><b>Definition:</b> H5Rpublic.h:639</div></div>
 <div class="ttc" id="a_h5_spublic_8h_html_a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"><div class="ttname"><a href="_h5_spublic_8h.html#a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550">H5S_SELECT_SET</a></div><div class="ttdeci">@ H5S_SELECT_SET</div><div class="ttdef"><b>Definition:</b> H5Spublic.h:87</div></div>
 <div class="ttc" id="agroup___h5_r_html_ga0ac6997b5de26b11d91a95de2869950d"><div class="ttname"><a href="group___h5_r.html#ga0ac6997b5de26b11d91a95de2869950d">H5Rcreate</a></div><div class="ttdeci">herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)</div><div class="ttdoc">Creates a reference.</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga2f4407dd73d0ec37e5d9e80e4382483d"><div class="ttname"><a href="group___h5_s.html#ga2f4407dd73d0ec37e5d9e80e4382483d">H5Sselect_elements</a></div><div class="ttdeci">herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)</div><div class="ttdoc">Selects array elements to be included in the selection for a dataspace.</div></div>

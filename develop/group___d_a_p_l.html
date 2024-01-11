@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -347,7 +347,7 @@ Functions</h2></td></tr>
 <p>The value of <code>size</code> is the size in bytes of the prefix, including the NULL terminator. If the size is unknown, a preliminary <a class="el" href="group___l_a_p_l.html#ga7960f746797bcf35f70746cd644f8b5a" title="Retrieves prefix applied to external link paths.">H5Pget_elink_prefix()</a> call with the pointer <code>prefix</code> set to NULL will return the size of the prefix without the NULL terminator.</p>
 <p>The <code>prefix</code> buffer must be allocated by the caller. In a call that retrieves the actual prefix, that buffer must be of the size specified in <code>size</code>.</p>
 <dl class="section note"><dt>Note</dt><dd>See <a class="el" href="group___d_a_p_l.html#gad487f84157fd0944cbe1cbd4dea4e1b8" title="Sets the external dataset storage file prefix in the dataset access property list.">H5Pset_efile_prefix()</a> for a more complete description of file location behavior and for notes on the use of the HDF5_EXTFILE_PREFIX environment variable.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.10.0, 1.8.17 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.8.17 </dd></dl>
 
 </div>
 </div>
@@ -688,7 +688,7 @@ VDS Functions: <a class="el" href="group___d_c_p_l.html#ga83dcce1ce110d1ff6eae0f
 As stated above, the use of the HDF5_EXTFILE_PREFIX environment variable overrides any property list setting. <a class="el" href="group___d_a_p_l.html#gad487f84157fd0944cbe1cbd4dea4e1b8" title="Sets the external dataset storage file prefix in the dataset access property list.">H5Pset_efile_prefix()</a> and <a class="el" href="group___d_a_p_l.html#ga442647d48171db920c71a7baf6fdeee6" title="Retrieves the prefix for external raw data storage files as set in the dataset access property list.">H5Pget_efile_prefix()</a>, being property functions, set and retrieve only the property list setting; they are unaware of the environment variable.</dd>
 <dd>
 On Windows, the prefix must be an ASCII string since the Windows standard C library's I/O functions cannot handle UTF-8 file names.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.10.0, 1.8.17 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.8.17 </dd></dl>
 
 </div>
 </div>

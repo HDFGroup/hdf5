@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -153,7 +153,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a pointer to an allocated string if successful; otherwise returns NULL.</dd></dl>
 <p><a class="el" href="group___o_p_a_q_u_e.html#ga6a9331e94d73e3b6e64a4b4dacc62bba" title="Gets the tag associated with an opaque datatype.">H5Tget_tag()</a> returns the tag associated with the opaque datatype <code>type</code>.</p>
-<dl class="section attention"><dt>Attention</dt><dd>The tag is returned via a pointer to an allocated string, which the caller must free. </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>The tag is returned via a pointer to an allocated string, which the caller must free.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -194,7 +195,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___o_p_a_q_u_e.html#ga3543ad909983a2a20e651d16502de43d" title="Tags an opaque datatype.">H5Tset_tag()</a> tags an opaque datatype <code>type</code> with a descriptive ASCII identifier, <code>tag</code>.</p>
 <p><code>tag</code> is intended to provide a concise description; the maximum size is hard-coded in the HDF5 library as 256 bytes (<a class="el" href="_h5_tpublic_8h.html#acfb0eb3c4d3d0c22b41997e69a69cc7f">H5T_OPAQUE_TAG_MAX</a>).</p>
-<dl class="section version"><dt>Version</dt><dd>1.6.5 The <a class="el" href="_h5_tpublic_8h.html#acfb0eb3c4d3d0c22b41997e69a69cc7f">H5T_OPAQUE_TAG_MAX</a> macro constant, specifying the maximum size of an opaque datatype tag, was added in <a class="el" href="_h5_tpublic_8h.html">H5Tpublic.h</a>. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.6.5 The <a class="el" href="_h5_tpublic_8h.html#acfb0eb3c4d3d0c22b41997e69a69cc7f">H5T_OPAQUE_TAG_MAX</a> macro constant, specifying the maximum size of an opaque datatype tag, was added in <a class="el" href="_h5_tpublic_8h.html">H5Tpublic.h</a>.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>

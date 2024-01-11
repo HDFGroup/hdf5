@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -627,7 +627,7 @@ Functions</h2></td></tr>
 <div class="line">fail_file:;</div>
 <div class="line">    }</div>
 </div><!-- fragment --> </dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.8.0</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_d.html#gabf62045119f4e9c512d87d77f2f992df" title="Creates a new dataset and links it into the file.">H5Dcreate2()</a>, <a class="el" href="group___h5_d.html#ga04198c4cf0b849ed3a8921f6c7169ee2" title="Opens an existing dataset.">H5Dopen2()</a> </dd></dl>
 
 </div>
@@ -948,6 +948,7 @@ Functions</h2></td></tr>
 <p>Space on disk is immediately allocated for the new dataset extent if the dataset's space allocation time is set to <a class="el" href="_h5_dpublic_8h.html#aab70b464cf3c5fc931dce0c4fe98b3d2a3c461ed83e0af151ef8c44ec232368b6">H5D_ALLOC_TIME_EARLY</a>. Fill values will be written to the dataset if the dataset's fill time is set to <a class="el" href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4aa85b225308b0a277c4dd6fed7ee465a72">H5D_FILL_TIME_IFSET</a> or <a class="el" href="_h5_dpublic_8h.html#aa39293626c4e68dd28b06c0dc84bde4aadd7bb84666434f7d1dc642e94c68eb28">H5D_FILL_TIME_ALLOC</a>. (See <a class="el" href="group___d_c_p_l.html#ga6bd822266b31f86551a9a1d79601b6a2" title="Sets the time when fill values are written to a dataset.">H5Pset_fill_time()</a> and <a class="el" href="group___d_c_p_l.html#ga85faefca58387bba409b65c470d7d851" title="Sets the timing for storage space allocation.">H5Pset_alloc_time()</a>.)</p>
 <p>This function ensures that the dataset dimensions are of at least the sizes specified in size. The function <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent()</a> must be used if the dataset dimension sizes are to be reduced.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. Parameter size syntax changed to <code>const hsize_t size[]</code> in this release. </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1014,6 +1015,7 @@ Functions</h2></td></tr>
 <dd>
 Applications sometimes write data only to portions of an allocated dataset. It is often useful in such cases to fill the unused space with a known fill value.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4" title="Sets the fill value for a dataset.">H5Pset_fill_value()</a>, <a class="el" href="group___d_c_p_l.html#ga82bbe8c77c7eb9c460bfd1eb26881355" title="Retrieves a dataset fill value.">H5Pget_fill_value()</a>, <a class="el" href="group___d_c_p_l.html#ga14f9bc2a0d6f9e62ab95661fc1045ad6" title="Determines whether fill value is defined.">H5Pfill_value_defined()</a>, <a class="el" href="group___d_c_p_l.html#ga6bd822266b31f86551a9a1d79601b6a2" title="Sets the time when fill values are written to a dataset.">H5Pset_fill_time()</a>, <a class="el" href="group___d_c_p_l.html#ga92c5eb5ee19bfd4a9184cf0428d1b00c" title="Retrieves the time when fill values are written to a dataset.">H5Pget_fill_time()</a>, <a class="el" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa" title="Creates a new property list as an instance of a property list class.">H5Pcreate()</a>, <a class="el" href="group___h5_d.html#ga15a77e82383d821fee8ecbf9ab8408cb" title="Creates a dataset in a file without linking it into the file structure.">H5Dcreate_anon()</a> </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -1381,7 +1383,8 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataset creation property list identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_d.html#ga8848f14f4aba8e6160c3d8bb7f1be163" title="Returns an identifier for a copy of the dataset creation property list for a dataset.">H5Dget_create_plist()</a> returns an identifier for a copy of the dataset creation property list associated with the dataset specified by <code>dset_id</code>.</p>
-<p>The creation property list identifier should be released with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a> to prevent resource leaks. </p>
+<p>The creation property list identifier should be released with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a> to prevent resource leaks.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1492,6 +1495,7 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a" title="Returns an identifier for a copy of the dataspace for a dataset.">H5Dget_space()</a> makes a copy of the dataspace of the dataset specified by <code>dset_id</code>. The function returns an identifier for the new copy of the dataspace.</p>
 <p>A dataspace identifier returned from this function should be released with <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> when the identifier is no longer needed so that resource leaks will not occur.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>
 <dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line">    {</div>
 <div class="line">        __label__ fail_update, fail_fspace, fail_dset, fail_file;</div>
 <div class="line">        <a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, dset, fspace;</div>
@@ -1611,7 +1615,8 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 <li>For filtered chunked datasets, the returned size is the space required to store the filtered data. For example, if a compression filter is in use, <a class="el" href="group___h5_d.html#gafb249479a493e80891f0c7f5d8a91b00" title="Returns the amount of storage allocated for a dataset.">H5Dget_storage_size()</a> will return the total space required to store the compressed chunks.</li>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>Note that <a class="el" href="group___h5_d.html#gafb249479a493e80891f0c7f5d8a91b00" title="Returns the amount of storage allocated for a dataset.">H5Dget_storage_size()</a> is not generally an appropriate function to use when determining the amount of memory required to work with a dataset. In such circumstances, you must determine the number of data points in a dataset and the size of an individual dataset element. <a class="el" href="group___h5_s.html#ga9d369fe1e01a95710d320bc5fd32cf83" title="Determines the number of elements in a dataspace.">H5Sget_simple_extent_npoints()</a> and <a class="el" href="group___h5_t.html#ga1b971589cd7a86f3e84affdee455564e" title="Returns the size of a datatype.">H5Tget_size()</a> can be used to calculate that amount.</dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd><a class="el" href="group___h5_d.html#gafb249479a493e80891f0c7f5d8a91b00" title="Returns the amount of storage allocated for a dataset.">H5Dget_storage_size()</a> does not differentiate between 0 (zero), the value returned for the storage size of a dataset with no stored values, and 0 (zero), the value returned to indicate an error. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd><a class="el" href="group___h5_d.html#gafb249479a493e80891f0c7f5d8a91b00" title="Returns the amount of storage allocated for a dataset.">H5Dget_storage_size()</a> does not differentiate between 0 (zero), the value returned for the storage size of a dataset with no stored values, and 0 (zero), the value returned to indicate an error.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -1641,7 +1646,8 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a datatype identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> returns an identifier of a copy of the datatype for a dataset.</p>
-<p>If a dataset has a named datatype, then an identifier to the opened datatype is returned. Otherwise, the returned datatype is read-only. </p>
+<p>If a dataset has a named datatype, then an identifier to the opened datatype is returned. Otherwise, the returned datatype is read-only.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1916,7 +1922,8 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 <div class="line">        <a class="code" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file);</div>
 <div class="line">fail_file:;</div>
 <div class="line">    }</div>
-</div><!-- fragment --></dd></dl>
+</div><!-- fragment --> </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -2333,7 +2340,8 @@ A call to <a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a05
 <p>The <code>type_id</code> must be the datatype stored in the buffer. The <code>space_id</code> describes the selection for the memory buffer to free the VL datatypes within. The <code>dxpl_id</code> is the dataset transfer property list that was used for the I/O transfer to create the buffer. And <code>buf</code> is the pointer to the buffer to be reclaimed.</p>
 <p>The VL structures (<a class="el" href="structhvl__t.html">hvl_t</a>) in the user's buffer are modified to zero out the VL information after the memory has been reclaimed.</p>
 <p>If nested VL datatypes were used to create the buffer, this routine frees them from the bottom up, releasing all the memory without creating memory leaks.</p>
-<dl class="section version"><dt>Version</dt><dd>1.12.0 Function was deprecated </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.12.0 Function was deprecated</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -2468,6 +2476,7 @@ If a dataset's storage layout is 'compact', care must be taken when writing data
 <div class="line">fail_file:;</div>
 <div class="line">    }</div>
 </div><!-- fragment --> </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___d_c_p_l.html#ga6bd822266b31f86551a9a1d79601b6a2" title="Sets the time when fill values are written to a dataset.">H5Pset_fill_time()</a>, <a class="el" href="group___d_c_p_l.html#ga85faefca58387bba409b65c470d7d851" title="Sets the timing for storage space allocation.">H5Pset_alloc_time()</a> </dd></dl>
 
 </div>

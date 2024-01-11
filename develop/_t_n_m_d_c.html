@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -459,7 +459,7 @@ New Metadata Cache Debugging Facilities</h1>
 <p>There is also an extensive statistics collection code. Use H5C_COLLECT_CACHE_STATS and H5C_COLLECT_CACHE_ENTRY_STATS in H5Cprivate.h to turn this on. If you also turn on H5AC_DUMP_STATS_ON_CLOSE in H5ACprivate.h, stats will be dumped when you close a file. Alternatively you can call H5C_stats() and H5C_stats__reset() within the library to dump and reset stats. Both of these functions are defined in H5C.c.</p>
 <p>Finally, the cache also contains an extensive sanity checking code. Much of this is turned on when you compile in debug mode, but to enable the full suite, turn on H5C_DO_SANITY_CHECKS in H5Cprivate.h.</p>
 <h1><a class="anchor" id="trouble"></a>
-Trouble Shooting</h1>
+Troubleshooting</h1>
 <p>Absent major bugs in the cache, the only troubleshooting you should have to do is diagnosing and fixing problems with your cache configuration.</p>
 <p>Assuming it runs on your platform (I've only used it under Linux), the reporting function is probably the most convenient diagnosis tool. However, since it is unsupported code, I will not discuss it further beyond directing you to the source (H5C_def_auto_resize_rpt_fcn() in H5C.c).</p>
 <p>Absent the reporting function, regular calls to <a class="el" href="group___m_d_c.html#gabea066c3fd924d2cf868ecee66a7c41f" title="Obtains target file&#39;s metadata cache hit rate.">H5Fget_mdc_hit_rate()</a> should give you a good idea of the hit rate over time. Remember that the hit rate stats are reset at the end of each epoch (when adaptive cache resizing is enabled), so you should expect some jitter.</p>

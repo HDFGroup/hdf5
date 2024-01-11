@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -289,7 +289,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> releases the datatype <code>dtype_id</code>. Further access through this datatype identifier is illegal. Failure to release a datatype with this call will result in resource leaks. </p>
+<p><a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> releases the datatype <code>dtype_id</code>. Further access through this datatype identifier is illegal. Failure to release a datatype with this call will result in resource leaks.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -320,6 +321,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Asynchronous version of <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a>. </p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -572,6 +574,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Asynchronous version of <a class="el" href="group___h5_t.html#ga10352b6fa9ac58a7fbd5299496f1df31" title="Commits a transient datatype, linking it into the file and creating a new committed datatype.">H5Tcommit2()</a>. </p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -601,7 +604,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns zero (false), a positive (true) or a negative (failure) value.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga0eba38d8c49784269e71ac9fa79b0f0a" title="Determines whether a datatype is a committed type or a transient type.">H5Tcommitted()</a> queries a type to determine whether the type specified by the <code>dtype_id</code> identifier is a committed (formerly known as a <em>named</em>) type or a transient type. If this function returns a positive value, then the type is committed (that is, it has been committed, perhaps by some other application). Datasets which return committed datatypes with <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> are able to share the datatype with other datasets in the same file.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Fortran API was added</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.6 or earlier </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -631,7 +634,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a datatype identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e" title="Copies an existing datatype.">H5Tcopy()</a> makes a copy of an existing datatype. The returned type is always transient and unlocked.</p>
 <p>The <code>type_id</code> argument can be either a datatype identifier, a predefined datatype (defined in <a class="el" href="_h5_tpublic_8h.html">H5Tpublic.h</a>), or a dataset identifier. If <code>type_id</code> is a dataset identifier, this function returns a transient, modifiable datatype which is a copy of the dataset's datatype.</p>
-<p>The returned datatype identifier should be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to prevent resource leaks. </p>
+<p>The returned datatype identifier should be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to prevent resource leaks.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -682,7 +686,7 @@ Functions</h2></td></tr>
 <p>ENUMs created with this function have a signed native integer base datatype. Use <a class="el" href="group___e_n_u_m.html#gafd8d8cfead535791b3f753d21e79991f" title="Creates a new enumeration datatype.">H5Tenum_create()</a> if a different integer base datatype is required.</p>
 <p>The datatype identifier returned from this function should be released with H5Tclose or resource leaks will result.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a></dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -711,7 +715,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a datatype identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga186d7ed91fc0f9c55e19dcd96c7b229b" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode()</a> Given an object description of datatype in binary in a buffer, <a class="el" href="group___h5_t.html#ga186d7ed91fc0f9c55e19dcd96c7b229b" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode()</a> reconstructs the HDF5 datatype object and returns a new object handle for it. The binary description of the object is encoded by <a class="el" href="group___h5_t.html#ga1ceda41ee462fab8dd70bdf67205ed1c" title="Encodes a datatype object description into a binary buffer.">H5Tencode()</a>. User is responsible for passing in the right buffer.</p>
-<p>The datatype identifier returned by this function can be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> when the identifier is no longer needed so that resource leaks will not develop. </p>
+<p>The datatype identifier returned by this function can be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> when the identifier is no longer needed so that resource leaks will not develop.</p>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -871,7 +876,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns zero (false), a positive (true) or a negative (failure) value.</dd></dl>
 <p><a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f" title="Determines whether two datatype identifiers refer to the same datatype.">H5Tequal()</a> determines whether two datatype identifiers refer to the same datatype.</p>
-<dl class="section since"><dt>Since</dt><dd>1.6 or earlier </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -902,7 +907,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_t.html#gafd60389b49e1e5e6f37caffbe6cbf6e5" title="Flushes all buffers associated with a committed datatype to disk.">H5Tflush()</a> causes all buffers associated with a committed datatype <code>type_id</code> to be immediately flushed to disk without removing the data from the cache.</p>
 <p>HDF5 does not possess full control over buffering. <a class="el" href="group___h5_t.html#gafd60389b49e1e5e6f37caffbe6cbf6e5" title="Flushes all buffers associated with a committed datatype to disk.">H5Tflush()</a> flushes the internal HDF5 buffers and then asks the operating system (the OS) to flush the system buffers for the open files. After that, the OS is responsible for ensuring that the data is actually flushed to disk.</p>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.10.0 C function introduced with this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.0</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_d.html#ga4a2175a62baa1e35ad2467bb1fdff1f7" title="Flushes all buffers associated with a dataset to disk.">H5Dflush()</a> <a class="el" href="group___h5_d.html#ga3c1ea7e5db3f62d9cf03dd62d1fb08da" title="Refreshes all buffers associated with a dataset.">H5Drefresh()</a> <a class="el" href="group___h5_t.html#gafd60389b49e1e5e6f37caffbe6cbf6e5" title="Flushes all buffers associated with a committed datatype to disk.">H5Tflush()</a> <a class="el" href="group___h5_g.html#ga0a8bdd0eb1b001222c27d3d39a909840" title="Refreshes all buffers associated with a group.">H5Grefresh()</a> <a class="el" href="group___h5_o.html#gad99f35048cba4534b6393214684f090f" title="Flushes all buffers associated with an HDF5 object to disk.">H5Oflush()</a> <a class="el" href="group___h5_o.html#gaf0318b68be9ab23a92b8a6bee0af9e2f" title="Refreshes all buffers associated with an HDF5 object.">H5Orefresh()</a> <a class="el" href="group___h5_t.html#gafd60389b49e1e5e6f37caffbe6cbf6e5" title="Flushes all buffers associated with a committed datatype to disk.">H5Tflush()</a> <a class="el" href="group___h5_t.html#ga5bc56f6b85e114829dc12d6b18d66f4d" title="Refreshes all buffers associated with a committed datatype.">H5Trefresh()</a> <a class="el" href="group___s_w_m_r.html#ga159be34fbe7e4a959589310ef0196dfe" title="Retrieves free-space section information for a file.">H5Fstart_swmr_write()</a> <a class="el" href="group___d_a_p_l.html#gacd6803640eebd20e408c330192b09fa6" title="Retrieves the values of the append property that is set up in the dataset access property list.">H5Pget_append_flush()</a> <a class="el" href="group___f_a_p_l.html#gadb66d434fd8d2f600213b0eec539564e" title="Retrieves the object flush property values from the file access property list.">H5Pget_object_flush_cb()</a> <a class="el" href="group___d_a_p_l.html#ga2f685a7b3f3a4fa35ddcd1659ab4a835" title="Sets two actions to perform when the size of a dataset&#39;s dimension being appended reaches a specified...">H5Pset_append_flush()</a> <a class="el" href="group___f_a_p_l.html#gab4a4a788af5b6e88381dda0df2efbf19" title="Sets a callback function to invoke when an object flush occurs in the file.">H5Pset_object_flush_cb()</a> </dd></dl>
 
 </div>
@@ -948,7 +953,8 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2">H5T_class_t</a>;</div>
 </div><!-- fragment --> <dl class="section note"><dt>Note</dt><dd>The library returns <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a2de5d7919fe54466b7cf6a6c0b4265fa">H5T_STRING</a> for both fixed-length and variable-length strings.</dd>
 <dd>
-Unsupported datatype: The time datatype class, <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a8d3af61b1a73c5682f7f9b131754f6e3">H5T_TIME</a>, is not supported. If <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a8d3af61b1a73c5682f7f9b131754f6e3">H5T_TIME</a> is used, the resulting data will be readable and modifiable only on the originating computing platform; it will not be portable to other platforms. </dd></dl>
+Unsupported datatype: The time datatype class, <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a8d3af61b1a73c5682f7f9b131754f6e3">H5T_TIME</a>, is not supported. If <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a8d3af61b1a73c5682f7f9b131754f6e3">H5T_TIME</a> is used, the resulting data will be readable and modifiable only on the originating computing platform; it will not be portable to other platforms.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1101,7 +1107,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 <li>For variable-length sequence datatypes (see <a class="el" href="group___v_l_e_n.html#ga6841355fa5b3c924876b121dedb8ed2f" title="Creates a new variable-length array datatype.">H5Tvlen_create()</a>), the returned value is the size of the <code><a class="el" href="structhvl__t.html">hvl_t</a></code> struct, or <code>sizeof</code>(<code><a class="el" href="structhvl__t.html">hvl_t</a></code>). The <code><a class="el" href="structhvl__t.html">hvl_t</a></code> struct contains a pointer to the actual data and a size value. This function does not return the size of actual variable-length sequence data.</li>
 </ul>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c" title="Sets size for a datatype.">H5Tset_size()</a></dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1130,7 +1136,8 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a datatype identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga331e8f7b388a50af77294018db788de3" title="Returns the base datatype from which a datatype is derived.">H5Tget_super()</a> returns the base datatype from which the datatype <code>type_id</code> is derived. In the case of an enumeration type, the return value is an integer type.</p>
-<p>The datatype identifier returned by this function must be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> when the identifier is no longer needed so that resource leaks will not develop. </p>
+<p>The datatype identifier returned by this function must be released with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> when the identifier is no longer needed so that resource leaks will not develop.</p>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -1158,7 +1165,8 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5_t.html#ga523642dbf4c60a83127fff87664a965b" title="Locks a datatype.">H5Tlock()</a> locks the datatype specified by the dtype_id identifier, making it read-only and non-destructible. This is normally done by the library for predefined datatypes so the application does not inadvertently change or delete a predefined type. Once a datatype is locked it can never be unlocked. </p>
+<p><a class="el" href="group___h5_t.html#ga523642dbf4c60a83127fff87664a965b" title="Locks a datatype.">H5Tlock()</a> locks the datatype specified by the dtype_id identifier, making it read-only and non-destructible. This is normally done by the library for predefined datatypes so the application does not inadvertently change or delete a predefined type. Once a datatype is locked it can never be unlocked.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1200,7 +1208,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000085">Deprecated:</a></b></dt><dd>This function has been renamed from <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> and is deprecated in favor of the macro <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a> or the function <a class="el" href="group___h5_t.html#ga7e65e77634f1fb4ba38cbcdab9a59bc2" title="Opens a committed (named) datatype.">H5Topen2()</a>.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga9f76fa0dc34bc7b310e100e5bfed66fb" title="Opens a named datatype.">H5Topen1()</a> opens a named datatype at the location specified by <code>loc_id</code> and returns an identifier for the datatype. <code>loc_id</code> can be either a file or group identifier. The identifier should eventually be closed by calling <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to release resources.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> renamed to <a class="el" href="group___h5_t.html#ga9f76fa0dc34bc7b310e100e5bfed66fb" title="Opens a named datatype.">H5Topen1()</a> and deprecated in this release.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1292,6 +1300,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 </div><div class="memdoc">
 
 <p>Asynchronous version of <a class="el" href="group___h5_t.html#ga7e65e77634f1fb4ba38cbcdab9a59bc2" title="Opens a committed (named) datatype.">H5Topen2()</a>. </p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -1321,7 +1330,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_t.html#ga5bc56f6b85e114829dc12d6b18d66f4d" title="Refreshes all buffers associated with a committed datatype.">H5Trefresh()</a> causes all buffers associated with a committed datatype to be cleared and immediately re-loaded with updated contents from disk.</p>
 <p>This function essentially closes the datatype, evicts all metadata associated with it from the cache, and then reopens the datatype. The reopened datatype is automatically re-registered with the same identifier.</p>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -1378,7 +1387,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
 <li>Ineligible datatypes: This function cannot be used with enumerated datatypes (<a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5ee305303f12787367ac271d8f28f2e6">H5T_ENUM</a>), array datatypes (<a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a547a4451911e912127f300ab15113854">H5T_ARRAY</a>), variable-length array datatypes (<a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2ad8ff83b6b7ca22575263561221193028">H5T_VLEN</a>), or reference datatypes (<a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a>).</li>
 </ul>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_t.html#ga1b971589cd7a86f3e84affdee455564e" title="Returns the size of a datatype.">H5Tget_size()</a></dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>

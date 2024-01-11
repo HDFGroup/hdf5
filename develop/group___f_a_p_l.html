@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -799,7 +799,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 </table>
  This list does not include custom drivers that might be defined and registered by a user.</p>
 <p>The returned driver identifier is only valid as long as the file driver remains registered.</p>
-<dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -847,7 +847,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the driver configuration string on success (not including the NUL terminator). Returns negative on failure.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#gac0d9eb573b84ce125433e81b2a475085" title="Retrieves a string representation of the configuration for the driver set on the given FAPL....">H5Pget_driver_config_str()</a> retrieves a string representation of the configuration for the driver set on the given FAPL. The returned string can be used to configure the same driver in an identical way.</p>
 <p>If <code>config_buf</code> is NULL, the length of the driver configuration string is simply returned. The caller can then allocate a buffer of the appropriate size and call this routine again.</p>
-<dl class="section version"><dt>Version</dt><dd>1.14.0 Function publicized in this release. </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
 </div>
 </div>
@@ -881,7 +881,8 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <dl class="section note"><dt>Note</dt><dd><a class="el" href="group___f_a_p_l.html#ga14056dca8f3d6249474d5321d4298fe2" title="Returns a pointer to file driver information.">H5Pget_driver_info()</a> and <a class="el" href="group___f_a_p_l.html#ga8bcce60e23e9d2a019212c63b146502e" title="Sets a file driver.">H5Pset_driver()</a> are used only when creating a virtual file driver (VFD) in the virtual file layer (VFL).</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.10.1 Return value was changed from <em>void</em> * to <em>const</em> <em>void</em> *. </dd>
 <dd>
-1.8.2 Function publicized in this release; previous releases described this function only in the virtual file driver documentation. </dd></dl>
+1.8.2 Function publicized in this release; previous releases described this function only in the virtual file driver documentation.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
 </div>
@@ -2367,7 +2368,7 @@ For a file opened without SWMR access, the value retrieved will always be the de
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga5554cf0775f9d7ac3b0cd844533d4486" title="Get the MPI communicator and info.">H5Pget_mpi_params()</a> gets the MPI communicator and info stored in the file access property list <code>fapl_id</code>.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000026">Todo:</a></b></dt><dd>When was this introduced?</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -3041,7 +3042,8 @@ Raw dataset chunk caching is supported when these drivers are used in read-only 
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga8bcce60e23e9d2a019212c63b146502e" title="Sets a file driver.">H5Pset_driver()</a> sets the file driver, driver_id, for a file access or data transfer property list, <code>plist_id</code>, and supplies an optional struct containing the driver-specific properties, <code>driver_info</code>.</p>
 <p>The driver properties will be copied into the property list and the reference count on the driver will be incremented, allowing the caller to close the driver identifier but still use the property list.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.2 Function publicized in this release; previous releases described this function only in the virtual file driver documentation. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.2 Function publicized in this release; previous releases described this function only in the virtual file driver documentation.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
 </div>
@@ -3089,7 +3091,7 @@ Raw dataset chunk caching is supported when these drivers are used in read-only 
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga156702db27ece40d21b37be5fe5e8b15" title="Sets a file driver according to a given driver name.">H5Pset_driver_by_name()</a> sets the file driver, by the name driver_name, for a file access or data transfer property list, <code>plist_id</code>, and supplies an optional string containing the driver-specific properties, <code>driver_config</code>. The driver properties string will be copied into the property list.</p>
 <p>If the driver specified by <code>driver_name</code> is not currently registered, an attempt will be made to load the driver as a plugin.</p>
-<dl class="section version"><dt>Version</dt><dd>1.14.0 Function publicized in this release. </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
 </div>
 </div>
@@ -3137,7 +3139,7 @@ Raw dataset chunk caching is supported when these drivers are used in read-only 
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#gac4426b1d36aa8766fbe2deaf67a18c06" title="Sets a file driver according to a given driver value (ID).">H5Pset_driver_by_value()</a> sets the file driver, by the value driver_value, for a file access or data transfer property list, <code>plist_id</code>, and supplies an optional string containing the driver-specific properties, <code>driver_config</code>. The driver properties string will be copied into the property list.</p>
 <p>If the driver specified by <code>driver_value</code> is not currently registered, an attempt will be made to load the driver as a plugin.</p>
-<dl class="section version"><dt>Version</dt><dd>1.14.0 Function publicized in this release. </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
 </div>
 </div>
@@ -4682,7 +4684,8 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 <p><a class="el" href="group___f_a_p_l.html#ga61f01a12d5392ccf1321168f3c28f36f" title="Sets garbage collecting references flag.">H5Pset_gc_references()</a> sets the flag for garbage collecting references for the file.</p>
 <p>Dataset region references and other reference types use space in an HDF5 file's global heap. If garbage collection is on and the user passes in an uninitialized value in a reference structure, the heap might get corrupted. When garbage collection is off, however, and the user re-uses a reference, the previous heap block will be orphaned and not returned to the free heap space.</p>
 <p>When garbage collection is on, the user must initialize the reference structures to 0 or risk heap corruption.</p>
-<p>The default value for garbage collecting references is off. </p>
+<p>The default value for garbage collecting references is off.</p>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -5316,7 +5319,7 @@ Failure Modes:<ul>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga6daceb4a9e51fca7cb198f964b67baf0" title="Set the MPI communicator and info.">H5Pset_mpi_params()</a> sets the MPI communicator and info stored in the file access property list <code>fapl_id</code>.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000027">Todo:</a></b></dt><dd>When was this introduced?</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>

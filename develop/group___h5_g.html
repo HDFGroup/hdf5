@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -801,7 +801,8 @@ Functions</h2></td></tr>
 </ul>
 <p>At most bufsize characters, including a null-terminator, are returned in <code>buf</code>. The returned value is not null-terminated if the comment is longer than the supplied buffer. If the size of the comment is unknown, a preliminary <code><a class="el" href="group___h5_g.html#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a></code> call will return the size of the comment, including space for the null-terminator.</p>
 <p>If an object does not have a comment, the empty string is returned in comment.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1123,7 +1124,8 @@ Functions</h2></td></tr>
 <p>If size is smaller than the size of the returned object name, then the name stored in the buffer value will not be <code>NULL</code> terminated.</p>
 <p>This function fails if <code>name</code> is not a symbolic link. The presence of a symbolic link can be tested by passing zero for <code>size</code> and <code>NULL</code> for value.</p>
 <p>This function should be used only after <a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a> (or the deprecated function <a class="el" href="group___h5_g.html#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a>) has been called to verify that name is a symbolic link.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1165,7 +1167,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000046">Deprecated:</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_g.html#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info()</a>.</dd></dl>
 <p><a class="el" href="group___h5_g.html#ga3e30142e15ccf9a08bfc91ca9925c14d" title="Returns number of objects in the group specified by its identifier.">H5Gget_num_objs()</a> returns number of objects in a group. Group is specified by its identifier <code>loc_id</code>. If a file identifier is passed in, then the number of objects in the root group is returned.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -1235,15 +1238,15 @@ Functions</h2></td></tr>
 <div class="line">    <span class="keywordtype">size_t</span>        <a class="code" href="struct_h5_g__stat__t.html#aa60adc607e378ee1f1f51a19f883eeb0">linklen</a>;   </div>
 <div class="line">    <a class="code" href="struct_h5_o__stat__t.html">H5O_stat_t</a>    <a class="code" href="struct_h5_g__stat__t.html#acec33440ee705e96159fa8eebe1702ea">ohdr</a>;      </div>
 <div class="line">} <a class="code" href="struct_h5_g__stat__t.html">H5G_stat_t</a>;</div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6">H5G_obj_t</a></div><div class="ttdeci">H5G_obj_t</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:535</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html"><div class="ttname"><a href="struct_h5_g__stat__t.html">H5G_stat_t</a></div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:563</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_a292266459b6436aa9818e8d7a9cd25cc"><div class="ttname"><a href="struct_h5_g__stat__t.html#a292266459b6436aa9818e8d7a9cd25cc">H5G_stat_t::type</a></div><div class="ttdeci">H5G_obj_t type</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:567</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_a2c8cbd250873ea4c133ba88beead3a4e"><div class="ttname"><a href="struct_h5_g__stat__t.html#a2c8cbd250873ea4c133ba88beead3a4e">H5G_stat_t::nlink</a></div><div class="ttdeci">unsigned nlink</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:566</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_a3e6af6ccd452ff6ff53a6aadc5a33860"><div class="ttname"><a href="struct_h5_g__stat__t.html#a3e6af6ccd452ff6ff53a6aadc5a33860">H5G_stat_t::fileno</a></div><div class="ttdeci">unsigned long fileno[2]</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:564</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_a4a2d3a53446ef3217564ced73636f9bf"><div class="ttname"><a href="struct_h5_g__stat__t.html#a4a2d3a53446ef3217564ced73636f9bf">H5G_stat_t::mtime</a></div><div class="ttdeci">time_t mtime</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:568</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_a871980f2e438ab5b2d466163496b8d84"><div class="ttname"><a href="struct_h5_g__stat__t.html#a871980f2e438ab5b2d466163496b8d84">H5G_stat_t::objno</a></div><div class="ttdeci">unsigned long objno[2]</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:565</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_aa60adc607e378ee1f1f51a19f883eeb0"><div class="ttname"><a href="struct_h5_g__stat__t.html#aa60adc607e378ee1f1f51a19f883eeb0">H5G_stat_t::linklen</a></div><div class="ttdeci">size_t linklen</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:569</div></div>
-<div class="ttc" id="astruct_h5_g__stat__t_html_acec33440ee705e96159fa8eebe1702ea"><div class="ttname"><a href="struct_h5_g__stat__t.html#acec33440ee705e96159fa8eebe1702ea">H5G_stat_t::ohdr</a></div><div class="ttdeci">H5O_stat_t ohdr</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:570</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6">H5G_obj_t</a></div><div class="ttdeci">H5G_obj_t</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:550</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html"><div class="ttname"><a href="struct_h5_g__stat__t.html">H5G_stat_t</a></div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:578</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_a292266459b6436aa9818e8d7a9cd25cc"><div class="ttname"><a href="struct_h5_g__stat__t.html#a292266459b6436aa9818e8d7a9cd25cc">H5G_stat_t::type</a></div><div class="ttdeci">H5G_obj_t type</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:582</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_a2c8cbd250873ea4c133ba88beead3a4e"><div class="ttname"><a href="struct_h5_g__stat__t.html#a2c8cbd250873ea4c133ba88beead3a4e">H5G_stat_t::nlink</a></div><div class="ttdeci">unsigned nlink</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:581</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_a3e6af6ccd452ff6ff53a6aadc5a33860"><div class="ttname"><a href="struct_h5_g__stat__t.html#a3e6af6ccd452ff6ff53a6aadc5a33860">H5G_stat_t::fileno</a></div><div class="ttdeci">unsigned long fileno[2]</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:579</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_a4a2d3a53446ef3217564ced73636f9bf"><div class="ttname"><a href="struct_h5_g__stat__t.html#a4a2d3a53446ef3217564ced73636f9bf">H5G_stat_t::mtime</a></div><div class="ttdeci">time_t mtime</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:583</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_a871980f2e438ab5b2d466163496b8d84"><div class="ttname"><a href="struct_h5_g__stat__t.html#a871980f2e438ab5b2d466163496b8d84">H5G_stat_t::objno</a></div><div class="ttdeci">unsigned long objno[2]</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:580</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_aa60adc607e378ee1f1f51a19f883eeb0"><div class="ttname"><a href="struct_h5_g__stat__t.html#aa60adc607e378ee1f1f51a19f883eeb0">H5G_stat_t::linklen</a></div><div class="ttdeci">size_t linklen</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:584</div></div>
+<div class="ttc" id="astruct_h5_g__stat__t_html_acec33440ee705e96159fa8eebe1702ea"><div class="ttname"><a href="struct_h5_g__stat__t.html#acec33440ee705e96159fa8eebe1702ea">H5G_stat_t::ohdr</a></div><div class="ttdeci">H5O_stat_t ohdr</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:585</div></div>
 <div class="ttc" id="astruct_h5_o__stat__t_html"><div class="ttname"><a href="struct_h5_o__stat__t.html">H5O_stat_t</a></div><div class="ttdef"><b>Definition:</b> H5Opublic.h:1706</div></div>
 </div><!-- fragment --><p> where <a class="el" href="struct_h5_o__stat__t.html">H5O_stat_t</a> (defined in <a class="el" href="_h5_opublic_8h.html">H5Opublic.h</a>) is: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="struct_h5_o__stat__t.html">H5O_stat_t</a> {</div>
@@ -1259,7 +1262,8 @@ Functions</h2></td></tr>
 </div><!-- fragment --> <dl class="section attention"><dt>Attention</dt><dd>Some systems will be able to record the time accurately but unable to retrieve the correct time; such systems (e.g., Irix64) will report an <code>mtime</code> value of 0 (zero).</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd>
 <dd>
-1.6.1 Two new fields were added to the <a class="el" href="struct_h5_g__stat__t.html">H5G_stat_t</a> struct in this release. </dd></dl>
+1.6.1 Two new fields were added to the <a class="el" href="struct_h5_g__stat__t.html">H5G_stat_t</a> struct in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1433,7 +1437,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> iterates over the members of name in the file or group specified with <code>loc_id</code>. For each object in the group, the <code>op_data</code> and some additional information, specified below, are passed to the operator function. The iteration begins with the <code>idx</code> object in the group and the next element to be processed by the operator is returned in <code>idx</code>. If <code>idx</code> is NULL, then the iterator starts at the first group member; since no stopping point is returned in this case, the iterator cannot be restarted if one of the calls to its operator returns non-zero. <a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> does not recursively follow links into subgroups of the specified group.</p>
 <p>The prototype for <a class="el" href="_h5_gpublic_8h.html#aa2bdcd48141dd7db6e4a6d2534801697">H5G_iterate_t</a> is: </p><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <a class="code" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code" href="_h5_gpublic_8h.html#aa2bdcd48141dd7db6e4a6d2534801697">H5G_iterate_t</a>)(<a class="code" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> group, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">void</span> *op_data);</div>
-<div class="ttc" id="a_h5_gpublic_8h_html_aa2bdcd48141dd7db6e4a6d2534801697"><div class="ttname"><a href="_h5_gpublic_8h.html#aa2bdcd48141dd7db6e4a6d2534801697">H5G_iterate_t</a></div><div class="ttdeci">herr_t(* H5G_iterate_t)(hid_t group, const char *name, void *op_data)</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:554</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_aa2bdcd48141dd7db6e4a6d2534801697"><div class="ttname"><a href="_h5_gpublic_8h.html#aa2bdcd48141dd7db6e4a6d2534801697">H5G_iterate_t</a></div><div class="ttdeci">herr_t(* H5G_iterate_t)(hid_t group, const char *name, void *op_data)</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:569</div></div>
 <div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition:</b> H5public.h:235</div></div>
 </div><!-- fragment --><p> The operation receives the group identifier for the group being iterated over, <code>group</code>, the name of the current object within the group, <code>name</code>, and the pointer to the operator data passed into <a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a>, <code>op_data</code>.</p>
 <p>The return values from an operator are: </p><ul>
@@ -1444,7 +1448,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> assumes that the membership of the group identified by <code>name</code> remains unchanged through the iteration. If the membership changes during the iteration, the function's behavior is undefined.</p>
 <p><a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> is not recursive. In particular, if a member of <code>name</code> is found to be a group, call it <code>subgroup_a</code>, <a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> does not examine the members of <code>subgroup_a</code>. When recursive iteration is required, the application must handle the recursion, explicitly calling <a class="el" href="group___h5_g.html#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> on discovered subgroups.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Adding or removing members to the group during iteration will lead to undefined behavior.</dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1502,7 +1507,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#ga1b9b2effdc1727613f81c4dcb2a4d644" title="Creates a link of the specified type from new_name to cur_name.">H5Glink()</a> creates a new name for an object that has some current name, possibly one of many names it currently has.</p>
 <p>If <code>link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a57c964305b99e9b9f9096f44d683b009">H5G_LINK_HARD</a>, then <code>cur_name</code> must specify the name of an existing object and both names are interpreted relative to <code>cur_loc_id</code>, which is either a file identifier or a group identifier.</p>
 <p>If <code>link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a55f1f04ca997fe006ca614b7e8952a96">H5G_LINK_SOFT</a>, then <code>cur_name</code> can be anything and is interpreted at lookup time relative to the group which contains the final component of <code>new_name</code>. For instance, if <code>cur_name</code> is <code>./foo</code>, <code>new_name</code> is <code>./x/y/bar</code>, and a request is made for <code>./x/y/bar</code>, then the actual object looked up is <code>./x/y/./foo</code>.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1567,7 +1573,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#gafabd07a7f64a7cbef27c56a3bee2df47" title="Creates a link of the specified type from cur_name to new_name.">H5Glink2()</a> creates a new name for an object that has some current name, possibly one of many names it currently has.</p>
 <p>If <code>link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a57c964305b99e9b9f9096f44d683b009">H5G_LINK_HARD</a>, then <code>cur_name</code> must specify the name of an existing object and both names are interpreted relative to <code>cur_loc_id</code> and <code>new_loc_id</code>, respectively, which are either file identifiers or group identifiers.</p>
 <p>If <code>link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a55f1f04ca997fe006ca614b7e8952a96">H5G_LINK_SOFT</a>, then <code>cur_name</code> can be anything and is interpreted at lookup time relative to the group which contains the final component of <code>new_name</code>. For instance, if <code>current_name</code> is <code>./foo</code>, <code>new_name</code> is <code>./x/y/bar</code>, and a request is made for <code>./x/y/bar</code>, then the actual object looked up is <code>./x/y/./foo</code>.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -1617,7 +1624,8 @@ Functions</h2></td></tr>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000039">Deprecated:</a></b></dt><dd>This function is deprecated.</dd></dl>
 <p><a class="el" href="group___h5_g.html#gaa6474351d346ad45309ae0b22ebdde9a" title="Renames an object within an HDF5 file.">H5Gmove()</a> renames an object within an HDF5 file. The original name, <code>src_name</code>, is unlinked from the group graph and the new name, <code>dst_name</code>, is inserted as an atomic operation. Both names are interpreted relative to <code>loc_id</code>, which is either a file or a group identifier.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Exercise care in moving groups as it is possible to render data in a file inaccessible with <a class="el" href="group___h5_g.html#gaa6474351d346ad45309ae0b22ebdde9a" title="Renames an object within an HDF5 file.">H5Gmove()</a>. See The Group Interface in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1675,7 +1683,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_g.html#gad97bf21798b06b63df0bdd404cac562c" title="Renames an object within an HDF5 file.">H5Gmove2()</a> renames an object within an HDF5 file. The original name, <code>src_name</code>, is unlinked from the group graph and the new name, <code>dst_name</code>, is inserted as an atomic operation.</p>
 <p><code>src_name</code> and <code>dst_name</code> are interpreted relative to <code>src_loc_id</code> and <code>dst_loc_id</code>, respectively, which are either file or group identifiers.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Exercise care in moving groups as it is possible to render data in a file inaccessible with <a class="el" href="group___h5_g.html#gad97bf21798b06b63df0bdd404cac562c" title="Renames an object within an HDF5 file.">H5Gmove2()</a>. See The Group Interface in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -1858,7 +1867,8 @@ Functions</h2></td></tr>
 <p>If <code>comment</code> is the empty string or a null pointer, the comment message is removed from the object.</p>
 <p>Comments should be relatively short, null-terminated, ASCII strings.</p>
 <p>Comments can be attached to any object that has an object header, e.g., datasets, groups, and named datatypes, but not symbolic links.</p>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1904,7 +1914,8 @@ Functions</h2></td></tr>
 <p>If the link count reaches zero, all file space associated with the object will be released, i.e., identified in memory as freespace. If any object identifier is open for the object, the space will not be released until after the object identifier is closed.</p>
 <p>Note that space identified as freespace is available for reuse only as long as the file remains open; once a file has been closed, the HDF5 library loses track of freespace. See “Freespace Management” in the <a class="el" href="_u_g.html">HDF5 User Guide</a> for further details.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Exercise care in moving groups as it is possible to render data in a file inaccessible with <a class="el" href="group___h5_g.html#gacb843cbd5bbb816cfa9c855463d1e51c" title="Removes the link to an object from a group.">H5Gunlink()</a>. See The Group Interface in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
-<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release. </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>

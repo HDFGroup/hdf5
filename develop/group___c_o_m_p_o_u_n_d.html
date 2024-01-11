@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -202,7 +202,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2aaf11325a64ed5369e88d8d0d600b5cce"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2aaf11325a64ed5369e88d8d0d600b5cce">H5T_OPAQUE</a></div><div class="ttdeci">@ H5T_OPAQUE</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:37</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2aba1fc36abc23f073912e337d2291b037"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2aba1fc36abc23f073912e337d2291b037">H5T_INTEGER</a></div><div class="ttdeci">@ H5T_INTEGER</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:32</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2ad8ff83b6b7ca22575263561221193028"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2ad8ff83b6b7ca22575263561221193028">H5T_VLEN</a></div><div class="ttdeci">@ H5T_VLEN</div><div class="ttdef"><b>Definition:</b> H5Tpublic.h:41</div></div>
-</div><!-- fragment --> <dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+</div><!-- fragment --> <dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
 </div>
@@ -244,7 +244,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___c_o_m_p_o_u_n_d.html#ga46cf2a60b54a08695635749c215af4af" title="Retrieves the offset of a field of a compound datatype.">H5Tget_member_offset()</a> retrieves the byte offset of the beginning of a field within a compound datatype with respect to the beginning of the compound datatype datum.</p>
 <p>Note that zero is a valid offset and that this function will fail only if a call to <a class="el" href="group___c_o_m_p_o_u_n_d.html#gac8476d164fb972fbf7b8c4584b8e916b" title="Returns datatype class of compound datatype member.">H5Tget_member_class()</a> fails with the same arguments.</p>
 <dl class="section version"><dt>Version</dt><dd>1.6.4 <code>member_no</code> parameter type changed to unsigned.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -285,7 +285,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns the identifier of a copy of the datatype of the field if successful; otherwise returns a negative value.</dd></dl>
 <p><a class="el" href="group___c_o_m_p_o_u_n_d.html#gaf5de0eabe28246f040342e275b9a63eb" title="Returns the datatype of the specified member.">H5Tget_member_type()</a> returns the datatype of the specified member. The caller should invoke <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to release resources associated with the type.</p>
 <dl class="section version"><dt>Version</dt><dd>1.6.4 <code>membno</code> parameter type changed to unsigned.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -341,7 +341,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___c_o_m_p_o_u_n_d.html#ga487d8f64a76f48b6eeb7f402d3b8b081" title="Adds a new member to a compound datatype.">H5Tinsert()</a> adds another member to the compound datatype, specified <code>type_id</code>.</p>
 <p>The new member has a <code>name</code> which must be unique within the compound datatype. The <code>offset</code> argument defines the start of the member in an instance of the compound datatype, and <code>member_id</code> is the datatype identifier of the new member.</p>
 <dl class="section note"><dt>Note</dt><dd>Members of a compound datatype do not have to be atomic datatypes; a compound datatype can have a member which is a compound datatype.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -370,7 +370,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___c_o_m_p_o_u_n_d.html#ga1a28ac30f83a4920aba49bb1b0a6a0f3" title="Recursively removes padding from within a compound datatype.">H5Tpack()</a> recursively removes padding from within a compound datatype to make it more efficient (space-wise) to store that data.</p>
-<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -368,7 +368,8 @@ Functions</h2></td></tr>
 </ul>
 <p>As stated above, <a class="el" href="group___h5.html#ga93525482e1168344f4c92470f99d88be" title="Verifies that HDF5 library versions are consistent.">H5check_version()</a> first verifies that the version of the HDF5 library with which an application was compiled matches the version of the HDF5 library against which the application is currently linked. If this check fails, <a class="el" href="group___h5.html#ga93525482e1168344f4c92470f99d88be" title="Verifies that HDF5 library versions are consistent.">H5check_version()</a> causes the application to abort (by means of a standard C abort() call) and prints information that is usually useful for debugging. This precaution is taken to avoid the risks of data corruption or segmentation faults.</p>
 <p>The most common cause of this failure is that an application was compiled with one version of HDF5 and is dynamically linked with a different version different version.</p>
-<p>If the above test passes, <a class="el" href="group___h5.html#ga93525482e1168344f4c92470f99d88be" title="Verifies that HDF5 library versions are consistent.">H5check_version()</a> proceeds to verify the consistency of additional library version information. This is designed to catch source code inconsistencies that do not normally cause failures; if this check reveals an inconsistency, an informational warning is printed but the application is allowed to run. </p>
+<p>If the above test passes, <a class="el" href="group___h5.html#ga93525482e1168344f4c92470f99d88be" title="Verifies that HDF5 library versions are consistent.">H5check_version()</a> proceeds to verify the consistency of additional library version information. This is designed to catch source code inconsistencies that do not normally cause failures; if this check reveals an inconsistency, an informational warning is printed but the application is allowed to run.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -390,7 +391,8 @@ Functions</h2></td></tr>
 
 <p>Flushes all data to disk, closes all open objects, and releases memory. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close()</a> flushes all data to disk, closes all open HDF5 objects, and cleans up all memory used by the HDF5 library. This function is generally called when the application calls exit(), but may be called earlier in the event of an emergency shutdown or out of a desire to free all resources used by the HDF5 library. </p>
+<p><a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close()</a> flushes all data to disk, closes all open HDF5 objects, and cleans up all memory used by the HDF5 library. This function is generally called when the application calls exit(), but may be called earlier in the event of an emergency shutdown or out of a desire to free all resources used by the HDF5 library.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -413,7 +415,8 @@ Functions</h2></td></tr>
 <p>Instructs library not to install atexit() cleanup routine. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5.html#ga7f80eb63b5e78812b9d0d50ac46764e8" title="Instructs library not to install atexit() cleanup routine.">H5dont_atexit()</a> indicates to the library that an atexit() cleanup routine should not be installed. The major purpose for using this function is in situations where the library is dynamically linked into an application and is un-linked from the application before exit() gets called. In those situations, a routine installed with atexit() would jump to a routine that was no longer in memory, causing errors.</p>
-<dl class="section attention"><dt>Attention</dt><dd>In order to be effective, this routine <em>must</em> be called before any other HDF5 function calls, and must be called each time the library is loaded/linked into the application (the first time and after it's been unloaded). </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>In order to be effective, this routine <em>must</em> be called before any other HDF5 function calls, and must be called each time the library is loaded/linked into the application (the first time and after it's been unloaded).</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -471,7 +474,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5.html#gae511943bcb837a52a012a3a5dd7b90ef" title="Garbage collects on all free-lists of all types.">H5garbage_collect()</a> walks through all garbage collection routines of the library, freeing any unused memory.</p>
 <p>It is not required that <a class="el" href="group___h5.html#gae511943bcb837a52a012a3a5dd7b90ef" title="Garbage collects on all free-lists of all types.">H5garbage_collect()</a> be called at any particular time; it is only necessary for certain situations where the application has performed actions that cause the library to allocate many objects. The application should call <a class="el" href="group___h5.html#gae511943bcb837a52a012a3a5dd7b90ef" title="Garbage collects on all free-lists of all types.">H5garbage_collect()</a> if it eventually releases those objects and wants to reduce the memory used by the library from the peak usage required.</p>
-<dl class="section note"><dt>Note</dt><dd>The library automatically garbage collects all the free lists when the application ends. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The library automatically garbage collects all the free lists when the application ends.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
 </div>
@@ -571,7 +575,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5.html#gaf87da966fdf896ec7bca794e21d4ab0a" title="Returns the HDF library release number.">H5get_libversion()</a> retrieves the major, minor, and release numbers of the version of the HDF5 library which is linked to the application. </p>
+<p><a class="el" href="group___h5.html#gaf87da966fdf896ec7bca794e21d4ab0a" title="Returns the HDF library release number.">H5get_libversion()</a> retrieves the major, minor, and release numbers of the version of the HDF5 library which is linked to the application.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -628,7 +633,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p>The HDF5 library, although not internally multi-threaded, can be built with a thread-safety feature enabled that protects internal data structures with a mutex. In certain circumstances, it may be useful to determine, at run-time, whether the linked HDF5 library was built with the thread-safety feature enabled. </p>
+<p>The HDF5 library, although not internally multi-threaded, can be built with a thread-safety feature enabled that protects internal data structures with a mutex. In certain circumstances, it may be useful to determine, at run-time, whether the linked HDF5 library was built with the thread-safety feature enabled.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -651,7 +657,8 @@ Functions</h2></td></tr>
 <p>Initializes the HDF5 library. </p>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480" title="Initializes the HDF5 library.">H5open()</a> initializes the HDF5 library.</p>
-<p>When the HDF5 library is used in a C application, the library is automatically initialized when the first HDf5 function call is issued. If one finds that an HDF5 library function is failing inexplicably, <a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480" title="Initializes the HDF5 library.">H5open()</a> can be called first. It is safe to call <a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480" title="Initializes the HDF5 library.">H5open()</a> before an application issues any other function calls to the HDF5 library, as there are no damaging side effects in calling it more than once. </p>
+<p>When the HDF5 library is used in a C application, the library is automatically initialized when the first HDf5 function call is issued. If one finds that an HDF5 library function is failing inexplicably, <a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480" title="Initializes the HDF5 library.">H5open()</a> can be called first. It is safe to call <a class="el" href="group___h5.html#ga27fa33dc262dda95c5aa8df533837480" title="Initializes the HDF5 library.">H5open()</a> before an application issues any other function calls to the HDF5 library, as there are no damaging side effects in calling it more than once.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -789,7 +796,7 @@ Functions</h2></td></tr>
 <p>The settings specified for block free lists are duplicated for factory free lists. Therefore, increasing the global limit on block free lists by x bytes will increase the potential free list memory usage by 2x bytes.</p>
 <p>Using a value of -1 for a limit means that no limit is set for the specified type of free list.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.3 Function changed in this release to set factory free list memory limits.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 
 </div>
 </div>

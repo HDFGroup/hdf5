@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -252,7 +252,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="group___h5_r.html#gad5b7b117cfaea90d1e4786304c58c55c" title="Copies an existing reference.">H5Rcopy()</a> creates a copy of an existing reference. <code>src_ref_ptr</code> points to the reference to copy, and <code>dst_ref_ptr</code> is the pointer to the destination reference. </p>
+<p><a class="el" href="group___h5_r.html#gad5b7b117cfaea90d1e4786304c58c55c" title="Copies an existing reference.">H5Rcopy()</a> creates a copy of an existing reference. <code>src_ref_ptr</code> points to the reference to copy, and <code>dst_ref_ptr</code> is the pointer to the destination reference.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -334,7 +335,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="a_h5_rpublic_8h_html_a7d148ddc165e65b01efabfd738ac056eae63b3cfa3688767f46335fad6db981a5"><div class="ttname"><a href="_h5_rpublic_8h.html#a7d148ddc165e65b01efabfd738ac056eae63b3cfa3688767f46335fad6db981a5">H5R_ATTR</a></div><div class="ttdeci">@ H5R_ATTR</div><div class="ttdef"><b>Definition:</b> H5Rpublic.h:57</div></div>
 </div><!-- fragment --><p> The parameters <code>loc_id</code> and <code>name</code> are used to locate the object.</p>
 <p>The parameter <code>space_id</code> identifies the dataset region that a dataset region reference points to. This parameter is used only with dataset region references and should be set to -1 if the reference is an object reference, <a class="el" href="_h5_rpublic_8h.html#ae1ffa09875ca6778df3a577592dacbd2">H5R_OBJECT</a>.</p>
-<dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -407,7 +408,8 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
 <div class="ttc" id="a_h5_rpublic_8h_html_a30e65b87f330f177dc5ae434104af580"><div class="ttname"><a href="_h5_rpublic_8h.html#a30e65b87f330f177dc5ae434104af580">H5R_REF_BUF_SIZE</a></div><div class="ttdeci">#define H5R_REF_BUF_SIZE</div><div class="ttdef"><b>Definition:</b> H5Rpublic.h:38</div></div>
 <div class="ttc" id="astruct_h5_r__ref__t_html"><div class="ttname"><a href="struct_h5_r__ref__t.html">H5R_ref_t</a></div><div class="ttdef"><b>Definition:</b> H5Rpublic.h:97</div></div>
-</div><!-- fragment --><p> <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference. </p>
+</div><!-- fragment --><p> <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -470,7 +472,8 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment --><p> <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference. </p>
+</div><!-- fragment --><p> <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -541,7 +544,8 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment --><p> <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference. </p>
+</div><!-- fragment --><p> <a class="el" href="group___h5_r.html#ga026114e6c23588bf89bb473eb9e4d095" title="Closes a reference.">H5Rdestroy()</a> should be used to release the resource from the reference.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -597,7 +601,7 @@ Functions</h2></td></tr>
 </ul>
 <p>The object opened with this function should be closed when it is no longer needed so that resource leaks will not develop. Use the appropriate close function, such as <a class="el" href="group___h5_o.html#ga545ad7c54987013ebd50b40fe9e73c61" title="Closes an object in an HDF5 file.">H5Oclose()</a> or <a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a> for datasets.</p>
 <dl class="section version"><dt>Version</dt><dd>1.10.0 Function <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference()</a> renamed to <a class="el" href="group___h5_r.html#gafe7bbbc168c4836949c4c0b092654c45" title="Opens the HDF5 object referenced.">H5Rdereference1()</a> and deprecated in this release. </dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -696,7 +700,8 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment -->
+</div><!-- fragment --> <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
+
 </div>
 </div>
 <a id="ga8d7dac2c604356f2fc657f36a201aea0"></a>
@@ -743,7 +748,8 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment -->
+</div><!-- fragment --> <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
+
 </div>
 </div>
 <a id="gaf9c6823346cc34f02b9f5d11e56344a0"></a>
@@ -790,7 +796,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the name if successful, otherwise, a negative value.</dd></dl>
 <p><a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> retrieves the attribute name for the attribute reference pointed to by <code>ref_ptr</code>.</p>
-<p>Up to size characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> call can be made. The return value of this call will be the size of the attribute name. That value can then be passed in for size in the second call to <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a>, which will retrieve the actual name. </p>
+<p>Up to size characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a> call can be made. The return value of this call will be the size of the attribute name. That value can then be passed in for size in the second call to <a class="el" href="group___h5_r.html#gaf9c6823346cc34f02b9f5d11e56344a0" title="Retrieves the attribute name for a referenced object.">H5Rget_attr_name()</a>, which will retrieve the actual name.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -838,7 +845,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the length of the name if successful, otherwise, a negative value.</dd></dl>
 <p><a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> retrieves the file name for the object, region or attribute reference pointed to by <code>ref_ptr</code>.</p>
-<p>Up to <code>size</code> characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of size, is unknown, a preliminary <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> call can be made. The return value of this call will be the size of the file name. That value can then be passed in for size in the second call to <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a>, which will retrieve the actual name. </p>
+<p>Up to <code>size</code> characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of size, is unknown, a preliminary <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a> call can be made. The return value of this call will be the size of the file name. That value can then be passed in for size in the second call to <a class="el" href="group___h5_r.html#ga659d950e37122a59d50612b407a48900" title="Retrieves the file name for a referenced object.">H5Rget_file_name()</a>, which will retrieve the actual name.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -974,7 +982,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> retrieves the object name for the object, region or attribute reference pointed to by <code>ref_ptr</code>.</p>
 <p>The parameter <code>rapl_id</code> is a reference access property list identifier for the reference. The access property list can be used to access external files that the reference points to (through a file access property list).</p>
 <p>Up to size characters of the name are returned in <code>name</code>; additional characters, if any, are not returned to the user application. If the length of the name, which determines the required value of <code>size</code>, is unknown, a preliminary call to <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> call can be made. The return value of this call will be the size of the object name. That value can then be passed in for <code>size</code> in the second call to <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a>, which will retrieve the actual name. If there is no name associated with the object identifier or if the name is NULL, <a class="el" href="group___h5_r.html#gac5a0a3a874cd3c4dc630579521539bb6" title="Retrieves the object name for a referenced object.">H5Rget_obj_name()</a> returns the size of the name buffer (the size does not include the <code>\0</code> terminator).</p>
-<p>If <code>ref_ptr</code> is an object reference, <code>name</code> will be returned with a name for the referenced object. If <code>ref_ptr</code> is a dataset region reference, <code>name</code> will contain a name for the object containing the referenced region. If <code>ref_ptr</code> is an attribute reference, <code>name</code> will contain a name for the object the attribute is attached to. Note that an object in an HDF5 file may have multiple paths if there are multiple links pointing to it. This function may return any one of these paths. </p>
+<p>If <code>ref_ptr</code> is an object reference, <code>name</code> will be returned with a name for the referenced object. If <code>ref_ptr</code> is a dataset region reference, <code>name</code> will contain a name for the object containing the referenced region. If <code>ref_ptr</code> is an attribute reference, <code>name</code> will contain a name for the object the attribute is attached to. Note that an object in an HDF5 file may have multiple paths if there are multiple links pointing to it. This function may return any one of these paths.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -1058,18 +1067,18 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code" href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a5fd24183914c12dd049f433cb6db2ff1">H5G_RESERVED_6</a>,   </div>
 <div class="line">    <a class="code" href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6aeb72828acc9addd40e217c9303e43be2">H5G_RESERVED_7</a>    </div>
 <div class="line">} <a class="code" href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6">H5G_obj_t</a>;</div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6">H5G_obj_t</a></div><div class="ttdeci">H5G_obj_t</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:535</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a0043526475bbfd89e75a77d2868c7a6c"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a0043526475bbfd89e75a77d2868c7a6c">H5G_LINK</a></div><div class="ttdeci">@ H5G_LINK</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:540</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a1e1ef9abeaee9ae9b93ee7ecd05243ef"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a1e1ef9abeaee9ae9b93ee7ecd05243ef">H5G_TYPE</a></div><div class="ttdeci">@ H5G_TYPE</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:539</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a45d6844bdf74176be3b846d007f8c740"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a45d6844bdf74176be3b846d007f8c740">H5G_UNKNOWN</a></div><div class="ttdeci">@ H5G_UNKNOWN</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:536</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a5797c5320135bb6d2d95e4ac65c3f165"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a5797c5320135bb6d2d95e4ac65c3f165">H5G_GROUP</a></div><div class="ttdeci">@ H5G_GROUP</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:537</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a5fd24183914c12dd049f433cb6db2ff1"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a5fd24183914c12dd049f433cb6db2ff1">H5G_RESERVED_6</a></div><div class="ttdeci">@ H5G_RESERVED_6</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:543</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a76b698867a009f71f14db4e18a0a74e7"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a76b698867a009f71f14db4e18a0a74e7">H5G_DATASET</a></div><div class="ttdeci">@ H5G_DATASET</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:538</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a8c0a2907854311285cd7bf5ab5562404"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a8c0a2907854311285cd7bf5ab5562404">H5G_RESERVED_5</a></div><div class="ttdeci">@ H5G_RESERVED_5</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:542</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a9d73a648e21cacd56c1b93d1d75f67d3"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a9d73a648e21cacd56c1b93d1d75f67d3">H5G_UDLINK</a></div><div class="ttdeci">@ H5G_UDLINK</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:541</div></div>
-<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6aeb72828acc9addd40e217c9303e43be2"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6aeb72828acc9addd40e217c9303e43be2">H5G_RESERVED_7</a></div><div class="ttdeci">@ H5G_RESERVED_7</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:544</div></div>
-</div><!-- fragment --> <dl class="section version"><dt>Version</dt><dd>1.8.0 Function <a class="el" href="group___h5_r.html#gafe413df448be0d230de922357fd7bc3b">H5Rget_obj_type()</a> renamed to <a class="el" href="group___h5_r.html#gaf3736b2880a58471882b079b9f03defe" title="Retrieves the type of object that an object reference points to.">H5Rget_obj_type1()</a> and deprecated in this release. </dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6">H5G_obj_t</a></div><div class="ttdeci">H5G_obj_t</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:550</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a0043526475bbfd89e75a77d2868c7a6c"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a0043526475bbfd89e75a77d2868c7a6c">H5G_LINK</a></div><div class="ttdeci">@ H5G_LINK</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:555</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a1e1ef9abeaee9ae9b93ee7ecd05243ef"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a1e1ef9abeaee9ae9b93ee7ecd05243ef">H5G_TYPE</a></div><div class="ttdeci">@ H5G_TYPE</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:554</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a45d6844bdf74176be3b846d007f8c740"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a45d6844bdf74176be3b846d007f8c740">H5G_UNKNOWN</a></div><div class="ttdeci">@ H5G_UNKNOWN</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:551</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a5797c5320135bb6d2d95e4ac65c3f165"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a5797c5320135bb6d2d95e4ac65c3f165">H5G_GROUP</a></div><div class="ttdeci">@ H5G_GROUP</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:552</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a5fd24183914c12dd049f433cb6db2ff1"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a5fd24183914c12dd049f433cb6db2ff1">H5G_RESERVED_6</a></div><div class="ttdeci">@ H5G_RESERVED_6</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:558</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a76b698867a009f71f14db4e18a0a74e7"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a76b698867a009f71f14db4e18a0a74e7">H5G_DATASET</a></div><div class="ttdeci">@ H5G_DATASET</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:553</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a8c0a2907854311285cd7bf5ab5562404"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a8c0a2907854311285cd7bf5ab5562404">H5G_RESERVED_5</a></div><div class="ttdeci">@ H5G_RESERVED_5</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:557</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6a9d73a648e21cacd56c1b93d1d75f67d3"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6a9d73a648e21cacd56c1b93d1d75f67d3">H5G_UDLINK</a></div><div class="ttdeci">@ H5G_UDLINK</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:556</div></div>
+<div class="ttc" id="a_h5_gpublic_8h_html_a4ee921b13233a7c297b81a49022a1dd6aeb72828acc9addd40e217c9303e43be2"><div class="ttname"><a href="_h5_gpublic_8h.html#a4ee921b13233a7c297b81a49022a1dd6aeb72828acc9addd40e217c9303e43be2">H5G_RESERVED_7</a></div><div class="ttdeci">@ H5G_RESERVED_7</div><div class="ttdef"><b>Definition:</b> H5Gpublic.h:559</div></div>
+</div><!-- fragment --> <dl class="section version"><dt>Version</dt><dd>1.8.0 Function <a class="el" href="group___h5_r.html#gafe413df448be0d230de922357fd7bc3b">H5Rget_obj_type()</a> renamed to <a class="el" href="group___h5_r.html#gaf3736b2880a58471882b079b9f03defe" title="Retrieves the type of object that an object reference points to.">H5Rget_obj_type1()</a> and deprecated in this release.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
 
 </div>
 </div>
@@ -1221,7 +1230,8 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdeca284c0f71c6d5986d1d62a5beea599468">H5O_TYPE_MAP</a>,            </div>
 <div class="line">    <a class="code" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdecaedfc23c7f5f047b0ca4b03608661ec79">H5O_TYPE_NTYPES</a>          </div>
 <div class="line">} <a class="code" href="_h5_opublic_8h.html#a929ff459574495f461657f6be804cdec">H5O_type_t</a>;</div>
-</div><!-- fragment -->
+</div><!-- fragment --> <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
+
 </div>
 </div>
 <a id="ga1702d609e85b9edd3d1e526a0276484f"></a>
@@ -1270,7 +1280,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_r.html#ga1702d609e85b9edd3d1e526a0276484f" title="Sets up a dataspace and selection as specified by a region reference.">H5Rget_region()</a> creates a copy of the dataspace of the dataset pointed to by a region reference, <code>ref</code>, and defines a selection matching the selection pointed to by ref within the dataspace copy.</p>
 <p><code>dataset</code> is used to identify the file containing the referenced region; it can be a file identifier or an identifier for any object in the file.</p>
 <p>The parameter <code>ref_type</code> specifies the reference type of <code>ref</code> and must contain the value <a class="el" href="_h5_rpublic_8h.html#a2a28c48c03a4616a02f9157fca4b2df0">H5R_DATASET_REGION</a>.</p>
-<p>Use <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> to release the dataspace identifier returned by this function when the identifier is no longer needed. </p>
+<p>Use <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> to release the dataspace identifier returned by this function when the identifier is no longer needed.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1318,7 +1329,8 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment -->
+</div><!-- fragment --> <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
+
 </div>
 </div>
 <a id="ga2a00d73b9a13b9069d0ad39225dd9f71"></a>
@@ -1367,7 +1379,8 @@ Functions</h2></td></tr>
 <p>Given a reference, <code>ref_ptr</code>, to an attribute attached to an object, <a class="el" href="group___h5_r.html#ga2a00d73b9a13b9069d0ad39225dd9f71" title="Opens the HDF5 attribute referenced.">H5Ropen_attr()</a> opens the attribute attached to that object and returns an identifier.</p>
 <p>The parameter <code>rapl</code> id is a reference access property list identifier for the reference. The access property list can be used to access external files that the reference points to (through a file access property list).</p>
 <p>The parameter <code>aapl_id</code> is an attribute access property list identifier for the referenced attribute.</p>
-<p>The attribute opened with this function should be closed with <a class="el" href="group___h5_a.html#gaef4394b661e2c930879e9868e122bdda" title="Closes the specified attribute.">H5Aclose()</a> when it is no longer needed. </p>
+<p>The attribute opened with this function should be closed with <a class="el" href="group___h5_a.html#gaef4394b661e2c930879e9868e122bdda" title="Closes the specified attribute.">H5Aclose()</a> when it is no longer needed.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -1423,7 +1436,8 @@ Functions</h2></td></tr>
 <div class="line">        int64_t align;                    </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code" href="struct_h5_r__ref__t.html">H5R_ref_t</a>;</div>
-</div><!-- fragment --><p> The object opened with this function should be closed when it is no longer needed so that resource leaks will not develop. Use the appropriate close function, such as <a class="el" href="group___h5_o.html#ga545ad7c54987013ebd50b40fe9e73c61" title="Closes an object in an HDF5 file.">H5Oclose()</a> or <a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a> for datasets. </p>
+</div><!-- fragment --><p> The object opened with this function should be closed when it is no longer needed so that resource leaks will not develop. Use the appropriate close function, such as <a class="el" href="group___h5_o.html#ga545ad7c54987013ebd50b40fe9e73c61" title="Closes an object in an HDF5 file.">H5Oclose()</a> or <a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a> for datasets.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>
@@ -1473,7 +1487,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_r.html#ga400154b014acd1736bae9a127f4e9a1a" title="Sets up a dataspace and selection as specified by a region reference.">H5Ropen_region()</a> creates a copy of the dataspace of the dataset pointed to by a region reference, <code>ref_ptr</code>, and defines a selection matching the selection pointed to by <code>ref_ptr</code> within the dataspace copy.</p>
 <p>The parameter <code>rapl</code> id is a reference access property list identifier for the reference. The access property list can be used to access external files that the reference points to (through a file access property list).</p>
 <p>The parameter <code>oapl</code> id is an object access property list identifier for the referenced object. The access property list must be of the same type as the object being referenced, that is a dataset property list in that case.</p>
-<p>Use <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> to release the dataspace identifier returned by this function when the identifier is no longer needed. </p>
+<p>Use <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> to release the dataspace identifier returned by this function when the identifier is no longer needed.</p>
+<dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
 </div>
 </div>

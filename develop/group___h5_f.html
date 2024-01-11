@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -461,6 +461,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd><b>Delayed close:</b> Note the following deviation from the above-described behavior. If <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> is called for a file, but one or more objects within the file remain open, those objects will remain accessible until they are individually closed. Thus, if the dataset <code>data_sample</code> is open when <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> is called for the file containing it, <code>data_sample</code> will remain open and accessible (including writable) until it is explicitly closed. The file will be automatically closed once all objects in the file have been closed.<br  />
  Be warned, however, that there are circumstances where it is not possible to delay closing a file. For example, an MPI-IO file close is a collective call; all of the processes that open the file must close it collectively. The file cannot be closed at some time in the future by each process in an independent fashion. Another example is that an application using an AFS token-based file access privilege may destroy its AFS token after <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> has returned successfully. This would make any future access to the file, or any object within it, illegal.<br  />
  In such situations, applications must close all open objects in a file before calling H5Fclose. It is generally recommended to do so in all cases.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen()</a> </dd></dl>
 
 </div>
@@ -664,7 +665,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="ttc" id="a_h5_fpublic_8h_html_ac9db1b1211555797021daed9b54b8cdfa3d09ee2d1551f31b008a7dc7d80b42bd"><div class="ttname"><a href="_h5_fpublic_8h.html#ac9db1b1211555797021daed9b54b8cdfa3d09ee2d1551f31b008a7dc7d80b42bd">H5F_SCOPE_LOCAL</a></div><div class="ttdeci">@ H5F_SCOPE_LOCAL</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:102</div></div>
 <div class="ttc" id="agroup___h5_f_html_gae686870f0a276c4d06bbc667b2c24124"><div class="ttname"><a href="group___h5_f.html#gae686870f0a276c4d06bbc667b2c24124">H5Fflush</a></div><div class="ttdeci">herr_t H5Fflush(hid_t object_id, H5F_scope_t scope)</div><div class="ttdoc">Flushes all buffers associated with a file to storage.</div></div>
 </div><!-- fragment --> </dd></dl>
-<dl class="section attention"><dt>Attention</dt><dd>HDF5 does not possess full control over buffering. <a class="el" href="group___h5_f.html#gae686870f0a276c4d06bbc667b2c24124" title="Flushes all buffers associated with a file to storage.">H5Fflush()</a> flushes the internal HDF5 buffers and then asks the operating system (the OS) to flush the system buffers for the open files. After that, the OS is responsible for ensuring that the data is actually flushed to disk. </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>HDF5 does not possess full control over buffering. <a class="el" href="group___h5_f.html#gae686870f0a276c4d06bbc667b2c24124" title="Flushes all buffers associated with a file to storage.">H5Fflush()</a> flushes the internal HDF5 buffers and then asks the operating system (the OS) to flush the system buffers for the open files. After that, the OS is responsible for ensuring that the data is actually flushed to disk.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -692,7 +694,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a file access property list identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
-<p><a class="el" href="group___h5_f.html#ga359585c49f82f5199178777b39e780f4" title="Returns a file access property list identifier.">H5Fget_access_plist()</a> returns the file access property list identifier of the specified file. </p>
+<p><a class="el" href="group___h5_f.html#ga359585c49f82f5199178777b39e780f4" title="Returns a file access property list identifier.">H5Fget_access_plist()</a> returns the file access property list identifier of the specified file.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -721,7 +724,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a file creation property list identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_f.html#ga2f823a9e929b00b06a6be80619a61778" title="Returns a file creation property list identifier.">H5Fget_create_plist()</a> returns the file creation property list identifier identifying the creation properties used to create this file. This function is useful for duplicating properties when creating another file.</p>
-<p>The creation property list identifier should be released with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a>. </p>
+<p>The creation property list identifier should be released with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a>.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1100,11 +1104,11 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">    } <a class="code" href="struct_h5_f__info1__t.html#a5cf928eff03dc598100ca7b4642ac263">sohm</a>;</div>
 <div class="line">} <a class="code" href="struct_h5_f__info1__t.html">H5F_info1_t</a>;</div>
 <div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition:</b> H5public.h:379</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html"><div class="ttname"><a href="struct_h5_f__info1__t.html">H5F_info1_t</a></div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1835</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html_a4bd7cc5a9377277d7ba270cb7173565b"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">H5F_info1_t::msgs_info</a></div><div class="ttdeci">H5_ih_info_t msgs_info</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1839</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html_a4d6224a7603c148dfbbd66169698dcbf"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4d6224a7603c148dfbbd66169698dcbf">H5F_info1_t::super_ext_size</a></div><div class="ttdeci">hsize_t super_ext_size</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1836</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html"><div class="ttname"><a href="struct_h5_f__info1__t.html">H5F_info1_t</a></div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1875</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html_a4bd7cc5a9377277d7ba270cb7173565b"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">H5F_info1_t::msgs_info</a></div><div class="ttdeci">H5_ih_info_t msgs_info</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1879</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html_a4d6224a7603c148dfbbd66169698dcbf"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4d6224a7603c148dfbbd66169698dcbf">H5F_info1_t::super_ext_size</a></div><div class="ttdeci">hsize_t super_ext_size</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1876</div></div>
 <div class="ttc" id="astruct_h5_f__info1__t_html_a5cf928eff03dc598100ca7b4642ac263"><div class="ttname"><a href="struct_h5_f__info1__t.html#a5cf928eff03dc598100ca7b4642ac263">H5F_info1_t::sohm</a></div><div class="ttdeci">struct H5F_info1_t::@3 sohm</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html_a89b75e42126975a5e12777cf5915a8cb"><div class="ttname"><a href="struct_h5_f__info1__t.html#a89b75e42126975a5e12777cf5915a8cb">H5F_info1_t::hdr_size</a></div><div class="ttdeci">hsize_t hdr_size</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1838</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html_a89b75e42126975a5e12777cf5915a8cb"><div class="ttname"><a href="struct_h5_f__info1__t.html#a89b75e42126975a5e12777cf5915a8cb">H5F_info1_t::hdr_size</a></div><div class="ttdeci">hsize_t hdr_size</div><div class="ttdef"><b>Definition:</b> H5Fpublic.h:1878</div></div>
 </div><!-- fragment --><p> <code>super_ext_size</code> is the size of the superblock extension.</p>
 <p>The <code>sohm</code> sub-struct contains shared object header message information as follows: </p><ul>
 <li><code>hdr_size</code> is the size of the shared object header message. </li>
@@ -1371,7 +1375,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <p>Multiple object types can be combined with the logical <code>OR</code> operator (|). For example, the expression <code></code>(<a class="el" href="_h5_fpublic_8h.html#afd59603f96ca7c23749b2a26befda4c5">H5F_OBJ_DATASET</a>|<a class="el" href="_h5_fpublic_8h.html#ac8e6b9f94f3cf5e0d5376c90d6b6101b">H5F_OBJ_GROUP</a>) would call for datasets and groups.</p>
 <dl class="section version"><dt>Version</dt><dd>1.6.8, 1.8.2 Function return type changed to <code>ssize_t</code>. </dd>
 <dd>
-1.6.5 <a class="el" href="_h5_fpublic_8h.html#aaf4856a526e9a610d2688194f3ba4b57">H5F_OBJ_LOCAL</a> has been added as a qualifier on the types of objects to be counted. <a class="el" href="_h5_fpublic_8h.html#aaf4856a526e9a610d2688194f3ba4b57">H5F_OBJ_LOCAL</a> restricts the search to objects opened through current file identifier. </dd></dl>
+1.6.5 <a class="el" href="_h5_fpublic_8h.html#aaf4856a526e9a610d2688194f3ba4b57">H5F_OBJ_LOCAL</a> has been added as a qualifier on the types of objects to be counted. <a class="el" href="_h5_fpublic_8h.html#aaf4856a526e9a610d2688194f3ba4b57">H5F_OBJ_LOCAL</a> restricts the search to objects opened through current file identifier.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -1742,7 +1747,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="ttc" id="agroup___h5_g_html_ga7397440085510728a2e2d22199e81980"><div class="ttname"><a href="group___h5_g.html#ga7397440085510728a2e2d22199e81980">H5Gcreate1</a></div><div class="ttdeci">hid_t H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)</div><div class="ttdoc">Creates a new group and links it into the file.</div></div>
 <div class="ttc" id="agroup___h5_g_html_ga8dbe20b390d2504f0bd3589ed8f4e221"><div class="ttname"><a href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221">H5Gclose</a></div><div class="ttdeci">herr_t H5Gclose(hid_t group_id)</div><div class="ttdoc">Closes the specified group.</div></div>
 </div><!-- fragment --> </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>To date, no file mount properties have been defined in HDF5. The proper value to pass for <code>plist</code> is <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, indicating the default file mount property list. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>To date, no file mount properties have been defined in HDF5. The proper value to pass for <code>plist</code> is <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, indicating the default file mount property list.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -1820,6 +1826,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <dd>
 <b>Special restriction on multiple opens of a file first opened by means of an external link:</b> When an external link is followed, the external file is always opened with the weak file close degree property setting, <a class="el" href="_h5_fpublic_8h.html#aa85fa00d037d2b0401cf72edf9a6475faea1127311a219b44e4af3cb12609035f">H5F_CLOSE_WEAK</a> (see <a class="el" href="group___h5_l.html#ga15dfaeb9b1c0b3136533cb97ee45e683" title="Creates an external link, a soft link to an object in a different file.">H5Lcreate_external()</a> and <a class="el" href="group___f_a_p_l.html#ga60e3567f677fd3ade75b909b636d7b9c" title="Sets the file close degree.">H5Pset_fclose_degree()</a>). If the file is reopened with H5Fopen while it remains held open from such an external link call, the file access property list used in the open call must include the file close degree setting <a class="el" href="_h5_fpublic_8h.html#aa85fa00d037d2b0401cf72edf9a6475faea1127311a219b44e4af3cb12609035f">H5F_CLOSE_WEAK</a> or the open will fail.</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.10.0 The <a class="el" href="_h5_fpublic_8h.html#a6217b039eabc4e484cee9813cbd0d020">H5F_ACC_SWMR_WRITE</a> and <a class="el" href="_h5_fpublic_8h.html#a22b12837bca0dba6689096a370d73402">H5F_ACC_SWMR_READ</a> flags were added.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> </dd></dl>
 
 </div>
@@ -1850,7 +1857,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <dl class="section return"><dt>Returns</dt><dd>Returns a file identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_f.html#ga3f213eb05c5419d63ba168c30036e47b" title="Returns a new identifier for a previously-opened HDF5 file.">H5Freopen()</a> returns a new file identifier for an already-open HDF5 file, as specified by <code>file_id</code>. Both identifiers share caches and other information. The only difference between the identifiers is that the new identifier is not mounted anywhere and no files are mounted on it.</p>
 <p>The new file identifier should be closed by calling <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> when it is no longer needed.</p>
-<dl class="section note"><dt>Note</dt><dd>Note that there is no circumstance under which <a class="el" href="group___h5_f.html#ga3f213eb05c5419d63ba168c30036e47b" title="Returns a new identifier for a previously-opened HDF5 file.">H5Freopen()</a> can actually open a closed file; the file must already be open and have an active <code>file_id</code>. E.g., one cannot close a file with <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> on <code>file_id</code> then use <a class="el" href="group___h5_f.html#ga3f213eb05c5419d63ba168c30036e47b" title="Returns a new identifier for a previously-opened HDF5 file.">H5Freopen()</a> on <code>file_id</code> to reopen it. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Note that there is no circumstance under which <a class="el" href="group___h5_f.html#ga3f213eb05c5419d63ba168c30036e47b" title="Returns a new identifier for a previously-opened HDF5 file.">H5Freopen()</a> can actually open a closed file; the file must already be open and have an active <code>file_id</code>. E.g., one cannot close a file with <a class="el" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124" title="Terminates access to an HDF5 file.">H5Fclose()</a> on <code>file_id</code> then use <a class="el" href="group___h5_f.html#ga3f213eb05c5419d63ba168c30036e47b" title="Returns a new identifier for a previously-opened HDF5 file.">H5Freopen()</a> on <code>file_id</code> to reopen it.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -2073,7 +2081,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p>Given a mount point, <a class="el" href="group___h5_f.html#gae8f807d3f04a33f132ffb6c5295e897f" title="Unounts an HDF5 file.">H5Funmount()</a> dissociates the mount point's file from the file mounted there. This function does not close either file.</p>
-<p>The mount point can be either the group in the parent or the root group of the mounted file (both groups have the same name). If the mount point was opened before the mount then it is the group in the parent; if it was opened after the mount then it is the root group of the child. </p>
+<p>The mount point can be either the group in the parent or the root group of the mounted file (both groups have the same name). If the mount point was opened before the mount then it is the group in the parent; if it was opened after the mount then it is the root group of the child.</p>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>

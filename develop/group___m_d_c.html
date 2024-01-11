@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -303,7 +303,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___m_d_c.html#gabea066c3fd924d2cf868ecee66a7c41f" title="Obtains target file&#39;s metadata cache hit rate.">H5Fget_mdc_hit_rate()</a> queries the metadata cache of the target file to obtain its hit rate <code>(cache hits / (cache hits + cache misses))</code> since the last time hit rate statistics were reset. If the cache has not been accessed since the last time the hit rate stats were reset, the hit rate is defined to be 0.0.</p>
 <p>The hit rate stats can be reset either manually (via <a class="el" href="group___m_d_c.html#ga6708886c2bb8740327d9078d7840197f" title="Resets hit rate statistics counters for the target file.">H5Freset_mdc_hit_rate_stats()</a>), or automatically. If the cache's adaptive resize code is enabled, the hit rate stats will be reset once per epoch. If they are reset manually as well, the cache may behave oddly.</p>
-<p>See the overview of the metadata cache in the special topics section of the user manual for details on the metadata cache and its adaptive resize algorithms. </p>
+<p>See the overview of the metadata cache in the special topics section of the user manual for details on the metadata cache and its adaptive resize algorithms.</p>
+<dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -466,7 +467,8 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___m_d_c.html#gacda6cbd60d3c50b59f801eba4e5a335f" title="Obtains current metadata cache size data for specified file.">H5Fget_mdc_size()</a> queries the metadata cache of the target file for the desired size information, and returns this information in the locations indicated by the pointer parameters. If any pointer parameter is NULL, the associated data is not returned.</p>
 <p>If the API call fails, the values returned via the pointer parameters are undefined.</p>
 <p>If adaptive cache resizing is enabled, the cache maximum size and minimum clean size may change at the end of each epoch. Current size and current number of entries can change on each cache access.</p>
-<p>Current size can exceed maximum size under certain conditions. See the overview of the metadata cache in the special topics section of the user manual for a discussion of this. </p>
+<p>Current size can exceed maximum size under certain conditions. See the overview of the metadata cache in the special topics section of the user manual for a discussion of this.</p>
+<dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -498,6 +500,7 @@ Functions</h2></td></tr>
 <p>If the adaptive cache resizing code is enabled, the hit rate statistics are reset at the beginning of each epoch. This API call allows you to do the same thing from your program.</p>
 <p>The adaptive cache resizing code may behave oddly if you use this call when adaptive cache resizing is enabled. However, the call should be useful if you choose to control metadata cache size from your program.</p>
 <p>See <a href="https://portal.hdfgroup.org/display/HDF5/Metadata+Caching+in+HDF5">Metadata Caching in HDF5</a> for details about the metadata cache and the adaptive cache resizing algorithms. If you have not read, understood, and thought about the material covered in that documentation, you should not be using this API call. </p>
+<dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>

@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.184445f</span>
+   &#160;<span id="projectnumber">1.15.0.5f5f5f0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -304,7 +304,7 @@ Functions</h2></td></tr>
 <p>The reference count for a newly created object will be 1. Reference counts for objects may be explicitly modified with this function or with <a class="el" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f" title="Increments the reference count for an object.">H5Iinc_ref()</a>. When an object identifier's reference count reaches zero, the object will be closed. Calling an object identifier's <code>close</code> function decrements the reference count for the identifier, which normally closes the object, but if the reference count for the identifier has been incremented with <a class="el" href="group___h5_i.html#ga3fd0c157704573965cafd6e1aa7f368f" title="Increments the reference count for an object.">H5Iinc_ref()</a>, the object will only be closed when the reference count reaches zero with further calls to this function or the object identifier's <code>close</code> function.</p>
 <p>If the object ID was created by a collective parallel call (such as <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a>, <a class="el" href="group___h5_g.html#ga3eca6807deff4f9e51fc5fe0befc2245">H5Gopen()</a>, etc.), the reference count should be modified by all the processes which have copies of the ID. Generally, this means that group, dataset, attribute, file and named datatype IDs should be modified by all the processes and that all other types of IDs are safe to modify by individual processes.</p>
 <p>This function is of particular value when an application maintains multiple copies of an object ID. The object ID can be incremented when a copy is made. Each copy of the ID can then be safely closed or decremented and the HDF5 object will be closed when the reference count for that object drops to zero.</p>
-<dl class="section since"><dt>Since</dt><dd>1.6.2 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.3 </dd></dl>
 
 </div>
 </div>
@@ -417,7 +417,7 @@ Functions</h2></td></tr>
 <p><a class="el" href="group___h5_i.html#gac9638ade14cc75b7b125b3723f319c81" title="Retrieves the reference count for an object.">H5Iget_ref()</a> retrieves the reference count of the object identified by <code>id</code>.</p>
 <p>The reference count for an object identifier is attached to the information about an object in memory and has no relation to the number of links to an object on disk.</p>
 <p>The function <a class="el" href="group___h5_i.html#ga20eb10c559d9ed5ba6f77b31d6a3ba9a" title="Determines whether an identifier is valid.">H5Iis_valid()</a> is used to determine whether a specific object identifier is valid.</p>
-<dl class="section since"><dt>Since</dt><dd>1.6.2 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.3 </dd></dl>
 
 </div>
 </div>
@@ -447,7 +447,8 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns the object type if successful; otherwise <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832ba3e61c9654de6398dc9676ad37cbe6133">H5I_BADID</a>.</dd></dl>
 <p><a class="el" href="group___h5_i.html#ga4941435d4d64de3d7095d2316f415f2d" title="Retrieves the type of an object.">H5Iget_type()</a> retrieves the type of the object identified by <code>id</code>. If no valid type can be determined or the identifier submitted is invalid, the function returns <a class="el" href="_h5_ipublic_8h.html#a13afe14178faf81b89fa2167e7ab832ba3e61c9654de6398dc9676ad37cbe6133">H5I_BADID</a>.</p>
 <p>This function is of particular use in determining the type of object closing function (<a class="el" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609" title="Closes the specified dataset.">H5Dclose()</a>, <a class="el" href="group___h5_g.html#ga8dbe20b390d2504f0bd3589ed8f4e221" title="Closes the specified group.">H5Gclose()</a>, etc.) to call after a call to <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference()</a>.</p>
-<dl class="section note"><dt>Note</dt><dd>Note that this function returns only the type of object that <code>id</code> would identify if it were valid; it does not determine whether <code>id</code> is valid identifier. Validity can be determined with a call to <a class="el" href="group___h5_i.html#ga20eb10c559d9ed5ba6f77b31d6a3ba9a" title="Determines whether an identifier is valid.">H5Iis_valid()</a>. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Note that this function returns only the type of object that <code>id</code> would identify if it were valid; it does not determine whether <code>id</code> is valid identifier. Validity can be determined with a call to <a class="el" href="group___h5_i.html#ga20eb10c559d9ed5ba6f77b31d6a3ba9a" title="Determines whether an identifier is valid.">H5Iis_valid()</a>.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
 </div>
@@ -480,7 +481,7 @@ Functions</h2></td></tr>
 <p>The reference count for a newly created object will be 1. Reference counts for objects may be explicitly modified with this function or with <a class="el" href="group___h5_i.html#gaea2aa78caea892edf2a6a6ac70486ed9" title="Decrements the reference count for an object.">H5Idec_ref()</a>. When an object ID's reference count reaches zero, the object will be closed. Calling an object ID's <code>close</code> function decrements the reference count for the ID which normally closes the object, but if the reference count for the ID has been incremented with this function, the object will only be closed when the reference count reaches zero with further calls to <a class="el" href="group___h5_i.html#gaea2aa78caea892edf2a6a6ac70486ed9" title="Decrements the reference count for an object.">H5Idec_ref()</a> or the object ID's <code>close</code> function.</p>
 <p>If the object ID was created by a collective parallel call (such as <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate()</a>, <a class="el" href="group___h5_g.html#ga3eca6807deff4f9e51fc5fe0befc2245">H5Gopen()</a>, etc.), the reference count should be modified by all the processes which have copies of the ID. Generally this means that group, dataset, attribute, file and named datatype IDs should be modified by all the processes and that all other types of IDs are safe to modify by individual processes.</p>
 <p>This function is of particular value when an application is maintaining multiple copies of an object ID. The object ID can be incremented when a copy is made. Each copy of the ID can then be safely closed or decremented and the HDF5 object will be closed when the reference count for that that object drops to zero.</p>
-<dl class="section since"><dt>Since</dt><dd>1.6.2 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.6.3 </dd></dl>
 
 </div>
 </div>
@@ -578,7 +579,8 @@ Functions</h2></td></tr>
 <p>The <code>discard_cb</code> parameter is a function pointer that will be invoked by the HDF5 library to destroy a future object. This callback will always be invoked for <em>every</em> future object, whether the <code>realize_cb</code> is invoked on it or not. It's possible that the <code>discard_cb</code> is invoked on a future object without the <code>realize_cb</code> being invoked, e.g. when a future ID is closed without requiring the future object to be realized into an actual one.</p>
 <p>Note that the <code>discard_cb</code> callback could receive a NULL value for a future object pointer, if one was used when <a class="el" href="group___h5_i.html#gad61703cd16f392fb194da648099e69a9" title="Registers a &quot;future&quot; object under a type and returns an ID for it.">H5Iregister_future()</a> was initially called.</p>
 <p>It is an error to pass NULL for <code>discard_cb</code>.</p>
-<dl class="section note"><dt>Note</dt><dd>The <a class="el" href="group___h5_i.html#gad61703cd16f392fb194da648099e69a9" title="Registers a &quot;future&quot; object under a type and returns an ID for it.">H5Iregister_future()</a> function is primarily targeted at VOL connector authors and is <em>not</em> designed for general-purpose application use. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The <a class="el" href="group___h5_i.html#gad61703cd16f392fb194da648099e69a9" title="Registers a &quot;future&quot; object under a type and returns an ID for it.">H5Iregister_future()</a> function is primarily targeted at VOL connector authors and is <em>not</em> designed for general-purpose application use.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
 </div>
 </div>
