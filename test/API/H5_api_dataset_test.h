@@ -23,6 +23,13 @@ int H5_api_dataset_test(void);
  *                                              *
  ************************************************/
 
+/* Check if the relative difference is smaller than a
+ *  predefined value M.  See if two values are relatively equal.
+ *  It's the developer's responsibility not to pass in the value 0, which
+ *  may cause the equation to fail.
+ */
+#define VL_DBL_REL_EQUAL(X, Y, M) (fabs(((Y) - (X)) / (X)) < (M))
+
 #define DATASET_CREATE_UNDER_ROOT_DSET_NAME  "/dset_under_root"
 #define DATASET_CREATE_UNDER_ROOT_SPACE_RANK 2
 
@@ -41,6 +48,13 @@ int H5_api_dataset_test(void);
 #define DATASET_CREATE_ANONYMOUS_INVALID_PARAMS_DATASET_NAME "invalid_params_anon_dset"
 #define DATASET_CREATE_ANONYMOUS_INVALID_PARAMS_GROUP_NAME   "anon_dset_creation_invalid_params_test"
 #define DATASET_CREATE_ANONYMOUS_INVALID_PARAMS_SPACE_RANK   2
+
+#define DATASET_STRING_ENCODINGS_RANK         1
+#define DATASET_STRING_ENCODINGS_EXTENT       1
+#define DATASET_STRING_ENCODINGS_DSET_NAME1   "encoding_dset1"
+#define DATASET_STRING_ENCODINGS_DSET_NAME2   "encoding_dset2"
+#define DATASET_STRING_ENCODINGS_ASCII_STRING "asciistr"
+#define DATASET_STRING_ENCODINGS_UTF8_STRING  "αaααaaaα"
 
 #define DATASET_CREATE_NULL_DATASPACE_TEST_SUBGROUP_NAME "dataset_with_null_space_test"
 #define DATASET_CREATE_NULL_DATASPACE_TEST_DSET_NAME     "dataset_with_null_space"
@@ -137,6 +151,16 @@ int H5_api_dataset_test(void);
 #define DATASET_STORAGE_SIZE_TEST_DSET_CHUNKED_NAME    "dataset_chunked"
 #define DATASET_STORAGE_SIZE_TEST_DSET_FILTERED_NAME   "dataset_filtered"
 #define DATASET_STORAGE_SIZE_TEST_TYPE                 H5T_NATIVE_INT
+
+#define DATASET_FILL_VALUE_TEST_DSET_NAME1        "dataset_fill_value_test_dataset1"
+#define DATASET_FILL_VALUE_TEST_DSET_NAME2        "dataset_fill_value_test_dataset2"
+#define DATASET_FILL_VALUE_TEST_DSET_NAME3        "dataset_fill_value_test_dataset3"
+#define DATASET_FILL_VALUE_TEST_INT_TYPE          H5T_NATIVE_INT
+#define DATASET_FILL_VALUE_TEST_INT_FILL_VALUE    1
+#define DATASET_FILL_VALUE_TEST_DOUBLE_TYPE       H5T_NATIVE_DOUBLE
+#define DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE 2.002
+#define DATASET_FILL_VALUE_TEST_STRING_FILL_VALUE "abcdefgh"
+#define DATASET_FILL_VALUE_TEST_STRING_SIZE       8 /* No null terminator for fixed length string*/
 
 #define DATASET_SMALL_READ_TEST_ALL_DSET_SPACE_RANK 3
 #define DATASET_SMALL_READ_TEST_ALL_DSET_DTYPESIZE  sizeof(int)

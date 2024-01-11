@@ -51,8 +51,8 @@ static herr_t object_copy_soft_link_expand_callback(hid_t group, const char *nam
                                                     void *op_data);
 static herr_t object_visit_callback(hid_t o_id, const char *name, const H5O_info2_t *object_info,
                                     void *op_data);
-static herr_t object_visit_callback(hid_t o_id, const char *name, const H5O_info2_t *object_info,
-                                    void *op_data);
+static herr_t object_visit_simple_callback(hid_t o_id, const char *name, const H5O_info2_t *object_info,
+                                           void *op_data);
 static herr_t object_visit_dset_callback(hid_t o_id, const char *name, const H5O_info2_t *object_info,
                                          void *op_data);
 static herr_t object_visit_dtype_callback(hid_t o_id, const char *name, const H5O_info2_t *object_info,
@@ -5066,7 +5066,7 @@ test_object_visit(void)
     hid_t    group_id5  = H5I_INVALID_HID;
     hssize_t num_elems  = 0;
     size_t   elem_size  = 0;
-    char     visit_filename[H5_API_FILENAME_MAX_LENGTH];
+    char     visit_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("object visiting");
 
@@ -5083,13 +5083,13 @@ test_object_visit(void)
 
     TESTING_2("test setup");
 
-    if ((file_id = H5Fopen(vol_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        printf("    couldn't open file '%s'\n", vol_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
-    snprintf(visit_filename, H5_API_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+    snprintf(visit_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
              OBJECT_VISIT_TEST_FILE_NAME);
 
     if ((file_id2 = H5Fcreate(visit_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -5147,7 +5147,7 @@ test_object_visit(void)
         if ((elem_size = H5Tget_size(dset_dtype)) == 0)
             TEST_ERROR;
 
-    } while ((num_elems * elem_size) > OBJECT_VISIT_TEST_TOTAL_DATA_SIZE_LIMIT);
+    } while (((long unsigned int)num_elems * elem_size) > OBJECT_VISIT_TEST_TOTAL_DATA_SIZE_LIMIT);
 
     if ((type_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
         H5_FAILED();
@@ -5401,7 +5401,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_attr)
         {
-            TESTING_2("H5Ovisit on an attribute")
+            TESTING_2("H5Ovisit on an attribute");
 
             i = 0;
 
@@ -5654,7 +5654,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_attr)
         {
-            TESTING_2("H5Ovisit_by_name on an attribute")
+            TESTING_2("H5Ovisit_by_name on an attribute");
 
             i = 0;
 
@@ -7323,22 +7323,22 @@ object_visit_soft_link_callback(hid_t o_id, const char *name, const H5O_info2_t 
 
     UNUSED(o_id);
 
-    if (!HDstrcmp(name, OBJECT_VISIT_TEST_GROUP_NAME_PARENT) ||
-        !HDstrcmp(name, OBJECT_VISIT_TEST_GROUP_NAME_PARENT "/" OBJECT_VISIT_TEST_GROUP_NAME_CHILD) ||
-        !HDstrcmp(name, OBJECT_VISIT_TEST_GROUP_NAME_PARENT "/" OBJECT_VISIT_TEST_GROUP_NAME_CHILD
-                                                            "/" OBJECT_VISIT_TEST_GROUP_NAME_GRANDCHILD)) {
+    if (!strcmp(name, OBJECT_VISIT_TEST_GROUP_NAME_PARENT) ||
+        !strcmp(name, OBJECT_VISIT_TEST_GROUP_NAME_PARENT "/" OBJECT_VISIT_TEST_GROUP_NAME_CHILD) ||
+        !strcmp(name, OBJECT_VISIT_TEST_GROUP_NAME_PARENT "/" OBJECT_VISIT_TEST_GROUP_NAME_CHILD
+                                                          "/" OBJECT_VISIT_TEST_GROUP_NAME_GRANDCHILD)) {
         (*i)--;
         goto done;
     }
 
-    if (!HDstrncmp(name, ".", strlen(".") + 1) && (counter_val <= 5)) {
+    if (!strncmp(name, ".", strlen(".") + 1) && (counter_val <= 5)) {
         if (H5O_TYPE_GROUP == object_info->type)
             goto done;
         else
-            HDprintf("    type for object '%s' was not H5O_TYPE_GROUP\n", name);
+            printf("    type for object '%s' was not H5O_TYPE_GROUP\n", name);
     }
     else
-        HDprintf("    object '%s' didn't match known names or came in an incorrect order\n", name);
+        printf("    object '%s' didn't match known names or came in an incorrect order\n", name);
 
     ret_val = -1;
 
@@ -7369,13 +7369,14 @@ object_visit_noop_callback(hid_t o_id, const char *name, const H5O_info2_t *obje
 static void
 cleanup_files(void)
 {
-    char filename[H5_API_FILENAME_MAX_LENGTH];
+    char filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
-    HDsnprintf(filename, H5_API_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
-               OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
+    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+             OBJECT_COPY_BETWEEN_FILES_TEST_FILE_NAME);
     H5Fdelete(filename, H5P_DEFAULT);
 
-    HDsnprintf(filename, H5_API_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix, OBJECT_VISIT_TEST_FILE_NAME);
+    snprintf(filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+             OBJECT_VISIT_TEST_FILE_NAME);
     H5Fdelete(filename, H5P_DEFAULT);
 }
 

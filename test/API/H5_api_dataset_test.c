@@ -63,6 +63,7 @@ static int test_write_multi_dataset_small_hyperslab(void);
 static int test_write_multi_dataset_small_point_selection(void);
 static int test_write_multi_dataset_data_verification(void);
 static int test_write_dataset_invalid_params(void);
+static int test_dataset_string_encodings(void);
 static int test_dataset_builtin_type_conversion(void);
 static int test_dataset_real_to_int_conversion(void);
 static int test_dataset_compound_partial_io(void);
@@ -134,6 +135,7 @@ static int (*dataset_tests[])(void) = {
     test_read_multi_dataset_small_point_selection,
     test_dataset_io_point_selections,
     test_read_dataset_invalid_params,
+    test_dataset_string_encodings,
     test_write_dataset_small_all,
     test_write_dataset_small_hyperslab,
     test_write_dataset_small_point_selection,
@@ -168,6 +170,9 @@ static int (*dataset_tests[])(void) = {
     test_get_vlen_buf_size,
 };
 
+size_t filter(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+              const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+              void H5_ATTR_UNUSED **buf);
 /*
  * A test to check that a dataset can be
  * created under the root group.
@@ -2457,7 +2462,7 @@ test_create_dataset_creation_properties(void)
                 PART_ERROR(DCPL_fill_value_test);
             }
 
-            for (int i = 0; i < DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK; i++)
+            for (i = 0; i < DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK; i++)
                 num_elems *= (size_t)dims[i];
 
             if ((read_buf = calloc(num_elems, sizeof(DATASET_FILL_VALUE_TEST_INT_TYPE))) == NULL) {
@@ -2473,7 +2478,7 @@ test_create_dataset_creation_properties(void)
                 PART_ERROR(DCPL_fill_value_test);
             }
 
-            for (size_t i = 0; i < num_elems; i++) {
+            for (i = 0; i < num_elems; i++) {
                 val = (int *)(read_buf) + i;
 
                 if (*(int *)val != DATASET_FILL_VALUE_TEST_INT_FILL_VALUE) {
@@ -2546,7 +2551,7 @@ test_create_dataset_creation_properties(void)
                 PART_ERROR(DCPL_fill_value_test);
             }
 
-            for (size_t i = 0; i < num_elems; i++) {
+            for (i = 0; i < num_elems; i++) {
                 val = (double *)(read_buf) + i;
 
                 if (!(VL_DBL_REL_EQUAL(*(double *)val, DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE,
@@ -2630,7 +2635,7 @@ test_create_dataset_creation_properties(void)
                 PART_ERROR(DCPL_fill_value_test);
             }
 
-            for (size_t i = 0; i < num_elems; i++) {
+            for (i = 0; i < num_elems; i++) {
                 char val_str[DATASET_FILL_VALUE_TEST_STRING_SIZE + 1];
 
                 memcpy(val_str, ((char *)read_buf) + i * DATASET_FILL_VALUE_TEST_STRING_SIZE,
@@ -2793,19 +2798,19 @@ test_create_dataset_creation_properties(void)
 
             if (H5Zregister((const void *)&filter_cls) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't register filter\n");
+                printf("    couldn't register filter\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't create DCPL\n");
+                printf("    couldn't create DCPL\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
             if (H5Pset_chunk(dcpl_id, DATASET_CREATION_PROPERTIES_TEST_SHAPE_RANK, chunk_dims) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't set chunking on DCPL\n");
+                printf("    couldn't set chunking on DCPL\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
@@ -2813,7 +2818,7 @@ test_create_dataset_creation_properties(void)
             if (H5Pset_filter(dcpl_id, (H5Z_filter_t)DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_ID,
                               H5Z_FLAG_MANDATORY, 3, filter_params) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't set user-defined filter on DCPL\n");
+                printf("    couldn't set user-defined filter on DCPL\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
@@ -2821,8 +2826,8 @@ test_create_dataset_creation_properties(void)
             if ((dset_id = H5Dcreate2(group_id, DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME,
                                       H5T_NATIVE_INT, fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't create dataset '%s'\n",
-                         DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME);
+                printf("    couldn't create dataset '%s'\n",
+                       DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME);
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
@@ -2838,8 +2843,8 @@ test_create_dataset_creation_properties(void)
             if ((dset_id = H5Dopen2(group_id, DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME,
                                     H5P_DEFAULT)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't open dataset '%s'\n",
-                         DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME);
+                printf("    couldn't open dataset '%s'\n",
+                       DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_DSET_NAME);
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
@@ -2858,13 +2863,13 @@ test_create_dataset_creation_properties(void)
 
             if ((dcpl_id = H5Dget_create_plist(dset_id)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve DCPL\n");
+                printf("    couldn't retrieve DCPL\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
             if ((nfilters = H5Pget_nfilters(dcpl_id)) != 1) {
                 H5_FAILED();
-                HDprintf("    retrieved incorrect number of filters from DCPL\n");
+                printf("    retrieved incorrect number of filters from DCPL\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
@@ -2872,14 +2877,14 @@ test_create_dataset_creation_properties(void)
                      dcpl_id, 0, H5Z_FLAG_MANDATORY, &num_filter_params, filter_params_out,
                      strlen(DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME), ud_filter_name, NULL)) < 0) {
                 H5_FAILED();
-                HDprintf("    retrieved incorrect user-defined filter ID\n");
+                printf("    retrieved incorrect user-defined filter ID\n");
                 PART_ERROR(DCPL_user_defined_filter_test);
             }
 
-            for (int i = 0; i < DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS; i++)
+            for (i = 0; i < DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS; i++)
                 if (filter_params[i] != filter_params_out[i]) {
                     H5_FAILED();
-                    HDprintf("    retrieved incorrect parameter value from DCPL\n");
+                    printf("    retrieved incorrect parameter value from DCPL\n");
                     PART_ERROR(DCPL_user_defined_filter_test);
                 }
 
@@ -4902,8 +4907,8 @@ test_read_multi_dataset_small_all(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_READ_TEST_ALL_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_SMALL_READ_TEST_ALL_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_READ_TEST_ALL_DSET_DTYPE,
@@ -5047,8 +5052,9 @@ test_read_multi_dataset_small_hyperslab(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i,
+                                                         '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_DTYPE,
@@ -5136,7 +5142,7 @@ test_read_multi_dataset_small_point_selection(void)
     hid_t   dset_id_arr[DATASET_MULTI_COUNT];
     hid_t   mspace_id_arr[DATASET_MULTI_COUNT], fspace_id_arr[DATASET_MULTI_COUNT];
     hid_t   dtype_arr[DATASET_MULTI_COUNT];
-    void   *data[DATASET_MULTI_COUNT];
+    void   *read_buf[DATASET_MULTI_COUNT];
 
     TESTING("small multi read from datasets with point selections");
 
@@ -5150,7 +5156,7 @@ test_read_multi_dataset_small_point_selection(void)
 
     /* Prevent uninitialized memory usage on test failure */
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        data[i]        = NULL;
+        read_buf[i]    = NULL;
         dset_id_arr[i] = H5I_INVALID_HID;
     }
 
@@ -5200,8 +5206,9 @@ test_read_multi_dataset_small_point_selection(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i,
+                                                         '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] =
@@ -5212,7 +5219,7 @@ test_read_multi_dataset_small_point_selection(void)
             goto error;
         }
 
-        if (NULL == (data[i] = malloc(data_size)))
+        if (NULL == (read_buf[i] = malloc(data_size)))
             TEST_ERROR;
 
         dtype_arr[i]     = DATASET_SMALL_READ_TEST_POINT_SELECTION_DSET_DTYPE;
@@ -5221,16 +5228,16 @@ test_read_multi_dataset_small_point_selection(void)
     }
 
     if (H5Dread_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_arr, mspace_id_arr, fspace_id_arr, H5P_DEFAULT,
-                      data) < 0) {
+                      read_buf) < 0) {
         H5_FAILED();
         printf("    couldn't read from dataset '%s'\n", DATASET_SMALL_READ_TEST_POINT_SELECTION_DSET_NAME);
         goto error;
     }
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        if (data[i]) {
-            free(data[i]);
-            data[i] = NULL;
+        if (read_buf[i]) {
+            free(read_buf[i]);
+            read_buf[i] = NULL;
         }
         if (H5Dclose(dset_id_arr[i]) < 0)
             TEST_ERROR;
@@ -5255,9 +5262,9 @@ error:
     H5E_BEGIN_TRY
     {
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-            if (data[i]) {
-                free(data[i]);
-                data[i] = NULL;
+            if (read_buf[i]) {
+                free(read_buf[i]);
+                read_buf[i] = NULL;
             }
             H5Dclose(dset_id_arr[i]);
         }
@@ -6916,22 +6923,24 @@ error:
 static int
 test_write_multi_dataset_small_all(void)
 {
-    hssize_t space_npoints;
-    hsize_t  dims[DATASET_SMALL_WRITE_TEST_ALL_DSET_SPACE_RANK] = {10, 5, 3};
-    size_t   i;
-    hid_t    file_id         = H5I_INVALID_HID;
-    hid_t    container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t    dset_id_arr[DATASET_MULTI_COUNT];
-    hid_t    fspace_id = H5I_INVALID_HID, fspace_id_arr[DATASET_MULTI_COUNT];
-    hid_t    dtype_id_arr[DATASET_MULTI_COUNT];
-    void    *data[DATASET_MULTI_COUNT];
+    hssize_t    space_npoints;
+    hsize_t     dims[DATASET_SMALL_WRITE_TEST_ALL_DSET_SPACE_RANK] = {10, 5, 3};
+    size_t      i;
+    hid_t       file_id         = H5I_INVALID_HID;
+    hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t       dset_id_arr[DATASET_MULTI_COUNT];
+    hid_t       fspace_id = H5I_INVALID_HID, fspace_id_arr[DATASET_MULTI_COUNT];
+    hid_t       dtype_id_arr[DATASET_MULTI_COUNT];
+    const void *write_buf[DATASET_MULTI_COUNT];
+    void       *wbuf_temp[DATASET_MULTI_COUNT];
 
     TESTING("small multi write to datasets with H5S_ALL");
 
     /* Prevent uninitialized memory usage on test failure */
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         dset_id_arr[i] = H5I_INVALID_HID;
-        data[i]        = NULL;
+        write_buf[i]   = NULL;
+        wbuf_temp[i]   = NULL;
     }
 
     /* Make sure the connector supports the API functions being tested */
@@ -6968,8 +6977,9 @@ test_write_multi_dataset_small_all(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i,
+                                                         '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPE,
@@ -6990,8 +7000,9 @@ test_write_multi_dataset_small_all(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i,
+                                                         '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dopen2(group_id, dset_name, H5P_DEFAULT)) < 0) {
@@ -7015,23 +7026,26 @@ test_write_multi_dataset_small_all(void)
         dtype_id_arr[i]  = DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPE;
         fspace_id_arr[i] = H5S_ALL;
 
-        if (NULL == (data[i] = malloc((hsize_t)space_npoints * DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPESIZE)))
+        if (NULL ==
+            (wbuf_temp[i] = malloc((hsize_t)space_npoints * DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPESIZE)))
             TEST_ERROR;
 
         for (size_t j = 0; j < (size_t)space_npoints; j++)
-            ((int **)data)[i][j] = (int)i;
+            ((int **)wbuf_temp)[i][j] = (int)i;
+
+        write_buf[i] = wbuf_temp[i];
     }
 
     if (H5Dwrite_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_id_arr, fspace_id_arr, fspace_id_arr,
-                       H5P_DEFAULT, (const void **)data) < 0) {
+                       H5P_DEFAULT, write_buf) < 0) {
         H5_FAILED();
         printf("    couldn't write to dataset '%s'\n", DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME);
         goto error;
     }
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        free(data[i]);
-        data[i] = NULL;
+        free(wbuf_temp[i]);
+        wbuf_temp[i] = NULL;
         if (H5Dclose(dset_id_arr[i]) < 0)
             TEST_ERROR;
     }
@@ -7052,8 +7066,8 @@ error:
     H5E_BEGIN_TRY
     {
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-            if (data[i])
-                free(data[i]);
+            if (wbuf_temp[i])
+                free(wbuf_temp[i]);
             H5Dclose(dset_id_arr[i]);
         }
 
@@ -7074,19 +7088,20 @@ error:
 static int
 test_write_multi_dataset_small_hyperslab(void)
 {
-    hsize_t start[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t stride[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t count[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t block[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t dims[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK] = {10, 5, 3};
-    size_t  i, data_size;
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   dset_id_arr[DATASET_MULTI_COUNT];
-    hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
-    hid_t   mspace_id_arr[DATASET_MULTI_COUNT], fspace_id_arr[DATASET_MULTI_COUNT];
-    hid_t   dtype_id_arr[DATASET_MULTI_COUNT];
-    void   *data[DATASET_MULTI_COUNT];
+    hsize_t     start[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+    hsize_t     stride[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+    hsize_t     count[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+    hsize_t     block[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+    hsize_t     dims[DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK] = {10, 5, 3};
+    size_t      i, data_size;
+    hid_t       file_id         = H5I_INVALID_HID;
+    hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t       dset_id_arr[DATASET_MULTI_COUNT];
+    hid_t       mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
+    hid_t       mspace_id_arr[DATASET_MULTI_COUNT], fspace_id_arr[DATASET_MULTI_COUNT];
+    hid_t       dtype_id_arr[DATASET_MULTI_COUNT];
+    const void *write_buf[DATASET_MULTI_COUNT];
+    void       *wbuf_temp[DATASET_MULTI_COUNT];
 
     TESTING("small multi write to datasets with hyperslab selections");
 
@@ -7100,7 +7115,8 @@ test_write_multi_dataset_small_hyperslab(void)
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         dset_id_arr[i] = H5I_INVALID_HID;
-        data[i]        = NULL;
+        write_buf[i]   = NULL;
+        wbuf_temp[i]   = NULL;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -7136,8 +7152,9 @@ test_write_multi_dataset_small_hyperslab(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_DSET_NAME,
+                                                         i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_DTYPE,
@@ -7147,11 +7164,13 @@ test_write_multi_dataset_small_hyperslab(void)
             goto error;
         }
 
-        if (NULL == (data[i] = malloc(data_size)))
+        if (NULL == (wbuf_temp[i] = malloc(data_size)))
             TEST_ERROR;
 
         for (size_t j = 0; j < data_size / DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE; j++)
-            ((int **)data)[i][j] = (int)i;
+            ((int **)wbuf_temp)[i][j] = (int)i;
+
+        write_buf[i] = (const void *)wbuf_temp[i];
     }
 
     for (i = 0; i < DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK; i++) {
@@ -7173,16 +7192,16 @@ test_write_multi_dataset_small_hyperslab(void)
     }
 
     if (H5Dwrite_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_id_arr, mspace_id_arr, fspace_id_arr,
-                       H5P_DEFAULT, (const void **)data) < 0) {
+                       H5P_DEFAULT, (const void **)write_buf) < 0) {
         H5_FAILED();
         printf("    couldn't write to dataset '%s'\n", DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_DSET_NAME);
         goto error;
     }
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        if (data[i]) {
-            free(data[i]);
-            data[i] = NULL;
+        if (wbuf_temp[i]) {
+            free(wbuf_temp[i]);
+            wbuf_temp[i] = NULL;
         }
         if (H5Dclose(dset_id_arr[i]) < 0)
             TEST_ERROR;
@@ -7207,9 +7226,9 @@ error:
     H5E_BEGIN_TRY
     {
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-            if (data[i]) {
-                free(data[i]);
-                data[i] = NULL;
+            if (wbuf_temp[i]) {
+                free(wbuf_temp[i]);
+                wbuf_temp[i] = NULL;
             }
             H5Dclose(dset_id_arr[i]);
         }
@@ -7231,18 +7250,19 @@ error:
 static int
 test_write_multi_dataset_small_point_selection(void)
 {
-    hsize_t points[DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS *
+    hsize_t     points[DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS *
                    DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_SPACE_RANK];
-    hsize_t dims[DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_SPACE_RANK] = {10, 10, 10};
-    hsize_t mdims[] = {DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS};
-    size_t  i, data_size;
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   dset_id_arr[DATASET_MULTI_COUNT];
-    hid_t   fspace_id = H5I_INVALID_HID, fspace_id_arr[DATASET_MULTI_COUNT];
-    hid_t   mspace_id = H5I_INVALID_HID, mspace_id_arr[DATASET_MULTI_COUNT];
-    hid_t   dtype_id_arr[DATASET_MULTI_COUNT];
-    void   *data[DATASET_MULTI_COUNT];
+    hsize_t     dims[DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_SPACE_RANK] = {10, 10, 10};
+    hsize_t     mdims[] = {DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS};
+    size_t      i, data_size;
+    hid_t       file_id         = H5I_INVALID_HID;
+    hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t       dset_id_arr[DATASET_MULTI_COUNT];
+    hid_t       fspace_id = H5I_INVALID_HID, fspace_id_arr[DATASET_MULTI_COUNT];
+    hid_t       mspace_id = H5I_INVALID_HID, mspace_id_arr[DATASET_MULTI_COUNT];
+    hid_t       dtype_id_arr[DATASET_MULTI_COUNT];
+    const void *write_buf[DATASET_MULTI_COUNT];
+    void       *wbuf_temp[DATASET_MULTI_COUNT];
 
     TESTING("small multi write to datasets with point selections");
 
@@ -7255,7 +7275,8 @@ test_write_multi_dataset_small_point_selection(void)
     }
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        data[i]        = NULL;
+        write_buf[i]   = NULL;
+        wbuf_temp[i]   = NULL;
         dset_id_arr[i] = H5I_INVALID_HID;
     }
 
@@ -7291,8 +7312,9 @@ test_write_multi_dataset_small_point_selection(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_SMALL_WRITE_MULTI_TEST_POINT_SELECTION_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <=
+            (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                   DATASET_SMALL_WRITE_MULTI_TEST_POINT_SELECTION_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] =
@@ -7303,11 +7325,13 @@ test_write_multi_dataset_small_point_selection(void)
             goto error;
         }
 
-        if (NULL == (data[i] = malloc(data_size)))
+        if (NULL == (wbuf_temp[i] = malloc(data_size)))
             TEST_ERROR;
 
         for (size_t j = 0; j < data_size / DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_DTYPESIZE; j++)
-            ((int **)data)[i][j] = (int)i;
+            ((int **)wbuf_temp)[i][j] = (int)i;
+
+        write_buf[i] = (const void *)wbuf_temp[i];
     }
 
     for (i = 0; i < DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS; i++) {
@@ -7331,16 +7355,16 @@ test_write_multi_dataset_small_point_selection(void)
     }
 
     if (H5Dwrite_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_id_arr, mspace_id_arr, fspace_id_arr,
-                       H5P_DEFAULT, (const void **)data) < 0) {
+                       H5P_DEFAULT, (const void **)write_buf) < 0) {
         H5_FAILED();
         printf("    couldn't write to multiple datasets\n");
         goto error;
     }
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        if (data[i]) {
-            free(data[i]);
-            data[i] = NULL;
+        if (wbuf_temp[i]) {
+            free(wbuf_temp[i]);
+            wbuf_temp[i] = NULL;
         }
 
         if (H5Dclose(dset_id_arr[i]) < 0)
@@ -7366,8 +7390,8 @@ error:
     H5E_BEGIN_TRY
     {
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-            if (data[i])
-                free(data[i]);
+            if (wbuf_temp[i])
+                free(wbuf_temp[i]);
 
             H5Dclose(dset_id_arr[i]);
         }
@@ -7407,9 +7431,10 @@ test_write_multi_dataset_data_verification(void)
     hid_t  mspace_id = H5I_INVALID_HID, mspace_id_arr[DATASET_MULTI_COUNT];
     hid_t  select_all_arr[DATASET_MULTI_COUNT];
     void  *data[DATASET_MULTI_COUNT];
-    void  *write_buf[DATASET_MULTI_COUNT];
-    void  *read_buf[DATASET_MULTI_COUNT];
-    char   dset_names[DATASET_MULTI_COUNT][DSET_NAME_BUF_SIZE];
+    const void *write_buf[DATASET_MULTI_COUNT];
+    void       *wbuf_temp[DATASET_MULTI_COUNT];
+    void       *read_buf[DATASET_MULTI_COUNT];
+    char        dset_names[DATASET_MULTI_COUNT][DSET_NAME_BUF_SIZE];
 
     TESTING_MULTIPART("verification of datasets' data using H5Dwrite_multi then H5Dread_multi");
 
@@ -7428,6 +7453,7 @@ test_write_multi_dataset_data_verification(void)
         select_all_arr[i] = H5S_ALL;
         read_buf[i]       = NULL;
         write_buf[i]      = NULL;
+        wbuf_temp[i]      = NULL;
         data[i]           = NULL;
     }
 
@@ -7459,8 +7485,9 @@ test_write_multi_dataset_data_verification(void)
     data_size *= DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        if (DSET_NAME_BUF_SIZE <= snprintf(dset_names[i], DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                           DATASET_DATA_VERIFY_WRITE_MULTI_TEST_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_names[i], DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                                         DATASET_DATA_VERIFY_WRITE_MULTI_TEST_DSET_NAME, i,
+                                                         '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_names[i], DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPE,
@@ -7477,6 +7504,8 @@ test_write_multi_dataset_data_verification(void)
 
         for (size_t j = 0; j < data_size / DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE; j++)
             ((int **)data)[i][j] = (int)j;
+
+        write_buf[i] = (const void *)data[i];
     }
 
     PASSED();
@@ -7488,7 +7517,7 @@ test_write_multi_dataset_data_verification(void)
             TESTING_2("H5Dwrite_multi using H5S_ALL then H5Dread_multi");
 
             if (H5Dwrite_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_id_arr, select_all_arr, select_all_arr,
-                               H5P_DEFAULT, (const void **)data) < 0) {
+                               H5P_DEFAULT, (const void **)write_buf) < 0) {
                 H5_FAILED();
                 printf("    couldn't write to datasets");
                 PART_ERROR(H5Dwrite_multi_all_read);
@@ -7585,14 +7614,14 @@ test_write_multi_dataset_data_verification(void)
             for (i = 0; i < DATASET_MULTI_COUNT; i++) {
                 data_size = dims[1] * 2 * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
-                if (NULL == (write_buf[i] = malloc(data_size))) {
+                if (NULL == (wbuf_temp[i] = malloc(data_size))) {
                     H5_FAILED();
                     printf("    couldn't allocate buffer for dataset write\n");
                     PART_ERROR(H5Dwrite_multi_hyperslab_read);
                 }
 
                 for (size_t j = 0; j < data_size / DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE; j++) {
-                    ((int *)write_buf[i])[j] = 56;
+                    ((int *)wbuf_temp[i])[j] = 56;
                 }
 
                 data_size = 1;
@@ -7605,6 +7634,8 @@ test_write_multi_dataset_data_verification(void)
                     printf("    couldn't allocate buffer for datasets' data verification\n");
                     PART_ERROR(H5Dwrite_multi_hyperslab_read);
                 }
+
+                write_buf[i] = (const void *)wbuf_temp[i];
             }
 
             if (H5Dread_multi(DATASET_MULTI_COUNT, dset_id_arr, dtype_id_arr, select_all_arr, select_all_arr,
@@ -7731,9 +7762,9 @@ test_write_multi_dataset_data_verification(void)
                     data[i] = NULL;
                 }
 
-                if (write_buf[i]) {
-                    free(write_buf[i]);
-                    write_buf[i] = NULL;
+                if (wbuf_temp[i]) {
+                    free(wbuf_temp[i]);
+                    wbuf_temp[i] = NULL;
                 }
 
                 if (read_buf[i]) {
@@ -7747,14 +7778,9 @@ test_write_multi_dataset_data_verification(void)
         PART_END(H5Dwrite_multi_hyperslab_read);
 
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-            if (data[i]) {
-                free(data[i]);
-                data[i] = NULL;
-            }
-
-            if (write_buf[i]) {
-                free(write_buf[i]);
-                write_buf[i] = NULL;
+            if (wbuf_temp[i]) {
+                free(wbuf_temp[i]);
+                wbuf_temp[i] = NULL;
             }
 
             if (read_buf[i]) {
@@ -7771,14 +7797,16 @@ test_write_multi_dataset_data_verification(void)
                 DATASET_DATA_VERIFY_WRITE_TEST_NUM_POINTS * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
             for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-                if (NULL == (write_buf[i] = malloc(data_size))) {
+                if (NULL == (wbuf_temp[i] = malloc(data_size))) {
                     H5_FAILED();
                     printf("    couldn't allocate buffer for dataset write\n");
                     PART_ERROR(H5Dwrite_multi_point_sel_read);
                 }
 
                 for (size_t j = 0; j < data_size / DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE; j++)
-                    ((int **)write_buf)[i][j] = 13;
+                    ((int **)wbuf_temp)[i][j] = 13;
+
+                write_buf[i] = (const void *)wbuf_temp[i];
 
                 data_size = 1;
 
@@ -7931,9 +7959,9 @@ test_write_multi_dataset_data_verification(void)
             data[i] = NULL;
         }
 
-        if (write_buf[i]) {
-            free(write_buf[i]);
-            write_buf[i] = NULL;
+        if (wbuf_temp[i]) {
+            free(wbuf_temp[i]);
+            wbuf_temp[i] = NULL;
         }
 
         if (read_buf[i]) {
@@ -7964,8 +7992,8 @@ error:
         for (i = 0; i < DATASET_MULTI_COUNT; i++) {
             if (data[i])
                 free(data[i]);
-            if (write_buf[i])
-                free(write_buf[i]);
+            if (wbuf_temp[i])
+                free(wbuf_temp[i]);
             if (read_buf[i])
                 free(read_buf[i]);
 
@@ -8220,6 +8248,251 @@ error:
         H5Fclose(file_id);
     }
     H5E_END_TRY
+
+    return 1;
+}
+
+/*
+ * A test to ensure that strings of any encoding
+ * can be written to and read from a dataset
+ */
+static int
+test_dataset_string_encodings(void)
+{
+    hid_t   file_id                             = H5I_INVALID_HID;
+    hid_t   container_group                     = H5I_INVALID_HID;
+    hid_t   dset_id1                            = H5I_INVALID_HID;
+    hid_t   dset_id2                            = H5I_INVALID_HID;
+    hid_t   type_id1                            = H5I_INVALID_HID;
+    hid_t   type_id2                            = H5I_INVALID_HID;
+    hid_t   space_id                            = H5I_INVALID_HID;
+    hsize_t dims[DATASET_STRING_ENCODINGS_RANK] = {DATASET_STRING_ENCODINGS_EXTENT};
+    size_t  ascii_str_size                      = 0;
+    size_t  utf8_str_size                       = 0;
+    char   *write_buf                           = NULL;
+    char   *read_buf                            = NULL;
+
+    TESTING_MULTIPART("string encoding read/write correctness on datasets");
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        SKIPPED();
+        printf("    API functions for basic file, group, basic or more dataset aren't supported with this "
+               "connector\n");
+        return 0;
+    }
+
+    TESTING_2("test setup");
+
+    ascii_str_size = strlen(DATASET_STRING_ENCODINGS_ASCII_STRING);
+    utf8_str_size  = strlen(DATASET_STRING_ENCODINGS_UTF8_STRING);
+
+    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
+        goto error;
+    }
+
+    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+        goto error;
+    }
+
+    if ((space_id = H5Screate_simple(DATASET_STRING_ENCODINGS_RANK, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataspace\n");
+        goto error;
+    }
+
+    if ((type_id1 = H5Tcopy(H5T_C_S1)) < 0) {
+        H5_FAILED();
+        printf("    couldn't copy builtin string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_size(type_id1, ascii_str_size)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set size of string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_cset(type_id1, H5T_CSET_ASCII)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set character set of string to ASCII\n");
+        goto error;
+    }
+
+    if ((dset_id1 = H5Dcreate(container_group, DATASET_STRING_ENCODINGS_DSET_NAME1, type_id1, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with ascii string\n");
+        goto error;
+    }
+
+    if ((type_id2 = H5Tcopy(H5T_C_S1)) < 0) {
+        H5_FAILED();
+        printf("    couldn't copy builtin string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_size(type_id2, utf8_str_size)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set size of string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_cset(type_id2, H5T_CSET_UTF8)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set character set of string to UTF-8\n");
+        goto error;
+    }
+
+    if ((dset_id2 = H5Dcreate(container_group, DATASET_STRING_ENCODINGS_DSET_NAME2, type_id2, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with UTF-8 string\n");
+        goto error;
+    }
+
+    PASSED();
+
+    BEGIN_MULTIPART
+    {
+        PART_BEGIN(ASCII_cset)
+        {
+            TESTING_2("ASCII character set");
+            /* Dataset with ASCII string datatype */
+            if ((write_buf = calloc(1, ascii_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for write buffer\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            memcpy(write_buf, DATASET_STRING_ENCODINGS_ASCII_STRING, ascii_str_size);
+
+            if ((H5Dwrite(dset_id1, type_id1, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf)) < 0) {
+                H5_FAILED();
+                printf("    couldn't write to dataset with ASCII string\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            if ((read_buf = calloc(1, ascii_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            if ((H5Dread(dset_id1, type_id1, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf)) < 0) {
+                H5_FAILED();
+                printf("    couldn't read from dataset with ASCII string\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            if (strncmp(write_buf, read_buf, ascii_str_size)) {
+                H5_FAILED();
+                printf("    incorrect data read from dataset with ASCII string\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            free(write_buf);
+            write_buf = NULL;
+
+            free(read_buf);
+            read_buf = NULL;
+
+            PASSED();
+        }
+        PART_END(ASCII_cset);
+
+        PART_BEGIN(UTF8_cset)
+        {
+            TESTING_2("UTF-8 character set");
+            /* Dataset with UTF-8 string datatype */
+            if ((write_buf = calloc(1, utf8_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for write buffer\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            memcpy(write_buf, DATASET_STRING_ENCODINGS_UTF8_STRING, utf8_str_size);
+
+            if ((H5Dwrite(dset_id2, type_id2, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf)) < 0) {
+                H5_FAILED();
+                printf("    couldn't write to dataset with ASCII string\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            if ((read_buf = calloc(1, utf8_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            if ((H5Dread(dset_id2, type_id2, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf)) < 0) {
+                H5_FAILED();
+                printf("    couldn't read from dataset with ASCII string\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            if (strncmp(write_buf, read_buf, utf8_str_size)) {
+                H5_FAILED();
+                printf("    incorrect data read from dataset with ASCII string\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            free(write_buf);
+            write_buf = NULL;
+
+            free(read_buf);
+            read_buf = NULL;
+
+            PASSED();
+        }
+        PART_END(UTF8_cset);
+
+        PASSED();
+    }
+    END_MULTIPART;
+
+    TESTING_2("test cleanup");
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Gclose(container_group) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id1) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id2) < 0)
+        TEST_ERROR;
+    if (H5Tclose(type_id1) < 0)
+        TEST_ERROR;
+    if (H5Tclose(type_id2) < 0)
+        TEST_ERROR;
+    if (write_buf)
+        free(write_buf);
+    if (read_buf)
+        free(read_buf);
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+        H5Gclose(container_group);
+        H5Dclose(dset_id1);
+        H5Dclose(dset_id2);
+        H5Tclose(type_id1);
+        H5Tclose(type_id2);
+        if (write_buf)
+            free(write_buf);
+        if (read_buf)
+            free(read_buf);
+    }
+    H5E_END_TRY;
 
     return 1;
 }
@@ -8798,9 +9071,9 @@ test_dataset_real_to_int_conversion(void)
 
     TESTING_2("test setup");
 
-    if ((file_id = H5Fopen(vol_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        printf("    couldn't open file '%s'\n", vol_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
@@ -8965,7 +9238,7 @@ test_dataset_real_to_int_conversion(void)
             }
 
             for (i = 0; i < dims[0] * dims[1] * dims[2]; i++)
-                ((int *)data)[i] = i;
+                ((int *)data)[i] = (int)i;
 
             for (i = 0; i < 2; i++) {
                 size_t j;
