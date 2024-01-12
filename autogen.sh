@@ -112,15 +112,11 @@ if test -z "${HDF5_ACLOCAL}"; then
     HDF5_ACLOCAL="$(command -v aclocal)"
 fi
 if test -z "${HDF5_LIBTOOLIZE}"; then
-    case "$(uname)" in
-    Darwin*)
-        # libtool on OS-X is non-gnu
-        HDF5_LIBTOOLIZE="$(command -v glibtoolize)"
-        ;;
-    *)
+    # check for glibtoolize (likely found on MacOS). If not found - check for libtoolize
+    HDF5_LIBTOOLIZE="$(command -v glibtoolize)"
+    if [ ! -f "$HDF5_LIBTOOLIZE" ] ; then
         HDF5_LIBTOOLIZE="$(command -v libtoolize)"
-        ;;
-    esac
+    fi
 fi
 if test -z "${HDF5_M4}"; then
     HDF5_M4="$(command -v m4)"
