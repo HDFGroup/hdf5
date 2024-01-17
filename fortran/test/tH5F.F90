@@ -197,6 +197,7 @@ CONTAINS
     !flag to check operation success
     !
     INTEGER     ::   error
+    INTEGER     ::   fintent
 
     !
     !general purpose integer
@@ -215,8 +216,8 @@ CONTAINS
     !data buffers
     !
     INTEGER, DIMENSION(NX,NY) :: data_in, data_out
-
     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
+
     filename1 = "mount1"
     filename2 = "mount2"
 
@@ -377,6 +378,13 @@ CONTAINS
     CALL h5fopen_f (fix_filename1, H5F_ACC_RDWR_F, file1_id, error)
     CALL check("hfopen_f",error,total_error)
 
+    CALL h5fget_intent_f(file1_id, fintent, error)
+    CALL check("h5fget_intent_f",error,total_error)
+
+    IF(fintent.NE.H5F_ACC_RDWR_F)THEN
+         total_error = total_error + 1
+    ENDIF
+
     CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
     CALL check(" h5fget_obj_count_f",error,total_error)
 
@@ -389,7 +397,6 @@ CONTAINS
 
     CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
     CALL check(" h5fget_obj_count_f",error,total_error)
-
     IF(obj_count.NE.2)THEN
        total_error = total_error + 1
     ENDIF
@@ -1038,7 +1045,7 @@ CONTAINS
        total_error = total_error + 1
        write(*,*) " Open with H5F_CLOSE_STRONG should fail "
     endif
-
+    
     CALL h5fget_obj_count_f(fid1, H5F_OBJ_ALL_F, obj_count, error)
     CALL check("h5fget_obj_count_f",error,total_error)
     if(error .eq.0 .and. obj_count .ne. 3) then

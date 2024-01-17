@@ -848,7 +848,7 @@ H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
  *
  * \brief Closes a dataspace selection iterator
  *
- * \space_id{sel_iter_id}
+ * \param[in] sel_iter_id Identifier of the dataspace selection iterator
  *
  * \return \herr_t
  *
@@ -882,13 +882,13 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  * \brief Retrieves a list of offset / length sequences for the elements in
  *        an iterator
  *
- * \space_id{sel_iter_id}
- * \param[in]  maxseq   Maximum number of sequences to retrieve
- * \param[in]  maxelmts Maximum number of elements to retrieve in sequences
- * \param[out] nseq     Number of sequences retrieved
- * \param[out] nelmts   Number of elements retrieved, in all sequences
- * \param[out] off      Array of sequence offsets
- * \param[out] len      Array of sequence lengths
+ * \param[in]  sel_iter_id Identifier of the dataspace selection iterator
+ * \param[in]  maxseq      Maximum number of sequences to retrieve
+ * \param[in]  maxelmts    Maximum number of elements to retrieve in sequences
+ * \param[out] nseq        Number of sequences retrieved
+ * \param[out] nelmts      Number of elements retrieved, in all sequences
+ * \param[out] off         Array of sequence offsets
+ * \param[out] len         Array of sequence lengths
  *
  * \return \herr_t
  *
