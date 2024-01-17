@@ -343,7 +343,6 @@ typedef H5T_t *(*H5T_copy_func_t)(H5T_t *old_dt);
 static herr_t H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                                 H5T_lib_conv_t func);
 static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_func_t *conv);
-static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func);
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt, void **request);
@@ -2672,7 +2671,7 @@ done:
 } /* end H5Tregister() */
 
 /*-------------------------------------------------------------------------
- * Function:   H5T__unregister
+ * Function:   H5T_unregister
  *
  * Purpose:    Removes conversion paths that match the specified criteria.
  *        All arguments are optional. Missing arguments are wild cards.
@@ -2683,15 +2682,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func)
+herr_t
+H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_object_t *owned_vol_obj,
+               H5T_conv_t func)
 {
     H5T_path_t *path   = NULL; /*conversion path             */
     H5T_soft_t *soft   = NULL; /*soft conversion information */
     int         nprint = 0;    /*number of paths shut down   */
     int         i;             /*counter                     */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Remove matching entries from the soft list */
     if (H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) {
@@ -2704,6 +2704,8 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
                 continue;
             if (dst && dst->shared->type != soft->dst)
                 continue;
+            if (owned_vol_obj)
+                continue;
             if (func && func != soft->conv.u.app_func)
                 continue;
 
@@ -2714,13 +2716,20 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 
     /* Remove matching conversion paths, except no-op path */
     for (i = H5T_g.npaths - 1; i > 0; --i) {
+        bool nomatch;
+
         path = H5T_g.path[i];
         assert(path);
 
+        nomatch = ((H5T_PERS_SOFT == pers && path->is_hard) || (H5T_PERS_HARD == pers && !path->is_hard)) ||
+                  (name && *name && strcmp(name, path->name) != 0) ||
+                  (src && H5T_cmp(src, path->src, false)) || (dst && H5T_cmp(dst, path->dst, false)) ||
+                  (owned_vol_obj && (owned_vol_obj != path->src->shared->owned_vol_obj) &&
+                   (owned_vol_obj != path->dst->shared->owned_vol_obj)) ||
+                  (func && func != path->conv.u.app_func);
+
         /* Not a match */
-        if (((H5T_PERS_SOFT == pers && path->is_hard) || (H5T_PERS_HARD == pers && !path->is_hard)) ||
-            (name && *name && strcmp(name, path->name) != 0) || (src && H5T_cmp(src, path->src, false)) ||
-            (dst && H5T_cmp(dst, path->dst, false)) || (func && func != path->conv.u.app_func)) {
+        if (nomatch) {
             /*
              * Notify all other functions to recalculate private data since some
              * functions might cache a list of conversion functions.  For
@@ -2769,7 +2778,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
     }                              /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5T__unregister() */
+} /* end H5T_unregister() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5Tunregister
@@ -2799,7 +2808,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T
     if (dst_id > 0 && (NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type");
 
-    if (H5T__unregister(pers, name, src, dst, func) < 0)
+    if (H5T_unregister(pers, name, src, dst, NULL, func) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "internal unregister function failed");
 
 done:
@@ -6096,3 +6105,26 @@ H5T_own_vol_obj(H5T_t *dt, H5VL_object_t *vol_obj)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_own_vol_obj() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T__get_path_table_npaths
+ *
+ * Purpose:     Testing function to return the number of type conversion
+ *              paths currently stored in the type conversion path table
+ *              cache.
+ *
+ * Return:      Number of type conversion paths (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T__get_path_table_npaths(void)
+{
+    int ret_value = 0;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    ret_value = H5T_g.npaths;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}

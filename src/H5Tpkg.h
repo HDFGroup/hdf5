@@ -877,4 +877,7 @@ H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
 /* Debugging functions */
 H5_DLL herr_t H5T__print_stats(H5T_path_t *path, int *nprint /*in,out*/);
 
+/* Testing functions */
+H5_DLL int H5T__get_path_table_npaths(void);
+
 #endif /* H5Tpkg_H */
