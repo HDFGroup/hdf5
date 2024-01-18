@@ -1550,7 +1550,7 @@ H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
         enc_size = *(*pp)++;
         assert(enc_size < 256);
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
-        efl->slot[u].offset = (off_t)enc_value;
+        efl->slot[u].offset = (HDoff_t)enc_value;
 
         /* decode size */
         enc_size = *(*pp)++;
