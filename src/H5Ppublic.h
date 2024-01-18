@@ -6948,7 +6948,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *             conflict can be detected only when the property list is used.
  *           - Users should be aware that there are factors that affect one's
  *             rights and ability to use SZIP compression by reviewing the
- *             SZIP copyright notice. (This limition does not apply to the
+ *             SZIP copyright notice. (This limitation does not apply to the
  *             libaec library).
  *
  * \note <b> For Users Familiar with SZIP in Other Contexts: </b>
