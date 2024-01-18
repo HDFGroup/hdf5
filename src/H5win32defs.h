@@ -22,7 +22,7 @@
 
 /* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
  * so we define HDoff_t to be __int64, which is the type of the st_size field
- * of the _stati64 struct.
+ * of the _stati64 struct and what is returned by _ftelli64().
  */
 #define HDoff_t __int64
 
@@ -42,6 +42,7 @@ struct timezone {
 #define HDcreat(S, M)        Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
 #define HDflock(F, L)        Wflock(F, L)
 #define HDfstat(F, B)        _fstati64(F, B)
+#define HDftell(F)           _ftelli64(F)
 #define HDgetdcwd(D, S, Z)   _getdcwd(D, S, Z)
 #define HDgetdrive()         _getdrive()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
