@@ -412,7 +412,7 @@ CONTAINS
           ENDDO
        ELSE IF (sel_type .eq. H5S_SEL_HYPERSLABS_F)THEN ! Hyperslab selection
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
-          CALL verify("H5Ssel_iter_get_seq_list_f", nbytes, 16_SIZE_T, total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 16_SIZE_T, total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(NUMP+1), INT(-99,HSIZE_T), total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,HSIZE_T), total_error)
           DO i = 1, NUMP
