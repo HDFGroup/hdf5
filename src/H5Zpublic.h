@@ -110,24 +110,55 @@ typedef int H5Z_filter_t;
  */
 #define H5Z_FLAG_SKIP_EDC 0x0200
 
-/* Special parameters for szip compression */
-/* [These are aliases for the similar definitions in szlib.h, which we can't
- * include directly due to the duplication of various symbols with the zlib.h
- * header file] */
+/* Special parameters for szip compression
+ *
+ * These are aliases for similarly-named definitions in szlib.h, which we
+ * can't include directly due to the duplication of various symbols with the
+ * zlib.h header file.
+ *
+ * The flag values are set to the same values as in szlib.h. The following
+ * symbols are internal and defined in H5Zprivate.h:
+ *
+ * - H5_SZIP_LSB_OPTION_MASK
+ * - H5_SZIP_MSB_OPTION_MASK
+ * - H5_SZIP_RAW_OPTION_MASK
+ *
+ * TODO: These symbols should probably be deprecated and moved to H5Zprivate.h
+ *       in the next major release of the library since they are only used
+ *       internally:
+ *
+ * - H5_SZIP_ALLOW_K13_OPTION_MASK
+ * - H5_SZIP_CHIP_OPTION_MASK
+ */
 /**
- * \ingroup SZIP */
+ * \ingroup SZIP
+ *
+ * Used internally. Always added to the \p options_mask parameter of H5Pset_szip().
+ */
 #define H5_SZIP_ALLOW_K13_OPTION_MASK 1
 /**
- * \ingroup SZIP */
+ * \ingroup SZIP
+ *
+ * Used internally. Always removed from the \p options_mask parameter of H5Pset_szip().
+ */
 #define H5_SZIP_CHIP_OPTION_MASK 2
 /**
- * \ingroup SZIP */
+ * \ingroup SZIP
+ *
+ * Use the entropy coding method
+ */
 #define H5_SZIP_EC_OPTION_MASK 4
 /**
- * \ingroup SZIP */
+ * \ingroup SZIP
+ *
+ * Use nearest neighbor preprocessing and then the entropy coding method
+ */
 #define H5_SZIP_NN_OPTION_MASK 32
 /**
- * \ingroup SZIP */
+ * \ingroup SZIP
+ *
+ * The maximum number of pixels per block (see H5Pset_szip())
+ */
 #define H5_SZIP_MAX_PIXELS_PER_BLOCK 32
 
 /* Macros for the shuffle filter */
