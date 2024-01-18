@@ -6477,6 +6477,9 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  *         when H5Dwrite() is called to write data to it, the library
  *         will create the file.
  *
+ * \note On Windows, off_t is typically a 32-bit signed long value, which
+ *       limits the valid offset that can be set to 2 GiB.
+ *
  * \since 1.0.0
  *
  */
