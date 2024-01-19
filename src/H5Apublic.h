@@ -929,7 +929,7 @@ H5_DLL herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 H5_DLL herr_t H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
                             hid_t dtype_id, void *buf, hid_t es_id);
 #else
-H5_DLL herr_t H5Aread_async(chid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id);
+H5_DLL herr_t H5Aread_async(hid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id);
 #endif
 /*-------------------------------------------------------------------------*/
 /**
