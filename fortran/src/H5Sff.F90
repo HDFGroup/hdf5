@@ -1479,7 +1479,9 @@ CONTAINS
 !!
 !! \param space_id    Dataspace identifier
 !! \param elmt_size   Size of element in the selection
-!! \param flags       Selection iterator flag
+!! \param flags       Selection iterator flag, valid values are:
+!!                    \li H5S_SEL_ITER_GET_SEQ_LIST_SORTED_F, ref. @ref H5S_SEL_ITER_GET_SEQ_LIST_SORTED
+!!                    \li H5S_SEL_ITER_SHARE_WITH_DATASPACE_F, ref. @ref H5S_SEL_ITER_SHARE_WITH_DATASPACE
 !! \param ds_iter_id  Dataspace selection iterator identifier
 !! \param hdferr      \fortran_error
 !!
