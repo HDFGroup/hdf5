@@ -7578,9 +7578,6 @@ error:
  * Return:  Success:    0
  *          Failure:    number of errors
  *
- * Programmer:  Mark Hodson
- *              Tuesday, March 17, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7593,7 +7590,7 @@ test_named_indirect_reopen_file(hid_t fapl)
     hid_t          strtype          = H5I_INVALID_HID;
     hid_t          reopened_strtype = H5I_INVALID_HID;
     hid_t          dset             = H5I_INVALID_HID;
-    static hsize_t dims[1]          = {3};
+    hsize_t        dims[1]          = {3};
     size_t         strtype_size, cmptype_size;
     char           filename[1024];
 
@@ -7618,7 +7615,7 @@ test_named_indirect_reopen_file(hid_t fapl)
     if ((strtype_size = H5Tget_size(strtype)) == 0)
         TEST_ERROR;
 
-    /* Commit compound type and verify the size doesn't change */
+    /* Commit string type and verify the size doesn't change */
     if (H5Tcommit2(file, "str_type", strtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (strtype_size != H5Tget_size(strtype))
