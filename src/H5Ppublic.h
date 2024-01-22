@@ -6477,6 +6477,9 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  *         when H5Dwrite() is called to write data to it, the library
  *         will create the file.
  *
+ * \note On Windows, off_t is typically a 32-bit signed long value, which
+ *       limits the valid offset that can be set to 2 GiB.
+ *
  * \since 1.0.0
  *
  */
@@ -6857,7 +6860,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *                         Valid values are #H5_SZIP_EC_OPTION_MASK and
  *                         #H5_SZIP_NN_OPTION_MASK.
  * \param[in] pixels_per_block The number of pixels or data elements in each
- *            data block
+ *            data block (max #H5_SZIP_MAX_PIXELS_PER_BLOCK)
  *
  * \return \herr_t
  *
@@ -6892,7 +6895,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *          <table>
  *            <tr>
  *             <th>Option</th>
- *             <th>Description (Mutually exclusive; select one.)</th>
+ *             <th>Description (Mutually exclusive; select one)</th>
  *            </tr>
  *            <tr>
  *             <td>#H5_SZIP_EC_OPTION_MASK</td>
@@ -6900,7 +6903,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *            </tr>
  *            <tr>
  *             <td>#H5_SZIP_NN_OPTION_MASK</td>
- *             <td>Selects nearest neighbor coding method</td>
+ *             <td>Selects nearest neighbor preprocessing followed by entropy coding</td>
  *            </tr>
  *           </table>
  *
@@ -6948,9 +6951,10 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *             conflict can be detected only when the property list is used.
  *           - Users should be aware that there are factors that affect one's
  *             rights and ability to use SZIP compression by reviewing the
- *             SZIP copyright notice.
+ *             SZIP copyright notice. (This limitation does not apply to the
+ *             libaec library).
  *
- * \note \b For \b Users \b Familiar \b with \b SZIP \b in \b Other \b Contexts:
+ * \note <b> For Users Familiar with SZIP in Other Contexts: </b>
  *
  * \note  The following notes are of interest primarily to those who have
  *        used SZIP compression outside of the HDF5 context.

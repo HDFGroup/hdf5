@@ -75,7 +75,7 @@
 #define H5F_OBJ_FILE     (0x0001u) /**< File objects */
 #define H5F_OBJ_DATASET  (0x0002u) /**< Dataset objects */
 #define H5F_OBJ_GROUP    (0x0004u) /**< Group objects */
-#define H5F_OBJ_DATATYPE (0x0008u) /**< Named datatype objects */
+#define H5F_OBJ_DATATYPE (0x0008u) /**< Datatype objects */
 #define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects */
 #define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
 #define H5F_OBJ_LOCAL                                                                                        \
@@ -761,7 +761,8 @@ H5_DLL herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
  *          object identifiers for the file.
  *
  *          To retrieve a count of open identifiers for open objects in all
- *          HDF5 application files that are currently open, pass the value
+ *          HDF5 application files that are currently open, as well as transient
+ *          datatype objects that are not associated with any file, pass the value
  *          #H5F_OBJ_ALL in \p file_id.
  *
  *          The types of objects to be counted are specified in types as

@@ -44,7 +44,7 @@
 #   HDF5_AUTOHEADER
 #   HDF5_AUTOMAKE
 #   HDF5_AUTOCONF
-#   HDF5_LIBTOOL
+#   HDF5_LIBTOOLIZE
 #   HDF5_M4
 #
 # Note that aclocal will attempt to include libtool's share/aclocal
@@ -111,16 +111,12 @@ fi
 if test -z "${HDF5_ACLOCAL}"; then
     HDF5_ACLOCAL="$(command -v aclocal)"
 fi
-if test -z "${HDF5_LIBTOOL}"; then
-    case "$(uname)" in
-    Darwin*)
-        # libtool on OS-X is non-gnu
-        HDF5_LIBTOOL="$(command -v glibtool)"
-        ;;
-    *)
-        HDF5_LIBTOOL="$(command -v libtool)"
-        ;;
-    esac
+if test -z "${HDF5_LIBTOOLIZE}"; then
+    # check for glibtoolize (likely found on MacOS). If not found - check for libtoolize
+    HDF5_LIBTOOLIZE="$(command -v glibtoolize)"
+    if [ ! -f "$HDF5_LIBTOOLIZE" ] ; then
+        HDF5_LIBTOOLIZE="$(command -v libtoolize)"
+    fi
 fi
 if test -z "${HDF5_M4}"; then
     HDF5_M4="$(command -v m4)"
@@ -129,25 +125,9 @@ fi
 
 # Make sure that these versions of the autotools are in the path
 AUTOCONF_DIR=$(dirname "${HDF5_AUTOCONF}")
-LIBTOOL_DIR=$(dirname "${HDF5_LIBTOOL}")
+LIBTOOL_DIR=$(dirname "${HDF5_LIBTOOLIZE}")
 M4_DIR=$(dirname "${HDF5_M4}")
 PATH=${AUTOCONF_DIR}:${LIBTOOL_DIR}:${M4_DIR}:$PATH
-
-# Make libtoolize match the specified libtool
-case "$(uname)" in
-Darwin*)
-    # On OS X, libtoolize could be named glibtoolize or
-    # libtoolize. Try the former first, then fall back
-    # to the latter if it's not found.
-    HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
-    if [ ! -f "$HDF5_LIBTOOLIZE" ] ; then
-        HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
-    fi
-    ;;
-*)
-    HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
-    ;;
-esac
 
 # Run scripts that process source.
 #
