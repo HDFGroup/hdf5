@@ -7583,16 +7583,16 @@ error:
 static int
 test_named_indirect_reopen_file(hid_t fapl)
 {
-    hid_t          file             = H5I_INVALID_HID;
-    hid_t          space            = H5I_INVALID_HID;
-    hid_t          cmptype          = H5I_INVALID_HID;
-    hid_t          reopened_cmptype = H5I_INVALID_HID;
-    hid_t          strtype          = H5I_INVALID_HID;
-    hid_t          reopened_strtype = H5I_INVALID_HID;
-    hid_t          dset             = H5I_INVALID_HID;
-    hsize_t        dims[1]          = {3};
-    size_t         strtype_size, cmptype_size;
-    char           filename[1024];
+    hid_t   file             = H5I_INVALID_HID;
+    hid_t   space            = H5I_INVALID_HID;
+    hid_t   cmptype          = H5I_INVALID_HID;
+    hid_t   reopened_cmptype = H5I_INVALID_HID;
+    hid_t   strtype          = H5I_INVALID_HID;
+    hid_t   reopened_strtype = H5I_INVALID_HID;
+    hid_t   dset             = H5I_INVALID_HID;
+    hsize_t dims[1]          = {3};
+    size_t  strtype_size, cmptype_size;
+    char    filename[1024];
 
     TESTING("indirectly reopening recursively committed datatypes including file reopening");
 
