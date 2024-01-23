@@ -81,7 +81,7 @@ cast_to_void(const void *data)
  *
  *              Sending descriptors to an IOC usually gets an ACK or
  *              NACK in response.  For the write operations, we post
- *              asynch READs to receive ACKs from IOC ranks that have
+ *              async READs to receive ACKs from IOC ranks that have
  *              allocated memory receive the data to write to the
  *              subfile.  Upon receiving an ACK, we send the actual
  *              user data to the IOC.
@@ -251,7 +251,7 @@ done:
  *
  *              Sending descriptors to an IOC usually gets an ACK or
  *              NACK in response.  For the read operations, we post
- *              asynch READs to receive the file data and wait until
+ *              async READs to receive the file data and wait until
  *              all pending operations have completed.
  *
  * Return:      Non-negative on success/Negative on failure

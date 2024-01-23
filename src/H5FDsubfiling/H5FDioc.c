@@ -12,8 +12,9 @@
 
 /*
  * Purpose:     The IOC VFD implements a file driver which relays all the
- *              VFD calls to an underlying VFD, and send all the write calls to
- *              another underlying VFD. Maintains two files simultaneously.
+ *              VFD calls to an underlying VFD, and sends all the write calls
+ *              to another underlying VFD. The IOC VFD maintains two files
+ *              simultaneously.
  */
 
 /* This source code file is part of the H5FD driver module */
@@ -43,7 +44,7 @@ static bool H5FD_mpi_self_initialized = false;
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
 
-/* The information of this ioc */
+/* The information of this IOC VFD */
 typedef struct H5FD_ioc_t {
     H5FD_t            pub; /* public stuff, must be first    */
     int               fd;  /* the filesystem file descriptor */
@@ -204,7 +205,7 @@ H5FL_DEFINE_STATIC(H5FD_ioc_config_t);
  * Purpose:     Initialize the IOC driver by registering it with the
  *              library.
  *
- * Return:      Success:    The driver ID for the ioc driver.
+ * Return:      Success:    The driver ID for the IOC driver.
  *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
@@ -316,7 +317,7 @@ done:
  * Function:    H5Pset_fapl_ioc
  *
  * Purpose:     Sets the file access property list to use the
- *              ioc driver.
+ *              IOC driver.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -361,7 +362,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ioc
  *
- * Purpose:     Returns information about the ioc file access property
+ * Purpose:     Returns information about the IOC file access property
  *              list through the structure config_out.
  *
  *              Will fail if config_out is received without pre-set valid
@@ -1071,7 +1072,7 @@ H5FD__ioc_alloc(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hi
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_free
  *
- * Purpose:     Free the resources for the ioc VFD.
+ * Purpose:     Free the resources for the IOC VFD.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -1590,7 +1591,7 @@ done:
  * Function:   H5FD__ioc_write_vector_internal
  *
  * Purpose:    This function takes 'count' vector entries
- *             and initiates an asynch write operation for each.
+ *             and initiates an async write operation for each.
  *             By asynchronous, we mean that MPI_Isends are utilized
  *             to communicate the write operations to the 'count'
  *             IO Concentrators.  The calling function will have
