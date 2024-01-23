@@ -23,13 +23,6 @@ int H5_api_dataset_test(void);
  *                                              *
  ************************************************/
 
-/* Check if the relative difference is smaller than a
- *  predefined value M.  See if two values are relatively equal.
- *  It's the developer's responsibility not to pass in the value 0, which
- *  may cause the equation to fail.
- */
-#define VL_DBL_REL_EQUAL(X, Y, M) (fabs(((Y) - (X)) / (X)) < (M))
-
 #define DATASET_CREATE_UNDER_ROOT_DSET_NAME  "/dset_under_root"
 #define DATASET_CREATE_UNDER_ROOT_SPACE_RANK 2
 
@@ -67,7 +60,7 @@ int H5_api_dataset_test(void);
 #define ZERO_DIM_DSET_TEST_DSET_NAME  "zero_dim_dset"
 
 #define DATASET_MANY_CREATE_GROUP_NAME "group_for_many_datasets"
-#define DSET_NAME_BUF_SIZE             64u
+#define DSET_NAME_BUF_SIZE             64
 #define DATASET_NUMB                   100u
 
 #define DATASET_SHAPE_TEST_DSET_BASE_NAME "dataset_shape_test"

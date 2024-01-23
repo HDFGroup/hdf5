@@ -2554,7 +2554,7 @@ test_create_dataset_creation_properties(void)
             for (i = 0; i < num_elems; i++) {
                 val = (double *)(read_buf) + i;
 
-                if (!(VL_DBL_REL_EQUAL(*(double *)val, DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE,
+                if (!(H5_DBL_REL_EQUAL(*(double *)val, DATASET_FILL_VALUE_TEST_DOUBLE_FILL_VALUE,
                                        0.0000001))) {
                     H5_FAILED();
                     printf("    incorrect value read from dataset");
@@ -3129,17 +3129,18 @@ error:
     {
         if (read_buf) {
             free(read_buf);
-
-            H5Sclose(compact_fspace_id);
-            H5Sclose(fspace_id);
-            H5Tclose(compact_dtype);
-            H5Tclose(dset_dtype);
-            H5Dclose(dset_id);
-            H5Pclose(dcpl_id);
-            H5Gclose(group_id);
-            H5Gclose(container_group);
-            H5Fclose(file_id);
         }
+
+        H5Sclose(compact_fspace_id);
+        H5Sclose(fspace_id);
+        H5Tclose(compact_dtype);
+        H5Tclose(dset_dtype);
+        H5Dclose(dset_id);
+        H5Pclose(dcpl_id);
+        H5Gclose(group_id);
+        H5Gclose(container_group);
+        H5Fclose(file_id);
+
         H5E_END_TRY
 
         return 1;
@@ -4907,8 +4908,8 @@ test_read_multi_dataset_small_all(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_SMALL_READ_TEST_ALL_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_READ_TEST_ALL_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_READ_TEST_ALL_DSET_DTYPE,
@@ -5052,9 +5053,8 @@ test_read_multi_dataset_small_hyperslab(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i,
-                                                         '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_DTYPE,
@@ -5206,9 +5206,8 @@ test_read_multi_dataset_small_point_selection(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i,
-                                                         '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] =
@@ -6977,9 +6976,8 @@ test_write_multi_dataset_small_all(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i,
-                                                         '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPE,
@@ -7000,9 +6998,8 @@ test_write_multi_dataset_small_all(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i,
-                                                         '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_WRITE_MULTI_TEST_ALL_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dopen2(group_id, dset_name, H5P_DEFAULT)) < 0) {
@@ -7152,9 +7149,8 @@ test_write_multi_dataset_small_hyperslab(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_DSET_NAME,
-                                                         i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_WRITE_MULTI_TEST_HYPERSLAB_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_name, DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_DTYPE,
@@ -7312,9 +7308,8 @@ test_write_multi_dataset_small_point_selection(void)
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
         char dset_name[DSET_NAME_BUF_SIZE];
 
-        if (DSET_NAME_BUF_SIZE <=
-            (unsigned int)snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                   DATASET_SMALL_WRITE_MULTI_TEST_POINT_SELECTION_DSET_NAME, i, '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_name, DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_SMALL_WRITE_MULTI_TEST_POINT_SELECTION_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] =
@@ -7485,9 +7480,8 @@ test_write_multi_dataset_data_verification(void)
     data_size *= DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
     for (i = 0; i < DATASET_MULTI_COUNT; i++) {
-        if (DSET_NAME_BUF_SIZE <= (unsigned int)snprintf(dset_names[i], DSET_NAME_BUF_SIZE, "%s%zu%c",
-                                                         DATASET_DATA_VERIFY_WRITE_MULTI_TEST_DSET_NAME, i,
-                                                         '\0'))
+        if (DSET_NAME_BUF_SIZE <= snprintf(dset_names[i], DSET_NAME_BUF_SIZE, "%s%zu%c",
+                                           DATASET_DATA_VERIFY_WRITE_MULTI_TEST_DSET_NAME, i, '\0'))
             TEST_ERROR;
 
         if ((dset_id_arr[i] = H5Dcreate2(group_id, dset_names[i], DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPE,
