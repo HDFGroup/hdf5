@@ -158,9 +158,8 @@ PROGRAM fortranlibtest
   CALL test_basic_select(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Basic selection test', total_error)
 
-
   ret_total_error = 0
-  CALL test_select_hyperslab( cleanup, ret_total_error)
+  CALL test_select_hyperslab(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Hyperslab selection test', total_error)
 
   ret_total_error = 0
@@ -178,6 +177,11 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_select_bounds(ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
+
+  ret_total_error = 0
+  CALL test_select_iter(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Dataspace selection iterators test', total_error)
+
 
 !
 !      '========================================='
