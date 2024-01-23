@@ -343,12 +343,13 @@ typedef H5T_t *(*H5T_copy_func_t)(H5T_t *old_dt);
 static herr_t H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                                 H5T_lib_conv_t func);
 static herr_t H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_func_t *conv);
-static herr_t H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func);
 static htri_t H5T__compiler_conv(H5T_t *src, H5T_t *dst);
 static herr_t H5T__set_size(H5T_t *dt, size_t size);
 static herr_t H5T__close_cb(H5T_t *dt, void **request);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
                                        H5T_conv_func_t *conv);
+static bool        H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
+                                  H5VL_object_t *owned_vol_obj, H5T_conv_t func);
 static bool        H5T__detect_vlen_ref(const H5T_t *dt);
 static H5T_t      *H5T__initiate_copy(const H5T_t *old_dt);
 static H5T_t      *H5T__copy_transient(H5T_t *old_dt);
@@ -2672,7 +2673,7 @@ done:
 } /* end H5Tregister() */
 
 /*-------------------------------------------------------------------------
- * Function:   H5T__unregister
+ * Function:   H5T_unregister
  *
  * Purpose:    Removes conversion paths that match the specified criteria.
  *        All arguments are optional. Missing arguments are wild cards.
@@ -2683,18 +2684,33 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_conv_t func)
+herr_t
+H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_object_t *owned_vol_obj,
+               H5T_conv_t func)
 {
     H5T_path_t *path   = NULL; /*conversion path             */
     H5T_soft_t *soft   = NULL; /*soft conversion information */
     int         nprint = 0;    /*number of paths shut down   */
     int         i;             /*counter                     */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_NOAPI_NOERR
 
-    /* Remove matching entries from the soft list */
-    if (H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) {
+    /*
+     * Remove matching entries from the soft list if:
+     *
+     *  - The caller didn't specify a particular type (soft or hard)
+     *    of conversion path to match against or specified that soft
+     *    conversion paths should be matched against
+     *
+     *  AND
+     *
+     *  - The caller didn't provide the `owned_vol_obj` parameter;
+     *    if this parameter is provided, we want to leave the soft
+     *    list untouched and only remove cached conversion paths
+     *    below where the file VOL object associated with the path's
+     *    source or destination types matches the given VOL object.
+     */
+    if ((H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) && !owned_vol_obj) {
         for (i = H5T_g.nsoft - 1; i >= 0; --i) {
             soft = H5T_g.soft + i;
             assert(soft);
@@ -2714,13 +2730,15 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 
     /* Remove matching conversion paths, except no-op path */
     for (i = H5T_g.npaths - 1; i > 0; --i) {
+        bool nomatch;
+
         path = H5T_g.path[i];
         assert(path);
 
+        nomatch = !H5T_path_match(path, pers, name, src, dst, owned_vol_obj, func);
+
         /* Not a match */
-        if (((H5T_PERS_SOFT == pers && path->is_hard) || (H5T_PERS_HARD == pers && !path->is_hard)) ||
-            (name && *name && strcmp(name, path->name) != 0) || (src && H5T_cmp(src, path->src, false)) ||
-            (dst && H5T_cmp(dst, path->dst, false)) || (func && func != path->conv.u.app_func)) {
+        if (nomatch) {
             /*
              * Notify all other functions to recalculate private data since some
              * functions might cache a list of conversion functions.  For
@@ -2769,7 +2787,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
     }                              /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5T__unregister() */
+} /* end H5T_unregister() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5Tunregister
@@ -2799,7 +2817,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T
     if (dst_id > 0 && (NULL == (dst = (H5T_t *)H5I_object_verify(dst_id, H5I_DATATYPE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type");
 
-    if (H5T__unregister(pers, name, src, dst, func) < 0)
+    if (H5T_unregister(pers, name, src, dst, NULL, func) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "internal unregister function failed");
 
 done:
@@ -5150,6 +5168,53 @@ done:
 } /* end H5T__path_find_real() */
 
 /*-------------------------------------------------------------------------
+ * Function:  H5T_path_match
+ *
+ * Purpose:   Helper function to determine whether a datatype conversion
+ *            path object matches against a given set of criteria.
+ *
+ * Return:    true/false (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static bool
+H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
+               H5VL_object_t *owned_vol_obj, H5T_conv_t func)
+{
+    bool ret_value = true;
+
+    assert(path);
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (
+        /* Check that the specified conversion function persistence matches */
+        ((H5T_PERS_SOFT == pers && path->is_hard) || (H5T_PERS_HARD == pers && !path->is_hard)) ||
+
+        /* Check that the specified conversion path name matches */
+        (name && *name && strcmp(name, path->name) != 0) ||
+
+        /*
+         * Check that the specified source and destination datatypes match
+         * the source and destination datatypes in the conversion path
+         */
+        (src && H5T_cmp(src, path->src, false)) || (dst && H5T_cmp(dst, path->dst, false)) ||
+
+        /*
+         * Check that the specified VOL object matches the VOL object
+         * in the conversion path
+         */
+        (owned_vol_obj && (owned_vol_obj != path->src->shared->owned_vol_obj) &&
+         (owned_vol_obj != path->dst->shared->owned_vol_obj)) ||
+
+        /* Check that the specified conversion function matches */
+        (func && func != path->conv.u.app_func))
+        ret_value = false;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5T_path_match() */
+
+/*-------------------------------------------------------------------------
  * Function:  H5T_path_noop
  *
  * Purpose:   Is the path the special no-op path? The no-op function can be
@@ -6096,3 +6161,26 @@ H5T_own_vol_obj(H5T_t *dt, H5VL_object_t *vol_obj)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_own_vol_obj() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T__get_path_table_npaths
+ *
+ * Purpose:     Testing function to return the number of type conversion
+ *              paths currently stored in the type conversion path table
+ *              cache.
+ *
+ * Return:      Number of type conversion paths (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T__get_path_table_npaths(void)
+{
+    int ret_value = 0;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    ret_value = H5T_g.npaths;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
