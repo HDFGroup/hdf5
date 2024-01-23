@@ -1615,6 +1615,18 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
         if (vol_wrap_ctx && (NULL == H5VL_object_unwrap(f->vol_obj)))
             HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object");
 
+        /*
+         * Clean up any cached type conversion path table entries that
+         * may have been keeping a reference to the file's VOL object
+         * in order to prevent the file from being closed out from
+         * underneath other places that may access the conversion path
+         * or its src/dst datatypes later on (currently, conversions on
+         * variable-length and reference datatypes involve this)
+         */
+        if (H5T_unregister(H5T_PERS_SOFT, NULL, NULL, NULL, f->vol_obj, NULL) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL,
+                        "unable to free cached type conversion path table entries");
+
         if (H5VL_free_object(f->vol_obj) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object");
         f->vol_obj = NULL;
