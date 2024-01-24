@@ -69,6 +69,8 @@ prog1=${H5TOOL}_prog1.$suffix
 prog1_o=${H5TOOL}_prog1.o
 prog2=${H5TOOL}_prog2.$suffix
 prog2_o=${H5TOOL}_prog2.o
+args=${H5TOOL}_args.$suffix
+args_o=${H5TOOL}_args.o
 applib=libapp${H5TOOL}.a
 
 # short hands
@@ -327,16 +329,38 @@ main (void)
 }
 EOF
 
+# Generate args:
+# An application main that test misc command line arguments being passed.
+cat > $args <<EOF
+#include "hdf5.h"
+#define H5FILE_NAME "check_args.h5"
+int
+main (void)
+{
+    char c = SGL_QUOTE; /* 'H' */
+    char *s = DBL_QUOTE; /* "HDF" */
+    int val = MISC; /* 42 */
+    hid_t   file; /* file and dataset handles */
+
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fclose(file);
+
+    printf("HDF5 C Sample program ran successfully. File %s generated.\n", H5FILE_NAME);
+    remove(H5FILE_NAME);
+
+    return 0;
+}
+EOF
 
 # Parse option
 #   None
 
-# Print a line-line message left justified in a field of 70 characters
+# Print a line-line message left justified in a field of 71 characters
 # beginning with the word "Testing".
 #
 TESTING() {
    SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+   echo "Testing $* $SPACES" | cut -c1-71 | tr -d '\012'
 }
 
 
@@ -511,6 +535,10 @@ else
     TOOLTEST $v112main
     TOOLTEST $v114main
 fi
+
+# Group 6: # HDF5 program that depends on input args.
+echo "***"Simple Compile and Link in one step with user-supplied arguments.
+TOOLTEST -DSGL_QUOTE=\'H\' -DDBL_QUOTE=\"HDF\" -DMISC=42 $args
 
 ##############################################################################
 # END

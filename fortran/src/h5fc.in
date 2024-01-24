@@ -237,7 +237,7 @@ for arg in $@ ; do
       misc_args="$misc_args $qarg"
       ;;
     *\'*)
-      qarg='\"'"$arg"'\"'
+      qarg='"'"$arg"'"'
       misc_args="$misc_args $qarg"
       ;;
 
