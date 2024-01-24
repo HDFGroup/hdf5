@@ -7567,6 +7567,174 @@ error:
     return 1;
 } /* end test_named_indirect_reopen() */
 
+/*-------------------------------------------------------------------------
+ * Function:    test_named_indirect_reopen_file
+ *
+ * Purpose: Tests that a named compound datatype that refers to a named
+ *          string datatype can be reopened indirectly through H5Dget_type,
+ *          and shows the correct H5Tcommitted() state, including after the
+ *          file has been closed and reopened.
+ *
+ * Return:  Success:    0
+ *          Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_named_indirect_reopen_file(hid_t fapl)
+{
+    hid_t   file             = H5I_INVALID_HID;
+    hid_t   space            = H5I_INVALID_HID;
+    hid_t   cmptype          = H5I_INVALID_HID;
+    hid_t   reopened_cmptype = H5I_INVALID_HID;
+    hid_t   strtype          = H5I_INVALID_HID;
+    hid_t   reopened_strtype = H5I_INVALID_HID;
+    hid_t   dset             = H5I_INVALID_HID;
+    hsize_t dims[1]          = {3};
+    size_t  strtype_size, cmptype_size;
+    char    filename[1024];
+
+    TESTING("indirectly reopening recursively committed datatypes including file reopening");
+
+    /* PREPARATION */
+
+    /* Create file, dataspace */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+    if ((space = H5Screate_simple(1, dims, dims)) < 0)
+        TEST_ERROR;
+
+    /* Create string type */
+    if ((strtype = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(strtype, H5T_VARIABLE) < 0)
+        TEST_ERROR;
+
+    /* Get size of string type */
+    if ((strtype_size = H5Tget_size(strtype)) == 0)
+        TEST_ERROR;
+
+    /* Commit string type and verify the size doesn't change */
+    if (H5Tcommit2(file, "str_type", strtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (strtype_size != H5Tget_size(strtype))
+        TEST_ERROR;
+
+    /* Create compound type */
+    if ((cmptype = H5Tcreate(H5T_COMPOUND, sizeof(char *))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(cmptype, "vlstr", (size_t)0, strtype) < 0)
+        TEST_ERROR;
+
+    /* Get size of compound type */
+    if ((cmptype_size = H5Tget_size(cmptype)) == 0)
+        TEST_ERROR;
+
+    /* Commit compound type and verify the size doesn't change */
+    if (H5Tcommit2(file, "cmp_type", cmptype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (cmptype_size != H5Tget_size(cmptype))
+        TEST_ERROR;
+
+    /* Create dataset with compound type */
+    if ((dset = H5Dcreate2(file, "cmp_dset", cmptype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close original types */
+    if (H5Tclose(strtype) < 0)
+        TEST_ERROR;
+    if (H5Tclose(cmptype) < 0)
+        TEST_ERROR;
+
+    /* CHECK DATA TYPES WHILE STILL HOLDING THE FILE OPEN */
+
+    /* Indirectly reopen compound type, verify that they report as committed, and the size doesn't change */
+    if ((reopened_cmptype = H5Dget_type(dset)) < 0)
+        TEST_ERROR;
+    if (cmptype_size != H5Tget_size(reopened_cmptype))
+        TEST_ERROR;
+    if (H5Tcommitted(reopened_cmptype) != 1)
+        TEST_ERROR;
+
+    /* Indirectly reopen string type, verify that they report as NOT committed, and the size doesn't change */
+    if ((reopened_strtype = H5Tget_member_type(reopened_cmptype, 0)) < 0)
+        TEST_ERROR;
+    if (strtype_size != H5Tget_size(reopened_strtype))
+        TEST_ERROR;
+    if (H5Tcommitted(reopened_strtype) != 0)
+        TEST_ERROR;
+
+    /* Close types and dataset */
+    if (H5Tclose(reopened_strtype) < 0)
+        TEST_ERROR;
+    if (H5Tclose(reopened_cmptype) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    /* CHECK DATA TYPES AFTER REOPENING THE SAME FILE */
+
+    /* Close file */
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Reopen file */
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Reopen dataset */
+    if ((dset = H5Dopen2(file, "cmp_dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Indirectly reopen compound type, verify that they report as committed, and the size doesn't change */
+    if ((reopened_cmptype = H5Dget_type(dset)) < 0)
+        TEST_ERROR;
+    if (cmptype_size != H5Tget_size(reopened_cmptype))
+        TEST_ERROR;
+    if (H5Tcommitted(reopened_cmptype) != 1)
+        TEST_ERROR;
+
+    /* Indirectly reopen string type, verify that they report as NOT committed, and the size doesn't change */
+    if ((reopened_strtype = H5Tget_member_type(reopened_cmptype, 0)) < 0)
+        TEST_ERROR;
+    if (strtype_size != H5Tget_size(reopened_strtype))
+        TEST_ERROR;
+    if (H5Tcommitted(reopened_strtype) != 0)
+        TEST_ERROR;
+
+    /* Close types and dataset */
+    if (H5Tclose(reopened_strtype) < 0)
+        TEST_ERROR;
+    if (H5Tclose(reopened_cmptype) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    /* DONE */
+
+    /* Close file and dataspace */
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(cmptype);
+        H5Tclose(strtype);
+        H5Tclose(reopened_cmptype);
+        H5Tclose(reopened_strtype);
+        H5Sclose(space);
+        H5Dclose(dset);
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
+    return 1;
+} /* end test_named_indirect_reopen() */
 static void
 create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t low, H5F_libver_t high)
 {
@@ -8870,6 +9038,7 @@ main(void)
     nerrors += test_latest();
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);
+    nerrors += test_named_indirect_reopen_file(fapl);
     nerrors += test_delete_obj_named(fapl);
     nerrors += test_delete_obj_named_fileid(fapl);
     nerrors += test_set_order_compound(fapl);

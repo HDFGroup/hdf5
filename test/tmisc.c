@@ -21,6 +21,7 @@
  *************************************************************/
 
 #define H5D_FRIEND /*suppress error about including H5Dpkg      */
+#define H5T_FRIEND /*suppress error about including H5Tpkg      */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5D_TESTING
@@ -28,6 +29,7 @@
 #include "testhdf5.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"      /* Datasets                 */
+#include "H5Tpkg.h"      /* Datatypes                */
 #include "H5MMprivate.h" /* Memory                   */
 
 /* Definitions for misc. test #1 */
@@ -334,6 +336,8 @@ typedef struct {
 /* The test file is formerly named h5_nrefs_POC.
    See https://nvd.nist.gov/vuln/detail/CVE-2020-10812 */
 #define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
+
+#define MISC38_FILE "type_conversion_path_table_issue.h5"
 
 /****************************************************************
 **
@@ -6259,6 +6263,190 @@ test_misc37(void)
 
 /****************************************************************
 **
+**  test_misc38():
+**      Test for issue where the type conversion path table cache
+**      would grow continuously when variable-length datatypes
+**      are involved due to file VOL object comparisons causing
+**      the library not to reuse type conversion paths
+**
+****************************************************************/
+static void
+test_misc38(void)
+{
+    H5VL_object_t *file_vol_obj = NULL;
+    const char    *buf[]        = {"attr_value"};
+    herr_t         ret          = SUCCEED;
+    hid_t          file_id      = H5I_INVALID_HID;
+    hid_t          attr_id      = H5I_INVALID_HID;
+    hid_t          str_type     = H5I_INVALID_HID;
+    hid_t          space_id     = H5I_INVALID_HID;
+    int            init_npaths  = 0;
+    int           *irbuf        = NULL;
+    char         **rbuf         = NULL;
+    bool           vol_is_native;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Fix for type conversion path table issue"));
+
+    /*
+     * Get the initial number of type conversion path table
+     * entries that are currently defined
+     */
+    init_npaths = H5T__get_path_table_npaths();
+
+    file_id = H5Fcreate(MISC38_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Check if native VOL is being used */
+    CHECK(h5_using_native_vol(H5P_DEFAULT, file_id, &vol_is_native), FAIL, "h5_using_native_vol");
+    if (!vol_is_native) {
+        CHECK(H5Fclose(file_id), FAIL, "H5Fclose");
+        MESSAGE(5, (" -- SKIPPED --\n"));
+        return;
+    }
+
+    /* Retrieve file's VOL object field for further use */
+    file_vol_obj = H5F_VOL_OBJ((H5F_t *)H5VL_object(file_id));
+
+    /*
+     * Check reference count of file's VOL object field. At this point,
+     * the object should have a reference count of 1 since the file
+     * was just created.
+     */
+    VERIFY(file_vol_obj->rc, 1, "checking reference count");
+
+    str_type = H5Tcopy(H5T_C_S1);
+    CHECK(str_type, H5I_INVALID_HID, "H5Tcopy");
+
+    ret = H5Tset_size(str_type, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    space_id = H5Screate(H5S_SCALAR);
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate");
+
+    /*
+     * Check the number of type conversion path table entries currently
+     * stored in the cache. It shouldn't have changed yet.
+     */
+    VERIFY(H5T__get_path_table_npaths(), init_npaths,
+           "checking number of type conversion path table entries");
+
+    attr_id = H5Acreate2(file_id, "attribute", str_type, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr_id, H5I_INVALID_HID, "H5Acreate2");
+
+    /*
+     * Check the number of type conversion path table entries currently
+     * stored in the cache. It shouldn't have changed yet.
+     */
+    VERIFY(H5T__get_path_table_npaths(), init_npaths,
+           "checking number of type conversion path table entries");
+
+    /*
+     * Check reference count of file's VOL object field. At this point,
+     * the object should have a reference count of 2. Creating the
+     * attribute on the dataset will have caused a H5T_set_loc call that
+     * associates the attribute's datatype with the file's VOL object
+     * and will have incremented the reference count by 1.
+     */
+    VERIFY(file_vol_obj->rc, 2, "checking reference count");
+
+    ret = H5Awrite(attr_id, str_type, buf);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /*
+     * Check the number of type conversion path table entries currently
+     * stored in the cache. The H5Awrite call should have added a new
+     * type conversion path. Note that if another test in this file uses
+     * the same conversion path, this check may fail and need to be
+     * refactored.
+     */
+    VERIFY(H5T__get_path_table_npaths(), init_npaths + 1,
+           "checking number of type conversion path table entries");
+
+    /*
+     * Check reference count of file's VOL object field. At this point,
+     * the object should have a reference count of 3. Writing to the
+     * variable-length typed attribute will have caused an H5T_convert
+     * call that ends up incrementing the reference count of the
+     * associated file's VOL object.
+     */
+    VERIFY(file_vol_obj->rc, 3, "checking reference count");
+
+    ret = H5Aclose(attr_id);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    irbuf = malloc(100 * 100 * sizeof(int));
+    CHECK_PTR(irbuf, "int read buf allocation");
+    rbuf = malloc(sizeof(char *));
+    CHECK_PTR(rbuf, "varstr read buf allocation");
+
+    for (size_t i = 0; i < 10; i++) {
+        file_id = H5Fopen(MISC38_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+        CHECK(file_id, H5I_INVALID_HID, "H5Fopen");
+
+        /* Retrieve file's VOL object field for further use */
+        file_vol_obj = H5F_VOL_OBJ((H5F_t *)H5VL_object(file_id));
+
+        /*
+         * Check reference count of file's VOL object field. At this point,
+         * the object should have a reference count of 1 since the file
+         * was just opened.
+         */
+        VERIFY(file_vol_obj->rc, 1, "checking reference count");
+
+        attr_id = H5Aopen(file_id, "attribute", H5P_DEFAULT);
+        CHECK(attr_id, H5I_INVALID_HID, "H5Aopen");
+
+        /*
+         * Check reference count of file's VOL object field. At this point,
+         * the object should have a reference count of 2 since opening
+         * the attribute will also have associated its type with the file's
+         * VOL object.
+         */
+        VERIFY(file_vol_obj->rc, 2, "checking reference count");
+
+        ret = H5Aread(attr_id, str_type, rbuf);
+        CHECK(ret, FAIL, "H5Aread");
+
+        /*
+         * Check the number of type conversion path table entries currently
+         * stored in the cache. Each H5Aread call shouldn't cause this number
+         * to go up, as the library should have removed the cached conversion
+         * paths on file close.
+         */
+        VERIFY(H5T__get_path_table_npaths(), init_npaths + 1,
+               "checking number of type conversion path table entries");
+
+        /*
+         * Check reference count of file's VOL object field. At this point,
+         * the object should have a reference count of 3. Writing to the
+         * variable-length typed attribute will have caused an H5T_convert
+         * call that ends up incrementing the reference count of the
+         * associated file's VOL object.
+         */
+        VERIFY(file_vol_obj->rc, 3, "checking reference count");
+
+        ret = H5Treclaim(str_type, space_id, H5P_DEFAULT, rbuf);
+
+        ret = H5Aclose(attr_id);
+        CHECK(ret, FAIL, "H5Aclose");
+        ret = H5Fclose(file_id);
+        CHECK(ret, FAIL, "H5Fclose");
+    }
+
+    free(irbuf);
+    free(rbuf);
+
+    ret = H5Tclose(str_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+}
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 **
 ****************************************************************/
@@ -6325,6 +6513,7 @@ test_misc(void)
     test_misc35(); /* Test behavior of free-list & allocation statistics API calls */
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
     test_misc37(); /* Test for seg fault failure at file close */
+    test_misc38(); /* Test for type conversion path table issue */
 
 } /* test_misc() */
 
@@ -6380,6 +6569,7 @@ cleanup_misc(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+        H5Fdelete(MISC38_FILE, H5P_DEFAULT);
     }
     H5E_END_TRY
 } /* end cleanup_misc() */
