@@ -1576,7 +1576,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Ssel_iter_reset(sel_iter_id, space_id) &
-            BIND(C,NAME='H5Ssel_iter_close')
+            BIND(C,NAME='H5Ssel_iter_reset')
          IMPORT :: HID_T, C_INT
          IMPLICIT NONE
          INTEGER(HID_T), VALUE :: sel_iter_id

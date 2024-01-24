@@ -431,13 +431,8 @@ CONTAINS
        ENDIF
 
        ! Reset iterator
-       !CALL H5Ssel_iter_reset_f(iter_id, sid, error)
-       !CALL check("H5Ssel_iter_reset_f", error, total_error)
-
-       !off = -99
-       !ilen = -99
-       !CALL H5Ssel_iter_get_seq_list_f(iter_id, SEL_ITER_MAX_SEQ, 1024_size_t * 1024_size_t, nseq, nbytes, off, ilen, error)
-       !CALL check("H5Ssel_iter_get_seq_list_f", error, total_error)
+       CALL H5Ssel_iter_reset_f(iter_id, sid, error)
+       CALL check("H5Ssel_iter_reset_f", error, total_error)
 
        ! Close selection iterator
        CALL H5Ssel_iter_close_f(iter_id, error)
