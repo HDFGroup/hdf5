@@ -56,7 +56,7 @@ SUBROUTINE mpi_param_03(nerrors)
 
   DO iconfig = 1, 2
 
-     ! Create the file acess propoerty
+     ! Create the file access property
      CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
      CALL check("h5pcreate_f", hdferror, nerrors)
 
@@ -209,7 +209,7 @@ SUBROUTINE mpi_param_08(nerrors)
 
   DO iconfig = 1, 2
 
-     ! Create the file acess propoerty
+     ! Create the file access property
      CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
      CALL check("h5pcreate_f", hdferror, nerrors)
 
