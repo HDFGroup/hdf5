@@ -5288,7 +5288,6 @@ END SUBROUTINE h5pget_fapl_mpio_f
 !! See C API: @ref H5Pget_fapl_mpio()
 !!
 SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
-  USE mpi_f08
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN)  :: prp_id
   TYPE(MPI_COMM), INTENT(OUT) :: comm
@@ -5529,18 +5528,50 @@ END SUBROUTINE h5pget_fapl_mpio_f
 
    END SUBROUTINE h5pget_mpio_no_collective_cause_f
 
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5P
 !!
-!! \brief Set the MPI communicator and info.
+!! \brief Set the MPI communicator and information.
 !!
 !! \param prp_id File access property list identifier.
-!! \param comm   The MPI communicator.
-!! \param info   The MPI info object.
+!! \param comm   MPI-2 communicator.
+!! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5Pset_mpi_params()
 !!
+  SUBROUTINE H5Pset_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER       , INTENT(IN)  :: comm
+    INTEGER       , INTENT(IN)  :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pset_mpi_params_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Set the MPI communicator and information.
+!!
+!! \note Supports MPI Fortran module mpi_f08
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   MPI-3 communicator.
+!! \param info   MPI-3 info object.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Pset_mpi_params()
+!!
+  SUBROUTINE H5Pset_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    TYPE(MPI_COMM), INTENT(IN)  :: comm
+    TYPE(MPI_INFO), INTENT(IN)  :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pset_mpi_params_f
+
+#else
+
   SUBROUTINE H5Pset_mpi_params_f90(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -5587,18 +5618,55 @@ END SUBROUTINE h5pget_fapl_mpio_f
 
   END SUBROUTINE H5Pset_mpi_params_f08
 #endif
+
+#endif
+
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5P
 !!
 !! \brief Get the MPI communicator and info.
 !!
 !! \param prp_id File access property list identifier.
-!! \param comm   The MPI communicator.
-!! \param info   The MPI info object.
+!! \param comm   MPI-2 communicator.
+!! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5Pget_mpi_params()
 !!
+  SUBROUTINE H5Pget_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER       , INTENT(OUT) :: comm
+    INTEGER       , INTENT(OUT) :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pget_mpi_params_f
+!>
+!! \ingroup FH5P
+!!
+!! \brief Get the MPI communicator and information.
+!!
+!! \note Supports MPI Fortran module mpi_f08
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   MPI-3 communicator.
+!! \param info   MPI-3 info object.
+!! \param hdferr \fortran_error
+!!
+!! \attention It is the responsibility of the application to free the MPI objects.
+!!
+!! See C API: @ref H5Pget_mpi_params()
+!!
+  SUBROUTINE H5Pget_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    TYPE(MPI_COMM), INTENT(OUT) :: comm
+    TYPE(MPI_INFO), INTENT(OUT) :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE H5Pget_mpi_params_f
+
+#else
+
   SUBROUTINE H5Pget_mpi_params_f90(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -5644,6 +5712,8 @@ END SUBROUTINE h5pget_fapl_mpio_f
     hdferr = INT(H5Pget_mpi_params(prp_id, comm, info))
 
   END SUBROUTINE H5Pget_mpi_params_f08
+#endif
+
 #endif
 
 !>

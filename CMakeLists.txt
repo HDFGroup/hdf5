@@ -1088,6 +1088,9 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       # Check if MPI-3 Fortran 2008 module mpi_f08 is supported
       if (MPI_Fortran_HAVE_F08_MODULE)
         set (H5_HAVE_MPI_F08 1)
+        message (VERBOSE "MPI-3 Fortran 2008 module mpi_f08 is supported")
+      else ()
+        message (VERBOSE "MPI-3 Fortran 2008 module mpi_f08 is NOT supported")
       endif ()
     endif ()
 
