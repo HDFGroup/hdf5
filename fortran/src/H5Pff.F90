@@ -49,9 +49,11 @@ MODULE H5P
   PRIVATE h5pget_integer, h5pget_char, h5pget_ptr
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
+#ifdef H5_HAVE_PARALLEL
   PRIVATE h5pset_fapl_mpio_f90, h5pget_fapl_mpio_f90
 #ifdef H5_HAVE_MPI_F08
   PRIVATE h5pset_fapl_mpio_f08, h5pget_fapl_mpio_f08
+#endif
 #endif
 
 #ifndef H5_DOXYGEN
