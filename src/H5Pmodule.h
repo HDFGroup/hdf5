@@ -891,46 +891,61 @@
  * properties. Property lists are deleted by closing the associated handles.
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox plcr_table
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox plcra_table
  *
  * \ref PLCR / \ref OCPL / \ref GCPL
+ *
  * \snippet{doc} tables/propertyLists.dox fcpl_table
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ *
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox lapl_table
  *
  * \ref PLCR / \ref OCPL
+ *
  * \snippet{doc} tables/propertyLists.dox dcpl_table
  *
  * \ref PLCR / \ref LAPL
+ *
  * \snippet{doc} tables/propertyLists.dox dapl_table
  *
  * \ref PLCR / \ref OCPL
+ *
  * \snippet{doc} tables/propertyLists.dox gcpl_table
  *
  * \ref PLCR / \ref LAPL
+ *
  * \snippet{doc} tables/propertyLists.dox gapl_table
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox ocpl_table
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox ocpypl_table
  *
  * \ref PLCR
+ *
  * \snippet{doc} tables/propertyLists.dox strcpl_table
  *
  * \ref PLCR / \ref STRCPL
+ *
  * \snippet{doc} tables/propertyLists.dox lcpl_table
  *
  * \ref PLCR / \ref STRCPL
+ *
  * \snippet{doc} tables/propertyLists.dox acpl_table
  *
  *
@@ -1005,6 +1020,7 @@
  * can be adjusted at runtime before a file is created or opened.
  *
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ *
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \defgroup FCPL File Creation Properties
