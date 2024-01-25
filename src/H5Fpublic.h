@@ -741,6 +741,11 @@ H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
  *          file identifier \p file_id and the pointer \p fnumber to the file
  *          number.
  *
+ *          This file number is the same for all open instances of the same
+ *          file. If the active VFD does not enforce this, then it is the
+ *          application's responsibility to avoid opening multiple handles into the
+ *          same file, which results in undefined behavior.
+ *
  * \since 1.12.0
  *
  */
