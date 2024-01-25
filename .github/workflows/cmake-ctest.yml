@@ -24,6 +24,11 @@ jobs:
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.10.0"
+
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
@@ -96,7 +101,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build doxygen graphviz
+        run: sudo apt-get install ninja-build graphviz
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.10.0"
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -166,7 +176,12 @@ jobs:
     runs-on: macos-11
     steps:
       - name: Install Dependencies (MacOS)
-        run: brew install ninja doxygen
+        run: brew install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.10.0"
 
       - name: Set file base name (MacOS)
         id: set-file-base

@@ -52,7 +52,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
-            docs: OFF
+            docs: ON
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -136,7 +136,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -151,8 +151,13 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja doxygen
+        run: brew install ninja
         if: matrix.os == 'macos-13'
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.9.7"
 
       - name: Set environment for MSVC (Windows)
         run: |
@@ -179,7 +184,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
-            -DHDF5_DOXY_WARNINGS=ON \
+            -DHDF5_ENABLE_DOXY_WARNINGS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
             -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
