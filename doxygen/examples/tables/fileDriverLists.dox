@@ -1,5 +1,5 @@
 /** File Driver List
- *
+ * \section file_driver
 //! [file_driver_table]
 <table>
 <caption>I/O file drivers</caption>
@@ -70,7 +70,7 @@
 </table>
 //! [file_driver_table]
  *
- *
+ * \section supported_file_driver
 //! [supported_file_driver_table]
 <table>
 <caption id="table_file_drivers">Supported file drivers</caption>

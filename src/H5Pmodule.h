@@ -891,61 +891,60 @@
  * properties. Property lists are deleted by closing the associated handles.
  *
  * \ref PLCR
- *
+ * \section plcr_table
  * \snippet{doc} tables/propertyLists.dox plcr_table
  *
  * \ref PLCR
- *
+ * \section plcr_table2
  * \snippet{doc} tables/propertyLists.dox plcra_table
  *
  * \ref PLCR / \ref OCPL / \ref GCPL
- *
+ * \section fcplcr_table
  * \snippet{doc} tables/propertyLists.dox fcpl_table
  *
  * \ref PLCR
- *
+ * \section faplcr_table
  * \snippet{doc} tables/propertyLists.dox fapl_table
- *
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \ref PLCR
- *
+ * \section laplcr_table
  * \snippet{doc} tables/propertyLists.dox lapl_table
  *
  * \ref PLCR / \ref OCPL
- *
+ * \section dcplcr_table
  * \snippet{doc} tables/propertyLists.dox dcpl_table
  *
  * \ref PLCR / \ref LAPL
- *
+ * \section daplcr_table
  * \snippet{doc} tables/propertyLists.dox dapl_table
  *
  * \ref PLCR / \ref OCPL
- *
+ * \section gcplcr_table
  * \snippet{doc} tables/propertyLists.dox gcpl_table
  *
  * \ref PLCR / \ref LAPL
- *
+ * \section gaplcr_table
  * \snippet{doc} tables/propertyLists.dox gapl_table
  *
  * \ref PLCR
- *
+ * \section oplcr_table
  * \snippet{doc} tables/propertyLists.dox ocpl_table
  *
  * \ref PLCR
- *
+ * \section oyplcr_table
  * \snippet{doc} tables/propertyLists.dox ocpypl_table
  *
  * \ref PLCR
- *
+ * \section splcr_table
  * \snippet{doc} tables/propertyLists.dox strcpl_table
  *
  * \ref PLCR / \ref STRCPL
- *
+ * \section lplcr_table
  * \snippet{doc} tables/propertyLists.dox lcpl_table
  *
  * \ref PLCR / \ref STRCPL
- *
+ * \section aplcr_table
  * \snippet{doc} tables/propertyLists.dox acpl_table
  *
  *
