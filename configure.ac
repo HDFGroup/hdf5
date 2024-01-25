@@ -1220,14 +1220,14 @@ AC_MSG_RESULT([$HDF5_DOXYGEN])
 ## This needs to be exposed for the library info file.
 AC_SUBST([HDF5_DOXY_WARNINGS])
 
-## Default is to consider doxygen warnings as errors
+## Default is to not consider doxygen warnings as errors
 DOXY_ERR=yes
 
 AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
 
 AC_ARG_ENABLE([doxygen-errors],
               [AS_HELP_STRING([--enable-doxygen-errors],
-                              [Error on HDF5 doxygen warnings [default=yes]])],
+                              [Error on HDF5 doxygen warnings [default=no]])],
               [DOXY_ERR=$enableval])
 
 if test "X$DOXY_ERR" = "Xyes"; then

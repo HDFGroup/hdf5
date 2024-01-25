@@ -1,4 +1,6 @@
 /** \page predefined_datatypes_tables HDF5 Predefined Datatypes
+  *
+ * \section sec_predefined_datatypes_tables HDF5 Predefined Datatypes
  *
  * The following datatypes are predefined in HDF5.
  *

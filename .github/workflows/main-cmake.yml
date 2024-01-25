@@ -96,7 +96,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
-            docs: OFF
+            docs: ON
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -179,6 +179,7 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_DOXY_WARNINGS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
             -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
