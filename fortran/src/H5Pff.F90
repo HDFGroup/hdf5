@@ -5233,18 +5233,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     TYPE(MPI_COMM), INTENT(IN) :: comm
     TYPE(MPI_INFO), INTENT(IN) :: info
     INTEGER, INTENT(OUT) :: hdferr
-    INTERFACE
-       INTEGER(C_INT) FUNCTION H5Pset_fapl_mpio(prp_id, comm, info) &
-            BIND(C,NAME='H5Pset_fapl_mpio')
-         IMPORT :: C_INT, HID_T, MPI_COMM, MPI_INFO
-         IMPLICIT NONE
-         INTEGER(HID_T), VALUE :: prp_id
-         TYPE(MPI_COMM), VALUE :: comm
-         TYPE(MPI_INFO), VALUE :: info
-       END FUNCTION H5Pset_fapl_mpio
-    END INTERFACE
 
-    hdferr = INT(H5Pset_fapl_mpio(prp_id, comm, info))
+    CALL h5pset_fapl_mpio_f90(prp_id, comm%mpi_val, info%mpi_val, hdferr)
 
   END SUBROUTINE h5pset_fapl_mpio_f08
 #endif
@@ -5328,18 +5318,8 @@ END SUBROUTINE h5pget_fapl_mpio_f
     TYPE(MPI_COMM), INTENT(OUT) :: comm
     TYPE(MPI_INFO), INTENT(OUT) :: info
     INTEGER, INTENT(OUT) :: hdferr
-    INTERFACE
-       INTEGER(C_INT) FUNCTION H5Pget_fapl_mpio(prp_id, comm, info) &
-            BIND(C,NAME='H5Pget_fapl_mpio')
-         IMPORT :: HID_T, C_INT, MPI_COMM, MPI_INFO
-         IMPLICIT NONE
-         INTEGER(HID_T), VALUE :: prp_id
-         TYPE(MPI_COMM) :: comm
-         TYPE(MPI_INFO) :: info
-       END FUNCTION H5Pget_fapl_mpio
-    END INTERFACE
 
-    hdferr = INT(H5Pget_fapl_mpio(prp_id, comm, info))
+    CALL h5pget_fapl_mpio_f90(prp_id, comm%mpi_val, info%mpi_val, hdferr)
 
   END SUBROUTINE h5pget_fapl_mpio_f08
 #endif
@@ -5605,18 +5585,7 @@ END SUBROUTINE h5pget_fapl_mpio_f
     TYPE(MPI_INFO), INTENT(IN)  :: info
     INTEGER       , INTENT(OUT) :: hdferr
 
-    INTERFACE
-       INTEGER(C_INT) FUNCTION H5Pset_mpi_params(prp_id, comm, info) &
-            BIND(C,NAME='H5Pset_mpi_params')
-         IMPORT :: HID_T, C_INT, MPI_COMM, MPI_INFO
-         IMPLICIT NONE
-         INTEGER(HID_T), VALUE :: prp_id
-         TYPE(MPI_COMM), VALUE :: comm
-         TYPE(MPI_INFO), VALUE :: info
-       END FUNCTION H5Pset_mpi_params
-    END INTERFACE
-
-    hdferr = INT(H5Pset_mpi_params(prp_id, comm, info))
+    CALL H5Pset_mpi_params_f90(prp_id, comm%mpi_val, info%mpi_val, hdferr)
 
   END SUBROUTINE H5Pset_mpi_params_f08
 #endif
@@ -5700,18 +5669,7 @@ END SUBROUTINE h5pget_fapl_mpio_f
     TYPE(MPI_INFO), INTENT(OUT) :: info
     INTEGER       , INTENT(OUT) :: hdferr
 
-    INTERFACE
-       INTEGER(C_INT) FUNCTION H5Pget_mpi_params(prp_id, comm, info) &
-            BIND(C,NAME='H5Pget_mpi_params')
-         IMPORT :: HID_T, C_INT, MPI_COMM, MPI_INFO
-         IMPLICIT NONE
-         INTEGER(HID_T), VALUE :: prp_id
-         TYPE(MPI_COMM) :: comm
-         TYPE(MPI_INFO) :: info
-       END FUNCTION H5pget_mpi_params
-    END INTERFACE
-
-    hdferr = INT(H5Pget_mpi_params(prp_id, comm, info))
+    CALL H5Pget_mpi_params_f90(prp_id, comm%mpi_val, info%mpi_val, hdferr)
 
   END SUBROUTINE H5Pget_mpi_params_f08
 #endif
