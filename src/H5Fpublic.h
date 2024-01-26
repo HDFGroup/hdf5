@@ -741,9 +741,11 @@ H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned *intent);
  *          number.
  *
  *          This file number is the same for all open instances of the same
- *          file. If the active VFD does not enforce this, then it is the
- *          application's responsibility to avoid opening multiple handles into the
- *          same file, which results in undefined behavior.
+ *          file, as long as 1. The active VFD implements the file comparison operator,
+ *          and 2. The current filesystem is able to determine if the same file is opened more
+ *          than once. If these conditions are not met, it is the application's
+ *          responsibility to avoid opening multiple handles into the same file,
+ *          which results in undefined behavior.
  *
  * \since 1.12.0
  *
