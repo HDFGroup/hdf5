@@ -505,7 +505,7 @@ H5FA__cache_hdr_free_icr(void *thing)
     /* Check arguments */
     assert(thing);
 
-    /* Release the extensible array header */
+    /* Release the fixed array header */
     if (H5FA__hdr_dest((H5FA_hdr_t *)thing) < 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTFREE, FAIL, "can't free fixed array header");
 
