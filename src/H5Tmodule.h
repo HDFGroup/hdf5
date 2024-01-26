@@ -3892,30 +3892,42 @@ filled according to the value of this property. The padding can be:
  * \details CPU-specific datatypes
  * \defgroup PDTALPHA DEC Alpha
  * \ingroup PDTCPU
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_dec_datatypes_table
+ * </div>
  * \defgroup PDTX86 AMD & INTEL
  * \ingroup PDTCPU
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_intel_datatypes_table
+ * </div>
  * \defgroup PDTMIPS SGI MIPS
  * \ingroup PDTCPU
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_mips_datatypes_table
+ * </div>
  *
  * \defgroup PDTIEEE IEEE
  * \ingroup PDT
  * \details The IEEE floating point types in big- and little-endian byte orders.
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_ieee_datatypes_table
+ * </div>
  *
  * \defgroup PDTSTD Standard Datatypes
  * \ingroup PDT
  * \details These are "standard" types. For instance, signed (2's complement)
  *          and unsigned integers of various sizes in big- and little-endian
  *          byte orders.
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_std_datatypes_table
+ * </div>
  *
  * \defgroup PDTUNIX UNIX-specific Datatypes
  * \ingroup PDT
  * \details Types which are particular to Unix.
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_unix_datatypes_table
+ * </div>
  *
  * \defgroup PDTNAT Native Datatypes
  * \ingroup PDT
@@ -3928,16 +3940,22 @@ filled according to the value of this property. The padding can be:
  *          \li The datatype \c LLONG corresponds C's \Code{long long} and
  *              \c LDOUBLE is \Code{long double}. These types might be the same
  *              as \c LONG and \c DOUBLE, respectively.
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_native_datatypes_table
+ * </div>
  *
  * \defgroup PDTC9x C9x Integer Datatypes
  * \ingroup PDTNAT
  * \details C9x integer types
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_c9x_datatypes_table
+ * </div>
  *
  * \defgroup PDTS Strings
  * \ingroup PDT
+ * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_string_datatypes_table
+ * </div>
  *
  */
 

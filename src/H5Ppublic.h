@@ -3360,8 +3360,9 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *
  *          Valid driver identifiers distributed with HDF5 are listed and
  *          described in the following table.
- *
+ * <div>
  *          \snippet{doc} tables/fileDriverLists.dox supported_file_driver_table
+ * </div>
  *
  *          This list does not include custom drivers that might be
  *          defined and registered by a user.
