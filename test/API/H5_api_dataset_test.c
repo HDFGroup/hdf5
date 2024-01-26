@@ -8531,7 +8531,7 @@ test_dataset_compound_partial_io(void)
 
             /* Write data */
             if (H5Dwrite(dset_id, b_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-                PART_TEST_ERROR(write_full_read_full);
+                PART_TEST_ERROR(write_b_read_full);
 
             /* Update fbuf to match file state - only element b was updated */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
