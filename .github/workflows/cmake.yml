@@ -44,11 +44,23 @@ jobs:
             build_mode: "Release"
 
     call-release-bintest:
-        name: CMake Test Release Binaries
+        name: "CMake Test Release Binaries"
         needs: call-release-cmake
         uses: ./.github/workflows/cmake-bintest.yml
         with:
             build_mode: "Release"
+
+    call-release-par:
+        name: "CMake Parallel Release Workflows"
+        uses: ./.github/workflows/main-cmake-par.yml
+        with:
+            build_mode: "Release"
+
+    call-debug-par:
+        name: "CMake Parallel Debug Workflows"
+        uses: ./.github/workflows/main-cmake-par.yml
+        with:
+            build_mode: "Debug"
 
     call-release-cmake-intel:
         name: "CMake Intel Workflows"
