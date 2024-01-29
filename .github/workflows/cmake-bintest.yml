@@ -37,7 +37,7 @@ jobs:
       - name: Get published binary (Windows)
         uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
-              name: zip-vs2022_cl-binary
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
 
       - name: Uncompress hdf5 binary (Win)
@@ -108,7 +108,7 @@ jobs:
       - name: Get published binary (Linux)
         uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
-              name: tgz-ubuntu-2204_gcc-binary
+              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
 
       - name: Uncompress hdf5 binary (Linux)
@@ -166,7 +166,7 @@ jobs:
       - name: Get published binary (MacOS)
         uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
-              name: tgz-osx12-binary
+              name: tgz-osx12-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
 
       - name: Uncompress hdf5 binary (MacOS)

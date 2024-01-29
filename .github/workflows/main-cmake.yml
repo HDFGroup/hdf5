@@ -268,7 +268,7 @@ jobs:
       - name: Save published binary (Windows)
         uses: actions/upload-artifact@v4
         with:
-              name: zip-vs2022_cl-binary
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  matrix.os == 'windows-latest'
@@ -276,15 +276,15 @@ jobs:
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-ubuntu-2204_gcc-binary
+              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  matrix.os == 'ubuntu-latest'
 
-      - name: Save published binary (linux)
+      - name: Save published binary (Mac)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-osx12-binary
+              name: tgz-osx12-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  matrix.os == 'macos-13'
