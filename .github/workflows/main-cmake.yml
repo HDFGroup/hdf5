@@ -165,7 +165,7 @@ jobs:
           echo "CXX=cl.exe" >> $GITHUB_ENV
           echo "CC=cl.exe" >> $GITHUB_ENV
         if:  matrix.os == 'windows-latest'
-    
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4.1.1
@@ -255,6 +255,39 @@ jobs:
       #
       # INSTALL (note that this runs even when we don't run the tests)
       #
+
+      - name: CMake Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space (Windows)
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      # Save files created by ctest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@v4
+        with:
+              name: zip-vs2022_cl-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  matrix.os == 'windows-latest'
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  matrix.os == 'ubuntu-latest'
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx12-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  matrix.os == 'macos-13'
 
   #
   # The GitHub runners are inadequate for running parallel HDF5 tests,

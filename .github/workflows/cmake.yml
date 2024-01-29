@@ -43,6 +43,13 @@ jobs:
             thread_safety: false
             build_mode: "Release"
 
+    call-release-bintest:
+        name: CMake Test Release Binaries
+        needs: call-release-cmake
+        uses: ./.github/workflows/cmake-bintest.yml
+        with:
+            build_mode: "Release"
+
     call-release-cmake-intel:
         name: "CMake Intel Workflows"
         uses: ./.github/workflows/intel-cmake.yml
