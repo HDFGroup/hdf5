@@ -84,6 +84,7 @@ jobs:
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       file_base: ${{ needs.create-files-ctest.outputs.file_base }}
+      preset_name: ci-StdShar
 
   call-workflow-release:
     #needs: [call-workflow-tarball, call-workflow-ctest]

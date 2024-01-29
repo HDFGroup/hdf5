@@ -10,6 +10,7 @@ SET_GLOBAL_VARIABLE (HDF5_JAVA_SOURCE_PACKAGES
 )
 
 set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
+    callbacks/Callbacks.java
     callbacks/H5A_iterate_cb.java
     callbacks/H5A_iterate_t.java
     callbacks/H5D_append_cb.java
@@ -37,7 +38,6 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/H5P_prp_set_func_cb.java
     callbacks/H5P_iterate_cb.java
     callbacks/H5P_iterate_t.java
-    callbacks/Callbacks.java
 )
 
 set (HDF5_JAVADOC_HDF_HDF5_CALLBACKS_SOURCES

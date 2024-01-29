@@ -872,7 +872,7 @@ HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                  
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                        OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                                OFF
 HDF5_BUILD_DOC                 "Build documentation"                                OFF
-HDF5_ENABLE_DOXY_WARNINGS      "Enable fail if doxygen parsing has warnings."       ON
+HDF5_ENABLE_DOXY_WARNINGS      "Enable fail if doxygen parsing has warnings."       OFF
 
 ---------------- HDF5 VFD Options ---------------------
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"           OFF

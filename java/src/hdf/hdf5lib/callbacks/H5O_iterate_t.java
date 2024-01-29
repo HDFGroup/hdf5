@@ -20,7 +20,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  */
 public interface H5O_iterate_t extends Callbacks {
     /**
-     * @ingroup JCALL
+     * @ingroup JCALLBK
      *
      *  application callback for each group
      *
