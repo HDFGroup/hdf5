@@ -143,15 +143,16 @@ typedef struct H5O_hdr_info_t {
  * (For H5Oget_info(), H5Oget_info_by_name(), H5Oget_info_by_idx() version 3)
  */
 typedef struct H5O_info2_t {
-    unsigned long fileno;    /**< File number that object is located in */
-    H5O_token_t   token;     /**< Token representing the object        */
-    H5O_type_t    type;      /**< Basic object type (group, dataset, etc.) */
-    unsigned      rc;        /**< Reference count of object            */
-    time_t        atime;     /**< Access time                          */
-    time_t        mtime;     /**< Modification time                    */
-    time_t        ctime;     /**< Change time                          */
-    time_t        btime;     /**< Birth time                           */
-    hsize_t       num_attrs; /**< Number of attributes attached to object   */
+    unsigned long
+        fileno; /**< File number that object is located in. Constant across multiple opens of the same file */
+    H5O_token_t token;     /**< Token representing the object        */
+    H5O_type_t  type;      /**< Basic object type (group, dataset, etc.) */
+    unsigned    rc;        /**< Reference count of object            */
+    time_t      atime;     /**< Access time                          */
+    time_t      mtime;     /**< Modification time                    */
+    time_t      ctime;     /**< Change time                          */
+    time_t      btime;     /**< Birth time                           */
+    hsize_t     num_attrs; /**< Number of attributes attached to object   */
 } H5O_info2_t;
 //! <!-- [H5O_info2_t_snip] -->
 
@@ -1717,7 +1718,8 @@ typedef struct H5O_stat_t {
  * H5Oget_info_by_idx() versions 1 & 2.)
  */
 typedef struct H5O_info1_t {
-    unsigned long  fileno;    /**< File number that object is located in */
+    unsigned long
+        fileno; /**< File number that object is located in. Constant across multiple opens of the same file */
     haddr_t        addr;      /**< Object address in file                */
     H5O_type_t     type;      /**< Basic object type (group, dataset, etc.) */
     unsigned       rc;        /**< Reference count of object    */
