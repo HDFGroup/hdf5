@@ -388,6 +388,11 @@ New Features
     Fortran Library:
     ----------------
 
+    - Add API support for Fortran MPI_F08 module definitions:
+      Adds support for MPI's MPI_F08 module datatypes: type(MPI_COMM) and type(MPI_INFO) for HDF5 APIs:
+      H5PSET_FAPL_MPIO_F, H5PGET_FAPL_MPIO_F, H5PSET_MPI_PARAMS_F, H5PGET_MPI_PARAMS_F
+      Ref. #3951
+
     - Added Fortran APIs:
       H5FGET_INTENT_F, H5SSEL_ITER_CREATE_F, H5SSEL_ITER_GET_SEQ_LIST_F,
       H5SSEL_ITER_CLOSE_F, H5S_mp_H5SSEL_ITER_RESET_F
