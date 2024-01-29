@@ -30,7 +30,10 @@ jobs:
   workflow-autotools:
     name: "Autotools Workflows"
     uses: ./.github/workflows/autotools.yml
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
   workflow-cmake:
     name: "CMake Workflows"
     uses: ./.github/workflows/cmake.yml
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+

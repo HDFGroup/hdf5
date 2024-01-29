@@ -83,7 +83,7 @@ jobs:
             mirror_vfd: ON
             direct_vfd: ON
             ros3_vfd: ON
-            toolchain: "config/toolchain/gcc.cmake"
+            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
 
@@ -106,7 +106,7 @@ jobs:
             mirror_vfd: ON
             direct_vfd: OFF
             ros3_vfd: OFF
-            toolchain: "config/toolchain/clang.cmake"
+            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/clang.cmake"
             generator: "-G Ninja"
             run_tests: true
 
@@ -182,7 +182,7 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_DOXY_WARNINGS=ON \
@@ -209,7 +209,7 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
@@ -302,7 +302,7 @@ jobs:
   CMake_build_parallel:
     name: "Parallel GCC-${{ inputs.build_mode }}"
     # Don't run the action if the commit message says to skip CI
-    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+    if: ${{ inputs.thread_safety != 'TS' }}
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
