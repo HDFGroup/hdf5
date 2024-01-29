@@ -199,7 +199,7 @@ jobs:
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
-        if: ${{ ! inputs.thread_safety == 'TS' }}
+        if: ${{ inputs.thread_safety != 'TS' }}
 
 
       - name: CMake Configure (Thread-Safe)
@@ -246,7 +246,7 @@ jobs:
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
-        if: ${{ matrix.run_tests && (! inputs.thread_safety == 'TS') }}
+        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
 
       # THREAD-SAFE
 
@@ -274,7 +274,7 @@ jobs:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'windows-latest') && (! inputs.thread_safety == 'TS') }}
+        if:  ${{ (matrix.os == 'windows-latest') && (inputs.thread_safety != 'TS') }}
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
@@ -282,7 +282,7 @@ jobs:
               name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'ubuntu-latest') && (! inputs.thread_safety == 'TS') }}
+        if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') }}
 
       - name: Save published binary (Mac)
         uses: actions/upload-artifact@v4
@@ -290,7 +290,7 @@ jobs:
               name: tgz-osx12-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-13') && (! inputs.thread_safety == 'TS') }}
+        if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}
 
   #
   # The GitHub runners are inadequate for running parallel HDF5 tests,
