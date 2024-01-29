@@ -177,7 +177,7 @@ jobs:
   # MacOS w/ Clang + CMake
   #
     name: "MacOS Clang CMake"
-    runs-on: macos-11
+    runs-on: macos-13
     steps:
       - name: Install Dependencies (MacOS)
         run: brew install ninja
