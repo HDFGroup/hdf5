@@ -15,10 +15,10 @@ permissions:
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel
 jobs:
-  build_and_test_win:
+  test_binary_win:
   # Windows w/ MSVC + CMake
   #
-    name: "Windows MSVC CTest"
+    name: "Windows MSVC Binary Test"
     runs-on: windows-latest
     steps:
       - name: Install Dependencies (Windows)
@@ -90,10 +90,10 @@ jobs:
           cmake --workflow --preset=ci-StdShar-MSVC --fresh
         shell: bash
 
-  build_and_test_linux:
+  test_binary_linux:
   # Linux (Ubuntu) w/ gcc + CMake
   #
-    name: "Ubuntu gcc CMake"
+    name: "Ubuntu gcc Binary Test"
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)
@@ -148,10 +148,10 @@ jobs:
           cmake --workflow --preset=ci-StdShar-GNUC --fresh
         shell: bash
 
-  build_and_test_mac:
+  test_binary_mac:
   # MacOS w/ Clang + CMake
   #
-    name: "MacOS Clang CMake"
+    name: "MacOS Clang Binary Test"
     runs-on: macos-11
     steps:
       - name: Install Dependencies (MacOS)
