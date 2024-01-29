@@ -1533,8 +1533,8 @@ CONTAINS
     INTEGER(HID_T) , INTENT(IN) :: sel_iter_id
     INTEGER(SIZE_T), INTENT(IN) :: maxseq
     INTEGER(SIZE_T), INTENT(IN) :: maxbytes
-    INTEGER(SIZE_T), INTENT(OUT), TARGET :: nseq
-    INTEGER(SIZE_T), INTENT(OUT), TARGET :: nbytes
+    INTEGER(SIZE_T), INTENT(OUT) :: nseq
+    INTEGER(SIZE_T), INTENT(OUT) :: nbytes
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: off
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: len
     INTEGER, INTENT(OUT) :: hdferr

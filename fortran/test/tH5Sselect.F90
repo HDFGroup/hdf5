@@ -339,7 +339,7 @@ CONTAINS
     INTEGER(SIZE_T) :: nseq                      ! # of sequences retrieved
     INTEGER(SIZE_T) :: nbytes                    ! # of bytes retrieved
     INTEGER(HSIZE_T), DIMENSION(SEL_ITER_MAX_SEQ) :: off     ! Offsets for retrieved sequences
-    INTEGER(SIZE_T), DIMENSION(SEL_ITER_MAX_SEQ) :: ilen     ! Lengths for retrieved sequences
+    INTEGER(HSIZE_T), DIMENSION(SEL_ITER_MAX_SEQ) :: ilen     ! Lengths for retrieved sequences
     INTEGER :: sel_type                  ! Selection type
     INTEGER :: error                     ! Error return value
     integer(size_t) :: i
@@ -400,7 +400,7 @@ CONTAINS
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, INT(0,SIZE_T), total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, INT(0,SIZE_T), total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(1), INT(-99,HSIZE_T), total_error)
-          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(1), INT(-99,SIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(1), INT(-99,HSIZE_T), total_error)
        ELSE IF (sel_type .EQ. H5S_SEL_POINTS_F)THEN ! Point selection
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 4_SIZE_T, total_error)
@@ -408,7 +408,7 @@ CONTAINS
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,HSIZE_T), total_error)
           DO i = 1, NUMP
              CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(i), INT((i-1)*26+12,HSIZE_T), total_error)
-             CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(1,SIZE_T), total_error)
+             CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(1,HSIZE_T), total_error)
           ENDDO
        ELSE IF (sel_type .eq. H5S_SEL_HYPERSLABS_F)THEN ! Hyperslab selection
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
@@ -417,7 +417,7 @@ CONTAINS
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,HSIZE_T), total_error)
           DO i = 1, NUMP
              CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(i), INT((i-1)*12,HSIZE_T), total_error)
-             CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(4,SIZE_T), total_error)
+             CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(4,HSIZE_T), total_error)
           ENDDO
        ELSE IF (sel_type.EQ.H5S_SEL_ALL_F)THEN ! "All" selection
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 1_SIZE_T, total_error )
