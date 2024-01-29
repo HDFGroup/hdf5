@@ -1536,7 +1536,7 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(OUT) :: nseq
     INTEGER(SIZE_T), INTENT(OUT) :: nbytes
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: off
-    INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: len
+    INTEGER(SIZE_T), DIMENSION(*), INTENT(OUT) :: len
     INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
@@ -1550,7 +1550,7 @@ CONTAINS
          INTEGER(SIZE_T) :: nseq
          INTEGER(SIZE_T) :: nbytes
          INTEGER(HSIZE_T), DIMENSION(*) :: off
-         INTEGER(HSIZE_T), DIMENSION(*) :: len
+         INTEGER(SIZE_T), DIMENSION(*) :: len
        END FUNCTION H5Ssel_iter_get_seq_list
     END INTERFACE
 
