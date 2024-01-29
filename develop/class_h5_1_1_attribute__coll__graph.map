@@ -1,6 +1,0 @@
-<map id="Attribute" name="Attribute">
-<area shape="rect" id="node1" title="Class Attribute operates on HDF5 attributes." alt="" coords="71,155,150,181"/>
-<area shape="rect" id="node2" href="$class_h5_1_1_abstract_ds.html" title="AbstractDs is an abstract base class, inherited by Attribute and DataSet." alt="" coords="5,80,99,107"/>
-<area shape="rect" id="node3" href="$class_h5_1_1_h5_location.html" title="H5Location is an abstract base class, added in version 1.8.12." alt="" coords="123,80,218,107"/>
-<area shape="rect" id="node4" href="$class_h5_1_1_id_component.html" title="Class IdComponent provides wrappers of the C functions that operate on an HDF5 identifier." alt="" coords="116,5,225,32"/>
-</map>

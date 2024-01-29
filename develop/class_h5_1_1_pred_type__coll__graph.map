@@ -1,8 +1,0 @@
-<map id="PredType" name="PredType">
-<area shape="rect" id="node1" title="Class PredType holds the definition of all the HDF5 predefined datatypes." alt="" coords="19,453,101,479"/>
-<area shape="rect" id="node2" href="$class_h5_1_1_atom_type.html" title="AtomType is a base class, inherited by IntType, FloatType, StrType, and PredType." alt="" coords="17,309,103,336"/>
-<area shape="rect" id="node3" href="$class_h5_1_1_data_type.html" title="Class DataType provides generic operations on HDF5 datatypes." alt="" coords="19,233,101,260"/>
-<area shape="rect" id="node4" href="$class_h5_1_1_h5_object.html" title="Class H5Object is a bridge between H5Location and DataSet, DataType, and Group." alt="" coords="19,157,101,184"/>
-<area shape="rect" id="node5" href="$class_h5_1_1_h5_location.html" title="H5Location is an abstract base class, added in version 1.8.12." alt="" coords="13,81,107,108"/>
-<area shape="rect" id="node6" href="$class_h5_1_1_id_component.html" title="Class IdComponent provides wrappers of the C functions that operate on an HDF5 identifier." alt="" coords="5,5,115,32"/>
-</map>
