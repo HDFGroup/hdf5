@@ -2456,6 +2456,10 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
     assert(udata->file);
     assert(udata->cpy_info);
 
+    /* Set the location of the src datatype */
+    if (H5T_set_loc(attr_src->shared->dt, H5F_VOL_OBJ(udata->oloc_src->file), H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk");
+
     if (NULL ==
         (attr_dst = H5A__attr_copy_file(attr_src, udata->file, udata->recompute_size, udata->cpy_info)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute");
