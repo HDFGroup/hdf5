@@ -19,6 +19,14 @@
 #define H5_HAVE_PARALLEL
 #endif
 
+! Define if MPI supports mpi_f08 module
+#cmakedefine01 CMAKE_H5_HAVE_MPI_F08
+#if CMAKE_H5_HAVE_MPI_F08 == 0
+#undef H5_HAVE_MPI_F08
+#else
+#define H5_HAVE_MPI_F08
+#endif
+
 ! Define if there is subfiling support
 #cmakedefine01 CMAKE_H5_HAVE_SUBFILING_VFD
 #if CMAKE_H5_HAVE_SUBFILING_VFD == 0

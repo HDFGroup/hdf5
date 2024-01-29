@@ -2840,6 +2840,25 @@ if test -n "$PARALLEL"; then
                 AC_MSG_RESULT([yes])],
                 [AC_MSG_RESULT([no])]
     )
+
+    AC_LANG_PUSH([Fortran])
+    AC_MSG_CHECKING([for MPI-3 module mpi_f08])
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([],
+                       [
+                        USE mpi_f08
+                        IMPLICIT NONE
+                        TYPE(MPI_Comm) :: comm
+                        TYPE(MPI_INFO) :: info
+                       ]
+                      )
+      ],
+      [AC_DEFINE([HAVE_MPI_F08], [1],
+                [Define if mpi_f08 module exist])
+                AC_MSG_RESULT([yes])],
+                [AC_MSG_RESULT([no])]
+    )
+    AC_LANG_POP(Fortran)
   fi
 
   ## ----------------------------------------------------------------------
