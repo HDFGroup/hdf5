@@ -18,7 +18,7 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5P_cls_close_func_cb extends Callbacks {
     /**
-     * @ingroup JCALL
+     * @ingroup JCALLBK
      *
      *  application callback for each property list
      *

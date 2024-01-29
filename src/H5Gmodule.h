@@ -477,7 +477,9 @@
  * </tr>
  * </table>
  *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * <table>
  * <caption>Other external link functions</caption>

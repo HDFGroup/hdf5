@@ -28,7 +28,7 @@ package hdf.hdf5lib.callbacks;
  * exceptions thrown will be passed to the default callback exception
  * handler.
  *
- * @defgroup JCALL HDF5 Library Java Callbacks
+ * @defgroup JCALLBK HDF5 Library Java Callbacks
  */
 public interface Callbacks {
 }

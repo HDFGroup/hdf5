@@ -408,14 +408,19 @@
  * </table>
  *
  * \anchor fcpl_table_tag File creation property list functions (H5P)
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fcpl_table
+ * </div>
  *
  * \anchor fapl_table_tag File access property list functions (H5P)
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ * </div>
  *
  * \anchor fd_pl_table_tag File driver property list functions (H5P)
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
- *
+ * </div>
  *
  * \subsection subsec_file_create Creating or Opening an HDF5 File
  * This section describes in more detail how to create and how to open files.
@@ -672,7 +677,9 @@
  * #H5FD_SEC2. Alternative layouts and drivers are designed to suit the needs of a variety of
  * systems, environments, and applications. The drivers are listed in the table below.
  *
+ * <div>
  * \snippet{doc} tables/fileDriverLists.dox supported_file_driver_table
+ * </div>
  *
  * For more information, see the HDF5 Reference Manual entries for the function calls shown in
  * the column on the right in the table above.
