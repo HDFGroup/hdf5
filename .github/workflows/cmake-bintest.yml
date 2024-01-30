@@ -50,10 +50,10 @@ jobs:
               ls -l ${{ github.workspace }}
 
       - name: create hdf5 location (Win)
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/hdf5
         run: |
           New-Item -Path "${{ github.workspace }}/HDF_Group/HDF5" -ItemType Directory
-          Copy-Item -Path "${{ github.workspace }}/HDF*/*" -Destination "${{ github.workspace }}/HDF_Group/HDF5" -Recurse
+          Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/HDF_Group/HDF5" -Recurse
         shell: pwsh
 
       - name: List files for the space (Win)
@@ -144,7 +144,7 @@ jobs:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
-          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/HDF5Examples"
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
           cmake --workflow --preset=ci-StdShar-GNUC --fresh
         shell: bash
 
@@ -211,7 +211,7 @@ jobs:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
-          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/HDF5Examples"
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
           cmake --workflow --preset=ci-StdShar-Clang --fresh
         shell: bash
 
