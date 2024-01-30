@@ -38,7 +38,7 @@ jobs:
         uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
-              path: ${{ github.workspace }}
+              path: ${{ github.workspace }}/hdf5
 
       - name: Uncompress hdf5 binary (Win)
         working-directory: ${{ github.workspace }}/hdf5
