@@ -41,13 +41,14 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: Uncompress hdf5 binary (Win)
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/hdf5
         run: 7z x HDF5-*-win64.zip
         shell: bash
 
       - name: List files for the space (Win)
         run: |
               ls -l ${{ github.workspace }}
+              ls -l ${{ github.workspace }}/hdf5
 
       - name: create hdf5 location (Win)
         working-directory: ${{ github.workspace }}/hdf5
