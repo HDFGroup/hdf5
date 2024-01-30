@@ -66,6 +66,8 @@ prog1=${H5TOOL}_prog1.$suffix
 prog1_o=${H5TOOL}_prog1.o
 prog2=${H5TOOL}_prog2.$suffix
 prog2_o=${H5TOOL}_prog2.o
+args=${H5TOOL}_args.$suffix
+args_o=${H5TOOL}_args.o
 applib=libapp${H5TOOL}.a
 
 # short hands
@@ -277,16 +279,85 @@ main (void)
 }
 EOF
 
+# Generate HDF5 v1.14 Main Program:
+# This makes unique V1.14 API calls.
+cat > $v114main <<EOF
+/* This is a V1.14 API calls example Program. */
+#include "hdf5.h"
+#define H5FILE_NAME        "tmp.h5"
+#define SPACE1_RANK    3
+int
+main (void)
+{
+    hid_t       sid;                  /* Dataspace ID */
+    hid_t       fapl = -1;            /* File access property list ID */
+    int         rank;                 /* Logical rank of dataspace    */
+    hsize_t     dims[] = {3, 3, 15};
+    size_t      sbuf_size=0;
+    herr_t      ret;                  /* Generic return value        */
+    hsize_t             start[] = {0, 0, 0};
+    hsize_t             stride[] = {2, 5, 3};
+    hsize_t             count[] = {2, 2, 2};
+    hsize_t             block[] = {1, 3, 1};
+
+    /* Create the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Set low/high bounds in the fapl */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST,
+                               H5F_LIBVER_LATEST);
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
+
+    /* Set the hyperslab selection */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    /* Encode simple dataspace in a buffer with the fapl setting */
+    ret = H5Sencode(sid, NULL, &sbuf_size, fapl);
+
+    /* Encode simple dataspace in a buffer with the fapl setting */
+    ret = H5Sencode2(sid, NULL, &sbuf_size, fapl);
+
+    printf("HDF5 C program created with V1.14 API ran successfully. ");
+/*       "File %s generated.\n", H5FILE_NAME);
+      remove(H5FILE_NAME); */
+    return 0;
+}
+EOF
+
+# Generate args:
+# An application main that test misc command line arguments being passed.
+cat > $args <<EOF
+#include "hdf5.h"
+#define H5FILE_NAME "check_args.h5"
+int
+main (void)
+{
+    char c = SGL_QUOTE; /* 'H' */
+    char *s = DBL_QUOTE; /* "HDF" */
+    int val = MISC; /* 42 */
+    hid_t   file; /* file and dataset handles */
+
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fclose(file);
+
+    printf("HDF5 C Sample program ran successfully. File %s generated.\n", H5FILE_NAME);
+    remove(H5FILE_NAME);
+
+    return 0;
+}
+EOF
 
 # Parse option
 #   None
 
-# Print a line-line message left justified in a field of 70 characters
+# Print a line-line message left justified in a field of 71 characters
 # beginning with the word "Testing".
 #
 TESTING() {
    SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+   echo "Testing $* $SPACES" | cut -c1-71 | tr -d '\012'
 }
 
 
@@ -449,6 +520,10 @@ else
     TOOLTEST $v110main
     TOOLTEST $v112main
 fi
+
+# Group 6: # HDF5 program that depends on input args.
+echo "***"Simple Compile and Link in one step with user-supplied arguments.
+TOOLTEST -DSGL_QUOTE=\'H\' -DDBL_QUOTE=\"HDF\" -DMISC=42 $args
 
 ##############################################################################
 # END
