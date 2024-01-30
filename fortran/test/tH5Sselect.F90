@@ -405,7 +405,7 @@ CONTAINS
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 4_SIZE_T, total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(NUMP+1), INT(-99,HSIZE_T), total_error)
-          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,SIZE_T), total_error)
           DO i = 1, NUMP
              CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(i), INT((i-1)*26+12,HSIZE_T), total_error)
              CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(1,SIZE_T), total_error)
@@ -414,7 +414,7 @@ CONTAINS
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 4_SIZE_T, total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 16_SIZE_T, total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(NUMP+1), INT(-99,HSIZE_T), total_error)
-          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(NUMP+1), INT(-99,SIZE_T), total_error)
           DO i = 1, NUMP
              CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(i), INT((i-1)*12,HSIZE_T), total_error)
              CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(i), INT(4,SIZE_T), total_error)
@@ -423,9 +423,9 @@ CONTAINS
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nseq, 1_SIZE_T, total_error )
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", nbytes, 72_SIZE_T, total_error )
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(1), INT(0,HSIZE_T), total_error)
-          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(1), INT(72,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(1), INT(72,SIZE_T), total_error)
           CALL VERIFY("H5Ssel_iter_get_seq_list_f", off(2), INT(-99,HSIZE_T), total_error)
-          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(2), INT(-99,HSIZE_T), total_error)
+          CALL VERIFY("H5Ssel_iter_get_seq_list_f", ilen(2), INT(-99,SIZE_T), total_error)
        ELSE
           CALL check("Incorrect selection option", error, total_error)
        ENDIF
