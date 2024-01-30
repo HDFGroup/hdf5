@@ -87,7 +87,7 @@ jobs:
           HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
-          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/HDF5Examples"
           cmake --workflow --preset=ci-StdShar-MSVC --fresh
         shell: bash
 
