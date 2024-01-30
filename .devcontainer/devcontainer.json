@@ -1,0 +1,26 @@
+{
+  "name": "HDF5 Developer",
+  "build": {
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-vscode.cpptools",
+        "ms-vscode.live-server",
+        "ms-vscode-remote.remote-containers",
+        "ms-azuretools.vscode-docker",
+        "h5web.vscode-h5web",
+        "davidanson.vscode-markdownlint"
+      ],
+      "settings": {
+        "C_Cpp.default.cppStandard": "c++17",
+        "C_Cpp.default.cStandard": "c99",
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  }
+}
