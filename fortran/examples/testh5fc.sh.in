@@ -146,12 +146,12 @@ EOF
 # Parse option
 #   None
 
-# Print a line-line message left justified in a field of 73 characters
+# Print a line-line message left justified in a field of 83 characters
 # beginning with the word "Testing".
 #
 TESTING() {
    SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-73 | tr -d '\012'
+   echo "Testing $* $SPACES" | cut -c1-83 | tr -d '\012'
 }
 
 
@@ -224,7 +224,12 @@ TOOLTEST $appmain_o $applib
 
 #  HDF5 program that depends on input args.
 echo "***"Simple Compile and Link in one step with user-supplied arguments.
-TOOLTEST -DSGL_QUOTE=\'H\' -DDBL_QUOTE=\"HDF\" -DMISC=42 $args
+FCBASE=`grep "FCBASE=" $H5TOOL_BIN`
+WF=""
+if grep -qi "xlf" <<< "$FCBASE"; then
+    WF="-WF,"
+fi
+TOOLTEST $WF-DSGL_QUOTE=\'H\' $WF-DDBL_QUOTE=\"HDF\" $WF-DMISC=42 $args
 
 # No preprocess test since -E is not a common option for Fortran compilers.
 
