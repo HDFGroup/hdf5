@@ -1,4 +1,4 @@
-name: hdf5 dev autotools parallel CI
+name: hdf5 dev PAR CMake CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:
@@ -23,10 +23,10 @@ jobs:
   # A workflow that builds the library
   # Parallel Linux (Ubuntu) w/ gcc + Autotools
   #
-  Autotools_build_parallel:
+  CMake_build_parallel:
     name: "Parallel GCC-${{ inputs.build_mode }}"
     # Don't run the action if the commit message says to skip CI
-    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+    if: ${{ inputs.thread_safety != 'TS' }}
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -40,7 +40,6 @@ jobs:
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
-           sudo apt install automake autoconf libtool libtool-bin
            sudo apt install libaec0 libaec-dev
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
@@ -50,28 +49,29 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.1
 
-      # AUTOTOOLS CONFIGURE
-      - name: Autotools Configure
+      # CMAKE CONFIGURE
+      - name: CMake Configure
         run: |
-          sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          CC=mpicc $GITHUB_WORKSPACE/configure \
-            --enable-build-mode=${{ inputs.build_mode }} \
-            --enable-deprecated-symbols \
-            --with-default-api-version=v114 \
-            --enable-shared \
-            --enable-parallel \
-            --disable-cxx \
-            --enable-fortran \
-            --disable-java \
-            --disable-mirror-vfd \
-            --disable-direct-vfd \
-            --disable-ros3-vfd \
-            --with-szlib=yes
+          CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN=ON \
+            -DHDF5_BUILD_JAVA=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=OFF \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            $GITHUB_WORKSPACE
         shell: bash
 
       # BUILD
-      - name: Autotools Build
-        run: make -j3
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
