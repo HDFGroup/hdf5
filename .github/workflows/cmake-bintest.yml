@@ -1,0 +1,218 @@
+name: hdf5 examples bintest runs
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel
+jobs:
+  test_binary_win:
+  # Windows w/ MSVC + CMake
+  #
+    name: "Windows MSVC Binary Test"
+    runs-on: windows-latest
+    steps:
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
+      # Get files created by cmake-ctest script
+      - name: Get published binary (Windows)
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        with:
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
+              path: ${{ github.workspace }}/hdf5
+
+      - name: Uncompress hdf5 binary (Win)
+        working-directory: ${{ github.workspace }}/hdf5
+        run: 7z x HDF5-*-win64.zip
+        shell: bash
+
+      - name: List files for the space (Win)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls -l ${{ github.workspace }}/hdf5
+
+      - name: create hdf5 location (Win)
+        working-directory: ${{ github.workspace }}/hdf5
+        run: |
+          New-Item -Path "${{ github.workspace }}/HDF_Group/HDF5" -ItemType Directory
+          Copy-Item -Path "${{ github.workspace }}/hdf5/HDF*/*" -Destination "${{ github.workspace }}/HDF_Group/HDF5" -Recurse
+        shell: pwsh
+
+      - name: List files for the space (Win)
+        run: ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR="${{ github.workspace }}/HDF_Group/HDF5"
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+          echo "HDF5_PLUGIN_PATH=$HDF5_ROOT/lib/plugin" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: List files for the binaries (Win)
+        run: |
+            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Run ctest (Windows)
+        env:
+          HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
+        run: |
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/HDF5Examples"
+          cmake --workflow --preset=ci-StdShar-MSVC --fresh
+        shell: bash
+
+  test_binary_linux:
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+    name: "Ubuntu gcc Binary Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux)
+        run: sudo apt-get install ninja-build doxygen graphviz
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+
+      - name: Get published binary (Linux)
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        with:
+              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
+              path: ${{ github.workspace }}
+
+      - name: Uncompress hdf5 binary (Linux)
+        run:  |
+            cd "${{ github.workspace }}"
+            tar -zxvf ${{ github.workspace }}/HDF5-*-Linux.tar.gz --strip-components 1
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR=${{ github.workspace }}/HDF_Group/HDF5/
+          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/HDF_Group/HDF5)
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+          echo "HDF5_PLUGIN_PATH=$HDF5_ROOT/lib/plugin" >> $GITHUB_OUTPUT
+
+      - name: List files for the binaries (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: Set file base name (Linux)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Run ctest (Linux)
+        env:
+          HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
+        run: |
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
+          cmake --workflow --preset=ci-StdShar-GNUC --fresh
+        shell: bash
+
+  test_binary_mac:
+  # MacOS w/ Clang + CMake
+  #
+    name: "MacOS Clang Binary Test"
+    runs-on: macos-13
+    steps:
+      - name: Install Dependencies (MacOS)
+        run: brew install ninja doxygen
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+
+      - name: Get published binary (MacOS)
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        with:
+              name: tgz-osx12-${{ inputs.build_mode }}-binary
+              path: ${{ github.workspace }}
+
+      - name: Uncompress hdf5 binary (MacOS)
+        run:  |
+            cd "${{ github.workspace }}"
+            tar -zxvf ${{ github.workspace }}/HDF5-*-Darwin.tar.gz --strip-components 1
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR=${{ github.workspace }}/HDF_Group/HDF5/
+          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/HDF_Group/HDF5)
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+          echo "HDF5_PLUGIN_PATH=$HDF5_ROOT/lib/plugin" >> $GITHUB_OUTPUT
+
+      - name: List files for the binaries (MacOS)
+        run: |
+            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: Set file base name (MacOS)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: List files for the space (MacOS)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      # symlinks the compiler executables to a common location 
+      - name: Setup GNU Fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 12
+
+      - name: Run ctest (MacOS)
+        id: run-ctest
+        env:
+          HDF5_ROOT: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
+        run: |
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
+          cmake --workflow --preset=ci-StdShar-Clang --fresh
+        shell: bash
+

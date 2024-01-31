@@ -17,7 +17,19 @@ jobs:
 
     call-parallel-special-autotools:
       name: "Autotools Parallel Special Workflows"
+      uses: ./.github/workflows/main-auto-par-spc.yml
+
+    call-debug-parallel-autotools:
+      name: "Autotools Parallel Workflows"
       uses: ./.github/workflows/main-auto-par.yml
+      with:
+            build_mode: "debug"
+
+    call-release-parallel-autotools:
+      name: "Autotools Parallel Workflows"
+      uses: ./.github/workflows/main-auto-par.yml
+      with:
+            build_mode: "production"
 
     call-debug-thread-autotools:
       name: "Autotools Debug Thread-Safety Workflows"
