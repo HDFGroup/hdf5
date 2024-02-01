@@ -1,0 +1,87 @@
+name: Check Application Binary Interface (ABI)
+
+on:
+  workflow_call:
+    inputs:
+      y0:
+        description: 'Release Minor Version'
+        type: string
+        required: true
+        default: '14'
+      y1:
+        description: 'Develop Minor Version'
+        type: string
+        required: true
+        default: '15'
+      z0:
+        description: 'Previous Release Patch Version'
+        type: string
+        required: true
+        default: '3'
+      z1:
+        description: 'New Release Patch Version'
+        type: string
+        required: true
+        default: '4'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt update
+          sudo apt install -q -y abi-compliance-checker abi-dumper
+          sudo apt install -q -y japi-compliance-checker
+      - name: Download previous version
+        run: |
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-1_14_3/hdf5-1_${{ inputs.y0 }}_${{ inputs.z0 }}-ubuntu-2204.tar.gz
+          tar zxf hdf5-1_${{ inputs.y0 }}_${{ inputs.z0 }}-ubuntu-2204.tar.gz
+          find .
+          cd hdf5
+          tar zxf HDF5-1.${{ inputs.y0 }}.${{ inputs.z0 }}-Linux.tar.gz
+      - name: Get snapshot hash
+        id: get_hash
+        run: |
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/snapshot/last-file.txt
+          cat last-file.txt
+          echo "HASH=$(cat last-file.txt | cut -d '-' -f3)" >> $GITHUB_OUTPUT
+      - name: Download snapshot
+        env:
+          h: ${{ steps.get_hash.outputs.HASH }}
+        run: |
+          echo $h
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/snapshot/hdf5-develop-$h-ubuntu-2204_gcc.tar.gz
+          tar zxf hdf5-develop-$h-ubuntu-2204_gcc.tar.gz
+          find .
+          cd hdf5
+          tar zxf HDF5-1.${{ inputs.y1 }}.0.$h-Linux.tar.gz
+
+      - name: Run Java API report
+        env:
+          h: ${{ steps.get_hash.outputs.HASH }}
+        run: |
+          japi-compliance-checker hdf5/HDF5-1.${{ inputs.y0 }}.${{ inputs.z0 }}-Linux/HDF_Group/HDF5/1.${{ inputs.y0 }}.${{ inputs.z0 }}/lib/jarhdf5-1.${{ inputs.y0 }}.${{ inputs.z0 }}.jar hdf5/HDF5-1.${{ inputs.y1 }}.0.$h-Linux/HDF_Group/HDF5/1.${{ inputs.y1 }}.0.$h/lib/jarhdf5-1.${{ inputs.y1 }}.0.jar
+
+      - name: Run ABI report
+        env:
+          h: ${{ steps.get_hash.outputs.HASH }}
+        run: |
+          abi-dumper hdf5/HDF5-1.${{ inputs.y0 }}.${{ inputs.z0 }}-Linux/HDF_Group/HDF5/1.${{ inputs.y0 }}.${{ inputs.z0 }}/lib/libhdf5.so -o ABI-0.dump -public-headers hdf5/HDF5-1.${{ inputs.y0 }}.${{ inputs.z0 }}-Linux/HDF_Group/HDF5/1.${{ inputs.y0 }}.${{ inputs.z0 }}/include
+          abi-dumper hdf5/HDF5-1.${{ inputs.y1 }}.0.$h-Linux/HDF_Group/HDF5/1.${{ inputs.y1 }}.0.$h/lib/libhdf5.so -o ABI-1.dump -public-headers hdf5/HDF5-1.${{ inputs.y1 }}.0.$h-Linux/HDF_Group/HDF5/1.${{ inputs.y1 }}.0.$h/include
+          ls
+          abi-compliance-checker -l HDF5-1.${{ inputs.y0 }}.${{ inputs.z1 }}  -old ABI-0.dump -new ABI-1.dump
+        continue-on-error: true
+
+      - name: Save output as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-file
+          path: |
+            compat_reports/HDF5-1.${{ inputs.y0 }}.${{ inputs.z1 }}/X_to_Y/compat_report.html
+            compat_reports/jarhdf5-/1.${{ inputs.y0 }}.${{ inputs.z0 }}_to_1.${{ inputs.y1 }}.0/compat_report.html
