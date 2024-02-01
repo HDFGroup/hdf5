@@ -119,15 +119,16 @@ PROGRAM main
   
   nelmts = 1
   CALL H5Pget_filter_f(dcpl, 0, flags, nelmts, cd_values, INT(MaxChrLen,SIZE_T), name, filter_id, hdferr)
-  WRITE(*,'("Filter type is: ")', ADVANCE='NO')
+  WRITE(*,'(A,1X)', ADVANCE='NO') "Filter type is:"
   IF(filter_id.EQ.H5Z_FILTER_DEFLATE_F)THEN
-     WRITE(*,'(" H5Z_FILTER_DEFLATE_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_DEFLATE_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_SHUFFLE_F)THEN
-     WRITE(*,'(" H5Z_FILTER_SHUFFLE_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_SHUFFLE_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_FLETCHER32_F)THEN
-     WRITE(*,'(" H5Z_FILTER_FLETCHER32_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_FLETCHER32_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_SZIP_F)THEN
-     WRITE(*,'(" H5Z_FILTER_SZIP_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_SZIP_F"
+  ENDIF
 ! DEFINED ONLY IN F2003 hdf5 branch
 !  ELSE IF(filter_id.EQ.H5Z_FILTER_NBIT_F)THEN
 !     WRITE(*,'(" H5Z_FILTER_NBIT_F")')
