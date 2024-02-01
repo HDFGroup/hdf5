@@ -128,13 +128,13 @@ PROGRAM main
      WRITE(*,'(A)') "H5Z_FILTER_FLETCHER32_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_SZIP_F)THEN
      WRITE(*,'(A)') "H5Z_FILTER_SZIP_F"
-  ELSE
-     WRITE(*,'(A)') "UNKNOWN"
 ! DEFINED ONLY IN F2003 hdf5 branch
 !  ELSE IF(filter_id.EQ.H5Z_FILTER_NBIT_F)THEN
 !     WRITE(*,'(" H5Z_FILTER_NBIT_F")')
 !  ELSE IF(filter_id.EQ.H5Z_FILTER_SCALEOFFSET_F)THEN
 !     WRITE(*,'(" H5Z_FILTER_SCALEOFFSET_F")')
+  ELSE
+     WRITE(*,'(A)') "UNKNOWN"
   ENDIF
   !
   ! Read the data using the default properties.
