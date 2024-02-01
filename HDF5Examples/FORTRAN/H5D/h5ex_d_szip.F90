@@ -130,7 +130,6 @@ PROGRAM main
      WRITE(*,'(A)') "H5Z_FILTER_SZIP_F"
   ELSE
      WRITE(*,'(A)') "UNKNOWN"
-  ENDIF
 ! DEFINED ONLY IN F2003 hdf5 branch
 !  ELSE IF(filter_id.EQ.H5Z_FILTER_NBIT_F)THEN
 !     WRITE(*,'(" H5Z_FILTER_NBIT_F")')
