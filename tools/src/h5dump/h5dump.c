@@ -1473,7 +1473,7 @@ main(int argc, char *argv[])
                                 xml_dtd_uri_g);
                 }
                 else {
-                    /*  TO DO: make -url option work in this case (may need new option) */
+                    /*  TODO: make -url option work in this case (may need new option) */
                     char *ns;
                     char *indx;
 
