@@ -2458,7 +2458,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
 
     /* Set the location of the src datatype */
     if (H5T_set_loc(attr_src->shared->dt, H5F_VOL_OBJ(udata->oloc_src->file), H5T_LOC_DISK) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "cannot mark datatype on disk");
 
     if (NULL ==
         (attr_dst = H5A__attr_copy_file(attr_src, udata->file, udata->recompute_size, udata->cpy_info)))
@@ -2469,7 +2469,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
 
     /* Reset shared location information */
     if (H5O_msg_reset_share(H5O_ATTR_ID, attr_dst) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset attribute sharing");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, H5_ITER_ERROR, "unable to reset attribute sharing");
 
     /* Set COPIED tag for destination object's metadata */
     H5_BEGIN_TAG(H5AC__COPIED_TAG)
@@ -2483,7 +2483,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
 
 done:
     if (attr_dst && H5A__close(attr_dst) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute");
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close destination attribute");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__dense_post_copy_file_cb() */
