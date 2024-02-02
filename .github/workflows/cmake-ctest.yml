@@ -8,6 +8,10 @@ on:
         description: "The common base name of the source tarballs"
         required: true
         type: string
+      preset_name:
+        description: "The common base name of the preset configuration name to control the build"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -23,6 +27,11 @@ jobs:
     steps:
       - name: Install Dependencies (Windows)
         run: choco install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.10.0"
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -59,7 +68,7 @@ jobs:
       - name: Run ctest (Windows)
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
-          cmake --workflow --preset=ci-StdShar-MSVC --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
         shell: bash
 
       - name: Publish binary (Windows)
@@ -70,7 +79,7 @@ jobs:
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/ci-StdShar-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
         shell: pwsh
@@ -96,7 +105,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build doxygen graphviz
+        run: sudo apt-get install ninja-build graphviz
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.10.0"
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -122,7 +136,7 @@ jobs:
       - name: Run ctest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
-          cmake --workflow --preset=ci-StdShar-GNUC --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-GNUC --fresh
         shell: bash
 
       - name: Publish binary (Linux)
@@ -133,7 +147,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
         shell: bash
@@ -156,17 +170,22 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
               name: docs-doxygen
-              path: ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/hdf5lib_docs/html
+              path: ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/hdf5lib_docs/html
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_and_test_mac:
   # MacOS w/ Clang + CMake
   #
     name: "MacOS Clang CMake"
-    runs-on: macos-11
+    runs-on: macos-13
     steps:
       - name: Install Dependencies (MacOS)
-        run: brew install ninja doxygen
+        run: brew install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.10.0"
 
       - name: Set file base name (MacOS)
         id: set-file-base
@@ -201,7 +220,7 @@ jobs:
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
-          cmake --workflow --preset=ci-StdShar-Clang --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-Clang --fresh
         shell: bash
 
       - name: Publish binary (MacOS)
@@ -212,7 +231,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz hdf5
         shell: bash
@@ -265,7 +284,7 @@ jobs:
       - name: Run ctest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
-          cmake --workflow --preset=ci-StdShar-GNUC-S3 --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-S3 --fresh
         shell: bash
 
       - name: Publish binary (Linux S3)
@@ -276,7 +295,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz hdf5
         shell: bash
@@ -350,7 +369,7 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
-          cmake --workflow --preset=ci-StdShar-Intel --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh
         shell: pwsh
 
       - name: Publish binary (Windows_intel)
@@ -361,7 +380,7 @@ jobs:
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/ci-StdShar-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip hdf5
         shell: pwsh
@@ -424,7 +443,7 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
-          cmake --workflow --preset=ci-StdShar-Intel --fresh
+          cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh
         shell: bash
 
       - name: Publish binary (Linux_intel)
@@ -435,7 +454,7 @@ jobs:
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz hdf5
         shell: bash

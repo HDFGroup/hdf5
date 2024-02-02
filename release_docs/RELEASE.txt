@@ -388,6 +388,11 @@ New Features
     Fortran Library:
     ----------------
 
+    - Add API support for Fortran MPI_F08 module definitions:
+      Adds support for MPI's MPI_F08 module datatypes: type(MPI_COMM) and type(MPI_INFO) for HDF5 APIs:
+      H5PSET_FAPL_MPIO_F, H5PGET_FAPL_MPIO_F, H5PSET_MPI_PARAMS_F, H5PGET_MPI_PARAMS_F
+      Ref. #3951
+
     - Added Fortran APIs:
       H5FGET_INTENT_F, H5SSEL_ITER_CREATE_F, H5SSEL_ITER_GET_SEQ_LIST_F,
       H5SSEL_ITER_CLOSE_F, H5S_mp_H5SSEL_ITER_RESET_F
@@ -931,6 +936,15 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Changed default of 'Error on HDF5 doxygen warnings' DOXYGEN_WARN_AS_ERROR option.
+
+      The default setting of DOXYGEN_WARN_AS_ERROR to 'FAIL_ON_WARNINGS' has been changed
+      to 'NO'. It was decided that the setting was too aggressive and should be a user choice.
+      The github actions and scripts have been updated to reflect this.
+
+        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: OFF)
+        * --enable-doxygen-errors: enable/disable (Default: disable)
+
     - Removed an Autotools configure hack that causes problems on MacOS
 
       A sed line in configure.ac was added in the past to paper over some

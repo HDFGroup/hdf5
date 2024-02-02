@@ -1,0 +1,137 @@
+name: hdf5 dev autotools parallel special CI
+
+# Controls when the action will run. Triggers the workflow on a call
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel. We just have one job, but the matrix items defined below will
+# run in parallel.
+jobs:
+  #
+  # SPECIAL AUTOTOOLS BUILDS
+  #
+  # These do not run tests and are not built into the matrix and instead
+  # become NEW configs as their name would clobber one of the matrix
+  # names (so make sure the names are UNIQUE).
+  #
+
+  build_parallel_debug_werror:
+    name: "gcc DBG parallel -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+           sudo apt install openmpi-bin openmpi-common mpi-default-dev
+           echo "CC=mpicc" >> $GITHUB_ENV
+           echo "FC=mpif90" >> $GITHUB_ENV
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CFLAGS=-Werror $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=debug \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v114 \
+            --enable-shared \
+            --enable-parallel \
+            --enable-subfiling-vfd \
+            --disable-cxx \
+            --disable-fortran \
+            --disable-java \
+            --disable-mirror-vfd \
+            --enable-direct-vfd \
+            --disable-ros3-vfd \
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+
+  build_parallel_release_werror:
+    name: "gcc REL parallel -Werror (build only)"
+    runs-on: ubuntu-latest
+    steps:
+      # SETUP
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install libaec0 libaec-dev
+           sudo apt install openmpi-bin openmpi-common mpi-default-dev
+           echo "CC=mpicc" >> $GITHUB_ENV
+           echo "FC=mpif90" >> $GITHUB_ENV
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      # AUTOTOOLS CONFIGURE
+      - name: Autotools Configure
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CFLAGS=-Werror $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=production \
+            --enable-deprecated-symbols \
+            --with-default-api-version=v114 \
+            --enable-shared \
+            --enable-parallel \
+            --enable-subfiling-vfd \
+            --disable-cxx \
+            --disable-fortran \
+            --disable-java \
+            --disable-mirror-vfd \
+            --enable-direct-vfd \
+            --disable-ros3-vfd \
+        shell: bash
+
+      # BUILD
+      - name: Autotools Build
+        run: make -j3
+        working-directory: ${{ runner.workspace }}/build
+
+      # INSTALL (note that this runs even when we don't run the tests)
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+

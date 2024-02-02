@@ -47,6 +47,8 @@ prog1_o=${H5TOOL}_prog1.o
 prog2=${H5TOOL}_prog2.$suffix
 prog2_o=${H5TOOL}_prog2.o
 applib=libapp${H5TOOL}.a
+args=${H5TOOL}_args.$suffix
+args_o=${H5TOOL}_args.o
 
 # short hands
 # Caution: if some *.h5 files must be cleaned here, list them by names.
@@ -134,16 +136,38 @@ int main (void)
 }
 EOF
 
+# Generate args:
+# An application main that test misc command line arguments being passed.
+cat > $args <<EOF
+#include <string>
+#include <iostream>
+#include "H5Cpp.h"
+#ifndef H5_NO_NAMESPACE
+using namespace H5;
+#endif
+
+const H5std_string FILE_NAME( "args.h5" );
+
+int main (void)
+{
+    char c = SGL_QUOTE; // 'H'
+    char *s = DBL_QUOTE; // "HDF"
+    int val = MISC; // 42
+
+    H5File file( FILE_NAME, H5F_ACC_TRUNC );
+    return 0;
+}
+EOF
 
 # Parse option
 #   None
 
-# Print a line-line message left justified in a field of 70 characters
+# Print a line-line message left justified in a field of 74 characters
 # beginning with the word "Testing".
 #
 TESTING() {
    SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+   echo "Testing $* $SPACES" | cut -c1-74 | tr -d '\012'
 }
 
 
@@ -230,6 +254,10 @@ fi
 echo "***"Just preprocess, no compile, no link.
 TOOLTEST -E $hdf5main
 TOOLTEST -E $appmain $prog1 $prog2
+
+# HDF5 program that depends on input args.
+echo "***"Simple Compile and Link in one step with user-supplied arguments.
+TOOLTEST -DSGL_QUOTE=\'H\' -DDBL_QUOTE=\"HDF\" -DMISC=42 $args
 
 ##############################################################################
 # END

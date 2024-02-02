@@ -2828,7 +2828,7 @@ get_iovec_sizes(subfiling_context_t *sf_context, size_t in_count, haddr_t file_o
              * I/O of a size greater than the block size definitionally
              * touches all subfiles at least once.
              */
-            cur_max_num_subfiles = (size_t)num_subfiles;
+            cur_max_num_subfiles = (int64_t)num_subfiles;
         }
         else if (data_size < stripe_size) {
             /*

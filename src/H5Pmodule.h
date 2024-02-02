@@ -891,48 +891,75 @@
  * properties. Property lists are deleted by closing the associated handles.
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcr_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcra_table
+ * </div>
  *
  * \ref PLCR / \ref OCPL / \ref GCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fcpl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fapl_table
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lapl_table
+ * </div>
  *
  * \ref PLCR / \ref OCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dcpl_table
+ * </div>
  *
  * \ref PLCR / \ref LAPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dapl_table
+ * </div>
  *
  * \ref PLCR / \ref OCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * \ref PLCR / \ref LAPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gapl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpypl_table
+ * </div>
  *
  * \ref PLCR
+ * <div>
  * \snippet{doc} tables/propertyLists.dox strcpl_table
+ * </div>
  *
  * \ref PLCR / \ref STRCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lcpl_table
+ * </div>
  *
  * \ref PLCR / \ref STRCPL
+ * <div>
  * \snippet{doc} tables/propertyLists.dox acpl_table
- *
+ * </div>
  *
  * \defgroup STRCPL String Creation Properties
  * \ingroup H5P
@@ -941,30 +968,33 @@
  * choice of a character encoding, applies to both attributes and links.
  * The second creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox strcpl_table
+ * </div>
  *
  * \defgroup LCPL Link Creation Properties
  * \ingroup STRCPL
  * This creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lcpl_table
- *
+ * </div>
  * @see STRCPL
  *
  * \defgroup ACPL Attribute Creation Properties
  * \ingroup STRCPL
  * The creation property, the choice of a character encoding, applies to attributes.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox acpl_table
+ * </div>
  *
  * @see STRCPL
  *
  * \defgroup LAPL Link Access Properties
  * \ingroup H5P
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox lapl_table
+ * </div>
  *
  * \defgroup DAPL Dataset Access Properties
  * \ingroup LAPL
@@ -974,8 +1004,9 @@
  * dataset file paths, and controlling flush behavior, etc. These properties
  * are \Emph{not} persisted with datasets, and can be adjusted at runtime before
  * a dataset is created or opened.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dapl_table
+ * </div>
  *
  * \defgroup DCPL Dataset Creation Properties
  * \ingroup OCPL
@@ -984,8 +1015,9 @@
  * Unlike dataset access and transfer properties, creation properties \Emph{are}
  * stored with the dataset, and cannot be changed once a dataset has been
  * created.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dcpl_table
+ * </div>
  *
  * \defgroup DXPL Dataset Transfer Properties
  * \ingroup H5P
@@ -993,8 +1025,9 @@
  * and writing datasets such as transformations, MPI-IO I/O mode, error
  * detection, etc. These properties are \Emph{not} persisted with datasets,
  * and can be adjusted at runtime before a dataset is read or written.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox dxpl_table
+ * </div>
  *
  * \defgroup FAPL File Access Properties
  * \ingroup H5P
@@ -1003,9 +1036,10 @@
  * file driver (VFD), configuring the metadata cache (MDC), control
  * file locking, etc. These properties are \Emph{not} persisted with files, and
  * can be adjusted at runtime before a file is created or opened.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fapl_table
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
+ * </div>
  *
  * \defgroup FCPL File Creation Properties
  * \ingroup GCPL
@@ -1014,14 +1048,16 @@
  * Unlike file access properties, creation properties \Emph{are}
  * stored with the file, and cannot be changed once a file has been
  * created.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox fcpl_table
+  * </div>
  *
  * \defgroup GAPL Group Access Properties
  * \ingroup LAPL
  * The functions in this section can be applied to group property lists.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gapl_table
+ * </div>
  *
  * \defgroup GCPL Group Creation Properties
  * \ingroup OCPL
@@ -1030,32 +1066,37 @@
  * Unlike file access properties, creation properties \Emph{are}
  * stored with the group, and cannot be changed once a group has been
  * created.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * \defgroup PLCR Property List Class Root
  * \ingroup H5P
  * Use the functions in this module to manage HDF5 property lists.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcr_table
+ * </div>
  *
  * \defgroup PLCRA Property List Class Root (Advanced)
  * \ingroup H5P
  * You can create and customize user-defined property list classes using the
  * functions described below. Arbitrary user-defined properties can also
  * be inserted into existing property lists as so-called temporary properties.
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox plcra_table
+ * </div>
  *
  * \defgroup OCPL Object Creation Properties
  * \ingroup H5P
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpl_table
+ * </div>
  *
  * \defgroup OCPYPL Object Copy Properties
  * \ingroup H5P
- *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox ocpypl_table
+ * </div>
  *
  * \defgroup FMPL File Mount Properties
  * \ingroup H5P

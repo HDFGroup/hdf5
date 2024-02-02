@@ -1220,6 +1220,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: file_id
     INTEGER, INTENT(OUT) :: intent
     INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT) :: c_intent
+
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Fget_intent(file_id, intent) BIND(C,NAME='H5Fget_intent')
          IMPORT :: C_INT
@@ -1230,7 +1233,8 @@ CONTAINS
        END FUNCTION H5Fget_intent
     END INTERFACE
 
-    hdferr = INT(H5Fget_intent(file_id, intent))
+    hdferr = INT(H5Fget_intent(file_id, c_intent))
+    intent = INT(c_intent)
 
   END SUBROUTINE h5fget_intent_f
 
