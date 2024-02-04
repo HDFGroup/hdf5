@@ -243,6 +243,23 @@
       ]
     },
     {
+      "name": "ci-StdShar-OSX-Clang",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ],
+      "execution": {
+        "noTestsAction": "error",
+        "timeout": 180,
+        "jobs": 2
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "configurePreset": "ci-StdShar-GNUC",
       "inherits": [
@@ -257,7 +274,7 @@
       ]
     },
     {
-      "name": "ci-StdShar-Intel",
+      "name": "ci-StdShar-win-Intel",
       "configurePreset": "ci-StdShar-Intel",
       "inherits": [
         "ci-x64-Release-Intel"
@@ -266,7 +283,19 @@
         "exclude": {
           "name": "H5DUMP-tfloatsattrs"
         }
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
+    },
+    {
+      "name": "ci-StdShar-Intel",
+      "configurePreset": "ci-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
     }
   ],
   "packagePresets": [
@@ -316,6 +345,15 @@
       ]
     },
     {
+      "name": "ci-StdShar-OSX-Clang",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Clang"},
+        {"type": "build", "name": "ci-StdShar-Clang"},
+        {"type": "test", "name": "ci-StdShar-OSX-Clang"},
+        {"type": "package", "name": "ci-StdShar-Clang"}
+      ]
+    },
+    {
       "name": "ci-StdShar-GNUC",
       "steps": [
         {"type": "configure", "name": "ci-StdShar-GNUC"},
@@ -341,7 +379,15 @@
         {"type": "test", "name": "ci-StdShar-Intel"},
         {"type": "package", "name": "ci-StdShar-Intel"}
       ]
+    },
+    {
+      "name": "ci-StdShar-win-Intel",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Intel"},
+        {"type": "build", "name": "ci-StdShar-Intel"},
+        {"type": "test", "name": "ci-StdShar-win-Intel"},
+        {"type": "package", "name": "ci-StdShar-Intel"}
+      ]
     }
   ]
 }
-

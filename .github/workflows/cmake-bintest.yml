@@ -214,6 +214,6 @@ jobs:
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
           cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
-          cmake --workflow --preset=ci-StdShar-Clang --fresh
+          cmake --workflow --preset=ci-StdShar-OSX-Clang --fresh
         shell: bash
 
