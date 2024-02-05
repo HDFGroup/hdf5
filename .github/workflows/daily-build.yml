@@ -29,7 +29,7 @@ jobs:
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-abi:
-    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest]
+    needs: [call-workflow-tarball, call-workflow-ctest]
     uses: ./.github/workflows/abi-report.yml
     with:
       file_ref: 1_14_3
