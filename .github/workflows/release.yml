@@ -86,9 +86,18 @@ jobs:
       file_base: ${{ needs.create-files-ctest.outputs.file_base }}
       preset_name: ci-StdShar
 
+  call-workflow-abi:
+    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest]
+    uses: ./.github/workflows/abi-report.yml
+    with:
+      file_ref: 1_14_3
+      file_base: ${{ needs.create-files-ctest.outputs.file_base }}
+      use_tag: ${{ needs.log-the-inputs.outputs.rel_tag }}
+      use_environ: release
+
   call-workflow-release:
     #needs: [call-workflow-tarball, call-workflow-ctest]
-    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest]
+    needs: [log-the-inputs, create-files-ctest, call-workflow-ctest, call-workflow-abi]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml

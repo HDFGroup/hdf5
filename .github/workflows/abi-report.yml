@@ -1,0 +1,114 @@
+name: hdf5 Check Application Binary Interface (ABI)
+
+on:
+  workflow_call:
+    inputs:
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: snapshot
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+      file_base:
+        description: "The common base name of the binary"
+        required: true
+        type: string
+      file_ref:
+        description: "The reference name for the release binary"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt update
+          sudo apt install -q -y abi-compliance-checker abi-dumper
+          sudo apt install -q -y japi-compliance-checker
+
+      - name: Get hdf5 snapshot release
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'HDFGroup/hdf5'
+          version: 'tags/snapshot'
+          file: '${{ inputs.file_base }}-ubuntu-2204.tar.gz'
+
+      - name: Get hdf5 current release
+        if: ${{ (inputs.use_environ == 'release') }}
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'HDFGroup/hdf5'
+          version: 'tags/${{ inputs.file_base }}'
+          file: '${{ inputs.file_base }}-ubuntu-2204.tar.gz'
+
+      - name: List files for the space (Linux)
+        run: |
+            ls -l ${{ github.workspace }}
+
+      - name: Uncompress gh binary (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ inputs.file_base }}-ubuntu-2204.tar.gz
+
+      - name: Uncompress hdf5 binary (Linux)
+        run:  |
+            cd "${{ github.workspace }}/hdf5"
+            tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+          HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
+          echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+
+      - name: Download reference version
+        run: |
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ file_ref }}/hdf5-${{ file_ref }}-ubuntu-2204.tar.gz
+          tar zxf hdf5-${{ file_ref }}-ubuntu-2204.tar.gz
+
+      - name: Uncompress hdf5 binary (Linux)
+        run:  |
+            cd "${{ github.workspace }}/hdf5R"
+            tar -zxvf ${{ github.workspace }}/hdf5/HDF5-${{ file_ref }}-Linux.tar.gz --strip-components 1
+
+      - name: set hdf5lib reference name
+        id: set-hdf5lib-refname
+        run: |
+          HDF5RDIR=${{ github.workspace }}/hdf5R/HDF_Group/HDF5/
+          FILE_NAME_HDF5R=$(ls ${{ github.workspace }}/hdf5R/HDF_Group/HDF5)
+          echo "HDF5R_ROOT=$HDF5RDIR$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
+
+      - name: List files for the space (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/hdf5R
+
+      - name: Run Java API report
+        run: |
+            japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ inputs.file_base }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ file_ref }}.jar
+
+      - name: Run ABI report
+        run: |
+          abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5.so -o ABI-0.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
+          abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5.so -o ABI-1.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
+          ls
+          abi-compliance-checker -l HDF5-${{ inputs.file_base }} -old ABI-0.dump -new ABI-1.dump
+        continue-on-error: true
+
+      - name: Save output as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-file
+          path: |
+            compat_reports/HDF5-${{ inputs.file_base }}/X_to_Y/compat_report.html
+            compat_reports/jarhdf5-${{ inputs.file_base }}/compat_report.html

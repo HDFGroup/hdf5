@@ -1163,6 +1163,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Generate the H5pubconf.h file containing user settings needed by compilation
+#-----------------------------------------------------------------------------
+configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
+
+#-----------------------------------------------------------------------------
 # Option to build examples
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
@@ -1173,10 +1178,5 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
     add_subdirectory (HDF5Examples)
   endif ()
 endif ()
-
-#-----------------------------------------------------------------------------
-# Generate the H5pubconf.h file containing user settings needed by compilation
-#-----------------------------------------------------------------------------
-configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 include (CMakeInstallation.cmake)
