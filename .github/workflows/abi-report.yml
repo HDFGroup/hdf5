@@ -74,13 +74,13 @@ jobs:
 
       - name: Download reference version
         run: |
-          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ file_ref }}/hdf5-${{ file_ref }}-ubuntu-2204.tar.gz
-          tar zxf hdf5-${{ file_ref }}-ubuntu-2204.tar.gz
+          wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
+          tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
 
       - name: Uncompress hdf5 binary (Linux)
         run:  |
             cd "${{ github.workspace }}/hdf5R"
-            tar -zxvf ${{ github.workspace }}/hdf5/HDF5-${{ file_ref }}-Linux.tar.gz --strip-components 1
+            tar -zxvf ${{ github.workspace }}/hdf5/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
 
       - name: set hdf5lib reference name
         id: set-hdf5lib-refname
