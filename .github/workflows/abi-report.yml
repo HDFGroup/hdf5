@@ -37,28 +37,18 @@ jobs:
           sudo apt install -q -y abi-compliance-checker abi-dumper
           sudo apt install -q -y japi-compliance-checker
 
-      - name: Get hdf5 snapshot release
-        if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: dsaltares/fetch-gh-release-asset@master
-        with:
-          repo: 'HDFGroup/hdf5'
-          version: 'tags/snapshot'
-          file: '${{ inputs.file_base }}-ubuntu-2204_gcc.tar.gz'
+      - uses: actions/checkout@v4.1.1
 
-      - name: Get hdf5 current release
-        if: ${{ (inputs.use_environ == 'release') }}
-        uses: dsaltares/fetch-gh-release-asset@master
+      - name: Get published binary (Linux)
+        if: ${{ (inputs.use_environ == 'snapshots') }}
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
-          repo: 'HDFGroup/hdf5'
-          version: 'tags/${{ inputs.file_base }}'
-          file: '${{ inputs.file_base }}-ubuntu-2204_gcc.tar.gz'
+              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
+              path: ${{ github.workspace }}
 
       - name: List files for the space (Linux)
         run: |
             ls -l ${{ github.workspace }}
-
-      - name: Uncompress gh binary (Linux)
-        run: tar -zxvf ${{ github.workspace }}/${{ inputs.file_base }}-ubuntu-2204.tar.gz
 
       - name: Uncompress hdf5 binary (Linux)
         run:  |
