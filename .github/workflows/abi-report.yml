@@ -43,7 +43,7 @@ jobs:
         with:
           repo: 'HDFGroup/hdf5'
           version: 'tags/snapshot'
-          file: '${{ inputs.file_base }}-ubuntu-2204.tar.gz'
+          file: '${{ inputs.file_base }}-ubuntu-2204_gcc.tar.gz'
 
       - name: Get hdf5 current release
         if: ${{ (inputs.use_environ == 'release') }}
@@ -51,7 +51,7 @@ jobs:
         with:
           repo: 'HDFGroup/hdf5'
           version: 'tags/${{ inputs.file_base }}'
-          file: '${{ inputs.file_base }}-ubuntu-2204.tar.gz'
+          file: '${{ inputs.file_base }}-ubuntu-2204_gcc.tar.gz'
 
       - name: List files for the space (Linux)
         run: |
@@ -96,6 +96,7 @@ jobs:
       - name: Run Java API report
         run: |
             japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ inputs.file_base }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ inputs.file_ref }}.jar
+            cp compat_reports/jarhdf5-${{ inputs.file_base }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
 
       - name: Run ABI report
         run: |
@@ -103,12 +104,13 @@ jobs:
           abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5.so -o ABI-1.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
           ls
           abi-compliance-checker -l HDF5-${{ inputs.file_base }} -old ABI-0.dump -new ABI-1.dump
+          cp compat_reports/HDF5-${{ inputs.file_base }}/X_to_Y/compat_report.html ${{ inputs.file_base }}-compat_report.html
         continue-on-error: true
 
       - name: Save output as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: output-file
+          name: abi-reports
           path: |
-            compat_reports/HDF5-${{ inputs.file_base }}/X_to_Y/compat_report.html
-            compat_reports/jarhdf5-${{ inputs.file_base }}/compat_report.html
+            ${{ inputs.file_base }}-compat_report.html
+            ${{ inputs.file_base }}-java_compat_report.html

@@ -132,6 +132,12 @@ jobs:
               name: tgz-ubuntu-2204_intel-binary
               path: ${{ github.workspace }}
 
+      - name: Get published abi reports (Linux)
+        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        with:
+              name: abi-reports
+              path: ${{ github.workspace }}
+
       - name: Store snapshot name
         run: |
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
@@ -145,6 +151,8 @@ jobs:
           prerelease: true
           files: |
               last-file.txt
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-compat_report.html
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
