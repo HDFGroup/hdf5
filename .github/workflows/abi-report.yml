@@ -66,11 +66,12 @@ jobs:
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
       - name: Download reference version
+        working-directory: ${{ github.workspace }}/hdf5R
         run: |
           wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
           tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
 
-      - name: Uncompress hdf5 binary (Linux)
+      - name: Uncompress hdf5 reference binary (Linux)
         run:  |
             cd "${{ github.workspace }}/hdf5R"
             tar -zxvf ${{ github.workspace }}/hdf5/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
