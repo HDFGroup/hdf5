@@ -90,7 +90,7 @@ jobs:
         id: set-hdf5lib-refname
         run: |
           HDF5RDIR=${{ github.workspace }}/hdf5R/hdf5/HDF_Group/HDF5/
-          FILE_NAME_HDF5R=$(ls ${{ github.workspace }}/hdf5R/hdf5/HDF_Group/HDF5)
+          FILE_NAME_HDF5R=$(ls ${{ github.workspace }}/hdf5R/HDF_Group/HDF5)
           echo "HDF5R_ROOT=$HDF5RDIR$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
           echo "HDF5R_VERS=$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
