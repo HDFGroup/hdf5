@@ -50,6 +50,9 @@ jobs:
         run: |
             ls -l ${{ github.workspace }}
 
+      - name: Uncompress gh binary (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ inputs.file_base }}-ubuntu-2204_gcc.tar.gz
+
       - name: Uncompress hdf5 binary (Linux)
         run:  |
             cd "${{ github.workspace }}/hdf5"
