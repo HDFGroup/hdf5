@@ -140,6 +140,9 @@
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
 
+/* Determine if _Float16 is available */
+#cmakedefine H5_HAVE__FLOAT16 @H5_HAVE__FLOAT16@
+
 /* Determine if __float128 is available */
 #cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
@@ -591,6 +594,9 @@
 
 /* The size of `_Quad', as computed by sizeof. */
 #define H5_SIZEOF__QUAD @H5_SIZEOF__QUAD@
+
+/* The size of `_Float16', as computed by sizeof. */
+#define H5_SIZEOF__FLOAT16 @H5_SIZEOF__FLOAT16@
 
 /* The size of `__float128', as computed by sizeof. */
 #define H5_SIZEOF___FLOAT128 @H5_SIZEOF___FLOAT128@

@@ -133,6 +133,7 @@ $SRC_H5DUMP_TESTFILES/tfcontents1.h5
 $SRC_H5DUMP_TESTFILES/tfcontents2.h5
 $SRC_H5DUMP_TESTFILES/tfilters.h5
 $SRC_H5DUMP_TESTFILES/tfloatsattrs.h5
+$SRC_H5DUMP_TESTFILES/tfloat16.h5
 $SRC_H5DUMP_TESTFILES/tfpformat.h5
 $SRC_H5DUMP_TESTFILES/tfvalues.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
@@ -273,6 +274,7 @@ $SRC_H5DUMP_OUTFILES/tfamily.ddl
 $SRC_H5DUMP_OUTFILES/tfill.ddl
 $SRC_H5DUMP_OUTFILES/tfletcher32.ddl
 $SRC_H5DUMP_OUTFILES/tfloatsattrs.ddl
+$SRC_H5DUMP_OUTFILES/tfloat16.ddl
 $SRC_H5DUMP_OUTFILES/tfpformat.ddl
 $SRC_H5DUMP_OUTFILES/tgroup-1.ddl
 $SRC_H5DUMP_OUTFILES/tgroup-2.ddl
@@ -1403,6 +1405,9 @@ TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
 TOOLTEST tfloatsattrs.ddl -p --enable-error-stack tfloatsattrs.h5
 TOOLTEST tldouble.ddl --enable-error-stack tldouble.h5
 TOOLTEST tldouble_scalar.ddl -p --enable-error-stack tldouble_scalar.h5
+
+# test for _Float16 type
+TOOLTEST tfloat16.ddl --enable-error-stack tfloat16.h5
 
 # test for vms
 TOOLTEST tvms.ddl --enable-error-stack tvms.h5

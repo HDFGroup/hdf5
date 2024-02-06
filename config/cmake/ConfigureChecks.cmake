@@ -363,6 +363,16 @@ endif ()
 HDF_CHECK_TYPE_SIZE (time_t          ${HDF_PREFIX}_SIZEOF_TIME_T)
 
 #-----------------------------------------------------------------------------
+# Check if _Float16 type is available
+#-----------------------------------------------------------------------------
+HDF_CHECK_TYPE_SIZE (_Float16 ${HDF_PREFIX}_SIZEOF__FLOAT16)
+if (${HDF_PREFIX}_SIZEOF__FLOAT16)
+  set (${HDF_PREFIX}_HAVE__FLOAT16 1)
+else ()
+  set (${HDF_PREFIX}_HAVE__FLOAT16 0)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Extra C99 types
 #-----------------------------------------------------------------------------
 

@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <fenv.h>
-#include <float.h>
 #include <math.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -35,6 +34,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+/* Define __STDC_WANT_IEC_60559_TYPES_EXT__ for _FloatN support, if available */
+#define __STDC_WANT_IEC_60559_TYPES_EXT__
+#include <float.h>
 
 /* POSIX headers */
 #ifdef H5_HAVE_SYS_TIME_H
@@ -538,6 +541,21 @@
 #else
 #define H5_GCC_CLANG_DIAG_OFF(x)
 #define H5_GCC_CLANG_DIAG_ON(x)
+#endif
+
+/* Create a typedef for library usage of the _Float16 type
+ * to avoid issues when compiling the library with the
+ * -pedantic flag or similar where we get warnings about
+ * _Float16 not being an ISO C type.
+ */
+#ifdef H5_HAVE__FLOAT16
+#if defined(__GNUC__)
+__extension__ typedef _Float16 H5__Float16;
+#elif defined(__clang__)
+/* TODO */
+#else
+typedef _Float16 H5__Float16;
+#endif
 #endif
 
 /* Function pointer typedef for qsort */

@@ -712,6 +712,14 @@
  *     </tr>
  *     <tr>
  *       <td>
+ * #H5T_NATIVE_FLOAT16
+ *       </td>
+ *       <td span='3'>
+ * _Float16
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
  * #H5T_NATIVE_FLOAT
  *       </td>
  *       <td span='3'>
@@ -3753,10 +3761,11 @@ filled according to the value of this property. The padding can be:
  *                 H5T_NATIVE_INT | H5T_NATIVE_UINT |
  *                 H5T_NATIVE_LONG | H5T_NATIVE_ULONG |
  *                 H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
- *   <float> ::= H5T_IEEE_F32BE | H5T_IEEE_F32LE |
+ *   <float> ::= H5T_IEEE_F16BE | H5T_IEEE_F16LE |
+ *               H5T_IEEE_F32BE | H5T_IEEE_F32LE |
  *               H5T_IEEE_F64BE | H5T_IEEE_F64LE |
- *               H5T_NATIVE_FLOAT | H5T_NATIVE_DOUBLE |
- *               H5T_NATIVE_LDOUBLE
+ *               H5T_NATIVE_FLOAT16 | H5T_NATIVE_FLOAT |
+ *               H5T_NATIVE_DOUBLE | H5T_NATIVE_LDOUBLE
  *   <time> ::= H5T_TIME: not yet implemented
  *   <string> ::= H5T_STRING {
  *                    STRSIZE <strsize> ;

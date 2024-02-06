@@ -16,6 +16,7 @@ srcdir=@srcdir@
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+HAVE__FLOAT16="@HAVE__FLOAT16@"
 
 TESTNAME=h5ls
 EXIT_SUCCESS=0
@@ -78,6 +79,7 @@ $SRC_H5DUMP_TESTFILES/tempty.h5
 $SRC_H5DUMP_TESTFILES/textlink.h5
 $SRC_H5DUMP_TESTFILES/textlinksrc.h5
 $SRC_H5DUMP_TESTFILES/textlinktar.h5
+$SRC_H5DUMP_TESTFILES/tfloat16.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
 $SRC_H5DUMP_TESTFILES/tgrpnullspace.h5
@@ -128,6 +130,8 @@ $SRC_H5LS_OUTFILES/textlinksrc-2-old.ls
 $SRC_H5LS_OUTFILES/textlinksrc-3-old.ls
 $SRC_H5LS_OUTFILES/textlinksrc-6-old.ls
 $SRC_H5LS_OUTFILES/textlinksrc-7-old.ls
+$SRC_H5LS_OUTFILES/tfloat16.ls
+$SRC_H5LS_OUTFILES/tfloat16_nosupport.ls
 $SRC_H5LS_OUTFILES/tsoftlinks-1.ls
 $SRC_H5LS_OUTFILES/tsoftlinks-2.ls
 $SRC_H5LS_OUTFILES/tsoftlinks-3.ls
@@ -360,6 +364,13 @@ TOOLTEST textlinksrc-nodangle-2.ls 1 -w80 --follow-symlinks --no-dangling-links 
 TOOLTEST tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5
 # when used file with no dangling links - expected exit code 0
 TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thlink.h5
+
+# test for _Float16 type
+if test $HAVE__FLOAT16 = "yes" ; then
+  TOOLTEST tfloat16.ls 0 -w80 -v tfloat16.h5
+else
+  TOOLTEST tfloat16_nosupport.ls 0 -w80 -v tfloat16.h5
+fi
 
 # test for wildcards in filename (does not work with cmake)
 # this h5ls test script does not pass the filename properly like the h5dump test script???

@@ -626,6 +626,11 @@ into a long integer buffer.)
 <th span="3"><strong>Float</strong></th>
 </tr>
 <tr>
+<td>_Float16</td>
+<td>#H5T_NATIVE_FLOAT16</td>
+<td>#H5T_IEEE_F16BE or #H5T_IEEE_F16LE</td>
+</tr>
+<tr>
 <td>float</td>
 <td>#H5T_NATIVE_FLOAT</td>
 <td>#H5T_IEEE_F32BE or #H5T_IEEE_F32LE</td>

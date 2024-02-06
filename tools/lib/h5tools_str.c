@@ -700,7 +700,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         switch (type_class) {
             case H5T_FLOAT:
                 H5TOOLS_DEBUG("H5T_FLOAT");
-                if (sizeof(float) == nsize) {
+#ifdef H5_HAVE__FLOAT16
+                if (sizeof(H5__Float16) == nsize) {
+                    /* if (H5Tequal(type, H5T_NATIVE_FLOAT16)) */
+                    H5__Float16 tempfloat16;
+
+                    memcpy(&tempfloat16, vp, sizeof(H5__Float16));
+                    h5tools_str_append(str, OPT(info->fmt_float, "%g"), (double)tempfloat16);
+                }
+                else
+#endif
+                    if (sizeof(float) == nsize) {
                     /* if (H5Tequal(type, H5T_NATIVE_FLOAT)) */
                     float tempfloat;
 

@@ -545,6 +545,17 @@ AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
+AC_CHECK_SIZEOF([_Float16])
+
+# Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
+# Also define HAVE__FLOAT16 value to substitute into other files for
+# conditional testing
+HAVE__FLOAT16="no"
+if test "$ac_cv_sizeof__Float16" != 0; then
+  HAVE__FLOAT16="yes"
+  AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
+fi
+AC_SUBST([HAVE__FLOAT16])
 
 ## ----------------------------------------------------------------------
 ## Check if the Fortran interface should be enabled
