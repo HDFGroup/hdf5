@@ -1294,7 +1294,7 @@ Platforms Tested
 
     Windows 10 x64                  Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++ only cmake)
+                                    Visual Studio 2019 w/ Intel (C/C++ only - cmake)
                                     Visual Studio 2022 w/ clang 15.0.1
                                         with MSVC-like command-line (C/C++ only - cmake)
                                     Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2023 (cmake)
