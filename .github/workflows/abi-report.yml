@@ -106,7 +106,7 @@ jobs:
 
       - name: List files for the lib spaces (Linux)
         run: |
-            ls -l ${{ steps.set-hdf5lib-refname.outputs.HDF5_ROOT }}/lib
+            ls -l ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib
             ls -l ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib
 
       - name: Run Java API report
