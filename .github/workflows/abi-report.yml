@@ -21,6 +21,10 @@ on:
         description: "The reference name for the release binary"
         required: true
         type: string
+      dot_file_ref:
+        description: "The reference version for the release binary"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -64,6 +68,7 @@ jobs:
           HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
           FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+          echo "HDF5_VERS=$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
       - name: Download reference version
         run: |
@@ -72,10 +77,14 @@ jobs:
           wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
           tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
 
+      - name: List files for the space (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/hdf5R
+
       - name: Uncompress hdf5 reference binary (Linux)
         run:  |
             cd "${{ github.workspace }}/hdf5R"
-            tar -zxvf ${{ github.workspace }}/hdf5R/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
+            tar -zxvf ${{ github.workspace }}/hdf5R/HDF5-${{ inputs.dot_file_ref }}-Linux.tar.gz --strip-components 1
 
       - name: set hdf5lib reference name
         id: set-hdf5lib-refname
@@ -83,6 +92,7 @@ jobs:
           HDF5RDIR=${{ github.workspace }}/hdf5R/hdf5/HDF_Group/HDF5/
           FILE_NAME_HDF5R=$(ls ${{ github.workspace }}/hdf5R/hdf5/HDF_Group/HDF5)
           echo "HDF5R_ROOT=$HDF5RDIR$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
+          echo "HDF5R_VERS=$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
       - name: List files for the space (Linux)
         run: |
@@ -90,8 +100,8 @@ jobs:
 
       - name: Run Java API report
         run: |
-            japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ inputs.file_base }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ inputs.file_ref }}.jar
-            cp compat_reports/jarhdf5-${{ inputs.file_base }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
+            japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ inputs.dot_file_ref }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}.jar
+            cp compat_reports/jarhdf5-${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
 
       - name: Run ABI report
         run: |
