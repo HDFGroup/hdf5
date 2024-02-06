@@ -66,8 +66,9 @@ jobs:
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
       - name: Download reference version
-        working-directory: ${{ github.workspace }}/hdf5R
         run: |
+          mkdir "${{ github.workspace }}/hdf5R"
+          cd "${{ github.workspace }}/hdf5R"
           wget -q https://github.com/HDFGroup/hdf5/releases/download/hdf5-${{ inputs.file_ref }}/hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
           tar zxf hdf5-${{ inputs.file_ref }}-ubuntu-2204.tar.gz
 
