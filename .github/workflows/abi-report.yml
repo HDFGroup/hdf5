@@ -73,7 +73,7 @@ jobs:
           HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
           FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
-          echo "HDF5_VERS=${FILE_NAME_HDF5R//[0-9]+\.[0-9]+\.[0-9]}" >> $GITHUB_OUTPUT
+          echo "HDF5_VERS=${FILE_NAME_HDF5 | sed -e 's/([0-9]+\.[0-9]+\.[0-9]).*/\1/p'}" >> $GITHUB_OUTPUT
 
       - name: Download reference version
         run: |
