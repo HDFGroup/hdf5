@@ -62,11 +62,16 @@ jobs:
             cd "${{ github.workspace }}/hdf5"
             tar -zxvf ${{ github.workspace }}/hdf5/HDF5-*-Linux.tar.gz --strip-components 1
 
+      - name: List files for the HDF space (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/hdf5
+            ls -l ${{ github.workspace }}/hdf5/HDF_Group/HDF5
+
       - name: set hdf5lib name
         id: set-hdf5lib-name
         run: |
-          HDF5DIR=${{ github.workspace }}/HDF_Group/HDF5/
-          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/HDF_Group/HDF5)
+          HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
+          FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
           echo "HDF5_VERS=$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
 
@@ -85,6 +90,11 @@ jobs:
         run:  |
             cd "${{ github.workspace }}/hdf5R"
             tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ inputs.dot_file_ref }}-Linux.tar.gz --strip-components 1
+
+      - name: List files for the HDFR space (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/hdf5R
+            ls -l ${{ github.workspace }}/hdf5R/HDF_Group/HDF5
 
       - name: set hdf5lib reference name
         id: set-hdf5lib-refname
