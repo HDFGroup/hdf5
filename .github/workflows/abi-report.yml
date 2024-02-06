@@ -75,13 +75,13 @@ jobs:
       - name: Uncompress hdf5 reference binary (Linux)
         run:  |
             cd "${{ github.workspace }}/hdf5R"
-            tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
+            tar -zxvf ${{ github.workspace }}/hdf5R/HDF5-${{ inputs.file_ref }}-Linux.tar.gz --strip-components 1
 
       - name: set hdf5lib reference name
         id: set-hdf5lib-refname
         run: |
-          HDF5RDIR=${{ github.workspace }}/hdf5R/HDF_Group/HDF5/
-          FILE_NAME_HDF5R=$(ls ${{ github.workspace }}/hdf5R/HDF_Group/HDF5)
+          HDF5RDIR=${{ github.workspace }}/hdf5R/hdf5/HDF_Group/HDF5/
+          FILE_NAME_HDF5R=$(ls ${{ github.workspace }}/hdf5R/hdf5/HDF_Group/HDF5)
           echo "HDF5R_ROOT=$HDF5RDIR$FILE_NAME_HDF5R" >> $GITHUB_OUTPUT
 
       - name: List files for the space (Linux)
