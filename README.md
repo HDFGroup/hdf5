@@ -87,7 +87,8 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.14.4 | S3 VFD improvements |
+| 1.14.4 | native float16 support, cloud-optimized HDF5 improvements |
+| 1.14.5 | TBD |
 | TBD | VFD SWMR |
 | 2.0.0 | TBD |
 
