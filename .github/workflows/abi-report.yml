@@ -84,7 +84,7 @@ jobs:
       - name: Uncompress hdf5 reference binary (Linux)
         run:  |
             cd "${{ github.workspace }}/hdf5R"
-            tar -zxvf ${{ github.workspace }}/hdf5R/HDF5-${{ inputs.dot_file_ref }}-Linux.tar.gz --strip-components 1
+            tar -zxvf ${{ github.workspace }}/hdf5R/hdf5/HDF5-${{ inputs.dot_file_ref }}-Linux.tar.gz --strip-components 1
 
       - name: set hdf5lib reference name
         id: set-hdf5lib-refname
