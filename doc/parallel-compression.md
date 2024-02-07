@@ -64,9 +64,9 @@ H5Dwrite(..., dxpl_id, ...);
 The following are two simple examples of using the parallel
 compression feature:
 
-[ph5_filtered_writes.c](https://github.com/HDFGroup/hdf5/blob/develop/examples/ph5_filtered_writes.c)
+[ph5_filtered_writes.c](https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_filtered_writes.c)
 
-[ph5_filtered_writes_no_sel.c](https://github.com/HDFGroup/hdf5/blob/develop/examples/ph5_filtered_writes_no_sel.c)
+[ph5_filtered_writes_no_sel.c](https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples/C/H5PAR/ph5_filtered_writes_no_sel.c)
 
 The former contains simple examples of using the parallel
 compression feature to write to compressed datasets, while the
