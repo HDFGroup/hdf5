@@ -120,7 +120,7 @@ main(void)
      * Output the data to the screen.
      */
     for (i = 0; i < DIM0; i++) {
-        printf("sensor[" PRIuHSIZE "]:\n", i);
+        printf("sensor[%" PRIuHSIZE "]:\n", i);
         printf("Serial number   : %d\n", sensor[i].serial_no);
         printf("Location        : %s\n", sensor[i].location);
         printf("Temperature (F) : %f\n", sensor[i].temperature);
