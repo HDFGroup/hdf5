@@ -119,10 +119,14 @@ jobs:
         run: |
           abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5.so -o ABI-0.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
           abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5.so -o ABI-1.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
-          ls
-          abi-compliance-checker -l HDF5-${{ inputs.file_base }} -old ABI-0.dump -new ABI-1.dump
-          cp compat_reports/HDF5-${{ inputs.file_base }}/X_to_Y/compat_report.html ${{ inputs.file_base }}-compat_report.html
+          abi-compliance-checker -l ${{ inputs.file_base }} -old ABI-0.dump -new ABI-1.dump
+          cp compat_reports/${{ inputs.file_base }}/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_compat_report.html
         continue-on-error: true
+
+      - name: List files for the report spaces (Linux)
+        run: |
+            ls -l compat_reports
+            ls -l *.html
 
       - name: Save output as artifact
         uses: actions/upload-artifact@v4
