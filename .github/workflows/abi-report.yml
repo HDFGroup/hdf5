@@ -113,7 +113,7 @@ jobs:
       - name: Run Java API report
         run: |
             japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ inputs.dot_file_ref }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
-            cp compat_reports/jarhdf5-${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
+            cp compat_reports/jarhdf5-/${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
 
       - name: Run ABI report
         run: |
