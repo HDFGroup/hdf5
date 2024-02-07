@@ -151,7 +151,7 @@ jobs:
           prerelease: true
           files: |
               last-file.txt
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-compat_report.html
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
@@ -173,7 +173,7 @@ jobs:
           prerelease: false
           #body_path: ${{ github.workspace }}-CHANGELOG.txt
           files: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-compat_report.html
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz

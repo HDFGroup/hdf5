@@ -109,22 +109,25 @@ jobs:
 
       - name: List files for the lib spaces (Linux)
         run: |
-            ls -l ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib
-            ls -l ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib
+          ls -l ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib
+          ls -l ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib
 
       - name: Run Java API report
         run: |
-            japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
-            cp compat_reports/jarhdf5-/${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
+          japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTS }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
 
       - name: Run ABI report
         run: |
           abi-dumper ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/libhdf5.so -o ABI-0.dump -public-headers ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/include
           abi-dumper ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/libhdf5.so -o ABI-1.dump -public-headers ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/include
           abi-compliance-checker -l ${{ inputs.file_base }} -old ABI-0.dump -new ABI-1.dump
+        continue-on-error: true
+
+      - name: Copy ABI reports
+        run: |
+          cp compat_reports/jarhdf5-/${{ steps.set-hdf5lib-refname.outputs.HDF5R_VERS }}_to_${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}/compat_report.html ${{ inputs.file_base }}-java_compat_report.html
           ls -l compat_reports/${{ inputs.file_base }}/X_to_Y
           cp compat_reports/${{ inputs.file_base }}/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_compat_report.html
-        continue-on-error: true
 
       - name: List files for the report spaces (Linux)
         run: |
@@ -136,5 +139,5 @@ jobs:
         with:
           name: abi-reports
           path: |
-            ${{ inputs.file_base }}-compat_report.html
+            ${{ inputs.file_base }}-hdf5_compat_report.html
             ${{ inputs.file_base }}-java_compat_report.html
