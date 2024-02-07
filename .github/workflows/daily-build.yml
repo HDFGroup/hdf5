@@ -32,7 +32,6 @@ jobs:
     needs: [call-workflow-tarball, call-workflow-ctest]
     uses: ./.github/workflows/abi-report.yml
     with:
-      dot_file_ref: '1.14.3'
       file_ref: '1_14_3'
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_tag: snapshot
