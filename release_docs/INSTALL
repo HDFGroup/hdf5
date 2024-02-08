@@ -7,7 +7,7 @@ This file provides instructions for installing the HDF5 software.
 For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
 
    HDF Forum:     https://forum.hdfgroup.org/
-   HDF Helpdesk:  https://portal.hdfgroup.org/display/support/The+HDF+Help+Desk
+   HDF Helpdesk:  https://hdfgroup.atlassian.net/servicedesk/customer/portals
 
 CONTENTS
 --------
@@ -51,10 +51,8 @@ CONTENTS
 *****************************************************************************
 
 1. Obtaining HDF5
-        The latest supported public release of HDF5 is available from
-        https://www.hdfgroup.org/downloads/hdf5/.  For Unix and UNIX-like
-        platforms, it is available in tar format compressed with gzip.
-        For Microsoft Windows, it is in ZIP format.
+        The latest supported public releases of HDF5 are available on
+        https://github.com/HDFGroup/hdf5.
 
 
 2. Quick installation
@@ -63,7 +61,6 @@ CONTENTS
         and support programs. For example, to install HDF5 version X.Y.Z at
         location /usr/local/hdf5, use the following steps.
 
-            $ gunzip < hdf5-X.Y.Z.tar.gz | tar xf -
             $ cd hdf5-X.Y.Z
             $ ./configure --prefix=/usr/local/hdf5 <more configure_flags>
             $ make
@@ -71,10 +68,6 @@ CONTENTS
             $ make install
             $ make check-install        # verify installation.
 
-        Some versions of the tar command support the -z option. In such cases,
-        the first step above can be simplified to the following:
-
-            $ tar zxf hdf5-X.Y.Z.tar.gz
 
         <configure_flags> above refers to the configure flags appropriate
         to your installation.  For example, to install HDF5 with the
