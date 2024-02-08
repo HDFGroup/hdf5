@@ -2050,8 +2050,8 @@ error:
 
 size_t
 filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-       const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
-       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+       const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+       void H5_ATTR_UNUSED **buf)
 {
     *buf_size = 0;
     return nbytes;
