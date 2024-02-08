@@ -2049,18 +2049,11 @@ error:
 }
 
 size_t
-filter(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned int H5_ATTR_UNUSED cd_values[],
-       size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+       const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes,
+       size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
-    buf_size = 0;
-
-    if (flags & H5Z_FLAG_REVERSE) {
-        /* No-op */
-    }
-    else {
-        /* No-op */
-    }
-
+    *buf_size = 0;
     return nbytes;
 }
 
@@ -2082,7 +2075,7 @@ test_create_dataset_creation_properties(void)
     void        *read_buf                                                             = NULL;
     unsigned int filter_params[DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS] = {1, 2, 3};
     unsigned int filter_params_out[DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS];
-    char         ud_filter_name[strlen(DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME)];
+    char         ud_filter_name[sizeof(DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NAME)];
     int          nfilters            = 0;
     H5Z_filter_t retrieved_filter_id = H5I_INVALID_HID;
     size_t       num_filter_params   = DATASET_CREATION_PROPERTIES_TEST_UD_FILTER_NUM_PARAMS;
