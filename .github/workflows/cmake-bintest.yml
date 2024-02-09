@@ -153,7 +153,6 @@ jobs:
   # MacOS w/ Clang + CMake
   #
     name: "MacOS Clang Binary Test"
-#    if: false
     runs-on: macos-13
     steps:
       - name: Install Dependencies (MacOS)
