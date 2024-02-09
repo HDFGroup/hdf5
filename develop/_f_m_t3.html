@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.365e233</span>
+   &#160;<span id="projectnumber">1.15.0.33bb197</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -10889,6 +10889,12 @@ within the embedded dataspace]<br />
               <a name="ClassReference"></a>
                 <p>Class specific information for the Reference class (Class 7):</p>
 
+                <p>Note that for region references, the stored data is
+                   a <a href="#GlobalHeapID">Global Heap ID</a> pointing to information
+                   about the region stored in the global heap.
+                </p>
+
+
                 <div align="center">
                   <table class="desc">
                     <caption>
@@ -11227,6 +11233,11 @@ within the embedded dataspace]<br />
                   <a name="ClassVarLen"></a>
                     <p>Class specific information for the Variable-length class (Class 9):</p>
 
+                    <p>Note that data with a variable length type is stored on the global heap.
+                      Locations that would normally store the data directly (e.g. attribute message)
+                      will instead contain a <a href="#GlobalHeapID">Global Heap ID</a>.
+                    </p>
+
                     <div align="center">
                       <table class="desc">
                         <caption>
@@ -11385,7 +11396,7 @@ within the embedded dataspace]<br />
                         </tr>
 
                         <tr>
-                          <td colspan="4"><br />Base Type<br /><br /></td>
+                          <td colspan="4"><br />Parent Type Message<br /><br /></td>
                         </tr>
 
                       </table>
@@ -11403,11 +11414,14 @@ within the embedded dataspace]<br />
 	                    </tr>
 
 	                    <tr>
-	                      <td><p>Base Type</p></td>
+	                      <td><p>Parent Type</p></td>
 	                      <td>
-                            <p>Each variable-length type is based on some parent type.  The
-                              information for that parent type is described recursively by
-                              this field.
+                            <p>Each variable-length type is based on some parent type.
+                              This field contains the datatype message describing that parent type.
+                              In the case of nested variable-length types, this parent datatype message will
+                              recursively contain all parent datatype messages.
+
+                              Variable-length strings are considered to have the parent type `H5T_NATIVE_UCHAR`.
                             </p>
                           </td>
 	                    </tr>
@@ -31286,6 +31300,12 @@ within the embedded dataspace]<br />
               <a name="ClassReference"></a>
                 <p>Class specific information for the Reference class (Class 7):</p>
 
+                <p>Note that for region references, the stored data is
+                   a <a href="#GlobalHeapID">Global Heap ID</a> pointing to information
+                   about the region stored in the global heap.
+                </p>
+
+
                 <div align="center">
                   <table class="desc">
                     <caption>
@@ -31624,6 +31644,11 @@ within the embedded dataspace]<br />
                   <a name="ClassVarLen"></a>
                     <p>Class specific information for the Variable-length class (Class 9):</p>
 
+                    <p>Note that data with a variable length type is stored on the global heap.
+                      Locations that would normally store the data directly (e.g. attribute message)
+                      will instead contain a <a href="#GlobalHeapID">Global Heap ID</a>.
+                    </p>
+
                     <div align="center">
                       <table class="desc">
                         <caption>
@@ -31782,7 +31807,7 @@ within the embedded dataspace]<br />
                         </tr>
 
                         <tr>
-                          <td colspan="4"><br />Base Type<br /><br /></td>
+                          <td colspan="4"><br />Parent Type Message<br /><br /></td>
                         </tr>
 
                       </table>
@@ -31800,11 +31825,14 @@ within the embedded dataspace]<br />
 	                    </tr>
 
 	                    <tr>
-	                      <td><p>Base Type</p></td>
+	                      <td><p>Parent Type</p></td>
 	                      <td>
-                            <p>Each variable-length type is based on some parent type.  The
-                              information for that parent type is described recursively by
-                              this field.
+                            <p>Each variable-length type is based on some parent type.
+                              This field contains the datatype message describing that parent type.
+                              In the case of nested variable-length types, this parent datatype message will
+                              recursively contain all parent datatype messages.
+
+                              Variable-length strings are considered to have the parent type `H5T_NATIVE_UCHAR`.
                             </p>
                           </td>
 	                    </tr>
