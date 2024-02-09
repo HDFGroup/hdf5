@@ -46,7 +46,6 @@ jobs:
       - uses: actions/checkout@v4.1.1
 
       - name: Get published binary (Linux)
-        if: ${{ (inputs.use_environ == 'snapshots') }}
         uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
         with:
             name: tgz-ubuntu-2204_gcc-binary
