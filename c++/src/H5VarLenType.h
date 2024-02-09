@@ -52,7 +52,7 @@ class H5_DLLCPP VarLenType : public DataType {
     VarLenType(const H5Location &loc, const H5std_string &name);
 
     // Noop destructor
-    virtual ~VarLenType() override;
+    virtual ~VarLenType() override = default;
 
     // Default constructor
     VarLenType();
