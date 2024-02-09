@@ -37,8 +37,8 @@ main(void)
         }
 
         // push a custom error message onto the default stack
-        if (H5Epush2(H5E_DEFAULT, __FILE__, __FUNCTION__, __LINE__, cls, major, minor, "%s Hello, error %s\n", RED, RESET) <
-            0) {
+        if (H5Epush2(H5E_DEFAULT, __FILE__, __FUNCTION__, __LINE__, cls, major, minor, "%s Hello, error %s\n",
+                     RED, RESET) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_push;
         }
