@@ -309,6 +309,58 @@ CONTAINS
 
   END SUBROUTINE h5epush_f
 
+  SUBROUTINE h5eregister_class_f(cls_name, lib_name, version, class_id, hdferr)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN)  :: cls_name
+    CHARACTER(LEN=*), INTENT(IN)  :: lib_name
+    CHARACTER(LEN=*), INTENT(IN)  :: version
+    INTEGER(HID_T)  , INTENT(OUT) :: class_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(cls_name)+1,KIND=C_CHAR) :: c_cls_name
+    CHARACTER(LEN=LEN_TRIM(lib_name)+1,KIND=C_CHAR) :: c_lib_name
+    CHARACTER(LEN=LEN_TRIM(version)+1,KIND=C_CHAR) :: c_version
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Eregister_class(cls_name, lib_name, version) &
+            BIND(C,NAME='H5Eregister_class')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: cls_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: lib_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: version
+
+       END FUNCTION H5Eregister_class
+    END INTERFACE
+
+    c_cls_name = TRIM(cls_name)//C_NULL_CHAR
+    c_lib_name = TRIM(lib_name)//C_NULL_CHAR
+    c_version  = TRIM(version)//C_NULL_CHAR
+
+    class_id = H5Eregister_class(c_cls_name, c_lib_name, c_version)
+
+    hdferr = 0
+    IF(class_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5eregister_class_f
+
+  SUBROUTINE h5eunregister_class_f(class_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: class_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Eunregister_class(class_id) BIND(C, NAME='H5Eunregister_class')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: class_id
+       END FUNCTION H5Eunregister_class
+    END INTERFACE
+
+    hdferr = INT(H5Eunregister_class(class_id))
+
+  END SUBROUTINE h5eunregister_class_f
+
 #if 0
 !>
 !! \ingroup FH5E
