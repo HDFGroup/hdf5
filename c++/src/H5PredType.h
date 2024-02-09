@@ -41,7 +41,7 @@ class H5_DLLCPP PredType : public AtomType {
     PredType(const PredType &original);
 
     // Noop destructor
-    virtual ~PredType() override;
+    virtual ~PredType() override = default;
 
     /*! \brief This dummy function do not inherit from DataType - it will
         throw a DataTypeIException if invoked.

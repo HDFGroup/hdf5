@@ -316,12 +316,4 @@ AbstractDs::getVarLenType() const
     }
 }
 
-//--------------------------------------------------------------------------
-// Function:    AbstractDs destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-AbstractDs::~AbstractDs()
-{
-}
-
 } // namespace H5

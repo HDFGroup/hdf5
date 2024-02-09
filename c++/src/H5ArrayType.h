@@ -60,7 +60,7 @@ class H5_DLLCPP ArrayType : public DataType {
     ArrayType(const hid_t existing_id);
 
     // Noop destructor
-    virtual ~ArrayType() override;
+    virtual ~ArrayType() override = default;
 
     // Default constructor
     ArrayType();
