@@ -38,6 +38,7 @@
 MODULE H5E
 
   USE H5GLOBAL
+  USE H5fortkit
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: PRINTON  = 1 !< Turn on automatic printing of errors
@@ -62,17 +63,17 @@ CONTAINS
     INTEGER(HID_T) :: estack_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5eclear_c(estack_id_default) BIND(C,NAME='h5eclear_c')
-         IMPORT :: HID_T
+       INTEGER(C_INT) FUNCTION H5Eclear(err_stack) BIND(C,NAME='H5Eclear2')
+         IMPORT :: C_INT, HID_T
          IMPLICIT NONE
-         INTEGER(HID_T) :: estack_id_default
-       END FUNCTION h5eclear_c
+         INTEGER(HID_T), VALUE :: err_stack
+       END FUNCTION H5Eclear
     END INTERFACE
 
     estack_id_default = H5E_DEFAULT_F
     IF(PRESENT(estack_id)) estack_id_default = estack_id
 
-    hdferr = h5eclear_c(estack_id_default)
+    hdferr = INT(H5Eclear(estack_id_default))
   END SUBROUTINE h5eclear_f
 
 !>
@@ -166,7 +167,6 @@ CONTAINS
 
     hdferr = h5eget_minor_c(error_no, name)
   END SUBROUTINE h5eget_minor_f
-
 !>
 !! \ingroup FH5E
 !!
@@ -214,6 +214,177 @@ CONTAINS
 
     hdferr = h5eset_auto2_c(printflag, estack_id_default, func_default, client_data_default)
   END SUBROUTINE h5eset_auto_f
+
+  SUBROUTINE h5epush_f(err_stack, cls_id, maj_id, min_id, msg, hdferr, file, func, line, &
+       arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, &
+       arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: err_stack
+    INTEGER(HID_T), INTENT(IN) :: cls_id
+    INTEGER(HID_T), INTENT(IN) :: maj_id
+    INTEGER(HID_T), INTENT(IN) :: min_id
+    CHARACTER(LEN=*), INTENT(IN) :: msg
+    INTEGER, INTENT(OUT) :: hdferr
+
+    TYPE(C_PTR), OPTIONAL, INTENT(IN), TARGET :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN), TARGET :: func
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
+    CHARACTER(LEN=*), OPTIONAL, INTENT(IN), TARGET :: arg1, arg2, arg3, arg4, arg5, &
+         arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, &
+         arg16, arg17, arg18, arg19, arg20
+
+    TYPE(C_PTR) :: file_def = C_NULL_PTR
+    TYPE(C_PTR) :: func_def = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_def = 0
+    TYPE(C_PTR) :: arg1_def = C_NULL_PTR, arg2_def = C_NULL_PTR, &
+         arg3_def = C_NULL_PTR, arg4_def = C_NULL_PTR, &
+         arg5_def = C_NULL_PTR, arg6_def = C_NULL_PTR, &
+         arg7_def = C_NULL_PTR, arg8_def = C_NULL_PTR, &
+         arg9_def = C_NULL_PTR, arg10_def = C_NULL_PTR, &
+         arg11_def = C_NULL_PTR, arg12_def = C_NULL_PTR, &
+         arg13_def = C_NULL_PTR, arg14_def = C_NULL_PTR, &
+         arg15_def = C_NULL_PTR, arg16_def = C_NULL_PTR, &
+         arg17_def = C_NULL_PTR, arg18_def = C_NULL_PTR, &
+         arg19_def = C_NULL_PTR, arg20_def = C_NULL_PTR
+
+    INTERFACE
+       INTEGER FUNCTION h5epush_c(err_stack, cls_id, maj_id, min_id, msg, file, func, line, &
+            arg1, arg2, arg3, arg4, arg5, &
+            arg6, arg7, arg8, arg9, arg10, &
+            arg11, arg12, arg13, arg14, arg15, &
+            arg16, arg17, arg18, arg19, arg20) BIND(C, NAME='h5epush_c')
+
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T) :: err_stack
+         INTEGER(HID_T) :: cls_id
+         INTEGER(HID_T) :: maj_id
+         INTEGER(HID_T) :: min_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: msg
+
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         TYPE(C_PTR), VALUE :: arg1, arg2, arg3, arg4, &
+         arg5, arg6, arg7, arg8, &
+         arg9, arg10, arg11, arg12, &
+         arg13, arg14, arg15, arg16, &
+         arg17, arg18, arg19, arg20
+
+       END FUNCTION h5epush_c
+    END INTERFACE
+
+    IF (PRESENT(file)) file_def = C_LOC(file)
+    IF (PRESENT(func)) func_def = C_LOC(func)
+    IF (PRESENT(line)) line_def = INT(line, C_INT)
+
+    IF (PRESENT(arg1)) arg1_def = C_LOC(arg1)
+    IF (PRESENT(arg2)) arg2_def = C_LOC(arg2)
+    IF (PRESENT(arg3)) arg3_def = C_LOC(arg3)
+    IF (PRESENT(arg4)) arg4_def = C_LOC(arg4)
+    IF (PRESENT(arg5)) arg5_def = C_LOC(arg5)
+    IF (PRESENT(arg6)) arg6_def = C_LOC(arg6)
+    IF (PRESENT(arg7)) arg7_def = C_LOC(arg7)
+    IF (PRESENT(arg8)) arg8_def = C_LOC(arg8)
+    IF (PRESENT(arg9)) arg9_def = C_LOC(arg9)
+    IF (PRESENT(arg10)) arg10_def = C_LOC(arg10)
+    IF (PRESENT(arg11)) arg11_def = C_LOC(arg11)
+    IF (PRESENT(arg12)) arg12_def = C_LOC(arg12)
+    IF (PRESENT(arg13)) arg13_def = C_LOC(arg13)
+    IF (PRESENT(arg14)) arg14_def = C_LOC(arg14)
+    IF (PRESENT(arg15)) arg15_def = C_LOC(arg15)
+    IF (PRESENT(arg16)) arg16_def = C_LOC(arg16)
+    IF (PRESENT(arg17)) arg17_def = C_LOC(arg17)
+    IF (PRESENT(arg18)) arg18_def = C_LOC(arg18)
+    IF (PRESENT(arg19)) arg19_def = C_LOC(arg19)
+    IF (PRESENT(arg20)) arg20_def = C_LOC(arg20)   
+
+    hdferr = h5epush_c(err_stack, cls_id, maj_id, min_id, msg, file_def, func_def, line_def, &
+       arg1_def, arg2_def, arg3_def, arg4_def, arg5_def, &
+       arg6_def, arg7_def, arg8_def, arg9_def, arg10_def, &
+       arg11_def, arg12_def, arg13_def, arg14_def, arg15_def, &
+       arg16_def, arg17_def, arg18_def, arg19_def, arg20_def)
+
+
+  END SUBROUTINE h5epush_f
+
+#if 0
+!>
+!! \ingroup FH5E
+!!
+!! \brief Returns a character string describing an error specified by a major error number.
+!!
+!! \param error_no Major error number.
+!! \param name     Character string describing the error.
+!! \param namelen  Number of characters in the name buffer.
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Eget_major()
+!!
+  SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
+    INTEGER, INTENT(IN) :: error_no
+    CHARACTER(LEN=*), INTENT(OUT) :: name
+    INTEGER(SIZE_T), INTENT(IN) :: namelen
+    INTEGER, INTENT(OUT) :: hdferr
+    INTERFACE
+       INTEGER FUNCTION h5eget_major_c(error_no, name, namelen)  BIND(C,NAME='h5eget_major_c')
+         IMPORT :: C_CHAR
+         IMPORT :: SIZE_T
+         IMPLICIT NONE
+         INTEGER :: error_no
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(SIZE_T), INTENT(IN) :: namelen
+       END FUNCTION h5eget_major_c
+    END INTERFACE
+
+    hdferr = h5eget_major_c(error_no, name, namelen)
+  END SUBROUTINE h5eget_major_f
+!>
+!! \ingroup FH5E
+!!
+!! \brief Returns a character string describing an error specified by a minor error number.
+!!
+!! \param error_no Minor error number.
+!! \param name     Character string describing the error.
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Eget_minor()
+!!
+  SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
+    INTEGER         , INTENT(IN)  :: error_no
+    CHARACTER(LEN=*), INTENT(OUT) :: name
+    INTEGER         , INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
+    TYPE(C_PTR) :: f_ptr
+    !CHARACTER(LEN=LEN(name), kind=c_char),  POINTER ::
+
+    INTERFACE
+       FUNCTION H5Eget_minor(error_no) RESULT(name) BIND(C,NAME='H5Eget_minor')
+         IMPORT :: C_PTR, C_INT
+         INTEGER(C_INT), VALUE :: error_no
+         TYPE(C_PTR)    :: name
+       END FUNCTION H5Eget_minor
+    END INTERFACE
+
+    f_ptr = C_LOC(c_name(1:1)(1:1))
+    f_ptr = H5Eget_minor( INT(error_no, C_INT) )
+
+    hdferr = 0
+    IF( .not. c_associated(f_ptr))THEN
+       hdferr = -1
+       PRINT*, "NOT"
+    ELSE
+       PRINT*, "YES", c_name(1)
+     !  CALL C_F_POINTER(c_name(1), data)
+     !  f_ptr = C_LOC(c_name(1:1)(1:1)
+
+       CALL HD5c2fstring(name, c_name, LEN(name))
+    ENDIF
+
+  END SUBROUTINE h5eget_minor_f
+#endif
 
 END MODULE H5E
 

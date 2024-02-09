@@ -251,3 +251,37 @@ h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *cli
 
     return ret_val;
 }
+
+int_f
+h5epush_c( hid_t_f *err_stack,  hid_t_f *cls_id,  hid_t_f *maj_id,  hid_t_f *min_id,
+           _fcd msg, size_t_f *msg_len,
+           char *file, char *func, int *line,
+           char *arg1, char *arg2, char *arg3, char *arg4,
+           char *arg5, char *arg6, char *arg7, char *arg8,
+           char *arg9, char *arg10, char *arg11, char *arg12,
+           char *arg13, char *arg14, char *arg15, char *arg16,
+           char *arg17, char *arg18, char *arg19, char *arg20 )
+/******/
+{
+
+  char *c_msg  = NULL; /* Buffer to hold C string */
+  int_f ret_value = 0; /* Return value */
+  /*
+   * Convert FORTRAN name to C name
+   */
+  if (NULL == (c_msg = HD5f2cstring(msg, (size_t)*msg_len)))
+        HGOTO_DONE(FAIL);
+
+  if (H5Epush2((hid_t)*err_stack, file, func, (uint)*line, (hid_t)*cls_id, (hid_t)*maj_id, (hid_t)*min_id,
+               c_msg,
+               arg1, arg2, arg3, arg4, arg5,
+               arg6, arg7, arg8, arg9, arg10,
+               arg11, arg12, arg13, arg14, arg15,
+               arg16, arg17, arg18, arg19, arg20 ) < 0)
+    HGOTO_DONE(FAIL);
+
+done:
+  if (c_msg)
+        free(c_msg);
+  return ret_value;
+}

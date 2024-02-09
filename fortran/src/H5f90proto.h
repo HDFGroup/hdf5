@@ -559,6 +559,14 @@ H5_FCDLL int_f h5eprint_c2(void);
 H5_FCDLL int_f h5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen);
 H5_FCDLL int_f h5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen);
 H5_FCDLL int_f h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data);
+H5_FCDLL int_f h5epush_c( hid_t_f *err_stack,  hid_t_f *cls_id,  hid_t_f *maj_id,  hid_t_f *min_id,
+                          _fcd msg, size_t_f *msg_len,
+                          char *file, char *func, int *line,
+                          char *arg1, char *arg2, char *arg3, char *arg4,
+                          char *arg5, char *arg6, char *arg7, char *arg8,
+                          char *arg9, char *arg10, char *arg11, char *arg12,
+                          char *arg13, char *arg14, char *arg15, char *arg16,
+                          char *arg17, char *arg18, char *arg19, char *arg20);
 
 /*
  * Functions from H5f.c

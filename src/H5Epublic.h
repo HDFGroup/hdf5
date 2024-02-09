@@ -916,7 +916,7 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  *        error number
  *
  * \param[in] maj Major error number
- * \return \herr_t
+ * \return Pointer to the message (success), or NULL (failure)
  *
  * \deprecated 1.8.0 Function deprecated in this release.
  *
@@ -939,7 +939,7 @@ H5_DLL char *H5Eget_major(H5E_major_t maj);
  *        error number
  *
  * \param[in] min Minor error number
- * \return \herr_t
+ * \return Pointer to the message (success), or NULL (failure)
  *
  * \deprecated 1.8.0 Function deprecated and return type changed in this release.
  *

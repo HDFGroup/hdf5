@@ -146,7 +146,7 @@ H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5Fff.lo H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo H5_ff.lo H5Sff.lo
-H5Eff.lo:            $(srcdir)/H5Eff.F90 H5f90global.lo
+H5Eff.lo:            $(srcdir)/H5Eff.F90 H5f90global.lo H5fortkit.lo
 H5ESff.lo:           $(srcdir)/H5ESff.F90 H5f90global.lo
 H5Fff.lo:            $(srcdir)/H5Fff.F90 H5f90global.lo
 H5Gff.lo:            $(srcdir)/H5Gff.F90 H5f90global.lo H5Pff.lo
