@@ -850,7 +850,7 @@ test_creating_groups_using_plugins(hid_t fid)
         char *sp = subgroup_name;
 
         sp += snprintf(subgroup_name, sizeof(subgroup_name), SUBGROUP_PREFIX);
-        sprintf(sp, "%d", i);
+        snprintf(sp, sizeof(sp), "%d", i);
 
         if ((sub_gid = H5Gcreate2(gid, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -909,7 +909,7 @@ test_opening_groups_using_plugins(hid_t fid)
         char *sp = subgroup_name;
 
         sp += snprintf(subgroup_name, sizeof(subgroup_name), SUBGROUP_PREFIX);
-        sprintf(sp, "%d", i);
+        snprintf(sp, sizeof(sp), "%d", i);
 
         if ((sub_gid = H5Gopen2(gid, subgroup_name, H5P_DEFAULT)) < 0)
             TEST_ERROR;
