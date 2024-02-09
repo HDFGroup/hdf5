@@ -136,7 +136,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER :: error_no
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
-         INTEGER(SIZE_T), INTENT(IN) :: namelen
+         INTEGER(SIZE_T) :: namelen
        END FUNCTION h5eget_major_c
     END INTERFACE
 
@@ -157,15 +157,20 @@ CONTAINS
     INTEGER, INTENT(IN) :: error_no
     CHARACTER(LEN=*), INTENT(OUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(SIZE_T) :: namelen
     INTERFACE
-       INTEGER FUNCTION h5eget_minor_c(error_no, name) BIND(C,NAME='h5eget_minor_c')
-         IMPORT :: C_CHAR
+       INTEGER FUNCTION h5eget_minor_c(error_no, name, namelen) BIND(C,NAME='h5eget_minor_c')
+         IMPORT :: C_CHAR, SIZE_T
          INTEGER :: error_no
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(SIZE_T) :: namelen
        END FUNCTION h5eget_minor_c
     END INTERFACE
 
-    hdferr = h5eget_minor_c(error_no, name)
+    namelen = LEN(name)
+    hdferr = h5eget_minor_c(error_no, name, namelen)
+
   END SUBROUTINE h5eget_minor_f
 !>
 !! \ingroup FH5E
@@ -215,7 +220,8 @@ CONTAINS
     hdferr = h5eset_auto2_c(printflag, estack_id_default, func_default, client_data_default)
   END SUBROUTINE h5eset_auto_f
 
-  SUBROUTINE h5epush_f(err_stack, cls_id, maj_id, min_id, msg, hdferr, file, func, line, &
+  SUBROUTINE h5epush_f(err_stack, cls_id, maj_id, min_id, msg, hdferr, &
+       file, func, line, &
        arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, &
        arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
     IMPLICIT NONE
@@ -226,16 +232,16 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: msg
     INTEGER, INTENT(OUT) :: hdferr
 
-    TYPE(C_PTR), OPTIONAL, INTENT(IN), TARGET :: file
-    TYPE(C_PTR), OPTIONAL, INTENT(IN), TARGET :: func
-    INTEGER    , OPTIONAL, INTENT(IN) :: line
-    CHARACTER(LEN=*), OPTIONAL, INTENT(IN), TARGET :: arg1, arg2, arg3, arg4, arg5, &
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: line
+    CHARACTER(LEN=*), OPTIONAL, TARGET :: arg1, arg2, arg3, arg4, arg5, &
          arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, &
          arg16, arg17, arg18, arg19, arg20
 
     TYPE(C_PTR) :: file_def = C_NULL_PTR
     TYPE(C_PTR) :: func_def = C_NULL_PTR
-    INTEGER(KIND=C_INT) :: line_def = 0
+    TYPE(C_PTR) :: line_def = C_NULL_PTR
     TYPE(C_PTR) :: arg1_def = C_NULL_PTR, arg2_def = C_NULL_PTR, &
          arg3_def = C_NULL_PTR, arg4_def = C_NULL_PTR, &
          arg5_def = C_NULL_PTR, arg6_def = C_NULL_PTR, &
@@ -248,7 +254,7 @@ CONTAINS
          arg19_def = C_NULL_PTR, arg20_def = C_NULL_PTR
 
     INTERFACE
-       INTEGER FUNCTION h5epush_c(err_stack, cls_id, maj_id, min_id, msg, file, func, line, &
+       INTEGER FUNCTION h5epush_c(err_stack, cls_id, maj_id, min_id, msg, msg_len, file, func, line, &
             arg1, arg2, arg3, arg4, arg5, &
             arg6, arg7, arg8, arg9, arg10, &
             arg11, arg12, arg13, arg14, arg15, &
@@ -262,10 +268,11 @@ CONTAINS
          INTEGER(HID_T) :: maj_id
          INTEGER(HID_T) :: min_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: msg
+         INTEGER :: msg_len
 
          TYPE(C_PTR), VALUE :: file
          TYPE(C_PTR), VALUE :: func
-         INTEGER(C_INT), VALUE :: line
+         TYPE(C_PTR), VALUE :: line
          TYPE(C_PTR), VALUE :: arg1, arg2, arg3, arg4, &
          arg5, arg6, arg7, arg8, &
          arg9, arg10, arg11, arg12, &
@@ -275,9 +282,9 @@ CONTAINS
        END FUNCTION h5epush_c
     END INTERFACE
 
-    IF (PRESENT(file)) file_def = C_LOC(file)
-    IF (PRESENT(func)) func_def = C_LOC(func)
-    IF (PRESENT(line)) line_def = INT(line, C_INT)
+    IF (PRESENT(file)) file_def = file
+    IF (PRESENT(func)) func_def = func
+    IF (PRESENT(line)) line_def = line
 
     IF (PRESENT(arg1)) arg1_def = C_LOC(arg1)
     IF (PRESENT(arg2)) arg2_def = C_LOC(arg2)
@@ -300,12 +307,12 @@ CONTAINS
     IF (PRESENT(arg19)) arg19_def = C_LOC(arg19)
     IF (PRESENT(arg20)) arg20_def = C_LOC(arg20)   
 
-    hdferr = h5epush_c(err_stack, cls_id, maj_id, min_id, msg, file_def, func_def, line_def, &
-       arg1_def, arg2_def, arg3_def, arg4_def, arg5_def, &
-       arg6_def, arg7_def, arg8_def, arg9_def, arg10_def, &
-       arg11_def, arg12_def, arg13_def, arg14_def, arg15_def, &
-       arg16_def, arg17_def, arg18_def, arg19_def, arg20_def)
-
+    hdferr = h5epush_c(err_stack, cls_id, maj_id, min_id, msg, LEN(msg), &
+         file_def, func_def, line_def, &
+         arg1_def, arg2_def, arg3_def, arg4_def, arg5_def, &
+         arg6_def, arg7_def, arg8_def, arg9_def, arg10_def, &
+         arg11_def, arg12_def, arg13_def, arg14_def, arg15_def, &
+         arg16_def, arg17_def, arg18_def, arg19_def, arg20_def)
 
   END SUBROUTINE h5epush_f
 
@@ -361,6 +368,55 @@ CONTAINS
 
   END SUBROUTINE h5eunregister_class_f
 
+  SUBROUTINE h5ecreate_msg_f(class_id, msg_type, msg, err_id, hdferr)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)  , INTENT(IN)  :: class_id
+    INTEGER         , INTENT(IN)  :: msg_type
+    CHARACTER(LEN=*), INTENT(IN)  :: msg
+    INTEGER(HID_T)  , INTENT(OUT) :: err_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CHARACTER(LEN=LEN_TRIM(msg)+1,KIND=C_CHAR) :: c_msg
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Ecreate_msg(class_id, msg_type, msg) &
+            BIND(C,NAME='H5Ecreate_msg')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE  :: class_id
+         INTEGER(C_INT), VALUE  :: msg_type
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: msg
+       END FUNCTION H5Ecreate_msg
+    END INTERFACE
+
+    c_msg = TRIM(msg)//C_NULL_CHAR
+
+    err_id = H5Ecreate_msg(class_id, INT(msg_type, C_INT), c_msg)
+
+    hdferr = 0
+    IF(err_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5ecreate_msg_f
+
+  SUBROUTINE h5eclose_msg_f(err_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: err_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Eclose_msg(err_id) BIND(C, NAME='H5Eclose_msg')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: err_id
+       END FUNCTION H5Eclose_msg
+    END INTERFACE
+
+    hdferr = INT(H5Eclose_msg(err_id))
+
+  END SUBROUTINE h5eclose_msg_f
+
 #if 0
 !>
 !! \ingroup FH5E
@@ -386,7 +442,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER :: error_no
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
-         INTEGER(SIZE_T), INTENT(IN) :: namelen
+         INTEGER(SIZE_T) :: namelen
        END FUNCTION h5eget_major_c
     END INTERFACE
 

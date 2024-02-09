@@ -197,4 +197,53 @@ SUBROUTINE test_error(total_error)
 
 END SUBROUTINE test_error
 
+SUBROUTINE test_error_stack(total_error)
+
+  IMPLICIT NONE
+
+  INTEGER :: total_error
+  INTEGER :: error
+  INTEGER(HID_T) :: cls_id, major, minor
+  CHARACTER(LEN=18), TARGET :: file
+  CHARACTER(LEN=18), TARGET :: func
+  INTEGER          , TARGET :: line
+  TYPE(C_PTR) :: ptr1, ptr2, ptr3
+  CHARACTER(LEN=180) :: name
+
+  CALL h5eregister_class_f("Custom error class", "H5E_F03", "0.1", cls_id, error)
+  CALL check("H5Eregister_class_f", error, total_error)
+
+  CALL H5Ecreate_msg_f(cls_id, H5E_MAJOR_F, "Okay, Houston, we've had a problem here", major, error)
+  CALL check("H5Ecreate_msg_f", error, total_error)
+  CALL H5Ecreate_msg_f(cls_id, H5E_MINOR_F, "Oops!", minor, error)
+  CALL check("H5Ecreate_msg_f", error, total_error)
+
+  file = "FILE"//C_NULL_CHAR
+  func = "FUNC"//C_NULL_CHAR
+  line = 99
+
+  ptr1 = C_LOC(file)
+  ptr2 = C_LOC(func)
+  ptr3 = C_LOC(line)
+
+  ! push a custom error message onto the default stack
+  CALL H5Epush_f(H5E_DEFAULT_F, cls_id, major, minor, "%s Hello, error %s"//C_NEW_LINE, error, &
+       ptr1, ptr2, ptr3, &
+       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+
+  CALL check("H5Epush_f", error, total_error)
+
+  CALL h5eprint_f(error) !, "stderr")
+  CALL check("h5eprint_f", error, total_error)
+
+  CALL H5Eclose_msg_f(major, error)
+  CALL check("H5Eclose_msg_f", error, total_error)
+  CALL H5Eclose_msg_f(minor, error)
+  CALL check("H5Eclose_msg_f", error, total_error)
+
+  CALL h5eunregister_class_f(cls_id, error)
+  CALL check("H5Eunregister_class_f", error, total_error)
+
+END SUBROUTINE test_error_stack
+
 END MODULE TH5E_F03
