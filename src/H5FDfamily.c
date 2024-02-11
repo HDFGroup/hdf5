@@ -234,27 +234,27 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate new filename buffer");
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = strstr(old_filename, ".h5"))) {
+    file_extension = strstr(old_filename, ".h5");
+    if (file_extension) {
         /* Insert the printf format between the filename and ".h5" extension. */
-        strcpy(tmp_buffer, old_filename);
-        file_extension = strstr(tmp_buffer, ".h5");
-        sprintf(file_extension, "%s%s", suffix, ".h5");
+        intptr_t beginningLength = file_extension - old_filename;
+        snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix, ".h5");
     }
-    else if ((file_extension = strrchr(old_filename, '.'))) {
-        char *new_extension_loc = NULL;
-
+    else {
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the printf format before that extension.
          */
-        strcpy(tmp_buffer, old_filename);
-        new_extension_loc = strrchr(tmp_buffer, '.');
-        sprintf(new_extension_loc, "%s%s", suffix, file_extension);
-    }
-    else {
-        /* If the filename doesn't contain an extension at all, just insert
-         * the printf format at the end of the filename.
-         */
-        snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        file_extension = strrchr(old_filename, '.');
+        if (file_extension) {
+            intptr_t beginningLength = file_extension - old_filename;
+            snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix, file_extension);
+        }
+        else {
+            /* If the filename doesn't contain an extension at all, just insert
+             * the printf format at the end of the filename.
+             */
+            snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        }
     }
 
     ret_value = tmp_buffer;

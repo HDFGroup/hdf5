@@ -532,27 +532,27 @@ H5FD__splitter_get_default_wo_path(char *new_path, size_t new_path_len, const ch
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "filename exceeds max length");
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = strstr(base_filename, ".h5"))) {
+    file_extension = strstr(base_filename, ".h5");
+    if (file_extension) {
         /* Insert the suffix between the filename and ".h5" extension. */
-        strcpy(new_path, base_filename);
-        file_extension = strstr(new_path, ".h5");
-        sprintf(file_extension, "%s%s", suffix, ".h5");
+        intptr_t beginningLength = file_extension - base_filename;
+        snprintf(new_path, new_path_len, "%.*s%s%s", (int)beginningLength, base_filename, suffix, ".h5");
     }
-    else if ((file_extension = strrchr(base_filename, '.'))) {
-        char *new_extension_loc = NULL;
-
+    else {
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the suffix before that extension.
          */
-        strcpy(new_path, base_filename);
-        new_extension_loc = strrchr(new_path, '.');
-        sprintf(new_extension_loc, "%s%s", suffix, file_extension);
-    }
-    else {
-        /* If the filename doesn't contain an extension at all, just insert
-         * the suffix at the end of the filename.
-         */
-        snprintf(new_path, new_path_len, "%s%s", base_filename, suffix);
+        file_extension = strrchr(base_filename, '.');
+        if (file_extension) {
+            intptr_t beginningLength = file_extension - base_filename;
+            snprintf(new_path, new_path_len, "%.*s%s%s", (int)beginningLength, base_filename, suffix, file_extension);
+        }
+        else {
+            /* If the filename doesn't contain an extension at all, just insert
+             * the suffix at the end of the filename.
+             */
+            snprintf(new_path, new_path_len, "%s%s", base_filename, suffix);
+        }
     }
 
 done:

@@ -3884,7 +3884,7 @@ gent_multi(void)
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
         memb_fapl[mt] = H5P_DEFAULT;
         memb_map[mt]  = mt;
-        sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+        snprintf(sv[mt], 1024, "%%s-%c.h5", multi_letters[mt]);
         memb_name[mt] = sv[mt];
         /*printf("memb_name[%d]=%s, memb_map[%d]=%d; ", mt, memb_name[mt], mt, memb_map[mt]);*/
         memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
