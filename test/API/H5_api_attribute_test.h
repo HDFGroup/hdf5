@@ -156,6 +156,10 @@ int H5_api_attribute_test(void);
 #define ATTRIBUTE_ITERATE_TEST_0_ATTRIBUTES_SUBGROUP_NAME   "attribute_iterate_test_0_attributes"
 #define ATTRIBUTE_ITERATE_TEST_0_ATTRIBUTES_DSET_NAME       "attribute_iterate_dset"
 
+#define ATTRIBUTE_COMPOUND_IO_ATTR_DIMS           10
+#define ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME "attribute_compound_io_test_group"
+#define ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME  "attribute_compound_io_test_attr"
+
 #define ATTRIBUTE_STRING_ENCODINGS_RANK         1
 #define ATTRIBUTE_STRING_ENCODINGS_EXTENT       1
 #define ATTRIBUTE_STRING_ENCODINGS_DSET_NAME1   "encoding_dset1"
