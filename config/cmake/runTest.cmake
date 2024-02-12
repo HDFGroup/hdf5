@@ -137,6 +137,7 @@ file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
 string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
 if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE "^.*ulimit -s.*\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
 endif ()
 
