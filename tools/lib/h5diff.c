@@ -1247,7 +1247,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 
                     /*Set up args to pass to worker task. */
                     if (strlen(obj1_fullpath) > 255 || strlen(obj2_fullpath) > 255) {
-                        fprintf(stderr, "The parallel diff only supports object names up to 255 characters\n");
+                        fprintf(stderr,
+                                "The parallel diff only supports object names up to 255 characters\n");
                         MPI_Abort(MPI_COMM_WORLD, 0);
                     } /* end if */
 
