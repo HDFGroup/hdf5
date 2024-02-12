@@ -31,7 +31,7 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__ainfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__ainfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__ainfo_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p, const void *_mesg);
 static void  *H5O__ainfo_copy(const void *_mesg, void *_dest);
 static size_t H5O__ainfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__ainfo_free(void *_mesg);
@@ -175,7 +175,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__ainfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__ainfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p, const void *_mesg)
 {
     const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
     unsigned char      flags; /* Flags for encoding attribute info */

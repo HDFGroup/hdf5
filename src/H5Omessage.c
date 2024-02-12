@@ -1597,7 +1597,7 @@ H5O_msg_encode(H5F_t *f, unsigned type_id, bool disable_shared, unsigned char *b
     assert(type);
 
     /* Encode */
-    if ((type->encode)(f, disable_shared, buf, mesg) < 0)
+    if ((type->encode)(f, disable_shared, SIZE_MAX, buf, mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
 
 done:
@@ -1972,7 +1972,7 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
         }
 #endif /* NDEBUG */
         assert(mesg->type->encode);
-        if ((mesg->type->encode)(f, false, mesg->raw, mesg->native) < 0)
+        if ((mesg->type->encode)(f, false, mesg->raw_size, mesg->raw, mesg->native) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message");
     } /* end if */
 
