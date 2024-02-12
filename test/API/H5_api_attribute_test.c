@@ -8337,7 +8337,6 @@ error:
     return 1;
 }
 
-
 /* A compound type for test_attribute_compound_subset */
 typedef struct attribute_compound_io_t {
     int a;
@@ -8351,15 +8350,15 @@ typedef struct attribute_compound_io_t {
 static int
 test_attribute_compound_subset(void)
 {
-    hsize_t                       dims[1] = {ATTRIBUTE_COMPOUND_IO_ATTR_DIMS};
-    size_t                        i;
-    hid_t                         file_id         = H5I_INVALID_HID;
-    hid_t                         container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t                         attr_id      = H5I_INVALID_HID;
-    hid_t                         space_id     = H5I_INVALID_HID;
-    hid_t                         full_type_id = H5I_INVALID_HID;
-    hid_t                         a_type_id    = H5I_INVALID_HID;
-    hid_t                         b_type_id    = H5I_INVALID_HID;
+    hsize_t                 dims[1] = {ATTRIBUTE_COMPOUND_IO_ATTR_DIMS};
+    size_t                  i;
+    hid_t                   file_id         = H5I_INVALID_HID;
+    hid_t                   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t                   attr_id      = H5I_INVALID_HID;
+    hid_t                   space_id     = H5I_INVALID_HID;
+    hid_t                   full_type_id = H5I_INVALID_HID;
+    hid_t                   a_type_id    = H5I_INVALID_HID;
+    hid_t                   b_type_id    = H5I_INVALID_HID;
     attribute_compound_io_t wbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
     attribute_compound_io_t rbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
     attribute_compound_io_t fbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
@@ -8394,8 +8393,7 @@ test_attribute_compound_subset(void)
     if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME, H5P_DEFAULT,
                                H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        printf("    couldn't create container sub-group '%s'\n",
-                 ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME);
+        printf("    couldn't create container sub-group '%s'\n", ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME);
         goto error;
     }
 
@@ -8419,8 +8417,8 @@ test_attribute_compound_subset(void)
     if (H5Tinsert(b_type_id, "b", HOFFSET(attribute_compound_io_t, b), H5T_NATIVE_INT) < 0)
         TEST_ERROR;
 
-    if ((attr_id = H5Acreate2(group_id, ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME, full_type_id,
-                              space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((attr_id = H5Acreate2(group_id, ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME, full_type_id, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create attribute '%s'\n", ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME);
         goto error;
