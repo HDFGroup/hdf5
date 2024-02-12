@@ -152,8 +152,8 @@ jobs:
           cp compat_reports/${{ inputs.file_base }}_hl/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_compat_report.html
           ls -l compat_reports/${{ inputs.file_base }}_cpp/X_to_Y
           cp compat_reports/${{ inputs.file_base }}_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_cpp_compat_report.html
-          ls -l compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y
-          cp compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
+#          ls -l compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y
+#          cp compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
 
       - name: List files for the report spaces (Linux)
         run: |
@@ -168,5 +168,4 @@ jobs:
             ${{ inputs.file_base }}-hdf5_compat_report.html
             ${{ inputs.file_base }}-hdf5_hl_compat_report.html
             ${{ inputs.file_base }}-hdf5_cpp_compat_report.html
-            ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
             ${{ inputs.file_base }}-java_compat_report.html

@@ -154,7 +154,6 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_cpp_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_cpp_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
@@ -179,7 +178,6 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_cpp_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_cpp_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
