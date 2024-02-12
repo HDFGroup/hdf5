@@ -247,7 +247,8 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
         file_extension = strrchr(old_filename, '.');
         if (file_extension) {
             intptr_t beginningLength = file_extension - old_filename;
-            snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix, file_extension);
+            snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix,
+                     file_extension);
         }
         else {
             /* If the filename doesn't contain an extension at all, just insert

@@ -545,7 +545,8 @@ H5FD__splitter_get_default_wo_path(char *new_path, size_t new_path_len, const ch
         file_extension = strrchr(base_filename, '.');
         if (file_extension) {
             intptr_t beginningLength = file_extension - base_filename;
-            snprintf(new_path, new_path_len, "%.*s%s%s", (int)beginningLength, base_filename, suffix, file_extension);
+            snprintf(new_path, new_path_len, "%.*s%s%s", (int)beginningLength, base_filename, suffix,
+                     file_extension);
         }
         else {
             /* If the filename doesn't contain an extension at all, just insert
