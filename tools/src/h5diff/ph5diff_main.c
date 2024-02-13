@@ -85,8 +85,9 @@ main(int argc, char *argv[])
 
             MPI_Barrier(MPI_COMM_WORLD);
 
-            print_info(&opts);
             print_manager_output();
+
+            print_info(&opts);
         }
         /* All other tasks become workers and wait for assignments. */
         else {
