@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-PROJECT (H5PAR_C C)
+project (H5PAR_C C)
 
 #-----------------------------------------------------------------------------
 # Define Sources

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
-PROJECT (HDF5Examples_C C)
+project (HDF5Examples_C C)
 
 #-----------------------------------------------------------------------------
 # Build the C Examples
