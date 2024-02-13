@@ -14,7 +14,7 @@ set (HDF_BUILD_CPP_LIB ${HDF5_BUILD_CPP_LIB} CACHE BOOL "Build HDF5 C++ Library"
 set (HDF_BUILD_HL_LIB ${HDF5_BUILD_HL_LIB} CACHE BOOL "Build HIGH Level examples" FORCE)
 set (HDF_ENABLE_THREADSAFE ${HDF5_ENABLE_THREADSAFE} CACHE BOOL "Enable examples thread-safety" FORCE)
 set (HDF_ENABLE_PARALLEL ${HDF5_ENABLE_PARALLEL} CACHE BOOL "Enable examples parallel build (requires MPI)" FORCE)
-set (H5EX_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "TRUE to use GNU Coding Standard install directory variables, FALSE to use historical settings" FORCE)
+set (H5EX_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" FORCE)
 
 #preset HDF5 cache vars to this projects libraries instead of searching
 set (H5EX_HDF5_HEADER "H5pubconf.h" CACHE STRING "Name of HDF5 header" FORCE)

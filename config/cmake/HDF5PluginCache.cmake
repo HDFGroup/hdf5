@@ -39,4 +39,4 @@ set (H5PL_TGZ_NAME "${PLUGIN_TGZ_NAME}" CACHE STRING "Use plugins from compresse
 set (PL_PACKAGE_NAME "${PLUGIN_PACKAGE_NAME}" CACHE STRING "Name of plugins package" FORCE)
 set (H5PL_CPACK_ENABLE OFF CACHE BOOL "Enable CPack include and components" FORCE)
 
-set (H5PL_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "TRUE to use GNU Coding Standard install directory variables" FORCE)
+set (H5PL_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS} CACHE BOOL "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" FORCE)
