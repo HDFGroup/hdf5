@@ -466,7 +466,7 @@ done
 
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
-(cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
+(cd "$tmpdir" && exec tar -ch --exclude-vcs --exclude=*autom4te* --exclude=.clang-format --exclude=.codespellrc --exclude=.devcontainer --exclude=.git* --exclude=.h5chkright.ini -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
 
 # Compress
 #SHA256=$HDF5_VERS.sha256
