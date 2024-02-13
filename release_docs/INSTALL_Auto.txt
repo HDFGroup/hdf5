@@ -30,7 +30,7 @@ Obtaining HDF5 source code
              hdf5-1_14_"X".tar.gz or hdf5-1_14_"X".zip
 
       and put it in "myhdfstuff".
-      Uncompress the file. There should be a hdf-4.3."X" folder.
+      Uncompress the file. There should be a hdf5-1.14."X" folder.
 
 
 ========================================================================
