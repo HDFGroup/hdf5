@@ -1192,7 +1192,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                  * object.
                  */
 
-                if (NULL == (this_str = (char *)malloc(64)))
+                const size_t size = 64;
+                if (NULL == (this_str = (char *)malloc(size)))
                     H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
                 if ((obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, cptr)) < 0)
@@ -1206,25 +1207,25 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
                 switch (oi.type) {
                     case H5O_TYPE_GROUP:
-                        if (sprintf(this_str, "%s %s", H5_TOOLS_GROUP, obj_tok_str) < 0)
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: sprintf failure");
+                        if (snprintf(this_str, size, "%s %s", H5_TOOLS_GROUP, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                         break;
 
                     case H5O_TYPE_DATASET:
-                        if (sprintf(this_str, "%s %s", H5_TOOLS_DATASET, obj_tok_str) < 0)
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: sprintf failure");
+                        if (snprintf(this_str, size, "%s %s", H5_TOOLS_DATASET, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                         break;
 
                     case H5O_TYPE_NAMED_DATATYPE:
-                        if (sprintf(this_str, "%s %s", H5_TOOLS_DATATYPE, obj_tok_str) < 0)
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: sprintf failure");
+                        if (snprintf(this_str, size, "%s %s", H5_TOOLS_DATATYPE, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                         break;
 
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
-                        if (sprintf(this_str, "%u-%s", (unsigned)oi.type, obj_tok_str) < 0)
-                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: sprintf failure");
+                        if (snprintf(this_str, size, "%u-%s", (unsigned)oi.type, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                         break;
                 }
 

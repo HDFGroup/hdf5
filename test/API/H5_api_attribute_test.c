@@ -10725,7 +10725,7 @@ test_attribute_many(void)
 
     /* Create many attributes */
     for (u = 0; u < ATTRIBUTE_MANY_NUMB; u++) {
-        sprintf(attrname, "many-%06u", u);
+        snprintf(attrname, sizeof(attrname), "many-%06u", u);
 
         if ((attr_id = H5Acreate2(group_id, attrname, attr_dtype, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
