@@ -417,6 +417,47 @@ CONTAINS
 
   END SUBROUTINE h5eclose_msg_f
 
+  SUBROUTINE H5Eget_msg_f(msg_id, msg_type, msg, msg_size, hdferr, req_size)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)  , INTENT(IN)  :: msg_id
+    INTEGER         , INTENT(OUT) :: msg_type
+    CHARACTER(LEN=*), INTENT(OUT) :: msg
+    INTEGER(SIZE_T) , INTENT(OUT) :: msg_size
+    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(SIZE_T) , INTENT(INOUT), OPTIONAL :: req_size
+
+    CHARACTER(LEN=LEN_TRIM(msg)+1,KIND=C_CHAR) :: c_msg
+    INTEGER(C_INT) :: c_msg_type
+    TYPE(C_PTR) :: f_ptr
+
+    INTERFACE
+       INTEGER(SIZE_T) FUNCTION H5Eget_msg(msg_id, msg_type, msg, size) &
+            BIND(C,NAME='H5Eget_msg')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE  :: msg_id
+         INTEGER(C_INT)         :: msg_type
+         TYPE(C_PTR)    , VALUE :: msg
+         INTEGER(SIZE_T), VALUE :: size
+       END FUNCTION H5Eget_msg
+    END INTERFACE
+
+    IF(PRESENT(req_size))THEN
+       msg_size = H5Eget_msg_f(msg_id, c_msg_type, C_NULL_PTR, 0)
+    ELSE
+       msg_size = H5Eget_msg_f(msg_id, c_msg_type, f_ptr, size)
+    ENDIF
+
+    msg_type = INT(msg_type)
+
+    hdferr = 0
+    IF(msg_size.LT.0) &
+         hdferr = -1
+
+  END SUBROUTINE H5Eget_msg_f
+
 #if 0
 !>
 !! \ingroup FH5E
