@@ -124,7 +124,7 @@ class H5_DLLCPP H5Object : public H5Location {
     virtual void p_setId(const hid_t new_id) override = 0;
 
     // Noop destructor.
-    virtual ~H5Object() override;
+    virtual ~H5Object() override = default;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

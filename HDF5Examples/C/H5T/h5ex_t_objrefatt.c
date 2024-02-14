@@ -38,7 +38,7 @@ main(void)
     hid_t      ref_type = H5T_STD_REF; /* Reference datatype */
     H5R_ref_t  wdata[DIM0];            /* buffer to write to disk */
     H5R_ref_t *rdata = NULL;           /* buffer to read into*/
-    H5R_type_t objtype;                /* Reference type */
+    H5O_type_t objtype;                /* Reference type */
 #else
     hid_t       ref_type = H5T_STD_REF_OBJ; /* Reference datatype */
     hobj_ref_t  wdata[DIM0];                /* Write buffer */

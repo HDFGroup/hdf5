@@ -81,7 +81,7 @@ class H5_DLLCPP EnumType : public DataType {
     // Copy constructor: same as the original EnumType.
     EnumType(const EnumType &original);
 
-    virtual ~EnumType() override;
+    virtual ~EnumType() override = default;
 
 }; // end of EnumType
 } // namespace H5

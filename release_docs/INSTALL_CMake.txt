@@ -788,13 +788,14 @@ if (WINDOWS)
   DISABLE_PDB_FILES "Do not install PDB files" OFF
 
 ---------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB      "Build HDF5 C++ Library"          OFF
-HDF5_BUILD_EXAMPLES     "Build HDF5 Library Examples"     ON
-HDF5_BUILD_FORTRAN      "Build FORTRAN support"           OFF
-HDF5_BUILD_JAVA         "Build JAVA support"              OFF
-HDF5_BUILD_HL_LIB       "Build HIGH Level HDF5 Library"   ON
-HDF5_BUILD_TOOLS        "Build HDF5 Tools"                ON
-HDF5_BUILD_HL_GIF_TOOLS "Build HIGH Level HDF5 GIF Tools" OFF
+HDF5_BUILD_CPP_LIB        "Build HDF5 C++ Library"          OFF
+HDF5_BUILD_EXAMPLES       "Build HDF5 Library Examples"     ON
+HDF5_BUILD_FORTRAN        "Build FORTRAN support"           OFF
+HDF5_BUILD_JAVA           "Build JAVA support"              OFF
+HDF5_BUILD_HL_LIB         "Build HIGH Level HDF5 Library"   ON
+HDF5_BUILD_TOOLS          "Build HDF5 Tools"                ON
+HDF5_BUILD_HL_GIF_TOOLS   "Build HIGH Level HDF5 GIF Tools" OFF
+HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"       OFF
 
 ---------------- HDF5 Folder Build Options ---------------------
 Defaults relative to $<INSTALL_PREFIX>
@@ -809,8 +810,8 @@ else ()
   HDF5_INSTALL_DATA_DIR   "share"
 HDF5_INSTALL_DOC_DIR      "HDF5_INSTALL_DATA_DIR"
 
-HDF5_USE_GNU_DIRS         "TRUE to use GNU Coding Standard install directory variables,
-                           FALSE to use historical settings"                                     FALSE
+HDF5_USE_GNU_DIRS         "ON to use GNU Coding Standard install directory variables,
+                           OFF to use historical settings"                                       OFF
 Defaults as defined by the `GNU Coding Standards`
 HDF5_INSTALL_BIN_DIR      "bin"
 HDF5_INSTALL_LIB_DIR      "lib"
@@ -839,6 +840,7 @@ HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"            
 HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                   OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                          OFF
+HDF5_ENABLE_MAP_API            "Build the map API"                                               OFF
 HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                         ON
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                           OFF
 
@@ -904,7 +906,7 @@ if (BUILD_TESTING)
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                               OFF
-HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     ON
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 
 ZLIB_USE_EXTERNAL         "Use External Library Building for ZLIB"    OFF

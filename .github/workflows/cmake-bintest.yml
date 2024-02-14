@@ -25,17 +25,17 @@ jobs:
         run: choco install ninja
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '19'
           distribution: 'temurin'
 
       - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1.12.1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
@@ -101,13 +101,13 @@ jobs:
         run: sudo apt-get install ninja-build doxygen graphviz
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '19'
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
               name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}
@@ -153,20 +153,19 @@ jobs:
   # MacOS w/ Clang + CMake
   #
     name: "MacOS Clang Binary Test"
-#    if: false
     runs-on: macos-13
     steps:
       - name: Install Dependencies (MacOS)
         run: brew install ninja doxygen
 
       - name: Set up JDK 19
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '19'
           distribution: 'temurin'
 
       - name: Get published binary (MacOS)
-        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
               name: tgz-osx12-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}

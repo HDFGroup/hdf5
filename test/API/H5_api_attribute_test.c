@@ -51,6 +51,8 @@ static int test_attribute_iterate_datatype(void);
 static int test_attribute_iterate_index_saving(void);
 static int test_attribute_iterate_invalid_params(void);
 static int test_attribute_iterate_0_attributes(void);
+static int test_attribute_compound_subset(void);
+static int test_attribute_string_encodings(void);
 static int test_delete_attribute(void);
 static int test_delete_attribute_invalid_params(void);
 static int test_attribute_exists(void);
@@ -99,6 +101,8 @@ static int (*attribute_tests[])(void) = {test_create_attribute_on_root,
                                          test_attribute_iterate_index_saving,
                                          test_attribute_iterate_invalid_params,
                                          test_attribute_iterate_0_attributes,
+                                         test_attribute_compound_subset,
+                                         test_attribute_string_encodings,
                                          test_delete_attribute,
                                          test_delete_attribute_invalid_params,
                                          test_attribute_exists,
@@ -8333,6 +8337,535 @@ error:
     return 1;
 }
 
+/* A compound type for test_attribute_compound_subset */
+typedef struct attribute_compound_io_t {
+    int a;
+    int b;
+} attribute_compound_io_t;
+
+/*
+ * A test to ensure that data is read back correctly from a attribute after it has
+ * been written, using subsets of compound datatypes
+ */
+static int
+test_attribute_compound_subset(void)
+{
+    hsize_t                 dims[1] = {ATTRIBUTE_COMPOUND_IO_ATTR_DIMS};
+    size_t                  i;
+    hid_t                   file_id         = H5I_INVALID_HID;
+    hid_t                   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t                   attr_id      = H5I_INVALID_HID;
+    hid_t                   space_id     = H5I_INVALID_HID;
+    hid_t                   full_type_id = H5I_INVALID_HID;
+    hid_t                   a_type_id    = H5I_INVALID_HID;
+    hid_t                   b_type_id    = H5I_INVALID_HID;
+    attribute_compound_io_t wbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
+    attribute_compound_io_t rbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
+    attribute_compound_io_t fbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
+    attribute_compound_io_t erbuf[ATTRIBUTE_COMPOUND_IO_ATTR_DIMS];
+
+    TESTING_MULTIPART(
+        "verification of attribute data using H5Awrite then H5Aread with compound type subsets");
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        SKIPPED();
+        printf(
+            "    API functions for basic file, group, or attribute aren't supported with this connector\n");
+        return 0;
+    }
+
+    TESTING_2("test setup");
+
+    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
+        goto error;
+    }
+
+    if ((container_group = H5Gopen2(file_id, ATTRIBUTE_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open container group '%s'\n", ATTRIBUTE_TEST_GROUP_NAME);
+        goto error;
+    }
+
+    if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME, H5P_DEFAULT,
+                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create container sub-group '%s'\n", ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME);
+        goto error;
+    }
+
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((full_type_id = H5Tcreate(H5T_COMPOUND, sizeof(attribute_compound_io_t))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(full_type_id, "a", HOFFSET(attribute_compound_io_t, a), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(full_type_id, "b", HOFFSET(attribute_compound_io_t, b), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+
+    if ((a_type_id = H5Tcreate(H5T_COMPOUND, sizeof(attribute_compound_io_t))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(a_type_id, "a", HOFFSET(attribute_compound_io_t, a), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+
+    if ((b_type_id = H5Tcreate(H5T_COMPOUND, sizeof(attribute_compound_io_t))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(b_type_id, "b", HOFFSET(attribute_compound_io_t, b), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+
+    if ((attr_id = H5Acreate2(group_id, ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME, full_type_id, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create attribute '%s'\n", ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME);
+        goto error;
+    }
+
+    PASSED();
+
+    BEGIN_MULTIPART
+    {
+        PART_BEGIN(write_full_read_full)
+        {
+            TESTING_2("H5Awrite then H5Aread with all compound members");
+
+            /* Initialize wbuf */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                wbuf[i].a = (int)(2 * i);
+                wbuf[i].b = (int)(2 * i + 1);
+            }
+
+            /* Write data */
+            if (H5Awrite(attr_id, full_type_id, wbuf) < 0)
+                PART_TEST_ERROR(write_full_read_full);
+
+            /* Update fbuf to match file state */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                fbuf[i].a = wbuf[i].a;
+                fbuf[i].b = wbuf[i].b;
+            }
+
+            /* Initialize rbuf to -1 */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                rbuf[i].a = -1;
+                rbuf[i].b = -1;
+            }
+
+            /* Set erbuf (simply match file state since we're reading the whole
+             * thing) */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                erbuf[i].a = fbuf[i].a;
+                erbuf[i].b = fbuf[i].b;
+            }
+
+            /* Read data */
+            if (H5Aread(attr_id, full_type_id, rbuf) < 0)
+                PART_TEST_ERROR(write_full_read_full);
+
+            /* Verify data */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                if (rbuf[i].a != erbuf[i].a)
+                    PART_TEST_ERROR(write_full_read_full);
+                if (rbuf[i].b != erbuf[i].b)
+                    PART_TEST_ERROR(write_full_read_full);
+            }
+
+            PASSED();
+        }
+        PART_END(write_full_read_full);
+
+        PART_BEGIN(read_a)
+        {
+            TESTING_2("H5Aread with compound member a");
+
+            /* Initialize rbuf to -1 */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                rbuf[i].a = -1;
+                rbuf[i].b = -1;
+            }
+
+            /* Set erbuf (element a comes from the file, element b in untouched)
+             */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                erbuf[i].a = fbuf[i].a;
+                erbuf[i].b = rbuf[i].b;
+            }
+
+            /* Read data */
+            if (H5Aread(attr_id, a_type_id, rbuf) < 0)
+                PART_TEST_ERROR(read_a);
+
+            /* Verify data */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                if (rbuf[i].a != erbuf[i].a)
+                    PART_TEST_ERROR(read_a);
+                if (rbuf[i].b != erbuf[i].b)
+                    PART_TEST_ERROR(read_a);
+            }
+
+            PASSED();
+        }
+        PART_END(read_a);
+
+        PART_BEGIN(write_b_read_full)
+        {
+            TESTING_2("H5Awrite with compound member b then H5Aread with all compound members");
+
+            /* Initialize wbuf */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                wbuf[i].a = (int)(2 * ATTRIBUTE_COMPOUND_IO_ATTR_DIMS + 2 * i);
+                wbuf[i].b = (int)(2 * ATTRIBUTE_COMPOUND_IO_ATTR_DIMS + 2 * i + 1);
+            }
+
+            /* Write data */
+            if (H5Awrite(attr_id, b_type_id, wbuf) < 0)
+                PART_TEST_ERROR(write_b_read_full);
+
+            /* Update fbuf to match file state - only element b was updated */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                fbuf[i].b = wbuf[i].b;
+            }
+
+            /* Initialize rbuf to -1 */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                rbuf[i].a = -1;
+                rbuf[i].b = -1;
+            }
+
+            /* Set erbuf (simply match file state since we're reading the whole
+             * thing) */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                erbuf[i].a = fbuf[i].a;
+                erbuf[i].b = fbuf[i].b;
+            }
+
+            /* Read data */
+            if (H5Aread(attr_id, full_type_id, rbuf) < 0)
+                PART_TEST_ERROR(write_b_read_full);
+
+            /* Verify data */
+            for (i = 0; i < ATTRIBUTE_COMPOUND_IO_ATTR_DIMS; i++) {
+                if (rbuf[i].a != erbuf[i].a)
+                    PART_TEST_ERROR(write_b_read_full);
+                if (rbuf[i].b != erbuf[i].b)
+                    PART_TEST_ERROR(write_b_read_full);
+            }
+
+            PASSED();
+        }
+        PART_END(write_b_read_full);
+    }
+    END_MULTIPART;
+
+    TESTING_2("test cleanup");
+
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Aclose(attr_id) < 0)
+        TEST_ERROR;
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+    if (H5Gclose(container_group) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(full_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(a_type_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(b_type_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_id);
+        H5Aclose(attr_id);
+        H5Gclose(group_id);
+        H5Gclose(container_group);
+        H5Fclose(file_id);
+        H5Tclose(full_type_id);
+        H5Tclose(a_type_id);
+        H5Tclose(b_type_id);
+    }
+    H5E_END_TRY;
+
+    return 1;
+}
+
+/*
+ * A test to check that attributes preserve data
+ * correctness for strings with ASCII or UTF-8 char sets
+ */
+static int
+test_attribute_string_encodings(void)
+{
+    hid_t   file_id                               = H5I_INVALID_HID;
+    hid_t   container_group                       = H5I_INVALID_HID;
+    hid_t   dset_id1                              = H5I_INVALID_HID;
+    hid_t   dset_id2                              = H5I_INVALID_HID;
+    hid_t   type_id1                              = H5I_INVALID_HID;
+    hid_t   type_id2                              = H5I_INVALID_HID;
+    hid_t   space_id                              = H5I_INVALID_HID;
+    hid_t   attr_id1                              = H5I_INVALID_HID;
+    hid_t   attr_id2                              = H5I_INVALID_HID;
+    hsize_t dims[ATTRIBUTE_STRING_ENCODINGS_RANK] = {ATTRIBUTE_STRING_ENCODINGS_EXTENT};
+    size_t  ascii_str_size                        = 0;
+    size_t  utf8_str_size                         = 0;
+    char   *write_buf                             = NULL;
+    char   *read_buf                              = NULL;
+
+    TESTING_MULTIPART("string encoding read/write correctness on attributes");
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
+        SKIPPED();
+        printf("    API functions for basic file, group, basic or more dataset aren't supported with this "
+               "connector\n");
+        return 0;
+    }
+
+    TESTING_2("test setup");
+
+    ascii_str_size = strlen(ATTRIBUTE_STRING_ENCODINGS_ASCII_STRING);
+    utf8_str_size  = strlen(ATTRIBUTE_STRING_ENCODINGS_UTF8_STRING);
+
+    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
+        goto error;
+    }
+
+    if ((container_group = H5Gopen2(file_id, ATTRIBUTE_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open container group '%s'\n", ATTRIBUTE_TEST_GROUP_NAME);
+        goto error;
+    }
+
+    if ((space_id = H5Screate_simple(ATTRIBUTE_STRING_ENCODINGS_RANK, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataspace\n");
+        goto error;
+    }
+
+    if ((type_id1 = H5Tcopy(H5T_C_S1)) < 0) {
+        H5_FAILED();
+        printf("    couldn't copy builtin string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_size(type_id1, ascii_str_size)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set size of string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_cset(type_id1, H5T_CSET_ASCII)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set character set of string to ASCII\n");
+        goto error;
+    }
+
+    if ((dset_id1 = H5Dcreate(container_group, ATTRIBUTE_STRING_ENCODINGS_DSET_NAME1, type_id1, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with ascii string\n");
+        goto error;
+    }
+
+    if ((attr_id1 = H5Acreate(dset_id1, ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME1, type_id1, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create attribute with ascii string\n");
+        goto error;
+    }
+
+    if ((type_id2 = H5Tcopy(H5T_C_S1)) < 0) {
+        H5_FAILED();
+        printf("    couldn't copy builtin string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_size(type_id2, utf8_str_size)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set size of string datatype\n");
+        goto error;
+    }
+
+    if ((H5Tset_cset(type_id2, H5T_CSET_UTF8)) < 0) {
+        H5_FAILED();
+        printf("    couldn't set character set of string to UTF-8\n");
+        goto error;
+    }
+
+    if ((dset_id2 = H5Dcreate(container_group, ATTRIBUTE_STRING_ENCODINGS_DSET_NAME2, type_id2, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with UTF-8 string\n");
+        goto error;
+    }
+
+    if ((attr_id2 = H5Acreate(dset_id2, ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME2, type_id2, space_id,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create attribute with ascii string\n");
+        goto error;
+    }
+
+    PASSED();
+
+    BEGIN_MULTIPART
+    {
+        PART_BEGIN(ASCII_cset)
+        {
+            TESTING_2("ASCII character set");
+            if ((write_buf = calloc(1, ascii_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for write buffer\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            memcpy(write_buf, ATTRIBUTE_STRING_ENCODINGS_ASCII_STRING, ascii_str_size);
+
+            if ((read_buf = calloc(1, ascii_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            if (H5Awrite(attr_id1, type_id1, write_buf) < 0) {
+                H5_FAILED();
+                printf("    couldn't write to attribute with ASCII string\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            if (H5Aread(attr_id1, type_id1, read_buf) < 0) {
+                H5_FAILED();
+                printf("    couldn't read from attribute with ASCII string\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            if (strncmp(write_buf, read_buf, ascii_str_size)) {
+                H5_FAILED();
+                printf("    incorrect data read from attribute with ASCII string\n");
+                PART_ERROR(ASCII_cset);
+            }
+
+            free(write_buf);
+            write_buf = NULL;
+
+            free(read_buf);
+            read_buf = NULL;
+
+            PASSED();
+        }
+        PART_END(ASCII_cset);
+
+        PART_BEGIN(UTF8_cset)
+        {
+            TESTING_2("UTF-8 character set");
+
+            if ((write_buf = calloc(1, utf8_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for write buffer\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            memcpy(write_buf, ATTRIBUTE_STRING_ENCODINGS_UTF8_STRING, utf8_str_size);
+
+            if ((read_buf = calloc(1, utf8_str_size + 1)) == NULL) {
+                H5_FAILED();
+                printf("    couldn't allocate memory for read buffer\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            if (H5Awrite(attr_id2, type_id2, write_buf) < 0) {
+                H5_FAILED();
+                printf("    couldn't write to attribute with UTF-8 string\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            if (H5Aread(attr_id2, type_id2, read_buf) < 0) {
+                H5_FAILED();
+                printf("    couldn't read from attribute with UTF-8 string\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            if (strncmp(write_buf, read_buf, utf8_str_size)) {
+                H5_FAILED();
+                printf("    incorrect data read from attribute with UTF-8 string\n");
+                PART_ERROR(UTF8_cset);
+            }
+
+            free(write_buf);
+            write_buf = NULL;
+
+            free(read_buf);
+            read_buf = NULL;
+
+            PASSED();
+        }
+        PART_END(UTF8_cset);
+
+        PASSED();
+    }
+    END_MULTIPART;
+
+    TESTING_2("test cleanup");
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Gclose(container_group) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id1) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id2) < 0)
+        TEST_ERROR;
+    if (H5Tclose(type_id1) < 0)
+        TEST_ERROR;
+    if (H5Tclose(type_id2) < 0)
+        TEST_ERROR;
+    if (H5Aclose(attr_id1) < 0)
+        TEST_ERROR;
+    if (H5Aclose(attr_id2) < 0)
+        TEST_ERROR;
+    if (write_buf)
+        free(write_buf);
+    if (read_buf)
+        free(read_buf);
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+        H5Gclose(container_group);
+        H5Dclose(dset_id1);
+        H5Dclose(dset_id2);
+        H5Tclose(type_id1);
+        H5Tclose(type_id2);
+        H5Aclose(attr_id1);
+        H5Aclose(attr_id2);
+        if (write_buf)
+            free(write_buf);
+        if (read_buf)
+            free(read_buf);
+    }
+    H5E_END_TRY;
+
+    return 1;
+}
+
 /*
  * A test to check that an attribute can be deleted
  * using H5Adelete(_by_idx).
@@ -10457,7 +10990,7 @@ test_attribute_many(void)
 
     /* Create many attributes */
     for (u = 0; u < ATTRIBUTE_MANY_NUMB; u++) {
-        sprintf(attrname, "many-%06u", u);
+        snprintf(attrname, sizeof(attrname), "many-%06u", u);
 
         if ((attr_id = H5Acreate2(group_id, attrname, attr_dtype, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
