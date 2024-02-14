@@ -600,7 +600,7 @@ static int
 H5C__flush_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
 {
     H5C_t *cache_ptr = (H5C_t *)_ctx;
-    int ret_value = H5_ITER_CONT;
+    int    ret_value = H5_ITER_CONT;
 
     /* Function enter macro */
     FUNC_ENTER_PACKAGE
@@ -646,7 +646,8 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
     if (H5C_set_slist_enabled(f->shared->cache, true, false, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
-    /* Iterate through hash table entries, adding those with specified tag to the slist, as well as any major global entries which should always be flushed when flushing based on tag value */
+    /* Iterate through hash table entries, adding those with specified tag to the slist, as well as any major
+     * global entries which should always be flushed when flushing based on tag value */
     if (H5C__iter_tagged_entries(cache, tag, true, H5C__flush_tagged_entries_cb, cache) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
 

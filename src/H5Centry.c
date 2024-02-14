@@ -2110,8 +2110,8 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    insert_pinned    = ((flags & H5C__PIN_ENTRY_FLAG) != 0);
-    flush_last       = ((flags & H5C__FLUSH_LAST_FLAG) != 0);
+    insert_pinned = ((flags & H5C__PIN_ENTRY_FLAG) != 0);
+    flush_last    = ((flags & H5C__FLUSH_LAST_FLAG) != 0);
 
     /* Get the ring type from the API context */
     ring = H5CX_get_ring();
@@ -3420,12 +3420,12 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    deleted          = ((flags & H5C__DELETED_FLAG) != 0);
-    dirtied          = ((flags & H5C__DIRTIED_FLAG) != 0);
-    pin_entry        = ((flags & H5C__PIN_ENTRY_FLAG) != 0);
-    unpin_entry      = ((flags & H5C__UNPIN_ENTRY_FLAG) != 0);
-    free_file_space  = ((flags & H5C__FREE_FILE_SPACE_FLAG) != 0);
-    take_ownership   = ((flags & H5C__TAKE_OWNERSHIP_FLAG) != 0);
+    deleted         = ((flags & H5C__DELETED_FLAG) != 0);
+    dirtied         = ((flags & H5C__DIRTIED_FLAG) != 0);
+    pin_entry       = ((flags & H5C__PIN_ENTRY_FLAG) != 0);
+    unpin_entry     = ((flags & H5C__UNPIN_ENTRY_FLAG) != 0);
+    free_file_space = ((flags & H5C__FREE_FILE_SPACE_FLAG) != 0);
+    take_ownership  = ((flags & H5C__TAKE_OWNERSHIP_FLAG) != 0);
 
     assert(f);
     assert(f->shared);

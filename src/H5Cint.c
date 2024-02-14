@@ -1602,7 +1602,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    ignore_protected     = ((flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0);
+    ignore_protected = ((flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0);
 
     for (i = (int)H5C_RING_UNDEFINED; i < (int)ring; i++)
         assert(cache_ptr->slist_ring_len[i] == 0);
