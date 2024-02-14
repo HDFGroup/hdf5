@@ -24,7 +24,8 @@
 
 static void  *H5O__mtime_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                     size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_new_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p, const void *_mesg);
+static herr_t H5O__mtime_new_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                    const void *_mesg);
 static size_t H5O__mtime_new_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 
 static void  *H5O__mtime_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
@@ -221,8 +222,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
-                      const void *_mesg)
+H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared,
+                      size_t H5_ATTR_UNUSED p_size, uint8_t *p, const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
 
@@ -257,7 +258,8 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_share
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t p_size, uint8_t *p, const void *_mesg)
+H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t p_size, uint8_t *p,
+                  const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
     struct tm    *tm;
@@ -272,7 +274,7 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, s
     /* encode */
     tm = HDgmtime(mesg);
     snprintf((char *)p, p_size, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
-            tm->tm_hour, tm->tm_min, tm->tm_sec);
+             tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_encode() */
