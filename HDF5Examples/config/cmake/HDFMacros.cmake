@@ -90,7 +90,7 @@ macro (HDFTEST_COPY_FILE src dest target)
 endmacro ()
 
 macro (HDF_DIR_PATHS package_prefix)
-  option (H5EX_USE_GNU_DIRS "TRUE to use GNU Coding Standard install directory variables, FALSE to use historical settings" FALSE)
+  option (H5EX_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" FALSE)
   if (H5EX_USE_GNU_DIRS)
     include(GNUInstallDirs)
     if (NOT ${package_prefix}_INSTALL_BIN_DIR)
@@ -121,7 +121,7 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
 
   if (APPLE)
-    option (${package_prefix}_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" FALSE)
+    option (${package_prefix}_BUILD_FRAMEWORKS "ON to build as frameworks libraries, OFF to build according to BUILD_SHARED_LIBS" FALSE)
   endif ()
 
   if (NOT ${package_prefix}_INSTALL_BIN_DIR)
@@ -170,10 +170,10 @@ macro (HDF_DIR_PATHS package_prefix)
   message(STATUS "Final: ${${package_prefix}_INSTALL_DOC_DIR}")
 
   # Always use full RPATH, i.e. don't skip the full RPATH for the build tree
-  set (CMAKE_SKIP_BUILD_RPATH  FALSE)
+  set (CMAKE_SKIP_BUILD_RPATH  OFF)
   # when building, don't use the install RPATH already
   # (but later on when installing)
-  set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  FALSE)
+  set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  OFF)
   # add the automatically determined parts of the RPATH
   # which point to directories outside the build tree to the install RPATH
   set (CMAKE_BUILD_WITH_INSTALL_RPATH ON)
