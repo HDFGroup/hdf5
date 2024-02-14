@@ -493,7 +493,7 @@ H5C_dest(H5F_t *f)
 #endif /* H5AC_DUMP_IMAGE_STATS_ON_CLOSE */
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries */
@@ -541,7 +541,7 @@ done:
          * calls to H5C_dest().  Thus we re-enable the slist on failure if it
          * and the cache still exist.  JRM -- 5/15/20
          */
-        if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
+        if (H5C_set_slist_enabled(f->shared->cache, false, false, false) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -567,7 +567,7 @@ H5C_evict(H5F_t *f)
     assert(f);
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries except the pinned entries */
@@ -575,7 +575,7 @@ H5C_evict(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache");
 
     /* Disable the slist */
-    if (H5C_set_slist_enabled(f->shared->cache, false, true) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, false, true, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed");
 
 done:
@@ -1056,7 +1056,7 @@ done:
  *
  *              Normally the slist will be empty at this point, however
  *              that need not be the case if H5C_flush_cache() has been
- *              called with the H5C__FLUSH_MARKED_ENTRIES_FLAG.
+ *              called with the H5C__EVICT_ALLOW_LAST_PINS_FLAG.
  *
  *              Thus shutdown proceeds as follows:
  *
@@ -1076,7 +1076,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist)
+H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist, bool populate_slist)
 {
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -1097,21 +1097,23 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist)
          */
         cache_ptr->slist_enabled = true;
 
-        /* scan the index list and insert all dirty entries in the slist */
-        entry_ptr = cache_ptr->il_head;
-        while (entry_ptr != NULL) {
-            if (entry_ptr->is_dirty)
-                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
-            entry_ptr = entry_ptr->il_next;
-        }
+        if (populate_slist) {
+            /* scan the index list and insert all dirty entries in the slist */
+            entry_ptr = cache_ptr->il_head;
+            while (entry_ptr != NULL) {
+                if (entry_ptr->is_dirty)
+                    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
+                entry_ptr = entry_ptr->il_next;
+            }
 
-        /* we don't maintain a dirty index len, so we can't do a cross
-         * check against it.  Note that there is no point in cross checking
-         * against the dirty LRU size, as the dirty LRU may not be maintained,
-         * and in any case, there is no requirement that all dirty entries
-         * will reside on the dirty LRU.
-         */
-        assert(cache_ptr->dirty_index_size == cache_ptr->slist_size);
+            /* we don't maintain a dirty index len, so we can't do a cross
+             * check against it.  Note that there is no point in cross checking
+             * against the dirty LRU size, as the dirty LRU may not be maintained,
+             * and in any case, there is no requirement that all dirty entries
+             * will reside on the dirty LRU.
+             */
+            assert(cache_ptr->dirty_index_size == cache_ptr->slist_size);
+        }
     }
     else { /* take down the skip list */
         if (!cache_ptr->slist_enabled)

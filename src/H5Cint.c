@@ -1573,7 +1573,6 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 {
     H5C_t             *cache_ptr = f->shared->cache;
     bool               flushed_entries_last_pass;
-    bool               flush_marked_entries;
     bool               ignore_protected;
     bool               tried_to_flush_protected_entry = false;
     bool               restart_slist_scan;
@@ -1604,11 +1603,9 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     ignore_protected     = ((flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0);
-    flush_marked_entries = ((flags & H5C__FLUSH_MARKED_ENTRIES_FLAG) != 0);
 
-    if (!flush_marked_entries)
-        for (i = (int)H5C_RING_UNDEFINED; i < (int)ring; i++)
-            assert(cache_ptr->slist_ring_len[i] == 0);
+    for (i = (int)H5C_RING_UNDEFINED; i < (int)ring; i++)
+        assert(cache_ptr->slist_ring_len[i] == 0);
 
     assert(cache_ptr->flush_in_progress);
 
@@ -1712,9 +1709,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
              */
             assert(entry_ptr->in_slist);
             assert(entry_ptr->is_dirty);
-
-            if (!flush_marked_entries || entry_ptr->flush_marker)
-                assert(entry_ptr->ring >= ring);
+            assert(entry_ptr->ring >= ring);
 
             /* Advance node pointer now, before we delete its target
              * from the slist.
@@ -1727,19 +1722,14 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
                 assert(next_entry_ptr->is_dirty);
                 assert(next_entry_ptr->in_slist);
-
-                if (!flush_marked_entries || next_entry_ptr->flush_marker)
-                    assert(next_entry_ptr->ring >= ring);
-
+                assert(next_entry_ptr->ring >= ring);
                 assert(entry_ptr != next_entry_ptr);
             } /* end if */
             else
                 next_entry_ptr = NULL;
 
-            if ((!flush_marked_entries || entry_ptr->flush_marker) &&
-                ((!entry_ptr->flush_me_last) ||
-                 ((entry_ptr->flush_me_last) && ((cache_ptr->num_last_entries >= cache_ptr->slist_len) ||
-                                                 (flush_marked_entries && entry_ptr->flush_marker)))) &&
+            if (((!entry_ptr->flush_me_last) ||
+                 ((entry_ptr->flush_me_last) && cache_ptr->num_last_entries >= cache_ptr->slist_len)) &&
                 ((entry_ptr->flush_dep_nchildren == 0) || (entry_ptr->flush_dep_ndirty_children == 0)) &&
                 (entry_ptr->ring == ring)) {
 
@@ -1790,10 +1780,8 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "cache has protected items");
 
 #ifdef H5C_DO_SANITY_CHECKS
-    if (!flush_marked_entries) {
-        assert(cache_ptr->slist_ring_len[ring] == 0);
-        assert(cache_ptr->slist_ring_size[ring] == 0);
-    }  /* end if */
+    assert(cache_ptr->slist_ring_len[ring] == 0);
+    assert(cache_ptr->slist_ring_size[ring] == 0);
 #endif /* H5C_DO_SANITY_CHECKS */
 
 done:
