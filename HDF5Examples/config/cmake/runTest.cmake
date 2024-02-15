@@ -134,9 +134,14 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
 file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
+string (FIND ${TEST_STREAM} "_pmi_alps" TEST_FIND_RESULT)
 if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+endif ()
+string (FIND ${TEST_STREAM} "ulimit -s" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
+  string (REGEX REPLACE "^.*ulimit -s[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
 endif ()
 
@@ -148,7 +153,7 @@ else ()
   # the error stack remains in the .err file
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
 endif ()
-string (FIND TEST_STREAM "no version information available" TEST_FIND_RESULT)
+string (FIND ${TEST_STREAM} "no version information available" TEST_FIND_RESULT)
 if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   # write back the changes to the original files
