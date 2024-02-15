@@ -15,7 +15,7 @@ jobs:
   get-old-names:
     runs-on: ubuntu-latest
     outputs:
-      hdf5-name: ${{ steps.gethdf4base.outputs.HDF5_NAME_BASE }}
+      hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
 
     steps:
     - uses: actions/checkout@v4.1.1
