@@ -542,7 +542,7 @@ test_multi_dataset_io(void)
                 size_t buf_end_idx;
 
                 /* Set dataset name */
-                sprintf(dset_name, "dset%d", (int)i);
+                snprintf(dset_name, sizeof(dset_name), "dset%d", (int)i);
 
                 /* Create the dataset asynchronously */
                 if ((dset_id[i] = H5Dcreate_async(file_id, dset_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT,
@@ -611,7 +611,7 @@ test_multi_dataset_io(void)
                 size_t buf_end_idx;
 
                 /* Set dataset name */
-                sprintf(dset_name, "dset%d", (int)i);
+                snprintf(dset_name, sizeof(dset_name), "dset%d", (int)i);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id, dset_name, H5P_DEFAULT, es_id)) < 0)
@@ -641,7 +641,7 @@ test_multi_dataset_io(void)
             /* Loop over datasets */
             for (i = 0; i < MULTI_DATASET_IO_TEST_NDSETS; i++) {
                 /* Set dataset name */
-                sprintf(dset_name, "dset%d", (int)i);
+                snprintf(dset_name, sizeof(dset_name), "dset%d", (int)i);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id, dset_name, H5P_DEFAULT, es_id)) < 0)
@@ -864,7 +864,7 @@ test_multi_file_dataset_io(void)
                 size_t buf_end_idx;
 
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Create file asynchronously */
                 if ((file_id[i] = H5Fcreate_async(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, es_id)) < 0)
@@ -1018,7 +1018,7 @@ test_multi_file_dataset_io(void)
                 size_t buf_end_idx;
 
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Open the file asynchronously */
                 if ((file_id[0] = H5Fopen_async(file_name, H5F_ACC_RDWR, fapl_id, es_id)) < 0)
@@ -1057,7 +1057,7 @@ test_multi_file_dataset_io(void)
             /* Loop over files */
             for (i = 0; i < MULTI_FILE_DATASET_IO_TEST_NFILES; i++) {
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Open the file asynchronously */
                 if ((file_id[0] = H5Fopen_async(file_name, H5F_ACC_RDONLY, fapl_id, es_id)) < 0)
@@ -1287,7 +1287,7 @@ test_multi_file_grp_dset_io(void)
                 size_t buf_end_idx;
 
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Create file asynchronously */
                 if ((file_id = H5Fcreate_async(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, es_id)) < 0)
@@ -1339,7 +1339,7 @@ test_multi_file_grp_dset_io(void)
             /* Loop over files */
             for (i = 0; i < MULTI_FILE_GRP_DSET_IO_TEST_NFILES; i++) {
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Open the file asynchronously */
                 if ((file_id = H5Fopen_async(file_name, H5F_ACC_RDONLY, fapl_id, es_id)) < 0)
@@ -1401,7 +1401,7 @@ test_multi_file_grp_dset_io(void)
                 size_t buf_end_idx;
 
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Create file asynchronously */
                 if ((file_id = H5Fcreate_async(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, es_id)) < 0)
@@ -1459,7 +1459,7 @@ test_multi_file_grp_dset_io(void)
             /* Loop over files */
             for (i = 0; i < MULTI_FILE_GRP_DSET_IO_TEST_NFILES; i++) {
                 /* Set file name */
-                sprintf(file_name, PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
+                snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, (int)i);
 
                 /* Open the file asynchronously */
                 if ((file_id = H5Fopen_async(file_name, H5F_ACC_RDONLY, fapl_id, es_id)) < 0)
@@ -3582,7 +3582,7 @@ cleanup_files(void)
     if (MAINPROCESS) {
         H5Fdelete(PAR_ASYNC_API_TEST_FILE, H5P_DEFAULT);
         for (i = 0; i <= max_printf_file; i++) {
-            snprintf(file_name, 64, PAR_ASYNC_API_TEST_FILE_PRINTF, i);
+            snprintf(file_name, sizeof(file_name), PAR_ASYNC_API_TEST_FILE_PRINTF, i);
             H5Fdelete(file_name, H5P_DEFAULT);
         } /* end for */
     }

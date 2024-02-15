@@ -139,6 +139,11 @@ if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
 endif ()
+string (FIND TEST_STREAM "ulimit -s" TEST_FIND_RESULT)
+if (TEST_FIND_RESULT GREATER -1)
+  string (REGEX REPLACE "^.*ulimit -s.*\n" "" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+endif ()
 
 # remove special error output
 if (NOT TEST_ERRREF)

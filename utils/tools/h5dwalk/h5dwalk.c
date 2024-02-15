@@ -1209,10 +1209,10 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     snprintf(cmdline, sizeof(cmdline), "\n---------\nCommand:");
     b_offset = strlen(cmdline);
     for (k = 0; k < count; k++) {
-        sprintf(&cmdline[b_offset], " %s", argv[k]);
+        snprintf(&cmdline[b_offset], sizeof(cmdline) - b_offset, " %s", argv[k]);
         b_offset = strlen(cmdline);
     }
-    sprintf(&cmdline[b_offset], "\n");
+    snprintf(&cmdline[b_offset], sizeof(cmdline) - b_offset, "\n");
     run_command(count, argv, cmdline, fname);
 
     mfu_free(argv);

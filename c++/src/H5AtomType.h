@@ -67,7 +67,7 @@ class H5_DLLCPP AtomType : public DataType {
     AtomType(const AtomType &original);
 
     // Noop destructor
-    virtual ~AtomType() override;
+    virtual ~AtomType() override = default;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
   protected:

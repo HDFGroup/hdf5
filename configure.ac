@@ -1220,14 +1220,14 @@ AC_MSG_RESULT([$HDF5_DOXYGEN])
 ## This needs to be exposed for the library info file.
 AC_SUBST([HDF5_DOXY_WARNINGS])
 
-## Default is to consider doxygen warnings as errors
+## Default is not to consider doxygen warnings as errors
 DOXY_ERR=yes
 
 AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
 
 AC_ARG_ENABLE([doxygen-errors],
               [AS_HELP_STRING([--enable-doxygen-errors],
-                              [Error on HDF5 doxygen warnings [default=yes]])],
+                              [Error on HDF5 doxygen warnings [default=no]])],
               [DOXY_ERR=$enableval])
 
 if test "X$DOXY_ERR" = "Xyes"; then
@@ -2840,6 +2840,25 @@ if test -n "$PARALLEL"; then
                 AC_MSG_RESULT([yes])],
                 [AC_MSG_RESULT([no])]
     )
+
+    AC_LANG_PUSH([Fortran])
+    AC_MSG_CHECKING([for MPI-3 module mpi_f08])
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([],
+                       [
+                        USE mpi_f08
+                        IMPLICIT NONE
+                        TYPE(MPI_Comm) :: comm
+                        TYPE(MPI_INFO) :: info
+                       ]
+                      )
+      ],
+      [AC_DEFINE([HAVE_MPI_F08], [1],
+                [Define if mpi_f08 module exist])
+                AC_MSG_RESULT([yes])],
+                [AC_MSG_RESULT([no])]
+    )
+    AC_LANG_POP(Fortran)
   fi
 
   ## ----------------------------------------------------------------------

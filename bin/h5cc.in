@@ -62,7 +62,7 @@ host_os="@host_os@"
 
 prog_name="`basename $0`"
 
-allargs=""
+misc_args=""
 compile_args=""
 libraries=""
 link_args=""
@@ -202,7 +202,6 @@ for arg in $@ ; do
 
   case "$arg" in
     -c)
-      allargs="$allargs $arg"
       compile_args="$compile_args $arg"
 
       if test "x$do_link" = "xyes" -a -n "$output_file"; then
@@ -213,7 +212,6 @@ for arg in $@ ; do
       dash_c="yes"
       ;;
     -o)
-      allargs="$allargs $arg"
       dash_o="yes"
 
       if test "x$dash_c" = "xyes"; then
@@ -225,14 +223,12 @@ for arg in $@ ; do
       fi
       ;;
     -E|-M|-MT)
-      allargs="$allargs $arg"
       compile_args="$compile_args $arg"
       dash_c="yes"
       do_link="no"
       ;;
     -l*)
       libraries=" $libraries $arg "
-      allargs="$allargs $arg"
       ;;
     -prefix=*)
       prefix="`expr "$arg" : '-prefix=\(.*\)'`"
@@ -264,14 +260,14 @@ for arg in $@ ; do
       ;;
     *\"*)
       qarg="'"$arg"'"
-      allargs="$allargs $qarg"
+      misc_args="$misc_args $qarg"
       ;;
     *\'*)
-      qarg='\"'"$arg"'\"'
-      allargs="$allargs $qarg"
+      qarg='"'"$arg"'"'
+      misc_args="$misc_args $qarg"
       ;;
     *)
-      allargs="$allargs $qarg"
+      misc_args="$misc_args $qarg"
 
       if test -s "$arg"; then
         ext=`expr "$arg" : '.*\(\..*\)'`
@@ -313,7 +309,7 @@ if test "x$do_compile" = "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-  $SHOW $CC -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CFLAGS $CFLAGS $compile_args
+  $SHOW $CC -I$includedir $H5BLD_CPPFLAGS $CPPFLAGS $H5BLD_CFLAGS $CFLAGS $misc_args $compile_args
   status=$?
 
   if test "$status" != "0"; then

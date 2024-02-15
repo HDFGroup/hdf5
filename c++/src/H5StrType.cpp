@@ -290,12 +290,4 @@ StrType::setStrpad(H5T_str_t strpad) const
     }
 }
 
-//--------------------------------------------------------------------------
-// Function:    StrType destructor
-///\brief       Properly terminates access to this string datatype.
-//--------------------------------------------------------------------------
-StrType::~StrType()
-{
-}
-
 } // namespace H5

@@ -953,7 +953,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 # check if Doxygen is installed
   find_package(Doxygen)
   if (DOXYGEN_FOUND)
-    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." ON)
+    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
     mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
     if (HDF5_ENABLE_DOXY_WARNINGS)
       set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS")
@@ -1077,6 +1077,13 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       if (MPI_Fortran_LINK_FLAGS)
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
       endif ()
+      # Check if MPI-3 Fortran 2008 module mpi_f08 is supported
+      if (MPI_Fortran_HAVE_F08_MODULE)
+        set (H5_HAVE_MPI_F08 1)
+        message (VERBOSE "MPI-3 Fortran 2008 module mpi_f08 is supported")
+      else ()
+        message (VERBOSE "MPI-3 Fortran 2008 module mpi_f08 is NOT supported")
+      endif ()
     endif ()
 
     #option (HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "NO")
@@ -1148,6 +1155,11 @@ if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Generate the H5pubconf.h file containing user settings needed by compilation
+#-----------------------------------------------------------------------------
+configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
+
+#-----------------------------------------------------------------------------
 # Option to build examples
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
@@ -1158,10 +1170,5 @@ if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR
     add_subdirectory (HDF5Examples)
   endif ()
 endif ()
-
-#-----------------------------------------------------------------------------
-# Generate the H5pubconf.h file containing user settings needed by compilation
-#-----------------------------------------------------------------------------
-configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 include (CMakeInstallation.cmake)

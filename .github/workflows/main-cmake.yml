@@ -5,9 +5,10 @@ on:
   workflow_call:
     inputs:
       thread_safety:
-        description: "thread-safety on/off"
+        description: "TS or empty"
         required: true
-        type: boolean
+        type: string
+
       build_mode:
         description: "release vs. debug build"
         required: true
@@ -47,12 +48,12 @@ jobs:
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
-            os: windows-2022
+            os: windows-latest
             toolchain: ""
             cpp: ON
             fortran: OFF
             java: ON
-            docs: OFF
+            docs: ON
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -82,7 +83,7 @@ jobs:
             mirror_vfd: ON
             direct_vfd: ON
             ros3_vfd: ON
-            toolchain: "config/toolchain/gcc.cmake"
+            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
 
@@ -96,7 +97,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
-            docs: OFF
+            docs: ON
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -105,14 +106,14 @@ jobs:
             mirror_vfd: ON
             direct_vfd: OFF
             ros3_vfd: OFF
-            toolchain: "config/toolchain/clang.cmake"
+            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/clang.cmake"
             generator: "-G Ninja"
             run_tests: true
 
 
 
     # Sets the job's name from the properties
-    name: "${{ matrix.name }}-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
+    name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}"
 
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
@@ -136,7 +137,7 @@ jobs:
       - name: Install Linux Dependencies
         run: |
            sudo apt update
-           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
@@ -151,8 +152,13 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja doxygen
+        run: brew install ninja
         if: matrix.os == 'macos-13'
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.9.7"
 
       - name: Set environment for MSVC (Windows)
         run: |
@@ -160,7 +166,7 @@ jobs:
           echo "CXX=cl.exe" >> $GITHUB_ENV
           echo "CC=cl.exe" >> $GITHUB_ENV
         if:  matrix.os == 'windows-latest'
-    
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4.1.1
@@ -176,9 +182,10 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_DOXY_WARNINGS=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
             -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
@@ -189,9 +196,11 @@ jobs:
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
-        if: "! (matrix.thread_safety)"
+        if: ${{ inputs.thread_safety != 'TS' }}
 
 
       - name: CMake Configure (Thread-Safe)
@@ -201,8 +210,9 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_STATIC_LIBS=${{ (matrix.os != 'windows-latest') }} \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
@@ -216,9 +226,10 @@ jobs:
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
-        if: (matrix.thread_safety)
+        if: ${{ inputs.thread_safety == 'TS' }}
 
       #
       # BUILD
@@ -237,75 +248,48 @@ jobs:
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
-        if: (matrix.run_tests) && ! (matrix.thread_safety)
+        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
 
       # THREAD-SAFE
 
       - name: CMake Run Thread-Safe Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
         working-directory: ${{ runner.workspace }}/build
-        if: (matrix.run_tests) && (matrix.thread_safety)
+        if: ${{ matrix.run_tests && (inputs.thread_safety == 'TS') }}
 
       #
       # INSTALL (note that this runs even when we don't run the tests)
       #
 
-  #
-  # The GitHub runners are inadequate for running parallel HDF5 tests,
-  # so we catch most issues in daily testing. What we have here is just
-  # a compile check to make sure nothing obvious is broken.
-  # A workflow that builds the library
-  # Parallel Linux (Ubuntu) w/ gcc + Autotools
-  #
-  CMake_build_parallel:
-    name: "Parallel GCC-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}"
-    # Don't run the action if the commit message says to skip CI
-    if: "!contains(github.event.head_commit.message, 'skip-ci')"
-
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # SETUP
-      - name: Install Linux Dependencies
-        run: |
-           sudo apt update
-           sudo apt-get install ninja-build doxygen graphviz
-           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           sudo apt install libaec0 libaec-dev
-           sudo apt install openmpi-bin openmpi-common mpi-default-dev
-           echo "CC=mpicc" >> $GITHUB_ENV
-           echo "FC=mpif90" >> $GITHUB_ENV
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v4.1.1
-
-      # CMAKE CONFIGURE
-      - name: CMake Configure
-        run: |
-          mkdir "${{ runner.workspace }}/build"
-          cd "${{ runner.workspace }}/build"
-          CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
-            -DBUILD_SHARED_LIBS=ON \
-            -DHDF5_ENABLE_ALL_WARNINGS=ON \
-            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
-            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-            -DHDF5_BUILD_FORTRAN=ON \
-            -DHDF5_BUILD_JAVA=OFF \
-            -DLIBAEC_USE_LOCALCONTENT=OFF \
-            -DZLIB_USE_LOCALCONTENT=OFF \
-            -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
-            -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=OFF \
-            $GITHUB_WORKSPACE
-        shell: bash
-
-      # BUILD
-      - name: CMake Build
-        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+      - name: CMake Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
+
+      - name: List files in the space
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      # Save files created by ctest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@v4
+        with:
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.os == 'windows-latest') && (inputs.thread_safety != 'TS') }}
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') }}
+
+      - name: Save published binary (Mac)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-osx12-${{ inputs.build_mode }}-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.os == 'macos-13') && (inputs.thread_safety != 'TS') }}

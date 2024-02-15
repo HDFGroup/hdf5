@@ -24,6 +24,13 @@ if (WIN32)
   endif ()
 endif ()
 
+if (H5_HAVE_MPI_F08) # MPI-3 module mpi_f08 supported
+  set (CMAKE_H5_HAVE_MPI_F08 1)
+else ()
+  set (H5_NOMPI_F08 ";")
+  set (CMAKE_H5_HAVE_MPI_F08 0)
+endif ()
+
 # configure for Fortran preprocessor
 
 # Define Parallel variable for passing to H5config_f.inc.cmake

@@ -243,6 +243,9 @@
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
 
+/* Define if MPI Fortran supports mpi_f08 module */
+#cmakedefine H5_HAVE_MPI_F08 @H5_HAVE_MPI_F08@
+
 /* Define if we have support for writing to filtered datasets in parallel */
 #cmakedefine H5_HAVE_PARALLEL_FILTERED_WRITES @H5_HAVE_PARALLEL_FILTERED_WRITES@
 
