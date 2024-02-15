@@ -286,14 +286,33 @@ image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *
         goto out;
 
     if (file_image_op == H5FD_FILE_IMAGE_OP_FILE_RESIZE) {
+        void *tmp_realloc;
+
         if (udata->vfd_image_ptr != ptr)
             goto out;
 
         if (udata->vfd_ref_count != 1)
             goto out;
 
-        if (NULL == (udata->vfd_image_ptr = realloc(ptr, size)))
+        /* Make sure all the udata structure image pointers
+         * match each other before we update them
+         */
+        assert(udata->vfd_image_ptr == udata->app_image_ptr);
+        assert(udata->vfd_image_ptr == udata->fapl_image_ptr);
+
+        tmp_realloc = realloc(ptr, size);
+        if (tmp_realloc) {
+            udata->vfd_image_ptr  = tmp_realloc;
+            udata->app_image_ptr  = udata->vfd_image_ptr;
+            udata->fapl_image_ptr = udata->vfd_image_ptr;
+        }
+        else {
+            free(ptr);
+            udata->vfd_image_ptr  = NULL;
+            udata->app_image_ptr  = NULL;
+            udata->fapl_image_ptr = NULL;
             goto out;
+        }
 
         udata->vfd_image_size = size;
         return_value          = udata->vfd_image_ptr;
@@ -359,11 +378,20 @@ image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *_udata)
              * references */
             if (udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0 &&
                 !(udata->flags & H5LT_FILE_IMAGE_DONT_RELEASE)) {
+                /* Make sure we aren't going to leak memory elsewhere */
+                assert(udata->app_image_ptr == udata->vfd_image_ptr || udata->app_image_ptr == NULL);
+                assert(udata->fapl_image_ptr == udata->vfd_image_ptr || udata->fapl_image_ptr == NULL);
+
                 free(udata->vfd_image_ptr);
                 udata->app_image_ptr  = NULL;
                 udata->fapl_image_ptr = NULL;
                 udata->vfd_image_ptr  = NULL;
-            } /* end if */
+            }
+
+            /* release reference to udata structure */
+            if (udata_free(udata) < 0)
+                goto out;
+
             break;
 
         /* added unused labels to keep the compiler quite */
@@ -437,9 +465,15 @@ udata_free(void *_udata)
 
     udata->ref_count--;
 
-    /* checks that there are no references outstanding before deallocating udata */
-    if (udata->ref_count == 0 && udata->fapl_ref_count == 0 && udata->vfd_ref_count == 0)
+    if (udata->ref_count == 0) {
+        /* There should not be any outstanding references
+         * to the udata structure at this point.
+         */
+        assert(udata->fapl_ref_count == 0);
+        assert(udata->vfd_ref_count == 0);
+
         free(udata);
+    }
 
     return (SUCCEED);
 
@@ -728,13 +762,13 @@ out:
 hid_t
 H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
 {
-    hid_t    fapl = -1, file_id = -1; /* HDF5 identifiers */
-    unsigned file_open_flags;         /* Flags for image open */
-    char     file_name[64];           /* Filename buffer */
-    size_t   alloc_incr;              /* Buffer allocation increment */
-    size_t   min_incr  = 65536;       /* Minimum buffer increment */
-    double   buf_prcnt = 0.1;         /* Percentage of buffer size to set
-                                          as increment */
+    H5LT_file_image_ud_t       *udata = NULL;            /* Pointer to udata structure */
+    hid_t                       fapl = -1, file_id = -1; /* HDF5 identifiers */
+    unsigned                    file_open_flags;         /* Flags for image open */
+    char                        file_name[64];           /* Filename buffer */
+    size_t                      alloc_incr;              /* Buffer allocation increment */
+    size_t                      min_incr  = 65536;       /* Minimum buffer increment */
+    double                      buf_prcnt = 0.1;         /* Percentage of buffer size to set as increment */
     static long                 file_name_counter;
     H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy, &image_realloc, &image_free,
                                              &udata_copy,   &udata_free,   (void *)NULL};
@@ -765,13 +799,11 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
 
     /* Set callbacks for file image ops ONLY if the file image is NOT copied */
     if (flags & H5LT_FILE_IMAGE_DONT_COPY) {
-        H5LT_file_image_ud_t *udata; /* Pointer to udata structure */
-
         /* Allocate buffer to communicate user data to callbacks */
         if (NULL == (udata = (H5LT_file_image_ud_t *)malloc(sizeof(H5LT_file_image_ud_t))))
             goto out;
 
-        /* Initialize udata with info about app buffer containing file image  and flags */
+        /* Initialize udata with info about app buffer containing file image and flags */
         udata->app_image_ptr   = buf_ptr;
         udata->app_image_size  = buf_size;
         udata->fapl_image_ptr  = NULL;
@@ -781,17 +813,30 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         udata->vfd_image_size  = 0;
         udata->vfd_ref_count   = 0;
         udata->flags           = flags;
-        udata->ref_count       = 1; /* corresponding to the first FAPL */
+
+        /*
+         * Initially, the FAPL created in this function holds a reference
+         * to the udata structure allocated above. The call to
+         * H5Pset_file_image_callbacks below will associate the udata
+         * structure with the FAPL and cause it to hold another reference
+         * in preparation for transfer of ownership to the file driver.
+         * Once the file has been opened with this FAPL and the FAPL is
+         * closed, the reference held by the FAPL is released and ownership
+         * is transferred to the file driver. The udata structure will then
+         * be freed when the image_free callback is made and the file driver
+         * releases its reference to the structure.
+         */
+        udata->ref_count = 1;
 
         /* copy address of udata into callbacks */
         callbacks.udata = (void *)udata;
 
         /* Set file image callbacks */
         if (H5Pset_file_image_callbacks(fapl, &callbacks) < 0) {
-            free(udata);
+            udata_free(udata);
             goto out;
-        } /* end if */
-    }     /* end if */
+        }
+    } /* end if */
 
     /* Assign file image in user buffer to FAPL */
     if (H5Pset_file_image(fapl, buf_ptr, buf_size) < 0)
@@ -821,8 +866,10 @@ out:
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl);
+        H5Fclose(file_id);
     }
     H5E_END_TRY
+
     return -1;
 } /* end H5LTopen_file_image() */
 
