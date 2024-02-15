@@ -70,11 +70,18 @@ message (STATUS "COMMAND Result: ${TEST_RESULT}")
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
 # remove special output
-file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
-if (TEST_FIND_RESULT GREATER -1)
-  string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
+if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
+  if (TEST_FIND_RESULT GREATER -1)
+    string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
+  string (FIND "${TEST_STREAM}" "ulimit -s" TEST_FIND_RESULT)
+  if (TEST_FIND_RESULT GREATER -1)
+    string (REGEX REPLACE "^.*ulimit -s[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # if the TEST_ERRREF exists grep the error output with the error reference
