@@ -1,4 +1,4 @@
-name: hdf5 dev autotools parallel special CI
+name: hdf5 1.14 autotools parallel special CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:
