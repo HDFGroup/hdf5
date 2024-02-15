@@ -345,7 +345,7 @@ string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
 set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
 
 # Setting definition if there is a 16 byte fortran integer
-string (FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)
+string (FIND "${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}" "16" pos)
 if (${pos} EQUAL -1)
   set (${HDF_PREFIX}_HAVE_Fortran_INTEGER_SIZEOF_16 0)
 else ()
