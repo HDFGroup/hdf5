@@ -116,7 +116,7 @@ print_incoming_data(void)
             MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA,
                      MPI_COMM_WORLD, &Status);
 
-            printf("%s", data);
+            parallel_print("%s", data);
         }
     } while (incomingMessage);
 }
@@ -1247,7 +1247,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
 
                     /*Set up args to pass to worker task. */
                     if (strlen(obj1_fullpath) > 255 || strlen(obj2_fullpath) > 255) {
-                        printf("The parallel diff only supports object names up to 255 characters\n");
+                        fprintf(stderr,
+                                "The parallel diff only supports object names up to 255 characters\n");
                         MPI_Abort(MPI_COMM_WORLD, 0);
                     } /* end if */
 
@@ -1392,7 +1393,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                                          MPI_COMM_WORLD);
                             } /* end else-if */
                             else {
-                                printf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
+                                fprintf(stderr, "ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
                                 MPI_Abort(MPI_COMM_WORLD, 0);
                                 MPI_Finalize();
                             } /* end else */
@@ -1477,10 +1478,10 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                     MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA,
                              MPI_COMM_WORLD, &Status);
 
-                    printf("%s", data);
+                    parallel_print("%s", data);
                 } /* end else-if */
                 else {
-                    printf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
+                    fprintf(stderr, "ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 } /* end else */
             }     /* end while */

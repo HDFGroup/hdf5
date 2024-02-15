@@ -156,6 +156,19 @@ int H5_api_attribute_test(void);
 #define ATTRIBUTE_ITERATE_TEST_0_ATTRIBUTES_SUBGROUP_NAME   "attribute_iterate_test_0_attributes"
 #define ATTRIBUTE_ITERATE_TEST_0_ATTRIBUTES_DSET_NAME       "attribute_iterate_dset"
 
+#define ATTRIBUTE_COMPOUND_IO_ATTR_DIMS       10
+#define ATTRIBUTE_COMPOUND_IO_TEST_GROUP_NAME "attribute_compound_io_test_group"
+#define ATTRIBUTE_COMPOUND_IO_TEST_ATTR_NAME  "attribute_compound_io_test_attr"
+
+#define ATTRIBUTE_STRING_ENCODINGS_RANK         1
+#define ATTRIBUTE_STRING_ENCODINGS_EXTENT       1
+#define ATTRIBUTE_STRING_ENCODINGS_DSET_NAME1   "encoding_dset1"
+#define ATTRIBUTE_STRING_ENCODINGS_DSET_NAME2   "encoding_dset2"
+#define ATTRIBUTE_STRING_ENCODINGS_ASCII_STRING "asciistr"
+#define ATTRIBUTE_STRING_ENCODINGS_UTF8_STRING  "αaααaaaα"
+#define ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME1   "encoding_attr1"
+#define ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME2   "encoding_attr2"
+
 #define ATTRIBUTE_ITERATE_INVALID_PARAMS_TEST_ATTR_SPACE_RANK 1
 #define ATTRIBUTE_ITERATE_INVALID_PARAMS_TEST_SUBGROUP_NAME   "attribute_iterate_invalid_params_test"
 #define ATTRIBUTE_ITERATE_INVALID_PARAMS_TEST_ATTR_NAME       "invalid_params_iter_attr1"

@@ -112,7 +112,7 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
     DSetMemXferPropList(const hid_t plist_id);
 
     // Noop destructor
-    virtual ~DSetMemXferPropList() override;
+    virtual ~DSetMemXferPropList() override = default;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

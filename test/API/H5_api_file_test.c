@@ -948,7 +948,7 @@ test_flush_file(void)
     }
 
     for (u = 0; u < 10; u++) {
-        sprintf(dset_name, "Dataset %u", u);
+        snprintf(dset_name, sizeof(dset_name), "Dataset %u", u);
 
         if ((dset_id = H5Dcreate2(file_id, dset_name, H5T_STD_U32LE, dspace_id, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0) {
