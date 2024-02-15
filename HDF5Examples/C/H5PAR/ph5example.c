@@ -269,6 +269,24 @@ phdf5writeInd(char *filename)
     assert(ret != FAIL);
     MESG("H5Pset_fapl_mpio succeed");
 
+    /*
+     * OPTIONAL: It is generally recommended to set collective
+     *           metadata reads on FAPL to perform metadata reads
+     *           collectively, which usually allows datasets
+     *           to perform better at scale, although it is not
+     *           strictly necessary.
+     */
+    H5Pset_all_coll_metadata_ops(acc_tpl1, true);
+
+    /*
+     * OPTIONAL: It is generally recommended to set collective
+     *           metadata writes on FAPL to perform metadata writes
+     *           collectively, which usually allows datasets
+     *           to perform better at scale, although it is not
+     *           strictly necessary.
+     */
+    H5Pset_coll_metadata_write(acc_tpl1, true);
+
     /* create the file collectively */
     fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl1);
     assert(fid1 != FAIL);
