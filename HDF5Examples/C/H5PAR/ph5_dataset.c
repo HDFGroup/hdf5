@@ -54,6 +54,24 @@ main(int argc, char **argv)
     H5Pset_fapl_mpio(plist_id, comm, info);
 
     /*
+     * OPTIONAL: It is generally recommended to set collective
+     *           metadata reads on FAPL to perform metadata reads
+     *           collectively, which usually allows datasets
+     *           to perform better at scale, although it is not
+     *           strictly necessary.
+     */
+    H5Pset_all_coll_metadata_ops(plist_id, true);
+
+    /*
+     * OPTIONAL: It is generally recommended to set collective
+     *           metadata writes on FAPL to perform metadata writes
+     *           collectively, which usually allows datasets
+     *           to perform better at scale, although it is not
+     *           strictly necessary.
+     */
+    H5Pset_coll_metadata_write(plist_id, true);
+
+    /*
      * Create a new file collectively and release property list identifier.
      */
     file_id = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
