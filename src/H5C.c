@@ -493,7 +493,7 @@ H5C_dest(H5F_t *f)
 #endif /* H5AC_DUMP_IMAGE_STATS_ON_CLOSE */
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false, true) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries */
@@ -541,7 +541,7 @@ done:
          * calls to H5C_dest().  Thus we re-enable the slist on failure if it
          * and the cache still exist.  JRM -- 5/15/20
          */
-        if (H5C_set_slist_enabled(f->shared->cache, false, false, false) < 0)
+        if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -567,7 +567,7 @@ H5C_evict(H5F_t *f)
     assert(f);
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false, true) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Flush and invalidate all cache entries except the pinned entries */
@@ -575,7 +575,7 @@ H5C_evict(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache");
 
     /* Disable the slist */
-    if (H5C_set_slist_enabled(f->shared->cache, false, true, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed");
 
 done:
@@ -1042,41 +1042,32 @@ done:
  *
  *              1) Verifies that the slist is empty.
  *
- *              2) Scans the index list, and inserts all dirty entries
- *                 into the slist.
+ *              2) If the populate_slist parameter is true, scans the
+ *                 index list, and inserts all dirty entries into the
+ *                 slist.
  *
  *              3) Sets cache_ptr->slist_enabled = true.
  *
- *              Note that the clear_slist parameter is ignored if
- *              the slist_enabed parameter is true.
- *
  *
  *              If the slist_enabled_parameter is false, the function
- *              shuts down the slist.
- *
- *              Normally the slist will be empty at this point, however
- *              that need not be the case if H5C_flush_cache() has been
- *              called with the H5C__EVICT_ALLOW_LAST_PINS_FLAG.
- *
- *              Thus shutdown proceeds as follows:
+ *              shuts down the slist:
  *
  *              1) Test to see if the slist is empty.  If it is, proceed
  *                 to step 3.
  *
- *              2) Test to see if the clear_slist parameter is true.
- *
- *                 If it is, remove all entries from the slist.
- *
- *                 If it isn't, throw an error.
+ *              2) Remove all entries from the slist.
  *
  *              3) set cache_ptr->slist_enabled = false.
+ *
+ *              Note that the populate_slist parameter is ignored if
+ *              the slist_enabed parameter is false.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist, bool populate_slist)
+H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool populate_slist)
 {
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -1119,20 +1110,8 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist, bo
         if (!cache_ptr->slist_enabled)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already disabled?");
 
-        if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)) {
-            if (clear_slist) {
-                H5SL_node_t *node_ptr;
-
-                node_ptr = H5SL_first(cache_ptr->slist_ptr);
-                while (node_ptr != NULL) {
-                    entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, false, FAIL);
-                    node_ptr = H5SL_first(cache_ptr->slist_ptr);
-                }
-            }
-            else
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?");
-        }
+        if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty?");
 
         cache_ptr->slist_enabled = false;
 

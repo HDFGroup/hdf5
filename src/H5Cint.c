@@ -1207,10 +1207,10 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     old_ring_pel_len = cur_ring_pel_len;
 
     while (cache_ptr->index_ring_len[ring] > 0) {
-        /* first, try to flush-destroy any dirty entries.   Do this by
+        /* First, try to flush-destroy any dirty entries.   Do this by
          * making a scan through the slist.  Note that new dirty entries
-         * may be created by the flush call backs.  Thus it is possible
-         * that the slist will not be empty after we finish the scan.
+         * may be created by the flush call back, thus we may need to
+         * restart the scan (see below).
          */
 
 #ifdef H5C_DO_SANITY_CHECKS

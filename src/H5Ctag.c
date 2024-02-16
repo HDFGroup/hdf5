@@ -643,7 +643,7 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
     cache = f->shared->cache;
 
     /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
     /* Iterate through hash table entries, adding those with specified tag to the slist, as well as any major
@@ -656,7 +656,7 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache");
 
     /* Disable the slist */
-    if (H5C_set_slist_enabled(f->shared->cache, false, false, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed");
 
 done:

@@ -12228,7 +12228,7 @@ check_flush_protected_err(unsigned paged)
         protect_entry(file_ptr, 0, 0);
 
         /* enable slist prior to flush */
-        if ((pass) && (H5C_set_slist_enabled(cache_ptr, true, false, true) < 0)) {
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, true, true) < 0)) {
 
             pass         = false;
             failure_mssg = "unable to enable slist prior to flush.\n";
@@ -12241,7 +12241,7 @@ check_flush_protected_err(unsigned paged)
         }
 
         /* disable the slist after the flush */
-        if ((pass) && (H5C_set_slist_enabled(cache_ptr, false, false, false) < 0)) {
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, false, false) < 0)) {
 
             pass         = false;
             failure_mssg = "unable to disable slist after  flush.\n";

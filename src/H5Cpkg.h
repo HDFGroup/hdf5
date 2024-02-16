@@ -2168,14 +2168,13 @@ typedef struct H5C_tag_info_t {
  * insert all dirtly entries in the skip list, and enable operations
  * on skip list by setting above control flag to true.
  *
+ * In the case of a partial flush (i.e. flush tagged entries), we only
+ * add tagged entries to the skip list, thus avoiding unnecessary scans
+ * over the entire cache.
+ *
  * At the end of a complete flush, we verify that the skip list is empty,
  * and set the control flag back to false, so as to avoid skip list
  * maintenance overhead until the next flush or close.
- *
- * In the case of a partial flush (i.e. flush marked entries), we remove
- * all remaining entries from the skip list, and then set the control flag
- * back to false -- again avoiding skip list maintenance overhead until
- * the next flush or close.
  *
  * slist_enabled: Boolean flag used to control operation of the skip
  *        list.  If this filed is false, operations on the slist are
