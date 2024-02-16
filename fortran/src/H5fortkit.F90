@@ -34,11 +34,12 @@ CONTAINS
 !  HD5c2fstring
 ! INPUTS
 !  cstring  -  C string stored as a string array of size 'len' of string size LEN=1
-!  len      -  length of Fortran string
+!  flen     -  length of Fortran string
+!  clen     -  length of C array 
 ! OUTPUT
-!   fstring -  Fortran string array of LEN=1
+!   fstring -  Fortran string LEN=1
 ! PURPOSE
-!   Copies a Fortran array of strings having a length of one to a fortran string and removes the C Null
+!   Copies a C array of strings having a length of one to a fortran string and removes the C Null
 !   terminator. The Null terminator is returned from C when calling the C APIs directly.
 !
 !   The fortran standard does not allow C_LOC to be used on a character string of

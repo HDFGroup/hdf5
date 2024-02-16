@@ -249,7 +249,7 @@ CONTAINS
 !!       \code
 !!       (..., "%s TEXT %s"//C_NEW_LINE, hdferr, ..., arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
 !!       \endcode
-!!       <br />Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similary,
+!!       <br />Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similarly,
 !!             using "\x1B" instead of ACHAR(27)
 !!
 !!
