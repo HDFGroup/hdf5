@@ -479,8 +479,8 @@
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-  ADD_H5_ERR_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "h5clear warning "-m" mod_h5clear_mdc_image.h5)
-  ADD_H5_ERR_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "h5clear warning "-s" "-m" mod_h5clear_mdc_image2.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "h5clear warning" "-m" mod_h5clear_mdc_image.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "h5clear warning" "-s" "-m" mod_h5clear_mdc_image2.h5)
 #
 #
 #
