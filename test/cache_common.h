@@ -137,7 +137,7 @@
     {                                                                                                        \
         herr_t rslt;                                                                                         \
                                                                                                              \
-        rslt = H5C_set_slist_enabled((file)->shared->cache, true, true);                              \
+        rslt = H5C_set_slist_enabled((file)->shared->cache, true, true);                                     \
                                                                                                              \
         if (rslt >= 0) {                                                                                     \
                                                                                                              \
@@ -146,7 +146,7 @@
                                                                                                              \
         if (rslt >= 0) {                                                                                     \
                                                                                                              \
-            rslt = H5C_set_slist_enabled((file)->shared->cache, false, false);                        \
+            rslt = H5C_set_slist_enabled((file)->shared->cache, false, false);                               \
         }                                                                                                    \
                                                                                                              \
         if (rslt < 0) {                                                                                      \
