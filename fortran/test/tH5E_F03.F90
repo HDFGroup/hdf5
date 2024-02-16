@@ -208,14 +208,20 @@ SUBROUTINE test_error_stack(total_error)
   CHARACTER(LEN=18), TARGET :: func
   INTEGER          , TARGET :: line
   TYPE(C_PTR) :: ptr1, ptr2, ptr3
-  CHARACTER(LEN=180) :: name
+
+  INTEGER :: msg_type
+  CHARACTER(LEN=9) :: maj_mesg = "MAJOR MSG"
+  CHARACTER(LEN=7) :: min_mesg = "MIN MSG"
+
+  CHARACTER(LEN=9) :: chr9
+  INTEGER(SIZE_T) :: msg_size
 
   CALL h5eregister_class_f("Custom error class", "H5E_F03", "0.1", cls_id, error)
   CALL check("H5Eregister_class_f", error, total_error)
 
-  CALL H5Ecreate_msg_f(cls_id, H5E_MAJOR_F, "Okay, Houston, we've had a problem here", major, error)
+  CALL H5Ecreate_msg_f(cls_id, H5E_MAJOR_F, maj_mesg, major, error)
   CALL check("H5Ecreate_msg_f", error, total_error)
-  CALL H5Ecreate_msg_f(cls_id, H5E_MINOR_F, "Oops!", minor, error)
+  CALL H5Ecreate_msg_f(cls_id, H5E_MINOR_F, min_mesg, minor, error)
   CALL check("H5Ecreate_msg_f", error, total_error)
 
   file = "FILE"//C_NULL_CHAR
@@ -227,11 +233,25 @@ SUBROUTINE test_error_stack(total_error)
   ptr3 = C_LOC(line)
 
   ! push a custom error message onto the default stack
-  CALL H5Epush_f(H5E_DEFAULT_F, cls_id, major, minor, "%s Hello, error %s"//C_NEW_LINE, error, &
+  CALL H5Epush_f(H5E_DEFAULT_F, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
        ptr1, ptr2, ptr3, &
        arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
 
   CALL check("H5Epush_f", error, total_error)
+
+  msg_size = 0
+  CALL H5Eget_msg_f(major, msg_type, chr9, error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MAJOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 9_SIZE_T, total_error)
+
+  ! Check when a shorter buffer length is passed as the msg_size
+  msg_size = 3
+  CALL H5Eget_msg_f(major, msg_type, chr9, error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MAJOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 9_SIZE_T, total_error)
+  CALL VERIFY("H5Eget_msg_f", TRIM(chr9), maj_mesg(1:3), total_error)
 
   CALL h5eprint_f(error) !, "stderr")
   CALL check("h5eprint_f", error, total_error)

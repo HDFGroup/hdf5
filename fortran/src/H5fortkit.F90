@@ -25,6 +25,8 @@
 !*****
 MODULE H5fortkit
 
+  USE H5FORTRAN_TYPES, ONLY : SIZE_T
+
 CONTAINS
 
 !****if* H5fortkit/HD5c2fstring
@@ -43,17 +45,23 @@ CONTAINS
 !   length greater than one, which is why we use the array of characters instead.
 !
 ! SOURCE
-  SUBROUTINE HD5c2fstring(fstring,cstring,len)
+  SUBROUTINE HD5c2fstring(fstring,cstring,flen,clen)
 !*****
     IMPLICIT NONE
 
-    INTEGER :: i
-    INTEGER :: len
-    CHARACTER(LEN=len) :: fstring
-    CHARACTER(LEN=1), DIMENSION(1:len) :: cstring
+    INTEGER(SIZE_T) :: i
+    INTEGER(SIZE_T) :: flen
+    INTEGER(SIZE_T) :: clen
+    CHARACTER(*)    :: fstring
+    CHARACTER(LEN=1), DIMENSION(1:clen) :: cstring
+
+    INTEGER(SIZE_T) :: flen_max
 
     fstring = ''
-    DO i = 1, len
+    flen_max = LEN(fstring, KIND=SIZE_T)
+    DO i = 1, clen
+       IF (i .GT. flen_max) EXIT
+       IF (i .GT. flen) EXIT
        IF (cstring(i)(1:1)==CHAR(0)) EXIT
        fstring(i:i) = cstring(i)(1:1)
     END DO

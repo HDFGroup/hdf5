@@ -417,25 +417,26 @@ CONTAINS
 
   END SUBROUTINE h5eclose_msg_f
 
-  SUBROUTINE H5Eget_msg_f(msg_id, msg_type, msg, msg_size, hdferr, req_size)
+  SUBROUTINE H5Eget_msg_f(msg_id, msg_type, msg, hdferr, msg_size)
     IMPLICIT NONE
 
     INTEGER(HID_T)  , INTENT(IN)  :: msg_id
     INTEGER         , INTENT(OUT) :: msg_type
     CHARACTER(LEN=*), INTENT(OUT) :: msg
-    INTEGER(SIZE_T) , INTENT(OUT) :: msg_size
     INTEGER         , INTENT(OUT) :: hdferr
-    INTEGER(SIZE_T) , INTENT(INOUT), OPTIONAL :: req_size
+    INTEGER(SIZE_T) , INTENT(INOUT), OPTIONAL :: msg_size
 
-    CHARACTER(LEN=LEN_TRIM(msg)+1,KIND=C_CHAR) :: c_msg
+    CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(:), ALLOCATABLE, TARGET :: c_msg
     INTEGER(C_INT) :: c_msg_type
     TYPE(C_PTR) :: f_ptr
+    INTEGER(SIZE_T) :: msg_cp_sz
+    INTEGER(SIZE_T) :: c_msg_size
 
     INTERFACE
        INTEGER(SIZE_T) FUNCTION H5Eget_msg(msg_id, msg_type, msg, size) &
             BIND(C,NAME='H5Eget_msg')
-         IMPORT :: C_CHAR, C_INT
-         IMPORT :: HID_T
+         IMPORT :: C_CHAR, C_PTR, C_INT
+         IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          INTEGER(HID_T), VALUE  :: msg_id
          INTEGER(C_INT)         :: msg_type
@@ -444,17 +445,43 @@ CONTAINS
        END FUNCTION H5Eget_msg
     END INTERFACE
 
-    IF(PRESENT(req_size))THEN
-       msg_size = H5Eget_msg_f(msg_id, c_msg_type, C_NULL_PTR, 0)
-    ELSE
-       msg_size = H5Eget_msg_f(msg_id, c_msg_type, f_ptr, size)
+    hdferr = 0
+    msg_cp_sz = 0
+    IF(PRESENT(msg_size))THEN
+       IF(msg_size .EQ. 0)THEN
+          c_msg_size = H5Eget_msg(msg_id, c_msg_type, C_NULL_PTR, 0_SIZE_T)
+
+          IF(PRESENT(msg_size)) msg_size = c_msg_size
+          msg_type = INT(c_msg_type)
+
+          IF(c_msg_size.LT.0) hdferr = -1
+          RETURN
+       ELSE
+          msg_cp_sz = msg_size
+       ENDIF
     ENDIF
 
-    msg_type = INT(msg_type)
+    IF(msg_cp_sz.EQ.0) msg_cp_sz = LEN(msg)
 
-    hdferr = 0
-    IF(msg_size.LT.0) &
-         hdferr = -1
+    ALLOCATE(c_msg(1:msg_cp_sz+1), stat=hdferr)
+    IF (hdferr .NE. 0) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+    f_ptr = C_LOC(c_msg(1)(1:1))
+    c_msg_size = H5Eget_msg(msg_id, c_msg_type, f_ptr, msg_cp_sz+1)
+
+    CALL HD5c2fstring(msg, c_msg, msg_cp_sz, msg_cp_sz+1_SIZE_T)
+
+    DEALLOCATE(c_msg)
+
+    IF(PRESENT(msg_size))THEN
+       msg_size = c_msg_size
+    ENDIF
+
+    msg_type = INT(c_msg_type)
+
+    IF(c_msg_size.LT.0) hdferr = -1
 
   END SUBROUTINE H5Eget_msg_f
 

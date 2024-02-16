@@ -35,6 +35,9 @@
 ! Define if the intrinsic function C_SIZEOF exists
 #undef FORTRAN_HAVE_C_SIZEOF
 
+! Define if Fortran supports allocatable character
+#undef FORTRAN_HAVE_CHAR_ALLOC
+
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #undef FORTRAN_HAVE_C_LONG_DOUBLE
 

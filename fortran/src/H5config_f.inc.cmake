@@ -67,6 +67,9 @@
 #define H5_FORTRAN_HAVE_C_SIZEOF
 #endif
 
+! Define if allocatable character is supported
+#define H5_FORTRAN_HAVE_CHAR_ALLOC @H5_FORTRAN_HAVE_CHAR_ALLOC@
+
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 

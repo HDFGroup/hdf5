@@ -72,6 +72,13 @@ set (STORAGE_SIZE_CODE
        END PROGRAM
   "
 )
+set (CHAR_ALLOC
+  "
+       PROGRAM main
+         CHARACTER(:), ALLOCATABLE :: str
+       END PROGRAM
+  "
+)
 set (ISO_FORTRAN_ENV_CODE
   "
        PROGRAM main
@@ -126,6 +133,7 @@ check_fortran_source_compiles (${STORAGE_SIZE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_S
 check_fortran_source_compiles (${ISO_FORTRAN_ENV_CODE} ${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV SRC_EXT f90)
 check_fortran_source_compiles (${REALISNOTDOUBLE_CODE} ${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE SRC_EXT f90)
 check_fortran_source_compiles (${ISO_C_BINDING_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING SRC_EXT f90)
+check_fortran_source_compiles (${CHAR_ALLOC} ${HDF_PREFIX}_FORTRAN_HAVE_CHAR_ALLOC SRC_EXT f90)
 
 #-----------------------------------------------------------------------------
 # Add debug information (intel Fortran : JB)

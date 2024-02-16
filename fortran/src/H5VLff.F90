@@ -343,7 +343,7 @@ CONTAINS
        IF(INT(H5VLget_connector_name(obj_id, c_name, l), SIZE_T).LT.0)THEN
           hdferr = H5I_INVALID_HID_F
        ELSE
-          CALL HD5c2fstring(name,c_name,LEN(name))
+          CALL HD5c2fstring(name, c_name, LEN(name,KIND=SIZE_T), LEN(name,KIND=SIZE_T)+1_SIZE_T )
        ENDIF
     ENDIF
 

@@ -114,6 +114,15 @@ else ()
   message (FATAL_ERROR "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE")
 endif ()
 
+# Check to see of Fortran supports allocatable character
+READ_SOURCE("PROGRAM PROG_CHAR_ALLOC" "END PROGRAM PROG_CHAR_ALLOC" SOURCE_CODE)
+check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_CHAR_ALLOC SRC_EXT f90)
+if (${FORTRAN_CHAR_ALLOC})
+  set (${HDF_PREFIX}_FORTRAN_HAVE_CHAR_ALLOC 1)
+else ()
+  set (${HDF_PREFIX}_FORTRAN_HAVE_CHAR_ALLOC 0)
+endif ()
+
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------

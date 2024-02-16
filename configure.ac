@@ -652,6 +652,12 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
   fi
+  ## Checking if the compiler supports fortran character being allocatable
+  PAC_HAVE_CHAR_ALLOC
+
+  if test "X$HAVE_CHAR_ALLOC_FORTRAN" = "Xno"; then
+    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
+  fi
 
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
@@ -738,6 +744,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
+  fi
+
+  if test "X$HAVE_CHAR_ALLOC_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_CHAR_ALLOC], [1], [Define if Fortran supports allocatable character])
   fi
 
   ## See if C_LONG_DOUBLE is available
