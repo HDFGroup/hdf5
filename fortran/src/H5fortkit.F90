@@ -34,8 +34,8 @@ CONTAINS
 !  HD5c2fstring
 ! INPUTS
 !  cstring  -  C string stored as a string array of size 'len' of string size LEN=1
-!  flen     -  length of Fortran string
-!  clen     -  length of C array 
+!  f_len    -  length of Fortran string
+!  c_len    -  length of C array
 ! OUTPUT
 !   fstring -  Fortran string LEN=1
 ! PURPOSE
@@ -46,23 +46,23 @@ CONTAINS
 !   length greater than one, which is why we use the array of characters instead.
 !
 ! SOURCE
-  SUBROUTINE HD5c2fstring(fstring,cstring,flen,clen)
+  SUBROUTINE HD5c2fstring(fstring,cstring,f_len,c_len)
 !*****
     IMPLICIT NONE
 
     INTEGER(SIZE_T) :: i
-    INTEGER(SIZE_T) :: flen
-    INTEGER(SIZE_T) :: clen
+    INTEGER(SIZE_T) :: f_len
+    INTEGER(SIZE_T) :: c_len
     CHARACTER(*)    :: fstring
-    CHARACTER(LEN=1), DIMENSION(1:clen) :: cstring
+    CHARACTER(LEN=1), DIMENSION(1:c_len) :: cstring
 
-    INTEGER(SIZE_T) :: flen_max
+    INTEGER(SIZE_T) :: f_len_max
 
     fstring = ''
-    flen_max = LEN(fstring, KIND=SIZE_T)
-    DO i = 1, clen
-       IF (i .GT. flen_max) EXIT
-       IF (i .GT. flen) EXIT
+    f_len_max = LEN(fstring, KIND=SIZE_T)
+    DO i = 1, c_len
+       IF (i .GT. f_len_max) EXIT
+       IF (i .GT. f_len) EXIT
        IF (cstring(i)(1:1)==CHAR(0)) EXIT
        fstring(i:i) = cstring(i)(1:1)
     END DO

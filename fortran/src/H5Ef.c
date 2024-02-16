@@ -271,7 +271,7 @@ h5epush_c(hid_t_f *err_stack, hid_t_f *cls_id, hid_t_f *maj_id, hid_t_f *min_id,
     if (NULL == (c_msg = HD5f2cstring(msg, (size_t)*msg_len)))
         HGOTO_DONE(FAIL);
 
-    if (H5Epush2((hid_t)*err_stack, file, func, (uint)*line, (hid_t)*cls_id, (hid_t)*maj_id, (hid_t)*min_id,
+    if (H5Epush2((hid_t)*err_stack, file, func, (unsigned int)*line, (hid_t)*cls_id, (hid_t)*maj_id, (hid_t)*min_id,
                  c_msg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
                  arg14, arg15, arg16, arg17, arg18, arg19, arg20) < 0)
         HGOTO_DONE(FAIL);
