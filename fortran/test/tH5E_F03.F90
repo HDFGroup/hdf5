@@ -212,6 +212,14 @@ SUBROUTINE test_error_stack(total_error)
   INTEGER :: msg_type
   CHARACTER(LEN=9) :: maj_mesg = "MAJOR MSG"
   CHARACTER(LEN=7) :: min_mesg = "MIN MSG"
+  !file status
+  LOGICAL :: status
+  CHARACTER(LEN=180) :: chr180
+  INTEGER :: idx
+
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  CHARACTER(:), ALLOCATABLE :: msg_alloc
+#endif
 
   CHARACTER(LEN=9) :: chr9
   INTEGER(SIZE_T) :: msg_size
@@ -253,8 +261,96 @@ SUBROUTINE test_error_stack(total_error)
   CALL VERIFY("H5Eget_msg_f", msg_size, 9_SIZE_T, total_error)
   CALL VERIFY("H5Eget_msg_f", TRIM(chr9), maj_mesg(1:3), total_error)
 
-  CALL h5eprint_f(error) !, "stderr")
+  ! Check when a exact size buffer length is passed as the msg_size
+  msg_size = 9
+  CALL H5Eget_msg_f(major, msg_type, chr9, error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MAJOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 9_SIZE_T, total_error)
+  CALL VERIFY("H5Eget_msg_f", TRIM(chr9), maj_mesg(1:9), total_error)
+
+  msg_size = 0
+  CALL H5Eget_msg_f(minor, msg_type, chr9, error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MINOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 7_SIZE_T, total_error)
+
+  ! Check when a shorter buffer length is passed as the msg_size
+  msg_size = 3
+  CALL H5Eget_msg_f(minor, msg_type, chr9, error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MINOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 7_SIZE_T, total_error)
+  CALL VERIFY("H5Eget_msg_f", TRIM(chr9), min_mesg(1:3), total_error)
+
+  ! Check when a larger buffer length is passed as the msg_size
+  msg_size = 9
+  CALL H5Eget_msg_f(minor, msg_type, chr9, error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MINOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 7_SIZE_T, total_error)
+  CALL VERIFY("H5Eget_msg_f", TRIM(chr9), min_mesg(1:7), total_error)
+
+  ! Check with an allocatable character of the exact size
+#ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
+  msg_size = 0
+  CALL H5Eget_msg_f(minor, msg_type, "", error, msg_size)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MINOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_size, 7_SIZE_T, total_error)
+
+  ALLOCATE(CHARACTER(LEN=msg_size) :: msg_alloc)
+  CALL H5Eget_msg_f(minor, msg_type, msg_alloc, error)
+  CALL check("H5Eget_msg_f", error, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_type, H5E_MINOR_F, total_error)
+  CALL VERIFY("H5Eget_msg_f", msg_alloc, min_mesg, total_error)
+#endif
+
+  INQUIRE(file="H5Etest.txt", EXIST=status)
+  IF(status)THEN
+     OPEN(UNIT=12, FILE="H5Etest.txt", status='old')
+     CLOSE(12, STATUS='delete')
+  ENDIF
+
+  CALL h5eprint_f(error, "H5Etest.txt")
   CALL check("h5eprint_f", error, total_error)
+
+  INQUIRE(file="H5Etest.txt", EXIST=status)
+  IF(.NOT.status)THEN
+     CALL check("h5eprint_f", -1, total_error)
+  ELSE
+     OPEN(UNIT=12, FILE="H5Etest.txt", status='old')
+
+     READ(12,'(A)') chr180
+     idx = INDEX(string=chr180,substring="Custom error class")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     idx = INDEX(string=chr180,substring="H5E_F03")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     idx = INDEX(string=chr180,substring="0.1")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+
+     READ(12,'(A)') chr180
+     idx = INDEX(string=chr180,substring="FILE")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     idx = INDEX(string=chr180,substring="99")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     idx = INDEX(string=chr180,substring="FUNC")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     idx = INDEX(string=chr180,substring="ERROR TEXT")
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+
+     READ(12,'()')
+
+     READ(12,"(A)") chr180
+     idx = INDEX(string=chr180,substring=maj_mesg)
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+
+     READ(12,"(A)") chr180
+     idx = INDEX(string=chr180,substring=min_mesg)
+     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+
+     CLOSE(12, STATUS='delete')
+  ENDIF
 
   CALL H5Eclose_msg_f(major, error)
   CALL check("H5Eclose_msg_f", error, total_error)

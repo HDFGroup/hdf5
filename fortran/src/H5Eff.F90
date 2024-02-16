@@ -84,6 +84,9 @@ CONTAINS
 !! \param hdferr \fortran_error
 !! \param name   Name of the file that contains print output
 !!
+!! \note If \p name is not specified, the output will be sent to
+!!       the standard error (stderr).
+!!
 !! See C API: @ref H5Eprint2()
 !!
   SUBROUTINE h5eprint_f(hdferr, name)
@@ -219,7 +222,39 @@ CONTAINS
 
     hdferr = h5eset_auto2_c(printflag, estack_id_default, func_default, client_data_default)
   END SUBROUTINE h5eset_auto_f
-
+!>
+!! \ingroup FH5E
+!!
+!! \brief Pushes a new error record onto an error stack.
+!!
+!! \param err_stack Error stack identifier. If the identifier is H5E_DEFAULT_F, the error
+!!                  record will be pushed to the current stack.
+!! \param cls_id Error class identifier
+!! \param maj_id Major error identifier
+!! \param min_id Minor error identifier
+!! \param msg Error description string
+!! \param hdferr \fortran_error
+!! \param file Name of the file in which the error was detected
+!! \param func Name of the function in which the error was detected
+!! \param line Line number in the file where the error was detected
+!! \param arg[1-20] C style format control strings
+!!
+!! \note \p arg[1-20] expects C-style format strings, similar to the
+!!       system and C functions printf() and fprintf().
+!!       Furthermore, special characters, such as ANSI escapes,
+!!       will only be interpreted correctly if the Fortran equivalent
+!!       is used. For example, to print \p msg "TEXT" in red and has
+!!       a space after the text would be:
+!!       <br /><br />
+!!       \code
+!!       (..., "%s TEXT %s"//C_NEW_LINE, hdferr, ..., arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+!!       \endcode
+!!       <br />Using "\n" instead of C_NEW_LINE will not be interpereted correctly, and similary,
+!!             using "\x1B" instead of ACHAR(27)
+!!
+!!
+!! See C API: @ref H5Epush2()
+!!
   SUBROUTINE h5epush_f(err_stack, cls_id, maj_id, min_id, msg, hdferr, &
        file, func, line, &
        arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, &
@@ -232,9 +267,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: msg
     INTEGER, INTENT(OUT) :: hdferr
 
-    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
-    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
-    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL :: line
     CHARACTER(LEN=*), OPTIONAL, TARGET :: arg1, arg2, arg3, arg4, arg5, &
          arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, &
          arg16, arg17, arg18, arg19, arg20
@@ -420,10 +455,10 @@ CONTAINS
   SUBROUTINE H5Eget_msg_f(msg_id, msg_type, msg, hdferr, msg_size)
     IMPLICIT NONE
 
-    INTEGER(HID_T)  , INTENT(IN)  :: msg_id
-    INTEGER         , INTENT(OUT) :: msg_type
-    CHARACTER(LEN=*), INTENT(OUT) :: msg
-    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)    :: msg_id
+    INTEGER         , INTENT(OUT)   :: msg_type
+    CHARACTER(LEN=*)                :: msg
+    INTEGER         , INTENT(OUT)   :: hdferr
     INTEGER(SIZE_T) , INTENT(INOUT), OPTIONAL :: msg_size
 
     CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(:), ALLOCATABLE, TARGET :: c_msg
