@@ -20,35 +20,6 @@
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
-/****if* H5Ef/h5eclear_c
- * NAME
- *  h5eclear_c
- * PURPOSE
- *  Call H5Eclear to clear the error stack for the current thread
- * INPUTS
- *
- * OUTPUTS
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5eclear_c(hid_t_f *estack_id)
-/******/
-{
-    int_f ret_value = 0;
-
-    /*
-     * Call H5Eclear function.
-     */
-    if (H5Eclear2((hid_t)*estack_id) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    return ret_value;
-}
-
 /****if* H5Ef/h5eprint_c1
  * NAME
  *  h5eprint_c1
