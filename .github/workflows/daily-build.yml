@@ -35,7 +35,6 @@ jobs:
   call-workflow-tarball:
     uses: ./.github/workflows/tarball.yml
     with:
-      preset_name: ci-StdShar
       #use_tag: snapshot-1.14
       use_environ: snapshots
 
