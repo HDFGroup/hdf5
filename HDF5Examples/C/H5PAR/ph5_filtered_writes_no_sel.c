@@ -271,12 +271,22 @@ main(int argc, char **argv)
     H5Pset_fapl_mpio(fapl_id, comm, info);
 
     /*
-     * OPTIONAL: Set collective metadata reads on FAPL to allow
-     *           parallel writes to filtered datasets to perform
-     *           better at scale. While not strictly necessary,
-     *           this is generally recommended.
+     * OPTIONAL: It is generally recommended to set collective
+     *           metadata reads on FAPL to perform metadata reads
+     *           collectively, which usually allows filtered datasets
+     *           to perform better at scale, although it is not
+     *           strictly necessary.
      */
     H5Pset_all_coll_metadata_ops(fapl_id, true);
+
+    /*
+     * OPTIONAL: It is generally recommended to set collective
+     *           metadata writes on FAPL to perform metadata writes
+     *           collectively, which usually allows filtered datasets
+     *           to perform better at scale, although it is not
+     *           strictly necessary.
+     */
+    H5Pset_coll_metadata_write(fapl_id, true);
 
     /*
      * OPTIONAL: Set the latest file format version for HDF5 in
