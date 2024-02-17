@@ -464,7 +464,8 @@ CONTAINS
 !!
 !! \param class_id An error class identifier
 !! \param msg_type The type of the error message
-!! \param msg	   Major error message
+!! \param msg	   Error message
+!! \param err_id   Error identifier
 !! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Ecreate_msg()

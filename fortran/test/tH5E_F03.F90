@@ -429,21 +429,21 @@ SUBROUTINE test_error_stack(total_error)
 
      READ(12,'(A)') chr180
      idx = INDEX(string=chr180,substring="Custom error class")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f1", -1, total_error)
      idx = INDEX(string=chr180,substring="H5E_F03")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f2", -1, total_error)
      idx = INDEX(string=chr180,substring="0.1")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f3", -1, total_error)
 
      READ(12,'(A)') chr180
      idx = INDEX(string=chr180,substring="FILE")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f4", -1, total_error)
      idx = INDEX(string=chr180,substring="99")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f5", -1, total_error)
      idx = INDEX(string=chr180,substring="FUNC")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f6", -1, total_error)
      idx = INDEX(string=chr180,substring="ERROR TEXT")
-     IF(idx.EQ.0) CALL check("h5eprint_f", -1, total_error)
+     IF(idx.EQ.0) CALL check("h5eprint_f7", -1, total_error)
 
      READ(12,'()')
 

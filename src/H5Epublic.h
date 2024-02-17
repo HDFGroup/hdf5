@@ -254,7 +254,7 @@ H5_DLL herr_t H5Eclose_msg(hid_t err_id);
  *
  * \param[in] cls An error class identifier
  * \param[in] msg_type The type of the error message
- * \param[in] msg Major error message
+ * \param[in] msg Error message
  * \return An error ID (success), H5I_INVALID_HID (failure)
  *
  * \details H5Ecreate_msg() adds an error message to an error class defined by
