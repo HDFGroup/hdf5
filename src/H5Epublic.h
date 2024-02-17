@@ -250,7 +250,7 @@ H5_DLL herr_t H5Eclose_msg(hid_t err_id);
  * --------------------------------------------------------------------------
  * \ingroup H5E
  *
- * \brief Adds a major error message to an error class
+ * \brief Adds a major or minor error message to an error class
  *
  * \param[in] cls An error class identifier
  * \param[in] msg_type The type of the error message
@@ -625,7 +625,7 @@ H5_DLL herr_t H5Eauto_is_v2(hid_t err_stack, unsigned *is_stack);
  * \brief Retrieves an error message
  *
  * \param[in] msg_id Error message identifier
- * \param[out] type The type of the error message Valid values are #H5E_MAJOR
+ * \param[out] type The type of the error message. Valid values are #H5E_MAJOR
  *                  and #H5E_MINOR.
  * \param[out] msg Error message buffer
  * \param[in] size The length of error message to be returned by this function
@@ -651,7 +651,8 @@ H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size
  * \brief Retrieves the number of error messages in an error stack
  *
  * \estack_id{error_stack_id}
- * \return Returns a non-negative value on success; otherwise returns a negative value.
+ * \return Returns number of error messages in an error stack on
+ *         success; otherwise returns a negative value.
  *
  * \details H5Eget_num() retrieves the number of error records in the error
  *          stack specified by \p error_stack_id (including major, minor

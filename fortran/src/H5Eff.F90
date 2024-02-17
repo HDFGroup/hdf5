@@ -44,6 +44,17 @@ MODULE H5E
   INTEGER, PARAMETER :: PRINTON  = 1 !< Turn on automatic printing of errors
   INTEGER, PARAMETER :: PRINTOFF = 0 !< Turn off automatic printing of errors
 
+!> @brief h5e_error_t derived type
+  TYPE, BIND(C) :: h5e_error_t
+     INTEGER(HID_T) :: cls_id  !< Class ID
+     INTEGER(HID_T) :: maj_num !< Major error ID
+     INTEGER(HID_T) :: min_num !< Minor error number
+     INTEGER(C_INT) :: line      !< Line in file where error occurs
+     TYPE(C_PTR)    :: func_name !< Function in which error occurred
+     TYPE(C_PTR)    :: file_name !< File in which error occurred
+     TYPE(C_PTR)    :: desc      !< Optional supplied description
+  END TYPE h5e_error_t
+
 CONTAINS
 
 !>
@@ -125,6 +136,8 @@ CONTAINS
 !! \param namelen  Number of characters in the name buffer.
 !! \param hdferr   \fortran_error
 !!
+!! \attention Deprecated: use H5Eget_msg_f() instead.
+!!
 !! See C API: @ref H5Eget_major()
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
@@ -153,6 +166,8 @@ CONTAINS
 !! \param error_no Minor error number.
 !! \param name     Character string describing the error.
 !! \param hdferr   \fortran_error
+!!
+!! \attention Deprecated: use H5Eget_msg_f() instead.
 !!
 !! See C API: @ref H5Eget_minor()
 !!
@@ -369,7 +384,19 @@ CONTAINS
          arg16_def, arg17_def, arg18_def, arg19_def, arg20_def)
 
   END SUBROUTINE h5epush_f
-
+!>
+!! \ingroup FH5E
+!!
+!! \brief Registers a client library or application program to the HDF5 error API.
+!!
+!! \param cls_name Name of the error class
+!! \param lib_name Name of the client library or application to which the error class belongs
+!! \param version  Version of the client library or application to which the error class belongs. It can be NULL.
+!! \param class_id Class identifier
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Eregister_class()
+!!
   SUBROUTINE h5eregister_class_f(cls_name, lib_name, version, class_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN)  :: cls_name
@@ -404,7 +431,16 @@ CONTAINS
     IF(class_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5eregister_class_f
-
+!>
+!! \ingroup FH5E
+!!
+!! \brief Removes an error class.
+!!
+!! \param class_id Class identifier
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Eunregister_class()
+!!
   SUBROUTINE h5eunregister_class_f(class_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class_id
@@ -421,7 +457,18 @@ CONTAINS
     hdferr = INT(H5Eunregister_class(class_id))
 
   END SUBROUTINE h5eunregister_class_f
-
+!>
+!! \ingroup FH5E
+!!
+!! \brief Adds a major or minor error message to an error class.
+!!
+!! \param class_id An error class identifier
+!! \param msg_type The type of the error message
+!! \param msg	   Major error message
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Ecreate_msg()
+!!
   SUBROUTINE h5ecreate_msg_f(class_id, msg_type, msg, err_id, hdferr)
     IMPLICIT NONE
 
@@ -453,7 +500,16 @@ CONTAINS
     IF(err_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5ecreate_msg_f
-
+!>
+!! \ingroup FH5E
+!!
+!! \brief Closes an error message.
+!!
+!! \param err_id An error message identifier
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Eclose_msg()
+!!
   SUBROUTINE h5eclose_msg_f(err_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: err_id
@@ -470,7 +526,25 @@ CONTAINS
     hdferr = INT(H5Eclose_msg(err_id))
 
   END SUBROUTINE h5eclose_msg_f
-
+!>
+!! \ingroup FH5E
+!!
+!! \brief Retrieves an error message.
+!!
+!! \param msg_id   Error message identifier
+!! \param msg_type The type of the error message. Valid values are H5E_MAJOR_F and H5E_MINOR_F.
+!! \param msg	   Error message buffer
+!! \param hdferr   \fortran_error
+!! \param msg_size The length of error message to be returned by this function
+!!
+!! If \p msg_size is omitted, the API will copy up to the length of \p msg, and it
+!! is the application's responsibility to provide a large enough buffer. If \p msg_size
+!! is zero, the required buffer size will be returned, and \p msg is not accessed.
+!! If \p msg_size is greater than zero, the function will copy up to the length
+!! of \p msg_size info \p msg.
+!!
+!! See C API: @ref H5Eget_msg()
+!!
   SUBROUTINE H5Eget_msg_f(msg_id, msg_type, msg, hdferr, msg_size)
     IMPLICIT NONE
 
@@ -538,6 +612,155 @@ CONTAINS
     IF(c_msg_size.LT.0) hdferr = -1
 
   END SUBROUTINE H5Eget_msg_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Retrieves the number of error messages in an error stack.
+!!
+!! \param err_id An error message identifier
+!! \param count  Number of error messages in \p err_id
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Eget_num()
+!!
+  SUBROUTINE h5eget_num_f(error_stack_id, count, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)  :: error_stack_id
+    INTEGER(SIZE_T), INTENT(OUT) :: count
+    INTEGER        , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(SIZE_T) FUNCTION H5Eget_num(error_stack_id) BIND(C, NAME='H5Eget_num')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: error_stack_id
+       END FUNCTION H5Eget_num
+    END INTERFACE
+
+    count = H5Eget_num(error_stack_id)
+
+    hdferr = 0
+    IF(count.LT.0) hdferr = -1
+
+  END SUBROUTINE h5eget_num_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Walks the specified error stack, calling the specified function.
+!!
+!! \param err_stack Error stack identifier
+!! \param direction Direction in which the error stack is to be walked
+!! \param op        Function to be called for each error encountered
+!! \param op_data   Data to be passed to func
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Ewalk2()
+!!
+  SUBROUTINE h5ewalk_f(err_stack, direction, op, op_data, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN)    :: err_stack
+    INTEGER        , INTENT(IN)    :: direction
+    TYPE(C_FUNPTR) , INTENT(IN)    :: op
+    TYPE(C_PTR)    , INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
+    INTEGER        , INTENT(OUT)   :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ewalk(err_stack, direction, op, op_data) &
+            BIND(C, NAME='H5Ewalk2')
+         IMPORT :: HID_T, C_FUNPTR, C_PTR, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: err_stack
+         INTEGER(C_INT), VALUE :: direction
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+       END FUNCTION H5Ewalk
+    END INTERFACE
+
+    hdferr = INT(H5Ewalk(err_stack, direction, op, op_data))
+
+  END SUBROUTINE h5ewalk_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Retrieves an error message.
+!!
+!! \param class_id Error class identifier
+!! \param name     Buffer for the error class name
+!! \param hdferr   \fortran_error
+!! \param size     The maximum number of characters of the class name to be returned by this function in \p name.
+!!
+!! If \p size is omitted, the API will copy up to the length of \p name, and it
+!! is the application's responsibility to provide a large enough buffer. If \p size
+!! is zero, the required buffer size will be returned, and \p name is not accessed.
+!! If \p size is greater than zero, the function will copy up to the length
+!! of \p size info \p name.
+!!
+!! See C API: @ref H5Eget_class_name()
+!!
+  SUBROUTINE H5Eget_class_name_f(class_id, name,  hdferr, size)
+    IMPLICIT NONE
+
+    INTEGER(HID_T)  , INTENT(IN)    :: class_id
+    CHARACTER(LEN=*)                :: name
+    INTEGER         , INTENT(OUT)   :: hdferr
+    INTEGER(SIZE_T) , INTENT(INOUT), OPTIONAL :: size
+
+    CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(:), ALLOCATABLE, TARGET :: c_name
+    TYPE(C_PTR) :: f_ptr
+    INTEGER(SIZE_T) :: name_cp_sz
+    INTEGER(SIZE_T) :: c_size
+
+    INTERFACE
+       INTEGER(SIZE_T) FUNCTION H5Eget_class_name(class_id, name, size) &
+            BIND(C,NAME='H5Eget_class_name')
+         IMPORT :: C_PTR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , VALUE :: class_id
+         TYPE(C_PTR)    , VALUE :: name
+         INTEGER(SIZE_T), VALUE :: size
+       END FUNCTION H5Eget_class_name
+    END INTERFACE
+
+    hdferr = 0
+    name_cp_sz = 0
+    IF(PRESENT(size))THEN
+       IF(size .EQ. 0)THEN
+          c_size = H5Eget_class_name(class_id, C_NULL_PTR, 0_SIZE_T)
+
+          IF(PRESENT(size)) size = c_size
+          IF(c_size.LT.0) hdferr = -1
+          RETURN
+       ELSE
+          name_cp_sz = size
+       ENDIF
+    ENDIF
+
+    IF(name_cp_sz.EQ.0) name_cp_sz = LEN(name)
+
+    ALLOCATE(c_name(1:name_cp_sz+1), stat=hdferr)
+    IF (hdferr .NE. 0) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+    f_ptr = C_LOC(c_name(1)(1:1))
+    c_size = H5Eget_class_name(class_id, f_ptr, name_cp_sz+1)
+
+    CALL HD5c2fstring(name, c_name, name_cp_sz, name_cp_sz+1_SIZE_T)
+
+    DEALLOCATE(c_name)
+
+    IF(PRESENT(size))THEN
+       size = c_size
+    ENDIF
+
+    IF(c_size.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Eget_class_name_f
+
 
 #if 0
 !>

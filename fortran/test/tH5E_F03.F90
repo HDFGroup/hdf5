@@ -90,6 +90,105 @@ CONTAINS
 
   END FUNCTION my_hdf5_error_handler_nodata
 
+  !-------------------------------------------------------------------------
+  ! Function:    custom_print_cb
+  !
+  ! Purpose:     Callback function to print error stack in customized way.
+  !
+  !-------------------------------------------------------------------------
+  !
+  INTEGER(C_INT) FUNCTION custom_print_cb(n, err_desc, op_data) BIND(C)
+
+    ! This error function handle works with only version 2 error stack
+
+    IMPLICIT NONE
+
+    INTEGER(SIZE_T), PARAMETER :: MSG_SIZE = 64
+
+    INTEGER(C_INT)    :: n
+    TYPE(h5e_error_t) :: err_desc
+    TYPE(C_PTR)       :: op_data
+
+    CHARACTER(LEN=MSG_SIZE) :: maj
+    CHARACTER(LEN=MSG_SIZE) :: min
+    CHARACTER(LEN=MSG_SIZE) :: cls
+    INTEGER :: indent = 4
+    INTEGER(SIZE_T) :: size
+    INTEGER :: msg_type
+
+    INTEGER :: error
+
+    TYPE(C_PTR) :: f_ptr
+
+    CALL H5Eget_class_name_f(err_desc%cls_id, cls, error)
+    IF(error .LT.0)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+    IF(TRIM(cls).NE."Custom error class")THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+    size = 3
+    CALL H5Eget_class_name_f(err_desc%cls_id, cls, error, size)
+    IF(error .LT.0)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+    IF(TRIM(cls).NE."Cus")THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+    size = 0
+    CALL H5Eget_class_name_f(err_desc%cls_id, "", error, size)
+    IF(error .LT.0)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+    IF(size.NE.18)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+    size = MSG_SIZE
+    CALL H5Eget_msg_f(err_desc%maj_num, msg_type, maj, error, size)
+    IF(error .LT.0)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+ !   CALL h5eget_major_f(INT(err_desc%maj_num), maj, size, error)
+
+    custom_print_cb = 0
+
+  END FUNCTION custom_print_cb
+#if 0
+    FILE     *stream = (FILE *)client_data;
+
+
+    if (H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE) < 0)
+        TEST_ERROR;
+
+    if (H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
+        TEST_ERROR;
+
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
+            err_desc->func_name, err_desc->line);
+    fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+
+    return 0;
+
+error:
+    return -1;
+} /* end custom_print_cb() */
+
+#endif
+
 END MODULE test_my_hdf5_error_handler
 
 MODULE TH5E_F03
@@ -207,7 +306,7 @@ SUBROUTINE test_error_stack(total_error)
   CHARACTER(LEN=18), TARGET :: file
   CHARACTER(LEN=18), TARGET :: func
   INTEGER          , TARGET :: line
-  TYPE(C_PTR) :: ptr1, ptr2, ptr3
+  TYPE(C_PTR) :: ptr1, ptr2, ptr3, ptr4
 
   INTEGER :: msg_type
   CHARACTER(LEN=9) :: maj_mesg = "MAJOR MSG"
@@ -216,6 +315,9 @@ SUBROUTINE test_error_stack(total_error)
   LOGICAL :: status
   CHARACTER(LEN=180) :: chr180
   INTEGER :: idx
+  INTEGER(SIZE_T) :: count
+  CHARACTER(LEN=64), TARGET :: stderr
+  TYPE(C_FUNPTR) :: func_ptr
 
 #ifdef H5_FORTRAN_HAVE_CHAR_ALLOC
   CHARACTER(:), ALLOCATABLE :: msg_alloc
@@ -246,6 +348,10 @@ SUBROUTINE test_error_stack(total_error)
        arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
 
   CALL check("H5Epush_f", error, total_error)
+
+  CALL h5eget_num_f(H5E_DEFAULT_F, count, error)
+  CALL check("h5eget_num_f", error, total_error)
+  CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
 
   msg_size = 0
   CALL H5Eget_msg_f(major, msg_type, chr9, error, msg_size)
@@ -351,6 +457,12 @@ SUBROUTINE test_error_stack(total_error)
 
      CLOSE(12, STATUS='delete')
   ENDIF
+
+  stderr = "** Print error stack in customized way **"//C_NULL_CHAR
+  ptr4 = C_LOC(stderr(1:1))
+  func_ptr = C_FUNLOC(custom_print_cb)
+  CALL h5ewalk_f(H5P_DEFAULT_F, H5E_WALK_UPWARD_F, func_ptr, ptr4, error)
+  CALL check("h5ewalk_f", error, total_error)
 
   CALL H5Eclose_msg_f(major, error)
   CALL check("H5Eclose_msg_f", error, total_error)
