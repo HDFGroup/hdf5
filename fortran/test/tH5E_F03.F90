@@ -110,7 +110,7 @@ CONTAINS
     TYPE(C_PTR)       :: op_data
 
     CHARACTER(LEN=MSG_SIZE) :: maj
-    CHARACTER(LEN=MSG_SIZE) :: min
+    CHARACTER(LEN=MSG_SIZE) :: minn
     CHARACTER(LEN=MSG_SIZE) :: cls
     INTEGER :: indent = 4
     INTEGER(SIZE_T) :: size
@@ -160,7 +160,26 @@ CONTAINS
        RETURN
     ENDIF
 
- !   CALL h5eget_major_f(INT(err_desc%maj_num), maj, size, error)
+    CALL h5eget_major_f(err_desc%maj_num, maj, size, error)
+    IF("MAJOR MSG".NE.TRIM(maj))THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+    IF(error .LT. 0)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+
+    CALL h5eget_minor_f(err_desc%min_num, minn, error)
+    IF(error .LT. 0)THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
+    IF("MIN MSG".NE.TRIM(minn))THEN
+       custom_print_cb = -1
+       RETURN
+    ENDIF
 
     custom_print_cb = 0
 
@@ -168,24 +187,11 @@ CONTAINS
 #if 0
     FILE     *stream = (FILE *)client_data;
 
-
-    if (H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE) < 0)
-        TEST_ERROR;
-
-    if (H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
-        TEST_ERROR;
-
     fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
             err_desc->func_name, err_desc->line);
     fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
     fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
     fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
-
-    return 0;
-
-error:
-    return -1;
-} /* end custom_print_cb() */
 
 #endif
 

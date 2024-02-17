@@ -126,6 +126,7 @@ CONTAINS
        hdferr = h5eprint_c2()
     ENDIF
   END SUBROUTINE h5eprint_f
+
 !>
 !! \ingroup FH5E
 !!
@@ -141,22 +142,18 @@ CONTAINS
 !! See C API: @ref H5Eget_major()
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
-    INTEGER, INTENT(IN) :: error_no
-    CHARACTER(LEN=*), INTENT(OUT) :: name
-    INTEGER(SIZE_T), INTENT(IN) :: namelen
+    INTEGER(HID_T)  , INTENT(IN)    :: error_no
+    CHARACTER(LEN=*), INTENT(OUT)   :: name
+    INTEGER(SIZE_T) , INTENT(INOUT) :: namelen
     INTEGER, INTENT(OUT) :: hdferr
-    INTERFACE
-       INTEGER FUNCTION h5eget_major_c(error_no, name, namelen)  BIND(C,NAME='h5eget_major_c')
-         IMPORT :: C_CHAR
-         IMPORT :: SIZE_T
-         IMPLICIT NONE
-         INTEGER :: error_no
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
-         INTEGER(SIZE_T) :: namelen
-       END FUNCTION h5eget_major_c
-    END INTERFACE
 
-    hdferr = h5eget_major_c(error_no, name, namelen)
+    INTEGER :: msg_type
+    INTEGER(SIZE_T) :: namelen2
+
+    namelen2 = namelen
+
+    CALL H5Eget_msg_f(error_no, msg_type, name, hdferr, namelen2)
+
   END SUBROUTINE h5eget_major_f
 !>
 !! \ingroup FH5E
@@ -172,22 +169,13 @@ CONTAINS
 !! See C API: @ref H5Eget_minor()
 !!
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
-    INTEGER, INTENT(IN) :: error_no
+    INTEGER(HID_T)  , INTENT(IN) :: error_no
     CHARACTER(LEN=*), INTENT(OUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 
-    INTEGER(SIZE_T) :: namelen
-    INTERFACE
-       INTEGER FUNCTION h5eget_minor_c(error_no, name, namelen) BIND(C,NAME='h5eget_minor_c')
-         IMPORT :: C_CHAR, SIZE_T
-         INTEGER :: error_no
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
-         INTEGER(SIZE_T) :: namelen
-       END FUNCTION h5eget_minor_c
-    END INTERFACE
+    INTEGER :: msg_type
 
-    namelen = LEN(name)
-    hdferr = h5eget_minor_c(error_no, name, namelen)
+    CALL H5Eget_msg_f(error_no, msg_type, name, hdferr)
 
   END SUBROUTINE h5eget_minor_f
 !>
@@ -619,9 +607,9 @@ CONTAINS
 !!
 !! \brief Retrieves the number of error messages in an error stack.
 !!
-!! \param err_id An error message identifier
-!! \param count  Number of error messages in \p err_id
-!! \param hdferr \fortran_error
+!! \param error_stack_id An error message identifier
+!! \param count          Number of error messages in \p err_id
+!! \param hdferr         \fortran_error
 !!
 !! See C API: @ref H5Eget_num()
 !!
@@ -761,84 +749,6 @@ CONTAINS
     IF(c_size.LT.0) hdferr = -1
 
   END SUBROUTINE H5Eget_class_name_f
-
-
-#if 0
-!>
-!! \ingroup FH5E
-!!
-!! \brief Returns a character string describing an error specified by a major error number.
-!!
-!! \param error_no Major error number.
-!! \param name     Character string describing the error.
-!! \param namelen  Number of characters in the name buffer.
-!! \param hdferr   \fortran_error
-!!
-!! See C API: @ref H5Eget_major()
-!!
-  SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
-    INTEGER, INTENT(IN) :: error_no
-    CHARACTER(LEN=*), INTENT(OUT) :: name
-    INTEGER(SIZE_T), INTENT(IN) :: namelen
-    INTEGER, INTENT(OUT) :: hdferr
-    INTERFACE
-       INTEGER FUNCTION h5eget_major_c(error_no, name, namelen)  BIND(C,NAME='h5eget_major_c')
-         IMPORT :: C_CHAR
-         IMPORT :: SIZE_T
-         IMPLICIT NONE
-         INTEGER :: error_no
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
-         INTEGER(SIZE_T) :: namelen
-       END FUNCTION h5eget_major_c
-    END INTERFACE
-
-    hdferr = h5eget_major_c(error_no, name, namelen)
-  END SUBROUTINE h5eget_major_f
-!>
-!! \ingroup FH5E
-!!
-!! \brief Returns a character string describing an error specified by a minor error number.
-!!
-!! \param error_no Minor error number.
-!! \param name     Character string describing the error.
-!! \param hdferr   \fortran_error
-!!
-!! See C API: @ref H5Eget_minor()
-!!
-  SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
-    INTEGER         , INTENT(IN)  :: error_no
-    CHARACTER(LEN=*), INTENT(OUT) :: name
-    INTEGER         , INTENT(OUT) :: hdferr
-
-    CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
-    TYPE(C_PTR) :: f_ptr
-    !CHARACTER(LEN=LEN(name), kind=c_char),  POINTER ::
-
-    INTERFACE
-       FUNCTION H5Eget_minor(error_no) RESULT(name) BIND(C,NAME='H5Eget_minor')
-         IMPORT :: C_PTR, C_INT
-         INTEGER(C_INT), VALUE :: error_no
-         TYPE(C_PTR)    :: name
-       END FUNCTION H5Eget_minor
-    END INTERFACE
-
-    f_ptr = C_LOC(c_name(1:1)(1:1))
-    f_ptr = H5Eget_minor( INT(error_no, C_INT) )
-
-    hdferr = 0
-    IF( .not. c_associated(f_ptr))THEN
-       hdferr = -1
-       PRINT*, "NOT"
-    ELSE
-       PRINT*, "YES", c_name(1)
-     !  CALL C_F_POINTER(c_name(1), data)
-     !  f_ptr = C_LOC(c_name(1:1)(1:1)
-
-       CALL HD5c2fstring(name, c_name, LEN(name))
-    ENDIF
-
-  END SUBROUTINE h5eget_minor_f
-#endif
 
 END MODULE H5E
 
