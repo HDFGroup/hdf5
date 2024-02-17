@@ -34,6 +34,8 @@
 !  to the Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
+! MISSING: H5Eauto_is_v2, H5Eclose_stack, H5Ecreate_stack
+!          H5Eget_auto2, H5Eget_current_stack, H5Epop, H5Eset_current_stack
 
 MODULE H5E
 
@@ -749,6 +751,40 @@ CONTAINS
     IF(c_size.LT.0) hdferr = -1
 
   END SUBROUTINE H5Eget_class_name_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Appends one error stack to another, optionally closing the source stack.
+!!
+!! \param dst_stack_id       Error stack identifier
+!! \param src_stack_id       Error stack identifier
+!! \param close_source_stack Flag to indicate whether to close the source stack
+!! \param hdferr             \fortran_error
+!!
+!! See C API: @ref H5Eappend_stack()
+!!
+  SUBROUTINE H5Eappend_stack_f(dst_stack_id, src_stack_id, close_source_stack, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: dst_stack_id
+    INTEGER(HID_T), INTENT(IN)  :: src_stack_id
+    LOGICAL       , INTENT(IN)  :: close_source_stack
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Eappend_stack(dst_stack_id, src_stack_id, close_source_stack) &
+            BIND(C, NAME='H5Eappend_stack')
+         IMPORT :: HID_T, C_BOOL, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T) , VALUE :: dst_stack_id
+         INTEGER(HID_T) , VALUE :: src_stack_id
+         LOGICAL(C_BOOL), VALUE :: close_source_stack
+       END FUNCTION H5Eappend_stack
+    END INTERFACE
+
+    hdferr = INT(H5Eappend_stack(dst_stack_id, src_stack_id, LOGICAL(close_source_stack, C_BOOL)))
+
+  END SUBROUTINE H5Eappend_stack_f
 
 END MODULE H5E
 
