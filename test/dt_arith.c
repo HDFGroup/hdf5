@@ -3307,6 +3307,8 @@ error:
         return MAX((int)fails_all_tests, 1);
     else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
         return 1;
+    else
+        return 1;
 #endif
 }
 
