@@ -308,7 +308,7 @@ SUBROUTINE test_error_stack(total_error)
 
   INTEGER :: total_error
   INTEGER :: error
-  INTEGER(HID_T) :: cls_id, major, minor
+  INTEGER(HID_T) :: cls_id, major, minor, estack_id1, estack_id2
   CHARACTER(LEN=18), TARGET :: file
   CHARACTER(LEN=18), TARGET :: func
   INTEGER          , TARGET :: line
@@ -427,6 +427,7 @@ SUBROUTINE test_error_stack(total_error)
   CALL h5eprint_f(error, "H5Etest.txt")
   CALL check("h5eprint_f", error, total_error)
 
+
   INQUIRE(file="H5Etest.txt", EXIST=status)
   IF(.NOT.status)THEN
      CALL check("h5eprint_f", -1, total_error)
@@ -467,16 +468,39 @@ SUBROUTINE test_error_stack(total_error)
   stderr = "** Print error stack in customized way **"//C_NULL_CHAR
   ptr4 = C_LOC(stderr(1:1))
   func_ptr = C_FUNLOC(custom_print_cb)
+
+! MSB WHY DOES THIS RESET count to 0? FIX
+#if 1
   CALL h5ewalk_f(H5P_DEFAULT_F, H5E_WALK_UPWARD_F, func_ptr, ptr4, error)
   CALL check("h5ewalk_f", error, total_error)
 
+  CALL h5eget_num_f(H5P_DEFAULT_F, count, error)
+  PRINT*,"LJDF2332", count
+#endif
+
+  ! Copy error stack, which clears the original
+  CALL H5Eget_current_stack_f(estack_id1, error)
+  CALL check("H5Eget_current_stack_f", error, total_error)
+
+  CALL h5eget_num_f(estack_id1, count, error)
+  CALL check("h5eget_num_f", error, total_error)
+  CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
+
   CALL H5Eclose_msg_f(major, error)
   CALL check("H5Eclose_msg_f", error, total_error)
+
   CALL H5Eclose_msg_f(minor, error)
   CALL check("H5Eclose_msg_f", error, total_error)
 
   CALL h5eunregister_class_f(cls_id, error)
   CALL check("H5Eunregister_class_f", error, total_error)
+
+  CALL H5Ecreate_stack_f(estack_id2, error)
+  CALL check("H5Ecreate_stack_f", error, total_error)
+
+  CALL H5Eclose_stack_f(estack_id2, error)
+  CALL check(" H5Eclose_stack_f", error, total_error)
+
 
 END SUBROUTINE test_error_stack
 

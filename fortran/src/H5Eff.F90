@@ -34,8 +34,7 @@
 !  to the Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-! MISSING: H5Eauto_is_v2, H5Eclose_stack, H5Ecreate_stack
-!          H5Eget_auto2, H5Eget_current_stack, H5Epop, H5Eset_current_stack
+! MISSING: H5Eauto_is_v2, H5Eget_auto2
 
 MODULE H5E
 
@@ -707,10 +706,11 @@ CONTAINS
     INTERFACE
        INTEGER(SIZE_T) FUNCTION H5Eget_class_name(class_id, name, size) &
             BIND(C,NAME='H5Eget_class_name')
-         IMPORT :: C_PTR
+         IMPORT :: C_PTR, C_CHAR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          INTEGER(HID_T) , VALUE :: class_id
+       !  CHARACTER(KIND=C_CHAR,LEN=1), DIMENSION(*) :: name
          TYPE(C_PTR)    , VALUE :: name
          INTEGER(SIZE_T), VALUE :: size
        END FUNCTION H5Eget_class_name
@@ -732,16 +732,19 @@ CONTAINS
 
     IF(name_cp_sz.EQ.0) name_cp_sz = LEN(name)
 
-    ALLOCATE(c_name(1:name_cp_sz+1), stat=hdferr)
+    ALLOCATE(c_name(1:name_cp_sz+2), stat=hdferr)
     IF (hdferr .NE. 0) THEN
        hdferr = -1
        RETURN
     ENDIF
-    f_ptr = C_LOC(c_name(1)(1:1))
+    f_ptr = C_LOC(c_name)
+    PRINT*,'lkjdsf',name_cp_sz, name_cp_sz+1_SIZE_T
     c_size = H5Eget_class_name(class_id, f_ptr, name_cp_sz+1)
-
-    CALL HD5c2fstring(name, c_name, name_cp_sz, name_cp_sz+1_SIZE_T)
-
+    !c_size = H5Eget_class_name(class_id, c_name, name_cp_sz+2)
+    PRINT*,c_name
+  !  CALL HD5c2fstring(name, c_name, name_cp_sz, name_cp_sz+1_SIZE_T)
+  !  name = "Custom error class"
+  !  PRINT*,name
     DEALLOCATE(c_name)
 
     IF(PRESENT(size))THEN
@@ -785,6 +788,148 @@ CONTAINS
     hdferr = INT(H5Eappend_stack(dst_stack_id, src_stack_id, LOGICAL(close_source_stack, C_BOOL)))
 
   END SUBROUTINE H5Eappend_stack_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Returns a copy of the current error stack.
+!!
+!! \param err_stack_id Error stack identifier
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Eget_current_stack()
+!!
+  SUBROUTINE H5Eget_current_stack_f(err_stack_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(OUT) :: err_stack_id
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Eget_current_stack() BIND(C, NAME='H5Eget_current_stack')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+       END FUNCTION H5Eget_current_stack
+    END INTERFACE
+
+    err_stack_id = H5Eget_current_stack()
+
+    hdferr = 0
+    IF(err_stack_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Eget_current_stack_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Replaces the current error stack.
+!!
+!! \param err_stack_id Error stack identifier
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Eset_current_stack()
+!!
+  SUBROUTINE H5Eset_current_stack_f(err_stack_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN ) :: err_stack_id
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Eset_current_stack(err_stack_id) BIND(C, NAME='H5Eset_current_stack')
+         IMPORT :: C_INT, HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: err_stack_id
+       END FUNCTION H5Eset_current_stack
+    END INTERFACE
+
+    hdferr = INT(H5Eset_current_stack(err_stack_id))
+
+  END SUBROUTINE H5Eset_current_stack_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Closes an error stack handle.
+!!
+!! \param err_stack_id Error stack identifier
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Eclose_stack()
+!!
+  SUBROUTINE H5Eclose_stack_f(err_stack_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN ) :: err_stack_id
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Eclose_stack(err_stack_id) BIND(C, NAME='H5Eclose_stack')
+         IMPORT :: C_INT, HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: err_stack_id
+       END FUNCTION H5Eclose_stack
+    END INTERFACE
+
+    hdferr = INT(H5Eclose_stack(err_stack_id))
+
+  END SUBROUTINE H5Eclose_stack_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Creates a new, empty error stack.
+!!
+!! \param err_stack_id Error stack identifier
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref  H5Ecreate_stack()
+!!
+  SUBROUTINE H5Ecreate_stack_f(err_stack_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(OUT) :: err_stack_id
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Ecreate_stack() BIND(C, NAME='H5Ecreate_stack')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+       END FUNCTION H5Ecreate_stack
+    END INTERFACE
+
+    err_stack_id = H5Ecreate_stack()
+
+    hdferr = 0
+    IF(err_stack_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Ecreate_stack_f
+
+!>
+!! \ingroup FH5E
+!!
+!! \brief Deletes specified number of error messages from the error stack.
+!!
+!! \param err_stack_id Error stack identifier
+!! \param count        The number of error messages to be deleted from the top of error stack
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Epop()
+!!
+  SUBROUTINE H5Epop_f(err_stack_id, count, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T) , INTENT(IN ) :: err_stack_id
+    INTEGER(SIZE_T), INTENT(IN ) :: count
+    INTEGER        , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Epop(err_stack_id, count) BIND(C, NAME='H5Epop')
+         IMPORT :: C_INT, HID_T, SIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , VALUE :: err_stack_id
+         INTEGER(SIZE_T), VALUE :: count
+       END FUNCTION H5Epop
+    END INTERFACE
+
+    hdferr = INT(H5Epop(err_stack_id, count))
+
+  END SUBROUTINE H5Epop_f
 
 END MODULE H5E
 
