@@ -154,7 +154,7 @@ END PROGRAM FC_AVAIL_KINDS
 !---- END ----- Determine the available KINDs for REALs and INTEGERs
 
 PROGRAM FC_MPI_CHECK
-  INCLUDE 'mpif.h'
+  USE mpi
   INTEGER :: comm, amode, info, fh, ierror
   CHARACTER(LEN=1) :: filename
   CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
