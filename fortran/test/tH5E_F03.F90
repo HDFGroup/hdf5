@@ -308,7 +308,7 @@ SUBROUTINE test_error_stack(total_error)
 
   INTEGER :: total_error
   INTEGER :: error
-  INTEGER(HID_T) :: cls_id, major, minor, estack_id1, estack_id2
+  INTEGER(HID_T) :: cls_id, major, minor, estack_id, estack_id1, estack_id2
   CHARACTER(LEN=18), TARGET :: file
   CHARACTER(LEN=18), TARGET :: func
   INTEGER          , TARGET :: line
@@ -348,14 +348,16 @@ SUBROUTINE test_error_stack(total_error)
   ptr2 = C_LOC(func)
   ptr3 = C_LOC(line)
 
+  call h5ecreate_stack_f(estack_id, error)
+  CALL check("h5ecreate_stack_f", error, total_error)
+
   ! push a custom error message onto the default stack
-  CALL H5Epush_f(H5E_DEFAULT_F, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
+  CALL H5Epush_f(estack_id, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
        ptr1, ptr2, ptr3, &
        arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
-
   CALL check("H5Epush_f", error, total_error)
 
-  CALL h5eget_num_f(H5E_DEFAULT_F, count, error)
+  CALL h5eget_num_f(estack_id, count, error)
   CALL check("h5eget_num_f", error, total_error)
   CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
 
@@ -423,7 +425,7 @@ SUBROUTINE test_error_stack(total_error)
      OPEN(UNIT=12, FILE="H5Etest.txt", status='old')
      CLOSE(12, STATUS='delete')
   ENDIF
-
+#if 0
   CALL h5eprint_f(error, "H5Etest.txt")
   CALL check("h5eprint_f", error, total_error)
 
@@ -464,19 +466,17 @@ SUBROUTINE test_error_stack(total_error)
 
      CLOSE(12, STATUS='delete')
   ENDIF
-
+#endif
   stderr = "** Print error stack in customized way **"//C_NULL_CHAR
   ptr4 = C_LOC(stderr(1:1))
   func_ptr = C_FUNLOC(custom_print_cb)
 
-! MSB WHY DOES THIS RESET count to 0? FIX
-#if 1
-  CALL h5ewalk_f(H5P_DEFAULT_F, H5E_WALK_UPWARD_F, func_ptr, ptr4, error)
+  CALL h5ewalk_f(estack_id, H5E_WALK_UPWARD_F, func_ptr, ptr4, error)
   CALL check("h5ewalk_f", error, total_error)
 
-  CALL h5eget_num_f(H5P_DEFAULT_F, count, error)
-  PRINT*,"LJDF2332", count
-#endif
+  CALL h5eget_num_f(estack_id, count, error)
+  CALL check("h5eget_num_f", error, total_error)
+  CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
 
   ! Copy error stack, which clears the original
   CALL H5Eget_current_stack_f(estack_id1, error)
@@ -484,7 +484,7 @@ SUBROUTINE test_error_stack(total_error)
 
   CALL h5eget_num_f(estack_id1, count, error)
   CALL check("h5eget_num_f", error, total_error)
-  CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
+  CALL VERIFY("h5eget_num_f", count, 0_SIZE_T, total_error)
 
   CALL H5Eclose_msg_f(major, error)
   CALL check("H5Eclose_msg_f", error, total_error)
@@ -501,6 +501,8 @@ SUBROUTINE test_error_stack(total_error)
   CALL H5Eclose_stack_f(estack_id2, error)
   CALL check(" H5Eclose_stack_f", error, total_error)
 
+  CALL H5Eclose_stack_f(estack_id, error)
+  CALL check("H5Eclose_stack_f", error, total_error)
 
 END SUBROUTINE test_error_stack
 

@@ -710,7 +710,6 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          INTEGER(HID_T) , VALUE :: class_id
-       !  CHARACTER(KIND=C_CHAR,LEN=1), DIMENSION(*) :: name
          TYPE(C_PTR)    , VALUE :: name
          INTEGER(SIZE_T), VALUE :: size
        END FUNCTION H5Eget_class_name
@@ -732,19 +731,15 @@ CONTAINS
 
     IF(name_cp_sz.EQ.0) name_cp_sz = LEN(name)
 
-    ALLOCATE(c_name(1:name_cp_sz+2), stat=hdferr)
+    ALLOCATE(c_name(1:name_cp_sz+1), stat=hdferr)
     IF (hdferr .NE. 0) THEN
        hdferr = -1
        RETURN
     ENDIF
     f_ptr = C_LOC(c_name)
-    PRINT*,'lkjdsf',name_cp_sz, name_cp_sz+1_SIZE_T
-    c_size = H5Eget_class_name(class_id, f_ptr, name_cp_sz+1)
-    !c_size = H5Eget_class_name(class_id, c_name, name_cp_sz+2)
-    PRINT*,c_name
-  !  CALL HD5c2fstring(name, c_name, name_cp_sz, name_cp_sz+1_SIZE_T)
-  !  name = "Custom error class"
-  !  PRINT*,name
+    c_size = H5Eget_class_name(class_id, f_ptr, name_cp_sz+1_SIZE_T)
+
+    CALL HD5c2fstring(name, c_name, name_cp_sz, name_cp_sz+1_SIZE_T)
     DEALLOCATE(c_name)
 
     IF(PRESENT(size))THEN
