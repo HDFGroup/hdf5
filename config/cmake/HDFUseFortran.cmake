@@ -32,6 +32,9 @@ endif ()
 #-----------------------------------------------------------------------------
 include (FortranCInterface)
 
+#-----------------------------------------------------------------------------
+# Verify that the Fortran and C/C++ compilers work together
+#-----------------------------------------------------------------------------
 FortranCInterface_VERIFY()
 
 FortranCInterface_HEADER (
@@ -41,17 +44,12 @@ FortranCInterface_HEADER (
 )
 
 file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL\\(.*,.*\\) +(.*)")
-if (CONTENTS)
-  message(${CONTENTS})
-  string (REGEX MATCH "H5_FC_GLOBAL\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
-  set (H5_FC_FUNC "H5_FC_FUNC(name,NAME) ${CMAKE_MATCH_1}")
-endif()
+string (REGEX MATCH "H5_FC_GLOBAL\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
+set (H5_FC_FUNC "H5_FC_FUNC(name,NAME) ${CMAKE_MATCH_1}")
 
 file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)")
-if (CONTENTS)
-  string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
-  set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
-endif()
+string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
+set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 
 #test code source
 set (SIZEOF_CODE
