@@ -481,6 +481,33 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed H5Fget_access_plist so that it returns the file locking
+      settings for a file
+
+      When H5Fget_access_plist (and the internal H5F_get_access_plist)
+      is called on a file, the returned File Access Property List has
+      the library's default file locking settings rather than any
+      settings set for the file. This causes two problems:
+
+        - Opening an HDF5 file through an external link using H5Gopen,
+          H5Dopen, etc. with H5P_DEFAULT for the Dataset/Group/etc.
+          Access Property List will cause the external file to be opened
+          with the library's default file locking settings rather than
+          inheriting them from the parent file. This can be surprising
+          when a file is opened with file locking disabled, but its
+          external files are opened with file locking enabled.
+
+        - An application cannot make use of the H5Pset_elink_fapl
+          function to match file locking settings between an external
+          file and its parent file without knowing the correct setting
+          ahead of time, as calling H5Fget_access_plist on the parent
+          file will not return the correct settings.
+
+      This has been fixed by copying a file's file locking settings
+      into the newly-created File Access Property List in H5F_get_access_plist.
+
+      This fix partially addresses GitHub issue #4011
+
     - Memory usage growth issue
 
       Starting with the HDF5 1.12.1 release, an issue (GitHub issue #1256)
