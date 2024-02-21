@@ -41,6 +41,9 @@
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
 #undef FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 
+! Define if Fortran C_BOOL is different from default LOGICAL
+#undef FORTRAN_C_BOOL_IS_UNIQUE
+
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #undef HAVE_ISO_FORTRAN_ENV
 

@@ -55,6 +55,31 @@ PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS
   ptr = C_LOC(ichr(1:1))
 END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS
 
+!---- START ----- Check to see C_BOOL is different from LOGICAL
+MODULE l_type_mod
+  USE ISO_C_BINDING
+  INTERFACE h5t
+     MODULE PROCEDURE h5t_c_bool
+     MODULE PROCEDURE h5t_logical
+  END INTERFACE
+CONTAINS
+  SUBROUTINE h5t_c_bool(lcb)
+    LOGICAL(KIND=C_BOOL) :: lcb
+  END SUBROUTINE h5t_c_bool
+  SUBROUTINE h5t_logical(l)
+    LOGICAL :: l
+  END SUBROUTINE h5t_logical
+END MODULE l_type_mod
+PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL
+  USE ISO_C_BINDING
+  USE l_type_mod
+  LOGICAL(KIND=C_BOOL) :: lcb
+  LOGICAL              :: l
+  CALL h5t(lcb)
+  CALL h5t(l)
+END PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL
+!---- END ------- Check to see C_BOOL is different from LOGICAL
+
 !---- START ----- Check to see C_LONG_DOUBLE is different from C_DOUBLE
 MODULE type_mod
   USE ISO_C_BINDING
