@@ -815,16 +815,18 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         udata->flags           = flags;
 
         /*
-         * Initially, the FAPL created in this function holds a reference
-         * to the udata structure allocated above. The call to
-         * H5Pset_file_image_callbacks below will associate the udata
-         * structure with the FAPL and cause it to hold another reference
-         * in preparation for transfer of ownership to the file driver.
-         * Once the file has been opened with this FAPL and the FAPL is
-         * closed, the reference held by the FAPL is released and ownership
-         * is transferred to the file driver. The udata structure will then
-         * be freed when the image_free callback is made and the file driver
-         * releases its reference to the structure.
+         * Initialize the udata structure with a reference count of 1. At
+         * first, nothing holds this reference to the udata structure. The
+         * call to H5Pset_file_image_callbacks below will associate the
+         * udata structure with the FAPL, incrementing the structure's
+         * reference count and causing the FAPL to hold one of the two
+         * references to the structure in preparation for transfer of
+         * ownership to the file driver. Once the file has been opened with
+         * this FAPL and the FAPL is closed, the reference held by the FAPL
+         * is released and ownership is transferred to the file driver, which
+         * will then hold the remaining reference to the udata structure.
+         * The udata structure will then be freed when the file driver calls
+         * the image_free callback and releases its reference to the structure.
          */
         udata->ref_count = 1;
 
