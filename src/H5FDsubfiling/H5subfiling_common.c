@@ -1186,7 +1186,7 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
 
     *ioc_sel_info_str = NULL;
 
-    if (env_value) {
+    if (env_value && (strlen(env_value) > 0)) {
         /*
          * Parse I/O Concentrator selection strategy criteria as
          * either a single value or two colon-separated values of
@@ -1821,7 +1821,8 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
                                 "couldn't allocate space for subfiling filename");
 
     /* Check for a subfile name prefix setting in the environment */
-    if ((env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
+    env_value = getenv(H5FD_SUBFILING_SUBFILE_PREFIX);
+    if (env_value && (strlen(env_value) > 0)) {
         if (NULL == (sf_context->subfile_prefix = strdup(env_value)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
     }
