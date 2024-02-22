@@ -13,13 +13,6 @@
 #include "h5hltest.h"
 #include "H5DOpublic.h"
 
-#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
-#define H5_ZLIB_HEADER "zlib.h"
-#endif
-#if defined(H5_ZLIB_HEADER)
-#include H5_ZLIB_HEADER /* "zlib.h" */
-#endif
-
 #define FILENAME     "test_append.h5"
 #define DNAME_NOTSET "dataset_notset"
 #define DNAME_UNLIM  "dataset_unlim"
