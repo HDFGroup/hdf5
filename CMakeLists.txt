@@ -723,6 +723,9 @@ if (HDF5_ENABLE_PARALLEL)
                Reading/Writing >2GB of data in a single parallel I/O operation will be disabled.")
       set (LARGE_PARALLEL_IO OFF)
     endif ()
+
+    #Turn on Subfiling VFD
+    set (HDF5_ENABLE_SUBFILING_VFD ON CACHE BOOL "Build Parallel HDF5 Subfiling VFD" FORCE)
   else ()
     message (FATAL_ERROR "Parallel libraries not found")
   endif ()
