@@ -4978,7 +4978,9 @@ H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking /*out*/, hbool_t *i
     H5TRACE3("e", "ixx", fapl_id, use_file_locking, ignore_when_disabled);
 
     /* Make sure this is a fapl */
-    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
     /* Get the plist structure */

@@ -293,16 +293,17 @@ struct H5F_shared_t {
     hsize_t  threshold;      /* Threshold for alignment		*/
     hsize_t  alignment;      /* Alignment				*/
     unsigned gc_ref;         /* Garbage-collect references?		*/
-    H5F_libver_t         low_bound;         /* The 'low' bound of library format versions */
-    H5F_libver_t         high_bound;        /* The 'high' bound of library format versions */
-    bool                 store_msg_crt_idx; /* Store creation index for object header messages?	*/
-    unsigned             ncwfs;             /* Num entries on cwfs list		*/
-    struct H5HG_heap_t **cwfs;              /* Global heap cache			*/
-    struct H5G_t        *root_grp;          /* Open root group			*/
-    H5FO_t              *open_objs;         /* Open objects in file                 */
-    H5UC_t              *grp_btree_shared;  /* Ref-counted group B-tree node info   */
-    bool                 use_file_locking;  /* Whether or not to use file locking */
-    bool                 closing;           /* File is in the process of being closed */
+    H5F_libver_t         low_bound;             /* The 'low' bound of library format versions */
+    H5F_libver_t         high_bound;            /* The 'high' bound of library format versions */
+    bool                 store_msg_crt_idx;     /* Store creation index for object header messages?	*/
+    unsigned             ncwfs;                 /* Num entries on cwfs list		*/
+    struct H5HG_heap_t **cwfs;                  /* Global heap cache			*/
+    struct H5G_t        *root_grp;              /* Open root group			*/
+    H5FO_t              *open_objs;             /* Open objects in file                 */
+    H5UC_t              *grp_btree_shared;      /* Ref-counted group B-tree node info   */
+    bool                 use_file_locking;      /* Whether or not to use file locking */
+    bool                 ignore_disabled_locks; /* Whether or not to ignore disabled file locking */
+    bool                 closing;               /* File is in the process of being closed */
 
     /* Cached VOL connector ID & info */
     hid_t               vol_id;   /* ID of VOL connector for the container */
@@ -391,9 +392,11 @@ H5FL_EXTERN(H5F_t);
 H5FL_EXTERN(H5F_shared_t);
 
 /* Whether or not to use file locking (based on the environment variable)
- * FAIL means ignore the environment variable.
+ * and whether or not to ignore disabled file locking. FAIL means ignore
+ * the environment variable.
  */
 H5_DLLVAR htri_t use_locks_env_g;
+H5_DLLVAR htri_t ignore_disabled_locks_g;
 
 /******************************/
 /* Package Private Prototypes */
@@ -411,7 +414,7 @@ H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
-H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
+H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks);
 H5_DLL herr_t H5F__delete(const char *filename, hid_t fapl_id);
 
 /* File mount related routines */
