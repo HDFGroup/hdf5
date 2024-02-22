@@ -57,7 +57,7 @@ if (BUILD_STATIC_LIBS)
     target_link_libraries (${HDF5_TEST_LIB_TARGET} PRIVATE "wsock32.lib")
   endif ()
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} STATIC 0)
-  set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test)
+  set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test UNITY_BUILD OFF)
 
   if (HDF5_EXPORTED_TARGETS AND HDF5_TEST_API_INSTALL)
     INSTALL_TARGET_PDB (${HDF5_TEST_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} libraries)
@@ -96,7 +96,7 @@ if (BUILD_SHARED_LIBS)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} PRIVATE "wsock32.lib")
   endif ()
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIBSH_TARGET} ${HDF5_TEST_LIB_NAME} SHARED "LIB")
-  set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES FOLDER libraries/test)
+  set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES FOLDER libraries/test UNITY_BUILD OFF)
 
   if (HDF5_EXPORTED_TARGETS AND HDF5_TEST_API_INSTALL)
     INSTALL_TARGET_PDB (${HDF5_TEST_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} libraries)
@@ -154,7 +154,7 @@ if (BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_TARGET} SHARED)
     target_link_libraries (${HDF5_TEST_PLUGIN_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_PLUGIN_NAME} SHARED "LIB")
-    set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+    set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN UNITY_BUILD OFF)
 
     #-----------------------------------------------------------------------------
     # Add Target to clang-format
@@ -186,7 +186,7 @@ if (BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_TARGET} SHARED)
     target_link_libraries (${HDF5_TEST_PLUGIN_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_TARGET} ${HDF5_TEST_PLUGIN_NAME} SHARED "LIB")
-    set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+    set_target_properties (${HDF5_TEST_PLUGIN_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN UNITY_BUILD OFF)
 
     #-----------------------------------------------------------------------------
     # Add Target to clang-format
@@ -230,7 +230,7 @@ if (BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${HDF5_VFD_PLUGIN_LIB_TARGET} SHARED)
     target_link_libraries (${HDF5_VFD_PLUGIN_LIB_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_VFD_PLUGIN_LIB_TARGET} ${HDF5_VFD_PLUGIN_LIB_NAME} SHARED "LIB")
-    set_target_properties (${HDF5_VFD_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+    set_target_properties (${HDF5_VFD_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN UNITY_BUILD OFF)
 
     #-----------------------------------------------------------------------------
     # Add Target to clang-format
@@ -274,7 +274,7 @@ if (BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${HDF5_VOL_PLUGIN_LIB_TARGET} SHARED)
     target_link_libraries (${HDF5_VOL_PLUGIN_LIB_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
     H5_SET_LIB_OPTIONS (${HDF5_VOL_PLUGIN_LIB_TARGET} ${HDF5_VOL_PLUGIN_LIB_NAME} SHARED "LIB")
-    set_target_properties (${HDF5_VOL_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+    set_target_properties (${HDF5_VOL_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN UNITY_BUILD OFF)
 
     #-----------------------------------------------------------------------------
     # Add Target to clang-format
@@ -443,7 +443,7 @@ macro (ADD_H5_EXE file)
     TARGET_C_PROPERTIES (${file} SHARED)
     target_link_libraries (${file} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   endif ()
-  set_target_properties (${file} PROPERTIES FOLDER test)
+  set_target_properties (${file} PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -485,7 +485,7 @@ else ()
   TARGET_C_PROPERTIES (chunk_info SHARED)
   target_link_libraries (chunk_info PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${LINK_COMP_LIBS})
 endif ()
-set_target_properties (chunk_info PROPERTIES FOLDER test)
+set_target_properties (chunk_info PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -506,7 +506,7 @@ else ()
   TARGET_C_PROPERTIES (direct_chunk SHARED)
   target_link_libraries (direct_chunk PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${LINK_COMP_LIBS})
 endif ()
-set_target_properties (direct_chunk PROPERTIES FOLDER test)
+set_target_properties (direct_chunk PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -528,7 +528,7 @@ else ()
   TARGET_C_PROPERTIES (testhdf5 SHARED)
   target_link_libraries (testhdf5 PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
-set_target_properties (testhdf5 PROPERTIES FOLDER test)
+set_target_properties (testhdf5 PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -549,7 +549,7 @@ else ()
   TARGET_C_PROPERTIES (cache_image SHARED)
   target_link_libraries (cache_image PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
-set_target_properties (cache_image PROPERTIES FOLDER test)
+set_target_properties (cache_image PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -573,7 +573,7 @@ else ()
   TARGET_C_PROPERTIES (ttsafe SHARED)
   target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>")
 endif ()
-set_target_properties (ttsafe PROPERTIES FOLDER test)
+set_target_properties (ttsafe PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -598,7 +598,7 @@ else ()
   TARGET_C_PROPERTIES (thread_id SHARED)
   target_link_libraries (thread_id PRIVATE ${HDF5_TEST_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>")
 endif ()
-set_target_properties (thread_id PROPERTIES FOLDER test)
+set_target_properties (thread_id PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -618,7 +618,7 @@ if (HDF5_BUILD_UTILS) # requires mirror server
     TARGET_C_PROPERTIES (mirror_vfd SHARED)
     target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   endif ()
-  set_target_properties (mirror_vfd PROPERTIES FOLDER test)
+  set_target_properties (mirror_vfd PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -698,7 +698,7 @@ macro (ADD_H5_VDS_EXE file)
     TARGET_C_PROPERTIES (${file} SHARED)
     target_link_libraries (${file} PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   endif ()
-  set_target_properties (${file} PROPERTIES FOLDER test)
+  set_target_properties (${file} PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -726,7 +726,7 @@ else ()
   TARGET_C_PROPERTIES (accum_swmr_reader SHARED)
   target_link_libraries (accum_swmr_reader PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
 endif ()
-set_target_properties (accum_swmr_reader PROPERTIES FOLDER test)
+set_target_properties (accum_swmr_reader PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -746,7 +746,7 @@ if (BUILD_SHARED_LIBS)
   target_include_directories (filter_plugin PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (filter_plugin SHARED)
   target_link_libraries (filter_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
-  set_target_properties (filter_plugin PROPERTIES FOLDER test)
+  set_target_properties (filter_plugin PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -759,7 +759,7 @@ if (BUILD_SHARED_LIBS)
   target_include_directories (vfd_plugin PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (vfd_plugin SHARED)
   target_link_libraries (vfd_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
-  set_target_properties (vfd_plugin PROPERTIES FOLDER test)
+  set_target_properties (vfd_plugin PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -772,7 +772,7 @@ if (BUILD_SHARED_LIBS)
   target_include_directories (vol_plugin PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (vol_plugin SHARED)
   target_link_libraries (vol_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
-  set_target_properties (vol_plugin PROPERTIES FOLDER test)
+  set_target_properties (vol_plugin PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -797,7 +797,7 @@ else ()
   TARGET_C_PROPERTIES (use_append_chunk SHARED)
   target_link_libraries (use_append_chunk PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
-set_target_properties (use_append_chunk PROPERTIES FOLDER test)
+set_target_properties (use_append_chunk PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -819,7 +819,7 @@ if (HDF5_BUILD_UTILS) # requires mirror server
     TARGET_C_PROPERTIES (use_append_chunk_mirror SHARED)
     target_link_libraries (use_append_chunk_mirror PRIVATE ${HDF5_TEST_LIBSH_TARGET})
   endif ()
-  set_target_properties (use_append_chunk_mirror PROPERTIES FOLDER test)
+  set_target_properties (use_append_chunk_mirror PROPERTIES FOLDER test UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -841,7 +841,7 @@ else ()
   TARGET_C_PROPERTIES (use_append_mchunks SHARED)
   target_link_libraries (use_append_mchunks PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
-set_target_properties (use_append_mchunks PROPERTIES FOLDER test)
+set_target_properties (use_append_mchunks PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
@@ -862,7 +862,7 @@ else ()
   TARGET_C_PROPERTIES (use_disable_mdc_flushes SHARED)
   target_link_libraries (use_disable_mdc_flushes PRIVATE ${HDF5_TEST_LIBSH_TARGET})
 endif ()
-set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
+set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format

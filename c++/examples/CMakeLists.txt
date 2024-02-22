@@ -47,7 +47,7 @@ foreach (example ${examples})
       )
     endif ()
   endif ()
-  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
@@ -72,7 +72,7 @@ foreach (example ${tutr_examples})
       )
     endif ()
   endif ()
-  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
+  set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp UNITY_BUILD OFF)
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format

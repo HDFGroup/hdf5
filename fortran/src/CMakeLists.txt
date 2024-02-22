@@ -205,6 +205,7 @@ if (BUILD_STATIC_LIBS)
   set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
       FOLDER libraries/fortran
       LINKER_LANGUAGE C
+      UNITY_BUILD OFF
   )
   add_dependencies (${HDF5_F90_C_LIB_TARGET} H5gen_i)
   set (install_targets ${HDF5_F90_C_LIB_TARGET})

@@ -55,7 +55,7 @@ else ()
     )
   endif ()
 endif ()
-set_target_properties (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
+set_target_properties (cpp_testhdf5 PROPERTIES FOLDER test/cpp UNITY_BUILD OFF)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format

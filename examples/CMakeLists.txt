@@ -44,7 +44,8 @@ foreach (example ${examples})
     TARGET_C_PROPERTIES (${example} SHARED)
     target_link_libraries (${example} PRIVATE ${HDF5_LIBSH_TARGET})
   endif ()
-  set_target_properties (${example} PROPERTIES FOLDER examples)
+  set_target_properties (${example} PROPERTIES FOLDER examples UNITY_BUILD OFF)
+
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
