@@ -19679,6 +19679,14 @@ test_link_iterate_hard_links(void)
         {
             TESTING_2("H5Literate2 by link name in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+                SKIPPED();
+                printf("    API functions for external or user-defined link aren't supported with this "
+                         "connector\n");
+                PART_EMPTY(H5Literate_link_name_increasing);
+            }
+
             i = 0;
 
             /* Test basic link iteration capability using both index types and both index orders */
@@ -20401,6 +20409,12 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate2 by link name in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+                SKIPPED();
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_name_increasing);
+            }
+
             i = 0;
 
             /* Test basic link iteration capability using both index types and both index orders */
@@ -20424,6 +20438,12 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+                SKIPPED();
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_name_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
@@ -20449,9 +20469,9 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_link_creation_increasing);
             }
 
@@ -20479,9 +20499,9 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_link_creation_decreasing);
             }
 
@@ -20509,6 +20529,12 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate_by_name2 by link name in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+                SKIPPED();
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_link_name_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 0;
 
@@ -20533,6 +20559,12 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+                SKIPPED();
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
@@ -20559,9 +20591,9 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking or the external link API aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_by_name_creation_increasing);
             }
 
@@ -20591,9 +20623,9 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking or the external link API are not supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_by_name_creation_decreasing);
             }
 
@@ -20838,6 +20870,13 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate2 by link name in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
+                SKIPPED();
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_name_increasing);
+            }
+
             i = 0;
 
             /* Test basic link iteration capability using both index types and both index orders */
@@ -20860,6 +20899,13 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
+                SKIPPED();
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_name_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
@@ -20884,9 +20930,11 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_link_creation_increasing);
             }
 
@@ -20914,9 +20962,11 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_link_creation_decreasing);
             }
 
@@ -20944,6 +20994,14 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by link name in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
+                SKIPPED();
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_link_name_increasing);
+            }
+
             i = 0;
 
             if (H5Literate_by_name2(
@@ -20967,6 +21025,14 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
+                SKIPPED();
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_link_name_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
@@ -20993,9 +21059,11 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_by_name_creation_increasing);
             }
 
@@ -21024,9 +21092,11 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_by_name_creation_decreasing);
             }
 
@@ -21055,9 +21125,11 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate2 index-saving capabilities in increasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_index_saving_increasing);
             }
 
@@ -21093,9 +21165,11 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate2 index-saving capabilities in decreasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
-                printf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking, external links, or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_index_saving_decreasing);
             }
 
@@ -25935,7 +26009,6 @@ link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t 
     herr_t  ret_val = H5_ITER_CONT;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
-        SKIPPED();
         printf("    API functions for external links aren't supported with this "
                "connector\n");
         return 1;
@@ -26000,7 +26073,6 @@ link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *in
     herr_t  ret_val     = 0;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
-        SKIPPED();
         printf("    API functions for external or user-defined link aren't supported with this "
                "connector\n");
         return 1;
@@ -26089,7 +26161,6 @@ link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *inf
     int *broken = (int *)op_data;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
-        SKIPPED();
         printf("    API functions for external or user-defined link aren't supported with this "
                "connector\n");
         return 1;
