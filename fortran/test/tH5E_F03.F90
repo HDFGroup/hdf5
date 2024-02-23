@@ -407,6 +407,8 @@ SUBROUTINE test_error_stack(total_error)
 
   CALL h5eprint_f(H5E_DEFAULT_F, error)
   CALL check("h5eprint_f", error, total_error)
+  CALL h5eprint_f(error)
+  CALL check("h5eprint_f", error, total_error)
 
   INQUIRE(file="H5Etest.txt", EXIST=status)
   IF(status)THEN
