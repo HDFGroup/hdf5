@@ -43,18 +43,18 @@ h5eprint_c(hid_t_f *err_stack, _fcd name, size_t_f *namelen)
     char *c_name    = NULL;
     int_f ret_value = 0;
 
-    if( namelen ) {
-      if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
-        HGOTO_DONE(FAIL);
-      if (NULL == (file = fopen(c_name, "a")))
-        HGOTO_DONE(FAIL);
+    if (namelen) {
+        if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+            HGOTO_DONE(FAIL);
+        if (NULL == (file = fopen(c_name, "a")))
+            HGOTO_DONE(FAIL);
     }
 
     /*
      * Call H5Eprint2 function.
      */
     if (H5Eprint2((hid_t)*err_stack, file) < 0)
-      HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
 
 done:
     if (file)
