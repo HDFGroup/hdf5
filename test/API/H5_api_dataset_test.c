@@ -10047,7 +10047,7 @@ test_dataset_vlen_io(void)
             TESTING_2("write and read entire dataspace with string sequence");
             /* Set up write buffer */
             for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
-                if ((wbuf[i].p = calloc(i + 1, DATASET_VLEN_IO_STR_LEN * (i + 1))) == NULL)
+                if ((wbuf[i].p = calloc(i + 1, DATASET_VLEN_IO_STR_LEN)) == NULL)
                     PART_TEST_ERROR(rw_all_string);
 
                 for (size_t j = 0; j < i + 1; j++) {
