@@ -114,6 +114,18 @@ jobs:
               name: tgz-ubuntu-2204_gcc-binary
               path: ${{ github.workspace }}
 
+      - name: Get published deb binary (Linux)
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+              name: deb-ubuntu-2204_gcc-binary
+              path: ${{ github.workspace }}
+
+      - name: Get published rpm binary (Linux)
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+              name: rpm-ubuntu-2204_gcc-binary
+              path: ${{ github.workspace }}
+
       - name: Get published binary (Linux S3)
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
@@ -160,6 +172,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
@@ -184,6 +198,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
