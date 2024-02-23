@@ -1,0 +1,79 @@
+*************************************************************************
+*          Installation Instructions for HDF5                           *
+*************************************************************************
+
+Instructions for the Installation of HDF5 Software
+==================================================
+
+This file provides instructions for installing the HDF5 software.
+
+For help with installing, questions can be posted to the HDF Forum or sent to the HDF Helpdesk:
+
+   HDF Forum:     https://forum.hdfgroup.org/
+   HDF Helpdesk:  https://hdfgroup.atlassian.net/servicedesk/customer/portals
+
+CONTENTS
+--------
+        1. Obtaining HDF5
+        2. Third-party Software Requirements
+        2.1. Zlib
+        2.2  Szip (optional)
+        2.3. MPI and MPI-IO
+
+
+
+*****************************************************************************
+
+1. Obtaining HDF5
+        The latest supported public releases of HDF5 are available on
+        https://github.com/HDFGroup/hdf5.
+
+2. Third-party Software Requirements
+2.1. Zlib
+        The HDF5 library includes a predefined compression filter that
+        uses the "deflate" method for chunked datasets. If zlib-1.1.2 or
+        later is found, HDF5 will use it.  Otherwise, HDF5's predefined
+        compression method will degenerate to a no-op; the compression
+        filter will succeed but the data will not be compressed.
+
+2.2. Szip (optional)
+        The HDF5 library includes a predefined compression filter that
+        uses the extended-Rice lossless compression algorithm for chunked
+        datasets.
+
+        Building instructions are available with the Szip source code.
+
+        The HDF Group does not distribute separate Szip precompiled libraries,
+        but the HDF5 pre-built binaries provided on The HDF Group download page
+        include the Szip library with the encoder enabled. These can be found
+        here:
+
+           https://www.hdfgroup.org/downloads/hdf5/
+
+        Please notice that if HDF5 configure cannot find a valid Szip library,
+        configure will not fail; in this case, the compression filter will
+        not be available to the applications.
+
+        To check if Szip compression was successfully configured in,
+        check the "I/O filters (external):" line in the configure output,
+        summary section, printed to the standard output.
+
+2.3. MPI and MPI-IO
+        The parallel version of the library is built upon the foundation
+        provided by MPI and MPI-IO. If these libraries are not available
+        when HDF5 is configured, only a serial version of HDF5 can be built.
+
+3. HDF5 Source Code and Precompiled Binaries
+        The HDF Group provides source code and pre-compiled binaries from the
+        HDF5 github releases page:
+
+        https://github.com/HDFGroup/hdf5/releases
+
+4. Build and Install HDF5 on Unix and Mac OSX Platforms with autotools
+        see the release_docs/INSTALL_Autotools.txt file.
+
+5. Build and Install HDF5 Libraries and tools with CMake
+        see the release_docs/INSTALL_CMake.txt file.
+
+
+
