@@ -166,7 +166,7 @@ CONTAINS
        c_namelen = C_LOC(namelen)
        hdferr = h5eprint_c(err_stack, name, c_namelen)
     ELSE
-       hdferr = h5eprint_c(err_stack, "", C_NULL_PTR)
+       hdferr = h5eprint_c(err_stack, C_NULL_CHAR, C_NULL_PTR)
     ENDIF
   END SUBROUTINE h5eprint2_f
 
