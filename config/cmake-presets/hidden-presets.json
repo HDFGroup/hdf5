@@ -531,19 +531,13 @@
       "name": "ci-x64-Release-Clang",
       "configurePreset": "ci-x64-Release-Clang",
       "hidden": true,
-      "inherits": "ci-base",
-      "generators": [
-        "TGZ"
-      ]
+      "inherits": "ci-base"
     },
     {
       "name": "ci-x64-Release-GNUC",
       "configurePreset": "ci-x64-Release-GNUC",
       "hidden": true,
-      "inherits": "ci-base",
-      "generators": [
-        "TGZ"
-      ]
+      "inherits": "ci-base"
     },
     {
       "name": "ci-x64-Release-Intel",
