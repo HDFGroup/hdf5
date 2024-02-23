@@ -66,7 +66,7 @@ MODULE H5E
        IMPORT :: C_CHAR, HID_T, C_PTR
        IMPLICIT NONE
        INTEGER(HID_T)     :: err_stack
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
        TYPE(C_PTR), VALUE :: namelen
      END FUNCTION h5eprint_c
   END INTERFACE

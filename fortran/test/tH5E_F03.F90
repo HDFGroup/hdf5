@@ -233,8 +233,7 @@ SUBROUTINE test_error(total_error)
   CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
   CALL verify("h5dcreate_f", error, -1, total_error)
 
-!!$    CALL verify("H5Eset_auto_f",my_hdf5_error_handler_data(1),10, total_error)
-!!$    CALL verify("H5Eset_auto_f",my_hdf5_error_handler_data(2),20, total_error)
+  CALL verify("H5Eset_auto_f",my_hdf5_error_handler_data, 990, total_error)
 
 !!$  ! Test enabling and disabling default printing
 !!$
@@ -333,7 +332,7 @@ SUBROUTINE test_error_stack(total_error)
   ptr2 = C_LOC(func)
   ptr3 = C_LOC(line)
 
-  call h5ecreate_stack_f(estack_id, error)
+  CALL h5ecreate_stack_f(estack_id, error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
   ! push a custom error message onto the stack
@@ -467,11 +466,53 @@ SUBROUTINE test_error_stack(total_error)
   CALL check("h5eget_num_f", error, total_error)
   CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
 
+  CALL H5Ecreate_stack_f(estack_id2, error)
+  CALL check("H5Ecreate_stack_f", error, total_error)
+
+  CALL H5Eappend_stack_f(estack_id2, estack_id, .FALSE., error)
+  CALL check("H5Eappend_stack_f", error, total_error)
+
+  CALL h5eget_num_f(estack_id2, count, error)
+  CALL check("h5eget_num_f", error, total_error)
+  CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
+
   ! Copy error stack, which clears the original
   CALL H5Eget_current_stack_f(estack_id1, error)
   CALL check("H5Eget_current_stack_f", error, total_error)
 
   CALL h5eget_num_f(estack_id1, count, error)
+  CALL check("h5eget_num_f", error, total_error)
+  CALL VERIFY("h5eget_num_f", count, 0_SIZE_T, total_error)
+
+  CALL H5Eclose_stack_f(estack_id2, error)
+  CALL check(" H5Eclose_stack_f", error, total_error)
+
+  CALL H5Eclose_stack_f(estack_id, error)
+  CALL check("H5Eclose_stack_f", error, total_error)
+
+  CALL H5Eclose_stack_f(estack_id1, error)
+  CALL check("H5Eclose_stack_f", error, total_error)
+
+  CALL h5ecreate_stack_f(estack_id1, error)
+  CALL check("h5ecreate_stack_f", error, total_error)
+
+  ! push a custom error message onto the stack
+  CALL H5Epush_f(estack_id1, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
+       ptr1, ptr2, ptr3, &
+       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+  CALL check("H5Epush_f", error, total_error)
+
+  CALL H5Eset_current_stack_f(estack_id1, error) ! API will also close estack_id1
+  CALL check("H5Eset_current_stack_f", error, total_error)
+
+  CALL h5eget_num_f(H5E_DEFAULT_F, count, error)
+  CALL check("h5eget_num_f", error, total_error)
+  CALL VERIFY("h5eget_num_f", count, 1_SIZE_T, total_error)
+
+  CALL h5epop_f(H5E_DEFAULT_F, 1_size_t, total_error)
+  CALL check("h5epop_f", error, total_error)
+
+  CALL h5eget_num_f(H5E_DEFAULT_F, count, error)
   CALL check("h5eget_num_f", error, total_error)
   CALL VERIFY("h5eget_num_f", count, 0_SIZE_T, total_error)
 
@@ -483,15 +524,6 @@ SUBROUTINE test_error_stack(total_error)
 
   CALL h5eunregister_class_f(cls_id, error)
   CALL check("H5Eunregister_class_f", error, total_error)
-
-  CALL H5Ecreate_stack_f(estack_id2, error)
-  CALL check("H5Ecreate_stack_f", error, total_error)
-
-  CALL H5Eclose_stack_f(estack_id2, error)
-  CALL check(" H5Eclose_stack_f", error, total_error)
-
-  CALL H5Eclose_stack_f(estack_id, error)
-  CALL check("H5Eclose_stack_f", error, total_error)
 
 END SUBROUTINE test_error_stack
 
