@@ -53,6 +53,9 @@
 /* Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE */
 #define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 
+/* Define if Fortran C_BOOL is different from default LOGICAL */
+#define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
+
 /* Define if we have Fortran C_LONG_DOUBLE */
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
