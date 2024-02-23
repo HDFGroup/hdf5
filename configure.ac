@@ -655,10 +655,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## Checking if the compiler supports fortran character being allocatable
   PAC_HAVE_CHAR_ALLOC
 
-  if test "X$HAVE_CHAR_ALLOC_FORTRAN" = "Xno"; then
-    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
-  fi
-
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
   ##

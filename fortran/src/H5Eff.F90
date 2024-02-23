@@ -56,6 +56,21 @@ MODULE H5E
      TYPE(C_PTR)    :: desc      !< Optional supplied description
   END TYPE h5e_error_t
 
+  INTERFACE h5eprint_f
+     MODULE PROCEDURE h5eprint1_f
+     MODULE PROCEDURE h5eprint2_f
+  END INTERFACE h5eprint_f
+
+  INTERFACE
+     INTEGER FUNCTION h5eprint_c(err_stack, name, namelen) BIND(C,NAME='h5eprint_c')
+       IMPORT :: C_CHAR, HID_T, C_PTR
+       IMPLICIT NONE
+       INTEGER(HID_T)     :: err_stack
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+       TYPE(C_PTR), VALUE :: namelen
+     END FUNCTION h5eprint_c
+  END INTERFACE
+
 CONTAINS
 
 !>
@@ -88,6 +103,7 @@ CONTAINS
     hdferr = INT(H5Eclear(estack_id_default))
   END SUBROUTINE h5eclear_f
 
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5E
 !!
@@ -99,34 +115,62 @@ CONTAINS
 !! \note If \p name is not specified, the output will be sent to
 !!       the standard error (stderr).
 !!
-!! See C API: @ref H5Eprint2()
+!! \attention Deprecated.
+!!
+!! See C API: @ref H5Eprint1()
 !!
   SUBROUTINE h5eprint_f(hdferr, name)
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: name
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER :: namelen
+  END SUBROUTINE h5eprint_f
 
-    INTERFACE
-       INTEGER FUNCTION h5eprint_c1(name, namelen) BIND(C,NAME='h5eprint_c1')
-         IMPORT :: C_CHAR
-         IMPLICIT NONE
-         INTEGER :: namelen
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-       END FUNCTION h5eprint_c1
-    END INTERFACE
+!! \ingroup FH5E
+!!
+!! \brief Prints the error stack in a default manner.
+!!
+!! \param err_stack Error stack identifier
+!! \param hdferr    \fortran_error
+!! \param name      Name of the file that contains print output
+!!
+!! \note If \p name is not specified, the output will be sent to
+!!       the standard error (stderr).
+!!
+!! See C API: @ref H5Eprint2()
+!!
+  SUBROUTINE h5eprint_f(err_stack, hdferr, name)
+    INTEGER(HID_T)  , INTENT(IN)  :: err_stack
+    INTEGER         , INTENT(OUT) :: hdferr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: name
+  END SUBROUTINE h5eprint_f
 
-    INTERFACE
-       INTEGER FUNCTION h5eprint_c2()  BIND(C,NAME='h5eprint_c2')
-       END FUNCTION h5eprint_c2
-    END INTERFACE
+#else
+
+  SUBROUTINE h5eprint1_f(hdferr, name)
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: name
+    INTEGER, INTENT(OUT) :: hdferr
+
+    CALL h5eprint2_f(H5E_DEFAULT_F, hdferr, name)
+
+  END SUBROUTINE h5eprint1_f
+
+  SUBROUTINE h5eprint2_f(err_stack, hdferr, name)
+    INTEGER(HID_T),   INTENT(IN) :: err_stack
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: name
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(SIZE_T), TARGET :: namelen
+    TYPE(C_PTR)            :: c_namelen
 
     IF (PRESENT(name)) THEN
-       namelen = LEN(NAME)
-       hdferr = h5eprint_c1(name, namelen)
+       namelen = LEN(NAME, SIZE_T)
+       c_namelen = C_LOC(namelen)
+       hdferr = h5eprint_c(err_stack, name, c_namelen)
     ELSE
-       hdferr = h5eprint_c2()
+       hdferr = h5eprint_c(err_stack, "", C_NULL_PTR)
     ENDIF
-  END SUBROUTINE h5eprint_f
+  END SUBROUTINE h5eprint2_f
+
+#endif
 
 !>
 !! \ingroup FH5E

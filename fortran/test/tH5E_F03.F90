@@ -99,8 +99,6 @@ CONTAINS
   !
   INTEGER(C_INT) FUNCTION custom_print_cb(n, err_desc, op_data) BIND(C)
 
-    ! This error function handle works with only version 2 error stack
-
     IMPLICIT NONE
 
     INTEGER(SIZE_T), PARAMETER :: MSG_SIZE = 64
@@ -112,13 +110,10 @@ CONTAINS
     CHARACTER(LEN=MSG_SIZE) :: maj
     CHARACTER(LEN=MSG_SIZE) :: minn
     CHARACTER(LEN=MSG_SIZE) :: cls
-    INTEGER :: indent = 4
     INTEGER(SIZE_T) :: size
     INTEGER :: msg_type
 
     INTEGER :: error
-
-    TYPE(C_PTR) :: f_ptr
 
     CALL H5Eget_class_name_f(err_desc%cls_id, cls, error)
     IF(error .LT.0)THEN
@@ -184,16 +179,6 @@ CONTAINS
     custom_print_cb = 0
 
   END FUNCTION custom_print_cb
-#if 0
-    FILE     *stream = (FILE *)client_data;
-
-    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-            err_desc->func_name, err_desc->line);
-    fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
-    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
-
-#endif
 
 END MODULE test_my_hdf5_error_handler
 
@@ -351,7 +336,7 @@ SUBROUTINE test_error_stack(total_error)
   call h5ecreate_stack_f(estack_id, error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
-  ! push a custom error message onto the default stack
+  ! push a custom error message onto the stack
   CALL H5Epush_f(estack_id, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
        ptr1, ptr2, ptr3, &
        arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
@@ -420,15 +405,17 @@ SUBROUTINE test_error_stack(total_error)
   CALL VERIFY("H5Eget_msg_f", msg_alloc, min_mesg, total_error)
 #endif
 
+  CALL h5eprint_f(H5E_DEFAULT_F, error)
+  CALL check("h5eprint_f", error, total_error)
+
   INQUIRE(file="H5Etest.txt", EXIST=status)
   IF(status)THEN
      OPEN(UNIT=12, FILE="H5Etest.txt", status='old')
      CLOSE(12, STATUS='delete')
   ENDIF
-#if 0
-  CALL h5eprint_f(error, "H5Etest.txt")
-  CALL check("h5eprint_f", error, total_error)
 
+  CALL h5eprint_f(estack_id, error, "H5Etest.txt")
+  CALL check("h5eprint_f", error, total_error)
 
   INQUIRE(file="H5Etest.txt", EXIST=status)
   IF(.NOT.status)THEN
@@ -466,7 +453,7 @@ SUBROUTINE test_error_stack(total_error)
 
      CLOSE(12, STATUS='delete')
   ENDIF
-#endif
+
   stderr = "** Print error stack in customized way **"//C_NULL_CHAR
   ptr4 = C_LOC(stderr(1:1))
   func_ptr = C_FUNLOC(custom_print_cb)

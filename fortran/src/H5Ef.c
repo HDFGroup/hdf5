@@ -20,14 +20,15 @@
 #include "H5f90.h"
 #include "H5Eprivate.h"
 
-/****if* H5Ef/h5eprint_c1
+/****if* H5Ef/h5eprint_c
  * NAME
- *  h5eprint_c1
+ *  h5eprint_c
  * PURPOSE
  *  Call H5Eprint to print the error stack in a default manner.
  * INPUTS
- *  name    - file name
- *  namelen - length of name
+ *  err_stack - error stack identifier
+ *  name      - file name
+ *  namelen   - length of name
  * OUTPUTS
  *
  * RETURNS
@@ -35,23 +36,25 @@
  * SOURCE
  */
 int_f
-h5eprint_c1(_fcd name, int_f *namelen)
+h5eprint_c(hid_t_f *err_stack, _fcd name, size_t_f *namelen)
 /******/
 {
     FILE *file      = NULL;
     char *c_name    = NULL;
     int_f ret_value = 0;
 
-    if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+    if( namelen ) {
+      if (NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL);
-    if (NULL == (file = fopen(c_name, "a")))
+      if (NULL == (file = fopen(c_name, "a")))
         HGOTO_DONE(FAIL);
+    }
 
     /*
      * Call H5Eprint2 function.
      */
-    if (H5Eprint2(H5E_DEFAULT, file) < 0)
-        HGOTO_DONE(FAIL);
+    if (H5Eprint2((hid_t)*err_stack, file) < 0)
+      HGOTO_DONE(FAIL);
 
 done:
     if (file)
@@ -59,36 +62,6 @@ done:
     if (c_name)
         free(c_name);
 
-    return ret_value;
-}
-
-/****if* H5Ef/h5eprint_c2
- * NAME
- *  h5eprint_c2
- * PURPOSE
- *  Call H5Eprint to print the error stack to stderr
- *  in a default manner.
- * INPUTS
- *
- * OUTPUTS
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5eprint_c2(void)
-/******/
-{
-    int_f ret_value = 0;
-
-    /*
-     * Call H5Eprint2 function.
-     */
-    if (H5Eprint2(H5E_DEFAULT, NULL) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
     return ret_value;
 }
 

@@ -553,8 +553,7 @@ H5_FCDLL int_f h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid);
  * Functions from H5Ef.c
  */
 
-H5_FCDLL int_f h5eprint_c1(_fcd name, int_f *namelen);
-H5_FCDLL int_f h5eprint_c2(void);
+H5_FCDLL int_f h5eprint_c(hid_t_f *err_stack, _fcd name, size_t_f *namelen);
 H5_FCDLL int_f h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data);
 H5_FCDLL int_f h5epush_c(hid_t_f *err_stack, hid_t_f *cls_id, hid_t_f *maj_id, hid_t_f *min_id, _fcd msg,
                          size_t_f *msg_len, char *file, char *func, int *line, const char *arg1,
