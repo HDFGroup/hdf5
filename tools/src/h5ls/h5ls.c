@@ -2858,7 +2858,8 @@ main(int argc, char *argv[])
 
             vfd_info.info = &ros3_fa;
 #else
-            fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n\n");
+            fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is "
+                                    "configured and built.\n\n");
             usage();
             leave(EXIT_FAILURE);
 #endif
@@ -2881,7 +2882,9 @@ main(int argc, char *argv[])
 
             vfd_info.info = &hdfs_fa;
 #else
-            fprintf(rawerrorstream, "Error: The HDFS VFD is not available unless enabled when HDF5 is configured and built.\n\n");
+            fprintf(
+                rawerrorstream,
+                "Error: The HDFS VFD is not available unless enabled when HDF5 is configured and built.\n\n");
             usage();
             leave(EXIT_FAILURE);
 #endif

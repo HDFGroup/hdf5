@@ -947,7 +947,8 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
                 drivername = drivernames[ROS3_VFD_IDX];
 #else
-                error_msg("Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+                error_msg(
+                    "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
                 goto error;
 #endif
                 break;
