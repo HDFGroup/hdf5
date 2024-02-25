@@ -3139,6 +3139,10 @@ AC_ARG_ENABLE([subfiling-vfd],
                                [default=no]])],
               [SUBFILING_VFD=$enableval], [SUBFILING_VFD=no])
 
+if test "X${PARALLEL}" == "Xyes"; then
+    SUBFILING_VFD=yes
+fi
+
 if test "X$SUBFILING_VFD" = "Xyes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([HAVE_SUBFILING_VFD], [1],
