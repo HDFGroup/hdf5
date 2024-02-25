@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - New option for building and naming tools in CMake
+
+      The following option has been added:
+        HDF5_BUILD_STATIC_TOOLS    "Build Static Tools Not Shared Tools"          OFF
+
+      The default will build shared tools unless BUILD_SHARED_LIBS = OFF.
+
     - Incorporated HDF5 examples repository into HDF5 library.
 
       The HDF5Examples folder is equivalent to the repository hdf5-examples.
