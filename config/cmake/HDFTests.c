@@ -175,29 +175,6 @@ int main(int argc, char **argv)
 }
 #endif
 
-#ifdef GETTIMEOFDAY_GIVES_TZ
-#include <time.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-int main(void)
-{
-    struct timeval tv;
-    struct timezone tz;
-
-    tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
-    tz.tz_dsttime = 7;
-
-    gettimeofday(&tv, &tz);
-
-    /* Check whether the function returned any value at all */
-    if (tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
-        return 1;
-    else
-        return 0;
-}
-#endif
-
 #ifdef HAVE_IOEO
 
 #include <windows.h>
