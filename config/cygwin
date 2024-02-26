@@ -17,5 +17,5 @@
 #
 # See BlankForm in this directory for details.
 
-# Use the linux-gnulibc1 file.
-. $srcdir/config/linux-gnulibc1
+# Use the linux-gnu file
+. $srcdir/config/linux-gnu
