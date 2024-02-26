@@ -1146,7 +1146,11 @@ Bug Fixes since HDF5-1.14.0 release
 
     Fortran API
     -----------
-    -
+    - Fixed: HDF5 fails to compile with -Werror=lto-type-mismatch
+
+      Removed the use of the offending C stub wrapper.
+
+      Fixes GitHub issue #3987
 
 
     High-Level Library
