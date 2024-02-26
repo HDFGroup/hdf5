@@ -1145,7 +1145,16 @@ Bug Fixes since HDF5-1.14.0 release
 
     High-Level Library
     ------------------
-    -
+    - Fixed a memory leak in H5LTopen_file_image with H5LT_FILE_IMAGE_DONT_COPY flag
+
+      When the H5LT_FILE_IMAGE_DONT_COPY flag is passed to H5LTopen_file_image, the
+      internally-allocated udata structure gets leaked as the core file driver doesn't
+      have a way to determine when or if it needs to call the "udata_free" callback.
+      This has been fixed by freeing the udata structure when the "image_free" callback
+      gets made during file close, where the file is holding the last reference to the
+      udata structure.
+
+      Fixes GitHub issue #827
 
 
     Fortran High-Level APIs
