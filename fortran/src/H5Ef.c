@@ -100,10 +100,10 @@ h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *cli
 
 int_f
 h5epush_c(hid_t_f *err_stack, hid_t_f *cls_id, hid_t_f *maj_id, hid_t_f *min_id, _fcd msg, size_t_f *msg_len,
-          char *file, char *func, int *line, const char *arg1, const char *arg2, char *arg3, char *arg4,
-          char *arg5, char *arg6, char *arg7, char *arg8, char *arg9, char *arg10, char *arg11, char *arg12,
-          char *arg13, char *arg14, char *arg15, char *arg16, char *arg17, char *arg18, char *arg19,
-          char *arg20)
+          char *file, char *func, int *line, const char *arg1, const char *arg2, const char *arg3, const char *arg4,
+          const char *arg5, const char *arg6, const char *arg7, const char *arg8, const char *arg9, const char *arg10,
+          const char *arg11, const char *arg12, const char *arg13, const char *arg14, const char *arg15,
+          const char *arg16, const char *arg17, const char *arg18, const char *arg19, const char *arg20)
 /******/
 {
 
