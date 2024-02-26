@@ -264,10 +264,7 @@ error:
  *
  * Purpose:     Asserts that there is an entry in the specified cache with
  *              the provided entry id and provided tag. The function will
- *              fail if this is not the case. If found, this function will
- *              set the entry's flush_marker flag, so future verification
- *              attempts can skip over this entry, knowing it has already been
- *              checked.
+ *              fail if this is not the case.
  *
  * Return:      0 on Success, -1 on Failure
  *
@@ -328,7 +325,7 @@ evict_entries(hid_t fid)
     mark_all_entries_investigated(fid);
 
     /* setup the skip list prior to calling H5C_flush_cache() */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
         TEST_ERROR;
 
     /* Evict all we can from the cache to examine full tag creation tree */
@@ -337,8 +334,8 @@ evict_entries(hid_t fid)
      */
     H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
 
-    /* shutdown the slist -- allow it to be non-empty */
-    if (H5C_set_slist_enabled(f->shared->cache, false, true) < 0)
+    /* shutdown the slist */
+    if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
         TEST_ERROR;
 
     return 0;

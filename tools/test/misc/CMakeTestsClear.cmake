@@ -112,7 +112,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_ERR_CMP testname resultfile resultcode)
+  macro (ADD_H5_ERR_CMP testname resultfile resultcode result_errcheck)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5CLEAR_CMP-${testname}
@@ -124,8 +124,9 @@
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+              -D "TEST_ERRREF=${result_errcheck}"
+              -D "TEST_SKIP_COMPARE=true"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5CLEAR_CMP-${testname} PROPERTIES DISABLED true)
@@ -443,11 +444,11 @@
   ADD_H5_CMP (h5clr_usage_junk h5clear_usage 1 "" junk.h5)
   ADD_H5_CMP (h5clr_usage_none h5clear_usage 1 "" orig_h5clear_sec2_v3.h5)
   ADD_H5_CMP (h5clr_missing_file_m h5clear_missing_file 1 "-m")
-  ADD_H5_ERR_CMP (h5clr_open_fail_s h5clear_open_fail 1 "-s" junk.h5)
+  ADD_H5_ERR_CMP (h5clr_open_fail_s h5clear_open_fail 1 "h5clear error" "-s" junk.h5)
   ADD_H5_CMP (h5clr_missing_file_ms h5clear_missing_file 1 "-m" "-s")
-  ADD_H5_ERR_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "-m" "-s"  junk.h5)
-  ADD_H5_ERR_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "-m" orig_h5clear_sec2_v2.h5)
-  ADD_H5_ERR_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "-s" "-m" orig_h5clear_sec2_v0.h5)
+  ADD_H5_ERR_CMP (h5clr_open_fail_ms h5clear_open_fail 1 "h5clear error" "-m" "-s"  junk.h5)
+  ADD_H5_ERR_CMP (h5clr_no_mdc_image_m h5clear_no_mdc_image 0 "h5clear warning" "-m" orig_h5clear_sec2_v2.h5)
+  ADD_H5_ERR_CMP (h5clr_no_mdc_image_ms h5clear_no_mdc_image 0 "h5clear warning" "-s" "-m" orig_h5clear_sec2_v0.h5)
 #
 #
 #
@@ -478,8 +479,8 @@
 #
 #
 # h5clear_mdc_image.h5 already has cache image removed earlier, verify the expected warning from h5clear:
-  ADD_H5_ERR_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "-m" mod_h5clear_mdc_image.h5)
-  ADD_H5_ERR_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "-s" "-m" mod_h5clear_mdc_image2.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_m h5clear_no_mdc_image 0 "h5clear warning" "-m" mod_h5clear_mdc_image.h5)
+  ADD_H5_ERR_CMP (h5clr_mdc_image_sm h5clear_no_mdc_image 0 "h5clear warning" "-s" "-m" mod_h5clear_mdc_image2.h5)
 #
 #
 #

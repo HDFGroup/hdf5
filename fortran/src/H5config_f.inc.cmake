@@ -76,6 +76,9 @@
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
 #define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 
+! Define if Fortran C_BOOL is different from default LOGICAL
+#define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
+
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #define H5_HAVE_ISO_FORTRAN_ENV @H5_HAVE_ISO_FORTRAN_ENV@
 

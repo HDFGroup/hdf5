@@ -101,6 +101,16 @@ else ()
   set (${HDF_PREFIX}_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 0)
 endif ()
 
+# Check to see C_BOOL is different from default LOGICAL
+
+READ_SOURCE("MODULE l_type_mod" "END PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL" SOURCE_CODE)
+check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_C_BOOL_IS_UNIQUE SRC_EXT f90)
+if (${FORTRAN_C_BOOL_IS_UNIQUE})
+  set (${HDF_PREFIX}_FORTRAN_C_BOOL_IS_UNIQUE 1)
+else ()
+  set (${HDF_PREFIX}_FORTRAN_C_BOOL_IS_UNIQUE 0)
+endif ()
+
 ## Set the sizeof function for use later in the fortran tests
 if (${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE)
   set (FC_SIZEOF_A "STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
@@ -354,7 +364,7 @@ string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
 set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
 
 # Setting definition if there is a 16 byte fortran integer
-string (FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)
+string (FIND "${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}" "16" pos)
 if (${pos} EQUAL -1)
   set (${HDF_PREFIX}_HAVE_Fortran_INTEGER_SIZEOF_16 0)
 else ()

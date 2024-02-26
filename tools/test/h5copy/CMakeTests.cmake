@@ -253,7 +253,7 @@
   # Similar to ADD_H5_TEST macro. Compare to outputs from source & target
   # files instead of checking with h5ls.
   #
-  macro (ADD_H5_CMP_TEST testname resultcode infile vparam sparam srcname dparam dstname)
+  macro (ADD_H5_CMP_TEST testname resultcode result_errcheck infile vparam sparam srcname dparam dstname)
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY-CMP-${testname}-clear-objects
@@ -276,9 +276,9 @@
               -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${testname}.out"
-              -D "TEST_ERRREF=./testfiles/${testname}.err"
+              -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_MASK=true"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
     set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
@@ -598,7 +598,7 @@
   #-----------------------------------------------------------------
   # "Test copying object into group which doesn't exist, without -p"
   #
-  ADD_H5_CMP_TEST (h5copy_misc1 1 ${HDF_FILE1}.h5 -v -s /simple -d /g1/g2/simple)
+  ADD_H5_CMP_TEST (h5copy_misc1 1 "h5copy error" ${HDF_FILE1}.h5 -v -s /simple -d /g1/g2/simple)
 
   #-------------------------------------------
   # "Test copying objects to the same file "

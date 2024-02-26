@@ -106,6 +106,9 @@ PROGRAM H5_test_buildiface
   END DO
   WRITE(11,'(A)') "     MODULE PROCEDURE verify_character"
   WRITE(11,'(A)') "     MODULE PROCEDURE verify_logical"
+#ifdef H5_FORTRAN_C_BOOL_IS_UNIQUE
+  WRITE(11,'(A)') "     MODULE PROCEDURE verify_c_bool"
+#endif
   WRITE(11,'(A)') "  END INTERFACE"
 
   WRITE(11,'(A)') '  INTERFACE check_real_eq'
@@ -299,6 +302,35 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(A)') '      ENDIF'
   WRITE(11,'(A)') '    ENDIF'
   WRITE(11,'(A)') '  END SUBROUTINE verify_logical'
+
+#ifdef H5_FORTRAN_C_BOOL_IS_UNIQUE
+! DLL definitions for windows
+  WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
+  WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_c_bool'
+  WRITE(11,'(A)') '!DEC$endif'
+! Subroutine API
+  WRITE(11,'(A)') '  SUBROUTINE verify_c_bool(string,value,correct_value,total_error,chck_eq)'
+  WRITE(11,'(A)') '    IMPLICIT NONE'
+  WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
+  WRITE(11,'(A)') '    LOGICAL(C_BOOL) :: value, correct_value'
+  WRITE(11,'(A)') '    INTEGER :: total_error'
+  WRITE(11,'(A)') '    LOGICAL, OPTIONAL :: chck_eq'
+  WRITE(11,'(A)') '    LOGICAL :: chck_eq_opt'
+  WRITE(11,'(A)') '    chck_eq_opt = .TRUE.'
+  WRITE(11,'(A)') '    IF(PRESENT(chck_eq)) chck_eq_opt = chck_eq'
+  WRITE(11,'(A)') '    IF(chck_eq_opt .EQV. .TRUE.)THEN'
+  WRITE(11,'(A)') '      IF (value .NEQV. correct_value) THEN'
+  WRITE(11,'(A)') '         total_error = total_error + 1'
+  WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '      ENDIF'
+  WRITE(11,'(A)') '    ELSE'
+  WRITE(11,'(A)') '      IF (value .EQV. correct_value) THEN'
+  WRITE(11,'(A)') '         total_error = total_error + 1'
+  WRITE(11,'(A)') '         WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '      ENDIF'
+  WRITE(11,'(A)') '    ENDIF'
+  WRITE(11,'(A)') '  END SUBROUTINE verify_c_bool'
+#endif
 
   WRITE(11,'(A)') "END MODULE TH5_MISC_gen"
 

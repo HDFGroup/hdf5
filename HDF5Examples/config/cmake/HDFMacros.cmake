@@ -90,7 +90,7 @@ macro (HDFTEST_COPY_FILE src dest target)
 endmacro ()
 
 macro (HDF_DIR_PATHS package_prefix)
-	option (H5EX_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" OFF)
+  option (H5EX_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" OFF)
   if (H5EX_USE_GNU_DIRS)
     include(GNUInstallDirs)
     if (NOT ${package_prefix}_INSTALL_BIN_DIR)
@@ -121,7 +121,7 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
 
   if (APPLE)
-	  option (${package_prefix}_BUILD_FRAMEWORKS "ON to build as frameworks libraries, OFF to build according to BUILD_SHARED_LIBS" OFF)
+    option (${package_prefix}_BUILD_FRAMEWORKS "ON to build as frameworks libraries, OFF to build according to BUILD_SHARED_LIBS" OFF)
   endif ()
 
   if (NOT ${package_prefix}_INSTALL_BIN_DIR)

@@ -134,7 +134,6 @@
  *
  *
  * These flags apply to H5C_insert_entry():
- *    H5C__SET_FLUSH_MARKER_FLAG
  *    H5C__PIN_ENTRY_FLAG
  *    H5C__FLUSH_LAST_FLAG        ; super block only
  *    H5C__FLUSH_COLLECTIVELY_FLAG    ; super block only
@@ -145,7 +144,6 @@
  *    H5C__FLUSH_COLLECTIVELY_FLAG    ; super block only
  *
  * These flags apply to H5C_unprotect():
- *    H5C__SET_FLUSH_MARKER_FLAG
  *    H5C__DELETED_FLAG
  *    H5C__DIRTIED_FLAG
  *    H5C__PIN_ENTRY_FLAG
@@ -162,7 +160,6 @@
  * These flags apply to H5C_flush_cache():
  *    H5C__FLUSH_INVALIDATE_FLAG
  *    H5C__FLUSH_CLEAR_ONLY_FLAG
- *    H5C__FLUSH_MARKED_ENTRIES_FLAG
  *    H5C__FLUSH_IGNORE_PROTECTED_FLAG (can't use this flag in combination
  *                      with H5C__FLUSH_INVALIDATE_FLAG)
  *    H5C__DURING_FLUSH_FLAG
@@ -170,32 +167,29 @@
  * These flags apply to H5C_flush_single_entry():
  *    H5C__FLUSH_INVALIDATE_FLAG
  *    H5C__FLUSH_CLEAR_ONLY_FLAG
- *    H5C__FLUSH_MARKED_ENTRIES_FLAG
  *    H5C__TAKE_OWNERSHIP_FLAG
  *    H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG
  *    H5C__GENERATE_IMAGE_FLAG
  *    H5C__UPDATE_PAGE_BUFFER_FLAG
  */
 #define H5C__NO_FLAGS_SET                   0x00000
-#define H5C__SET_FLUSH_MARKER_FLAG          0x00001
-#define H5C__DELETED_FLAG                   0x00002
-#define H5C__DIRTIED_FLAG                   0x00004
-#define H5C__PIN_ENTRY_FLAG                 0x00008
-#define H5C__UNPIN_ENTRY_FLAG               0x00010
-#define H5C__FLUSH_INVALIDATE_FLAG          0x00020
-#define H5C__FLUSH_CLEAR_ONLY_FLAG          0x00040
-#define H5C__FLUSH_MARKED_ENTRIES_FLAG      0x00080
-#define H5C__FLUSH_IGNORE_PROTECTED_FLAG    0x00100
-#define H5C__READ_ONLY_FLAG                 0x00200
-#define H5C__FREE_FILE_SPACE_FLAG           0x00400
-#define H5C__TAKE_OWNERSHIP_FLAG            0x00800
-#define H5C__FLUSH_LAST_FLAG                0x01000
-#define H5C__FLUSH_COLLECTIVELY_FLAG        0x02000
-#define H5C__EVICT_ALLOW_LAST_PINS_FLAG     0x04000
-#define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG 0x08000
-#define H5C__DURING_FLUSH_FLAG              0x10000 /* Set when the entire cache is being flushed */
-#define H5C__GENERATE_IMAGE_FLAG            0x20000 /* Set during parallel I/O */
-#define H5C__UPDATE_PAGE_BUFFER_FLAG        0x40000 /* Set during parallel I/O */
+#define H5C__DELETED_FLAG                   0x00001
+#define H5C__DIRTIED_FLAG                   0x00002
+#define H5C__PIN_ENTRY_FLAG                 0x00004
+#define H5C__UNPIN_ENTRY_FLAG               0x00008
+#define H5C__FLUSH_INVALIDATE_FLAG          0x00010
+#define H5C__FLUSH_CLEAR_ONLY_FLAG          0x00020
+#define H5C__FLUSH_IGNORE_PROTECTED_FLAG    0x00040
+#define H5C__READ_ONLY_FLAG                 0x00080
+#define H5C__FREE_FILE_SPACE_FLAG           0x00100
+#define H5C__TAKE_OWNERSHIP_FLAG            0x00200
+#define H5C__FLUSH_LAST_FLAG                0x00400
+#define H5C__FLUSH_COLLECTIVELY_FLAG        0x00800
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG     0x01000
+#define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG 0x02000
+#define H5C__DURING_FLUSH_FLAG              0x04000 /* Set when the entire cache is being flushed */
+#define H5C__GENERATE_IMAGE_FLAG            0x08000 /* Set during parallel I/O */
+#define H5C__UPDATE_PAGE_BUFFER_FLAG        0x10000 /* Set during parallel I/O */
 
 /* Debugging/sanity checking/statistics settings */
 /* #define H5C_DO_SANITY_CHECKS */
@@ -1074,11 +1068,6 @@ typedef int H5C_ring_t;
  *        As a general rule, entries are placed in the list when they are
  *        marked dirty.
  *
- * flush_marker:  Boolean flag indicating that the entry is to be flushed
- *        the next time H5C_flush_cache() is called with the
- *        H5C__FLUSH_MARKED_ENTRIES_FLAG.  The flag is reset when
- *        the entry is flushed for whatever reason.
- *
  * flush_me_last:  Boolean flag indicating that this entry should not be
  *        flushed from the cache until all other entries without the
  *        flush_me_last flag set have been flushed.
@@ -1557,7 +1546,6 @@ typedef struct H5C_cache_entry_t {
     int                ro_ref_count;
     bool               is_pinned;
     bool               in_slist;
-    bool               flush_marker;
     bool               flush_me_last;
 #ifdef H5_HAVE_PARALLEL
     bool clear_on_unprotect;
@@ -2207,7 +2195,7 @@ H5_DLL herr_t H5C_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr, bool evictions_enabled);
-H5_DLL herr_t H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool clear_slist);
+H5_DLL herr_t H5C_set_slist_enabled(H5C_t *cache_ptr, bool slist_enabled, bool populate_slist);
 H5_DLL herr_t H5C_set_prefix(H5C_t *cache_ptr, char *prefix);
 H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name, bool display_detailed_stats);
 H5_DLL void   H5C_stats__reset(H5C_t *cache_ptr);

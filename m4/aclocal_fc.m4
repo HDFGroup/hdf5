@@ -143,6 +143,17 @@ AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
 ])
 fi
 
+dnl Check if C_BOOL is different from default LOGICAL
+
+AC_DEFUN([PAC_PROG_FC_C_BOOL_EQ_LOGICAL],[
+  C_BOOL_IS_UNIQUE_FORTRAN="no"
+  AC_MSG_CHECKING([if Fortran C_BOOL is different from default LOGICAL])
+  TEST_SRC="`sed -n '/MODULE l_type_mod/,/END PROGRAM PROG_FC_C_BOOL_EQ_LOGICAL/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
+            C_BOOL_IS_UNIQUE_FORTRAN="yes"],
+         [AC_MSG_RESULT([no])])
+])
+
 dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
 

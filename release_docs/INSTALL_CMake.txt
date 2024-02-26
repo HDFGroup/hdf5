@@ -213,7 +213,7 @@ Notes: This short set of instructions is written for users who want to
            cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.15."X"
 
          On Windows 64 bit
-           cmake -G "Visual Studio 16 2019 Win64" -A x64 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.15."X"
+           cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.15."X"
 
          On Linux and Mac
            cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5-1.15."X"
@@ -657,7 +657,7 @@ These five steps are described in detail below.
 
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
-               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" "-Ax64"\
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" "-Ax64" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -692,11 +692,11 @@ These five steps are described in detail below.
                -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
 
            The options to control the GIT parameters (config/cmake/cacheinit.cmake file) are:
-               ZLIB_GIT_URL:STRING="http://${git_url}/zlib"
+               ZLIB_GIT_URL:STRING="https://${git_url}/zlib"
                ZLIB_GIT_BRANCH="${git_branch}"
-               SZIP_GIT_URL:STRING="http://${git_url}/szip"
+               SZIP_GIT_URL:STRING="https://${git_url}/szip"
                SZIP_GIT_BRANCH="${git_branch}"
-               PLUGIN_GIT_URL:STRING="http://${git_url}/plugin"
+               PLUGIN_GIT_URL:STRING="https://${git_url}/plugin"
                PLUGIN_GIT_BRANCH="${git_branch}"
            ${git_url} should be changed to your location and ${git_branch} is
            your branch in the repository. Also define CMAKE_BUILD_TYPE
@@ -909,23 +909,23 @@ HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                             
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 
-ZLIB_USE_EXTERNAL         "Use External Library Building for ZLIB"    OFF
-ZLIB_TGZ_ORIGPATH         "Use ZLIB from original location"           "https://github.com/madler/zlib/releases/download/v1.2.13"
-ZLIB_TGZ_NAME             "Use ZLIB from original compressed file"    "zlib-1.2.13.tar.gz"
-ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"      ON
+ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"    OFF
+ZLIB_TGZ_ORIGPATH           "Use ZLIB from original location"           "https://github.com/madler/zlib/releases/download/v1.2.13"
+ZLIB_TGZ_NAME               "Use ZLIB from original compressed file"    "zlib-1.2.13.tar.gz"
+ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"      ON
 
-SZIP_USE_EXTERNAL         "Use External Library Building for SZIP"    OFF
+SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"    OFF
 if (HDF5_ENABLE_SZIP_SUPPORT)
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                     ON
-LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"         "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
-LIBAEC_TGZ_NAME           "Use LIBAEC from original compressed file"  "libaec-v1.0.6.tar.gz"
-LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    ON
+LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"         "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
+LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"  "libaec-v1.0.6.tar.gz"
+LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"    ON
 
-PLUGIN_USE_EXTERNAL       "Use External Library Building for PLUGINS" OFF
+PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS" OFF
 if (WINDOWS)
-    H5_DEFAULT_PLUGINDIR  "%ALLUSERSPROFILE%/hdf5/lib/plugin"
+    H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()
-    H5_DEFAULT_PLUGINDIR  "/usr/local/hdf5/lib/plugin"
+    H5_DEFAULT_PLUGINDIR    "/usr/local/hdf5/lib/plugin"
 endif ()
 
 NOTE:

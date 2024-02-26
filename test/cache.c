@@ -2779,16 +2779,14 @@ check_insert_entry(unsigned paged)
     if (pass) {
 
         insert_entry(file_ptr, entry_type, 0, H5C__NO_FLAGS_SET);
-        insert_entry(file_ptr, entry_type, 1, H5C__SET_FLUSH_MARKER_FLAG);
-        insert_entry(file_ptr, entry_type, 2, H5C__PIN_ENTRY_FLAG);
-        insert_entry(file_ptr, entry_type, 3, (H5C__SET_FLUSH_MARKER_FLAG | H5C__PIN_ENTRY_FLAG));
+        insert_entry(file_ptr, entry_type, 1, H5C__PIN_ENTRY_FLAG);
     }
 
     /* Verify that the entries are inserted as desired. */
 
     i         = 0;
     base_addr = entries[0];
-    while (pass && (i < 4)) {
+    while (pass && (i < 2)) {
         entry_ptr = &(base_addr[i]);
 
         /* Start by checking everything we can via H5C_get_entry_status() */
@@ -2815,7 +2813,7 @@ check_insert_entry(unsigned paged)
         if (pass) {
 
             /* verify that the pinned flag got set correctly */
-            if ((i == 2) || (i == 3)) {
+            if (i == 1) {
 
                 if (!is_pinned) {
 
@@ -2838,24 +2836,6 @@ check_insert_entry(unsigned paged)
         /* That's all we can get from H5C_get_entry_status().
          * Now start looking at the cache data structures directly.
          */
-
-        if (pass) {
-
-            /* Verify that the flush marker got set correctly */
-            if ((i == 1) || (i == 3)) {
-
-                if (!((entry_ptr->header).flush_marker)) {
-
-                    pass         = false;
-                    failure_mssg = "Unexpected insert results 5.";
-                }
-            }
-            else if ((entry_ptr->header).flush_marker) {
-
-                pass         = false;
-                failure_mssg = "Unexpected insert results 6.";
-            }
-        }
 
         if (pass) {
 
@@ -2927,15 +2907,15 @@ check_insert_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * entry_sizes[entry_type]) ||
+        if ((cache_ptr->index_len != 2) || (cache_ptr->index_size != 2 * entry_sizes[entry_type]) ||
             ((cache_ptr->slist_enabled) &&
-             ((cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]))) ||
-            (cache_ptr->pl_len != 0) || (cache_ptr->pl_size != (size_t)0) || (cache_ptr->pel_len != 2) ||
-            (cache_ptr->pel_size != 2 * entry_sizes[entry_type]) || (cache_ptr->LRU_list_len != 2) ||
-            (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type])
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * entry_sizes[entry_type]))) ||
+            (cache_ptr->pl_len != 0) || (cache_ptr->pl_size != (size_t)0) || (cache_ptr->pel_len != 1) ||
+            (cache_ptr->pel_size != 1 * entry_sizes[entry_type]) || (cache_ptr->LRU_list_len != 1) ||
+            (cache_ptr->LRU_list_size != 1 * entry_sizes[entry_type])
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
-            || (cache_ptr->dLRU_list_len != 2) ||
-            (cache_ptr->dLRU_list_size != 2 * entry_sizes[entry_type]) || (cache_ptr->cLRU_list_len != 0) ||
+            || (cache_ptr->dLRU_list_len != 1) ||
+            (cache_ptr->dLRU_list_size != 1 * entry_sizes[entry_type]) || (cache_ptr->cLRU_list_len != 0) ||
             (cache_ptr->cLRU_list_size != (size_t)0)
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
         ) {
@@ -2951,14 +2931,12 @@ check_insert_entry(unsigned paged)
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
-        if ((cache_ptr->insertions[entry_type] != 4) || (cache_ptr->pinned_insertions[entry_type] != 2) ||
-            (cache_ptr->pins[entry_type] != 2) || (cache_ptr->unpins[entry_type] != 0) ||
-            (cache_ptr->dirty_pins[entry_type] != 0) || (cache_ptr->max_index_len != 4) ||
-            (cache_ptr->max_index_size != 4 * entry_sizes[entry_type]) ||
-            ((cache_ptr->slist_enabled) &&
-             ((cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]))) ||
-            (cache_ptr->max_pl_len != 0) || (cache_ptr->max_pl_size != (size_t)0) ||
-            (cache_ptr->max_pel_len != 2) || (cache_ptr->max_pel_size != 2 * entry_sizes[entry_type])) {
+        if ((cache_ptr->insertions[entry_type] != 2) || (cache_ptr->pinned_insertions[entry_type] != 1) ||
+            (cache_ptr->pins[entry_type] != 1) || (cache_ptr->unpins[entry_type] != 0) ||
+            (cache_ptr->dirty_pins[entry_type] != 0) || (cache_ptr->max_index_len != 2) ||
+            (cache_ptr->max_index_size != 2 * entry_sizes[entry_type]) || (cache_ptr->max_pl_len != 0) ||
+            (cache_ptr->max_pl_size != (size_t)0) || (cache_ptr->max_pel_len != 1) ||
+            (cache_ptr->max_pel_size != 1 * entry_sizes[entry_type])) {
 
             pass         = false;
             failure_mssg = "Unexpected insert results 11.";
@@ -2970,8 +2948,7 @@ check_insert_entry(unsigned paged)
 
     if (pass) {
 
-        unpin_entry(entry_type, 2);
-        unpin_entry(entry_type, 3);
+        unpin_entry(entry_type, 1);
     }
 
     if (pass) {
@@ -3130,12 +3107,6 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
                         "flush with flags = 0x08 failed on empty cache.\n")
     }
 
-    if (pass) {
-
-        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_MARKED_ENTRIES_FLAG,
-                        "flush with flags = 0x10 failed on empty cache.\n")
-    }
-
 } /* check_flush_cache__empty_cache() */
 
 /*-------------------------------------------------------------------------
@@ -3169,71 +3140,70 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
         int                          test_num    = 1;
         unsigned int                 flush_flags = H5C__NO_FLAGS_SET;
         unsigned int                 spec_size   = 8;
-        struct flush_cache_test_spec spec[8]     = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false}};
+        struct flush_cache_test_spec spec[8]     = {{/* entry_num             = */ 0,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 100,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 1,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 75,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 2,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 25,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 3,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 50,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 4,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 10,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 5,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 20,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 6,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 30,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 7,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 40,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false}};
 
         check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
@@ -3242,71 +3212,70 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
         int                          test_num    = 2;
         unsigned int                 flush_flags = H5C__FLUSH_INVALIDATE_FLAG;
         unsigned int                 spec_size   = 8;
-        struct flush_cache_test_spec spec[8]     = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true}};
+        struct flush_cache_test_spec spec[8]     = {{/* entry_num             = */ 0,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 100,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 1,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 75,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 2,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 25,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 3,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 50,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 4,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 10,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 5,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 20,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 6,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 30,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 7,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 40,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ true}};
 
         check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
@@ -3315,512 +3284,215 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
         int                          test_num    = 3;
         unsigned int                 flush_flags = H5C__FLUSH_CLEAR_ONLY_FLAG;
         unsigned int                 spec_size   = 8;
-        struct flush_cache_test_spec spec[8]     = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false}};
+        struct flush_cache_test_spec spec[8]     = {{/* entry_num             = */ 0,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 100,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 1,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 75,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 2,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 25,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 3,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 50,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 4,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 10,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 5,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 20,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 6,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 30,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 7,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 40,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false}};
 
         check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
 
     if (pass) {
         int                          test_num    = 4;
-        unsigned int                 flush_flags = H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int                 spec_size   = 8;
-        struct flush_cache_test_spec spec[8]     = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false}};
-
-        check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
-    }
-
-    if (pass) {
-        int                          test_num    = 5;
         unsigned int                 flush_flags = H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG;
         unsigned int                 spec_size   = 8;
-        struct flush_cache_test_spec spec[8]     = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true}};
-
-        check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
-    }
-
-    if (pass) {
-        int          test_num                = 6;
-        unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
-        struct flush_cache_test_spec spec[8] = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true}};
-
-        check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
-    }
-
-    if (pass) {
-        int          test_num                = 7;
-        unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
-        struct flush_cache_test_spec spec[8] = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false}};
-
-        check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
-    }
-
-    if (pass) {
-        int          test_num = 8;
-        unsigned int flush_flags =
-            H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int                 spec_size = 8;
-        struct flush_cache_test_spec spec[8]   = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true}};
+        struct flush_cache_test_spec spec[8]     = {{/* entry_num             = */ 0,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 100,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 1,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 75,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 2,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 25,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 3,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 50,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 4,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 10,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 5,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 20,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 6,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 30,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true},
+                                                {/* entry_num             = */ 7,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 40,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ true}};
 
         check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
 
     /* verify that all other flags are ignored */
     if (pass) {
-        int          test_num    = 9;
-        unsigned int flush_flags = (unsigned)~(H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                                               H5C__FLUSH_MARKED_ENTRIES_FLAG);
+        int          test_num    = 5;
+        unsigned int flush_flags = (unsigned)~(H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG);
         unsigned int spec_size   = 8;
-        struct flush_cache_test_spec spec[8] = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ false}};
+        struct flush_cache_test_spec spec[8] = {{/* entry_num             = */ 0,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 100,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 1,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 75,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 2,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 25,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 3,
+                                                 /* entry_type            = */ PICO_ENTRY_TYPE,
+                                                 /* entry_index           = */ 50,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 4,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 10,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ false,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 5,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 20,
+                                                 /* insert_flag           = */ false,
+                                                 /* flags                 = */ H5C__DIRTIED_FLAG,
+                                                 /* expected_deserialized = */ true,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 6,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 30,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false},
+                                                {/* entry_num             = */ 7,
+                                                 /* entry_type            = */ MONSTER_ENTRY_TYPE,
+                                                 /* entry_index           = */ 40,
+                                                 /* insert_flag           = */ true,
+                                                 /* flags                 = */ H5C__NO_FLAGS_SET,
+                                                 /* expected_deserialized = */ false,
+                                                 /* expected_serialized   = */ true,
+                                                 /* expected_destroyed    = */ false}};
 
         check_flush_cache__multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
@@ -3885,7 +3557,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 10,
              /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__NO_FLAGS_SET,
              /* num_pins              = */ 4,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, -1, -1, -1, -1},
@@ -3897,7 +3569,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 20,
              /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__DIRTIED_FLAG,
              /* num_pins              = */ 5,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1, -1,
@@ -3910,7 +3582,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 30,
              /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__NO_FLAGS_SET,
              /* num_pins              = */ 6,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
@@ -3923,7 +3595,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 40,
              /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__NO_FLAGS_SET,
              /* num_pins              = */ 7,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
@@ -3990,7 +3662,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 10,
              /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__NO_FLAGS_SET,
              /* num_pins              = */ 0,
              /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4001,7 +3673,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 20,
              /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__DIRTIED_FLAG,
              /* num_pins              = */ 1,
              /* pin_type[MAX_PINS]    = */ {MONSTER_ENTRY_TYPE, -1, -1, -1, -1 - 1, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {10, -1, -1, -1 - 1, -1, -1, -1},
@@ -4012,7 +3684,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 30,
              /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__NO_FLAGS_SET,
              /* num_pins              = */ 2,
              /* pin_type[MAX_PINS]    = */ {MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1, -1, -1, -1, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {10, 20, -1, -1, -1, -1, -1, -1},
@@ -4023,7 +3695,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 40,
              /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
+             /* flags                 = */ H5C__NO_FLAGS_SET,
              /* num_pins              = */ 3,
              /* pin_type[MAX_PINS]    = */
              {MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1, -1, -1, -1, -1},
@@ -4088,104 +3760,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 10,
              /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 0,
-             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 0,
-             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 0,
-             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 0,
-             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true}};
-
-        check_flush_cache__pe_multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
-    }
-
-    if (pass) {
-        int          test_num                   = 4;
-        unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size                  = 8;
-        struct pe_flush_cache_test_spec spec[8] = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
              /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* num_pins              = */ 0,
-             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
              /* num_pins              = */ 0,
              /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4197,109 +3772,9 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_index           = */ 20,
              /* insert_flag           = */ false,
              /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* num_pins              = */ 4,
-             /* pin_type[MAX_PINS]    = */
-             {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 6,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 30,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 4,
-             /* pin_type[MAX_PINS]    = */
-             {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 7,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 40,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
              /* num_pins              = */ 0,
              /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ true,
-             /* expected_destroyed    = */ true}};
-
-        check_flush_cache__pe_multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
-    }
-
-    if (pass) {
-        int          test_num = 5;
-        unsigned int flush_flags =
-            H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int                    spec_size = 8;
-        struct pe_flush_cache_test_spec spec[8]   = {
-            {/* entry_num             = */ 0,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 100,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* num_pins              = */ 0,
-             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 1,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 75,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 2,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 25,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 3,
-             /* entry_type            = */ PICO_ENTRY_TYPE,
-             /* entry_index           = */ 50,
-             /* insert_flag           = */ true,
-             /* flags                 = */ H5C__NO_FLAGS_SET,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ false,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 4,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 10,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
-             /* expected_deserialized = */ true,
-             /* expected_serialized   = */ false,
-             /* expected_destroyed    = */ true},
-            {/* entry_num             = */ 5,
-             /* entry_type            = */ MONSTER_ENTRY_TYPE,
-             /* entry_index           = */ 20,
-             /* insert_flag           = */ false,
-             /* flags                 = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
              /* expected_deserialized = */ true,
              /* expected_serialized   = */ false,
              /* expected_destroyed    = */ true},
@@ -4307,10 +3782,10 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 30,
              /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
+             /* flags                 = */ H5C__NO_FLAGS_SET,
+             /* num_pins              = */ 0,
+             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ false,
              /* expected_destroyed    = */ true},
@@ -4318,10 +3793,10 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* entry_type            = */ MONSTER_ENTRY_TYPE,
              /* entry_index           = */ 40,
              /* insert_flag           = */ true,
-             /* flags                 = */ H5C__SET_FLUSH_MARKER_FLAG,
-             /* num_pins              = */ 1,
-             /* pin_type[MAX_PINS]    = */ {PICO_ENTRY_TYPE, -1, -1, -1, -1, -1, -1, -1},
-             /* pin_idx[MAX_PINS]     = */ {100, -1, -1, -1, -1, -1, -1, -1},
+             /* flags                 = */ H5C__NO_FLAGS_SET,
+             /* num_pins              = */ 0,
+             /* pin_type[MAX_PINS]    = */ {-1, -1, -1, -1, -1, -1, -1, -1},
+             /* pin_idx[MAX_PINS]     = */ {-1, -1, -1, -1, -1, -1, -1, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ false,
              /* expected_destroyed    = */ true}};
@@ -5927,198 +5402,6 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
 
     if (pass) /* test #21 */
     {
-        /* Now mix things up a bit.
-         *
-         * Load several entries, two of which have flush functions that
-         * resize, dirty, and move two entries that are not in the
-         * cache.  Mark only one of these entries, and then flush the
-         * cache with the flush marked entries flag.
-         *
-         * This is the only test in which we test the
-         * H5C__FLUSH_MARKED_ENTRIES_FLAG.  The hope is that since
-         * we test the two features extensively by themselves, so
-         * it should be sufficient to verify that they play together
-         * as expected.
-         */
-        int          test_num                 = 21;
-        unsigned int flush_flags              = H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int          spec_size                = 4;
-        int          check_size               = 4;
-        unsigned     init_expected_index_len  = 4;
-        size_t       init_expected_index_size = (2 * VARIABLE_ENTRY_SIZE) + (2 * PICO_ENTRY_SIZE);
-        unsigned     expected_index_len       = 6;
-        size_t       expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (VARIABLE_ENTRY_SIZE / 4) +
-                                     (VARIABLE_ENTRY_SIZE / 2) + (2 * PICO_ENTRY_SIZE);
-
-        assert(spec_size <= max_num_spec);
-        assert(check_size <= max_num_check);
-
-        spec[0] = (struct fo_flush_cache_test_spec){
-            /* entry_num          = */ 0,
-            /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-            /* entry_index        = */ 1,
-            /* insert_flag        = */ false,
-            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* resize_flag        = */ false,
-            /* new_size           = */ 0,
-            /* num_pins           = */ 0,
-            /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* num_flush_ops      = */ 6,
-            /* flush_ops          = */
-            /*    op_code:        type:        idx:        flag:    size:    order_ptr: */
-            {{FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 0, false, VARIABLE_ENTRY_SIZE / 4, NULL},
-             {FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 0, false, 0, NULL},
-             {FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 0, false, 0, NULL},
-             {FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 2, false, 0, NULL},
-             {FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 2, false, VARIABLE_ENTRY_SIZE / 2, NULL},
-             {FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 2, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL}},
-            /* expected_deserialized = */ true,
-            /* expected_serialized = */ true,
-            /* expected_destroyed = */ false};
-        spec[1] = (struct fo_flush_cache_test_spec){
-            /* entry_num          = */ 1,
-            /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-            /* entry_index        = */ 11,
-            /* insert_flag        = */ false,
-            /* flags              = */ H5C__DIRTIED_FLAG,
-            /* resize_flag        = */ false,
-            /* new_size           = */ 0,
-            /* num_pins           = */ 0,
-            /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* num_flush_ops      = */ 6,
-            /* flush_ops          = */
-            /*    op_code:        type:        idx:        flag:    size:    order_ptr: */
-            {{FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 10, false, VARIABLE_ENTRY_SIZE / 4, NULL},
-             {FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 10, false, 0, NULL},
-             {FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 10, false, 0, NULL},
-             {FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 12, false, 0, NULL},
-             {FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 12, false, VARIABLE_ENTRY_SIZE / 2, NULL},
-             {FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 12, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL}},
-            /* expected_deserialized = */ true,
-            /* expected_serialized = */ false,
-            /* expected_destroyed = */ false};
-        spec[2] = (struct fo_flush_cache_test_spec){
-            /* entry_num          = */ 2,
-            /* entry_type         = */ PICO_ENTRY_TYPE,
-            /* entry_index        = */ 0,
-            /* insert_flag        = */ false,
-            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* resize_flag        = */ false,
-            /* new_size           = */ 0,
-            /* num_pins           = */ 0,
-            /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* num_flush_ops      = */ 0,
-            /* flush_ops          = */
-            /*    op_code:        type:    idx:    flag:    size: order_ptr: */
-            {{FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL}},
-            /* expected_deserialized = */ true,
-            /* expected_serialized = */ true,
-            /* expected_destroyed = */ false};
-        spec[3] = (struct fo_flush_cache_test_spec){
-            /* entry_num          = */ 3,
-            /* entry_type         = */ PICO_ENTRY_TYPE,
-            /* entry_index        = */ 1,
-            /* insert_flag        = */ false,
-            /* flags              = */ H5C__DIRTIED_FLAG,
-            /* resize_flag        = */ false,
-            /* new_size           = */ 0,
-            /* num_pins           = */ 0,
-            /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
-            /* num_flush_ops      = */ 0,
-            /* flush_ops          = */
-            /*    op_code:        type:    idx:    flag:    size: order_ptr: */
-            {{FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL},
-             {FLUSH_OP__NO_OP, 0, 0, false, 0, NULL}},
-            /* expected_deserialized = */ true,
-            /* expected_serialized = */ false,
-            /* expected_destroyed = */ false};
-
-        checks[0] = (struct fo_flush_entry_check){/* entry_num          = */ 0,
-                                                  /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-                                                  /* entry_index        = */ 0,
-                                                  /* expected_size      = */ VARIABLE_ENTRY_SIZE / 4,
-                                                  /* in_cache           = */ true,
-                                                  /* at_main_addr       = */ false,
-                                                  /* is_dirty           = */ true,
-                                                  /* is_protected       = */ false,
-                                                  /* is_pinned          = */ false,
-                                                  /* expected_deserialized = */ true,
-                                                  /* expected_serialized = */ false,
-                                                  /* expected_destroyed = */ false};
-        checks[1] = (struct fo_flush_entry_check){/* entry_num          = */ 1,
-                                                  /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-                                                  /* entry_index        = */ 2,
-                                                  /* expected_size      = */ VARIABLE_ENTRY_SIZE / 2,
-                                                  /* in_cache           = */ true,
-                                                  /* at_main_addr       = */ false,
-                                                  /* is_dirty           = */ true,
-                                                  /* is_protected       = */ false,
-                                                  /* is_pinned          = */ false,
-                                                  /* expected_deserialized = */ true,
-                                                  /* expected_serialized = */ false,
-                                                  /* expected_destroyed = */ false};
-        checks[2] = (struct fo_flush_entry_check){/* entry_num          = */ 2,
-                                                  /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-                                                  /* entry_index        = */ 10,
-                                                  /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-                                                  /* in_cache           = */ false,
-                                                  /* at_main_addr       = */ true,
-                                                  /* is_dirty           = */ false,
-                                                  /* is_protected       = */ false,
-                                                  /* is_pinned          = */ false,
-                                                  /* expected_deserialized = */ false,
-                                                  /* expected_serialized = */ false,
-                                                  /* expected_destroyed = */ false};
-        checks[3] = (struct fo_flush_entry_check){/* entry_num          = */ 3,
-                                                  /* entry_type         = */ VARIABLE_ENTRY_TYPE,
-                                                  /* entry_index        = */ 12,
-                                                  /* expected_size      = */ VARIABLE_ENTRY_SIZE,
-                                                  /* in_cache           = */ false,
-                                                  /* at_main_addr       = */ true,
-                                                  /* is_dirty           = */ false,
-                                                  /* is_protected       = */ false,
-                                                  /* is_pinned          = */ false,
-                                                  /* expected_deserialized = */ false,
-                                                  /* expected_serialized = */ false,
-                                                  /* expected_destroyed = */ false};
-
-        check_flush_cache__flush_op_test(file_ptr, test_num, flush_flags, spec_size, spec,
-                                         init_expected_index_len, init_expected_index_size,
-                                         expected_index_len, expected_index_size, check_size, checks);
-        reset_entries();
-    }
-
-    if (pass) /* test #22 */
-    {
         /* Mix things up some more.
          *
          * Load lots of entries, some of which have flush functions that
@@ -6128,7 +5411,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Also load entries that have flush ops on entries that are in
          * cache.
          */
-        int          test_num                 = 22;
+        int          test_num                 = 21;
         unsigned int flush_flags              = H5C__NO_FLAGS_SET;
         int          spec_size                = 6;
         int          check_size               = 4;
@@ -6359,9 +5642,9 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    if (pass) /* test #23 */
+    if (pass) /* test #22 */
     {
-        /* Repeat test #23 with the flush invalidate flag set.
+        /* Repeat test #21 with the flush invalidate flag set.
          *
          * Mix things up some more.
          *
@@ -6372,7 +5655,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Also load entries that have flush ops on entries that are in
          * cache.
          */
-        int          test_num                 = 23;
+        int          test_num                 = 22;
         unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
         int          spec_size                = 6;
         int          check_size               = 4;
@@ -6606,12 +5889,12 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
      *
      * Now create some tests mixing flush ops and pins.
      */
-    if (pass) /* test #24 */
+    if (pass) /* test #23 */
     {
         /* Pico entries 50 and 150 pin pico entry 100, and also dirty
          * pico entry 100 on flush.
          */
-        int          test_num                 = 24;
+        int          test_num                 = 23;
         unsigned int flush_flags              = H5C__NO_FLAGS_SET;
         int          spec_size                = 3;
         int          check_size               = 0;
@@ -6723,14 +6006,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
                                          expected_index_len, expected_index_size, check_size, checks);
     }
 
-    if (pass) /* test #25 */
+    if (pass) /* test #24 */
     {
         /* Repeat the previous test with the flush invalidate flag.
          *
          * Pico entries 50 and 150 pin pico entry 100, and also dirty
          * pico entry 100 on flush.
          */
-        int          test_num                 = 25;
+        int          test_num                 = 24;
         unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
         int          spec_size                = 3;
         int          check_size               = 0;
@@ -6842,7 +6125,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
                                          expected_index_len, expected_index_size, check_size, checks);
     }
 
-    if (pass) /* test #26 */
+    if (pass) /* test #25 */
     {
         /* This one is complex.
          *
@@ -6919,7 +6202,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          *         dirties    (VET, 650)
          *         dirties (VET, 750)
          */
-        int          test_num                 = 26;
+        int          test_num                 = 25;
         unsigned int flush_flags              = H5C__NO_FLAGS_SET;
         int          spec_size                = 10;
         int          check_size               = 3;
@@ -7246,9 +6529,9 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    if (pass) /* test #27 */
+    if (pass) /* test #26 */
     {
-        /* Repeat test #26 with the flush invalidate flag.
+        /* Repeat test #25 with the flush invalidate flag.
          *
          * In the following overview table, VET stands for
          * VARIABLE_ENTRY_TYPE.
@@ -7327,7 +6610,7 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          *         dirties    (VET, 650)
          *         dirties (VET, 750)
          */
-        int          test_num                 = 27;
+        int          test_num                 = 26;
         unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
         int          spec_size                = 10;
         int          check_size               = 3;
@@ -7654,13 +6937,13 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    if (pass) /* test #28 */
+    if (pass) /* test #27 */
     {
         /* Test the expected fheap case, in which an entry dirties
          * and resizes itself, and dirties an entry which it has
          * pinned.
          */
-        int          test_num                 = 28;
+        int          test_num                 = 27;
         unsigned int flush_flags              = H5C__NO_FLAGS_SET;
         int          spec_size                = 5;
         int          check_size               = 0;
@@ -7828,15 +7111,15 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    if (pass) /* test #29 */
+    if (pass) /* test #28 */
     {
-        /* Repeat test #28 with the flush invalidate flag.
+        /* Repeat test #27 with the flush invalidate flag.
          *
          * Test the expected fheap case, in which an entry dirties
          * and resizes itself, and dirties an entry which it has
          * pinned.
          */
-        int          test_num                 = 29;
+        int          test_num                 = 28;
         unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
         int          spec_size                = 5;
         int          check_size               = 0;
@@ -9640,10 +8923,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* entry_idx             */ 0,
             /* insert_flag           */ false,
             /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
+            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_deserialized */ true,
             /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
+            /* expected_destroyed    */ true);
     }
 
     if (pass) {
@@ -9655,10 +8938,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* entry_idx             */ 0,
             /* insert_flag           */ false,
             /* flags                 */ H5C__DIRTIED_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
+            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_deserialized */ true,
             /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
+            /* expected_destroyed    */ true);
     }
 
     if (pass) {
@@ -9668,12 +8951,12 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 9,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
+            /* insert_flag           */ true,
             /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
+            /* flush_flags           */ H5C__NO_FLAGS_SET,
+            /* expected_deserialized */ false,
+            /* expected_serialized   */ true,
+            /* expected_destroyed    */ false);
     }
 
     if (pass) {
@@ -9683,12 +8966,12 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 10,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
+            /* insert_flag           */ true,
+            /* flags                 */ H5C__NO_FLAGS_SET,
+            /* flush_flags           */ H5C__NO_FLAGS_SET,
+            /* expected_deserialized */ false,
+            /* expected_serialized   */ true,
+            /* expected_destroyed    */ false);
     }
 
     if (pass) {
@@ -9698,10 +8981,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 11,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
+            /* insert_flag           */ true,
             /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
+            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
+            /* expected_deserialized */ false,
             /* expected_serialized   */ false,
             /* expected_destroyed    */ false);
     }
@@ -9713,10 +8996,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 12,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
+            /* insert_flag           */ true,
+            /* flags                 */ H5C__NO_FLAGS_SET,
+            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
+            /* expected_deserialized */ false,
             /* expected_serialized   */ false,
             /* expected_destroyed    */ false);
     }
@@ -9728,11 +9011,11 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 13,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
+            /* insert_flag           */ true,
             /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
+            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
+            /* expected_deserialized */ false,
+            /* expected_serialized   */ true,
             /* expected_destroyed    */ true);
     }
 
@@ -9743,10 +9026,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 14,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ true,
+            /* insert_flag           */ true,
+            /* flags                 */ H5C__NO_FLAGS_SET,
+            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
+            /* expected_deserialized */ false,
             /* expected_serialized   */ true,
             /* expected_destroyed    */ true);
     }
@@ -9758,11 +9041,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 15,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
+            /* insert_flag           */ true,
             /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ true,
+            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
+            /* expected_deserialized */ false,
             /* expected_serialized   */ false,
             /* expected_destroyed    */ true);
     }
@@ -9774,736 +9056,9 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             /* test_num              */ 16,
             /* entry_type            */ PICO_ENTRY_TYPE,
             /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 17,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__NO_FLAGS_SET,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 18,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__NO_FLAGS_SET,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 19,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 20,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 21,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 22,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 23,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 24,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 25,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 26,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 27,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 28,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 29,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 30,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 31,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 32,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ false,
-            /* flags                 */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ true,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 33,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__NO_FLAGS_SET,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 34,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__NO_FLAGS_SET,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 35,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 36,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 37,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 38,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 39,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 40,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 41,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
             /* insert_flag           */ true,
             /* flags                 */ H5C__NO_FLAGS_SET,
             /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 42,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 43,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 44,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 45,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 46,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 47,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 48,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__NO_FLAGS_SET,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 49,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__NO_FLAGS_SET,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 50,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__NO_FLAGS_SET,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 51,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 52,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 53,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 54,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 55,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 56,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 57,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 58,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 59,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 60,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ false);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 61,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 62,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_INVALIDATE_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ true,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 63,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
-            /* expected_deserialized */ false,
-            /* expected_serialized   */ false,
-            /* expected_destroyed    */ true);
-    }
-
-    if (pass) {
-
-        check_flush_cache__single_entry_test(
-            /* file_ptr             */ file_ptr,
-            /* test_num              */ 64,
-            /* entry_type            */ PICO_ENTRY_TYPE,
-            /* entry_idx             */ 0,
-            /* insert_flag           */ true,
-            /* flags                 */ H5C__SET_FLUSH_MARKER_FLAG,
-            /* flush_flags           */ H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG |
-                H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_deserialized */ false,
             /* expected_serialized   */ false,
             /* expected_destroyed    */ true);
@@ -10523,13 +9078,9 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
      *
      *  5) Marked dirty by call to H5C_mark_entry_dirty() while pinned or not.
      *
-     *     6) Entry marked for flush or not.
+     *     6) Call flush with H5C__FLUSH_CLEAR_ONLY_FLAG or not.
      *
-     *     7) Call flush with H5C__FLUSH_MARKED_ENTRIES_FLAG or not.
-     *
-     *     8) Call flush with H5C__FLUSH_CLEAR_ONLY_FLAG or not.
-     *
-     * This yields a total of 256 tests.
+     * This yields a total of 64 tests.
      *
      * The tests and their expected results are given in the spec table
      * below.  The values assigned to the expected_serialized,
@@ -10548,24 +9099,10 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
      * was adapted from, and it doesn't do any particular harm.
      *
      * In general, we expect an entry to be flushed if it is dirty, and
-     * flush in invoked WITHOUT the H5C__FLUSH_CLEAR_ONLY_FLAG.  However,
-     * there are exceptions:  If flush is invoked with the
-     * H5C__FLUSH_MARKED_ENTRIES_FLAG, only marked entries will be flushed.
-     *
-     * Further, unprotecting an entry with the H5C__SET_FLUSH_MARKER_FLAG
-     * will NOT mark the entry unless the entry has either been marked
-     * dirty either before or durting the unprotect call.  This results in
-     * some counterintuitive entries in the table.  It make be useful to
-     * look in the test code to see the exact order of operations.
+     * flush in invoked WITHOUT the H5C__FLUSH_CLEAR_ONLY_FLAG.
      *
      * Similarly, we expect an entry to be cleared if it is dirty, and
-     * flush is invoked WITH the H5C__FLUSH_CLEAR_ONLY_FLAG.  Again, there
-     * are exceptions -- If flush is also invoked with the
-     * H5C__FLUSH_MARKED_ENTRIES_FLAG, only the marked entries will be
-     * cleared.
-     *
-     * The above comments about applying unprotect with the
-     * H5C__SET_FLUSH_MARKER_FLAG apply here as well.
+     * flush is invoked WITH the H5C__FLUSH_CLEAR_ONLY_FLAG.
      */
 
     if (pass) {
@@ -10573,14 +9110,14 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         struct pinned_single_entry_test_spec *spec = NULL;
         size_t                                i;
 
-        spec = malloc(256 * sizeof(struct pinned_single_entry_test_spec));
+        spec = malloc(64 * sizeof(struct pinned_single_entry_test_spec));
         if (spec == NULL) {
 
             pass         = false;
             failure_mssg = "couldn't allocated pinned single entry test spec array";
         }
 
-        for (i = 0; i < 256; i++) {
+        for (i = 0; i < 64; i++) {
             int          test_num;
             int          entry_type;
             int          entry_idx;
@@ -10605,31 +9142,19 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             pop_mark_dirty_pinned = (i / 2) % 2;
             unprotect_unpin       = i % 2;
 
-            /* Generate alternating sequences of H5C__NO_FLAGS_SET
-             * and H5C__SET_FLUSH_MARKER_FLAG
+            /* Flags are not used for this test
              */
-            if ((i / 32) % 2)
-                flags = H5C__SET_FLUSH_MARKER_FLAG;
-            else
-                flags = H5C__NO_FLAGS_SET;
+            flags = H5C__NO_FLAGS_SET;
 
             /*
-             * Generate sequences of H5C__NO_FLAGS_SET,
-             * H5C__FLUSH_MARKED_ENTRIES_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG
-             * and H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG
+             * Generate sequences of H5C__NO_FLAGS_SET, and H5C__FLUSH_CLEAR_ONLY_FLAG
              */
-            switch (i / 64) {
+            switch (i / 32) {
                 case 0:
                     flush_flags = H5C__NO_FLAGS_SET;
                     break;
                 case 1:
-                    flush_flags = H5C__FLUSH_MARKED_ENTRIES_FLAG;
-                    break;
-                case 2:
                     flush_flags = H5C__FLUSH_CLEAR_ONLY_FLAG;
-                    break;
-                case 3:
-                    flush_flags = H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG;
                     break;
                 default:
                     flush_flags = H5C__NO_FLAGS_SET;
@@ -10638,20 +9163,8 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
 
             expected_serialized = false;
             if (0 == (flush_flags & H5C__FLUSH_CLEAR_ONLY_FLAG)) {
-                if (flush_flags & H5C__FLUSH_MARKED_ENTRIES_FLAG) {
-                    if (flags & H5C__SET_FLUSH_MARKER_FLAG) {
-                        if (mark_dirty && pop_mark_dirty_prot) {
-                            expected_serialized = true;
-                        }
-                        else if (dirty_flag || pop_mark_dirty_prot) {
-                            expected_serialized = true;
-                        }
-                    }
-                }
-                else {
-                    if (dirty_flag || mark_dirty || pop_mark_dirty_prot || pop_mark_dirty_pinned)
-                        expected_serialized = true;
-                }
+                if (dirty_flag || mark_dirty || pop_mark_dirty_prot || pop_mark_dirty_pinned)
+                    expected_serialized = true;
             }
 
             expected_destroyed = false;
@@ -10673,7 +9186,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         }
 
         i = 0;
-        while (pass && (i < 256)) {
+        while (pass && (i < 64)) {
             check_flush_cache__pinned_single_entry_test(
                 /* file_ptr              */ file_ptr,
                 /* test_num              */ spec[i].test_num,
@@ -13715,7 +12228,7 @@ check_flush_protected_err(unsigned paged)
         protect_entry(file_ptr, 0, 0);
 
         /* enable slist prior to flush */
-        if ((pass) && (H5C_set_slist_enabled(cache_ptr, true, false) < 0)) {
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, true, true) < 0)) {
 
             pass         = false;
             failure_mssg = "unable to enable slist prior to flush.\n";

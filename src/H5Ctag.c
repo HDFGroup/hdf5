@@ -80,8 +80,6 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 static herr_t H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, void *cb_ctx);
-static herr_t H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag);
-static herr_t H5C__flush_marked_entries(H5F_t *f);
 
 /*********************/
 /* Package Variables */
@@ -520,101 +518,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_evict_tagged_entries() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5C__mark_tagged_entries_cb
- *
- * Purpose:     Callback to set the flush marker on dirty entries in the cache
- *
- * Return:      H5_ITER_CONT (can't fail)
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
-{
-    /* Function enter macro */
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Sanity checks */
-    assert(entry);
-
-    /* We only want to set the flush marker on entries that
-     * actually need flushed (i.e., dirty ones) */
-    if (entry->is_dirty)
-        entry->flush_marker = true;
-
-    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
-} /* H5C__mark_tagged_entries_cb() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__mark_tagged_entries
- *
- * Purpose:     Set the flush marker on dirty entries in the cache that have
- *              the specified tag, as well as all globally tagged entries.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    /* Function enter macro */
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check */
-    assert(cache);
-
-    /* Iterate through hash table entries, marking those with specified tag, as
-     * well as any major global entries which should always be flushed
-     * when flushing based on tag value */
-    if (H5C__iter_tagged_entries(cache, tag, true, H5C__mark_tagged_entries_cb, NULL) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__mark_tagged_entries() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__flush_marked_entries
- *
- * Purpose:     Flushes all marked entries in the cache.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__flush_marked_entries(H5F_t *f)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    /* Assertions */
-    assert(f != NULL);
-
-    /* Enable the slist, as it is needed in the flush */
-    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
-
-    /* Flush all marked entries */
-    if (H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache");
-
-    /* Disable the slist.  Set the clear_slist parameter to true
-     * since we called H5C_flush_cache() with the
-     * H5C__FLUSH_MARKED_ENTRIES_FLAG.
-     */
-    if (H5C_set_slist_enabled(f->shared->cache, false, true) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__flush_marked_entries */
-
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
 
 /*-------------------------------------------------------------------------
@@ -685,6 +588,36 @@ done:
 #endif
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C__flush_tagged_entries_cb
+ *
+ * Purpose:     Callback to set the flush marker on dirty entries in the cache
+ *
+ * Return:      H5_ITER_CONT (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5C__flush_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
+{
+    H5C_t *cache_ptr = (H5C_t *)_ctx;
+    int    ret_value = H5_ITER_CONT;
+
+    /* Function enter macro */
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    assert(entry);
+    assert(cache_ptr);
+
+    /* We only want to add entries to the slist that actually need flushed (i.e., dirty ones) */
+    if (entry->is_dirty)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry, H5_ITER_ERROR);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_tagged_entries_cb() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_flush_tagged_entries
  *
  * Purpose:     Flushes all entries with the specified tag to disk.
@@ -709,13 +642,22 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
     /* Get cache pointer */
     cache = f->shared->cache;
 
-    /* Mark all entries with specified tag */
-    if (H5C__mark_tagged_entries(cache, tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries");
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed");
 
-    /* Flush all marked entries */
-    if (H5C__flush_marked_entries(f) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries");
+    /* Iterate through hash table entries, adding those with specified tag to the slist, as well as any major
+     * global entries which should always be flushed when flushing based on tag value */
+    if (H5C__iter_tagged_entries(cache, tag, true, H5C__flush_tagged_entries_cb, cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed");
+
+    /* Flush all entries in the slist */
+    if (H5C_flush_cache(f, H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache");
+
+    /* Disable the slist */
+    if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
