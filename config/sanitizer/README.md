@@ -85,8 +85,6 @@ These are used by declaring the `USE_SANITIZER` CMake variable as one of:
 
 ## Code Coverage [`code-coverage.cmake`](code-coverage.cmake)
 
-![Code Coverage Examples](img/code-cov.png)
-
 > In computer science, test coverage is a measure used to describe the degree to which the source code of a program is executed when a particular test suite runs. A program with high test coverage, measured as a percentage, has had more of its source code executed during testing, which suggests it has a lower chance of containing undetected software bugs compared to a program with low test coverage. Many different metrics can be used to calculate test coverage; some of the most basic are the percentage of program subroutines and the percentage of program statements called during execution of the test suite. 
 >
 > [Wikipedia, Code Coverage](https://en.wikipedia.org/wiki/Code_coverage)
