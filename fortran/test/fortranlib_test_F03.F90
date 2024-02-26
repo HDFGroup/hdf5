@@ -55,12 +55,11 @@ PROGRAM fortranlibtest_F03
      total_error = total_error + 1
   ENDIF
 
-  ret_total_error = 0
-!  PROBLEMS with C
-!  CALL test_error(ret_total_error)
-!  CALL write_test_status(ret_total_error, ' Test error API based on data I/O', total_error)
-
   WRITE(*,*)
+
+  ret_total_error = 0
+  CALL test_error(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Test error API based on data I/O', total_error)
 
   ret_total_error = 0
   CALL test_array_compound_atomic(ret_total_error)

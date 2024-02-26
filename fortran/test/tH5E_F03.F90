@@ -55,40 +55,26 @@ CONTAINS
 
     ! estack_id is always passed from C as: H5E_DEFAULT
     INTEGER(HID_T) :: estack_id
+
     ! data that was registered with H5Eset_auto_f
-    INTEGER :: data_inout
+    ! INTEGER :: data_inout ! another option
+    ! or
+    TYPE(C_PTR), VALUE :: data_inout
 
-    PRINT*, " "
-    PRINT*, " Subtest: H5Eset_auto_f custom error message with callback, WITH DATA"
-    PRINT*, "         -This message should be written to standard out-  "
-    PRINT*, "          Data Values Passed In =", data_inout
-    PRINT*, " "
+    INTEGER, POINTER :: iunit
 
-    data_inout = 10*data_inout
+    CALL C_F_POINTER(data_inout, iunit)
+
+  ! iunit = data_inout
+
+    WRITE(iunit,'(A)') "H5Eset_auto_f_msg"
+    WRITE(iunit,'(I0)') iunit
+
+    iunit = 10*iunit
 
     my_hdf5_error_handler = 1 ! this is not used by the C routine
 
   END FUNCTION my_hdf5_error_handler
-
-  INTEGER FUNCTION my_hdf5_error_handler_nodata(estack_id, data_inout) bind(C)
-
-    ! This error function handle works with only version 2 error stack
-
-    IMPLICIT NONE
-
-    ! estack_id is always passed from C as: H5E_DEFAULT
-    INTEGER(HID_T) :: estack_id
-    ! data that was registered with H5Eset_auto_f
-    TYPE(C_PTR) :: data_inout
-
-    PRINT*, " "
-    PRINT*, " Subtest: H5Eset_auto_f custom error message with callback, NO DATA"
-    PRINT*, "         -This message should be written to standard out-  "
-    PRINT*, " "
-
-    my_hdf5_error_handler_nodata = 1 ! this is not used by the C routine
-
-  END FUNCTION my_hdf5_error_handler_nodata
 
   !-------------------------------------------------------------------------
   ! Function:    custom_print_cb
@@ -193,30 +179,24 @@ SUBROUTINE test_error(total_error)
 
   IMPLICIT NONE
 
-  INTEGER(hid_t), PARAMETER :: FAKE_ID = -1
   INTEGER :: total_error
   INTEGER(hid_t) :: file
-  INTEGER(hid_t) :: dataset, space
-  INTEGER(hsize_t), DIMENSION(1:2) :: dims
   INTEGER :: error
-  INTEGER, DIMENSION(:), POINTER :: ptr_data
   INTEGER, TARGET :: my_hdf5_error_handler_data
+  INTEGER, TARGET :: iunit
   TYPE(C_PTR) :: f_ptr
   TYPE(C_FUNPTR) :: func
+  CHARACTER(LEN=180) :: chr180
+  INTEGER :: idx
 
-  TYPE(C_PTR), TARGET :: f_ptr1
+  LOGICAL :: status
 
-  INTEGER, DIMENSION(1:1) :: array_shape
+  ! set the error stack to the customized routine
 
-  my_hdf5_error_handler_data = 99
-  CALL h5fcreate_f("terror.h5", H5F_ACC_TRUNC_F, file, error)
-  CALL check("h5fcreate_f", error, total_error)
+  iunit = 12
+  OPEN(iunit, FILE="stderr.txt")
 
-  ! Create the data space
-  dims(1) = 10
-  dims(2) = 20
-  CALL H5Screate_simple_f(2, dims, space, error)
-  CALL check("h5screate_simple_f", error, total_error)
+  my_hdf5_error_handler_data = iunit
 
   ! ** SET THE CUSTOMIZED PRINTING OF ERROR STACK **
 
@@ -226,63 +206,35 @@ SUBROUTINE test_error(total_error)
   ! set the data sent to the customized routine
   f_ptr = c_loc(my_hdf5_error_handler_data)
 
-  ! turn on automatic printing, and use a custom error routine with input data
   CALL H5Eset_auto_f(1, error, H5E_DEFAULT_F, func, f_ptr)
+  CALL check("H5Eset_auto_f", error, total_error)
 
-  ! Create the erring dataset
-  CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
-  CALL verify("h5dcreate_f", error, -1, total_error)
+  CALL h5fopen_f("DOESNOTEXIST", H5F_ACC_RDONLY_F, file, error)
+  CALL VERIFY("h5fopen_f", error, -1, total_error)
 
-  CALL verify("H5Eset_auto_f",my_hdf5_error_handler_data, 990, total_error)
+  CLOSE(iunit)
 
-!!$  ! Test enabling and disabling default printing
-!!$
-!!$  CALL H5Eget_auto_f(H5E_DEFAULT_F, func1, f_ptr1, error)
-!!$  CALL verify("H5Eget_auto_f", error, 0, total_error)
+  OPEN(iunit, FILE="stderr.txt")
 
-  !    PRINT*,c_associated(f_ptr1)
+  READ(iunit,'(A)') chr180
+  idx = INDEX(string=chr180,substring="H5Eset_auto_f_msg")
+  IF(idx.EQ.0) CALL check("H5Eset_auto_f", -1, total_error)
+  READ(iunit, *) idx
+  CALL VERIFY("H5Eset_auto_f", idx, iunit, total_error)
+  CALL VERIFY("H5Eset_auto_f", my_hdf5_error_handler_data, 10*iunit, total_error)
 
-  ALLOCATE(ptr_data(1:2))
-  ptr_data = 0
-  array_shape(1) = 2
-  CALL C_F_POINTER(f_ptr1, ptr_data, array_shape)
-
-  !    ptr_data => f_ptr1(1)
-
-  !    PRINT*,ptr_data(1)
-
-!!$    if(old_data != NULL)
-!!$	TEST_ERROR;
-!!$#ifdef H5_USE_16_API
-!!$    if (old_func != (H5E_auto_t)H5Eprint)
-!!$	TEST_ERROR;
-!!$#else  H5_USE_16_API
-!!$    if (old_func != (H5E_auto2_t)H5Eprint2)
-!!$	TEST_ERROR;
-!!$#endif  H5_USE_16_API
-
-
-  ! set the customized error handling routine
-  func = c_funloc(my_hdf5_error_handler_nodata)
-  ! set the data sent to the customized routine as null
-  f_ptr = C_NULL_PTR
-  ! turn on automatic printing, and use a custom error routine with no input data
-  CALL H5Eset_auto_f(1, error, H5E_DEFAULT_F, func, f_ptr)
-
-  CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
-  CALL verify("h5dcreate_f", error, -1, total_error)
-
-
-  ! turn on automatic printing with h5eprint_f which prints an error stack in the default manner.
-
-  !    func = c_funloc(h5eprint_f)
-  !    CALL H5Eset_auto_f(0, error, H5E_DEFAULT_F, func, C_NULL_PTR)
+  CLOSE(iunit, STATUS='delete')
 
   CALL H5Eset_auto_f(0, error)
-  CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
+  CALL check("H5Eset_auto_f", error, total_error)
 
-  CALL H5Eset_auto_f(1, error)
-  CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
+  CALL h5fopen_f("DOESNOTEXIST", H5F_ACC_RDONLY_F, file, error)
+  CALL VERIFY("h5fopen_f", error, -1, total_error)
+
+  INQUIRE(file="H5Etest.txt", EXIST=status)
+  IF(status)THEN
+     CALL VERIFY("H5Eset_auto_f", error, -1, total_error)
+  ENDIF
 
 END SUBROUTINE test_error
 
