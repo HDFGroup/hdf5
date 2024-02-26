@@ -1036,7 +1036,6 @@ CONTAINS
        total_error=total_error + 1
     endif
     CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, fid2, error, access_prp=fapl2)
-
     if( error .ne. -1) then
        total_error = total_error + 1
        write(*,*) " Open with H5F_CLOSE_SEMI should fail "
