@@ -21001,8 +21001,8 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by link name in increasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
-                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
                 printf("    external links or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_by_name_link_name_increasing);
@@ -21032,8 +21032,8 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
 
-            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || 
-                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) ) {
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
+                !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
                 SKIPPED();
                 printf("    external links or user-defined links aren't supported with this VOL connector\n");
                 PART_EMPTY(H5Literate_by_name_link_name_decreasing);
