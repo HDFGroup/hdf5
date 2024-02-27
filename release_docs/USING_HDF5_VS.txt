@@ -12,7 +12,7 @@ be found in the USING_HDF5_CMake.txt file found in this folder.
 NOTE: Building applications with the dynamic/shared hdf5 libraries requires
       that the "H5_BUILT_AS_DYNAMIC_LIB" compile definition be used.
       Go to "Project" and select "Properties", find "Configuration Properties",
-      and then "C/C+±"and then "Preprocessor".
+      and then "C/C++"and then "Preprocessor".
       Add H5_BUILT_AS_DYNAMIC_LIB to Preprocessor definitions.
 
 The following two sections are helpful if you do not use CMake to build
@@ -93,7 +93,7 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
 
     Community support forum available, please see:
 
-       https://forum.hdfgroup.org/c/hdf4/21
+       https://forum.hdfgroup.org/c/hdf5/8
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
