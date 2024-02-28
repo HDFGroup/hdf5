@@ -501,7 +501,7 @@ if (ONLY_SHARED_LIBS)
 endif ()
 
 if (NOT BUILD_SHARED_LIBS AND NOT HDF5_BUILD_STATIC_TOOLS)
-  message (WARNING "Cannot build shared tools without shared libraries. Building static tools.")
+  message (VERBOSE "Cannot build shared tools without shared libraries. Building static tools.")
   set (HDF5_BUILD_STATIC_TOOLS ON CACHE BOOL "Build Static Tools NOT Shared Tools" FORCE)
 endif ()
 

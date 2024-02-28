@@ -53,6 +53,7 @@ New Features
         HDF5_BUILD_STATIC_TOOLS    "Build Static Tools Not Shared Tools"          OFF
 
       The default will build shared tools unless BUILD_SHARED_LIBS = OFF.
+      Tools will no longer have "-shared" as only one set of tools will be created.
 
     - Incorporated HDF5 examples repository into HDF5 library.
 

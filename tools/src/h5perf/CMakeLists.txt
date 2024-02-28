@@ -46,7 +46,7 @@ if (H5_HAVE_PARALLEL)
   set_target_properties (h5perf PROPERTIES FOLDER perform)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5perf")
 
-  set (H5_DEP_EXECUTABLES h5perf)
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5perf)
 
   if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_TOOLS_SRC_H5PERF_h5perf_FORMAT h5perf)
