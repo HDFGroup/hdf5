@@ -73,8 +73,8 @@ External compression szip and zlib libraries:
 "Use ZLIB from original location"          "https://github.com/madler/zlib/releases/download/v1.2.13"
 "Use ZLIB from original compressed file"   "zlib-1.3.tar.gz"
 
-"Use LIBAEC from original location"        "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.0.6"
-"Use LIBAEC from original compressed file" "libaec-v1.0.6.tar.gz"
+"Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"
+"Use LIBAEC from original compressed file" "libaec-1.0.6.tar.gz"
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 
@@ -929,8 +929,8 @@ ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"      ON
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"    OFF
 if (HDF5_ENABLE_SZIP_SUPPORT)
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                     ON
-LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"         "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
-LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"  "libaec-v1.0.6.tar.gz"
+LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"         "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"
+LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"  "libaec-1.0.6.tar.gz"
 LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"    ON
 
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS" OFF
