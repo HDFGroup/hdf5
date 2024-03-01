@@ -540,7 +540,7 @@
       "name": "ci-x64-Release-Intel",
       "configurePreset": "ci-x64-Release-Intel",
       "hidden": true,
-      "inherits": "ci-base",
+      "inherits": "ci-base"
     }
   ]
 }
