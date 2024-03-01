@@ -73,7 +73,7 @@ jobs:
         run: |
           HDF5DIR=${{ github.workspace }}/hdf5/HDF_Group/HDF5/
           FILE_NAME_HDF5=$(ls ${{ github.workspace }}/hdf5/HDF_Group/HDF5)
-          FILE_VERS=$(echo "$FILE_NAME_HDF5" | sed -r "s/([0-9]+\.[0-9]+\.[0-9]+)(\-[0-9]+).*/\1/")
+          FILE_VERS=$(echo "$FILE_NAME_HDF5" | sed -r "s/([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
           echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
           echo "HDF5_VERS=$FILE_VERS" >> $GITHUB_OUTPUT
 
