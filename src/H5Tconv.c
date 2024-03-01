@@ -753,14 +753,38 @@
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX))                                                                              \
             *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                                 \
-        else if (*(S) < (ST)(D_MIN))                                                                         \
-            *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                                 \
-        else                                                                                                 \
-            *(D) = (DT)(*(S));                                                                               \
+        else {                                                                                               \
+            intmax_t s_cast = (intmax_t)(*(S));                                                              \
+            intmax_t d_cast = (intmax_t)(D_MAX);                                                             \
+                                                                                                             \
+            /* Check if source value would underflow destination. Do NOT do this                             \
+             * by comparing against D_MIN casted to type ST here, as this will                               \
+             * generally be undefined behavior (casting negative float value <= 1.0                          \
+             * to integer) for all floating point types and some compilers optimize                          \
+             * this in a way that causes unexpected behavior. Instead, grab the                              \
+             * absolute value of the source value first, then compare it to D_MAX.                           \
+             */                                                                                              \
+            if (s_cast != INTMAX_MIN)                                                                        \
+                s_cast = imaxabs(s_cast);                                                                    \
+            else {                                                                                           \
+                /* Handle two's complement integer representations where abs(INTMAX_MIN)                     \
+                 * can't be represented. Other representations will fall here as well,                       \
+                 * but this should be fine.                                                                  \
+                 */                                                                                          \
+                s_cast = INTMAX_MAX;                                                                         \
+                d_cast -= 1;                                                                                 \
+            }                                                                                                \
+                                                                                                             \
+            if (s_cast > d_cast)                                                                             \
+                *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
+            else                                                                                             \
+                *(D) = (DT)(*(S));                                                                           \
+        }                                                                                                    \
     }
 
 #define H5T_CONV_Xf(STYPE, DTYPE, ST, DT, D_MIN, D_MAX)                                                      \
     do {                                                                                                     \
+        HDcompile_assert(sizeof(ST) >= sizeof(DT));                                                          \
         H5T_CONV(H5T_CONV_Xf, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, Y)                                         \
     } while (0)
 
@@ -9141,7 +9165,8 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             goto padding;
                         }
                     }
-                    else {
+
+                    if (!cb_struct.func || (except_ret == H5T_CONV_UNHANDLED)) {
                         /*make destination infinity by setting exponent to maximal number and
                          *mantissa to zero.*/
                         expo = expo_max;

@@ -611,22 +611,30 @@ test_particular_fp_integer(void)
     int            flag;
     double         src_d = (double)SCHAR_MAX;
     signed char    dst_c;
-    unsigned char *buf1 = NULL, *buf2 = NULL, *buf3 = NULL;
-    unsigned char *saved_buf1 = NULL, *saved_buf2 = NULL, *saved_buf3 = NULL;
-    size_t         src_size1, src_size2;
-    size_t         dst_size1, dst_size2;
-    float          src_f = (float)INT_MAX;
-    int            dst_i;
-    int            fill_value = 13;
+    unsigned char *buf1       = NULL;
+    unsigned char *saved_buf1 = NULL;
+    size_t         src_size1;
+    size_t         dst_size1;
     int            endian; /*endianness            */
     unsigned int   fails_this_test = 0;
     size_t         j;
+#ifdef H5_WANT_DCONV_EXCEPTION
+    unsigned char *buf2       = NULL;
+    unsigned char *saved_buf2 = NULL;
+    size_t         src_size2;
+    size_t         dst_size2;
+    float          src_f      = (float)INT_MAX;
+    int            fill_value = 13;
+    int            dst_i;
 #ifdef H5_HAVE__FLOAT16
-    H5__Float16 src_half   = (H5__Float16)SHRT_MAX;
-    short       s_fill_val = 25;
-    short       dst_s;
-    size_t      src_size3;
-    size_t      dst_size3;
+    unsigned char *buf3       = NULL;
+    unsigned char *saved_buf3 = NULL;
+    H5__Float16    src_half   = (H5__Float16)SHRT_MAX;
+    short          s_fill_val = 25;
+    short          dst_s;
+    size_t         src_size3;
+    size_t         dst_size3;
+#endif
 #endif
 
     TESTING("hard particular floating number -> integer conversions");
@@ -688,6 +696,8 @@ test_particular_fp_integer(void)
         printf(" %29d\n", y);
     }
 
+/* Only run this part of the test if conversion exceptions are enabled */
+#ifdef H5_WANT_DCONV_EXCEPTION
     /* Test conversion from float (the value is INT_MAX) to int. */
     src_size2  = H5Tget_size(H5T_NATIVE_FLOAT);
     dst_size2  = H5Tget_size(H5T_NATIVE_INT);
@@ -777,6 +787,7 @@ test_particular_fp_integer(void)
         printf(" %29d\n", (int)y);
     }
 #endif
+#endif
 
     if (fails_this_test)
         goto error;
@@ -789,16 +800,27 @@ test_particular_fp_integer(void)
 
     if (buf1)
         free(buf1);
+
+#ifdef H5_WANT_DCONV_EXCEPTION
     if (buf2)
         free(buf2);
+#ifdef H5_HAVE__FLOAT16
     if (buf3)
         free(buf3);
+#endif
+#endif
+
     if (saved_buf1)
         free(saved_buf1);
+
+#ifdef H5_WANT_DCONV_EXCEPTION
     if (saved_buf2)
         free(saved_buf2);
+#ifdef H5_HAVE__FLOAT16
     if (saved_buf3)
         free(saved_buf3);
+#endif
+#endif
 
     PASSED();
     return 0;
@@ -812,16 +834,27 @@ error:
     H5E_END_TRY
     if (buf1)
         free(buf1);
+
+#ifdef H5_WANT_DCONV_EXCEPTION
     if (buf2)
         free(buf2);
+#ifdef H5_HAVE__FLOAT16
     if (buf3)
         free(buf3);
+#endif
+#endif
+
     if (saved_buf1)
         free(saved_buf1);
+
+#ifdef H5_WANT_DCONV_EXCEPTION
     if (saved_buf2)
         free(saved_buf2);
+#ifdef H5_HAVE__FLOAT16
     if (saved_buf3)
         free(saved_buf3);
+#endif
+#endif
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -3383,15 +3416,21 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 
                 /* Suppress warning about non-standard floating-point literal suffix */
                 H5_GCC_CLANG_DIAG_OFF("pedantic")
-                if (underflow && fabsf(x) <= (float)FLT16_MIN && fabsf(hw_half) <= (float)FLT16_MIN)
+#ifdef H5_HAVE_FABSF16
+                if (underflow && fabsf16(x) <= FLT16_MIN && fabsf16(hw_half) <= FLT16_MIN)
                     continue; /* all underflowed, no error */
+#else
+                if (underflow && fabsf((float)x) <= (float)FLT16_MIN &&
+                    fabsf((float)hw_half) <= (float)FLT16_MIN)
+                    continue; /* all underflowed, no error */
+#endif
                 H5_GCC_CLANG_DIAG_ON("pedantic")
 
                 if (overflow && my_isinf(dendian, buf + j * sizeof(H5__Float16), dst_size, dst_mpos,
                                          dst_msize, dst_epos, dst_esize))
                     continue; /* all overflowed, no error */
-                check_mant[0] = (double)frexpf(x, check_expo + 0);
-                check_mant[1] = (double)frexpf(hw_half, check_expo + 1);
+                check_mant[0] = (double)frexpf((float)x, check_expo + 0);
+                check_mant[1] = (double)frexpf((float)hw_half, check_expo + 1);
 #else
                 assert(0 && "Should not reach this point!");
 #endif

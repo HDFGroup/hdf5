@@ -545,16 +545,57 @@ AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
-AC_CHECK_SIZEOF([_Float16])
 
-# Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
-# Also define HAVE__FLOAT16 value to substitute into other files for
-# conditional testing
+## ----------------------------------------------------------------------
+## Check if _Float16 support is available
+##
 HAVE__FLOAT16="no"
+AC_CHECK_SIZEOF([_Float16])
 if test "$ac_cv_sizeof__Float16" != 0; then
-  HAVE__FLOAT16="yes"
-  AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
+  # Some compilers expose the _Float16 datatype, but not the macros and
+  # functions used with the datatype. We need the macros for proper
+  # datatype conversion support. The main function we're interested in
+  # is fabsf16. Check for these here.
+  AC_CHECK_DECL([FLT16_EPSILON], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MIN], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MAX], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MIN_10_EXP], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MAX_10_EXP], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+  AC_CHECK_DECL([FLT16_MANT_DIG], [], [], [[
+                 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+                 #include <float.h>]])
+
+  if test "X$ac_cv_have_decl_FLT16_EPSILON" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MIN" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MAX" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MIN_10_EXP" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MAX_10_EXP" = "Xyes" &&
+     test "X$ac_cv_have_decl_FLT16_MANT_DIG" = "Xyes" ; then
+    HAVE__FLOAT16="yes"
+
+    # Check if we can use fabsf16
+    AC_CHECK_FUNC([fabsf16], [AC_DEFINE([HAVE_FABSF16], [1],
+                      [Define if has fabsf16 function])], [])
+
+    # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
+    AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
+  fi
+
+  AC_MSG_CHECKING([if _Float16 support is available])
+  AC_MSG_RESULT([$HAVE__FLOAT16])
 fi
+
+# Define HAVE__FLOAT16 value to substitute into other files for conditional testing
 AC_SUBST([HAVE__FLOAT16])
 
 ## ----------------------------------------------------------------------

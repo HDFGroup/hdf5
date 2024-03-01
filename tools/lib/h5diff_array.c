@@ -2375,7 +2375,7 @@ diff_float16_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
      *-------------------------------------------------------------------------
      */
     else {
-        if (equal_float(temp1_float16, temp2_float16, opts) == false) {
+        if (equal_float((float)temp1_float16, (float)temp2_float16, opts) == false) {
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {

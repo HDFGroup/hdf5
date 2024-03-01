@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <fenv.h>
-#include <math.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdio.h>
@@ -38,6 +37,7 @@
 /* Define __STDC_WANT_IEC_60559_TYPES_EXT__ for _FloatN support, if available */
 #define __STDC_WANT_IEC_60559_TYPES_EXT__
 #include <float.h>
+#include <math.h>
 
 /* POSIX headers */
 #ifdef H5_HAVE_SYS_TIME_H
@@ -462,9 +462,25 @@
 #define H5_DBL_ABS_EQUAL(X, Y)  (fabs((X) - (Y)) < DBL_EPSILON)
 #define H5_LDBL_ABS_EQUAL(X, Y) (fabsl((X) - (Y)) < LDBL_EPSILON)
 
+#ifdef H5_HAVE__FLOAT16
+#ifdef H5_HAVE_FABSF16
+#define H5_FLT16_ABS_EQUAL(X, Y) (fabsf16((X) - (Y)) < FLT16_EPSILON)
+#else
+#define H5_FLT16_ABS_EQUAL(X, Y) H5_FLT_ABS_EQUAL((float)X, (float)Y)
+#endif
+#endif
+
 #define H5_FLT_REL_EQUAL(X, Y, M)  (fabsf(((Y) - (X)) / (X)) < (M))
 #define H5_DBL_REL_EQUAL(X, Y, M)  (fabs(((Y) - (X)) / (X)) < (M))
 #define H5_LDBL_REL_EQUAL(X, Y, M) (fabsl(((Y) - (X)) / (X)) < (M))
+
+#ifdef H5_HAVE__FLOAT16
+#ifdef H5_HAVE_FABSF16
+#define H5_FLT16_REL_EQUAL(X, Y, M) (fabsf16(((Y) - (X)) / (X)) < (M))
+#else
+#define H5_FLT16_REL_EQUAL(X, Y, M) H5_FLT_REL_EQUAL((float)X, (float)Y, M)
+#endif
+#endif
 
 /* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
 #define H5_KB (1024.0F)
@@ -543,16 +559,14 @@
 #define H5_GCC_CLANG_DIAG_ON(x)
 #endif
 
-/* Create a typedef for library usage of the _Float16 type
- * to avoid issues when compiling the library with the
- * -pedantic flag or similar where we get warnings about
- * _Float16 not being an ISO C type.
+/* If necessary, create a typedef for library usage of the
+ * _Float16 type to avoid issues when compiling the library
+ * with the -pedantic flag or similar where we get warnings
+ * about _Float16 not being an ISO C type.
  */
 #ifdef H5_HAVE__FLOAT16
 #if defined(__GNUC__)
 __extension__ typedef _Float16 H5__Float16;
-#elif defined(__clang__)
-/* TODO */
 #else
 typedef _Float16 H5__Float16;
 #endif
@@ -893,7 +907,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 

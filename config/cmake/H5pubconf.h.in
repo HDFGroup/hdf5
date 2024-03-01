@@ -128,6 +128,9 @@
 /* Define if library information should be embedded in the executables */
 #cmakedefine H5_HAVE_EMBEDDED_LIBINFO @H5_HAVE_EMBEDDED_LIBINFO@
 
+/* Define to 1 if you have the `fabsf16' function. */
+#cmakedefine H5_HAVE_FABSF16 @H5_HAVE_FABSF16@
+
 /* Define to 1 if you have the `fcntl' function. */
 #cmakedefine H5_HAVE_FCNTL @H5_HAVE_FCNTL@
 

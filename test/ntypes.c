@@ -3124,13 +3124,14 @@ test__Float16(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (size_t i = 0; i < DIM0; i++)
-        for (size_t j = 0; j < DIM1; j++)
-            if (!H5_FLT_ABS_EQUAL(ipoints->arr[i][j], icheck->arr[i][j])) {
+        for (size_t j = 0; j < DIM1; j++) {
+            if (!H5_FLT16_ABS_EQUAL(ipoints->arr[i][j], icheck->arr[i][j])) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %zu,%zu\n", i, j);
                 goto error;
             } /* end if */
+        }
 
     if (H5Sclose(space) < 0)
         TEST_ERROR;
