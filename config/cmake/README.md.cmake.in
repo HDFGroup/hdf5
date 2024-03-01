@@ -2,13 +2,13 @@
 ------------------------------------------------------------------------------
 
 This directory contains the binary (release) distribution of
-@HDF5_PACKAGE_NAME@ @HDF5_PACKAGE_VERSION_MAJOR@ that was compiled on;
+@HDF5_PACKAGE_NAME@ @HDF5_PACKAGE_VERSION_MAJOR@.@HDF4_PACKAGE_VERSION_MINOR@ that was compiled on;
     @BINARY_PLATFORM@.
 
 It was built with the following options:
     -- @LIB_TYPE@ C/C++/Fortran libraries
     -- SZIP (encoder enabled) and ZLIB
-    -- @LIB_TYPE@ HDF5 tools
+    -- HDF5 tools
     -- Java @Java_VERSION@
 
 The contents of this directory are:
@@ -16,23 +16,23 @@ The contents of this directory are:
     COPYING                 - Copyright notice
     README.md               - This file
     @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_INSTALL_ENDING@    - HDF5 Install Package
+    OR
+    @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_COMPRESS_ENDING@    - HDF5 Compressed Package
 
 This binary was built with the ZLIB and SZIP/Libaec external libraries and are
 included for convenience.  Libaec is an unrestricted open-source replacement for SZIP
-(version 1.0.4, Encoder ENABLED).
-
-The official ZLIB and SZIP/Libaec pages are at:
-
-    ZLIB: https://git.savannah.gnu.org/cgit/gzip.git/
-        https://git.savannah.gnu.org/cgit/gzip.git/tree/COPYING
-    SZIP/Libaec: https://github.com/MathisRosenhauer/libaec
-        https://github.com/MathisRosenhauer/libaec/blob/master/LICENSE.txt
+(Encoder ENABLED).
 
 
 Installation
 ===========================================================================
 1. Execute @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_INSTALL_ENDING@
 2. Follow prompts
+===========================================================================
+
+Uncompress
+===========================================================================
+1. Extract @HDF5_PACKAGE_NAME@-@HDF5_PACKAGE_VERSION@-@BINARY_SYSTEM_NAME@.@BINARY_COMPRESS_ENDING@
 ===========================================================================
 
 After Installation
@@ -75,6 +75,6 @@ For more information see USING_CMake_Examples.txt in the install folder.
 ===========================================================================
 
 Documentation for this release can be found at the following URL:
-     https://portal.hdfgroup.org/display/HDF5/HDF5
+    https://portal.hdfgroup.org/documentation/index.html#hdf5
 
 Bugs should be reported to help@hdfgroup.org.
