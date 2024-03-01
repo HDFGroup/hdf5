@@ -70,11 +70,8 @@ External compression plugin libraries from https://github.com/HDFGroup/hdf5_plug
     hdf5_plugins.tar.gz
 
 External compression szip and zlib libraries:
-"Use ZLIB from original location"          "https://github.com/madler/zlib/releases/download/v1.2.13"
-"Use ZLIB from original compressed file"   "zlib-1.3.tar.gz"
-
-"Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"
-"Use LIBAEC from original compressed file" "libaec-1.0.6.tar.gz"
+    ZLIB          "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.3.tar.gz"
+    LIBAEC        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
 
