@@ -150,9 +150,36 @@ jobs:
               name: abi-reports
               path: ${{ github.workspace }}
 
+      - name: Create sha256 sums for files
+        run: |
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip > sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports >> sha256sums.txt
+
       - name: Store snapshot name
         run: |
           echo "${{ steps.get-file-base.outputs.FILE_BASE }}" > ./last-file.txt
+
+      - name: Get NEWSLETTER
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+              name: NEWSLETTER
+              path: ${{ github.workspace }}/NEWSLETTER.txt
+
+      - name: Create description file
+        run: |
+          cat ${{ github.workspace }}/NEWSLETTER.txt > description.txt
+          cat "\nSHA256 sums:\n" >> description.txt
+          cat sha256sums.txt >> description.txt
 
       - name: PreRelease tag
         id: create_prerelease
@@ -163,10 +190,6 @@ jobs:
           prerelease: true
           files: |
               last-file.txt
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_cpp_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
@@ -178,6 +201,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
+              sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Release tag
@@ -187,12 +212,8 @@ jobs:
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
-          #body_path: ${{ github.workspace }}-CHANGELOG.txt
+          body_path: description.txt
           files: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_cpp_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
@@ -204,6 +225,8 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
+              sha256sums.txt
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: List files for the space (Linux)
