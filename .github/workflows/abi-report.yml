@@ -178,4 +178,4 @@ jobs:
         with:
           name: abi-reports
           path: |
-            ${{ inputs.file_base }}.html.abi.reports
+            ${{ runner.workspace }}/buildabi/${{ inputs.file_base }}.html.abi.reports
