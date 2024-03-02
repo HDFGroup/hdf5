@@ -188,6 +188,7 @@ jobs:
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
+          body_path: description.txt
           files: |
               last-file.txt
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
