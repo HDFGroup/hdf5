@@ -178,7 +178,7 @@ jobs:
       - name: Create description file
         run: |
           cat ${{ github.workspace }}/NEWSLETTER.txt > description.txt
-          echo "\nSHA256 sums:\n" >> description.txt
+          echo "SHA256 sums:" >> description.txt
           cat sha256sums.txt >> description.txt
 
       - name: PreRelease tag
