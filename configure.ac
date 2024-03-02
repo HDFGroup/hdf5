@@ -581,14 +581,51 @@ if test "$ac_cv_sizeof__Float16" != 0; then
      test "X$ac_cv_have_decl_FLT16_MIN_10_EXP" = "Xyes" &&
      test "X$ac_cv_have_decl_FLT16_MAX_10_EXP" = "Xyes" &&
      test "X$ac_cv_have_decl_FLT16_MANT_DIG" = "Xyes" ; then
-    HAVE__FLOAT16="yes"
+    # Finally, some compilers like OneAPI on MSVC appear to just be broken,
+    # as support for _Float16 and its macros can be detected properly, but
+    # then code is generated that uses the __truncsfhf2, __truncdfhf2,
+    # __extendhfsf2 functions, which end up being unresolved with MSVC. Let's
+    # try to compile a program that will generate these functions as a last
+    # resort for checking for _Float16 support.
+    AC_MSG_CHECKING([if _Float16 program can be compiled])
+    AC_CACHE_VAL([hdf5_cv_float16_prog_compiled],
+      [AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #define __STDC_WANT_IEC_60559_TYPES_EXT__
+            #include <float.h>
+        ],[
+            signed char a;
+            _Float16    b;
+            double      c;
+            /* Convert signed char to _Float16  */
+            a = 1;
+            b = (_Float16)a;
+            /* Convert back */
+            b = 3.0f16;
+            a = (signed char)b;
+            /* Convert double to _Float16 */
+            c = 5.0;
+            b = (_Float16)c;
+            /* Convert back */
+            b = 3.0f16;
+            c = (double)b;
+        ])]
+      , [hdf5_cv_float16_prog_compiled=yes], [hdf5_cv_float16_prog_compiled=no], [hdf5_cv_float16_prog_compiled=no])])
 
-    # Check if we can use fabsf16
-    AC_CHECK_FUNC([fabsf16], [AC_DEFINE([HAVE_FABSF16], [1],
-                      [Define if has fabsf16 function])], [])
+    if test ${hdf5_cv_float16_prog_compiled} = "yes" ; then
+      AC_MSG_RESULT([yes])
+    
+      HAVE__FLOAT16="yes"
 
-    # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
-    AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
+      # Check if we can use fabsf16
+      AC_CHECK_FUNC([fabsf16], [AC_DEFINE([HAVE_FABSF16], [1],
+                        [Define if has fabsf16 function])], [])
+
+      # Define HAVE__FLOAT16 macro for H5pubconf.h if _Float16 is available.
+      AC_DEFINE([HAVE__FLOAT16], [1], [Determine if _Float16 is available])
+    else
+      AC_MSG_RESULT([no])
+    fi
   fi
 
   AC_MSG_CHECKING([if _Float16 support is available])

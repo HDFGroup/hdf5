@@ -384,10 +384,27 @@ if (${HDF_PREFIX}_SIZEOF__FLOAT16)
   if (h5_have_flt16_epsilon AND h5_have_flt16_min AND
       h5_have_flt16_max AND h5_have_flt16_min_10_exp AND
       h5_have_flt16_max_10_exp AND h5_have_flt16_mant_dig)
-    set (${HDF_PREFIX}_HAVE__FLOAT16 1)
+    # Finally, some compilers like OneAPI on MSVC appear to just be broken,
+    # as support for _Float16 and its macros can be detected properly, but
+    # then code is generated that uses the __truncsfhf2, __truncdfhf2,
+    # __extendhfsf2 functions, which end up being unresolved with MSVC. Let's
+    # try to compile a program that will generate these functions as a last
+    # resort for checking for _Float16 support.
+    message (VERBOSE "Compiling test program for _Float16 support")
+    try_compile (
+        h5_compiled_float16_test
+        ${CMAKE_BINARY_DIR} 
+        ${HDF_RESOURCES_DIR}/HDFTests.c
+        COMPILE_DEFINITIONS "-DCHECK_FLOAT16"
+        C_STANDARD 99
+    )
 
-    # Check if we can use fabsf16
-    CHECK_FUNCTION_EXISTS (fabsf16 ${HDF_PREFIX}_HAVE_FABSF16)
+    if (${h5_compiled_float16_test})
+      set (${HDF_PREFIX}_HAVE__FLOAT16 1)
+
+      # Check if we can use fabsf16
+      CHECK_FUNCTION_EXISTS (fabsf16 ${HDF_PREFIX}_HAVE_FABSF16)
+    endif ()
   else ()
     set (${HDF_PREFIX}_HAVE__FLOAT16 0)
   endif ()
