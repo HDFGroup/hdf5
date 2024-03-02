@@ -285,3 +285,32 @@ int HDF_NO_UBSAN main(void)
 }
 
 #endif
+
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT_TEST
+
+#define __STDC_WANT_IEC_60559_TYPES_EXT__
+
+#include <stdlib.h>
+#include <float.h>
+#include <math.h>
+#include <limits.h>
+
+int HDF_NO_UBSAN main(void)
+{
+    long double ld;
+    _Float16    half;
+    int         ret = 1;
+
+    ld   = 32.0L;
+    half = 64.0f16;
+
+    half = (_Float16)ld;
+
+    if (fabsl(ld - (long double)half) < LDBL_EPSILON)
+        ret = 0;
+
+done:
+    exit(ret);
+}
+
+#endif

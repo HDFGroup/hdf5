@@ -8085,6 +8085,7 @@ H5T__conv_double__Float16(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_FLOAT16
 herr_t
 H5T__conv_ldouble__Float16(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                            size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
@@ -8094,6 +8095,7 @@ H5T__conv_ldouble__Float16(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_
     H5T_CONV_Ff(LDOUBLE, FLOAT16, long double, H5__Float16, -FLT16_MAX, FLT16_MAX);
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
+#endif
 
 herr_t
 H5T__conv__Float16_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,

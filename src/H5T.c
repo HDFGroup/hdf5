@@ -398,105 +398,105 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
  * If more of these are added, the new ones must be added to the list of
  * types to reset in H5T_term_package().
  */
-hid_t H5T_IEEE_F16BE_g = FAIL;
-hid_t H5T_IEEE_F16LE_g = FAIL;
-hid_t H5T_IEEE_F32BE_g = FAIL;
-hid_t H5T_IEEE_F32LE_g = FAIL;
-hid_t H5T_IEEE_F64BE_g = FAIL;
-hid_t H5T_IEEE_F64LE_g = FAIL;
+hid_t H5T_IEEE_F16BE_g = H5I_INVALID_HID;
+hid_t H5T_IEEE_F16LE_g = H5I_INVALID_HID;
+hid_t H5T_IEEE_F32BE_g = H5I_INVALID_HID;
+hid_t H5T_IEEE_F32LE_g = H5I_INVALID_HID;
+hid_t H5T_IEEE_F64BE_g = H5I_INVALID_HID;
+hid_t H5T_IEEE_F64LE_g = H5I_INVALID_HID;
 
-hid_t H5T_VAX_F32_g = FAIL;
-hid_t H5T_VAX_F64_g = FAIL;
+hid_t H5T_VAX_F32_g = H5I_INVALID_HID;
+hid_t H5T_VAX_F64_g = H5I_INVALID_HID;
 
-hid_t H5T_STD_I8BE_g        = FAIL;
-hid_t H5T_STD_I8LE_g        = FAIL;
-hid_t H5T_STD_I16BE_g       = FAIL;
-hid_t H5T_STD_I16LE_g       = FAIL;
-hid_t H5T_STD_I32BE_g       = FAIL;
-hid_t H5T_STD_I32LE_g       = FAIL;
-hid_t H5T_STD_I64BE_g       = FAIL;
-hid_t H5T_STD_I64LE_g       = FAIL;
-hid_t H5T_STD_U8BE_g        = FAIL;
-hid_t H5T_STD_U8LE_g        = FAIL;
-hid_t H5T_STD_U16BE_g       = FAIL;
-hid_t H5T_STD_U16LE_g       = FAIL;
-hid_t H5T_STD_U32BE_g       = FAIL;
-hid_t H5T_STD_U32LE_g       = FAIL;
-hid_t H5T_STD_U64BE_g       = FAIL;
-hid_t H5T_STD_U64LE_g       = FAIL;
-hid_t H5T_STD_B8BE_g        = FAIL;
-hid_t H5T_STD_B8LE_g        = FAIL;
-hid_t H5T_STD_B16BE_g       = FAIL;
-hid_t H5T_STD_B16LE_g       = FAIL;
-hid_t H5T_STD_B32BE_g       = FAIL;
-hid_t H5T_STD_B32LE_g       = FAIL;
-hid_t H5T_STD_B64BE_g       = FAIL;
-hid_t H5T_STD_B64LE_g       = FAIL;
-hid_t H5T_STD_REF_OBJ_g     = FAIL;
-hid_t H5T_STD_REF_DSETREG_g = FAIL;
-hid_t H5T_STD_REF_g         = FAIL;
+hid_t H5T_STD_I8BE_g        = H5I_INVALID_HID;
+hid_t H5T_STD_I8LE_g        = H5I_INVALID_HID;
+hid_t H5T_STD_I16BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_I16LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_I32BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_I32LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_I64BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_I64LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_U8BE_g        = H5I_INVALID_HID;
+hid_t H5T_STD_U8LE_g        = H5I_INVALID_HID;
+hid_t H5T_STD_U16BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_U16LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_U32BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_U32LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_U64BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_U64LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_B8BE_g        = H5I_INVALID_HID;
+hid_t H5T_STD_B8LE_g        = H5I_INVALID_HID;
+hid_t H5T_STD_B16BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_B16LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_B32BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_B32LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_B64BE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_B64LE_g       = H5I_INVALID_HID;
+hid_t H5T_STD_REF_OBJ_g     = H5I_INVALID_HID;
+hid_t H5T_STD_REF_DSETREG_g = H5I_INVALID_HID;
+hid_t H5T_STD_REF_g         = H5I_INVALID_HID;
 
-hid_t H5T_UNIX_D32BE_g = FAIL;
-hid_t H5T_UNIX_D32LE_g = FAIL;
-hid_t H5T_UNIX_D64BE_g = FAIL;
-hid_t H5T_UNIX_D64LE_g = FAIL;
+hid_t H5T_UNIX_D32BE_g = H5I_INVALID_HID;
+hid_t H5T_UNIX_D32LE_g = H5I_INVALID_HID;
+hid_t H5T_UNIX_D64BE_g = H5I_INVALID_HID;
+hid_t H5T_UNIX_D64LE_g = H5I_INVALID_HID;
 
-hid_t H5T_C_S1_g = FAIL;
+hid_t H5T_C_S1_g = H5I_INVALID_HID;
 
-hid_t H5T_FORTRAN_S1_g = FAIL;
+hid_t H5T_FORTRAN_S1_g = H5I_INVALID_HID;
 
-hid_t H5T_NATIVE_SCHAR_g   = FAIL;
-hid_t H5T_NATIVE_UCHAR_g   = FAIL;
-hid_t H5T_NATIVE_SHORT_g   = FAIL;
-hid_t H5T_NATIVE_USHORT_g  = FAIL;
-hid_t H5T_NATIVE_INT_g     = FAIL;
-hid_t H5T_NATIVE_UINT_g    = FAIL;
-hid_t H5T_NATIVE_LONG_g    = FAIL;
-hid_t H5T_NATIVE_ULONG_g   = FAIL;
-hid_t H5T_NATIVE_LLONG_g   = FAIL;
-hid_t H5T_NATIVE_ULLONG_g  = FAIL;
-hid_t H5T_NATIVE_FLOAT16_g = FAIL;
-hid_t H5T_NATIVE_FLOAT_g   = FAIL;
-hid_t H5T_NATIVE_DOUBLE_g  = FAIL;
-hid_t H5T_NATIVE_LDOUBLE_g = FAIL;
-hid_t H5T_NATIVE_B8_g      = FAIL;
-hid_t H5T_NATIVE_B16_g     = FAIL;
-hid_t H5T_NATIVE_B32_g     = FAIL;
-hid_t H5T_NATIVE_B64_g     = FAIL;
-hid_t H5T_NATIVE_OPAQUE_g  = FAIL;
-hid_t H5T_NATIVE_HADDR_g   = FAIL;
-hid_t H5T_NATIVE_HSIZE_g   = FAIL;
-hid_t H5T_NATIVE_HSSIZE_g  = FAIL;
-hid_t H5T_NATIVE_HERR_g    = FAIL;
-hid_t H5T_NATIVE_HBOOL_g   = FAIL;
+hid_t H5T_NATIVE_SCHAR_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UCHAR_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_SHORT_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_USHORT_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_g     = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_g    = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LONG_g    = H5I_INVALID_HID;
+hid_t H5T_NATIVE_ULONG_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LLONG_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_ULLONG_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_FLOAT16_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_FLOAT_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_DOUBLE_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LDOUBLE_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B8_g      = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B16_g     = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B32_g     = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B64_g     = H5I_INVALID_HID;
+hid_t H5T_NATIVE_OPAQUE_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HADDR_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HSIZE_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HSSIZE_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HERR_g    = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HBOOL_g   = H5I_INVALID_HID;
 
-hid_t H5T_NATIVE_INT8_g        = FAIL;
-hid_t H5T_NATIVE_UINT8_g       = FAIL;
-hid_t H5T_NATIVE_INT_LEAST8_g  = FAIL;
-hid_t H5T_NATIVE_UINT_LEAST8_g = FAIL;
-hid_t H5T_NATIVE_INT_FAST8_g   = FAIL;
-hid_t H5T_NATIVE_UINT_FAST8_g  = FAIL;
+hid_t H5T_NATIVE_INT8_g        = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT8_g       = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_LEAST8_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_LEAST8_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_FAST8_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_FAST8_g  = H5I_INVALID_HID;
 
-hid_t H5T_NATIVE_INT16_g        = FAIL;
-hid_t H5T_NATIVE_UINT16_g       = FAIL;
-hid_t H5T_NATIVE_INT_LEAST16_g  = FAIL;
-hid_t H5T_NATIVE_UINT_LEAST16_g = FAIL;
-hid_t H5T_NATIVE_INT_FAST16_g   = FAIL;
-hid_t H5T_NATIVE_UINT_FAST16_g  = FAIL;
+hid_t H5T_NATIVE_INT16_g        = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT16_g       = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_LEAST16_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_LEAST16_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_FAST16_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_FAST16_g  = H5I_INVALID_HID;
 
-hid_t H5T_NATIVE_INT32_g        = FAIL;
-hid_t H5T_NATIVE_UINT32_g       = FAIL;
-hid_t H5T_NATIVE_INT_LEAST32_g  = FAIL;
-hid_t H5T_NATIVE_UINT_LEAST32_g = FAIL;
-hid_t H5T_NATIVE_INT_FAST32_g   = FAIL;
-hid_t H5T_NATIVE_UINT_FAST32_g  = FAIL;
+hid_t H5T_NATIVE_INT32_g        = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT32_g       = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_LEAST32_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_LEAST32_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_FAST32_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_FAST32_g  = H5I_INVALID_HID;
 
-hid_t H5T_NATIVE_INT64_g        = FAIL;
-hid_t H5T_NATIVE_UINT64_g       = FAIL;
-hid_t H5T_NATIVE_INT_LEAST64_g  = FAIL;
-hid_t H5T_NATIVE_UINT_LEAST64_g = FAIL;
-hid_t H5T_NATIVE_INT_FAST64_g   = FAIL;
-hid_t H5T_NATIVE_UINT_FAST64_g  = FAIL;
+hid_t H5T_NATIVE_INT64_g        = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT64_g       = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_LEAST64_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_LEAST64_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_FAST64_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_FAST64_g  = H5I_INVALID_HID;
 
 /*
  * Alignment constraints for HDF5 types.  Accessing objects of these
@@ -1165,8 +1165,10 @@ H5T_init(void)
         H5T__register_int(H5T_PERS_HARD, "flt_flt16", native_float, native_float16, H5T__conv_float__Float16);
     status |= H5T__register_int(H5T_PERS_HARD, "dbl_flt16", native_double, native_float16,
                                 H5T__conv_double__Float16);
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_FLOAT16
     status |= H5T__register_int(H5T_PERS_HARD, "ldbl_flt16", native_ldouble, native_float16,
                                 H5T__conv_ldouble__Float16);
+#endif
 #endif
 
     /* from long long */
@@ -1733,102 +1735,102 @@ H5T_top_term_package(void)
 
     /* Reset all the datatype IDs */
     if (H5T_IEEE_F32BE_g > 0) {
-        H5T_IEEE_F16BE_g = FAIL;
-        H5T_IEEE_F16LE_g = FAIL;
-        H5T_IEEE_F32BE_g = FAIL;
-        H5T_IEEE_F32LE_g = FAIL;
-        H5T_IEEE_F64BE_g = FAIL;
-        H5T_IEEE_F64LE_g = FAIL;
+        H5T_IEEE_F16BE_g = H5I_INVALID_HID;
+        H5T_IEEE_F16LE_g = H5I_INVALID_HID;
+        H5T_IEEE_F32BE_g = H5I_INVALID_HID;
+        H5T_IEEE_F32LE_g = H5I_INVALID_HID;
+        H5T_IEEE_F64BE_g = H5I_INVALID_HID;
+        H5T_IEEE_F64LE_g = H5I_INVALID_HID;
 
-        H5T_STD_I8BE_g        = FAIL;
-        H5T_STD_I8LE_g        = FAIL;
-        H5T_STD_I16BE_g       = FAIL;
-        H5T_STD_I16LE_g       = FAIL;
-        H5T_STD_I32BE_g       = FAIL;
-        H5T_STD_I32LE_g       = FAIL;
-        H5T_STD_I64BE_g       = FAIL;
-        H5T_STD_I64LE_g       = FAIL;
-        H5T_STD_U8BE_g        = FAIL;
-        H5T_STD_U8LE_g        = FAIL;
-        H5T_STD_U16BE_g       = FAIL;
-        H5T_STD_U16LE_g       = FAIL;
-        H5T_STD_U32BE_g       = FAIL;
-        H5T_STD_U32LE_g       = FAIL;
-        H5T_STD_U64BE_g       = FAIL;
-        H5T_STD_U64LE_g       = FAIL;
-        H5T_STD_B8BE_g        = FAIL;
-        H5T_STD_B8LE_g        = FAIL;
-        H5T_STD_B16BE_g       = FAIL;
-        H5T_STD_B16LE_g       = FAIL;
-        H5T_STD_B32BE_g       = FAIL;
-        H5T_STD_B32LE_g       = FAIL;
-        H5T_STD_B64BE_g       = FAIL;
-        H5T_STD_B64LE_g       = FAIL;
-        H5T_STD_REF_OBJ_g     = FAIL;
-        H5T_STD_REF_DSETREG_g = FAIL;
-        H5T_STD_REF_g         = FAIL;
+        H5T_STD_I8BE_g        = H5I_INVALID_HID;
+        H5T_STD_I8LE_g        = H5I_INVALID_HID;
+        H5T_STD_I16BE_g       = H5I_INVALID_HID;
+        H5T_STD_I16LE_g       = H5I_INVALID_HID;
+        H5T_STD_I32BE_g       = H5I_INVALID_HID;
+        H5T_STD_I32LE_g       = H5I_INVALID_HID;
+        H5T_STD_I64BE_g       = H5I_INVALID_HID;
+        H5T_STD_I64LE_g       = H5I_INVALID_HID;
+        H5T_STD_U8BE_g        = H5I_INVALID_HID;
+        H5T_STD_U8LE_g        = H5I_INVALID_HID;
+        H5T_STD_U16BE_g       = H5I_INVALID_HID;
+        H5T_STD_U16LE_g       = H5I_INVALID_HID;
+        H5T_STD_U32BE_g       = H5I_INVALID_HID;
+        H5T_STD_U32LE_g       = H5I_INVALID_HID;
+        H5T_STD_U64BE_g       = H5I_INVALID_HID;
+        H5T_STD_U64LE_g       = H5I_INVALID_HID;
+        H5T_STD_B8BE_g        = H5I_INVALID_HID;
+        H5T_STD_B8LE_g        = H5I_INVALID_HID;
+        H5T_STD_B16BE_g       = H5I_INVALID_HID;
+        H5T_STD_B16LE_g       = H5I_INVALID_HID;
+        H5T_STD_B32BE_g       = H5I_INVALID_HID;
+        H5T_STD_B32LE_g       = H5I_INVALID_HID;
+        H5T_STD_B64BE_g       = H5I_INVALID_HID;
+        H5T_STD_B64LE_g       = H5I_INVALID_HID;
+        H5T_STD_REF_OBJ_g     = H5I_INVALID_HID;
+        H5T_STD_REF_DSETREG_g = H5I_INVALID_HID;
+        H5T_STD_REF_g         = H5I_INVALID_HID;
 
-        H5T_UNIX_D32BE_g = FAIL;
-        H5T_UNIX_D32LE_g = FAIL;
-        H5T_UNIX_D64BE_g = FAIL;
-        H5T_UNIX_D64LE_g = FAIL;
+        H5T_UNIX_D32BE_g = H5I_INVALID_HID;
+        H5T_UNIX_D32LE_g = H5I_INVALID_HID;
+        H5T_UNIX_D64BE_g = H5I_INVALID_HID;
+        H5T_UNIX_D64LE_g = H5I_INVALID_HID;
 
-        H5T_C_S1_g = FAIL;
+        H5T_C_S1_g = H5I_INVALID_HID;
 
-        H5T_FORTRAN_S1_g = FAIL;
+        H5T_FORTRAN_S1_g = H5I_INVALID_HID;
 
-        H5T_NATIVE_SCHAR_g   = FAIL;
-        H5T_NATIVE_UCHAR_g   = FAIL;
-        H5T_NATIVE_SHORT_g   = FAIL;
-        H5T_NATIVE_USHORT_g  = FAIL;
-        H5T_NATIVE_INT_g     = FAIL;
-        H5T_NATIVE_UINT_g    = FAIL;
-        H5T_NATIVE_LONG_g    = FAIL;
-        H5T_NATIVE_ULONG_g   = FAIL;
-        H5T_NATIVE_LLONG_g   = FAIL;
-        H5T_NATIVE_ULLONG_g  = FAIL;
-        H5T_NATIVE_FLOAT16_g = FAIL;
-        H5T_NATIVE_FLOAT_g   = FAIL;
-        H5T_NATIVE_DOUBLE_g  = FAIL;
-        H5T_NATIVE_LDOUBLE_g = FAIL;
-        H5T_NATIVE_B8_g      = FAIL;
-        H5T_NATIVE_B16_g     = FAIL;
-        H5T_NATIVE_B32_g     = FAIL;
-        H5T_NATIVE_B64_g     = FAIL;
-        H5T_NATIVE_OPAQUE_g  = FAIL;
-        H5T_NATIVE_HADDR_g   = FAIL;
-        H5T_NATIVE_HSIZE_g   = FAIL;
-        H5T_NATIVE_HSSIZE_g  = FAIL;
-        H5T_NATIVE_HERR_g    = FAIL;
-        H5T_NATIVE_HBOOL_g   = FAIL;
+        H5T_NATIVE_SCHAR_g   = H5I_INVALID_HID;
+        H5T_NATIVE_UCHAR_g   = H5I_INVALID_HID;
+        H5T_NATIVE_SHORT_g   = H5I_INVALID_HID;
+        H5T_NATIVE_USHORT_g  = H5I_INVALID_HID;
+        H5T_NATIVE_INT_g     = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_g    = H5I_INVALID_HID;
+        H5T_NATIVE_LONG_g    = H5I_INVALID_HID;
+        H5T_NATIVE_ULONG_g   = H5I_INVALID_HID;
+        H5T_NATIVE_LLONG_g   = H5I_INVALID_HID;
+        H5T_NATIVE_ULLONG_g  = H5I_INVALID_HID;
+        H5T_NATIVE_FLOAT16_g = H5I_INVALID_HID;
+        H5T_NATIVE_FLOAT_g   = H5I_INVALID_HID;
+        H5T_NATIVE_DOUBLE_g  = H5I_INVALID_HID;
+        H5T_NATIVE_LDOUBLE_g = H5I_INVALID_HID;
+        H5T_NATIVE_B8_g      = H5I_INVALID_HID;
+        H5T_NATIVE_B16_g     = H5I_INVALID_HID;
+        H5T_NATIVE_B32_g     = H5I_INVALID_HID;
+        H5T_NATIVE_B64_g     = H5I_INVALID_HID;
+        H5T_NATIVE_OPAQUE_g  = H5I_INVALID_HID;
+        H5T_NATIVE_HADDR_g   = H5I_INVALID_HID;
+        H5T_NATIVE_HSIZE_g   = H5I_INVALID_HID;
+        H5T_NATIVE_HSSIZE_g  = H5I_INVALID_HID;
+        H5T_NATIVE_HERR_g    = H5I_INVALID_HID;
+        H5T_NATIVE_HBOOL_g   = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT8_g        = FAIL;
-        H5T_NATIVE_UINT8_g       = FAIL;
-        H5T_NATIVE_INT_LEAST8_g  = FAIL;
-        H5T_NATIVE_UINT_LEAST8_g = FAIL;
-        H5T_NATIVE_INT_FAST8_g   = FAIL;
-        H5T_NATIVE_UINT_FAST8_g  = FAIL;
+        H5T_NATIVE_INT8_g        = H5I_INVALID_HID;
+        H5T_NATIVE_UINT8_g       = H5I_INVALID_HID;
+        H5T_NATIVE_INT_LEAST8_g  = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_LEAST8_g = H5I_INVALID_HID;
+        H5T_NATIVE_INT_FAST8_g   = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_FAST8_g  = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT16_g        = FAIL;
-        H5T_NATIVE_UINT16_g       = FAIL;
-        H5T_NATIVE_INT_LEAST16_g  = FAIL;
-        H5T_NATIVE_UINT_LEAST16_g = FAIL;
-        H5T_NATIVE_INT_FAST16_g   = FAIL;
-        H5T_NATIVE_UINT_FAST16_g  = FAIL;
+        H5T_NATIVE_INT16_g        = H5I_INVALID_HID;
+        H5T_NATIVE_UINT16_g       = H5I_INVALID_HID;
+        H5T_NATIVE_INT_LEAST16_g  = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_LEAST16_g = H5I_INVALID_HID;
+        H5T_NATIVE_INT_FAST16_g   = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_FAST16_g  = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT32_g        = FAIL;
-        H5T_NATIVE_UINT32_g       = FAIL;
-        H5T_NATIVE_INT_LEAST32_g  = FAIL;
-        H5T_NATIVE_UINT_LEAST32_g = FAIL;
-        H5T_NATIVE_INT_FAST32_g   = FAIL;
-        H5T_NATIVE_UINT_FAST32_g  = FAIL;
+        H5T_NATIVE_INT32_g        = H5I_INVALID_HID;
+        H5T_NATIVE_UINT32_g       = H5I_INVALID_HID;
+        H5T_NATIVE_INT_LEAST32_g  = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_LEAST32_g = H5I_INVALID_HID;
+        H5T_NATIVE_INT_FAST32_g   = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_FAST32_g  = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT64_g        = FAIL;
-        H5T_NATIVE_UINT64_g       = FAIL;
-        H5T_NATIVE_INT_LEAST64_g  = FAIL;
-        H5T_NATIVE_UINT_LEAST64_g = FAIL;
-        H5T_NATIVE_INT_FAST64_g   = FAIL;
-        H5T_NATIVE_UINT_FAST64_g  = FAIL;
+        H5T_NATIVE_INT64_g        = H5I_INVALID_HID;
+        H5T_NATIVE_UINT64_g       = H5I_INVALID_HID;
+        H5T_NATIVE_INT_LEAST64_g  = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_LEAST64_g = H5I_INVALID_HID;
+        H5T_NATIVE_INT_FAST64_g   = H5I_INVALID_HID;
+        H5T_NATIVE_UINT_FAST64_g  = H5I_INVALID_HID;
 
         n++;
     } /* end if */

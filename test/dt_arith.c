@@ -2855,6 +2855,308 @@ my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t 
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_flt16
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from _Float16 to another type by casting. Also checks for
+ *              overflow and underflow when the destination type is a type
+ *              with a smaller width than _Float16.
+ *
+ * Return:      -1 on failure
+ *              0 on success without overflow or underflow
+ *              1 on overflow
+ *              2 on underflow
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE__FLOAT16
+static int
+test_conv_flt_1_hw_conv_from_flt16(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    H5__Float16 aligned;
+    int         ret = 0;
+
+    memcpy(&aligned, src_buf + idx * sizeof(H5__Float16), sizeof(H5__Float16));
+
+    switch (dst_type) {
+        case FLT_FLOAT16:
+            *((H5__Float16 *)hw_dst) = aligned;
+            break;
+        case FLT_FLOAT:
+            *((float *)hw_dst) = (float)aligned;
+            break;
+        case FLT_DOUBLE:
+            *((double *)hw_dst) = (double)aligned;
+            break;
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+        case FLT_LDOUBLE:
+            *((long double *)hw_dst) = (long double)aligned;
+            break;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+#endif
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_flt
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from float to another type by casting. Also checks for
+ *              overflow and underflow when the destination type is a
+ *              type with a smaller width than float.
+ *
+ * Return:      -1 on failure
+ *              0 on success without overflow or underflow
+ *              1 on overflow
+ *              2 on underflow
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    float aligned;
+    int   ret = 0;
+
+    memcpy(&aligned, src_buf + idx * sizeof(float), sizeof(float));
+
+    switch (dst_type) {
+#ifdef H5_HAVE__FLOAT16
+        case FLT_FLOAT16:
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabsf(aligned) > (float)FLT16_MAX)
+                ret = 1;
+            else if (fabsf(aligned) < (float)FLT16_MIN)
+                ret = 2;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+#endif
+        case FLT_FLOAT:
+            *((float *)hw_dst) = aligned;
+            break;
+        case FLT_DOUBLE:
+            *((double *)hw_dst) = (double)aligned;
+            break;
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+        case FLT_LDOUBLE:
+            *((long double *)hw_dst) = (long double)aligned;
+            break;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_double
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from double to another type by casting. Also checks for
+ *              overflow and underflow when the destination type is a
+ *              type with a smaller width than double.
+ *
+ * Return:      -1 on failure
+ *              0 on success without overflow or underflow
+ *              1 on overflow
+ *              2 on underflow
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    double aligned;
+    int    ret = 0;
+
+    memcpy(&aligned, src_buf + idx * sizeof(double), sizeof(double));
+
+    switch (dst_type) {
+#ifdef H5_HAVE__FLOAT16
+        case FLT_FLOAT16:
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabs(aligned) > (double)FLT16_MAX)
+                ret = 1;
+            else if (fabs(aligned) < (double)FLT16_MIN)
+                ret = 2;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+#endif
+        case FLT_FLOAT:
+            *((float *)hw_dst) = (float)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabs(aligned) > (double)FLT_MAX)
+                ret = 1;
+            else if (fabs(aligned) < (double)FLT_MIN)
+                ret = 2;
+
+            break;
+        case FLT_DOUBLE:
+            *((double *)hw_dst) = aligned;
+            break;
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+        case FLT_LDOUBLE:
+            *((long double *)hw_dst) = (long double)aligned;
+            break;
+#endif
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_conv_flt_1_hw_conv_from_ldouble
+ *
+ * Purpose:     Helper function for test_conv_flt_1 to perform conversion
+ *              from long double to another type by casting. Also checks
+ *              for overflow and underflow when the destination type is a
+ *              type with a smaller width than long double.
+ *
+ * Return:      -1 on failure
+ *              0 on success without overflow or underflow
+ *              1 on overflow
+ *              2 on underflow
+ *
+ *-------------------------------------------------------------------------
+ */
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+static int
+test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_t idx, dtype_t dst_type)
+{
+    long double aligned;
+    int         ret = 0;
+
+    memcpy(&aligned, src_buf + idx * sizeof(long double), sizeof(long double));
+
+    switch (dst_type) {
+#ifdef H5_HAVE__FLOAT16
+        case FLT_FLOAT16:
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabsl(aligned) > (long double)FLT16_MAX)
+                ret = 1;
+            else if (fabsl(aligned) < (long double)FLT16_MIN)
+                ret = 2;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+#endif
+        case FLT_FLOAT:
+            *((float *)hw_dst) = (float)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabsl(aligned) > (long double)FLT_MAX)
+                ret = 1;
+            else if (fabsl(aligned) < (long double)FLT_MIN)
+                ret = 2;
+
+            break;
+        case FLT_DOUBLE:
+            *((double *)hw_dst) = (double)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabsl(aligned) > (long double)DBL_MAX)
+                ret = 1;
+            else if (fabsl(aligned) < (long double)DBL_MIN)
+                ret = 2;
+
+            break;
+        case FLT_LDOUBLE:
+            *((long double *)hw_dst) = aligned;
+            break;
+        case INT_SCHAR:
+        case INT_UCHAR:
+        case INT_SHORT:
+        case INT_USHORT:
+        case INT_INT:
+        case INT_UINT:
+        case INT_LONG:
+        case INT_ULONG:
+        case INT_LLONG:
+        case INT_ULLONG:
+        case OTHER:
+        default:
+            H5_FAILED();
+            printf("invalid destination conversion datatype");
+            ret = -1;
+            goto done;
+    }
+
+done:
+    return ret;
+}
+#endif
+
+/*-------------------------------------------------------------------------
  * Function:    test_conv_flt_1
  *
  * Purpose:    Test conversion of floating point values from SRC to
@@ -2882,8 +3184,9 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char *saved = NULL;         /*original values    */
     char           str[256];             /*hello string        */
     void          *aligned = NULL;       /*aligned buffer    */
-    float          hw_f;                 /*hardware-converted     */
-    double         hw_d;                 /*hardware-converted    */
+    void          *hw_p    = NULL;
+    float          hw_f; /*hardware-converted     */
+    double         hw_d; /*hardware-converted    */
 #ifdef H5_HAVE__FLOAT16
     H5__Float16 hw_half;
 #endif
@@ -3156,11 +3459,31 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     if (H5Tconvert(src, dst, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
 
+    /* Set pointer to matching type for hardware conversion */
+    if (FLT_FLOAT == dst_type)
+        hw_p = &hw_f;
+    else if (FLT_DOUBLE == dst_type)
+        hw_p = &hw_d;
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+    else if (FLT_LDOUBLE == dst_type)
+        hw_p = &hw_ld;
+#endif
+#ifdef H5_HAVE__FLOAT16
+    else if (FLT_FLOAT16 == dst_type)
+        hw_p = &hw_half;
+#endif
+    else
+        goto error;
+
+    /* Set convenience pointer for indexing into bytes of matching type */
+    hw = (unsigned char *)hw_p;
+
     /* Check the software results against the hardware */
     for (j = 0; j < nelmts; j++) {
-        underflow = 0;
-        hw_f      = 911.0F;
-        hw_d      = 911.0;
+        int conv_ret = -1;
+
+        hw_f = 911.0F;
+        hw_d = 911.0;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         hw_ld = 911.0L;
 #endif
@@ -3169,141 +3492,29 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #endif
 
         /* The hardware conversion */
-        /* Check for underflow when src is a "larger" float than dst.*/
-        if (FLT_FLOAT == src_type) {
-            memcpy(aligned, saved + j * sizeof(float), sizeof(float));
-            if (FLT_FLOAT == dst_type) {
-                hw_f = *((float *)aligned);
-                hw   = (unsigned char *)&hw_f;
-            }
-            else if (FLT_DOUBLE == dst_type) {
-                hw_d = (double)*((float *)aligned);
-                hw   = (unsigned char *)&hw_d;
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-            }
-            else if (FLT_LDOUBLE == dst_type) {
-                hw_ld = (long double)*((float *)aligned);
-                hw    = (unsigned char *)&hw_ld;
-#endif
-            }
-            else if (FLT_FLOAT16 == dst_type) {
 #ifdef H5_HAVE__FLOAT16
-                hw_half = (H5__Float16) * ((float *)aligned);
-                hw      = (unsigned char *)&hw_half;
-
-                /* Suppress warning about non-standard floating-point literal suffix */
-                H5_GCC_CLANG_DIAG_OFF("pedantic")
-                underflow = fabsf(*((float *)aligned)) < (float)FLT16_MIN;
-                overflow  = fabsf(*((float *)aligned)) > (float)FLT16_MAX;
-                H5_GCC_CLANG_DIAG_ON("pedantic")
-#else
-                assert(0 && "Should not reach this point!");
-#endif
-            }
-            else
-                goto error;
-        }
-        else if (FLT_DOUBLE == src_type) {
-            memcpy(aligned, saved + j * sizeof(double), sizeof(double));
-            if (FLT_FLOAT == dst_type) {
-                hw_f      = (float)(*((double *)aligned));
-                hw        = (unsigned char *)&hw_f;
-                underflow = fabs(*((double *)aligned)) < (double)FLT_MIN;
-                overflow  = fabs(*((double *)aligned)) > (double)FLT_MAX;
-            }
-            else if (FLT_DOUBLE == dst_type) {
-                hw_d = *((double *)aligned);
-                hw   = (unsigned char *)&hw_d;
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-            }
-            else if (FLT_LDOUBLE == dst_type) {
-                hw_ld = (long double)*((double *)aligned);
-                hw    = (unsigned char *)&hw_ld;
-#endif
-            }
-            else if (FLT_FLOAT16 == dst_type) {
-#ifdef H5_HAVE__FLOAT16
-                hw_half = (H5__Float16) * ((double *)aligned);
-                hw      = (unsigned char *)&hw_half;
-
-                /* Suppress warning about non-standard floating-point literal suffix */
-                H5_GCC_CLANG_DIAG_OFF("pedantic")
-                underflow = fabs(*((double *)aligned)) < (double)FLT16_MIN;
-                overflow  = fabs(*((double *)aligned)) > (double)FLT16_MAX;
-                H5_GCC_CLANG_DIAG_ON("pedantic")
-#else
-                assert(0 && "Should not reach this point!");
-#endif
-            }
-            else
-                goto error;
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-        }
-        else if (FLT_LDOUBLE == src_type) {
-            memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
-            if (FLT_FLOAT == dst_type) {
-                hw_f      = (float)*((long double *)aligned);
-                hw        = (unsigned char *)&hw_f;
-                underflow = fabsl(*((long double *)aligned)) < (long double)FLT_MIN;
-                overflow  = fabsl(*((long double *)aligned)) > (long double)FLT_MAX;
-            }
-            else if (FLT_DOUBLE == dst_type) {
-                hw_d      = (double)*((long double *)aligned);
-                hw        = (unsigned char *)&hw_d;
-                underflow = fabsl(*((long double *)aligned)) < (long double)DBL_MIN;
-                overflow  = fabsl(*((long double *)aligned)) > (long double)DBL_MAX;
-            }
-            else if (FLT_LDOUBLE == dst_type) {
-                hw_ld = *((long double *)aligned);
-                hw    = (unsigned char *)&hw_ld;
-            }
-            else if (FLT_FLOAT16 == dst_type) {
-#ifdef H5_HAVE__FLOAT16
-                hw_half = (H5__Float16) * ((long double *)aligned);
-                hw      = (unsigned char *)&hw_half;
-
-                /* Suppress warning about non-standard floating-point literal suffix */
-                H5_GCC_CLANG_DIAG_OFF("pedantic")
-                underflow = fabsl(*((long double *)aligned)) < (long double)FLT16_MIN;
-                overflow  = fabsl(*((long double *)aligned)) > (long double)FLT16_MAX;
-                H5_GCC_CLANG_DIAG_ON("pedantic")
-#else
-                assert(0 && "Should not reach this point!");
-#endif
-            }
-            else
-                goto error;
-#endif
-        }
-        else if (FLT_FLOAT16 == src_type) {
-#ifdef H5_HAVE__FLOAT16
-            memcpy(aligned, saved + j * sizeof(H5__Float16), sizeof(H5__Float16));
-            if (FLT_FLOAT == dst_type) {
-                hw_f = (float)*((H5__Float16 *)aligned);
-                hw   = (unsigned char *)&hw_f;
-            }
-            else if (FLT_DOUBLE == dst_type) {
-                hw_d = (double)*((H5__Float16 *)aligned);
-                hw   = (unsigned char *)&hw_d;
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-            }
-            else if (FLT_LDOUBLE == dst_type) {
-                hw_ld = (long double)*((H5__Float16 *)aligned);
-                hw    = (unsigned char *)&hw_ld;
-#endif
-            }
-            else if (FLT_FLOAT16 == dst_type) {
-                hw_half = *((H5__Float16 *)aligned);
-                hw      = (unsigned char *)&hw_half;
-            }
-            else
-                goto error;
-#else
-            assert(0 && "Should not reach this point!");
-#endif
+        if (FLT_FLOAT16 == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_flt16(hw_p, saved, j, dst_type);
         }
         else
+#endif
+            if (FLT_FLOAT == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_flt(hw_p, saved, j, dst_type);
+        }
+        else if (FLT_DOUBLE == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_double(hw_p, saved, j, dst_type);
+        }
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+        else if (FLT_LDOUBLE == src_type) {
+            conv_ret = test_conv_flt_1_hw_conv_from_ldouble(hw_p, saved, j, dst_type);
+        }
+#endif
+
+        if (conv_ret < 0)
             goto error;
+
+        overflow  = (conv_ret == 1);
+        underflow = (conv_ret == 2);
 
         /* For Intel machines, the size of "long double" is 12 bytes, precision
          * is 80 bits; for Intel IA64 and AMD processors, the size of "long double"
@@ -5324,7 +5535,19 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT16);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE);
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT16);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s normalized %s -> %s conversions", name, "long double",
+                 "_Float16");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif
 #endif
 #endif
 
@@ -5357,7 +5580,19 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT16);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE);
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT16);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions", name, "long double",
+                 "_Float16");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif
 #endif
 #endif
 
@@ -5389,7 +5624,19 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT16);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE);
+#ifdef H5_LDOUBLE_TO_FLOAT16_CORRECT
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT16);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                 "_Float16");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif
 #endif
 #endif
 

@@ -581,12 +581,11 @@ if test "$ac_cv_sizeof__Float16" != 0; then
      test "X$ac_cv_have_decl_FLT16_MIN_10_EXP" = "Xyes" &&
      test "X$ac_cv_have_decl_FLT16_MAX_10_EXP" = "Xyes" &&
      test "X$ac_cv_have_decl_FLT16_MANT_DIG" = "Xyes" ; then
-    # Finally, some compilers like OneAPI on MSVC appear to just be broken,
-    # as support for _Float16 and its macros can be detected properly, but
-    # then code is generated that uses the __truncsfhf2, __truncdfhf2,
-    # __extendhfsf2 functions, which end up being unresolved with MSVC. Let's
-    # try to compile a program that will generate these functions as a last
-    # resort for checking for _Float16 support.
+    # Some compilers like OneAPI on MSVC appear to just be broken, as support
+    # for _Float16 and its macros can be detected properly, but then code is
+    # generated that uses the __truncsfhf2, __truncdfhf2, __extendhfsf2 functions,
+    # which end up being unresolved with MSVC. Let's try to compile a program
+    # that will generate these functions to check for _Float16 support.
     AC_MSG_CHECKING([if _Float16 program can be compiled])
     AC_CACHE_VAL([hdf5_cv_float16_prog_compiled],
       [AC_RUN_IFELSE(
@@ -614,7 +613,33 @@ if test "$ac_cv_sizeof__Float16" != 0; then
 
     if test ${hdf5_cv_float16_prog_compiled} = "yes" ; then
       AC_MSG_RESULT([yes])
-    
+
+      # Finally, MacOS 13 appears to have a bug specifically when converting
+      # long double values to _Float16. Release builds of the dt_arith test
+      # would cause any assignments to a _Float16 variable to be elided,
+      # whereas Debug builds would perform incorrect hardware conversions by
+      # simply chopping off all the bytes of the value except for the first 2.
+      # These tests pass on MacOS 14, so let's perform a quick test to check
+      # if the hardware conversion is done correctly.
+      AC_MSG_CHECKING([if compiler can correctly convert long double values to _Float16])
+      TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_FLOAT16_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+      if test ${ac_cv_sizeof_long_double} = 0; then
+        hdf5_cv_ldouble_to_float16_correct=${hdf5_cv_ldouble_to_float16_correct=no}
+      else
+        AC_CACHE_VAL([hdf5_cv_ldouble_to_float16_correct],
+        [AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([$TEST_SRC])],
+            [hdf5_cv_ldouble_to_float16_correct=yes], [hdf5_cv_ldouble_to_float16_correct=no], [hdf5_cv_ldouble_to_float16_correct=yes])])
+      fi
+
+      if test ${hdf5_cv_ldouble_to_float16_correct} = "yes"; then
+        AC_DEFINE([LDOUBLE_TO_FLOAT16_CORRECT], [1],
+          [Define if your system can convert long double to _Float16 values correctly.])
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+      fi
+
       HAVE__FLOAT16="yes"
 
       # Check if we can use fabsf16

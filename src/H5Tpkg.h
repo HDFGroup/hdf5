@@ -143,6 +143,14 @@
 #define H5T_CONV_INTERNAL_LDOUBLE_ULLONG 0
 #endif
 
+/* Define an internal macro for converting long double to _Float16. Mac OS 13
+ * gives incorrect conversions that appear to be resolved in Mac OS 14. */
+#ifdef H5_HAVE__FLOAT16
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LDOUBLE_TO_FLOAT16_CORRECT)) || (!H5_WANT_DATA_ACCURACY)
+#define H5T_CONV_INTERNAL_LDOUBLE_FLOAT16 1
+#endif
+#endif
+
 /* Statistics about a conversion function */
 struct H5T_stats_t {
     unsigned      ncalls; /*num calls to conversion function   */
@@ -861,8 +869,10 @@ H5_DLL herr_t H5T__conv_float__Float16(hid_t src_id, hid_t dst_id, H5T_cdata_t *
                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T__conv_double__Float16(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                         size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_FLOAT16
 H5_DLL herr_t H5T__conv_ldouble__Float16(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                          size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
+#endif
 H5_DLL herr_t H5T__conv__Float16_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T__conv__Float16_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
