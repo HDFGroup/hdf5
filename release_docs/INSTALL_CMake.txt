@@ -860,6 +860,7 @@ DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114, 
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
 HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"                OFF
 HDF5_MINGW_STATIC_GCC_LIBS     "Statically link libgcc/libstdc++"                                OFF
+HDF5_BUILD_STATIC_CRT_LIBS     "Build With Static Windows CRT Libraries"                         OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -959,13 +960,10 @@ VII. User Defined Options for HDF5 Libraries with CMake
 ========================================================================
 
 Support for User Defined macros and options has been added. The file
-UserMacros.cmake has an example of the technique. In the folder,
-config/cmake/UserMacros, is an implementation for Windows Visual Studio
-users for linking libraries to the static CRT - Windows_MT.cmake.
+UserMacros.cmake has an example of the technique.
 
-Copy the contents of the file, both macro and option, into the
-UserMacros.cmake file. Then enable the option to the CMake configuration,
-build and test process.
+Replace the template code with your macro in the UserMacros.cmake file.
+Then enable the option to the CMake configuration, build and test process.
 
 
 ========================================================================
