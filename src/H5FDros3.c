@@ -87,7 +87,7 @@ static hid_t H5FD_ROS3_g = 0;
         unsigned long long donotshadowresult = 1;                                                            \
         unsigned           donotshadowindex  = 0;                                                            \
         for (donotshadowindex = 0;                                                                           \
-             donotshadowindex < (((bin_i) * ROS3_STATS_INTERVAL) + ROS3_STATS_START_POWER);                  \
+             donotshadowindex < (((bin_i)*ROS3_STATS_INTERVAL) + ROS3_STATS_START_POWER);                    \
              donotshadowindex++) {                                                                           \
             donotshadowresult *= ROS3_STATS_BASE;                                                            \
         }                                                                                                    \
