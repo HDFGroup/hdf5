@@ -82,7 +82,7 @@ macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
         NAME H5DUMP_VFD-${vfdname}-${resultfile}-h5dump
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_VFD:STRING=${vfdname}"
             -D "TEST_EXPECT=${resultcode}"

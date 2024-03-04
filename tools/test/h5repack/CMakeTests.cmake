@@ -249,13 +249,13 @@
   macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5REPACK-h5repack-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN})
+      add_test (NAME H5REPACK-h5repack-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN})
     else ()
       add_test (
           NAME H5REPACK-h5repack-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=h5repack-${testname}.out"
@@ -287,7 +287,7 @@
         )
         add_test (
             NAME H5REPACK_OLD-${testname}
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES
             DEPENDS H5REPACK_OLD-${testname}-clear-objects
@@ -297,7 +297,7 @@
         endif ()
         add_test (
             NAME H5REPACK_OLD-${testname}_DFF
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES
             DEPENDS H5REPACK_OLD-${testname}
@@ -332,7 +332,7 @@
       )
       add_test (
           NAME H5REPACK-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname} PROPERTIES
           DEPENDS H5REPACK-${testname}-clear-objects
@@ -342,7 +342,7 @@
       endif ()
       add_test (
           NAME H5REPACK-${testname}_DFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES
           DEPENDS H5REPACK-${testname}
@@ -378,7 +378,7 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_CMP-${testname}
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES
             DEPENDS H5REPACK_CMP-${testname}-clear-objects
@@ -388,7 +388,7 @@
             NAME H5REPACK_CMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack${tgt_file_ext}>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
                 -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -432,14 +432,14 @@
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_MASK-${testname}
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
       else (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_MASK-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack${tgt_file_ext}>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
                 -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -482,7 +482,7 @@
       )
       add_test (
           NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
       )
       set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
           DEPENDS H5REPACK_DMP-${testname}-clear-objects
@@ -495,7 +495,7 @@
             NAME H5REPACK_DMP-h5dump-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                 -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -547,7 +547,7 @@
       )
       add_test (
           NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
       )
       set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
           DEPENDS H5REPACK_DMP-${testname}-clear-objects
@@ -560,7 +560,7 @@
             NAME H5REPACK_DMP-h5dump-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                 -D "TEST_ARGS:STRING=out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -594,7 +594,7 @@
       )
       add_test (
           NAME H5REPACK_DIFF-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES
           DEPENDS H5REPACK_DIFF-${testname}-clear-objects
@@ -606,7 +606,7 @@
           NAME H5REPACK_DIFF-${testname}_DFF
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
               -D "TEST_ARGS:STRING=-v;--enable-error-stack;${testfile};out-${testname}.${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=out-${testname}.${testfile}.out"
@@ -646,7 +646,7 @@
       )
       add_test (
           NAME H5REPACK_STAT-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
       )
       set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES
           DEPENDS H5REPACK_STAT-${testname}-clear-objects
@@ -659,7 +659,7 @@
             NAME H5REPACK_STAT-h5stat-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5stat${tgt_file_ext}>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
                 -D "TEST_ARGS:STRING=-S;-s;out-${statarg}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -709,7 +709,7 @@
         )
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES
             DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}-clear-objects
@@ -719,7 +719,7 @@
         endif ()
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES
             DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}
@@ -732,7 +732,7 @@
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                   -D "TEST_ARGS:STRING=-d;${testdset};-pH;out-${testname}.${testfile}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -758,7 +758,7 @@
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+                  -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                   -D "TEST_ARGS:STRING=-pH;out-${testname}.${testfile}"
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -803,7 +803,7 @@
         )
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -816,7 +816,7 @@
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                 -D "TEST_ARGS:STRING=-d;${testdset};-p;out-${testname}.${testfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -851,7 +851,7 @@
       )
       add_test (
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname} PROPERTIES
           DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}-clear-objects
@@ -863,7 +863,7 @@
           NAME H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-H;-B;out-${testname}.${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
@@ -895,7 +895,7 @@
       )
       add_test (
           NAME ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> -j;${lowbound};-k;${highbound} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname} PROPERTIES
           DEPENDS ADD_H5_VERIFY_INVALIDBOUNDS-h5repack-${testname}-clear-objects
@@ -923,7 +923,7 @@
       )
       add_test (
           NAME H5REPACK_META-${testname}_N
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5
       )
       set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES
           DEPENDS H5REPACK_META-${testname}-clear-objects
@@ -935,7 +935,7 @@
           NAME H5REPACK_META-${testname}_N_DFF
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
               -D "TEST_ARGS:STRING=-v;${testfile};out-${testname}_N.${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=out-${testname}_N.${testname}.out"
@@ -951,7 +951,7 @@
       endif ()
       add_test (
           NAME H5REPACK_META-${testname}_M
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
       )
       set_tests_properties (H5REPACK_META-${testname}_M PROPERTIES
           DEPENDS H5REPACK_META-${testname}_N_DFF
@@ -963,7 +963,7 @@
           NAME H5REPACK_META-${testname}_M_DFF
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
               -D "TEST_ARGS:STRING=-v;${testfile};out-${testname}_M.${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=out-${testname}_M.${testname}.out"
@@ -1013,7 +1013,7 @@
           NAME H5REPACK_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack-shared>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
               -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_EXPECT=${resultcode}"
@@ -1035,7 +1035,7 @@
           NAME H5REPACK_UD-${testname}-h5dump
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump-shared>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-pH;out-${testname}.${resultfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}-${testname}.out"
@@ -1098,7 +1098,7 @@
         # comparison of known files
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}_DFF1
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
         )
         set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF1 PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -1110,7 +1110,7 @@
         # repack the external file to the repacked file
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5
         )
         set_tests_properties (H5REPACK_EXTERNAL-${testname} PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -1122,7 +1122,7 @@
         # comparison of repacked file to known files
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}_DFF2
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
         )
         set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF2 PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -1133,7 +1133,7 @@
         endif ()
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}_DFF3
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
         )
         set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF3 PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -1157,7 +1157,7 @@
         # verify comparison of repacked file to known file
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}_DFF4
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}.h5
         )
         set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF4 PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -1169,7 +1169,7 @@
         # verify comparison of repacked file to known external file fails
         add_test (
             NAME H5REPACK_EXTERNAL-${testname}_DFF_FAIL
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_rp.h5 ${PROJECT_BINARY_DIR}/testfiles/h5repack_${testfile}_ex.h5
         )
         set_tests_properties (H5REPACK_EXTERNAL-${testname}_DFF_FAIL PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
