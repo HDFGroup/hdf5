@@ -2568,6 +2568,12 @@ H5_DLL herr_t H5Tset_sign(hid_t type_id, H5T_sign_t sign);
  *          Fields are not allowed to extend beyond the number of bits of
  *          precision, nor are they allowed to overlap with one another.
  *
+ * \note The size and precision of the floating-point datatype should be set
+ *       appropriately before calling H5Tset_fields(). Otherwise, H5Tset_fields()
+ *       may fail when checking that the values make sense for the datatype.
+ *       This is of particular concern if another floating-point datatype was
+ *       copied as a starting point.
+ *
  * \since 1.0.0
  *
  */
