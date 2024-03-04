@@ -351,9 +351,7 @@ III. Full installation instructions for source distributions
 
 
    3.11. Backward compatibility
-        The 1.15 version of the HDF5 library can be configured to operate
-        identically to the v1.14 library with the
-            --with-default-api-version=v114
+        The 1.14 version of the HDF5 library can be configured to operate
         identically to the v1.12 library with the
             --with-default-api-version=v112
         configure flag, or identically to the v1.10 library with the

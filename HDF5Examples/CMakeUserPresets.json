@@ -20,11 +20,11 @@
       "name": "my-HDF5Dev",
       "hidden": true,
       "environment": {
-        "HDF5_ROOT": "${sourceParentDir}/temp/HDF_Group/HDF5/1.15.0",
-        "HDF5_PLUGIN_PATH": "${sourceParentDir}/temp/HDF_Group/HDF5/1.15.0/lib/plugin"
+        "HDF5_ROOT": "${sourceParentDir}/temp/HDF_Group/HDF5/1.14.4",
+        "HDF5_PLUGIN_PATH": "${sourceParentDir}/temp/HDF_Group/HDF5/1.14.4/lib/plugin"
       },
       "cacheVariables": {
-        "HDF5_ROOT": {"type": "STRING", "value": "${sourceParentDir}/temp/HDF_Group/HDF5/1.15.0"},
+        "HDF5_ROOT": {"type": "STRING", "value": "${sourceParentDir}/temp/HDF_Group/HDF5/1.14.4"},
         "HDF_BUILD_FORTRAN": "ON",
         "HDF_BUILD_JAVA": "ON",
         "HDF_BUILD_FILTERS": "ON",
