@@ -5946,7 +5946,7 @@ test_floattypes(hid_t file)
             for (j = 0; j < (size_t)size[1]; j++) {
                 if (isnan(orig_data[i][j]))
                     continue; /* skip if value is NaN */
-                if (!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
+                if (!H5_LDBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                     H5_FAILED();
                     printf("    Read different values than written.\n");
                     printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
