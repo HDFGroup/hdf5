@@ -865,6 +865,8 @@ test_basic_file_operation(const char *env_h5_drvr)
     hid_t fapl_id2   = H5I_INVALID_HID;
     hid_t fcpl_id    = H5I_INVALID_HID;
 
+    htri_t      use_locking_env     = FAIL;
+    htri_t      ignore_disabled_env = FAIL;
     char        filename[1024];
     ssize_t     obj_count;
     hid_t       obj_id_list[1];
@@ -893,6 +895,24 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
     if (H5Pset_metadata_read_attempts(fapl_id, 9) < 0)
         TEST_ERROR;
+
+    /* Similar to the above, make sure the FAPL has an appropriate file locking
+     * setting if the HDF5_USE_FILE_LOCKING environment variable was set so that
+     * the H5Pequal call will work correctly.
+     */
+    h5_check_file_locking_env_var(&use_locking_env, &ignore_disabled_env);
+    if (use_locking_env != FAIL) {
+        hbool_t default_use_locking           = true;
+        hbool_t default_ignore_disabled_locks = true;
+
+        if (H5Pget_file_locking(H5P_DEFAULT, &default_use_locking, &default_ignore_disabled_locks) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_file_locking(fapl_id, (bool)use_locking_env,
+                                (ignore_disabled_env == FAIL) ? default_ignore_disabled_locks
+                                                              : (bool)ignore_disabled_env) < 0)
+            TEST_ERROR;
+    }
 
     /* H5Fcreate */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)

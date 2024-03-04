@@ -109,7 +109,7 @@
   macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -118,7 +118,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -138,7 +138,7 @@
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
+      add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES
           ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
@@ -154,7 +154,7 @@
           NAME H5DUMP_PREFIX-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -173,7 +173,7 @@
   macro (ADD_H5_VDS_LAYOUT resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> -p ${ARGN})
+      add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> -p ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -186,7 +186,7 @@
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-p;${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
               -D "TEST_OUTPUT=${resultfile}.out"

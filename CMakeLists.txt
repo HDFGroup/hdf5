@@ -482,7 +482,9 @@ set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 
-# only shared libraries is true if user forces static OFF
+option (HDF5_BUILD_STATIC_TOOLS "Build Static Tools NOT Shared Tools" OFF)
+
+# only shared libraries/tools is true if user forces static OFF
 if (NOT BUILD_STATIC_LIBS)
   set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
 endif ()
@@ -492,6 +494,15 @@ if (ONLY_SHARED_LIBS)
   set (H5_ENABLE_STATIC_LIB NO)
   set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
   set (BUILD_STATIC_LIBS OFF CACHE BOOL "Build Static Libraries" FORCE)
+  if (HDF5_BUILD_STATIC_TOOLS)
+    message (WARNING "Cannot build static tools without static libraries. Building shared tools.")
+  endif ()
+  set (HDF5_BUILD_STATIC_TOOLS OFF CACHE BOOL "Build Static Tools NOT Shared Tools" FORCE)
+endif ()
+
+if (NOT BUILD_SHARED_LIBS AND NOT HDF5_BUILD_STATIC_TOOLS)
+  message (VERBOSE "Cannot build shared tools without shared libraries. Building static tools.")
+  set (HDF5_BUILD_STATIC_TOOLS ON CACHE BOOL "Build Static Tools NOT Shared Tools" FORCE)
 endif ()
 
 if (BUILD_STATIC_LIBS)
@@ -502,12 +513,6 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if (NOT BUILD_SHARED_LIBS)
-  set (tgt_file_ext "")
-else ()
-  set (tgt_file_ext "-shared")
-endif ()
 
 #-----------------------------------------------------------------------------
 # perl is used in some optional src and tests, check availability
@@ -1158,7 +1163,11 @@ endif ()
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
   option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
   if (HDF5_BUILD_JAVA)
-    add_subdirectory (java)
+    if (NOT BUILD_SHARED_LIBS)
+      message (FATAL_ERROR "\nJava requires shared libraries!\n")
+    else ()
+      add_subdirectory (java)
+    endif ()
   endif ()
 endif ()
 
