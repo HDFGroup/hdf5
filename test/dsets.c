@@ -5939,9 +5939,7 @@ test_floattypes(hid_t file)
         if (H5Dread(dataset, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
             goto error;
 
-        /* Check that the values read are the same as the values written
-         * Assume size of long long = size of double
-         */
+        /* Check that the values read are the same as the values written */
         for (i = 0; i < (size_t)size[0]; i++) {
             for (j = 0; j < (size_t)size[1]; j++) {
                 if (isnan(orig_data[i][j]))
