@@ -5793,12 +5793,11 @@ test_floattypes(hid_t file)
 
     /* double */
     {
-        double orig_data[2][5] = {{(double)1.6081706885101836e+60L, (double)-255.32099170994480,
-                                   (double)1.2677579992621376e-61L, (double)64568.289448797700,
-                                   (double)-1.0619721778839084e-75L},
-                                  {(double)2.1499497833454840e+56L, (double)6.6562295504670740e-3,
-                                   (double)-1.5747263393432150, (double)1.0711093225222612,
-                                   (double)-9.8971679387636870e-1}};
+        double orig_data[2][5] = {
+            {(double)1.6081706885101836e+60L, (double)-255.32099170994480, (double)1.2677579992621376e-61L,
+             (double)64568.289448797700, (double)-1.0619721778839084e-75L},
+            {(double)2.1499497833454840e+56L, (double)6.6562295504670740e-3, (double)-1.5747263393432150,
+             (double)1.0711093225222612, (double)-9.8971679387636870e-1}};
         double new_data[2][5];
 
         TESTING("    double (setup)");
@@ -5881,18 +5880,21 @@ test_floattypes(hid_t file)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     /* long double */
     {
-        long double orig_data[2][5] = {{(long double)1.6081706885101836e+600L, (long double)-255.3209917099448032099170994480,
-                                        (long double)1.2677579992621376e-610L, (long double)64568.289448797700289448797700,
-                                        (long double)-1.0619721778839084e-750L},
-                                       {(long double)2.1499497833454840991499497833454840e+560L, (long double)6.6562295504670740996562295504670740e-3,
-                                        (long double)-1.5747263393432150995747263393432150, (long double)1.0711093225222612990711093225222612,
-                                        (long double)-9.8971679387636870998971679387636870e-1}};
+        long double orig_data[2][5] = {
+            {(long double)1.6081706885101836e+600L, (long double)-255.3209917099448032099170994480,
+             (long double)1.2677579992621376e-610L, (long double)64568.289448797700289448797700,
+             (long double)-1.0619721778839084e-750L},
+            {(long double)2.1499497833454840991499497833454840e+560L,
+             (long double)6.6562295504670740996562295504670740e-3,
+             (long double)-1.5747263393432150995747263393432150,
+             (long double)1.0711093225222612990711093225222612,
+             (long double)-9.8971679387636870998971679387636870e-1}};
         long double new_data[2][5];
 
         TESTING("    long double (setup)");
 
         /* Define user-defined quad-precision floating-point type for dataset */
-        datatype = H5Tcopy(H5T_NATIVE_LDOUBLE);
+        datatype  = H5Tcopy(H5T_NATIVE_LDOUBLE);
         precision = 128;
         if (H5Tset_precision(datatype, precision) < 0)
             goto error;
@@ -5911,8 +5913,8 @@ test_floattypes(hid_t file)
             goto error;
 
         /* Create the dataset */
-        if ((dataset = H5Dcreate2(file, "long_double_type", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
-            0)
+        if ((dataset = H5Dcreate2(file, "long_double_type", datatype, space, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0)
             goto error;
 
         PASSED();
