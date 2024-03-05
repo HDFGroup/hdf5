@@ -542,7 +542,7 @@ set (${HDF_PREFIX}_CONVERT_DENORMAL_FLOAT 1)
 # This disables the free lists, as the memory reuse scheme they implement
 # can hide memory problems.
 #-----------------------------------------------------------------------------
-if (HDF5_USING_ANALYSIS_TOOL)
+if (HDF5_ENABLE_USING_MEMCHECKER)
   set (${HDF_PREFIX}_USING_MEMCHECKER 1)
 endif ()
 

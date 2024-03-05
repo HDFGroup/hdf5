@@ -572,8 +572,8 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
-option (HDF5_USING_ANALYSIS_TOOL "Indicate that a memory checker is used" OFF)
-if (HDF5_USING_ANALYSIS_TOOL)
+option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
+if (HDF5_ENABLE_USING_MEMCHECKER)
   set (H5_USING_MEMCHECKER 1)
 endif ()
 
