@@ -816,13 +816,13 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Other variables */
     unsigned int   i;
-    hid_t          fid       = H5I_INVALID_HID;
-    hid_t          did       = H5I_INVALID_HID;
-    hid_t          sid       = H5I_INVALID_HID;
-    hid_t          dcpl      = H5I_INVALID_HID;
-    hid_t          dxpl      = H5I_INVALID_HID;
-    hid_t          array_dt  = H5I_INVALID_HID;
-    static hsize_t dim[]     = {NX, NY};
+    hid_t          fid      = H5I_INVALID_HID;
+    hid_t          did      = H5I_INVALID_HID;
+    hid_t          sid      = H5I_INVALID_HID;
+    hid_t          dcpl     = H5I_INVALID_HID;
+    hid_t          dxpl     = H5I_INVALID_HID;
+    hid_t          array_dt = H5I_INVALID_HID;
+    static hsize_t dim[]    = {NX, NY};
     s1_t           fillvalue1;
     s7_t           fillvalue7;
     size_t         ss = 0, ss1 = 0, ss2 = 0;
