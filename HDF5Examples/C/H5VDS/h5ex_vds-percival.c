@@ -80,7 +80,7 @@ main(void)
 
         file      = H5Fcreate(SRC_FILE[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         src_space = H5Screate_simple(RANK, dims, NULL);
-        dset      = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT, H5P_DEFAULT,
+        dset      = H5Dcreate2(file, SRC_DATASET[i], H5T_STD_I32LE, src_space, H5P_DEFAULT, H5P_DEFAULT,
                                H5P_DEFAULT);
         status    = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
         status    = H5Sclose(src_space);
@@ -130,7 +130,7 @@ main(void)
     H5Sselect_none(vspace);
 
     /* Create a virtual dataset */
-    dset   = H5Dcreate2(file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    dset   = H5Dcreate2(file, DATASET, H5T_STD_I32LE, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     status = H5Sclose(vspace);
     status = H5Sclose(src_space);
     status = H5Dclose(dset);
