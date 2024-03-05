@@ -91,7 +91,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static inline herr_t
-H5O_SHARED_ENCODE(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg)
+H5O_SHARED_ENCODE(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p, const void *_mesg)
 {
     const H5O_shared_t *sh_mesg =
         (const H5O_shared_t *)_mesg; /* Pointer to shared message portion of actual message */

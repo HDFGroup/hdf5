@@ -67,7 +67,7 @@ Default installation process:
            ctest -S HDF5_Examples.cmake,CTEST_SOURCE_NAME=MyExamples,INSTALLDIR=MyLocation -C Release -V -O test.log
 
     When executed, the ctest script will save the results to the log file, test.log, as
-    indicated by the ctest command. If you wish the to see more build and test information,
+    indicated by the ctest command. If you wish to see more build and test information,
     add "-VV" to the ctest command. The output should show;
           100% tests passed, 0 tests failed out of 156.
 

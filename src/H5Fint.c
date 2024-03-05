@@ -79,7 +79,8 @@ static int    H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name /*out*/);
 static char  *H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
-static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, bool *use_file_locking);
+static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, bool *use_file_locking,
+                                             bool *ignore_disabled_locks);
 static herr_t H5F__dest(H5F_t *f, bool flush, bool free_on_failure);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
@@ -94,7 +95,8 @@ static herr_t H5F__flush_phase2(H5F_t *f, bool closing);
  * true/false have obvious meanings. FAIL means the environment variable was
  * not set, so the code should ignore it and use the fapl value instead.
  */
-htri_t use_locks_env_g = FAIL;
+htri_t use_locks_env_g         = FAIL;
+htri_t ignore_disabled_locks_g = FAIL;
 
 /*****************************/
 /* Library Private Variables */
@@ -140,7 +142,7 @@ H5F_init(void)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* Check the file locking environment variable */
-    if (H5F__parse_file_lock_env_var(&use_locks_env_g) < 0)
+    if (H5F__parse_file_lock_env_var(&use_locks_env_g, &ignore_disabled_locks_g) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to parse file locking environment variable");
 
 done:
@@ -237,7 +239,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__parse_file_lock_env_var(htri_t *use_locks)
+H5F__parse_file_lock_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
 {
     char *lock_env_var = NULL; /* Environment variable pointer */
 
@@ -245,13 +247,23 @@ H5F__parse_file_lock_env_var(htri_t *use_locks)
 
     /* Check the file locking environment variable */
     lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && (!strcmp(lock_env_var, "FALSE") || !strcmp(lock_env_var, "0")))
-        *use_locks = false; /* Override: Never use locks */
-    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "BEST_EFFORT") ||
-                              !strcmp(lock_env_var, "1")))
-        *use_locks = true; /* Override: Always use locks */
-    else
-        *use_locks = FAIL; /* Environment variable not set, or not set correctly */
+    if (lock_env_var && (!strcmp(lock_env_var, "FALSE") || !strcmp(lock_env_var, "0"))) {
+        *use_locks             = false; /* Override: Never use locks */
+        *ignore_disabled_locks = FAIL;
+    }
+    else if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT")) {
+        *use_locks             = true; /* Override: Always use locks */
+        *ignore_disabled_locks = true; /* Override: Ignore disabled locks */
+    }
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1"))) {
+        *use_locks             = true;  /* Override: Always use locks */
+        *ignore_disabled_locks = false; /* Override: Don't ignore disabled locks */
+    }
+    else {
+        /* Environment variable not set, or not set correctly */
+        *use_locks             = FAIL;
+        *ignore_disabled_locks = FAIL;
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F__parse_file_lock_env_var() */
@@ -374,8 +386,13 @@ H5F_get_access_plist(H5F_t *f, bool app_ref)
     if (H5P_set(new_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &f->shared->high_bound) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                     "can't set 'high' bound for library format versions");
+    if (H5P_set(new_plist, H5F_ACS_USE_FILE_LOCKING_NAME, &f->shared->use_file_locking) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set file locking property");
+    if (H5P_set(new_plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &f->shared->ignore_disabled_locks) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
+                    "can't set 'ignore disabled file locks' property");
     if (H5P_set(new_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &(f->shared->read_attempts)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set 'read attempts ' flag");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set 'read attempts' flag");
     if (H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set object flush callback");
 
@@ -1644,7 +1661,9 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
 /*-------------------------------------------------------------------------
  * Function:    H5F__check_if_using_file_locks
  *
- * Purpose:     Determines if this file will use file locks.
+ * Purpose:     Determines if this file will use file locks and whether or
+ *              not to ignore the case where file locking is disabled on
+ *              the file system.
  *
  * There are three ways that file locking can be controlled:
  *
@@ -1665,22 +1684,35 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__check_if_using_file_locks(H5P_genplist_t *fapl, bool *use_file_locking)
+H5F__check_if_using_file_locks(H5P_genplist_t *fapl, bool *use_file_locking, bool *ignore_disabled_locks)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* Make sure the out parameter has a value */
-    *use_file_locking = true;
+    /* Make sure the out parameters have a value */
+    *use_file_locking      = true;
+    *ignore_disabled_locks = false;
 
-    /* Check the fapl property */
-    if (H5P_get(fapl, H5F_ACS_USE_FILE_LOCKING_NAME, use_file_locking) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get use file locking flag");
+    /* Check file locking environment variable first */
+    if (use_locks_env_g != FAIL) {
+        *use_file_locking = (use_locks_env_g == true);
+    }
+    else {
+        /* Check the file locking fapl property */
+        if (H5P_get(fapl, H5F_ACS_USE_FILE_LOCKING_NAME, use_file_locking) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get use file locking flag");
+    }
 
-    /* Check the environment variable */
-    if (use_locks_env_g != FAIL)
-        *use_file_locking = (use_locks_env_g == true) ? true : false;
+    /* Check "ignore disabled file locks" environment variable first */
+    if (ignore_disabled_locks_g != FAIL) {
+        *ignore_disabled_locks = (ignore_disabled_locks_g == true);
+    }
+    else {
+        /* Check the "ignore disabled file locks" fapl property */
+        if (H5P_get(fapl, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, ignore_disabled_locks) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get ignore disabled file locks property");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1775,10 +1807,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     bool               set_flag               = false; /*set the status_flags in the superblock */
     bool               clear                  = false; /*clear the status_flags         */
     bool               evict_on_close;                 /* evict on close value from plist  */
-    bool               use_file_locking = true;        /* Using file locks? */
-    bool               ci_load          = false;       /* whether MDC ci load requested */
-    bool               ci_write         = false;       /* whether MDC CI write requested */
-    H5F_t             *ret_value        = NULL;        /*actual return value           */
+    bool               use_file_locking      = true;   /* Using file locks? */
+    bool               ignore_disabled_locks = false;  /* Ignore disabled file locks? */
+    bool               ci_load               = false;  /* whether MDC ci load requested */
+    bool               ci_write              = false;  /* whether MDC CI write requested */
+    H5F_t             *ret_value             = NULL;   /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1798,8 +1831,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list");
 
     /* Check if we are using file locking */
-    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag");
+    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking, &ignore_disabled_locks) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flags");
 
     /*
      * Opening a file is a two step process. First we try to open the
@@ -1951,14 +1984,20 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     shared = file->shared;
     lf     = shared->lf;
 
-    /* Set the file locking flag. If the file is already open, the file
+    /* Set the file locking flags. If the file is already open, the file
      * requested file locking flag must match that of the open file.
      */
-    if (shared->nrefs == 1)
-        file->shared->use_file_locking = use_file_locking;
-    else if (shared->nrefs > 1)
+    if (shared->nrefs == 1) {
+        file->shared->use_file_locking      = use_file_locking;
+        file->shared->ignore_disabled_locks = ignore_disabled_locks;
+    }
+    else if (shared->nrefs > 1) {
         if (file->shared->use_file_locking != use_file_locking)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file locking flag values don't match");
+        if (file->shared->use_file_locking && (file->shared->ignore_disabled_locks != ignore_disabled_locks))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
+                        "file locking 'ignore disabled locks' flag values don't match");
+    }
 
     /* Check if page buffering is enabled */
     if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)

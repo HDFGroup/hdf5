@@ -256,6 +256,11 @@ int H5_api_dataset_test(void);
 #define DATASET_DATA_COMPOUND_PARTIAL_IO_TEST_GROUP_NAME "dataset_compound_partial_io_test"
 #define DATASET_DATA_COMPOUND_PARTIAL_IO_TEST_DSET_NAME  "dataset_compound_partial_io_test"
 
+#define DATASET_VLEN_IO_DSET_DIMS 100
+#define DATASET_VLEN_IO_DSET_NAME "vlen_dset"
+#define DATASET_VLEN_IO_STR_LEN   8
+#define DATASET_VLEN_IO_STR_VALUE "abcdefgh"
+
 #define DATASET_SET_EXTENT_CHUNKED_UNLIMITED_TEST_SPACE_RANK 2
 #define DATASET_SET_EXTENT_CHUNKED_UNLIMITED_TEST_NUM_PASSES 3
 #define DATASET_SET_EXTENT_CHUNKED_UNLIMITED_TEST_GROUP_NAME "set_extent_chunked_unlimited_test"

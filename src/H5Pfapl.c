@@ -3159,9 +3159,10 @@ done:
 herr_t
 H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
 {
-    H5P_genplist_t        *fapl;                /* Property list pointer */
-    H5FD_file_image_info_t info;                /* File image info */
-    herr_t                 ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t        *fapl;                   /* Property list pointer */
+    H5FD_file_image_info_t info;                   /* File image info */
+    bool                   copied_udata = false;   /* Whether udata structure was copied */
+    herr_t                 ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*DI", fapl_id, callbacks_ptr);
@@ -3209,11 +3210,18 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the supplied udata");
     } /* end if */
 
+    copied_udata = true;
+
     /* Set values */
     if (H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file image info");
 
 done:
+    if (ret_value < 0) {
+        if (copied_udata && (callbacks_ptr->udata_free(info.callbacks.udata) < 0))
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed");
+    }
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image_callbacks() */
 
@@ -4978,7 +4986,9 @@ H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking /*out*/, hbool_t *i
     H5TRACE3("e", "ixx", fapl_id, use_file_locking, ignore_when_disabled);
 
     /* Make sure this is a fapl */
-    if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else if (true != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist");
 
     /* Get the plist structure */

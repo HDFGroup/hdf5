@@ -459,7 +459,7 @@ H5AC_dest(H5F_t *f)
          */
         if (H5F_ACC_RDWR & H5F_INTENT(f)) {
             /* enable and load the skip list */
-            if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+            if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
 
             if (H5AC__flush_entries(f) < 0)
@@ -1127,7 +1127,7 @@ H5AC_prep_for_file_flush(H5F_t *f)
     assert(f->shared);
     assert(f->shared->cache);
 
-    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
 
 done:

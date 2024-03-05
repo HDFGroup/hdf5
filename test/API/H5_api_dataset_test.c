@@ -67,6 +67,7 @@ static int test_dataset_string_encodings(void);
 static int test_dataset_builtin_type_conversion(void);
 static int test_dataset_real_to_int_conversion(void);
 static int test_dataset_compound_partial_io(void);
+static int test_dataset_vlen_io(void);
 static int test_dataset_set_extent_chunked_unlimited(void);
 static int test_dataset_set_extent_chunked_fixed(void);
 static int test_dataset_set_extent_data(void);
@@ -148,6 +149,7 @@ static int (*dataset_tests[])(void) = {
     test_dataset_builtin_type_conversion,
     test_dataset_real_to_int_conversion,
     test_dataset_compound_partial_io,
+    test_dataset_vlen_io,
     test_dataset_set_extent_chunked_unlimited,
     test_dataset_set_extent_chunked_fixed,
     test_dataset_set_extent_data,
@@ -9823,6 +9825,484 @@ error:
         H5Tclose(full_type_id);
         H5Tclose(a_type_id);
         H5Tclose(b_type_id);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
+
+/* A test to check that vlen sequences can be written and read back
+ * with basic parent types and selections */
+static int
+test_dataset_vlen_io(void)
+{
+    hid_t file_id         = H5I_INVALID_HID;
+    hid_t container_group = H5I_INVALID_HID;
+    hid_t space_id        = H5I_INVALID_HID;
+    hid_t dset_int        = H5I_INVALID_HID;
+    hid_t dset_float      = H5I_INVALID_HID;
+    hid_t dset_string     = H5I_INVALID_HID;
+    hid_t vlen_int        = H5I_INVALID_HID;
+    hid_t vlen_float      = H5I_INVALID_HID;
+    hid_t vlen_string     = H5I_INVALID_HID;
+    hid_t str_base_type   = H5I_INVALID_HID;
+
+    hsize_t dims[1] = {DATASET_VLEN_IO_DSET_DIMS};
+    hsize_t point_coords[DATASET_VLEN_IO_DSET_DIMS / 2];
+
+    hvl_t wbuf[DATASET_VLEN_IO_DSET_DIMS];
+    hvl_t rbuf[DATASET_VLEN_IO_DSET_DIMS];
+
+    TESTING_MULTIPART(
+        "verification of dataset data with H5Dwrite and then H5D read with variable length sequence data");
+
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        SKIPPED();
+        printf("    API functions for basic file, group, or dataset aren't supported with this "
+               "connector\n");
+        return 0;
+    }
+
+    TESTING_2("test setup");
+
+    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
+        goto error;
+    }
+
+    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+        goto error;
+    }
+
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataspace");
+        goto error;
+    }
+
+    if ((vlen_int = H5Tvlen_create(H5T_NATIVE_INT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create vlen integer sequence");
+        goto error;
+    }
+
+    if ((vlen_float = H5Tvlen_create(H5T_NATIVE_FLOAT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create vlen float sequence");
+        goto error;
+    }
+
+    if ((str_base_type = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+
+    if ((H5Tset_size(str_base_type, DATASET_VLEN_IO_STR_LEN)) < 0)
+        TEST_ERROR;
+
+    if ((vlen_string = H5Tvlen_create(str_base_type)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create vlen string sequence");
+        goto error;
+    }
+
+    if ((dset_int = H5Dcreate2(file_id, DATASET_VLEN_IO_DSET_NAME "_int", vlen_int, space_id, H5P_DEFAULT,
+                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with vlen integer sequence datatype");
+        goto error;
+    }
+
+    if ((dset_float = H5Dcreate2(file_id, DATASET_VLEN_IO_DSET_NAME "_float", vlen_float, space_id,
+                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with vlen float sequence datatype");
+        goto error;
+    }
+
+    if ((dset_string = H5Dcreate2(file_id, DATASET_VLEN_IO_DSET_NAME "_string", vlen_string, space_id,
+                                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("    couldn't create dataset with vlen string sequence datatype");
+        goto error;
+    }
+
+    memset(wbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+    memset(rbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+
+    PASSED();
+
+    BEGIN_MULTIPART
+    {
+        PART_BEGIN(rw_all_int)
+        {
+            TESTING_2("write and read entire dataspace with integer sequence");
+            /* Set up write buffer */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if ((wbuf[i].p = calloc(i + 1, sizeof(int) * (i + 1))) == NULL)
+                    PART_TEST_ERROR(rw_all_int);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    ((int *)wbuf[i].p)[j] = (int)(i * j + 1);
+                }
+
+                wbuf[i].len = i + 1;
+            }
+
+            /* Perform write */
+            if ((H5Dwrite(dset_int, vlen_int, space_id, H5S_ALL, H5P_DEFAULT, (const void *)wbuf)) < 0)
+                PART_TEST_ERROR(rw_all_int);
+
+            /* Perform read */
+            if ((H5Dread(dset_int, vlen_int, space_id, H5S_ALL, H5P_DEFAULT, (void *)rbuf)) < 0)
+                PART_TEST_ERROR(rw_all_int);
+
+            /* Verify data */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if (!rbuf[i].p)
+                    PART_TEST_ERROR(rw_all_int);
+
+                if (rbuf[i].len != wbuf[i].len)
+                    PART_TEST_ERROR(rw_all_int);
+
+                for (size_t j = 0; j < i + 1; j++)
+                    if (((int *)rbuf[i].p)[j] != ((int *)wbuf[i].p)[j])
+                        PART_TEST_ERROR(rw_all_int);
+            }
+
+            PASSED();
+
+            /* Reset buffers */
+
+            if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, rbuf) < 0)
+                PART_TEST_ERROR(rw_all_int);
+
+            if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, wbuf) < 0)
+                PART_TEST_ERROR(rw_all_int);
+
+            memset(wbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+            memset(rbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+        }
+        PART_END(rw_all_int)
+        {
+            TESTING_2("write and read entire dataspace with float sequence");
+            /* Set up write buffer */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if ((wbuf[i].p = calloc(i + 1, sizeof(float) * (i + 1))) == NULL)
+                    PART_TEST_ERROR(rw_all_float);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    ((float *)wbuf[i].p)[j] = (float)(i * j + 1);
+                }
+
+                wbuf[i].len = i + 1;
+            }
+
+            /* Perform write */
+            if ((H5Dwrite(dset_float, vlen_float, space_id, H5S_ALL, H5P_DEFAULT, (const void *)wbuf)) < 0)
+                PART_TEST_ERROR(rw_all_float);
+
+            /* Perform read */
+            if ((H5Dread(dset_float, vlen_float, space_id, H5S_ALL, H5P_DEFAULT, (void *)rbuf)) < 0)
+                PART_TEST_ERROR(rw_all_float);
+
+            /* Verify data */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if (!rbuf[i].p)
+                    PART_TEST_ERROR(rw_all_float);
+
+                if (rbuf[i].len != wbuf[i].len)
+                    PART_TEST_ERROR(rw_all_float);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    float expected = ((float *)wbuf[i].p)[j];
+                    float actual   = ((float *)rbuf[i].p)[j];
+
+                    if (!(H5_DBL_REL_EQUAL(expected, actual, 0.001)))
+                        PART_TEST_ERROR(rw_all_float);
+                }
+            }
+
+            PASSED();
+
+            /* Reset buffers */
+
+            if (H5Treclaim(vlen_float, space_id, H5P_DEFAULT, rbuf) < 0)
+                PART_TEST_ERROR(rw_all_float);
+
+            if (H5Treclaim(vlen_float, space_id, H5P_DEFAULT, wbuf) < 0)
+                PART_TEST_ERROR(rw_all_float);
+
+            memset(wbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+            memset(rbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+            PART_BEGIN(rw_all_float)
+        }
+        PART_END(rw_all_float);
+
+        PART_BEGIN(rw_all_string)
+        {
+            TESTING_2("write and read entire dataspace with string sequence");
+            /* Set up write buffer */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if ((wbuf[i].p = calloc(i + 1, DATASET_VLEN_IO_STR_LEN)) == NULL)
+                    PART_TEST_ERROR(rw_all_string);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    char *str_ptr = ((char *)wbuf[i].p) + DATASET_VLEN_IO_STR_LEN * j;
+                    memcpy(str_ptr, DATASET_VLEN_IO_STR_VALUE, DATASET_VLEN_IO_STR_LEN);
+                }
+
+                wbuf[i].len = i + 1;
+            }
+
+            /* Perform write */
+            if ((H5Dwrite(dset_string, vlen_string, space_id, H5S_ALL, H5P_DEFAULT, (const void *)wbuf)) < 0)
+                PART_TEST_ERROR(rw_all_string);
+
+            /* Perform read */
+            if ((H5Dread(dset_string, vlen_string, space_id, H5S_ALL, H5P_DEFAULT, (void *)rbuf)) < 0)
+                PART_TEST_ERROR(rw_all_string);
+
+            /* Verify data */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if (!rbuf[i].p)
+                    PART_TEST_ERROR(rw_all_string);
+
+                if (rbuf[i].len != wbuf[i].len)
+                    PART_TEST_ERROR(rw_all_string);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    char  str_buf[DATASET_VLEN_IO_STR_LEN + 1];
+                    char *str_ptr = (char *)rbuf[i].p + DATASET_VLEN_IO_STR_LEN * j;
+                    memcpy(str_buf, str_ptr, DATASET_VLEN_IO_STR_LEN);
+                    str_buf[DATASET_VLEN_IO_STR_LEN] = '\0';
+
+                    if (strcmp(str_buf, DATASET_VLEN_IO_STR_VALUE))
+                        PART_TEST_ERROR(rw_all_string);
+                }
+            }
+
+            PASSED();
+
+            /* Reset buffers */
+
+            if (H5Treclaim(vlen_string, space_id, H5P_DEFAULT, rbuf) < 0)
+                PART_TEST_ERROR(rw_all_string);
+
+            if (H5Treclaim(vlen_string, space_id, H5P_DEFAULT, wbuf) < 0)
+                PART_TEST_ERROR(rw_all_string);
+
+            memset(wbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+            memset(rbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+        }
+        PART_END(rw_all_string);
+
+        PART_BEGIN(rw_point_selection)
+        {
+            /* Select even-indexed points */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS / 2; i++)
+                point_coords[i] = i * 2;
+
+            /* Select points on dataspace */
+            if (H5Sselect_elements(space_id, H5S_SELECT_SET, DATASET_VLEN_IO_DSET_DIMS / 2,
+                                   (const hsize_t *)point_coords) < 0)
+                PART_TEST_ERROR(rw_point_selection);
+
+            /* Set up write buffer */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if ((wbuf[i].p = calloc(i + 1, sizeof(int) * (i + 1))) == NULL)
+                    PART_TEST_ERROR(rw_point_selection);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    ((int *)wbuf[i].p)[j] = (int)(i * j + 1);
+                }
+
+                wbuf[i].len = i + 1;
+            }
+
+            /* Perform write */
+            if ((H5Dwrite(dset_int, vlen_int, space_id, space_id, H5P_DEFAULT, (const void *)wbuf)) < 0)
+                PART_TEST_ERROR(rw_point_selection);
+
+            /* Perform read */
+            if ((H5Dread(dset_int, vlen_int, space_id, space_id, H5P_DEFAULT, (void *)rbuf)) < 0)
+                PART_TEST_ERROR(rw_point_selection);
+
+            /* Verify data */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if (i % 2 == 0) {
+                    if (!rbuf[i].p)
+                        PART_TEST_ERROR(rw_point_selection);
+
+                    if (rbuf[i].len != wbuf[i].len)
+                        PART_TEST_ERROR(rw_point_selection);
+
+                    for (size_t j = 0; j < i + 1; j++)
+                        if (((int *)rbuf[i].p)[j] != ((int *)wbuf[i].p)[j])
+                            PART_TEST_ERROR(rw_point_selection);
+                }
+                else {
+                    /* Odd positions in buffer should still read 0 */
+                    if (rbuf[i].p)
+                        PART_TEST_ERROR(rw_point_selection);
+                    if (rbuf[i].len)
+                        PART_TEST_ERROR(rw_point_selection);
+                }
+            }
+
+            PASSED();
+
+            /* Reset buffers */
+
+            if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, rbuf) < 0)
+                PART_TEST_ERROR(rw_point_selection);
+
+            if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, wbuf) < 0)
+                PART_TEST_ERROR(rw_point_selection);
+
+            memset(wbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+            memset(rbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+        }
+        PART_END(rw_point_selection);
+
+        PART_BEGIN(rw_hyperslab_selection)
+        {
+            /* Select hyperslab of every 3rd element */
+            const hsize_t start[1]  = {0};
+            const hsize_t stride[1] = {3};
+            const hsize_t count[1]  = {1 + (DATASET_VLEN_IO_DSET_DIMS / stride[0])};
+            const hsize_t block[1]  = {1};
+
+            if ((H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block)) < 0)
+                PART_TEST_ERROR(rw_hyperslab_selection);
+
+            /* Set up write buffer */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if ((wbuf[i].p = calloc(i + 1, sizeof(int) * (i + 1))) == NULL)
+                    PART_TEST_ERROR(rw_hyperslab_selection);
+
+                for (size_t j = 0; j < i + 1; j++) {
+                    ((int *)wbuf[i].p)[j] = (int)(i * j + 1);
+                }
+
+                wbuf[i].len = i + 1;
+            }
+
+            /* Perform write */
+            if ((H5Dwrite(dset_int, vlen_int, space_id, space_id, H5P_DEFAULT, (const void *)wbuf)) < 0)
+                PART_TEST_ERROR(rw_hyperslab_selection);
+
+            /* Perform read */
+            if ((H5Dread(dset_int, vlen_int, space_id, space_id, H5P_DEFAULT, (void *)rbuf)) < 0)
+                PART_TEST_ERROR(rw_hyperslab_selection);
+
+            /* Verify data */
+            for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+                if (i % stride[0] == 0) {
+                    if (!rbuf[i].p)
+                        PART_TEST_ERROR(rw_hyperslab_selection);
+
+                    if (rbuf[i].len != wbuf[i].len)
+                        PART_TEST_ERROR(rw_hyperslab_selection);
+
+                    for (size_t j = 0; j < i + 1; j++)
+                        if (((int *)rbuf[i].p)[j] != ((int *)wbuf[i].p)[j])
+                            PART_TEST_ERROR(rw_hyperslab_selection);
+                }
+                else {
+                    /* Unread positions should still be 0 */
+                    if (rbuf[i].p)
+                        PART_TEST_ERROR(rw_hyperslab_selection);
+                    if (rbuf[i].len)
+                        PART_TEST_ERROR(rw_hyperslab_selection);
+                }
+            }
+
+            PASSED();
+
+            /* Reset buffers */
+
+            if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, rbuf) < 0)
+                PART_TEST_ERROR(rw_hyperslab_selection);
+
+            if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, wbuf) < 0)
+                PART_TEST_ERROR(rw_hyperslab_selection);
+
+            memset(wbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+            memset(rbuf, 0, sizeof(hvl_t) * DATASET_VLEN_IO_DSET_DIMS);
+        }
+        PART_END(rw_hyperslab_selection);
+    }
+    END_MULTIPART;
+
+    TESTING_2("test cleanup");
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Gclose(container_group) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_int) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_float) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_string) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    /* In case of memory allocation error, not all hvl_t buffers in array may be allocated.
+     * Free one-by-one */
+    for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+        if (wbuf[i].p) {
+            free(wbuf[i].p);
+            wbuf[i].p = NULL;
+        }
+    }
+
+    for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+        if (rbuf[i].p) {
+            free(rbuf[i].p);
+            rbuf[i].p = NULL;
+        }
+    }
+
+    if (H5Tclose(vlen_int) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_float) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_string) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+error:
+
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+        H5Gclose(container_group);
+        H5Dclose(dset_int);
+        H5Dclose(dset_float);
+        H5Dclose(dset_string);
+        H5Sclose(space_id);
+        for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+            if (wbuf[i].p) {
+                free(wbuf[i].p);
+                wbuf[i].p = NULL;
+            }
+        }
+
+        for (size_t i = 0; i < DATASET_VLEN_IO_DSET_DIMS; i++) {
+            if (rbuf[i].p) {
+                free(rbuf[i].p);
+                rbuf[i].p = NULL;
+            }
+        }
+        H5Tclose(vlen_int);
+        H5Tclose(vlen_float);
+        H5Tclose(vlen_string);
     }
     H5E_END_TRY
 

@@ -2067,6 +2067,49 @@ error:
 } /* end h5_check_if_file_locking_enabled() */
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_check_file_locking_env_var
+ *
+ * Purpose:     Checks if the HDF5_USE_FILE_LOCKING file locking
+ *              environment variable is set and parses its value if so.
+ *
+ *              If the environment variable is not set, both `use_locks`
+ *              and `ignore_disabled_locks` will be set to FAIL to indicate
+ *              this. Otherwise, they will each be set appropriately based
+ *              on the setting for the environment variable.
+ *
+ * Return:      Nothing
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
+{
+    char *lock_env_var = NULL;
+
+    assert(use_locks);
+    assert(ignore_disabled_locks);
+
+    lock_env_var = getenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && (!strcmp(lock_env_var, "FALSE") || !strcmp(lock_env_var, "0"))) {
+        *use_locks             = false; /* Override: Never use locks */
+        *ignore_disabled_locks = FAIL;
+    }
+    else if (lock_env_var && !strcmp(lock_env_var, "BEST_EFFORT")) {
+        *use_locks             = true; /* Override: Always use locks */
+        *ignore_disabled_locks = true; /* Override: Ignore disabled locks */
+    }
+    else if (lock_env_var && (!strcmp(lock_env_var, "TRUE") || !strcmp(lock_env_var, "1"))) {
+        *use_locks             = true;  /* Override: Always use locks */
+        *ignore_disabled_locks = false; /* Override: Don't ignore disabled locks */
+    }
+    else {
+        /* Environment variable not set, or not set correctly */
+        *use_locks             = FAIL;
+        *ignore_disabled_locks = FAIL;
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:    h5_using_native_vol
  *
  * Purpose:     Checks if the VOL connector being used is (or the VOL

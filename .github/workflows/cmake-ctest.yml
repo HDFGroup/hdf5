@@ -45,7 +45,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -120,7 +120,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -152,6 +152,32 @@ jobs:
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
         shell: bash
 
+      - name: Publish deb binary (Linux)
+        id: publish-ctest-deb-binary
+        run: |
+          mkdir "${{ runner.workspace }}/builddeb"
+          mkdir "${{ runner.workspace }}/builddeb/hdf5"
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
+          cd "${{ runner.workspace }}/builddeb"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb hdf5
+        shell: bash
+
+      - name: Publish rpm binary (Linux)
+        id: publish-ctest-rpm-binary
+        run: |
+          mkdir "${{ runner.workspace }}/buildrpm"
+          mkdir "${{ runner.workspace }}/buildrpm/hdf5"
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/hdf5
+          cd "${{ runner.workspace }}/buildrpm"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm hdf5
+        shell: bash
+
       - name: List files in the space (Linux)
         run: |
               ls ${{ github.workspace }}
@@ -163,6 +189,22 @@ jobs:
         with:
               name: tgz-ubuntu-2204_gcc-binary
               path: ${{ runner.workspace }}/build114/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Save files created by ctest script
+      - name: Save published binary deb (Linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: deb-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/builddeb/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      # Save files created by ctest script
+      - name: Save published binary rpm (Linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: rpm-ubuntu-2204_gcc-binary
+              path: ${{ runner.workspace }}/buildrpm/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       # Save doxygen files created by ctest script
@@ -195,7 +237,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS)
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -269,7 +311,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -343,7 +385,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -429,7 +471,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}

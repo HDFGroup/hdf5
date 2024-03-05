@@ -30,7 +30,8 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__fsinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                  size_t p_size, const uint8_t *p);
-static herr_t H5O__fsinfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__fsinfo_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                 const void *_mesg);
 static void  *H5O__fsinfo_copy(const void *_mesg, void *_dest);
 static size_t H5O__fsinfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__fsinfo_free(void *mesg);
@@ -221,7 +222,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__fsinfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__fsinfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                   const void *_mesg)
 {
     const H5O_fsinfo_t *fsinfo = (const H5O_fsinfo_t *)_mesg;
     H5F_mem_page_t      ptype; /* Memory type for iteration */
