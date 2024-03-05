@@ -788,7 +788,7 @@ In the options listed below, there are three columns of information:
 Option Name, Option Description, and Option Default.
 The config/cmake/cacheinit.cmake file can override the following values.
 
----------------- General Build Options ---------------------
+---------------- General Build Options -------------------------------------
 BUILD_SHARED_LIBS  "Build Shared Libraries"    ON
 BUILD_STATIC_LIBS  "Build Static Libraries"    ON
 BUILD_STATIC_EXECS "Build Static Executables"  OFF
@@ -796,17 +796,18 @@ BUILD_TESTING      "Build HDF5 Unit Testing"   ON
 if (WINDOWS)
   DISABLE_PDB_FILES "Do not install PDB files" OFF
 
----------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB        "Build HDF5 C++ Library"          OFF
-HDF5_BUILD_EXAMPLES       "Build HDF5 Library Examples"     ON
-HDF5_BUILD_FORTRAN        "Build FORTRAN support"           OFF
-HDF5_BUILD_JAVA           "Build JAVA support"              OFF
-HDF5_BUILD_HL_LIB         "Build HIGH Level HDF5 Library"   ON
-HDF5_BUILD_TOOLS          "Build HDF5 Tools"                ON
-HDF5_BUILD_HL_GIF_TOOLS   "Build HIGH Level HDF5 GIF Tools" OFF
-HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"       OFF
+---------------- HDF5 Build Options ----------------------------------------
+HDF5_BUILD_CPP_LIB        "Build HDF5 C++ Library"              OFF
+HDF5_BUILD_EXAMPLES       "Build HDF5 Library Examples"         ON
+HDF5_BUILD_FORTRAN        "Build FORTRAN support"               OFF
+HDF5_BUILD_JAVA           "Build JAVA support"                  OFF
+HDF5_BUILD_HL_LIB         "Build HIGH Level HDF5 Library"       ON
+HDF5_BUILD_TOOLS          "Build HDF5 Tools"                    ON
+HDF5_BUILD_HL_GIF_TOOLS   "Build HIGH Level HDF5 GIF Tools"     OFF
+HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"           OFF
+HDF5_BUILD_STATIC_TOOLS   "Build Static Tools Not Shared Tools" OFF
 
----------------- HDF5 Folder Build Options ---------------------
+---------------- HDF5 Folder Build Options ---------------------------------
 Defaults relative to $<INSTALL_PREFIX>
 HDF5_INSTALL_BIN_DIR      "bin"
 HDF5_INSTALL_LIB_DIR      "lib"
@@ -911,26 +912,26 @@ if (BUILD_TESTING)
         HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"                       ON
     TEST_SHELL_SCRIPTS             "Enable shell script tests"                                    ON
     HDF5_DISABLE_TESTS_REGEX       "Regex pattern to set execution of specific tests to DISABLED" ""
-
+    HDF5_USING_ANALYSIS_TOOL       "Indicate that an analysis checker is used"                    ON
 ---------------- External Library Options ---------------------
-HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
-HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                               OFF
-HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
+HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"  "NO"
+HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                         OFF
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                               OFF
+HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                           ON
 
-ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"    OFF
-ZLIB_TGZ_ORIGPATH           "Use ZLIB from original location"           "https://github.com/madler/zlib/releases/download/v1.2.13"
-ZLIB_TGZ_NAME               "Use ZLIB from original compressed file"    "zlib-1.2.13.tar.gz"
-ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"      ON
+ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"        OFF
+ZLIB_TGZ_ORIGPATH           "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.2.13"
+ZLIB_TGZ_NAME               "Use ZLIB from original compressed file"        "zlib-1.2.13.tar.gz"
+ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          ON
 
-SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"    OFF
+SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"        OFF
 if (HDF5_ENABLE_SZIP_SUPPORT)
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                     ON
-LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"         "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"
-LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"  "libaec-1.0.6.tar.gz"
-LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"    ON
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                           ON
+LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"             "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"
+LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"      "libaec-1.0.6.tar.gz"
+LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"        ON
 
-PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS" OFF
+PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS"     OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()
