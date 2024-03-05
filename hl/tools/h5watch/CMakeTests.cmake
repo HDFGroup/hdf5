@@ -69,7 +69,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -94,7 +94,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -121,7 +121,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
   endmacro ()
 
   macro (ADD_H5_WATCH resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5WATCH-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
