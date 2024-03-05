@@ -860,7 +860,6 @@ DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114, 
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
 HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"                OFF
 HDF5_MINGW_STATIC_GCC_LIBS     "Statically link libgcc/libstdc++"                                OFF
-HDF5_BUILD_STATIC_CRT_LIBS     "Build With Static Windows CRT Libraries"                         OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)

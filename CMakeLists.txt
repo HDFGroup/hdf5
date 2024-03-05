@@ -943,15 +943,6 @@ if (HDF5_ENABLE_MAP_API)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to Build with Static CRT libraries on Windows
-#-----------------------------------------------------------------------------
-option (HDF5_BUILD_STATIC_CRT_LIBS "Build With Static Windows CRT Libraries" OFF)
-mark_as_advanced (HDF5_BUILD_STATIC_CRT_LIBS)
-if (HDF5_BUILD_STATIC_CRT_LIBS)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif ()
-
-#-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 add_subdirectory (src)

@@ -19,14 +19,6 @@ set (HDF_PREFIX "H5")
 include (CheckFortranSourceRuns)
 include (CheckFortranSourceCompiles)
 
-#-------------------------------------------------------------------------------
-#  Fix Fortran flags if we are compiling statically on Windows using
-#  Windows_MT.cmake from config/cmake/UserMacros
-#-------------------------------------------------------------------------------
-if (BUILD_STATIC_CRT_LIBS)
-  TARGET_STATIC_CRT_FLAGS ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Detect name mangling convention used between Fortran and C
 #-----------------------------------------------------------------------------
