@@ -45,10 +45,7 @@ jobs:
           token: ${{ github.token }}
           tag: "${{ inputs.use_tag }}"
           assets: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_hl_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-hdf5_cpp_compat_report.html
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-java_compat_report.html
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
