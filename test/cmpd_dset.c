@@ -1115,6 +1115,7 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Release buffers */
     free(s1);
+    free(save_s1);
     free(s3);
     free(save_s3);
     free(rbuf1);
@@ -1145,30 +1146,19 @@ error:
     H5E_END_TRY
 
     /* Release resources */
-    if (s1)
-        free(s1);
-    if (s3)
-        free(s3);
-    if (save_s3)
-        free(save_s3);
-    if (rbuf1)
-        free(rbuf1);
-    if (rbuf3)
-        free(rbuf3);
-    if (s7)
-        free(s7);
-    if (save_s7)
-        free(save_s7);
-    if (s8)
-        free(s8);
-    if (save_s8)
-        free(save_s8);
-    if (rbuf7)
-        free(rbuf7);
-    if (rbuf8)
-        free(rbuf8);
-    if (save_rbuf8)
-        free(save_rbuf8);
+    free(s1);
+    free(save_s1);
+    free(s3);
+    free(save_s3);
+    free(rbuf1);
+    free(rbuf3);
+    free(s7);
+    free(save_s7);
+    free(s8);
+    free(save_s8);
+    free(rbuf7);
+    free(rbuf8);
+    free(save_rbuf8);
 
     printf("\n*** SELECT COMPOUND DATASET TESTS FAILED ***\n");
     return 1;
