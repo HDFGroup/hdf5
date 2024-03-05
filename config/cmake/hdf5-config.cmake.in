@@ -52,6 +52,7 @@ set (${HDF5_PACKAGE_NAME}_BUILD_DIMENSION_SCALES_WITH_NEW_REF @DIMENSION_SCALES_
 #-----------------------------------------------------------------------------
 set (${HDF5_PACKAGE_NAME}_BUILD_TOOLS           @HDF5_BUILD_TOOLS@)
 set (${HDF5_PACKAGE_NAME}_BUILD_HL_GIF_TOOLS    @HDF5_BUILD_HL_GIF_TOOLS@)
+set (${HDF5_PACKAGE_NAME}_BUILD_STATIC_TOOLS    @HDF5_BUILD_STATIC_TOOLS@)
 #-----------------------------------------------------------------------------
 set (${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT  @HDF5_ENABLE_Z_LIB_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT   @HDF5_ENABLE_SZIP_SUPPORT@)

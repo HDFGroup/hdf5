@@ -69,6 +69,6 @@ endif ()
 message (STATUS "HDF5 Example link libs: ${H5EX_HDF5_LINK_LIBS} Includes: ${H5EX_HDF5_INCLUDE_DIRS}")
 
 set (HDF5_TOOLS_DIR ${CMAKE_TEST_OUTPUT_DIRECTORY} CACHE STRING "HDF5 Directory for all Executables" FORCE)
-set (H5EX_HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump${tgt_file_ext}> CACHE STRING "HDF5 h5dump target" FORCE)
-set (H5EX_HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack${tgt_file_ext}> CACHE STRING "HDF5 h5repack target" FORCE)
+set (H5EX_HDF5_DUMP_EXECUTABLE $<TARGET_FILE:h5dump> CACHE STRING "HDF5 h5dump target" FORCE)
+set (H5EX_HDF5_REPACK_EXECUTABLE $<TARGET_FILE:h5repack> CACHE STRING "HDF5 h5repack target" FORCE)
 

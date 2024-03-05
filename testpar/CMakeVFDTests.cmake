@@ -28,7 +28,7 @@ set (H5P_VFD_subfiling_TESTS_SKIP
 )
 
 macro (ADD_VFD_TEST vfdname resultcode)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     foreach (h5_test ${H5P_VFD_TESTS})
       if (NOT "${h5_test}" IN_LIST H5P_VFD_${vfdname}_TESTS_SKIP)
         add_test (

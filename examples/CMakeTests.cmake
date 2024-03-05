@@ -74,7 +74,7 @@ if (HDF5_TEST_SERIAL)
   )
 
   foreach (example ${examples})
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME EXAMPLES-${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${example}>)
     else ()
       add_test (NAME EXAMPLES-${example} COMMAND "${CMAKE_COMMAND}"

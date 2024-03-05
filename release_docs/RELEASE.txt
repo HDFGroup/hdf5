@@ -47,6 +47,24 @@ New Features
 
     Configuration:
     -------------
+    - Renamed HDF5_ENABLE_USING_MEMCHECKER to HDF5_USING_ANALYSIS_TOOL
+
+      The HDF5_USING_ANALYSIS_TOOL is used to indicate to test macros that
+      an analysis tool is being used and that the tests should not use
+      the runTest.cmake macros and it's variations. The analysis tools,
+      like valgrind, test the macro code instead of the program under test.
+
+      HDF5_ENABLE_USING_MEMCHECKER is still used for controlling the HDF5
+      define, H5_USING_MEMCHECKER.
+
+    - New option for building and naming tools in CMake
+
+      The following option has been added:
+        HDF5_BUILD_STATIC_TOOLS    "Build Static Tools Not Shared Tools"          OFF
+
+      The default will build shared tools unless BUILD_SHARED_LIBS = OFF.
+      Tools will no longer have "-shared" as only one set of tools will be created.
+
     - Incorporated HDF5 examples repository into HDF5 library.
 
       The HDF5Examples folder is equivalent to the repository hdf5-examples.
@@ -481,6 +499,16 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a bug where H5Tset_fields does not account for any offset
+      set for a floating-point datatype when determining if values set
+      for spos, epos, esize, mpos and msize make sense for the datatype
+
+      Previously, H5Tset_fields did not take datatype offsets into account
+      when determining if the values set make sense for the datatype.
+      This would cause the function to fail when the precision for a
+      datatype is correctly set such that the offset bits are not included.
+      This has now been fixed.
+
     - Fixed H5Fget_access_plist so that it returns the file locking
       settings for a file
 

@@ -69,12 +69,12 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -94,12 +94,12 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -121,12 +121,12 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
   endmacro ()
 
   macro (ADD_H5_WATCH resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5WATCH-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5watch>"
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"

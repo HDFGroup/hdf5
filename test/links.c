@@ -9837,24 +9837,26 @@ error:
 static int
 external_link_inherit_locking(hid_t fapl_id, bool new_format)
 {
-    hid_t fid                     = H5I_INVALID_HID;
-    hid_t tmp_fid                 = H5I_INVALID_HID;
-    hid_t gid                     = H5I_INVALID_HID;
-    hid_t ext_fid                 = H5I_INVALID_HID;
-    hid_t file_fapl               = H5I_INVALID_HID;
-    hid_t tmp_fapl                = H5I_INVALID_HID;
-    bool  use_locking             = true;
-    bool  ignore_disabled_locking = false;
-    char *filename                = NULL;
-    char *ext_filename            = NULL;
+    htri_t use_locking_env         = FAIL;
+    htri_t ignore_disabled_env     = FAIL;
+    hid_t  fid                     = H5I_INVALID_HID;
+    hid_t  tmp_fid                 = H5I_INVALID_HID;
+    hid_t  gid                     = H5I_INVALID_HID;
+    hid_t  ext_fid                 = H5I_INVALID_HID;
+    hid_t  file_fapl               = H5I_INVALID_HID;
+    hid_t  tmp_fapl                = H5I_INVALID_HID;
+    bool   use_locking             = true;
+    bool   ignore_disabled_locking = false;
+    char  *filename                = NULL;
+    char  *ext_filename            = NULL;
 
     if (new_format)
         TESTING("inheriting of file locking settings (w/new group format)");
     else
         TESTING("inheriting of file locking settings");
 
-    if (HDsetenv(HDF5_USE_FILE_LOCKING, "", 1) < 0)
-        TEST_ERROR;
+    /* Get the settings for the file locking environment variables */
+    h5_check_file_locking_env_var(&use_locking_env, &ignore_disabled_env);
 
     /* Check that external links are registered with the library */
     if (H5Lis_registered(H5L_TYPE_EXTERNAL) != true)
@@ -9884,101 +9886,125 @@ external_link_inherit_locking(hid_t fapl_id, bool new_format)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    /* Set file locking on */
-    if (H5Pset_file_locking(file_fapl, true, true) < 0)
-        TEST_ERROR;
+    /* Test for file locking on unless disabled by environment variable */
+    if (use_locking_env != false) {
+        /* Set file locking on */
+        if (H5Pset_file_locking(file_fapl, true, true) < 0)
+            TEST_ERROR;
 
-    /* Open main file */
-    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, file_fapl)) < 0)
-        TEST_ERROR;
+        /* Open main file */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, file_fapl)) < 0)
+            TEST_ERROR;
 
-    /* Make sure that locking setting retrieved from access plist
-     * matches what we set.
-     */
-    if ((tmp_fapl = H5Fget_access_plist(fid)) < 0)
-        TEST_ERROR;
-    if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
-        TEST_ERROR;
-    if (use_locking != true || ignore_disabled_locking != true)
-        TEST_ERROR;
-    if (H5Pclose(tmp_fapl) < 0)
-        TEST_ERROR;
+        /* Make sure that locking setting retrieved from access plist
+         * matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != true)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being on, unless
+         * disabled by environment variable
+         */
+        if (ignore_disabled_env != false && ignore_disabled_locking != true)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
 
-    /* Open external file through link */
-    if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        /* Open external file through link */
+        if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
+            TEST_ERROR;
 
-    /* Get file ID for external file */
-    if ((tmp_fid = H5Iget_file_id(gid)) < 0)
-        TEST_ERROR;
+        /* Get file ID for external file */
+        if ((tmp_fid = H5Iget_file_id(gid)) < 0)
+            TEST_ERROR;
 
-    /* Make sure that locking setting retrieved from external file's
-     * access plist matches what we set.
-     */
-    if ((tmp_fapl = H5Fget_access_plist(tmp_fid)) < 0)
-        TEST_ERROR;
-    if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
-        TEST_ERROR;
-    if (use_locking != true || ignore_disabled_locking != true)
-        TEST_ERROR;
-    if (H5Pclose(tmp_fapl) < 0)
-        TEST_ERROR;
+        /* Make sure that locking setting retrieved from external file's
+         * access plist matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(tmp_fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != true)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being on, unless
+         * disabled by environment variable
+         */
+        if (ignore_disabled_env != false && ignore_disabled_locking != true)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
 
-    if (H5Gclose(gid) < 0)
-        TEST_ERROR;
-    if (H5Fclose(tmp_fid) < 0)
-        TEST_ERROR;
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
+        if (H5Gclose(gid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(tmp_fid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+    }
 
-    /* Repeat with file locking off */
+    /* Test for file locking off unless force enabled by environment variable */
+    if (use_locking_env != true) {
+        /* Set file locking off */
+        if (H5Pset_file_locking(file_fapl, false, false) < 0)
+            TEST_ERROR;
 
-    /* Set file locking off */
-    if (H5Pset_file_locking(file_fapl, false, false) < 0)
-        TEST_ERROR;
+        /* Open main file */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, file_fapl)) < 0)
+            TEST_ERROR;
 
-    /* Open main file */
-    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, file_fapl)) < 0)
-        TEST_ERROR;
+        /* Make sure that locking setting retrieved from access plist
+         * matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != false)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being off, unless
+         * force enabled by environment variable
+         */
+        if (ignore_disabled_env != true && ignore_disabled_locking != false)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
 
-    /* Make sure that locking setting retrieved from access plist
-     * matches what we set.
-     */
-    if ((tmp_fapl = H5Fget_access_plist(fid)) < 0)
-        TEST_ERROR;
-    if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
-        TEST_ERROR;
-    if (use_locking != false || ignore_disabled_locking != false)
-        TEST_ERROR;
-    if (H5Pclose(tmp_fapl) < 0)
-        TEST_ERROR;
+        /* Open external file through link */
+        if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
+            TEST_ERROR;
 
-    /* Open external file through link */
-    if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        /* Get file ID for external file */
+        if ((tmp_fid = H5Iget_file_id(gid)) < 0)
+            TEST_ERROR;
 
-    /* Get file ID for external file */
-    if ((tmp_fid = H5Iget_file_id(gid)) < 0)
-        TEST_ERROR;
+        /* Make sure that locking setting retrieved from external file's
+         * access plist matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(tmp_fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != false)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being off, unless
+         * force enabled by environment variable
+         */
+        if (ignore_disabled_env != true && ignore_disabled_locking != false)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
 
-    /* Make sure that locking setting retrieved from external file's
-     * access plist matches what we set.
-     */
-    if ((tmp_fapl = H5Fget_access_plist(tmp_fid)) < 0)
-        TEST_ERROR;
-    if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
-        TEST_ERROR;
-    if (use_locking != false || ignore_disabled_locking != false)
-        TEST_ERROR;
-    if (H5Pclose(tmp_fapl) < 0)
-        TEST_ERROR;
-
-    if (H5Gclose(gid) < 0)
-        TEST_ERROR;
-    if (H5Fclose(tmp_fid) < 0)
-        TEST_ERROR;
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR;
+        if (H5Gclose(gid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(tmp_fid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+    }
 
     if (H5Fdelete(ext_filename, file_fapl) < 0)
         TEST_ERROR;
