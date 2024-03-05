@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Renamed HDF5_ENABLE_USING_MEMCHECKER to HDF5_USING_ANALYSIS_TOOL
+
+      The HDF5_USING_ANALYSIS_TOOL is used to indicate to test macros that
+      an analysis tool is being used and that the tests should not use
+      the runTest.cmake macros and it's variations. The analysis tools,
+      like valgrind, test the macro code instead of the program under test.
+
+      HDF5_ENABLE_USING_MEMCHECKER is still used for controlling the HDF5
+      define, H5_USING_MEMCHECKER.
+
     - New option for building and naming tools in CMake
 
       The following option has been added:
