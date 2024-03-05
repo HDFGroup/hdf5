@@ -55,7 +55,7 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode resultoption)
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5MKGRP-${resultfile}
           COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${resultoption} ${resultfile}.h5 ${ARGN}
@@ -103,7 +103,7 @@
   endmacro ()
 
   macro (ADD_H5_CMP resultfile resultcode)
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARGN})
     else ()
       add_test (
@@ -139,7 +139,7 @@
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-  if (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_USING_ANALYSIS_TOOL)
     add_test (
         NAME H5MKGRP-clearall-objects
         COMMAND ${CMAKE_COMMAND} -E remove

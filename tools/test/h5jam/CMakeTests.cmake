@@ -53,7 +53,7 @@
   #
   macro (TEST_H5JAM_OUTPUT expectfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5JAM-${expectfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jam> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5JAM-${expectfile} PROPERTIES WILL_FAIL "true")
@@ -85,7 +85,7 @@
   #
   macro (TEST_H5UNJAM_OUTPUT expectfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5JAM-UNJAM-${expectfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5unjam> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5JAM-UNJAM-${expectfile} PROPERTIES WILL_FAIL "true")
@@ -111,7 +111,7 @@
 
   macro (CHECKFILE testname testdepends expected actual)
     # If using memchecker add tests without using scripts
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5JAM-${testname}-CHECKFILE-H5DMP
           COMMAND "${CMAKE_COMMAND}"
@@ -150,7 +150,7 @@
   endmacro()
 
   macro (UNJAMTEST testname setfile infile ufile chkfile outfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5JAM-${testname}-UNJAM-SETUP-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove ${infile}
@@ -256,7 +256,7 @@
   endmacro()
 
   macro (JAMTEST testname jamfile infile chkfile outfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5JAM-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove ${outfile} ${infile}.cpy.h5
@@ -266,7 +266,7 @@
     if ("H5JAM-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5JAM-${testname} PROPERTIES DISABLED true)
     endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       set_tests_properties (H5JAM-${testname} PROPERTIES DEPENDS H5JAM-${testname}-clear-objects)
       set (compare_test ${outfile})
       set (compare_orig testfiles/${infile})
@@ -305,7 +305,7 @@
   endmacro ()
 
   macro (JAMTEST_NONE testname jamfile infile setfile chkfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5JAM-${testname}_NONE-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove

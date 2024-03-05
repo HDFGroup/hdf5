@@ -106,7 +106,7 @@ const char H5build_settings[]=
     "              (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@\n"
     "    Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@\n"
     "                       API tracing: @HDF5_ENABLE_TRACE@\n"
-    "              Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@\n"
+    "              Using memory checker: @HDF5_USING_ANALYSIS_TOOL@\n"
     "            Function stack tracing: @HDF5_ENABLE_CODESTACK@\n"
     "                  Use file locking: @HDF5_FILE_LOCKING_SETTING@\n"
     "         Strict file format checks: @HDF5_STRICT_FORMAT_CHECKS@\n"

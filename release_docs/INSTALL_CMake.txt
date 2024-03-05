@@ -840,7 +840,7 @@ HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"           
 HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                             ON
 HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                   OFF
-HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                          OFF
+HDF5_USING_ANALYSIS_TOOL   "Indicate that a memory checker is used"                          OFF
 HDF5_ENABLE_MAP_API            "Build the map API"                                               OFF
 HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                         ON
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                           OFF
