@@ -450,8 +450,11 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
-    int            fillvalue = (-1);
+    stype1         fillvalue;
     size_t         ss, ss1, ss2;
+
+    /* Initialize the fill value */
+    memset(&fillvalue, 0, sizeof(stype1));
 
     /* Create the file for this test */
     if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -625,8 +628,11 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
     hsize_t        dims[2]       = {NX, NY};
     hsize_t        chunk_dims[2] = {NX / 10, NY / 10};
     unsigned char *rew_buf = NULL, *save_rew_buf = NULL, *rbuf = NULL;
-    int            fillvalue = (-1);
+    stype2         fillvalue;
     size_t         ss, ss1, ss2;
+
+    /* Initialize the fill value */
+    memset(&fillvalue, 0, sizeof(stype2));
 
     /* Create the file for this test */
     if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -810,16 +816,21 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Other variables */
     unsigned int   i;
-    hid_t          fid       = H5I_INVALID_HID;
-    hid_t          did       = H5I_INVALID_HID;
-    hid_t          sid       = H5I_INVALID_HID;
-    hid_t          dcpl      = H5I_INVALID_HID;
-    hid_t          dxpl      = H5I_INVALID_HID;
-    hid_t          array_dt  = H5I_INVALID_HID;
-    static hsize_t dim[]     = {NX, NY};
-    int            fillvalue = (-1);
+    hid_t          fid      = H5I_INVALID_HID;
+    hid_t          did      = H5I_INVALID_HID;
+    hid_t          sid      = H5I_INVALID_HID;
+    hid_t          dcpl     = H5I_INVALID_HID;
+    hid_t          dxpl     = H5I_INVALID_HID;
+    hid_t          array_dt = H5I_INVALID_HID;
+    static hsize_t dim[]    = {NX, NY};
+    s1_t           fillvalue1;
+    s7_t           fillvalue7;
     size_t         ss = 0, ss1 = 0, ss2 = 0;
     hsize_t        memb_size[1] = {4};
+
+    /* Initialize the fill values */
+    memset(&fillvalue1, 0, sizeof(s1_t));
+    memset(&fillvalue7, 0, sizeof(s7_t));
 
     /* Allocate buffers */
     if (NULL == (s1 = (s1_t *)calloc(NX * NY, sizeof(s1_t))))
@@ -900,7 +911,7 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Set fill value accordingly */
     if (set_fillvalue) {
-        if (H5Pset_fill_value(dcpl, s1_tid, &fillvalue) < 0)
+        if (H5Pset_fill_value(dcpl, s1_tid, &fillvalue1) < 0)
             goto error;
     }
 
@@ -1022,7 +1033,7 @@ test_select_compound(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fillva
 
     /* Set fill value accordingly */
     if (set_fillvalue) {
-        if (H5Pset_fill_value(dcpl, s7_tid, &fillvalue) < 0)
+        if (H5Pset_fill_value(dcpl, s7_tid, &fillvalue7) < 0)
             goto error;
     }
 
