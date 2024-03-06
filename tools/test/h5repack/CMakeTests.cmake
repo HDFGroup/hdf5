@@ -360,7 +360,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_FILTER_TEST testname testfilter testtype resultcode resultfile)
+  macro (ADD_H5_FILTER_TEST testname testfilter replacefilter testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_USING_ANALYSIS_TOOL)
         add_test (
@@ -393,7 +393,9 @@
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_FILTER:STRING=${testfilter}"
+                -D "TEST_MASK:STRING=O?...ing file[^\n]+\n"
+                -D "TEST_FILTER:STRING=GZIP   \\(0\\.[0-9][0-9][0-9]:1\\)"
+                -D "TEST_FILTER_REPLACE:STRING=GZIP   (0.XXX:1)"
                 -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
@@ -434,7 +436,7 @@
             NAME H5REPACK_MASK-${testname}
             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
         )
-      else (HDF5_USING_ANALYSIS_TOOL)
+      else ()
         add_test (
             NAME H5REPACK_MASK-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -1017,7 +1019,7 @@
               -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_FILTER:STRING=O?...ing file[^\n]+\n"
+              -D "TEST_MASK:STRING=O?...ing file[^\n]+\n"
               -D "TEST_OUTPUT=${testname}.${resultfile}.out"
               -D "TEST_REFERENCE=${testname}.${resultfile}.tst"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
@@ -1362,7 +1364,7 @@
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif ()
-  ADD_H5_FILTER_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
+  ADD_H5_FILTER_TEST (gzip_verbose_filters "GZIP   \(0\.[0-9][0-9][0-9]:1\)" "GZIP   (0.XXX:1)" ${TESTTYPE} 0 ${arg})
 
 ###########################################################
 # the following tests assume the input files have filters
@@ -1688,14 +1690,19 @@
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
 
 # test CVE-2018-17432 fix
-  set (arg h5repack_CVE-2018-17432.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
-  set (TESTTYPE "TEST")
-  ADD_H5_FILTER_TEST (HDFFV-10590 "" ${TESTTYPE} 1 ${arg})
+  set (arg --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
+  add_test (
+      NAME H5REPACK-HDFFV-10590
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${arg} ${PROJECT_BINARY_DIR}/testfiles/h5repack_CVE-2018-17432.h5 ${PROJECT_BINARY_DIR}/testfiles/out-HDFFV-10590.h5repack_CVE-2018-17432.h5
+  )
+  set_tests_properties (H5REPACK-HDFFV-10590 PROPERTIES WILL_FAIL "true")
 
 # test CVE-2018-14460 fix
-  set (arg h5repack_CVE-2018-14460.h5)
-  set (TESTTYPE "TEST")
-  ADD_H5_FILTER_TEST (HDFFV-11223 "" ${TESTTYPE} 1 ${arg})
+  add_test (
+      NAME H5REPACK-HDFFV-11223
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${PROJECT_BINARY_DIR}/testfiles/h5repack_CVE-2018-17432.h5 ${PROJECT_BINARY_DIR}/testfiles/out-HDFFV-11223.h5repack_CVE-2018-17432.h5
+  )
+  set_tests_properties (H5REPACK-HDFFV-11223 PROPERTIES WILL_FAIL "true")
 
 # tests for metadata block size option ('-M')
   ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)

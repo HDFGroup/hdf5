@@ -167,7 +167,7 @@ if (TEST_FIND_RESULT GREATER -1)
 endif ()
 
 # if the output file needs Storage text removed
-if (TEST_MASK)
+if (TEST_MASK_STORE)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   string (REGEX REPLACE "Storage:[^\n]+\n" "Storage:   <details removed for portability>\n" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
@@ -205,8 +205,16 @@ if (TEST_MASK_ERROR)
 endif ()
 
 # remove text from the output file
+if (TEST_MASK)
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  string (REGEX REPLACE "${TEST_MASK}" "" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+endif ()
+
+# replace text from the output file
 if (TEST_FILTER)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
   string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
 endif ()

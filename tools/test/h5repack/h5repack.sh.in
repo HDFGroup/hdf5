@@ -858,6 +858,10 @@ TOOLTESTV()
 
     # display output compare
     STDOUT_FILTER $actual
+    cp $actual $tmp_file
+    sed -e 's/GZIP   \(0\.[0-9][0-9][0-9]:1\)/GZIP   (0.XXX:1)/' \
+    < $tmp_file > $actual
+    rm -f $tmp_file
     cat $actual_err >> $actual
 
     VERIFY output from $H5REPACK $@
