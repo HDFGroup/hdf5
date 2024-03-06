@@ -2196,7 +2196,7 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled)
     herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*!", object_id, are_disabled);
+    H5TRACE2("e", "i*b", object_id, are_disabled);
 
     /* Sanity check */
     if (!are_disabled)

@@ -1216,7 +1216,7 @@ H5is_library_threadsafe(bool *is_ts /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*!", is_ts);
+    H5TRACE1("e", "*b", is_ts);
 
     if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
@@ -1251,7 +1251,7 @@ H5is_library_terminating(bool *is_terminating /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*!", is_terminating);
+    H5TRACE1("e", "*b", is_terminating);
 
     assert(is_terminating);
 

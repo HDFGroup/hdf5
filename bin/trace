@@ -31,6 +31,7 @@ $Source = "";
                "H5A_operator1_t"            => "Ao",
                "H5A_operator2_t"            => "AO",
                "hbool_t"                    => "b",
+               "bool"                       => "b",
                "H5AC_cache_config_t"        => "Cc",
                "H5AC_cache_image_config_t"  => "CC",
                "double"                     => "d",
