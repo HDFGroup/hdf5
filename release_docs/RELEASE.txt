@@ -288,14 +288,17 @@ New Features
     --------
     - Added support for _Float16 16-bit half-precision floating-point datatype
 
-      Native support for the _Float16 C datatype has been added on platforms
-      where:
+      Support for the _Float16 C datatype has been added on platforms where:
 
         - The _Float16 datatype and its associated macros (FLT16_MIN, FLT16_MAX,
           FLT16_EPSILON, etc.) are available
-        - A simple test program using the _Float16 datatype can be successfully
-          compiled at configuration time (some compilers are buggy with
-          respect to the _Float16 datatype)
+        - A simple test program that converts between the _Float16 datatype and
+          other datatypes with casts can be successfully compiled and run at
+          configure time. Some compilers appear to be buggy or feature-incomplete
+          in this regard and will generate calls to compiler-internal functions
+          for converting between the _Float16 datatype and other datatypes, but
+          will not link these functions into the build, resulting in build
+          failures.
 
       The following new macros have been added:
 
@@ -318,16 +321,20 @@ New Features
                                         _Float16. Some compilers have issues with
                                         this.
 
+        H5T_NATIVE_FLOAT16 - This macro maps to the ID of an HDF5 datatype representing
+                             the native C _Float16 datatype for the platform. If
+                             support for the _Float16 datatype is not available, the
+                             macro will map to H5I_INVALID_HID and should not be used.
+
         H5T_IEEE_F16BE - This macro maps to the ID of an HDF5 datatype representing
-                         a big-endian IEEE 754 16-bit floating-point datatype.
+                         a big-endian IEEE 754 16-bit floating-point datatype. This
+                         datatype is available regardless of whether _Float16 support
+                         is available or not.
 
         H5T_IEEE_F16LE - This macro maps to the ID of an HDF5 datatype representing
                          a little-endian IEEE 754 16-bit floating-point datatype.
-
-        H5T_NATIVE_FLOAT16 - This macro maps to an HDF5 datatype representing the
-                             native C _Float16 datatype for the platform. If support
-                             for the _Float16 datatype is not available, the macro
-                             will map to H5I_INVALID_HID and should not be used.
+                         This datatype is available regardless of whether _Float16
+                         support is available or not.
 
       The following new hard datatype conversion paths have been added, but
       will only be used when _Float16 support is available:
@@ -341,7 +348,15 @@ New Features
         H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT16
 
       The H5T_NATIVE_LDOUBLE -> H5T_NATIVE_FLOAT16 hard conversion path will only
-      be available and used if H5_LDOUBLE_TO_FLOAT16_CORRECT has a value of 1
+      be available and used if H5_LDOUBLE_TO_FLOAT16_CORRECT has a value of 1. Otherwise,
+      the conversion will be emulated in software by the library.
+
+      Note that in the absence of any compiler flags for architecture-specific
+      tuning, the generated code for datatype conversions with the _Float16 type
+      may perform conversions by first promoting the type to float. Use of
+      architecture-specific tuning compiler flags may instead allow for the
+      generation of specialized instructions, such as AVX512-FP16 instructions,
+      if available.
 
     - Implemented optimized support for vector I/O in the Subfiling VFD
 

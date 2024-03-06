@@ -978,6 +978,8 @@ H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV FALSE "Checking IF th
 #-----------------------------------------------------------------------------
 # Check if _Float16 type is available
 #-----------------------------------------------------------------------------
+message (STATUS "Checking if _Float16 support is available")
+set (${HDF_PREFIX}_HAVE__FLOAT16 0)
 HDF_CHECK_TYPE_SIZE (_Float16 ${HDF_PREFIX}_SIZEOF__FLOAT16)
 if (${HDF_PREFIX}_SIZEOF__FLOAT16)
   # Request _Float16 support
@@ -985,8 +987,7 @@ if (${HDF_PREFIX}_SIZEOF__FLOAT16)
 
   # Some compilers expose the _Float16 datatype, but not the macros and
   # functions used with the datatype. We need the macros for proper
-  # datatype conversion support. The main function we're interested in
-  # is fabsf16. Check for these here.
+  # datatype conversion support. Check for these here.
   CHECK_SYMBOL_EXISTS (FLT16_EPSILON "float.h" h5_have_flt16_epsilon)
   CHECK_SYMBOL_EXISTS (FLT16_MIN "float.h" h5_have_flt16_min)
   CHECK_SYMBOL_EXISTS (FLT16_MAX "float.h" h5_have_flt16_max)
@@ -997,21 +998,24 @@ if (${HDF_PREFIX}_SIZEOF__FLOAT16)
   if (h5_have_flt16_epsilon AND h5_have_flt16_min AND
       h5_have_flt16_max AND h5_have_flt16_min_10_exp AND
       h5_have_flt16_max_10_exp AND h5_have_flt16_mant_dig)
-    # Some compilers like OneAPI on MSVC appear to just be broken, as support
-    # for _Float16 and its macros can be detected properly, but then code is
-    # generated that uses the __truncsfhf2, __truncdfhf2, __extendhfsf2 functions,
-    # which end up being unresolved with MSVC. Let's try to compile a program
-    # that will generate these functions to check for _Float16 support.
-    message (STATUS "Compiling test program to check for _Float16 support")
-    try_compile (
-        h5_compiled_float16_test
-        ${CMAKE_BINARY_DIR} 
-        ${HDF_RESOURCES_DIR}/HDFTests.c
-        COMPILE_DEFINITIONS "-DCHECK_FLOAT16"
-        C_STANDARD 99
+    # Some compilers like OneAPI on Windows appear to detect _Float16 support
+    # properly up to this point, and, in the absence of any architecture-specific
+    # tuning compiler flags, will generate code for H5Tconv.c that performs
+    # software conversions on _Float16 variables with compiler-internal functions
+    # such as __extendhfsf2, __truncsfhf2, or __truncdfhf2. However, these
+    # compilers will fail to link these functions into the build for currently
+    # unknown reasons and cause the build to fail. Since these are compiler-internal
+    # functions that we don't appear to have much control over, let's try to
+    # compile a program that will generate these functions to check for _Float16
+    # support. If we fail to compile this program, we will simply disable
+    # _Float16 support for the time being.
+    H5ConversionTests (
+        ${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK
+        FALSE
+        "Checking if compiler can convert _Float16 type with casts"
     )
 
-    if (${h5_compiled_float16_test})
+    if (${${HDF_PREFIX}_FLOAT16_CONVERSION_FUNCS_LINK})
       # Finally, MacOS 13 appears to have a bug specifically when converting
       # long double values to _Float16. Release builds of the dt_arith test
       # would cause any assignments to a _Float16 variable to be elided,
@@ -1025,16 +1029,21 @@ if (${HDF_PREFIX}_SIZEOF__FLOAT16)
           "Checking if correctly converting long double to _Float16 values"
       )
 
+      if (NOT ${${HDF_PREFIX}_LDOUBLE_TO_FLOAT16_CORRECT})
+        message (VERBOSE "Conversions from long double to _Float16 appear to be incorrect. These will be emulated through a soft conversion function.")
+      endif ()
+
       set (${HDF_PREFIX}_HAVE__FLOAT16 1)
 
       # Check if we can use fabsf16
       CHECK_FUNCTION_EXISTS (fabsf16 ${HDF_PREFIX}_HAVE_FABSF16)
     else ()
-      message (STATUS "Failed to compile test program to check for _Float16 support")
+      message (STATUS "_Float16 support has been disabled because the compiler couldn't compile and run a test program for _Float16 conversions")
+      message (STATUS "Check ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log for information on why the test program couldn't be compiled/run")
     endif ()
   else ()
-    set (${HDF_PREFIX}_HAVE__FLOAT16 0)
+    message (STATUS "_Float16 support has been disabled since the required macros (FLT16_MAX, FLT16_EPSILON, etc. were not found)")
   endif ()
 else ()
-  set (${HDF_PREFIX}_HAVE__FLOAT16 0)
+  message (STATUS "_Float16 support has been disabled since the _Float16 type was not found")
 endif ()

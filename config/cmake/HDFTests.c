@@ -192,36 +192,3 @@ int main ()
 }
 
 #endif /* HAVE_IOEO */
-
-#ifdef CHECK_FLOAT16
-
-#define __STDC_WANT_IEC_60559_TYPES_EXT__
-#include <float.h>
-
-int
-main(int argc, char **argv)
-{
-    signed char a;
-    _Float16    b;
-    double      c;
-
-    /* Convert signed char to _Float16  */
-    a = 1;
-    b = (_Float16)a;
-
-    /* Convert back */
-    b = 3.0f16;
-    a = (signed char)b;
-
-    /* Convert double to _Float16 */
-    c = 5.0;
-    b = (_Float16)c;
-
-    /* Convert back */
-    b = 3.0f16;
-    c = (double)b;
-
-    return 0;
-}
-
-#endif /* CHECK_FLOAT16 */
