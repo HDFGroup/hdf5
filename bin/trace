@@ -75,6 +75,7 @@ $Source = "";
                "H5F_file_space_type_t"      => "Ft",
                "H5F_libver_t"               => "Fv",
                "H5G_iterate_t"              => "Gi",
+               "H5G_info_t"                 => "GI",
                "H5G_obj_t"                  => "Go",
                "H5G_stat_t"                 => "Gs",
                "hsize_t"                    => "h",

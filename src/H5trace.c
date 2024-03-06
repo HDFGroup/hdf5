@@ -1480,8 +1480,40 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5G_iterate_t git = (H5G_iterate_t)va_arg(ap, H5G_iterate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)git);
-                        } /* end block */
-                        break;
+                        } break;
+
+                        case 'I': /* H5G_info_t */
+                        {
+                            H5G_info_t ginfo = va_arg(ap, H5G_info_t);
+
+                            H5RS_acat(rs, "{");
+                            switch (ginfo.storage_type) {
+                                case H5G_STORAGE_TYPE_UNKNOWN:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_UNKNOWN");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_SYMBOL_TABLE:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_SYMBOL_TABLE");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_COMPACT:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_COMPACT");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_DENSE:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_DENSE");
+                                    break;
+
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)ginfo.storage_type);
+                                    break;
+                            }
+                            H5RS_asprintf_cat(rs, ", ");
+                            H5RS_asprintf_cat(rs, "%" PRIuHSIZE ", ", ginfo.nlinks);
+                            H5RS_asprintf_cat(rs, "%" PRId64 ", ", ginfo.max_corder);
+                            H5_trace_args_bool(rs, ginfo.mounted);
+                            H5RS_asprintf_cat(rs, "}");
+                        } break;
 
                         case 'o': /* H5G_obj_t */
                         {
