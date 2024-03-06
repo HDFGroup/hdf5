@@ -23,7 +23,7 @@
 /* Module Setup */
 /****************/
 #include "H5module.h" /* This source code file is part of the H5 module */
-#define H5I_FRIEND    /*suppress error about including H5Ipkg      */
+#define H5I_FRIEND    /* Suppress error about including H5Ipkg */
 
 /***********/
 /* Headers */
@@ -40,7 +40,7 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #ifdef H5_HAVE_PARALLEL
-/* datatypes of predefined drivers needed by H5_trace() */
+/* Datatypes of predefined drivers needed by H5_trace() */
 #include "H5FDmpio.h"
 #endif /* H5_HAVE_PARALLEL */
 
@@ -79,7 +79,7 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
  * Function:    H5_trace_args_bool
  *
  * Purpose:     This routine formats an bool and adds the output to
- *		the refcounted string (RS) argument.
+ *              the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -104,7 +104,7 @@ H5_trace_args_bool(H5RS_str_t *rs, bool val)
  * Function:    H5_trace_args_cset
  *
  * Purpose:     This routine formats an H5T_cset_t and adds the output to
- *		the refcounted string (RS) argument.
+ *              the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -148,7 +148,7 @@ H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
         default:
             H5RS_asprintf_cat(rs, "%ld", (long)cset);
             break;
-    } /* end switch */
+    }
 
     return SUCCEED;
 } /* end H5_trace_args_cset() */
@@ -197,14 +197,14 @@ H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
  * Function:    H5_trace_args
  *
  * Purpose:     This routine formats a set of function arguments, placing the
- *		resulting string in the refcounted string (RS) argument.
+ *              resulting string in the refcounted string (RS) argument.
  *
- *		The TYPE argument is a string which gives the type of each of
+ *              The TYPE argument is a string which gives the type of each of
  *              the following argument pairs.  Each type begins with zero or
- *		more asterisks (one for each level of indirection, although
- *		some types have one level of indirection already implied)
- *		followed by either one letter (lower case) or two letters
- *		(first one uppercase).
+ *              more asterisks (one for each level of indirection, although
+ *              some types have one level of indirection already implied)
+ *              followed by either one letter (lower case) or two letters
+ *              (first one uppercase).
  *
  *              The variable argument list consists of pairs of values. Each
  *              pair is a string which is the formal argument name in the

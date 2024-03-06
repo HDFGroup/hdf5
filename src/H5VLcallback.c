@@ -284,7 +284,7 @@ H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("e", "ix", connector_id, cap_flags);
+    H5TRACE2("e", "i*UL", connector_id, cap_flags);
 
     /* Check args */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -315,7 +315,7 @@ H5VLget_value(hid_t connector_id, H5VL_class_value_t *value /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("e", "ix", connector_id, value);
+    H5TRACE2("e", "i*VC", connector_id, value);
 
     /* Check args */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -663,7 +663,7 @@ H5VLconnector_str_to_info(const char *str, hid_t connector_id, void **info /*out
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "*six", str, connector_id, info);
+    H5TRACE3("e", "*si**x", str, connector_id, info);
 
     /* Call internal routine */
     if (H5VL__connector_str_to_info(str, connector_id, info) < 0)
@@ -763,7 +763,7 @@ H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "*xix", obj, connector_id, wrap_ctx);
+    H5TRACE3("e", "*xi**x", obj, connector_id, wrap_ctx);
 
     /* Check args and get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -1060,8 +1060,8 @@ H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE10("*x", "*x*#i*siiiiix", obj, loc_params, connector_id, name, type_id, space_id, acpl_id, aapl_id,
-              dxpl_id, req);
+    H5TRACE10("*x", "*x*#i*siiiii**x", obj, loc_params, connector_id, name, type_id, space_id, acpl_id,
+              aapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1163,7 +1163,7 @@ H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("*x", "*x*#i*siix", obj, loc_params, connector_id, name, aapl_id, dxpl_id, req);
+    H5TRACE7("*x", "*x*#i*sii**x", obj, loc_params, connector_id, name, aapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1260,7 +1260,7 @@ H5VLattr_read(void *obj, hid_t connector_id, hid_t mem_type_id, void *buf, hid_t
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xii*xix", obj, connector_id, mem_type_id, buf, dxpl_id, req);
+    H5TRACE6("e", "*xii*xi**x", obj, connector_id, mem_type_id, buf, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1359,7 +1359,7 @@ H5VLattr_write(void *obj, hid_t connector_id, hid_t mem_type_id, const void *buf
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xii*xix", obj, connector_id, mem_type_id, buf, dxpl_id, req);
+    H5TRACE6("e", "*xii*xi**x", obj, connector_id, mem_type_id, buf, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1456,7 +1456,7 @@ H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dx
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1561,7 +1561,7 @@ H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1662,7 +1662,7 @@ H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1796,7 +1796,7 @@ H5VLattr_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiix", obj, connector_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, connector_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1902,7 +1902,7 @@ H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connect
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE11("*x", "*x*#i*siiiiiix", obj, loc_params, connector_id, name, lcpl_id, type_id, space_id,
+    H5TRACE11("*x", "*x*#i*siiiiii**x", obj, loc_params, connector_id, name, lcpl_id, type_id, space_id,
               dcpl_id, dapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
@@ -2005,7 +2005,7 @@ H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("*x", "*x*#i*siix", obj, loc_params, connector_id, name, dapl_id, dxpl_id, req);
+    H5TRACE7("*x", "*x*#i*sii**x", obj, loc_params, connector_id, name, dapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2182,7 +2182,7 @@ H5VLdataset_read(size_t count, void *obj[], hid_t connector_id, hid_t mem_type_i
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "z**xi*i*i*ii**xx", count, obj, connector_id, mem_type_id, mem_space_id, file_space_id,
+    H5TRACE9("e", "z**xi*i*i*ii**x**x", count, obj, connector_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf, req);
 
     /* Check args and get class pointer */
@@ -2372,7 +2372,7 @@ H5VLdataset_write(size_t count, void *obj[], hid_t connector_id, hid_t mem_type_
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "z**xi*i*i*ii**xx", count, obj, connector_id, mem_type_id, mem_space_id, file_space_id,
+    H5TRACE9("e", "z**xi*i*i*ii**x**x", count, obj, connector_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf, req);
 
     /* Check args and get class pointer */
@@ -2483,7 +2483,7 @@ H5VLdataset_get(void *obj, hid_t connector_id, H5VL_dataset_get_args_t *args, hi
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2583,7 +2583,7 @@ H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2682,7 +2682,7 @@ H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, 
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2832,7 +2832,7 @@ H5VLdataset_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiix", obj, connector_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, connector_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2936,8 +2936,8 @@ H5VLdatatype_commit(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE10("*x", "*x*#i*siiiiix", obj, loc_params, connector_id, name, type_id, lcpl_id, tcpl_id, tapl_id,
-              dxpl_id, req);
+    H5TRACE10("*x", "*x*#i*siiiii**x", obj, loc_params, connector_id, name, type_id, lcpl_id, tcpl_id,
+              tapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3039,7 +3039,7 @@ H5VLdatatype_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("*x", "*x*#i*siix", obj, loc_params, connector_id, name, tapl_id, dxpl_id, req);
+    H5TRACE7("*x", "*x*#i*sii**x", obj, loc_params, connector_id, name, tapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3138,7 +3138,7 @@ H5VLdatatype_get(void *obj, hid_t connector_id, H5VL_datatype_get_args_t *args, 
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3238,7 +3238,7 @@ H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3381,7 +3381,7 @@ H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args,
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3525,7 +3525,7 @@ H5VLdatatype_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*ou
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiix", obj, connector_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, connector_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3628,7 +3628,7 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
     void                 *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("*x", "*sIuiiix", name, flags, fcpl_id, fapl_id, dxpl_id, req);
+    H5TRACE6("*x", "*sIuiii**x", name, flags, fcpl_id, fapl_id, dxpl_id, req);
 
     /* Get the VOL info from the fapl */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -3889,7 +3889,7 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
     void                 *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("*x", "*sIuiix", name, flags, fapl_id, dxpl_id, req);
+    H5TRACE5("*x", "*sIuii**x", name, flags, fapl_id, dxpl_id, req);
 
     /* Get the VOL info from the fapl */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -3990,7 +3990,7 @@ H5VLfile_get(void *obj, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dx
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4125,7 +4125,7 @@ H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -4221,7 +4221,7 @@ H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4365,7 +4365,7 @@ H5VLfile_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiix", obj, connector_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, connector_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4467,7 +4467,7 @@ H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("*x", "*x*#i*siiiix", obj, loc_params, connector_id, name, lcpl_id, gcpl_id, gapl_id, dxpl_id,
+    H5TRACE9("*x", "*x*#i*siiii**x", obj, loc_params, connector_id, name, lcpl_id, gcpl_id, gapl_id, dxpl_id,
              req);
 
     /* Check args and get class pointer */
@@ -4570,7 +4570,7 @@ H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_i
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("*x", "*x*#i*siix", obj, loc_params, connector_id, name, gapl_id, dxpl_id, req);
+    H5TRACE7("*x", "*x*#i*sii**x", obj, loc_params, connector_id, name, gapl_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4667,7 +4667,7 @@ H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t 
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4766,7 +4766,7 @@ H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *ar
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -4867,7 +4867,7 @@ H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hi
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5012,7 +5012,7 @@ H5VLgroup_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiix", obj, connector_id, dxpl_id, req);
+    H5TRACE4("e", "*xii**x", obj, connector_id, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5127,7 +5127,7 @@ H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE8("e", "*!*x*#iiiix", args, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
+    H5TRACE8("e", "*!*x*#iiii**x", args, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -5233,8 +5233,8 @@ H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id,
-             dxpl_id, req);
+    H5TRACE9("e", "*x*#*x*#iiii**x", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id,
+             lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -5340,8 +5340,8 @@ H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id,
-             dxpl_id, req);
+    H5TRACE9("e", "*x*#*x*#iiii**x", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id,
+             lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -5439,7 +5439,7 @@ H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5542,7 +5542,7 @@ H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5643,7 +5643,7 @@ H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5805,7 +5805,7 @@ H5VLobject_open(void *obj, const H5VL_loc_params_t *params, hid_t connector_id, 
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("*x", "*x*#i*Itix", obj, params, connector_id, opened_type, dxpl_id, req);
+    H5TRACE6("*x", "*x*#i*Iti**x", obj, params, connector_id, opened_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5915,8 +5915,8 @@ H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const ch
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE11("e", "*x*#*s*x*#*siiiix", src_obj, src_loc_params, src_name, dst_obj, dst_loc_params, dst_name,
-              connector_id, ocpypl_id, lcpl_id, dxpl_id, req);
+    H5TRACE11("e", "*x*#*s*x*#*siiii**x", src_obj, src_loc_params, src_name, dst_obj, dst_loc_params,
+              dst_name, connector_id, ocpypl_id, lcpl_id, dxpl_id, req);
 
     /* Check args and get class pointers */
     if (NULL == src_obj || NULL == dst_obj)
@@ -6017,7 +6017,7 @@ H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_i
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6120,7 +6120,7 @@ H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6221,7 +6221,7 @@ H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
+    H5TRACE6("e", "*x*#i*!i**x", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -6392,7 +6392,7 @@ H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t l
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiVLx", obj, connector_id, lvl, conn_cls);
+    H5TRACE4("e", "*xiVL**#", obj, connector_id, lvl, conn_cls);
 
     /* Check args */
     if (NULL == obj)
@@ -6464,7 +6464,7 @@ H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "*xix", info, connector_id, cap_flags);
+    H5TRACE3("e", "*xi*UL", info, connector_id, cap_flags);
 
     /* Check args */
     if (NULL == cap_flags)
@@ -6568,7 +6568,7 @@ H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, 
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xiVSIsx", obj, connector_id, subcls, opt_type, flags);
+    H5TRACE5("e", "*xiVSIs*UL", obj, connector_id, subcls, opt_type, flags);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6671,7 +6671,7 @@ H5VLrequest_wait(void *req, hid_t connector_id, uint64_t timeout, H5VL_request_s
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiULx", req, connector_id, timeout, status);
+    H5TRACE4("e", "*xiUL*#", req, connector_id, timeout, status);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6878,7 +6878,7 @@ H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status 
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "*xix", req, connector_id, status);
+    H5TRACE3("e", "*xi*#", req, connector_id, status);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -7415,7 +7415,7 @@ H5VLblob_get(void *obj, hid_t connector_id, const void *blob_id, void *buf /*out
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xi*xxz*x", obj, connector_id, blob_id, buf, size, ctx);
+    H5TRACE6("e", "*xi*x*xz*x", obj, connector_id, blob_id, buf, size, ctx);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -8038,7 +8038,7 @@ H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dx
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
+    H5TRACE5("e", "*xi*!i**x", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)

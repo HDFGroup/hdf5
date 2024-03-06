@@ -893,7 +893,7 @@ H5Pget_nlinks(hid_t plist_id, size_t *nlinks /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, nlinks);
+    H5TRACE2("e", "i*z", plist_id, nlinks);
 
     if (!nlinks)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer passed in");
@@ -964,7 +964,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", plist_id, prefix, size);
+    H5TRACE3("Zs", "i*sz", plist_id, prefix, size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
@@ -1109,7 +1109,7 @@ H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", lapl_id, flags);
+    H5TRACE2("e", "i*Iu", lapl_id, flags);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
@@ -1184,7 +1184,7 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func /*out*/, void **op_dat
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", lapl_id, func, op_data);
+    H5TRACE3("e", "i*Lt**x", lapl_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))

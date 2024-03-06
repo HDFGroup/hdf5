@@ -1667,7 +1667,7 @@ H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revi
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*six", filename, fapl_id, revision_count);
+    H5TRACE3("e", "*si*UL", filename, fapl_id, revision_count);
 
     /* Check args */
     if (!filename || !strcmp(filename, ""))

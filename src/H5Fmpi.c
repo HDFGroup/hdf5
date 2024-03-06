@@ -326,7 +326,7 @@ H5Fget_mpi_atomicity(hid_t file_id, bool *flag /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", file_id, flag);
+    H5TRACE2("e", "i*!", file_id, flag);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))

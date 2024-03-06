@@ -199,7 +199,7 @@ $Source = "";
                "H5FD_t"                     => "#",
                "H5FD_hdfs_fapl_t"           => "#",
                "H5FD_mirror_fapl_t"         => "#",
-               "H5FD_onion_fapl_t"         => "#",
+               "H5FD_onion_fapl_t"          => "#",
                "H5FD_ros3_fapl_t"           => "#",
                "H5FD_splitter_vfd_config_t" => "#",
                "H5L_class_t"                => "#",
@@ -305,10 +305,18 @@ sub rewrite_func ($$$$$) {
     $trace = "H5TRACE0(\"$rettype\", \"\");\n";
     $argtrace = "H5ARG_TRACE0(\"\")";
   } else {
-    # Split arguments.  First convert `/*in,out*/' to get rid of the
-    # comma and remove lines beginning with a '#', then split the arguments
-    # on commas.
-    $args =~ s/(\/\*\s*in),\s*(out\s*\*\/)/$1_$2/g;     # Get rid of comma in 'in,out'
+    # Split arguments
+    #
+    # First remove:
+    #   * /*in*/, /*out*/, /*in_out*/, and /*in,out*/ comments
+    #   * preprocessor lines that start with #
+    #   * H5FL_TRACKING_PARAMS macros (free list code only)
+    #
+    # then split the function arguments on commas
+    $args =~ s/\/\*\s*in\s*\*\///g;  # Get rid of /*in*/
+    $args =~ s/\/\*\s*out\s*\*\///g; # Get rid of /*out*/
+    $args =~ s/\/\*\s*in,\s*out\s*\*\///g; # Get rid of /*in,out*/
+    $args =~ s/\/\*\s*in_out\s*\*\///g; # Get rid of /*in,out*/
     $args =~ s/H5FL_TRACK_PARAMS//g; # Remove free list macro
     $args =~ s/\n#.*?\n/\n/g;        # Remove lines beginning with '#'
     my @args = split /,[\s\n]*/, $args;
@@ -320,8 +328,7 @@ sub rewrite_func ($$$$$) {
         next;
       }
       unless ($arg=~/^((\s*[a-z_A-Z](\w|\*)*\s+)+(\s*\*\s*|\s*const\s*|\s*volatile\s*)*)
-              ([a-z_A-Z]\w*)(\[.*?\])?
-              (\s*\/\*\s*(in|out|in_out)\s*\*\/)?\s*$/x) {
+              ([a-z_A-Z]\w*)(\[.*?\])?\s*$/x) {
         errmesg $file, $name, "unable to parse \`$arg\'";
         goto error;
       } else {
