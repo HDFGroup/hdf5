@@ -49,7 +49,6 @@ jobs:
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
             os: windows-latest
-            toolchain: ""
             cpp: ON
             fortran: OFF
             java: ON
@@ -83,7 +82,6 @@ jobs:
             mirror_vfd: ON
             direct_vfd: ON
             ros3_vfd: ON
-            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
 
@@ -106,7 +104,6 @@ jobs:
             mirror_vfd: ON
             direct_vfd: OFF
             ros3_vfd: OFF
-            toolchain: "-DCMAKE_TOOLCHAIN_FILE=config/toolchain/clang.cmake"
             generator: "-G Ninja"
             run_tests: true
 
@@ -182,7 +179,6 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_DOXY_WARNINGS=ON \
@@ -210,7 +206,6 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            ${{ matrix.toolchain }} \
             -DBUILD_SHARED_LIBS=ON \
             -DBUILD_STATIC_LIBS=${{ (matrix.os != 'windows-latest') }} \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
