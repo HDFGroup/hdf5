@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.5d6acc5</span>
+   &#160;<span id="projectnumber">1.15.0.fe5d0d5</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -743,6 +743,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#gafbdc98b45749e5cfbaf1a8689f3c403d" title="Sets locations and sizes of floating point bit fields.">H5Tset_fields()</a> sets the locations and sizes of the various floating-point bit fields. The field positions are bit positions in the significant region of the datatype. Bits are numbered with the least significant bit number zero.</p>
 <p>Fields are not allowed to extend beyond the number of bits of precision, nor are they allowed to overlap with one another.</p>
+<dl class="section note"><dt>Note</dt><dd>The size and precision of, as well as any offset for, a floating-point datatype should generally be set appropriately before calling <a class="el" href="#gafbdc98b45749e5cfbaf1a8689f3c403d" title="Sets locations and sizes of floating point bit fields.">H5Tset_fields()</a>. Otherwise, <a class="el" href="#gafbdc98b45749e5cfbaf1a8689f3c403d" title="Sets locations and sizes of floating point bit fields.">H5Tset_fields()</a> may fail when checking that the values make sense for the datatype. However, if the precision of a floating-point datatype will be decreased during its creation with a call to <a class="el" href="#gab0f4dccfc2fb47bf2c7e06c9bf84c1f7" title="Sets the precision of an atomic datatype.">H5Tset_precision()</a>, then <a class="el" href="#gafbdc98b45749e5cfbaf1a8689f3c403d" title="Sets locations and sizes of floating point bit fields.">H5Tset_fields()</a> should instead be called first to set appropriate values for <code>spos</code>, <code>epos</code>, <code>esize</code>, <code>mpos</code> and <code>msize</code> before reducing the precision of the datatype with <a class="el" href="#gab0f4dccfc2fb47bf2c7e06c9bf84c1f7" title="Sets the precision of an atomic datatype.">H5Tset_precision()</a>. This is of particular concern if another floating-point datatype was copied as a starting point.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
 </div>
