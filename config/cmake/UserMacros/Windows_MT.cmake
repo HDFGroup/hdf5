@@ -20,7 +20,7 @@
 # INCLUDE(path_to_file/WINDOWS_MT.cmake)
 
 #-----------------------------------------------------------------------------
-# Option to Build with Static CRT libraries on Windows
+# Option to Build with Static CRT libraries on Windows (USE WITH CAUTION!!!)
 #-----------------------------------------------------------------------------
 option (HDF5_BUILD_STATIC_CRT_LIBS "Build With Static Windows CRT Libraries" OFF)
 mark_as_advanced (HDF5_BUILD_STATIC_CRT_LIBS)
