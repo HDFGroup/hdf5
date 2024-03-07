@@ -758,7 +758,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size /*out*/)
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*sx", id, name, size);
+    H5TRACE3("e", "i*s*z", id, name, size);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -963,7 +963,7 @@ H5Pget_nprops(hid_t id, size_t *nprops /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", id, nprops);
+    H5TRACE2("e", "i*z", id, nprops);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -1263,7 +1263,7 @@ H5Pget(hid_t plist_id, const char *name, void *value /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*sx", plist_id, name, value);
+    H5TRACE3("e", "i*s*x", plist_id, name, value);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))

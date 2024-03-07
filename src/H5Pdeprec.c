@@ -449,7 +449,7 @@ H5Pget_version(hid_t plist_id, unsigned *super /*out*/, unsigned *freelist /*out
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ixxxx", plist_id, super, freelist, stab, shhdr);
+    H5TRACE5("e", "i*Iu*Iu*Iu*Iu", plist_id, super, freelist, stab, shhdr);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
@@ -605,7 +605,7 @@ H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy /*out*/, hsize
     herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, strategy, threshold);
+    H5TRACE3("e", "i*Ft*h", plist_id, strategy, threshold);
 
     /* Get current file space info */
     if (H5Pget_file_space_strategy(plist_id, &new_strategy, &new_persist, &new_threshold) < 0)

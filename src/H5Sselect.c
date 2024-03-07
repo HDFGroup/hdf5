@@ -596,7 +596,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t start[] /*out*/, hsize_t end[] /*out
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", spaceid, start, end);
+    H5TRACE3("e", "i*h*h", spaceid, start, end);
 
     /* Check args */
     if (start == NULL || end == NULL)
@@ -2901,7 +2901,7 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "izzxxxx", sel_iter_id, maxseq, maxelmts, nseq, nelmts, off, len);
+    H5TRACE7("e", "izz*z*z*h*z", sel_iter_id, maxseq, maxelmts, nseq, nelmts, off, len);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))

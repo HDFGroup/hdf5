@@ -47,7 +47,7 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*out*/, size_t 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "ixxxxx", type_id, spos, epos, esize, mpos, msize);
+    H5TRACE6("e", "i*z*z*z*z*z", type_id, spos, epos, esize, mpos, msize);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

@@ -679,7 +679,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation /*out*/)
     herr_t                  ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dset_id, allocation);
+    H5TRACE2("e", "i*Ds", dset_id, allocation);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -1053,7 +1053,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_i
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
+    H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     /* Read the data */
     if (H5D__read_api_common(1, &dset_id, &mem_type_id, &mem_space_id, &file_space_id, dxpl_id, &buf, NULL,
@@ -1083,7 +1083,7 @@ H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "*s*sIuiiiiixi", app_file, app_func, app_line, dset_id, mem_type_id, mem_space_id,
+    H5TRACE10("e", "*s*sIuiiiii*xi", app_file, app_func, app_line, dset_id, mem_type_id, mem_space_id,
               file_space_id, dxpl_id, buf, es_id);
 
     /* Set up request token pointer for asynchronous operation */
@@ -1099,7 +1099,7 @@ H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE10(__func__, "*s*sIuiiiiixi", app_file, app_func, app_line, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
+                        H5ARG_TRACE10(__func__, "*s*sIuiiiii*xi", app_file, app_func, app_line, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -1124,7 +1124,7 @@ H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spac
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "z*i*i*i*iix", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
+    H5TRACE7("e", "z*i*i*i*ii**x", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     if (count == 0)
         HGOTO_DONE(SUCCEED);
@@ -1159,7 +1159,7 @@ H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_lin
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE11("e", "*s*sIuz*i*i*i*iixi", app_file, app_func, app_line, count, dset_id, mem_type_id,
+    H5TRACE11("e", "*s*sIuz*i*i*i*ii**xi", app_file, app_func, app_line, count, dset_id, mem_type_id,
               mem_space_id, file_space_id, dxpl_id, buf, es_id);
 
     /* Set up request token pointer for asynchronous operation */
@@ -1175,7 +1175,7 @@ H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_lin
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(__func__, "*s*sIuz*i*i*i*iixi", app_file, app_func, app_line, count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
+                        H5ARG_TRACE11(__func__, "*s*sIuz*i*i*i*ii**xi", app_file, app_func, app_line, count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -1201,7 +1201,7 @@ H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fil
     herr_t                              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ii*h*Iux", dset_id, dxpl_id, offset, filters, buf);
+    H5TRACE5("e", "ii*h*Iu*x", dset_id, dxpl_id, offset, filters, buf);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -1581,7 +1581,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
     herr_t          ret_value      = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "DS*xiix", op, op_data, type_id, dst_space_id, dst_buf);
+    H5TRACE5("e", "DS*xii*x", op, op_data, type_id, dst_space_id, dst_buf);
 
     /* Check args */
     if (op == NULL)
@@ -1674,7 +1674,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*xizxDg*x", src_space_id, src_buf, type_id, dst_buf_size, dst_buf, op, op_data);
+    H5TRACE7("e", "i*xiz*xDg*x", src_space_id, src_buf, type_id, dst_buf_size, dst_buf, op, op_data);
 
     /* Check args */
     if (NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
@@ -1906,7 +1906,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iiix", dataset_id, type_id, space_id, size);
+    H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(dataset_id)))
@@ -2201,7 +2201,7 @@ H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type /*out*/)
     herr_t                              ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dset_id, idx_type);
+    H5TRACE2("e", "i*Dk", dset_id, idx_type);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -2243,7 +2243,7 @@ H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_n
     herr_t                              ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*hx", dset_id, offset, chunk_nbytes);
+    H5TRACE3("e", "i*h*h", dset_id, offset, chunk_nbytes);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -2294,7 +2294,7 @@ H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks /*out*/)
     herr_t                              ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iix", dset_id, fspace_id, nchunks);
+    H5TRACE3("e", "ii*h", dset_id, fspace_id, nchunks);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -2346,7 +2346,7 @@ H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *of
     herr_t                              ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "iihxxxx", dset_id, fspace_id, chk_index, offset, filter_mask, addr, size);
+    H5TRACE7("e", "iih*h*Iu*a*h", dset_id, fspace_id, chk_index, offset, filter_mask, addr, size);
 
     /* Check arguments */
     if (NULL == offset && NULL == filter_mask && NULL == addr && NULL == size)
@@ -2415,7 +2415,7 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
     herr_t                              ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*hxxx", dset_id, offset, filter_mask, addr, size);
+    H5TRACE5("e", "i*h*Iu*a*h", dset_id, offset, filter_mask, addr, size);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))

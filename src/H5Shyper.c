@@ -4820,7 +4820,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihhx", spaceid, startblock, numblocks, buf);
+    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if (buf == NULL)
@@ -12430,7 +12430,7 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[] /*out*/, hsize_t stride[
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ixxxx", spaceid, start, stride, count, block);
+    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

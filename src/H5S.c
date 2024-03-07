@@ -876,7 +876,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[] /*out*/, hsize_t maxdim
     int    ret_value = -1;
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Is", "ixx", space_id, dims, maxdims);
+    H5TRACE3("Is", "i*h*h", space_id, dims, maxdims);
 
     /* Check args */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))

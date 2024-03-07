@@ -2846,7 +2846,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata /*out*/)
     H5T_conv_t  ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE3("TC", "iix", src_id, dst_id, pcdata);
+    H5TRACE3("TC", "ii**!", src_id, dst_id, pcdata);
 
     /* Check args */
     if (NULL == (src = (H5T_t *)H5I_object_verify(src_id, H5I_DATATYPE)) ||
