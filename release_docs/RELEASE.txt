@@ -47,6 +47,21 @@ New Features
 
     Configuration:
     -------------
+    - Added support for the new MSVC preprocessor
+
+      Microsoft added support for a new, standards-conformant preprocessor
+      to MSVC, which can be enabled with the /Zc:preprocessor option. This
+      preprocessor would trip over our HDopen() variadic function-like
+      macro, which uses a feature that only works with the legacy preprocessor.
+
+      ifdefs have been added that select the correct HDopen() form and
+      allow building HDF5 with the /Zc:preprocessor option.
+
+      The HDopen() macro is located in an internal header file and only
+      affects building the HDF5 library from source.
+
+      Fixes GitHub #2515
+
     - Renamed HDF5_ENABLE_USING_MEMCHECKER to HDF5_USING_ANALYSIS_TOOL
 
       The HDF5_USING_ANALYSIS_TOOL is used to indicate to test macros that
