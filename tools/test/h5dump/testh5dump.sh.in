@@ -575,7 +575,7 @@ TOOLTESTC() {
 
     tmp_file=/tmp/h5test_tmp_$$
     cp $actual $tmp_file
-    sed -e 's/SIZE [0-9]* ($txttype\.[0-9][0-9][0-9]:1 COMPRESSION)/SIZE XXXX ($txttype.XXX:1 COMPRESSION)/' \
+    sed -e 's/SIZE [0-9]* ("$txttype"\.[0-9][0-9][0-9]:1 COMPRESSION)/SIZE XXXX ("$txttype".XXX:1 COMPRESSION)/' \
     < $tmp_file > $actual
     rm -f $tmp_file
 
