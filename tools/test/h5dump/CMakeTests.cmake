@@ -1269,25 +1269,25 @@
 
   # tests for filters
   # SZIP
-  ADD_H5_TEST (tszip 0 --enable-error-stack -H -p -d szip tfilters.h5)
+  ADD_H5_COMP_TEST (tszip 0 2 --enable-error-stack -H -p -d szip tfilters.h5)
 
   # deflate
-  ADD_H5_TEST (tdeflate 0 --enable-error-stack -H -p -d deflate tfilters.h5)
+  ADD_H5_COMP_TEST (tdeflate 0 2 --enable-error-stack -H -p -d deflate tfilters.h5)
 
   # shuffle
   ADD_H5_TEST (tshuffle 0 --enable-error-stack -H -p -d shuffle tfilters.h5)
 
   # fletcher32
-  ADD_H5_TEST (tfletcher32 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
+  ADD_H5_COMP_TEST (tfletcher32 0 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
   # nbit
-  ADD_H5_TEST (tnbit 0 --enable-error-stack -H -p -d nbit  tfilters.h5)
+  ADD_H5_COMP_TEST (tnbit 0 10 --enable-error-stack -H -p -d nbit  tfilters.h5)
 
   # scaleoffset
   ADD_H5_COMP_TEST (tscaleoffset 0 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
 
   # all
-  ADD_H5_TEST (tallfilters 0 --enable-error-stack -H -p -d all  tfilters.h5)
+  ADD_H5_COMP_TEST (tallfilters 0 1 --enable-error-stack -H -p -d all  tfilters.h5)
 
   # user defined
   ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)

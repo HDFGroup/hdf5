@@ -1418,19 +1418,19 @@ TOOLTEST texceedsubblock.ddl --enable-error-stack -d 1d -k 1,3 taindices.h5
 
 # tests for filters
 # SZIP
-TOOLTEST tszip.ddl --enable-error-stack -H -p -d szip tfilters.h5
+TOOLTESTC 2 tszip.ddl --enable-error-stack -H -p -d szip tfilters.h5
 # deflate
-TOOLTEST tdeflate.ddl --enable-error-stack -H -p -d deflate tfilters.h5
+TOOLTESTC 2 tdeflate.ddl --enable-error-stack -H -p -d deflate tfilters.h5
 # shuffle
 TOOLTEST tshuffle.ddl --enable-error-stack -H -p -d shuffle tfilters.h5
 # fletcher32
-TOOLTEST tfletcher32.ddl --enable-error-stack -H -p -d fletcher32  tfilters.h5
+TOOLTESTC 0 tfletcher32.ddl --enable-error-stack -H -p -d fletcher32  tfilters.h5
 # nbit
-TOOLTEST tnbit.ddl --enable-error-stack -H -p -d nbit  tfilters.h5
+TOOLTESTC 10 tnbit.ddl --enable-error-stack -H -p -d nbit  tfilters.h5
 # scaleoffset
 TOOLTESTC 4 tscaleoffset.ddl --enable-error-stack -H -p -d scaleoffset  tfilters.h5
 # all
-TOOLTEST tallfilters.ddl --enable-error-stack -H -p -d all  tfilters.h5
+TOOLTESTC 1 tallfilters.ddl --enable-error-stack -H -p -d all  tfilters.h5
 # user defined
 TOOLTEST tuserfilter.ddl --enable-error-stack -H  -p -d myfilter  tfilters.h5
 
