@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - New option for building with static CRT in Windows
+
+      The following option has been added:
+        HDF5_BUILD_STATIC_CRT_LIBS    "Build With Static Windows CRT Libraries"          OFF
+      Because our minimum CMake is 3.18, the macro to change runtime flags no longer
+      works as CMake changed the default behavior in CMake 3.15.
+
+      Fixes GitHub issue #3984
+
     - Added support for the new MSVC preprocessor
 
       Microsoft added support for a new, standards-conformant preprocessor

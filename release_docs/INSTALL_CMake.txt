@@ -968,13 +968,10 @@ VII. User Defined Options for HDF5 Libraries with CMake
 ========================================================================
 
 Support for User Defined macros and options has been added. The file
-UserMacros.cmake has an example of the technique. In the folder,
-config/cmake/UserMacros, is an implementation for Windows Visual Studio
-users for linking libraries to the static CRT - Windows_MT.cmake.
+UserMacros.cmake has an example of the technique.
 
-Copy the contents of the file, both macro and option, into the
-UserMacros.cmake file. Then enable the option to the CMake configuration,
-build and test process.
+Replace the template code with your macro in the UserMacros.cmake file.
+Then enable the option to the CMake configuration, build and test process.
 
 
 ========================================================================
