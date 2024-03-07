@@ -16,8 +16,8 @@ HDF5 version 1.15.0 currently under development
 *Please refer to the release_docs/INSTALL file for installation instructions.*
 
 This repository contains a high-performance library's source code and a file format
-specification that implement the HDF5® data model. The model has been adopted across
-many industries and this implementation has become a de facto data management standard
+specification that implements the HDF5® data model. The model has been adopted across
+many industries, and this implementation has become a de facto data management standard
 in science, engineering, and research communities worldwide.
 
 The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more

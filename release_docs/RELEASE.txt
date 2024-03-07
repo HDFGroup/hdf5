@@ -56,6 +56,31 @@ New Features
 
       Fixes GitHub issue #3984
 
+    - Added support for the new MSVC preprocessor
+
+      Microsoft added support for a new, standards-conformant preprocessor
+      to MSVC, which can be enabled with the /Zc:preprocessor option. This
+      preprocessor would trip over our HDopen() variadic function-like
+      macro, which uses a feature that only works with the legacy preprocessor.
+
+      ifdefs have been added that select the correct HDopen() form and
+      allow building HDF5 with the /Zc:preprocessor option.
+
+      The HDopen() macro is located in an internal header file and only
+      affects building the HDF5 library from source.
+
+      Fixes GitHub #2515
+
+    - Renamed HDF5_ENABLE_USING_MEMCHECKER to HDF5_USING_ANALYSIS_TOOL
+
+      The HDF5_USING_ANALYSIS_TOOL is used to indicate to test macros that
+      an analysis tool is being used and that the tests should not use
+      the runTest.cmake macros and it's variations. The analysis tools,
+      like valgrind, test the macro code instead of the program under test.
+
+      HDF5_ENABLE_USING_MEMCHECKER is still used for controlling the HDF5
+      define, H5_USING_MEMCHECKER.
+
     - New option for building and naming tools in CMake
 
       The following option has been added:
@@ -405,7 +430,13 @@ New Features
     Fortran Library:
     ----------------
 
-    - Add API support for Fortran MPI_F08 module definitions:
+    - Added Fortran H5E APIs:
+      h5eregister_class_f, h5eunregister_class_f, h5ecreate_msg_f, h5eclose_msg_f
+      h5eget_msg_f, h5epush_f, h5eget_num_f, h5ewalk_f, h5eget_class_name_f,
+      h5eappend_stack_f, h5eget_current_stack_f, h5eset_current_stack_f, h5ecreate_stack_f,
+      h5eclose_stack_f, h5epop_f, h5eprint_f (C h5eprint v2 signature)
+
+    - Added API support for Fortran MPI_F08 module definitions:
       Adds support for MPI's MPI_F08 module datatypes: type(MPI_COMM) and type(MPI_INFO) for HDF5 APIs:
       H5PSET_FAPL_MPIO_F, H5PGET_FAPL_MPIO_F, H5PSET_MPI_PARAMS_F, H5PGET_MPI_PARAMS_F
       Ref. #3951
@@ -498,6 +529,16 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a bug where H5Tset_fields does not account for any offset
+      set for a floating-point datatype when determining if values set
+      for spos, epos, esize, mpos and msize make sense for the datatype
+
+      Previously, H5Tset_fields did not take datatype offsets into account
+      when determining if the values set make sense for the datatype.
+      This would cause the function to fail when the precision for a
+      datatype is correctly set such that the offset bits are not included.
+      This has now been fixed.
+
     - Fixed H5Fget_access_plist so that it returns the file locking
       settings for a file
 
@@ -1157,7 +1198,11 @@ Bug Fixes since HDF5-1.14.0 release
 
     Fortran API
     -----------
-    -
+    - Fixed: HDF5 fails to compile with -Werror=lto-type-mismatch
+
+      Removed the use of the offending C stub wrapper.
+
+      Fixes GitHub issue #3987
 
 
     High-Level Library
@@ -1393,6 +1438,10 @@ Known Problems
 
     The subsetting option in ph5diff currently will fail and should be avoided.
     The subsetting option works correctly in serial h5diff.
+
+    Flang Fortran compilation will fail (last check version 17) due to not yet
+    implemented: (1) derived type argument passed by value (H5VLff.F90),
+    and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
 
     Several tests currently fail on certain platforms:
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.

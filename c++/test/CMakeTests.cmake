@@ -17,7 +17,7 @@ add_custom_target(cpp_testhdf5_files ALL COMMENT "Copying files needed by cpp_te
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-if (HDF5_ENABLE_USING_MEMCHECKER)
+if (HDF5_USING_ANALYSIS_TOOL)
   add_test (NAME CPP_testhdf5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_testhdf5>)
 else ()
   add_test (NAME CPP_testhdf5 COMMAND "${CMAKE_COMMAND}"
