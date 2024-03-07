@@ -1042,7 +1042,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*sxzi", loc_id, name, buf, size, lapl_id);
+    H5TRACE5("e", "i*s*xzi", loc_id, name, buf, size, lapl_id);
 
     /* Check arguments */
     if (!name || !*name)
@@ -1100,7 +1100,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, buf, size, lapl_id);
+    H5TRACE8("e", "i*sIiIoh*xzi", loc_id, group_name, idx_type, order, n, buf, size, lapl_id);
 
     /* Check arguments */
     if (!group_name || !*group_name)
@@ -1272,7 +1272,7 @@ H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo /*out*/, hid_t l
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
+    H5TRACE4("e", "i*s*!i", loc_id, name, linfo, lapl_id);
 
     /* Check arguments */
     if (!name || !*name)
@@ -1325,7 +1325,7 @@ H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo, lapl_id);
+    H5TRACE7("e", "i*sIiIoh*!i", loc_id, group_name, idx_type, order, n, linfo, lapl_id);
 
     /* Check arguments */
     if (!group_name || !*group_name)
@@ -1515,7 +1515,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     ssize_t              ret_value     = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE8("Zs", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, name, size, lapl_id);
+    H5TRACE8("Zs", "i*sIiIoh*szi", loc_id, group_name, idx_type, order, n, name, size, lapl_id);
 
     /* Check arguments */
     if (!group_name || !*group_name)

@@ -591,7 +591,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *group_info /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", loc_id, group_info);
+    H5TRACE2("e", "i*GI", loc_id, group_info);
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_api_common(loc_id, group_info, NULL, NULL) < 0)
@@ -620,7 +620,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id);
+    H5TRACE6("e", "*s*sIui*GIi", app_file, app_func, app_line, loc_id, group_info, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -634,7 +634,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                H5ARG_TRACE6(__func__, "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
+                H5ARG_TRACE6(__func__, "*s*sIui*GIi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -699,7 +699,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *group_info /*out
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sxi", loc_id, name, group_info, lapl_id);
+    H5TRACE4("e", "i*s*GIi", loc_id, name, group_info, lapl_id);
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_by_name_api_common(loc_id, name, group_info, lapl_id, NULL, NULL) < 0)
@@ -728,7 +728,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id);
+    H5TRACE8("e", "*s*sIui*s*GIii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -742,7 +742,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(__func__, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE8(__func__, "*s*sIui*s*GIii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
@@ -809,7 +809,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, group_info, lapl_id);
+    H5TRACE7("e", "i*sIiIoh*GIi", loc_id, group_name, idx_type, order, n, group_info, lapl_id);
 
     /* Retrieve group information synchronously */
     if (H5G__get_info_by_idx_api_common(loc_id, group_name, idx_type, order, n, group_info, lapl_id, NULL,
@@ -840,8 +840,8 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE11("e", "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n,
-              group_info, lapl_id, es_id);
+    H5TRACE11("e", "*s*sIui*sIiIoh*GIii", app_file, app_func, app_line, loc_id, group_name, idx_type, order,
+              n, group_info, lapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -856,7 +856,7 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(__func__, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE11(__func__, "*s*sIui*sIiIoh*GIii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set");
 
