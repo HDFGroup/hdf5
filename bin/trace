@@ -318,7 +318,7 @@ sub rewrite_func ($$$$$) {
     $args =~ s/\/\*\s*in\s*\*\///g;  # Get rid of /*in*/
     $args =~ s/\/\*\s*out\s*\*\///g; # Get rid of /*out*/
     $args =~ s/\/\*\s*in,\s*out\s*\*\///g; # Get rid of /*in,out*/
-    $args =~ s/\/\*\s*in_out\s*\*\///g; # Get rid of /*in,out*/
+    $args =~ s/\/\*\s*in_out\s*\*\///g; # Get rid of /*in_out*/
     $args =~ s/H5FL_TRACK_PARAMS//g; # Remove free list macro
     $args =~ s/\n#.*?\n/\n/g;        # Remove lines beginning with '#'
     my @args = split /,[\s\n]*/, $args;
