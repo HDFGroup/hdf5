@@ -530,6 +530,70 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_DMP_MASK testname testtype resultcode resultfile)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_USING_ANALYSIS_TOOL)
+        add_test (
+            NAME H5REPACK_DMP-${testname}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+        )
+        set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
+      endif ()
+    else ()
+      add_test (
+          NAME H5REPACK_DMP-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
+      )
+      add_test (
+          NAME H5REPACK_DMP-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+      )
+      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
+          DEPENDS H5REPACK_DMP-${testname}-clear-objects
+      )
+      if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
+      endif ()
+      if (NOT HDF5_USING_ANALYSIS_TOOL)
+        add_test (
+            NAME H5REPACK_DMP-h5dump-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
+                -D "TEST_FILTER:STRING=SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
+                -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (2.XXX:1 COMPRESSION)"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+        )
+        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
+            DEPENDS H5REPACK_DMP-${testname}
+        )
+        if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+          set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
+        endif ()
+        add_test (
+            NAME H5REPACK_DMP-${testname}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
+        )
+        set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
+            DEPENDS H5REPACK_DMP-h5dump-${testname}
+        )
+      else ()
+        add_test (
+            NAME H5REPACK_DMP-${testname}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
+        )
+        set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
+            DEPENDS H5REPACK_DMP-${testname}
+        )
+      endif ()
+    endif ()
+  endmacro ()
+
   macro (ADD_H5_DMP_NO_OPT_TEST testname testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_USING_ANALYSIS_TOOL)
@@ -1481,7 +1545,7 @@
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif ()
-  ADD_H5_DMP_TEST (deflate_limit ${TESTTYPE} 0 ${arg})
+  ADD_H5_DMP_MASK (deflate_limit ${TESTTYPE} 0 ${arg})
 
 #file
   set (arg ${FILE4} -e ${INFO_FILE})
