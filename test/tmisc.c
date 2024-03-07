@@ -338,6 +338,7 @@ typedef struct {
 #define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
 
 #define MISC38_FILE "type_conversion_path_table_issue.h5"
+#define MISC39_FILE "set_est_link_info.h5"
 
 /****************************************************************
 **
@@ -6447,6 +6448,103 @@ test_misc38(void)
 
 /****************************************************************
 **
+**  test_misc39(): Ensure H5Pset_est_link_info() handles large
+**                 values
+**
+**  H5Pset_est_link_info() values can be set to large values,
+**  which could cause the library to attempt to create large
+**  object headers that exceed limits and trip asserts in
+**  the library.
+**
+**  This test ensures that the library doesn't error regardless
+**  of the values passed to H5Pset_est_link_info() and
+**  H5Pset_link_phase_change().
+**
+****************************************************************/
+static void
+test_misc39(void)
+{
+    hid_t  fid  = H5I_INVALID_HID; /* File ID */
+    hid_t  gid  = H5I_INVALID_HID; /* Group ID */
+    hid_t  fapl = H5I_INVALID_HID; /* File access property list ID */
+    hid_t  gcpl = H5I_INVALID_HID; /* Group creation property list ID */
+    herr_t ret  = H5I_INVALID_HID; /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Ensure H5Pset_est_link_info handles large values\n"));
+
+    /* Compose file access property list
+     *
+     * NOTE: The bug in question only occurs in new-style groups
+     */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the file */
+    fid = H5Fcreate(MISC39_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Compose group creation property list */
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Set the estimated link info values to large numbers */
+    ret = H5Pset_est_link_info(gcpl, UINT16_MAX, UINT16_MAX);
+    CHECK(ret, FAIL, "H5Pset_est_link_info");
+
+    /* Create a group */
+    gid = H5Gcreate2(fid, "foo", H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, H5I_INVALID_HID, "H5Gcreate2");
+
+    /* Close the group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the file. Asserts typically occur here, when the metadata cache
+     * objects are flushed.
+     */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    /* Set the compact/dense value high, to see if we can trick the
+     * library into creating a dense group object header that is
+     * larger than the maximum allowed size.
+     */
+    ret = H5Pset_link_phase_change(gcpl, UINT16_MAX, UINT16_MAX);
+    CHECK(ret, FAIL, "H5Pset_link_phase_change");
+
+    /* Set the estimated link info values to large numbers */
+    ret = H5Pset_est_link_info(gcpl, UINT16_MAX / 2, UINT16_MAX);
+    CHECK(ret, FAIL, "H5Pset_est_link_info");
+
+    /* Create another group */
+    gid = H5Gcreate2(fid, "bar", H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, H5I_INVALID_HID, "H5Gcreate2");
+
+    /* Close the group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the property lists */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+} /* end test_misc25c() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 **
 ****************************************************************/
@@ -6514,6 +6612,7 @@ test_misc(void)
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
     test_misc37(); /* Test for seg fault failure at file close */
     test_misc38(); /* Test for type conversion path table issue */
+    test_misc39(); /* Test for type conversion path table issue */
 
 } /* test_misc() */
 
@@ -6570,6 +6669,7 @@ cleanup_misc(void)
         H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
         H5Fdelete(MISC38_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC39_FILE, H5P_DEFAULT);
     }
     H5E_END_TRY
 } /* end cleanup_misc() */

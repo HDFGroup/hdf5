@@ -499,6 +499,26 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed asserts raised by large values of H5Pset_est_link_info() parameters
+
+      If large values for est_num_entries and/or est_name_len were passed
+      to H5Pset_est_link_info(), the library would attempt to create an
+      object header NIL message to reserve enough space to hold the links in
+      compact form (i.e., concatenated), which could exceed allowable object
+      header message size limits and trip asserts in the library.
+
+      This bug only occurred when using the HDF5 1.8 file format or later and
+      required the product of the two values to be ~64k more than the size
+      of any links written to the group, which would cause the library to
+      write out a too-large NIL spacer message to reserve the space for the
+      unwritten links.
+
+      The library now inspects the phase change values to see if the dataset
+      is likely to be compact and checks the size to ensure any NIL spacer
+      messages won't be larger than the library allows.
+
+      Fixes GitHub #1632
+
     - Fixed a bug where H5Tset_fields does not account for any offset
       set for a floating-point datatype when determining if values set
       for spos, epos, esize, mpos and msize make sense for the datatype
