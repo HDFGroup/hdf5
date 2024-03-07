@@ -57,7 +57,7 @@ struct timezone {
  * MinGW and the newer, conforming MSVC preprocessor do not exhibit this
  * behavior.
  */
-#if defined(_MSC_VER) && !defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL
+#if (defined(_MSC_VER) && !defined(_MSVC_TRADITIONAL)) || _MSVC_TRADITIONAL
 /* Using the MSVC traditional preprocessor */
 #define HDopen(S, F, ...) Wopen_utf8(S, F, __VA_ARGS__)
 #else
