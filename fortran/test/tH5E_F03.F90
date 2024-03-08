@@ -201,10 +201,10 @@ SUBROUTINE test_error(total_error)
   ! ** SET THE CUSTOMIZED PRINTING OF ERROR STACK **
 
   ! set the customized error handling routine
-  func = c_funloc(my_hdf5_error_handler)
+  func = C_FUNLOC(my_hdf5_error_handler)
 
   ! set the data sent to the customized routine
-  f_ptr = c_loc(my_hdf5_error_handler_data)
+  f_ptr = C_LOC(my_hdf5_error_handler_data)
 
   CALL H5Eset_auto_f(1, error, H5E_DEFAULT_F, func, f_ptr)
   CALL check("H5Eset_auto_f", error, total_error)
@@ -280,8 +280,8 @@ SUBROUTINE test_error_stack(total_error)
   func = "FUNC"//C_NULL_CHAR
   line = 99
 
-  ptr1 = C_LOC(file)
-  ptr2 = C_LOC(func)
+  ptr1 = C_LOC(file(1:1))
+  ptr2 = C_LOC(func(1:1))
   ptr3 = C_LOC(line)
 
   CALL h5ecreate_stack_f(estack_id, error)
