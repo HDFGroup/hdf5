@@ -1205,6 +1205,10 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Initialize skip list for chunk selections */
         fm->use_single = true;
 
+        /* Initialize selection type in memory and file */
+	fm->msel_type = H5S_SEL_NONE;
+	fm->fsel_type = H5S_SEL_NONE;
+
         /* Initialize single chunk dataspace */
         if (NULL == dataset->shared->cache.chunk.single_space) {
             /* Make a copy of the dataspace for the dataset */
