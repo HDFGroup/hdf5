@@ -139,16 +139,6 @@ if (HDF5_ENABLE_DEBUG_H5T_REF)
   list (APPEND HDF5_DEBUG_APIS H5T_REF_DEBUG)
 endif ()
 
-# HDF5 module debug definitions for debug code which may add
-# considerable amounts of overhead when enabled and is usually
-# only useful for specific circumstances rather than general
-# developer use.
-option (HDF5_ENABLE_DEBUG_H5B "Enable debugging of H5B module" OFF)
-mark_as_advanced (HDF5_ENABLE_DEBUG_H5B)
-if (HDF5_ENABLE_DEBUG_H5B)
-  list (APPEND HDF5_DEBUG_APIS H5B_DEBUG)
-endif ()
-
 option (HDF5_ENABLE_DEBUG_H5B2 "Enable debugging of H5B2 module" OFF)
 mark_as_advanced (HDF5_ENABLE_DEBUG_H5B2)
 if (HDF5_ENABLE_DEBUG_H5B2)
