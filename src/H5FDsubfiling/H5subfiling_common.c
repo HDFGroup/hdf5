@@ -777,7 +777,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
 
     /* Check if a prefix has been set for the configuration file name */
     prefix_env = getenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
-    if (prefix_env && (strlen(prefix_env > 0)) {
+    if (prefix_env && (strlen(prefix_env) > 0)) {
         if (NULL == (new_context->config_file_prefix = strdup(prefix_env)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
     }
