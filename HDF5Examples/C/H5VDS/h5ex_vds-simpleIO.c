@@ -94,7 +94,7 @@ main(void)
     status    = H5Pset_virtual(dcpl, vspace, SRC_FILE, SRC_DATASET, src_space);
 
     /* Create a virtual dataset */
-    dset   = H5Dcreate2(file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    dset   = H5Dcreate2(file, DATASET, H5T_STD_I32LE, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     status = H5Sclose(vspace);
     status = H5Sclose(src_space);
     status = H5Dclose(dset);

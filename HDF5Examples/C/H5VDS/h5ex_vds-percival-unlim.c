@@ -142,7 +142,7 @@ main(void)
     H5Sselect_none(vspace);
 
     /* Create a virtual dataset */
-    vdset  = H5Dcreate2(vfile, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    vdset  = H5Dcreate2(vfile, DATASET, H5T_STD_I32LE, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     status = H5Sclose(vspace);
     status = H5Sclose(src_space);
     status = H5Pclose(dcpl);
