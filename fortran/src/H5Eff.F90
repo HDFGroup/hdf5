@@ -712,7 +712,7 @@ CONTAINS
        END FUNCTION H5Ewalk
     END INTERFACE
 
-    hdferr = INT(H5Ewalk(err_stack, direction, op, op_data))
+    hdferr = INT(H5Ewalk(err_stack, INT(direction, C_INT), op, op_data))
 
   END SUBROUTINE h5ewalk_f
 
