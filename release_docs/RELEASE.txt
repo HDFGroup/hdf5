@@ -433,16 +433,22 @@ Bug Fixes since HDF5-1.14.3 release
 Platforms Tested
 ===================
 
+    - HDF5 supports the latest macOS versions, including the current and two
+      preceding releases. As new major macOS versions become available, HDF5
+      will discontinue  support for the  oldest  version and add  the latest
+      version to its list of compatible systems, along with the previous two
+      releases.
+
+    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
+                                     (cmake and autotools)
+
     Linux 5.19.0-1023-aws            GNU gcc, gfortran, g++
     #24-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
     Ubuntu 22.04                     Ubuntu clang version 14.0.0-1ubuntu1
                                      Intel(R) oneAPI DPC++/C++ Compiler 2023.1.0
                                      ifort (IFORT) 2021.9.0 20230302
-                                     (cmake and autotools)
-
-    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
-    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
-    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
                                      (cmake and autotools)
 
     Linux 5.14.21-cray_shasta_c      cray-mpich/8.1.23
