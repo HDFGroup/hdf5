@@ -44,9 +44,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - run: |
-          git checkout ${{ inputs.file_sha }}
-
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         id: "tag_create"
         with:
@@ -183,7 +180,6 @@ jobs:
 
       - name: PreRelease tag
         id: create_prerelease
-        if: ${{ (inputs.use_environ == 'snapshots') }}
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           tag_name: "${{ inputs.use_tag }}"
@@ -191,30 +187,6 @@ jobs:
           body_path: description.txt
           files: |
               last-file.txt
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports
-              sha256sums.txt
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-
-      - name: Release tag
-        id: create_release
-        if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
-        with:
-          tag_name: "${{ inputs.use_tag }}"
-          prerelease: false
-          body_path: description.txt
-          files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
