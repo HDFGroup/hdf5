@@ -5682,6 +5682,306 @@ error:
 } /* end test_multiopen() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_floattypes
+ *
+ * Purpose:    Make some datasets with various float types.
+ *
+ * Return:    Success:    0
+ *
+ *        Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_floattypes(hid_t file)
+{
+    hid_t         dataset  = H5I_INVALID_HID;
+    hid_t         datatype = H5I_INVALID_HID;
+    hid_t         space    = H5I_INVALID_HID;
+    const hsize_t size[2]  = {2, 5};
+    size_t        i, j;
+    size_t        precision, offset;
+
+    puts("Testing float datatypes");
+
+    /* float */
+    {
+        /* orig_data[] are initialized to be within the range that can be represented by
+         * dataset datatype (no precision loss during datatype conversion)
+         */
+        float orig_data[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
+                                 {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
+        float new_data[2][5];
+
+        TESTING("    float (setup)");
+
+        /* Define user-defined single-precision floating-point type for dataset */
+        datatype = H5Tcopy(H5T_IEEE_F32BE);
+        if (H5Tset_fields(datatype, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0)
+            goto error;
+        offset = 7;
+        if (H5Tset_offset(datatype, offset) < 0)
+            goto error;
+        precision = 20;
+        if (H5Tset_precision(datatype, precision) < 0)
+            goto error;
+        if (H5Tset_size(datatype, (size_t)4) < 0)
+            goto error;
+        if (H5Tset_ebias(datatype, (size_t)31) < 0)
+            goto error;
+
+        /* Create the data space */
+        if ((space = H5Screate_simple(2, size, NULL)) < 0)
+            goto error;
+
+        /* Create the dataset */
+        if ((dataset =
+                 H5Dcreate2(file, "float_type)", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * STEP 1: Test  writing to it.
+         *----------------------------------------------------------------------
+         */
+        TESTING("    float (write)");
+
+        if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+            goto error;
+
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * STEP 2: Try to read the data we just wrote.
+         *----------------------------------------------------------------------
+         */
+        TESTING("    float (read)");
+
+        /* Read the dataset back */
+        if (H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+            goto error;
+
+        /* Check that the values read are the same as the values written
+         * Assume size of int = size of float
+         */
+        for (i = 0; i < (size_t)size[0]; i++) {
+            for (j = 0; j < (size_t)size[1]; j++) {
+                if (isnan(orig_data[i][j]))
+                    continue; /* skip if value is NaN */
+                if (!H5_FLT_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
+                    H5_FAILED();
+                    printf("    Read different values than written.\n");
+                    printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                    goto error;
+                }
+            }
+        }
+
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * Cleanup
+         *----------------------------------------------------------------------
+         */
+        if (H5Tclose(datatype) < 0)
+            goto error;
+        if (H5Sclose(space) < 0)
+            goto error;
+        if (H5Dclose(dataset) < 0)
+            goto error;
+    }
+
+    /* double */
+    {
+        double orig_data[2][5] = {
+            {(double)1.6081706885101836e+60L, (double)-255.32099170994480, (double)1.2677579992621376e-61L,
+             (double)64568.289448797700, (double)-1.0619721778839084e-75L},
+            {(double)2.1499497833454840e+56L, (double)6.6562295504670740e-3, (double)-1.5747263393432150,
+             (double)1.0711093225222612, (double)-9.8971679387636870e-1}};
+        double new_data[2][5];
+
+        TESTING("    double (setup)");
+
+        /* Define user-defined double-precision floating-point type for dataset */
+        datatype = H5Tcopy(H5T_IEEE_F64BE);
+        if (H5Tset_fields(datatype, (size_t)55, (size_t)46, (size_t)9, (size_t)5, (size_t)41) < 0)
+            goto error;
+        offset = 5;
+        if (H5Tset_offset(datatype, offset) < 0)
+            goto error;
+        precision = 51;
+        if (H5Tset_precision(datatype, precision) < 0)
+            goto error;
+        if (H5Tset_size(datatype, (size_t)8) < 0)
+            goto error;
+        if (H5Tset_ebias(datatype, (size_t)255) < 0)
+            goto error;
+
+        /* Create the data space */
+        if ((space = H5Screate_simple(2, size, NULL)) < 0)
+            goto error;
+
+        /* Create the dataset */
+        if ((dataset =
+                 H5Dcreate2(file, "double_type", datatype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * STEP 1: Test writing to it.
+         *----------------------------------------------------------------------
+         */
+        TESTING("    double (write)");
+
+        if (H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+            goto error;
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * STEP 2: Try to read the data we just wrote.
+         *----------------------------------------------------------------------
+         */
+        TESTING("    double (read)");
+
+        /* Read the dataset back */
+        if (H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+            goto error;
+
+        /* Check that the values read are the same as the values written
+         * Assume size of long long = size of double
+         */
+        for (i = 0; i < (size_t)size[0]; i++) {
+            for (j = 0; j < (size_t)size[1]; j++) {
+                if (isnan(orig_data[i][j]))
+                    continue; /* skip if value is NaN */
+                if (!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
+                    H5_FAILED();
+                    printf("    Read different values than written.\n");
+                    printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                    goto error;
+                }
+            }
+        }
+
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * Cleanup
+         *----------------------------------------------------------------------
+         */
+        if (H5Tclose(datatype) < 0)
+            goto error;
+        if (H5Sclose(space) < 0)
+            goto error;
+        if (H5Dclose(dataset) < 0)
+            goto error;
+    }
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+    /* long double */
+    {
+        long double orig_data[2][5] = {
+            {(long double)1.6081706885101836e+600L, (long double)-255.3209917099448032099170994480,
+             (long double)1.2677579992621376e-610L, (long double)64568.289448797700289448797700,
+             (long double)-1.0619721778839084e-750L},
+            {(long double)2.1499497833454840991499497833454840e+560L,
+             (long double)6.6562295504670740996562295504670740e-3,
+             (long double)-1.5747263393432150995747263393432150,
+             (long double)1.0711093225222612990711093225222612,
+             (long double)-9.8971679387636870998971679387636870e-1}};
+        long double new_data[2][5];
+
+        TESTING("    long double (setup)");
+
+        /* Define user-defined quad-precision floating-point type for dataset */
+        datatype  = H5Tcopy(H5T_NATIVE_LDOUBLE);
+        precision = 128;
+        if (H5Tset_precision(datatype, precision) < 0)
+            goto error;
+        if (H5Tset_fields(datatype, (size_t)127, (size_t)112, (size_t)15, (size_t)5, (size_t)107) < 0)
+            goto error;
+        offset = 5;
+        if (H5Tset_offset(datatype, offset) < 0)
+            goto error;
+        if (H5Tset_size(datatype, (size_t)16) < 0)
+            goto error;
+        if (H5Tset_ebias(datatype, (size_t)255) < 0)
+            goto error;
+
+        /* Create the data space */
+        if ((space = H5Screate_simple(2, size, NULL)) < 0)
+            goto error;
+
+        /* Create the dataset */
+        if ((dataset = H5Dcreate2(file, "long_double_type", datatype, space, H5P_DEFAULT, H5P_DEFAULT,
+                                  H5P_DEFAULT)) < 0)
+            goto error;
+
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * STEP 1: Test writing to it.
+         *----------------------------------------------------------------------
+         */
+        TESTING("    long double (write)");
+
+        if (H5Dwrite(dataset, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+            goto error;
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * STEP 2: Try to read the data we just wrote.
+         *----------------------------------------------------------------------
+         */
+        TESTING("    long double (read)");
+
+        /* Read the dataset back */
+        if (H5Dread(dataset, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+            goto error;
+
+        /* Check that the values read are the same as the values written */
+        for (i = 0; i < (size_t)size[0]; i++) {
+            for (j = 0; j < (size_t)size[1]; j++) {
+                if (isnan(orig_data[i][j]))
+                    continue; /* skip if value is NaN */
+                if (!H5_LDBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
+                    H5_FAILED();
+                    printf("    Read different values than written.\n");
+                    printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                    goto error;
+                }
+            }
+        }
+
+        PASSED();
+
+        /*----------------------------------------------------------------------
+         * Cleanup
+         *----------------------------------------------------------------------
+         */
+        if (H5Tclose(datatype) < 0)
+            goto error;
+        if (H5Sclose(space) < 0)
+            goto error;
+        if (H5Dclose(dataset) < 0)
+            goto error;
+    }
+#endif
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(datatype);
+        H5Sclose(space);
+        H5Dclose(dataset);
+    }
+    H5E_END_TRY
+    return FAIL;
+} /* end test_floattypes() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_types
  *
  * Purpose:    Make some datasets with various types so we can test h5ls.
@@ -15583,6 +15883,7 @@ main(void)
                 nerrors += (test_scaleoffset_double_2(file) < 0 ? 1 : 0);
                 nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                 nerrors += (test_types(file) < 0 ? 1 : 0);
+                nerrors += (test_floattypes(file) < 0 ? 1 : 0);
                 nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0 ? 1 : 0);
 
                 if (driver_is_default_compatible) {
