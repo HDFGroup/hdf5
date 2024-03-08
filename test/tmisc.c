@@ -6541,7 +6541,7 @@ test_misc39(void)
     ret = H5Pclose(gcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
-} /* end test_misc25c() */
+} /* end test_misc39() */
 
 /****************************************************************
 **
@@ -6612,7 +6612,7 @@ test_misc(void)
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
     test_misc37(); /* Test for seg fault failure at file close */
     test_misc38(); /* Test for type conversion path table issue */
-    test_misc39(); /* Test for type conversion path table issue */
+    test_misc39(); /* Ensure H5Pset_est_link_info() handles large values */
 
 } /* test_misc() */
 
