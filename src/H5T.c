@@ -350,12 +350,13 @@ static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const
                                        H5T_conv_func_t *conv);
 static bool        H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                                   H5VL_object_t *owned_vol_obj, H5T_conv_t func);
-static bool        H5T__detect_vlen_ref(const H5T_t *dt);
-static H5T_t      *H5T__initiate_copy(const H5T_t *old_dt);
-static H5T_t      *H5T__copy_transient(H5T_t *old_dt);
-static H5T_t      *H5T__copy_all(H5T_t *old_dt);
-static herr_t      H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo,
-                                      bool set_memory_type, H5T_copy_func_t copyfn);
+static bool   H5T_path_match_find_type_with_volobj(const H5T_t *datatype, const H5VL_object_t *owned_vol_obj);
+static bool   H5T__detect_vlen_ref(const H5T_t *dt);
+static H5T_t *H5T__initiate_copy(const H5T_t *old_dt);
+static H5T_t *H5T__copy_transient(H5T_t *old_dt);
+static H5T_t *H5T__copy_all(H5T_t *old_dt);
+static herr_t H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo,
+                                 bool set_memory_type, H5T_copy_func_t copyfn);
 
 /*****************************/
 /* Library Private Variables */
@@ -5182,9 +5183,9 @@ H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, 
 {
     bool ret_value = true;
 
-    assert(path);
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(path);
 
     if (
         /* Check that the specified conversion function persistence matches */
@@ -5200,11 +5201,12 @@ H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, 
         (src && H5T_cmp(src, path->src, false)) || (dst && H5T_cmp(dst, path->dst, false)) ||
 
         /*
-         * Check that the specified VOL object matches the VOL object
-         * in the conversion path
+         * Check that the specified VOL object pointer matches the `owned_vol_obj`
+         * field for either the source datatype or destination datatype in the
+         * conversion path
          */
-        (owned_vol_obj && (owned_vol_obj != path->src->shared->owned_vol_obj) &&
-         (owned_vol_obj != path->dst->shared->owned_vol_obj)) ||
+        (owned_vol_obj && (H5T_path_match_find_type_with_volobj(path->src, owned_vol_obj) == false) &&
+         (H5T_path_match_find_type_with_volobj(path->dst, owned_vol_obj) == false)) ||
 
         /* Check that the specified conversion function matches */
         (func && func != path->conv.u.app_func))
@@ -5212,6 +5214,70 @@ H5T_path_match(H5T_path_t *path, H5T_pers_t pers, const char *name, H5T_t *src, 
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5T_path_match() */
+
+/*-------------------------------------------------------------------------
+ * Function:  H5T_path_match_find_type_with_volobj
+ *
+ * Purpose:   Helper function to determine whether a datatype is or
+ *            contains a datatype that has a VOL object pointer matching
+ *            the given VOL object pointer.
+ *
+ * Return:    true/false (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static bool
+H5T_path_match_find_type_with_volobj(const H5T_t *datatype, const H5VL_object_t *owned_vol_obj)
+{
+    bool ret_value = false;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(datatype);
+    assert(owned_vol_obj);
+
+    ret_value = (datatype->shared->owned_vol_obj == owned_vol_obj);
+    if (!ret_value) {
+        switch (datatype->shared->type) {
+            case H5T_COMPOUND:
+                for (unsigned i = 0; i < datatype->shared->u.compnd.nmembs; i++) {
+                    if (ret_value)
+                        break;
+                    ret_value = H5T_path_match_find_type_with_volobj(datatype->shared->u.compnd.memb[i].type,
+                                                                     owned_vol_obj);
+                }
+                break;
+
+            case H5T_VLEN:
+                /* Should be an error if no parent, but simplify logic for a true/false return value */
+                if (datatype->shared->parent)
+                    ret_value = H5T_path_match_find_type_with_volobj(datatype->shared->parent, owned_vol_obj);
+                break;
+
+            case H5T_ARRAY:
+                /* Should be an error if no parent, but simplify logic for a true/false return value */
+                if (datatype->shared->parent)
+                    ret_value = H5T_path_match_find_type_with_volobj(datatype->shared->parent, owned_vol_obj);
+                break;
+
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
+            case H5T_REFERENCE: /* Should have been determined by above check */
+            case H5T_ENUM:
+            case H5T_NO_CLASS: /* Error value, but simplify logic for a true/false return value */
+            case H5T_NCLASSES: /* Error value, but simplify logic for a true/false return value */
+            default:
+                ret_value = false;
+                break;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:  H5T_path_noop
