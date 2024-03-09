@@ -916,7 +916,8 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
     }
     else if (cmp) {
         /* We couldn't figure out which branch to follow out of this node */
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "internal error: likely corrupt key values");
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
+                    "internal error: could not determine which branch to follow out of this node");
     }
     else if (bt->level > 0) {
         /*
