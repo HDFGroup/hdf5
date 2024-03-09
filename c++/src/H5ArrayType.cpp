@@ -199,12 +199,4 @@ ArrayType::getArrayDims(hsize_t *dims) const
     return (ndims);
 }
 
-//--------------------------------------------------------------------------
-// Function:    ArrayType destructor
-///\brief       Properly terminates access to this array datatype.
-//--------------------------------------------------------------------------
-ArrayType::~ArrayType()
-{
-}
-
 } // namespace H5

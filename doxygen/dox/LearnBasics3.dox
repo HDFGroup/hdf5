@@ -288,7 +288,7 @@ is met, at a certain point in the future.)
 
 \section secLBContentsProg Programming Example
 
-\subsection subsecLBContentsProgUsing Using #H5Literate, #H5Lvisit and #H5Ovisit
+\subsection subsecLBContentsProgUsing Using H5Literate, H5Lvisit and H5Ovisit
 For example code, see the \ref HDF5Examples page.
 Specifically look at the \ref ExAPI.
 There are examples for different languages, where examples of using #H5Literate and #H5Ovisit/#H5Lvisit are included.

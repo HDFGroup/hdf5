@@ -773,7 +773,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     s2_t   *s2_wbuf_bak = NULL;
     s2_t   *s2_rbuf     = NULL;
     char    dset_name[DSET_NAME_LEN];
-    int     fillvalue = -1;
+    s1_t    fillvalue;
+
+    /* Initialize the fill value */
+    memset(&fillvalue, 0, sizeof(s1_t));
 
     /* Create dataset transfer property list */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)

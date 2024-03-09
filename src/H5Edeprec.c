@@ -317,7 +317,7 @@ H5Eget_auto1(H5E_auto1_t *func /*out*/, void **client_data /*out*/)
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "xx", func, client_data);
+    H5TRACE2("e", "*Ea**x", func, client_data);
 
     /* Retrieve default error stack */
     if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in

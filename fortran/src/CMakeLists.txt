@@ -24,6 +24,13 @@ if (WIN32)
   endif ()
 endif ()
 
+if (H5_HAVE_MPI_F08) # MPI-3 module mpi_f08 supported
+  set (CMAKE_H5_HAVE_MPI_F08 1)
+else ()
+  set (H5_NOMPI_F08 ";")
+  set (CMAKE_H5_HAVE_MPI_F08 0)
+endif ()
+
 # configure for Fortran preprocessor
 
 # Define Parallel variable for passing to H5config_f.inc.cmake
@@ -54,6 +61,11 @@ endif ()
 set (CMAKE_H5_FORTRAN_HAVE_C_SIZEOF 0)
 if (H5_FORTRAN_HAVE_C_SIZEOF)
   set (CMAKE_H5_FORTRAN_HAVE_C_SIZEOF 1)
+endif ()
+
+set (CMAKE_H5_FORTRAN_HAVE_CHAR_ALLOC 0)
+if (H5_FORTRAN_HAVE_CHAR_ALLOC)
+  set (CMAKE_H5_FORTRAN_HAVE_CHAR_ALLOC 1)
 endif ()
 
 configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${HDF5_F90_BINARY_DIR}/H5config_f.inc @ONLY)

@@ -19,18 +19,16 @@ set (HDF_PREFIX "H5")
 include (CheckFortranSourceRuns)
 include (CheckFortranSourceCompiles)
 
-#-------------------------------------------------------------------------------
-#  Fix Fortran flags if we are compiling statically on Windows using
-#  Windows_MT.cmake from config/cmake/UserMacros
-#-------------------------------------------------------------------------------
-if (BUILD_STATIC_CRT_LIBS)
-  TARGET_STATIC_CRT_FLAGS ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Detect name mangling convention used between Fortran and C
 #-----------------------------------------------------------------------------
 include (FortranCInterface)
+
+#-----------------------------------------------------------------------------
+# Verify that the Fortran and C/C++ compilers work together
+#-----------------------------------------------------------------------------
+FortranCInterface_VERIFY()
+
 FortranCInterface_HEADER (
     ${CMAKE_BINARY_DIR}/FCMangle.h
     MACRO_NAMESPACE "H5_FC_"
@@ -38,11 +36,11 @@ FortranCInterface_HEADER (
 )
 
 file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL\\(.*,.*\\) +(.*)")
-string (REGEX MATCH "H5_FC_GLOBAL\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
+string (REGEX MATCH "H5_FC_GLOBAL\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
 set (H5_FC_FUNC "H5_FC_FUNC(name,NAME) ${CMAKE_MATCH_1}")
 
 file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)")
-string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
+string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
 set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 
 #test code source
@@ -69,6 +67,13 @@ set (STORAGE_SIZE_CODE
          INTEGER :: a
          INTEGER :: result
          result = storage_size(a)
+       END PROGRAM
+  "
+)
+set (CHAR_ALLOC
+  "
+       PROGRAM main
+         CHARACTER(:), ALLOCATABLE :: str
        END PROGRAM
   "
 )
@@ -126,6 +131,7 @@ check_fortran_source_compiles (${STORAGE_SIZE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_S
 check_fortran_source_compiles (${ISO_FORTRAN_ENV_CODE} ${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV SRC_EXT f90)
 check_fortran_source_compiles (${REALISNOTDOUBLE_CODE} ${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE SRC_EXT f90)
 check_fortran_source_compiles (${ISO_C_BINDING_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING SRC_EXT f90)
+check_fortran_source_compiles (${CHAR_ALLOC} ${HDF_PREFIX}_FORTRAN_HAVE_CHAR_ALLOC SRC_EXT f90)
 
 #-----------------------------------------------------------------------------
 # Add debug information (intel Fortran : JB)

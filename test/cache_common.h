@@ -126,11 +126,6 @@
  *              for it to setup the slist on entry, and take it down
  *              on exit.
  *
- *              Note that the slist need not be empty if the flags
- *              indicate a partial flush (i.e.
- *              H5C__FLUSH_MARKED_ENTRIES_FLAG).  Compute clear_slist
- *              and pass it into H5C_set_slist_enabled as appropriate.
- *
  *              On error, set pass to false, and set failure_mssg
  *              to the supplied error message.
  *
@@ -140,12 +135,9 @@
 
 #define H5C_FLUSH_CACHE(file, flags, fail_mssg)                                                              \
     {                                                                                                        \
-        bool   clear_slist;                                                                                  \
         herr_t rslt;                                                                                         \
                                                                                                              \
-        clear_slist = ((flags & H5C__FLUSH_MARKED_ENTRIES_FLAG) != 0);                                       \
-                                                                                                             \
-        rslt = H5C_set_slist_enabled((file)->shared->cache, true, false);                                    \
+        rslt = H5C_set_slist_enabled((file)->shared->cache, true, true);                                     \
                                                                                                              \
         if (rslt >= 0) {                                                                                     \
                                                                                                              \
@@ -154,7 +146,7 @@
                                                                                                              \
         if (rslt >= 0) {                                                                                     \
                                                                                                              \
-            rslt = H5C_set_slist_enabled((file)->shared->cache, false, clear_slist);                         \
+            rslt = H5C_set_slist_enabled((file)->shared->cache, false, false);                               \
         }                                                                                                    \
                                                                                                              \
         if (rslt < 0) {                                                                                      \

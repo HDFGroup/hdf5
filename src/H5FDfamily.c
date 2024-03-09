@@ -234,27 +234,28 @@ H5FD__family_get_default_printf_filename(const char *old_filename)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate new filename buffer");
 
     /* Determine if filename contains a ".h5" extension. */
-    if ((file_extension = strstr(old_filename, ".h5"))) {
+    file_extension = strstr(old_filename, ".h5");
+    if (file_extension) {
         /* Insert the printf format between the filename and ".h5" extension. */
-        strcpy(tmp_buffer, old_filename);
-        file_extension = strstr(tmp_buffer, ".h5");
-        sprintf(file_extension, "%s%s", suffix, ".h5");
+        intptr_t beginningLength = file_extension - old_filename;
+        snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix, ".h5");
     }
-    else if ((file_extension = strrchr(old_filename, '.'))) {
-        char *new_extension_loc = NULL;
-
+    else {
         /* If the filename doesn't contain a ".h5" extension, but contains
          * AN extension, just insert the printf format before that extension.
          */
-        strcpy(tmp_buffer, old_filename);
-        new_extension_loc = strrchr(tmp_buffer, '.');
-        sprintf(new_extension_loc, "%s%s", suffix, file_extension);
-    }
-    else {
-        /* If the filename doesn't contain an extension at all, just insert
-         * the printf format at the end of the filename.
-         */
-        snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        file_extension = strrchr(old_filename, '.');
+        if (file_extension) {
+            intptr_t beginningLength = file_extension - old_filename;
+            snprintf(tmp_buffer, new_filename_len, "%.*s%s%s", (int)beginningLength, old_filename, suffix,
+                     file_extension);
+        }
+        else {
+            /* If the filename doesn't contain an extension at all, just insert
+             * the printf format at the end of the filename.
+             */
+            snprintf(tmp_buffer, new_filename_len, "%s%s", old_filename, suffix);
+        }
     }
 
     ret_value = tmp_buffer;
@@ -382,7 +383,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", fapl_id, msize, memb_fapl_id);
+    H5TRACE3("e", "i*h*i", fapl_id, msize, memb_fapl_id);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");

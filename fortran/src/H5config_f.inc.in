@@ -17,6 +17,9 @@
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
 
+! Define if MPI supports mpi_f08 module
+#undef HAVE_MPI_F08
+
 ! Define if we have subfiling support
 #undef HAVE_SUBFILING_VFD
 
@@ -32,11 +35,17 @@
 ! Define if the intrinsic function C_SIZEOF exists
 #undef FORTRAN_HAVE_C_SIZEOF
 
+! Define if Fortran supports allocatable character
+#undef FORTRAN_HAVE_CHAR_ALLOC
+
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #undef FORTRAN_HAVE_C_LONG_DOUBLE
 
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
 #undef FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
+
+! Define if Fortran C_BOOL is different from default LOGICAL
+#undef FORTRAN_C_BOOL_IS_UNIQUE
 
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #undef HAVE_ISO_FORTRAN_ENV

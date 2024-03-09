@@ -100,6 +100,8 @@ static const char *FILENAME[] = {"links0",
                                  TMPDIR "extlinks21D", /* 49: */
                                  TMPDIR "extlinks21E", /* 50: */
                                  "extlinks21E",        /* 51: (same as #50, only without the TMPDIR prefix) */
+                                 "extlinks22",         /* 52: */
+                                 "extlinks22A",        /* 53: */
                                  NULL};
 
 #define FAMILY_SIZE    1024
@@ -9819,6 +9821,225 @@ error:
     H5E_END_TRY
     return FAIL;
 } /* end external_set_elink_acc_flags() */
+
+/*-------------------------------------------------------------------------
+ * Function:    external_link_inherit_locking
+ *
+ * Purpose:     Test that opening a file through an external link using a
+ *              default FAPL will cause that file to inherit the parent
+ *              file's file locking settings.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_inherit_locking(hid_t fapl_id, bool new_format)
+{
+    htri_t use_locking_env         = FAIL;
+    htri_t ignore_disabled_env     = FAIL;
+    hid_t  fid                     = H5I_INVALID_HID;
+    hid_t  tmp_fid                 = H5I_INVALID_HID;
+    hid_t  gid                     = H5I_INVALID_HID;
+    hid_t  ext_fid                 = H5I_INVALID_HID;
+    hid_t  file_fapl               = H5I_INVALID_HID;
+    hid_t  tmp_fapl                = H5I_INVALID_HID;
+    bool   use_locking             = true;
+    bool   ignore_disabled_locking = false;
+    char  *filename                = NULL;
+    char  *ext_filename            = NULL;
+
+    if (new_format)
+        TESTING("inheriting of file locking settings (w/new group format)");
+    else
+        TESTING("inheriting of file locking settings");
+
+    /* Get the settings for the file locking environment variables */
+    h5_check_file_locking_env_var(&use_locking_env, &ignore_disabled_env);
+
+    /* Check that external links are registered with the library */
+    if (H5Lis_registered(H5L_TYPE_EXTERNAL) != true)
+        TEST_ERROR;
+
+    if (NULL == (filename = malloc(NAME_BUF_SIZE)))
+        TEST_ERROR;
+    if (NULL == (ext_filename = malloc(NAME_BUF_SIZE)))
+        TEST_ERROR;
+
+    if ((file_fapl = H5Pcopy(fapl_id)) < 0)
+        TEST_ERROR;
+
+    /* Create external file */
+    h5_fixname(FILENAME[53], file_fapl, ext_filename, NAME_BUF_SIZE);
+    if ((ext_fid = H5Fcreate(ext_filename, H5F_ACC_TRUNC, H5P_DEFAULT, file_fapl)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(ext_fid) < 0)
+        TEST_ERROR;
+
+    /* Create main file and link to external file */
+    h5_fixname(FILENAME[52], file_fapl, filename, NAME_BUF_SIZE);
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, file_fapl)) < 0)
+        TEST_ERROR;
+    if (H5Lcreate_external(ext_filename, "/", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Test for file locking on unless disabled by environment variable */
+    if (use_locking_env != false) {
+        /* Set file locking on */
+        if (H5Pset_file_locking(file_fapl, true, true) < 0)
+            TEST_ERROR;
+
+        /* Open main file */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, file_fapl)) < 0)
+            TEST_ERROR;
+
+        /* Make sure that locking setting retrieved from access plist
+         * matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != true)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being on, unless
+         * disabled by environment variable
+         */
+        if (ignore_disabled_env != false && ignore_disabled_locking != true)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
+
+        /* Open external file through link */
+        if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+
+        /* Get file ID for external file */
+        if ((tmp_fid = H5Iget_file_id(gid)) < 0)
+            TEST_ERROR;
+
+        /* Make sure that locking setting retrieved from external file's
+         * access plist matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(tmp_fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != true)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being on, unless
+         * disabled by environment variable
+         */
+        if (ignore_disabled_env != false && ignore_disabled_locking != true)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
+
+        if (H5Gclose(gid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(tmp_fid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+    }
+
+    /* Test for file locking off unless force enabled by environment variable */
+    if (use_locking_env != true) {
+        /* Set file locking off */
+        if (H5Pset_file_locking(file_fapl, false, false) < 0)
+            TEST_ERROR;
+
+        /* Open main file */
+        if ((fid = H5Fopen(filename, H5F_ACC_RDWR, file_fapl)) < 0)
+            TEST_ERROR;
+
+        /* Make sure that locking setting retrieved from access plist
+         * matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != false)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being off, unless
+         * force enabled by environment variable
+         */
+        if (ignore_disabled_env != true && ignore_disabled_locking != false)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
+
+        /* Open external file through link */
+        if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+
+        /* Get file ID for external file */
+        if ((tmp_fid = H5Iget_file_id(gid)) < 0)
+            TEST_ERROR;
+
+        /* Make sure that locking setting retrieved from external file's
+         * access plist matches what we set.
+         */
+        if ((tmp_fapl = H5Fget_access_plist(tmp_fid)) < 0)
+            TEST_ERROR;
+        if (H5Pget_file_locking(tmp_fapl, &use_locking, &ignore_disabled_locking) < 0)
+            TEST_ERROR;
+        if (use_locking != false)
+            TEST_ERROR;
+        /* Check for "ignore disabled file locks" setting being off, unless
+         * force enabled by environment variable
+         */
+        if (ignore_disabled_env != true && ignore_disabled_locking != false)
+            TEST_ERROR;
+        if (H5Pclose(tmp_fapl) < 0)
+            TEST_ERROR;
+
+        if (H5Gclose(gid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(tmp_fid) < 0)
+            TEST_ERROR;
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR;
+    }
+
+    if (H5Fdelete(ext_filename, file_fapl) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(filename, file_fapl) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(file_fapl) < 0)
+        TEST_ERROR;
+
+    free(ext_filename);
+    ext_filename = NULL;
+    free(filename);
+    filename = NULL;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(tmp_fapl);
+        H5Pclose(file_fapl);
+        H5Fclose(ext_fid);
+        H5Gclose(gid);
+        H5Fclose(tmp_fid);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    free(ext_filename);
+    free(filename);
+
+    return FAIL;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    external_set_elink_cb
@@ -23034,6 +23255,7 @@ main(void)
 
                     nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_inherit_locking(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
 #ifdef H5_HAVE_WINDOW_PATH
                     nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;

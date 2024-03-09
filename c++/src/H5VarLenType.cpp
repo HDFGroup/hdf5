@@ -146,12 +146,4 @@ VarLenType::decode() const
     return (encoded_vltype);
 }
 
-//--------------------------------------------------------------------------
-// Function:    VarLenType destructor
-///\brief       Properly terminates access to this datatype.
-//--------------------------------------------------------------------------
-VarLenType::~VarLenType()
-{
-}
-
 } // namespace H5

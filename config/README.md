@@ -32,8 +32,6 @@ An Autotools build will first use `$host_cpu`, `$host_os`, etc. to try to find a
 suitable platform file in `config` to source and start checking compilers. The
 code that does this is in `configure.ac` (search for `host_os`). For example,
 MacOS will source the `apple` file and FreeBSD will source the `freebsd` file.
-There are a bunch of Linux files, but they all eventually invoke
-`linux-gnulibc1`.
 
 If you dig into one of these files, the way that they check for compilers is
 rather crude. Each OS script will simply source the various C, C++, and

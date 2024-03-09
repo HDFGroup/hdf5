@@ -19,29 +19,48 @@ jobs:
         name: "CMake Debug Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
-            thread_safety: true
+            thread_safety: "TS"
             build_mode: "Debug"
 
     call-release-thread-cmake:
         name: "CMake Release Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
-            thread_safety: true
+            thread_safety: "TS"
             build_mode: "Release"
 
     call-debug-cmake:
         name: "CMake Debug Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
-            thread_safety: false
+            thread_safety: ""
             build_mode: "Debug"
 
     call-release-cmake:
         name: "CMake Release Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
-            thread_safety: false
+            thread_safety: ""
             build_mode: "Release"
+
+    call-release-bintest:
+        name: "CMake Test Release Binaries"
+        needs: call-release-cmake
+        uses: ./.github/workflows/cmake-bintest.yml
+        with:
+            build_mode: "Release"
+
+    call-release-par:
+        name: "CMake Parallel Release Workflows"
+        uses: ./.github/workflows/main-cmake-par.yml
+        with:
+            build_mode: "Release"
+
+    call-debug-par:
+        name: "CMake Parallel Debug Workflows"
+        uses: ./.github/workflows/main-cmake-par.yml
+        with:
+            build_mode: "Debug"
 
     call-release-cmake-intel:
         name: "CMake Intel Workflows"

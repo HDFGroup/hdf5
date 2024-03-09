@@ -258,7 +258,7 @@ H5F__reparse_file_lock_variable_test(void)
     FUNC_ENTER_PACKAGE
 
     /* Check the file locking environment variable */
-    if (H5F__parse_file_lock_env_var(&use_locks_env_g) < 0)
+    if (H5F__parse_file_lock_env_var(&use_locks_env_g, &ignore_disabled_locks_g) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to parse file locking environment variable");
 
 done:

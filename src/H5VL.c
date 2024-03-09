@@ -420,7 +420,7 @@ H5VLget_connector_name(hid_t obj_id, char *name /*out*/, size_t size)
     ssize_t ret_value = -1;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", obj_id, name, size);
+    H5TRACE3("Zs", "i*sz", obj_id, name, size);
 
     /* Call internal routine */
     if ((ret_value = H5VL__get_connector_name(obj_id, name, size)) < 0)
@@ -770,7 +770,7 @@ H5VLretrieve_lib_state(void **state /*out*/)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "x", state);
+    H5TRACE1("e", "**x", state);
 
     /* Check args */
     if (NULL == state)
@@ -938,7 +938,7 @@ H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t 
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVSIsx", obj_id, subcls, opt_type, flags);
+    H5TRACE4("e", "iVSIs*UL", obj_id, subcls, opt_type, flags);
 
     /* Check args */
     if (NULL == flags)
@@ -989,7 +989,7 @@ H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "VS*sx", subcls, op_name, op_val);
+    H5TRACE3("e", "VS*s*Is", subcls, op_name, op_val);
 
     /* Check args */
     if (NULL == op_val)
@@ -1028,7 +1028,7 @@ H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "VS*sx", subcls, op_name, op_val);
+    H5TRACE3("e", "VS*s*Is", subcls, op_name, op_val);
 
     /* Check args */
     if (NULL == op_val)

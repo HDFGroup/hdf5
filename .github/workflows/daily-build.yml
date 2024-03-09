@@ -12,6 +12,26 @@ permissions:
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel.
 jobs:
+  get-old-names:
+    runs-on: ubuntu-latest
+    outputs:
+      hdf5-name: ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}
+
+    steps:
+    - uses: actions/checkout@v4.1.1
+
+    - name: Get hdf5 release base name
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        version: 'tags/snapshot'
+        file: 'last-file.txt'
+
+    - name: Read base-name file
+      id: gethdf5base
+      run: echo "HDF5_NAME_BASE=$(cat last-file.txt)" >> $GITHUB_OUTPUT
+
+    - run: echo "hdf5 base name is ${{ steps.gethdf5base.outputs.HDF5_NAME_BASE }}."
+
   call-workflow-tarball:
     uses: ./.github/workflows/tarball.yml
     with:
@@ -23,12 +43,23 @@ jobs:
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      preset_name: ci-StdShar
+      use_environ: snapshots
       #use_tag: snapshot
-      #use_environ: snapshots
+    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+
+  call-workflow-abi:
+    needs: [call-workflow-tarball, call-workflow-ctest]
+    uses: ./.github/workflows/abi-report.yml
+    with:
+      file_ref: '1_14_3'
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_tag: snapshot
+      use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-release:
-    needs: [call-workflow-tarball, call-workflow-ctest]
+    needs: [call-workflow-tarball, call-workflow-ctest, call-workflow-abi]
     permissions:
       contents: write # In order to allow tag creation
     uses: ./.github/workflows/release-files.yml
@@ -36,6 +67,17 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: snapshot
+      use_environ: snapshots
+    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+
+  call-workflow-remove:
+    needs: [get-old-names, call-workflow-tarball, call-workflow-ctest, call-workflow-abi, call-workflow-release]
+    permissions:
+      contents: write # In order to allow file deletion
+    uses: ./.github/workflows/remove-files.yml
+    with:
+      file_base: ${{ needs.get-old-names.outputs.hdf5-name }}
       use_tag: snapshot
       use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}

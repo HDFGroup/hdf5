@@ -143,8 +143,8 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
@@ -157,7 +157,7 @@
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -174,10 +174,10 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_ERR_TEST resultfile resultcode)
+  macro (ADD_H5_ERR_TEST resultfile resultcode result_errcheck)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
+    if (HDF5_USING_ANALYSIS_TOOL)
+      add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -187,14 +187,15 @@
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
-              -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+              -D "TEST_ERRREF=${result_errcheck}"
+              -D "TEST_SKIP_COMPARE=true"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
     set_tests_properties (H5LS-${resultfile} PROPERTIES
@@ -206,12 +207,12 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5LS_UD-${testname}-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls${tgt_file_ext}>"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
@@ -264,7 +265,7 @@
   # test for displaying groups
   # The following combination of arguments is expected to return an error message
   # and return value 1
-  ADD_H5_ERR_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
+  ADD_H5_ERR_TEST (tgroup-1 1 "option not compatible" -w80 -r -g tgroup.h5)
   ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
 
   # test for files with groups that have long comments
@@ -305,7 +306,7 @@
   # tests for no-dangling-links
   # if this option is given on dangling link, h5ls should return exit code 1
   # when used alone , expect to print out help and return exit code 1
-  ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 -w80 --no-dangling-links textlinksrc.h5)
+  ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 "no-dangling-links must be used" -w80 --no-dangling-links textlinksrc.h5)
   # external dangling link - expected exit code 1
   ADD_H5_TEST (textlinksrc-nodangle-2 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
   # soft dangling link - expected exit code 1
@@ -367,7 +368,7 @@
   endif ()
 
   # test for non-existing file
-  ADD_H5_ERR_TEST (nosuchfile 1 nosuchfile.h5)
+  ADD_H5_ERR_TEST (nosuchfile 1 "unable to open file" nosuchfile.h5)
 
   # test for variable length data types in verbose mode
   if (H5_WORDS_BIGENDIAN)

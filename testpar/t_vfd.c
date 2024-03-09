@@ -3987,17 +3987,20 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            sprintf(test_title, "parallel vector write test 7 -- %s / independent", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 7 -- %s / independent",
+                     vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            sprintf(test_title, "parallel vector write test 7 -- %s / col op / ind I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 7 -- %s / col op / ind I/O",
+                     vfd_name);
         }
         else {
 
             assert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            sprintf(test_title, "parallel vector write test 7 -- %s / col op / col I/O", vfd_name);
+            snprintf(test_title, sizeof(test_title), "parallel vector write test 7 -- %s / col op / col I/O",
+                     vfd_name);
         }
 
         TESTING(test_title);

@@ -108,15 +108,6 @@ PredType::committed()
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-// Default destructor
-//--------------------------------------------------------------------------
-// Function:    PredType destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-PredType::~PredType()
-{
-}
-
 /*****************************************************************************
         The following section is regarding the global constants PredType,
         DataSpace, and PropList.

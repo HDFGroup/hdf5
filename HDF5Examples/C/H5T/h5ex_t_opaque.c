@@ -111,7 +111,7 @@ main(void)
      */
     printf("Datatype tag for %s is: \"%s\"\n", DATASET, tag);
     for (i = 0; i < dims[0]; i++) {
-        printf("%s[%u]: ", DATASET, i);
+        printf("%s[%" PRIuHSIZE "]: ", DATASET, i);
         for (j = 0; j < len; j++)
             printf("%c", rdata[j + i * len]);
         printf("\n");

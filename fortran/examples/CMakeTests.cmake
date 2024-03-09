@@ -54,7 +54,7 @@ if (HDF5_TEST_SERIAL)
   )
 
   foreach (example ${examples})
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME f90_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:f90_ex_${example}>)
     else ()
       add_test (NAME f90_ex_${example} COMMAND "${CMAKE_COMMAND}"
@@ -77,7 +77,7 @@ if (HDF5_TEST_SERIAL)
   endforeach ()
 
   foreach (example ${F2003_examples})
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME f03_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:f03_ex_${example}>)
     else ()
       add_test (NAME f03_ex_${example} COMMAND "${CMAKE_COMMAND}"

@@ -73,7 +73,7 @@ set_tests_properties (FORTRAN_testhdf5-clean-objects PROPERTIES
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
-if (HDF5_ENABLE_USING_MEMCHECKER)
+if (HDF5_USING_ANALYSIS_TOOL)
   add_test (NAME FORTRAN_testhdf5_fortran COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5_fortran>)
 else ()
   add_test (NAME FORTRAN_testhdf5_fortran COMMAND "${CMAKE_COMMAND}"
@@ -99,7 +99,7 @@ if ("FORTRAN_testhdf5_fortran" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
 endif ()
 
 #-- Adding test for testhdf5_fortran_1_8
-if (HDF5_ENABLE_USING_MEMCHECKER)
+if (HDF5_USING_ANALYSIS_TOOL)
   add_test (NAME FORTRAN_testhdf5_fortran_1_8 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5_fortran_1_8>)
 else ()
   add_test (NAME FORTRAN_testhdf5_fortran_1_8 COMMAND "${CMAKE_COMMAND}"
@@ -126,7 +126,7 @@ if ("FORTRAN_testhdf5_fortran_1_8" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
 endif ()
 
 #-- Adding test for fortranlib_test_F03
-if (HDF5_ENABLE_USING_MEMCHECKER)
+if (HDF5_USING_ANALYSIS_TOOL)
   add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:fortranlib_test_F03>)
 else ()
   add_test (NAME FORTRAN_fortranlib_test_F03 COMMAND "${CMAKE_COMMAND}"
@@ -153,7 +153,7 @@ if ("FORTRAN_fortranlib_test_F03" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
 endif ()
 
 #-- Adding test for vol_connector
-if (HDF5_ENABLE_USING_MEMCHECKER)
+if (HDF5_USING_ANALYSIS_TOOL)
   add_test (NAME FORTRAN_vol_connector COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vol_connector>)
 else ()
   add_test (NAME FORTRAN_vol_connector COMMAND "${CMAKE_COMMAND}"

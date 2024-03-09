@@ -50,7 +50,7 @@ class H5_DLLCPP DSetAccPropList : public LinkAccPropList {
     DSetAccPropList(const hid_t plist_id);
 
     // Noop destructor.
-    virtual ~DSetAccPropList() override;
+    virtual ~DSetAccPropList() override = default;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

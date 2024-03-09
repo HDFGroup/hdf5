@@ -19,6 +19,14 @@
 #define H5_HAVE_PARALLEL
 #endif
 
+! Define if MPI supports mpi_f08 module
+#cmakedefine01 CMAKE_H5_HAVE_MPI_F08
+#if CMAKE_H5_HAVE_MPI_F08 == 0
+#undef H5_HAVE_MPI_F08
+#else
+#define H5_HAVE_MPI_F08
+#endif
+
 ! Define if there is subfiling support
 #cmakedefine01 CMAKE_H5_HAVE_SUBFILING_VFD
 #if CMAKE_H5_HAVE_SUBFILING_VFD == 0
@@ -59,11 +67,17 @@
 #define H5_FORTRAN_HAVE_C_SIZEOF
 #endif
 
+! Define if allocatable character is supported
+#define H5_FORTRAN_HAVE_CHAR_ALLOC @H5_FORTRAN_HAVE_CHAR_ALLOC@
+
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
 #define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
+
+! Define if Fortran C_BOOL is different from default LOGICAL
+#define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
 
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #define H5_HAVE_ISO_FORTRAN_ENV @H5_HAVE_ISO_FORTRAN_ENV@

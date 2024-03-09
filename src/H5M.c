@@ -881,7 +881,7 @@ H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
     herr_t               ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("e", "ixi", map_id, count, dxpl_id);
+    H5TRACE3("e", "i*hi", map_id, count, dxpl_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))

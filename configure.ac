@@ -652,6 +652,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
   fi
+  ## Checking if the compiler supports fortran character being allocatable
+  PAC_HAVE_CHAR_ALLOC
 
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
@@ -710,6 +712,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
+  AC_SUBST([FORTRAN_C_BOOL_IS_UNIQUE])
   AC_SUBST([H5CONFIG_F_NUM_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND])
   AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])
@@ -740,6 +743,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
 
+  if test "X$HAVE_CHAR_ALLOC_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_CHAR_ALLOC], [1], [Define if Fortran supports allocatable character])
+  fi
+
   ## See if C_LONG_DOUBLE is available
   PAC_PROG_FC_HAVE_C_LONG_DOUBLE
 
@@ -759,6 +766,16 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     else
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
     fi
+  fi
+
+  ## Is C_BOOL different from default LOGICAL
+  FORTRAN_C_BOOL_IS_UNIQUE="0"
+  PAC_PROG_FC_C_BOOL_EQ_LOGICAL
+  if test "X$C_BOOL_IS_UNIQUE_FORTRAN" = "Xyes"; then
+    FORTRAN_C_BOOL_IS_UNIQUE="1"
+    AC_DEFINE([FORTRAN_C_BOOL_IS_UNIQUE], [1], [Define if Fortran C_BOOL is different from default LOGICAL])
+  else
+    FORTRAN_C_BOOL_IS_UNIQUE="0"
   fi
 
   FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
@@ -1220,14 +1237,14 @@ AC_MSG_RESULT([$HDF5_DOXYGEN])
 ## This needs to be exposed for the library info file.
 AC_SUBST([HDF5_DOXY_WARNINGS])
 
-## Default is to consider doxygen warnings as errors
+## Default is not to consider doxygen warnings as errors
 DOXY_ERR=yes
 
 AC_MSG_CHECKING([if doxygen warnings as errors is enabled])
 
 AC_ARG_ENABLE([doxygen-errors],
               [AS_HELP_STRING([--enable-doxygen-errors],
-                              [Error on HDF5 doxygen warnings [default=yes]])],
+                              [Error on HDF5 doxygen warnings [default=no]])],
               [DOXY_ERR=$enableval])
 
 if test "X$DOXY_ERR" = "Xyes"; then
@@ -2555,8 +2572,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,MM,O,S,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,MM,O,S,T,Z"
+## all_packages="AC,B,B2,D,F,FA,FL,FS,MM,O,S,T,Z"
+all_packages="AC,B2,CX,D,F,MM,O,S,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -2840,6 +2857,25 @@ if test -n "$PARALLEL"; then
                 AC_MSG_RESULT([yes])],
                 [AC_MSG_RESULT([no])]
     )
+
+    AC_LANG_PUSH([Fortran])
+    AC_MSG_CHECKING([for MPI-3 module mpi_f08])
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([],
+                       [
+                        USE mpi_f08
+                        IMPLICIT NONE
+                        TYPE(MPI_Comm) :: comm
+                        TYPE(MPI_INFO) :: info
+                       ]
+                      )
+      ],
+      [AC_DEFINE([HAVE_MPI_F08], [1],
+                [Define if mpi_f08 module exist])
+                AC_MSG_RESULT([yes])],
+                [AC_MSG_RESULT([no])]
+    )
+    AC_LANG_POP(Fortran)
   fi
 
   ## ----------------------------------------------------------------------

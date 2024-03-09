@@ -345,7 +345,7 @@ the return value.  Two keys differing by one or two bits will have
 totally different hash values.
 
 The best hash table sizes are powers of 2.  There is no need to do
-mod a prime (mod is sooo slow!).  If you need less than 32 bits,
+mod a prime (mod is so slow!).  If you need less than 32 bits,
 use a bitmask.  For example, if you need only 10 bits, do
   h = (h & hashmask(10));
 In which case, the hash table should have hashsize(10) elements.

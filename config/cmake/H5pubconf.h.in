@@ -53,6 +53,9 @@
 /* Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE */
 #define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
 
+/* Define if Fortran C_BOOL is different from default LOGICAL */
+#define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
+
 /* Define if we have Fortran C_LONG_DOUBLE */
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
@@ -64,6 +67,9 @@
 
 /* Define if we have Fortran intrinsic STORAGE_SIZE */
 #cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
+
+/* Define if Fortran supports allocatable character */
+#cmakedefine H5_FORTRAN_HAVE_CHAR_ALLOC @H5_FORTRAN_HAVE_CHAR_ALLOC@
 
 /* Determine the size of C long double */
 #cmakedefine H5_FORTRAN_SIZEOF_LONG_DOUBLE @H5_FORTRAN_SIZEOF_LONG_DOUBLE@
@@ -242,6 +248,9 @@
 
 /* Define if we have parallel support */
 #cmakedefine H5_HAVE_PARALLEL @H5_HAVE_PARALLEL@
+
+/* Define if MPI Fortran supports mpi_f08 module */
+#cmakedefine H5_HAVE_MPI_F08 @H5_HAVE_MPI_F08@
 
 /* Define if we have support for writing to filtered datasets in parallel */
 #cmakedefine H5_HAVE_PARALLEL_FILTERED_WRITES @H5_HAVE_PARALLEL_FILTERED_WRITES@

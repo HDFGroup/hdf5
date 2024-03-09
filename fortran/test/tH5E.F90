@@ -48,8 +48,6 @@ CONTAINS
      CHARACTER(LEN=8), PARAMETER :: err_filename = "err_file"! Error output file
      CHARACTER(LEN=80)  :: fix_err_filename
 
-
-
      INTEGER(HID_T) :: file_id       ! File identifier
      INTEGER(HID_T) :: grp_id        ! Group identifier
      INTEGER :: error, tmp_error, err_flag

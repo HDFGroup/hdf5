@@ -118,15 +118,17 @@ PROGRAM main
   !
   nelmts = 1
   CALL H5Pget_filter_f(dcpl, 0, flags, nelmts, cd_values, MaxChrLen, name, filter_id, hdferr)
-  WRITE(*,'("Filter type is: ")', ADVANCE='NO')
+  WRITE(*,'(A,1X)', ADVANCE='NO') "Filter type is:"
   IF(filter_id.EQ.H5Z_FILTER_DEFLATE_F)THEN
-     WRITE(*,'(T2,"H5Z_FILTER_DEFLATE_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_DEFLATE_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_SHUFFLE_F)THEN
-     WRITE(*,'(T2,"H5Z_FILTER_SHUFFLE_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_SHUFFLE_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_FLETCHER32_F)THEN
-     WRITE(*,'(T2,"H5Z_FILTER_FLETCHER32_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_FLETCHER32_F"
   ELSE IF(filter_id.EQ.H5Z_FILTER_SZIP_F)THEN
-     WRITE(*,'(T2,"H5Z_FILTER_SZIP_F")')
+     WRITE(*,'(A)') "H5Z_FILTER_SZIP_F"
+  ELSE
+     WRITE(*,'(A)') "UNKNOWN"
   ENDIF
   !
   ! Read the data using the default properties.

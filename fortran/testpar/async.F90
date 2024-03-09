@@ -26,9 +26,8 @@ MODULE test_async_APIs
   LOGICAL :: async_enabled = .TRUE.
   LOGICAL :: mpi_thread_mult = .TRUE.
 
-  INTEGER(C_INT), PARAMETER :: logical_true = 1
-  INTEGER(C_INT), PARAMETER :: logical_false = 0
-  
+  LOGICAL(C_BOOL), PARAMETER :: logical_true = .TRUE.
+  LOGICAL(C_BOOL), PARAMETER :: logical_false = .FALSE.
 
   ! Custom group iteration callback data
   TYPE, bind(c) ::  iter_info
@@ -178,7 +177,7 @@ CONTAINS
     INTEGER(HID_T) :: space_id
     INTEGER(HID_T) :: attr_id0, attr_id1, attr_id2
     LOGICAL :: exists
-    INTEGER(C_INT), TARGET :: exists0=logical_false, exists1=logical_false, exists2=logical_false, exists3=logical_false
+    LOGICAL(C_BOOL), TARGET :: exists0=logical_false, exists1=logical_false, exists2=logical_false, exists3=logical_false
     TYPE(C_PTR) :: f_ptr, f_ptr1, f_ptr2
 
     CALL H5EScreate_f(es_id, hdferror)
@@ -788,7 +787,7 @@ CONTAINS
     INTEGER(hid_t)  :: sid = -1  ! Dataspace ID
     CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME  = "corder_group"
     CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME2 = "corder_grp00"
-    INTEGER(C_INT), TARGET :: exists1, exists2
+    LOGICAL(C_BOOL), TARGET :: exists1, exists2
     LOGICAL :: exists
     TYPE(C_PTR) :: f_ptr
 

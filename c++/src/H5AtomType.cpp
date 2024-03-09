@@ -276,14 +276,4 @@ AtomType::setPad(H5T_pad_t lsb, H5T_pad_t msb) const
     }
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:    AtomType destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-AtomType::~AtomType()
-{
-}
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 } // namespace H5

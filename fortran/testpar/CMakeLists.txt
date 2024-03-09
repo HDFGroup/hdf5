@@ -20,6 +20,7 @@ add_executable (parallel_test
     ptest.F90
     hyper.F90
     mdset.F90
+    mpi_param.F90
     multidsetrw.F90
 )
 target_include_directories (parallel_test
