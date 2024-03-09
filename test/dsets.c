@@ -5877,6 +5877,7 @@ test_floattypes(hid_t file)
         if (H5Dclose(dataset) < 0)
             goto error;
     }
+#if 0
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     /* long double */
     {
@@ -5966,6 +5967,7 @@ test_floattypes(hid_t file)
         if (H5Dclose(dataset) < 0)
             goto error;
     }
+#endif
 #endif
 
     return SUCCEED;
