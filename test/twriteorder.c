@@ -283,7 +283,7 @@ write_wo_file(void)
     } /* end for */
 
     /* write the last blkaddr in partition 0 */
-    HDlseek(write_fd_g, (HDoff_t)0, SEEK_SET);
+    HDlseek(write_fd_g, 0, SEEK_SET);
     if ((bytes_wrote = HDwrite(write_fd_g, &blkaddr_old, (size_t)sizeof(blkaddr_old))) !=
         sizeof(blkaddr_old)) {
         printf("blkaddr write failed in partition %d\n", 0);
@@ -310,7 +310,7 @@ read_wo_file(void)
 
     /* keep reading the initial block address until it is non-zero before proceeding. */
     while (blkaddr == 0) {
-        HDlseek(read_fd, (HDoff_t)0, SEEK_SET);
+        HDlseek(read_fd, 0, SEEK_SET);
         if ((bytes_read = HDread(read_fd, &blkaddr, (size_t)sizeof(blkaddr))) != sizeof(blkaddr)) {
             printf("blkaddr read failed in partition %d\n", 0);
             return -1;

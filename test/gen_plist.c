@@ -123,13 +123,13 @@ main(void)
         assert(ret > 0);
 
     max_size[0] = 100;
-    if ((ret = H5Pset_external(dcpl1, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+    if ((ret = H5Pset_external(dcpl1, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
         assert(ret > 0);
-    if ((ret = H5Pset_external(dcpl1, "ext2.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+    if ((ret = H5Pset_external(dcpl1, "ext2.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
         assert(ret > 0);
-    if ((ret = H5Pset_external(dcpl1, "ext3.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+    if ((ret = H5Pset_external(dcpl1, "ext3.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
         assert(ret > 0);
-    if ((ret = H5Pset_external(dcpl1, "ext4.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+    if ((ret = H5Pset_external(dcpl1, "ext4.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
         assert(ret > 0);
 
     if ((ret = encode_plist(dcpl1, little_endian, word_length, "plist_files/dcpl_")) < 0)

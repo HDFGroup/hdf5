@@ -393,7 +393,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
             int    myerrno = errno;
             time_t mytime  = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+            offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
@@ -871,8 +871,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                  * partial results, and the end of the file.
                  */
 
-                uint8_t *mem    = file->mem;  /* memory pointer for writes */
-                HDoff_t  offset = (HDoff_t)0; /* offset for reading */
+                uint8_t *mem    = file->mem; /* memory pointer for writes */
+                HDoff_t  offset = 0;         /* offset for reading */
 
                 while (size > 0) {
                     h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
@@ -900,7 +900,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                         int    myerrno = errno;
                         time_t mytime  = HDtime(NULL);
 
-                        offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+                        offset = HDlseek(file->fd, 0, SEEK_CUR);
 
                         HGOTO_ERROR(
                             H5E_IO, H5E_READERROR, NULL,

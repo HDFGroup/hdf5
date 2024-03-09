@@ -5400,10 +5400,10 @@ make_external(hid_t fid)
     size                      = (max_size[0] * sizeof(int) / 2);
 
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    ret  = H5Pset_external(dcpl, "ext1.bin", (off_t)0, size);
+    ret  = H5Pset_external(dcpl, "ext1.bin", 0, size);
     assert(ret >= 0);
 
-    ret = H5Pset_external(dcpl, "ext2.bin", (off_t)0, size);
+    ret = H5Pset_external(dcpl, "ext2.bin", 0, size);
     assert(ret >= 0);
 
     sid = H5Screate_simple(1, cur_size, max_size);

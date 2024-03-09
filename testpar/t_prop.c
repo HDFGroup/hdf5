@@ -172,13 +172,13 @@ test_plist_ed(void)
     VRFY((ret >= 0), "set fill-value succeeded");
 
     max_size[0] = 100;
-    ret         = H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4));
+    ret         = H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4));
     VRFY((ret >= 0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4));
+    ret = H5Pset_external(dcpl, "ext2.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4));
     VRFY((ret >= 0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext3.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4));
+    ret = H5Pset_external(dcpl, "ext3.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4));
     VRFY((ret >= 0), "set external succeeded");
-    ret = H5Pset_external(dcpl, "ext4.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4));
+    ret = H5Pset_external(dcpl, "ext4.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4));
     VRFY((ret >= 0), "set external succeeded");
 
     ret = test_encode_decode(dcpl, mpi_rank, recv_proc);

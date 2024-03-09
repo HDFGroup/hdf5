@@ -178,8 +178,8 @@ test_plists(const char *filename_prefix)
             testfile = H5_get_srcdir_filename(filename);
             if ((fd_1 = HDopen(testfile, O_RDONLY)) < 0)
                 TEST_ERROR;
-            size_1 = (size_t)HDlseek(fd_1, (HDoff_t)0, SEEK_END);
-            HDlseek(fd_1, (HDoff_t)0, SEEK_SET);
+            size_1 = (size_t)HDlseek(fd_1, 0, SEEK_END);
+            HDlseek(fd_1, 0, SEEK_SET);
             buf_1 = (void *)malloc(size_1);
             if (HDread(fd_1, buf_1, size_1) < 0)
                 TEST_ERROR;
@@ -194,8 +194,8 @@ test_plists(const char *filename_prefix)
             testfile = H5_get_srcdir_filename(filename);
             if ((fd_2 = HDopen(testfile, O_RDONLY)) < 0)
                 TEST_ERROR;
-            size_2 = (size_t)HDlseek(fd_2, (HDoff_t)0, SEEK_END);
-            HDlseek(fd_2, (HDoff_t)0, SEEK_SET);
+            size_2 = (size_t)HDlseek(fd_2, 0, SEEK_END);
+            HDlseek(fd_2, 0, SEEK_SET);
             buf_2 = (void *)malloc(size_2);
             if (HDread(fd_2, buf_2, size_2) < 0)
                 TEST_ERROR;
