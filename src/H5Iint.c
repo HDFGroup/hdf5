@@ -373,15 +373,6 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
             /* Discard the future object */
             if ((info->discard_cb)(info->u.object) < 0) {
                 if (udata->force) {
-#ifdef H5I_DEBUG
-                    if (H5DEBUG(I)) {
-                        fprintf(H5DEBUG(I),
-                                "H5I: discard type=%d obj=%p "
-                                "failure ignored\n",
-                                (int)udata->type_info->cls->type, info->u.c_object);
-                    }
-#endif /* H5I_DEBUG */
-
                     /* Indicate node should be removed from list */
                     mark = true;
                 }
@@ -396,15 +387,6 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
             if (udata->type_info->cls->free_func &&
                 (udata->type_info->cls->free_func)(info->u.object, H5_REQUEST_NULL) < 0) {
                 if (udata->force) {
-#ifdef H5I_DEBUG
-                    if (H5DEBUG(I)) {
-                        fprintf(H5DEBUG(I),
-                                "H5I: free type=%d obj=%p "
-                                "failure ignored\n",
-                                (int)udata->type_info->cls->type, info->u.c_object);
-                    }
-#endif /* H5I_DEBUG */
-
                     /* Indicate node should be removed from list */
                     mark = true;
                 }
