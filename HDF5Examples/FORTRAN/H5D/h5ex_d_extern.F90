@@ -40,7 +40,7 @@ PROGRAM main
   INTEGER :: i, j
   ! This change was introduced in the 1.8.12 release
 #if H5_VERSION_GE(1,8,12)
-  INTEGER(OFF_T) :: offset = 0 ! Offset, in bytes, from thebeginning of the file to the 
+  INTEGER(OFF_T) :: offset = 0 ! Offset, in bytes, from the beginning of the file to the 
                                ! location in the file where the data starts.
 #else
   INTEGER :: offset = 0

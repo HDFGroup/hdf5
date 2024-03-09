@@ -645,6 +645,8 @@ DSetCreatPropList::setFletcher32() const
 ///             the total size is larger than the size of a dataset then the
 ///             dataset can be extended (provided the data space also allows
 ///             the extending).
+///\note        On Windows, off_t is typically a 32-bit signed long value, which
+///             limits the valid offset that can be set to 2 GiB.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::setExternal(const char *name, off_t offset, hsize_t size) const
@@ -693,6 +695,8 @@ DSetCreatPropList::getExternalCount() const
 ///             external file name will not be returned.  If \a offset or
 ///             \a size are null pointers then the corresponding information
 ///             will not be returned.
+///\note        On Windows, off_t is typically a 32-bit signed long value, which
+///             limits the valid offset that can be returned to 2 GiB.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char *name, off_t &offset, hsize_t &size) const
