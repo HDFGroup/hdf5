@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - The CMake HDF5_ENABLE_DEBUG_H5B option has been removed
+
+      This enabled some additional version-1 B-tree checks. These have been
+      removed so the option is no longer necessary.
+
+      This option was CMake-only and marked as advanced.
+
     - New option for building with static CRT in Windows
 
       The following option has been added:

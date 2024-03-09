@@ -14,7 +14,7 @@
  *
  * Created:         H5Bdbg.c
  *
- * Purpose:         Debugging routines for B-link tree package.
+ * Purpose:         Debugging routines for B-link tree package
  *
  *-------------------------------------------------------------------------
  */
@@ -36,10 +36,9 @@
 /*-------------------------------------------------------------------------
  * Function:    H5B_debug
  *
- * Purpose:     Prints debugging info about a B-tree.
+ * Purpose:     Prints debugging info about a B-tree
  *
  * Return:      Non-negative on success/Negative on failure
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -132,15 +131,15 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5B__assert
  *
- * Purpose:     Verifies that the tree is structured correctly.
+ * Purpose:     Verifies that the tree is structured correctly
+ *
+ *              Relies on assert(), so only built when NDEBUG is not set
  *
  * Return:      Success:    SUCCEED
- *
- *              Failure:    aborts if something is wrong.
- *
+ *              Failure:    assert()
  *-------------------------------------------------------------------------
  */
-#ifdef H5B_DEBUG
+#ifndef NDEBUG
 herr_t
 H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 {
@@ -149,7 +148,6 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     H5B_shared_t  *shared;      /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata; /* User-data for metadata cache callback */
     int            ncell, cmp;
-    static int     ncalls = 0;
     herr_t         status;
     herr_t         ret_value = SUCCEED; /* Return value */
 
@@ -161,11 +159,6 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
     FUNC_ENTER_PACKAGE
-
-    if (0 == ncalls++) {
-        if (H5DEBUG(B))
-            fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
-    } /* end if */
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
@@ -257,4 +250,4 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__assert() */
-#endif /* H5B_DEBUG */
+#endif /* !NDEBUG */
