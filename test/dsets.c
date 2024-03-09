@@ -5898,9 +5898,9 @@ test_floattypes(hid_t file)
         precision = 128;
         if (H5Tset_precision(datatype, precision) < 0)
             goto error;
-        if (H5Tset_fields(datatype, (size_t)127, (size_t)112, (size_t)15, (size_t)5, (size_t)107) < 0)
+        if (H5Tset_fields(datatype, (size_t)127, (size_t)112, (size_t)15, (size_t)0, (size_t)112) < 0)
             goto error;
-        offset = 5;
+        offset = 0;
         if (H5Tset_offset(datatype, offset) < 0)
             goto error;
         if (H5Tset_size(datatype, (size_t)16) < 0)
