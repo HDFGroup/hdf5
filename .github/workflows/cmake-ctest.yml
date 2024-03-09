@@ -333,6 +333,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
