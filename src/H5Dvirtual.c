@@ -2678,11 +2678,11 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset
 
         {
             /* Initialize source_dinfo */
-            source_dinfo.dset        = source_dset->dset;
-            source_dinfo.mem_space   = source_dset->projected_mem_space;
-            source_dinfo.file_space  = projected_src_space;
-            source_dinfo.buf.vp      = dset_info->buf.vp;
-            source_dinfo.mem_type_id = dset_info->type_info.dst_type_id;
+            source_dinfo.dset       = source_dset->dset;
+            source_dinfo.mem_space  = source_dset->projected_mem_space;
+            source_dinfo.file_space = projected_src_space;
+            source_dinfo.buf.vp     = dset_info->buf.vp;
+            source_dinfo.mem_type   = dset_info->type_info.dst_type;
 
             /* Read in the point (with the custom VL memory allocator) */
             if (H5D__read(1, &source_dinfo) < 0)
@@ -2875,11 +2875,11 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdse
 
         {
             /* Initialize source_dinfo */
-            source_dinfo.dset        = source_dset->dset;
-            source_dinfo.mem_space   = source_dset->projected_mem_space;
-            source_dinfo.file_space  = projected_src_space;
-            source_dinfo.buf.cvp     = dset_info->buf.cvp;
-            source_dinfo.mem_type_id = dset_info->type_info.dst_type_id;
+            source_dinfo.dset       = source_dset->dset;
+            source_dinfo.mem_space  = source_dset->projected_mem_space;
+            source_dinfo.file_space = projected_src_space;
+            source_dinfo.buf.cvp    = dset_info->buf.cvp;
+            source_dinfo.mem_type   = dset_info->type_info.dst_type;
 
             /* Read in the point (with the custom VL memory allocator) */
             if (H5D__write(1, &source_dinfo) < 0)
