@@ -140,7 +140,6 @@ static void
 test_szip_filter(H5File &file1)
 {
 #ifdef H5_HAVE_FILTER_SZIP
-    int      points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
     unsigned szip_options_mask     = H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block = 4;
 
@@ -149,6 +148,8 @@ test_szip_filter(H5File &file1)
 
     if (h5_szip_can_encode() == 1) {
         char *tconv_buf = new char[1000];
+        auto  points    = new int[DSET_DIM1][DSET_DIM2];
+        auto  check     = new int[DSET_DIM1][DSET_DIM2];
 
         try {
             const hsize_t size[2] = {DSET_DIM1, DSET_DIM2};
@@ -201,6 +202,8 @@ test_szip_filter(H5File &file1)
         }
 
         delete[] tconv_buf;
+        delete[] points;
+        delete[] check;
     } // if szip presents
     else {
         SKIPPED();
