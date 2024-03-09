@@ -1615,6 +1615,9 @@ CONTAINS
 !! \param bytes  Size of the external file data.
 !! \param hdferr \fortran_error
 !!
+!! \note On Windows, off_t is typically a 32-bit signed long value, which
+!!       limits the valid offset that can be set to 2 GiB.
+!!
 !! See C API: @ref H5Pset_external()
 !!
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
@@ -1686,9 +1689,12 @@ CONTAINS
 !! \param bytes     Size of the external file data.
 !! \param hdferr    \fortran_error
 !!
+!! \note On Windows, off_t is typically a 32-bit signed long value, which
+!!       limits the valid offset that can be returned to 2 GiB.
+!!
 !! See C API: @ref H5Pget_external()
 !!
-  SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
+  SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset, bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: idx

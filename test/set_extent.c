@@ -1831,10 +1831,10 @@ test_external(hid_t fapl, bool use_select_io)
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_external(dcpl, EXT_FILE_NAME1, (off_t)0, size) < 0)
+    if (H5Pset_external(dcpl, EXT_FILE_NAME1, 0, size) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_external(dcpl, EXT_FILE_NAME2, (off_t)0, size) < 0)
+    if (H5Pset_external(dcpl, EXT_FILE_NAME2, 0, size) < 0)
         FAIL_STACK_ERROR;
 
     {
