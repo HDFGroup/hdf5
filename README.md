@@ -30,10 +30,10 @@ The latest doxygen documentation generated on changes to HDF5 1.14.x is availabl
 
    https://hdfgroup.github.io/hdf5/
 
-See the [RELEASE.txt](/release_docs/RELEASE.txt) file in the [release_docs/](/release_docs/) directory for information specific
+See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
 to the features and updates included in this release of the library.
 
-Several more files are located within the [release_docs/](/release_docs/) directory with specific
+Several more files are located within the [release_docs/](release_docs/) directory with specific
 details for several common platforms and configurations.
 
     INSTALL - Start Here. General instructions for compiling and installing the library
