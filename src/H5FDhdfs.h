@@ -43,7 +43,7 @@ extern "C" {
 
 /**
  * The version number of the H5FD_hdfs_fapl_t configuration
- * structure for the $H5FD_HDFS driver
+ * structure for the #H5FD_HDFS driver
  */
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
 
