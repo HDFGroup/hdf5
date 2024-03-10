@@ -4145,6 +4145,16 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
     struct fo_flush_entry_check     *checks        = NULL;
     H5C_t                           *cache_ptr     = file_ptr->shared->cache;
 
+    /* Per-test variables. Each test sets these. */
+    int          test_num;
+    unsigned int flush_flags;
+    int          spec_size;
+    int          check_size;
+    unsigned     init_expected_index_len;
+    size_t       init_expected_index_size;
+    unsigned     expected_index_len;
+    size_t       expected_index_size;
+
     if (cache_ptr == NULL) {
 
         pass         = false;
@@ -4176,14 +4186,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * resident in cache, and the second entry dirties the first in
          * the flush callback.  No size changes, and no flush flags.
          */
-        int          test_num                 = 1;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 2;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 2;
-        size_t       init_expected_index_size = 2 * PICO_ENTRY_SIZE;
-        unsigned     expected_index_len       = 2;
-        size_t       expected_index_size      = 2 * PICO_ENTRY_SIZE;
+        test_num                 = 1;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 2;
+        check_size               = 0;
+        init_expected_index_len  = 2;
+        init_expected_index_size = 2 * PICO_ENTRY_SIZE;
+        expected_index_len       = 2;
+        expected_index_size      = 2 * PICO_ENTRY_SIZE;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4270,14 +4280,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Create two entries resident in cache, and have the second entry
          * dirty the first in the flush callback.
          */
-        int          test_num                 = 2;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 2;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 2;
-        size_t       init_expected_index_size = 2 * PICO_ENTRY_SIZE;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = 0;
+        test_num                 = 2;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 2;
+        check_size               = 0;
+        init_expected_index_len  = 2;
+        init_expected_index_size = 2 * PICO_ENTRY_SIZE;
+        expected_index_len       = 0;
+        expected_index_size      = 0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4361,14 +4371,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * which the call back function resizes the entry for which it has
          * been called.
          */
-        int          test_num                 = 3;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = VARIABLE_ENTRY_SIZE / 4;
-        unsigned     expected_index_len       = 1;
-        size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
+        test_num                 = 3;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 0;
+        init_expected_index_len  = 1;
+        init_expected_index_size = VARIABLE_ENTRY_SIZE / 4;
+        expected_index_len       = 1;
+        expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4427,14 +4437,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * which the call back function resizes the entry for which it has
          * been called.
          */
-        int          test_num                 = 4;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 1;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = VARIABLE_ENTRY_SIZE / 4;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = 0;
+        test_num                 = 4;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 1;
+        check_size               = 0;
+        init_expected_index_len  = 1;
+        init_expected_index_size = VARIABLE_ENTRY_SIZE / 4;
+        expected_index_len       = 0;
+        expected_index_size      = 0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4500,14 +4510,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * be accompanied by a resize.  Note that as a result, this
          * test becomes redundant with later tests.
          */
-        int          test_num                 = 5; /* and 6 */
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 1;
-        size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
+        test_num                 = 5; /* and 6 */
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 0;
+        init_expected_index_len  = 1;
+        init_expected_index_size = VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 1;
+        expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4597,14 +4607,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * be accompanied by a resize.  Note that as a result, this
          * test becomes redundant with later tests.
          */
-        int          test_num                 = 7; /* and 8 */
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 1;
-        size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
+        test_num                 = 7; /* and 8 */
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 0;
+        init_expected_index_len  = 1;
+        init_expected_index_size = VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 1;
+        expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4690,14 +4700,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Again, we run this entry twice, as the first run moves the entry
          * to its alternate address, and the second moves it back.
          */
-        int          test_num                 = 9; /* and 10 */
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = VARIABLE_ENTRY_SIZE / 2;
-        unsigned     expected_index_len       = 1;
-        size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
+        test_num                 = 9; /* and 10 */
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 0;
+        init_expected_index_len  = 1;
+        init_expected_index_size = VARIABLE_ENTRY_SIZE / 2;
+        expected_index_len       = 1;
+        expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4781,14 +4791,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Again, we run this entry twice, as the first run moves the entry to its
          * alternate address, and the second moves it back.
          */
-        int          test_num                 = 11; /* and 12 */
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = VARIABLE_ENTRY_SIZE / 2;
-        unsigned     expected_index_len       = 1;
-        size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
+        test_num                 = 11; /* and 12 */
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 0;
+        init_expected_index_len  = 1;
+        init_expected_index_size = VARIABLE_ENTRY_SIZE / 2;
+        expected_index_len       = 1;
+        expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4874,14 +4884,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * At present, I am assured that this case will never occur, but
          * lets make sure we can handle it regardless.
          */
-        int          test_num                 = 13;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 2;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = 1 * PICO_ENTRY_SIZE;
-        unsigned     expected_index_len       = 3;
-        size_t       expected_index_size      = 3 * PICO_ENTRY_SIZE;
+        test_num                 = 13;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 2;
+        init_expected_index_len  = 1;
+        init_expected_index_size = 1 * PICO_ENTRY_SIZE;
+        expected_index_len       = 3;
+        expected_index_size      = 3 * PICO_ENTRY_SIZE;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -4956,14 +4966,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * At present, I am assured that this case will never occur, but
          * lets make sure we can handle it regardless.
          */
-        int          test_num                 = 14;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 1;
-        int          check_size               = 2;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = 1 * PICO_ENTRY_SIZE;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = (size_t)0;
+        test_num                 = 14;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 1;
+        check_size               = 2;
+        init_expected_index_len  = 1;
+        init_expected_index_size = 1 * PICO_ENTRY_SIZE;
+        expected_index_len       = 0;
+        expected_index_size      = (size_t)0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5035,15 +5045,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * At present, I am assured that this case will never occur, but
          * lets make sure we can handle it regardless.
          */
-        int          test_num                 = 15;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 2;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 3;
-        size_t       expected_index_size =
-            VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
+        test_num                 = 15;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 2;
+        init_expected_index_len  = 1;
+        init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 3;
+        expected_index_size = VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5117,14 +5126,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * At present, I am assured that this case will never occur, but
          * lets make sure we can handle it regardless.
          */
-        int          test_num                 = 16;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 1;
-        int          check_size               = 2;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = (size_t)0;
+        test_num                 = 16;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 1;
+        check_size               = 2;
+        init_expected_index_len  = 1;
+        init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 0;
+        expected_index_size      = (size_t)0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5196,15 +5205,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * At present, I am assured that this case will never occur, but
          * lets make sure we can handle it regardless.
          */
-        int          test_num                 = 17; /* and 18 */
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 2;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 3;
-        size_t       expected_index_size =
-            VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
+        test_num                 = 17; /* and 18 */
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 2;
+        init_expected_index_len  = 1;
+        init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 3;
+        expected_index_size = VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5300,15 +5308,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * At present, I am assured that this case will never occur, but
          * lets make sure we can handle it regardless.
          */
-        int          test_num                 = 19; /* and 20 */
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 1;
-        int          check_size               = 2;
-        unsigned     init_expected_index_len  = 1;
-        size_t       init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 3;
-        size_t       expected_index_size =
-            VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
+        test_num                 = 19; /* and 20 */
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 1;
+        check_size               = 2;
+        init_expected_index_len  = 1;
+        init_expected_index_size = 1 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 3;
+        expected_index_size = VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5411,15 +5418,15 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Also load entries that have flush ops on entries that are in
          * cache.
          */
-        int          test_num                 = 21;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 6;
-        int          check_size               = 4;
-        unsigned     init_expected_index_len  = 6;
-        size_t       init_expected_index_size = (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-        unsigned     expected_index_len       = 10;
-        size_t       expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (2 * (VARIABLE_ENTRY_SIZE / 4)) +
-                                     (2 * (VARIABLE_ENTRY_SIZE / 2)) + (4 * PICO_ENTRY_SIZE);
+        test_num                 = 21;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 6;
+        check_size               = 4;
+        init_expected_index_len  = 6;
+        init_expected_index_size = (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
+        expected_index_len       = 10;
+        expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (2 * (VARIABLE_ENTRY_SIZE / 4)) +
+                              (2 * (VARIABLE_ENTRY_SIZE / 2)) + (4 * PICO_ENTRY_SIZE);
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5655,14 +5662,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Also load entries that have flush ops on entries that are in
          * cache.
          */
-        int          test_num                 = 22;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 6;
-        int          check_size               = 4;
-        unsigned     init_expected_index_len  = 6;
-        size_t       init_expected_index_size = (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = 0;
+        test_num                 = 22;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 6;
+        check_size               = 4;
+        init_expected_index_len  = 6;
+        init_expected_index_size = (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
+        expected_index_len       = 0;
+        expected_index_size      = 0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -5894,14 +5901,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         /* Pico entries 50 and 150 pin pico entry 100, and also dirty
          * pico entry 100 on flush.
          */
-        int          test_num                 = 23;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 3;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 3;
-        size_t       init_expected_index_size = 3 * PICO_ENTRY_SIZE;
-        unsigned     expected_index_len       = 3;
-        size_t       expected_index_size      = 3 * PICO_ENTRY_SIZE;
+        test_num                 = 23;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 3;
+        check_size               = 0;
+        init_expected_index_len  = 3;
+        init_expected_index_size = 3 * PICO_ENTRY_SIZE;
+        expected_index_len       = 3;
+        expected_index_size      = 3 * PICO_ENTRY_SIZE;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -6013,14 +6020,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * Pico entries 50 and 150 pin pico entry 100, and also dirty
          * pico entry 100 on flush.
          */
-        int          test_num                 = 24;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 3;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 3;
-        size_t       init_expected_index_size = 3 * PICO_ENTRY_SIZE;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = (size_t)0;
+        test_num                 = 24;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 3;
+        check_size               = 0;
+        init_expected_index_len  = 3;
+        init_expected_index_size = 3 * PICO_ENTRY_SIZE;
+        expected_index_len       = 0;
+        expected_index_size      = (size_t)0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -6202,14 +6209,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          *         dirties    (VET, 650)
          *         dirties (VET, 750)
          */
-        int          test_num                 = 25;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 10;
-        int          check_size               = 3;
-        unsigned     init_expected_index_len  = 10;
-        size_t       init_expected_index_size = 10 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 13;
-        size_t       expected_index_size      = 9 * VARIABLE_ENTRY_SIZE;
+        test_num                 = 25;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 10;
+        check_size               = 3;
+        init_expected_index_len  = 10;
+        init_expected_index_size = 10 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 13;
+        expected_index_size      = 9 * VARIABLE_ENTRY_SIZE;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -6610,14 +6617,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          *         dirties    (VET, 650)
          *         dirties (VET, 750)
          */
-        int          test_num                 = 26;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 10;
-        int          check_size               = 3;
-        unsigned     init_expected_index_len  = 10;
-        size_t       init_expected_index_size = 10 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = (size_t)0;
+        test_num                 = 26;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 10;
+        check_size               = 3;
+        init_expected_index_len  = 10;
+        init_expected_index_size = 10 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 0;
+        expected_index_size      = (size_t)0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -6943,14 +6950,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * and resizes itself, and dirties an entry which it has
          * pinned.
          */
-        int          test_num                 = 27;
-        unsigned int flush_flags              = H5C__NO_FLAGS_SET;
-        int          spec_size                = 5;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 5;
-        size_t       init_expected_index_size = 3 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 5;
-        size_t       expected_index_size      = 4 * VARIABLE_ENTRY_SIZE;
+        test_num                 = 27;
+        flush_flags              = H5C__NO_FLAGS_SET;
+        spec_size                = 5;
+        check_size               = 0;
+        init_expected_index_len  = 5;
+        init_expected_index_size = 3 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 5;
+        expected_index_size      = 4 * VARIABLE_ENTRY_SIZE;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
@@ -7119,14 +7126,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
          * and resizes itself, and dirties an entry which it has
          * pinned.
          */
-        int          test_num                 = 28;
-        unsigned int flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
-        int          spec_size                = 5;
-        int          check_size               = 0;
-        unsigned     init_expected_index_len  = 5;
-        size_t       init_expected_index_size = 3 * VARIABLE_ENTRY_SIZE;
-        unsigned     expected_index_len       = 0;
-        size_t       expected_index_size      = 0;
+        test_num                 = 28;
+        flush_flags              = H5C__FLUSH_INVALIDATE_FLAG;
+        spec_size                = 5;
+        check_size               = 0;
+        init_expected_index_len  = 5;
+        init_expected_index_size = 3 * VARIABLE_ENTRY_SIZE;
+        expected_index_len       = 0;
+        expected_index_size      = 0;
 
         assert(spec_size <= max_num_spec);
         assert(check_size <= max_num_check);
