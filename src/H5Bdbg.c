@@ -240,7 +240,7 @@ H5B__verify_structure(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *uda
 
         /* Release node */
         if (H5AC_unprotect(f, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "can't protect B-tree node");
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "can't unprotect B-tree node");
 
         bt = NULL; /* Make certain future references will be caught */
 
