@@ -1483,8 +1483,8 @@ H5T_top_term_package(void)
                 H5T__print_stats(path, &nprint /*in,out*/);
                 path->cdata.command = H5T_CONV_FREE;
                 if (path->conv.is_app) {
-                    if ((path->conv.u.app_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0,
-                                                (size_t)0, (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+                    if ((path->conv.u.app_func)(H5I_INVALID_HID, H5I_INVALID_HID, &(path->cdata), 0, 0, 0,
+                                                NULL, NULL, H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
                         if (H5DEBUG(T)) {
                             fprintf(H5DEBUG(T),
@@ -1498,8 +1498,7 @@ H5T_top_term_package(void)
                     }                          /* end if */
                 }                              /* end if */
                 else {
-                    if ((path->conv.u.lib_func)(NULL, NULL, &(path->cdata), NULL, (size_t)0, (size_t)0,
-                                                (size_t)0, NULL, NULL) < 0) {
+                    if ((path->conv.u.lib_func)(NULL, NULL, &(path->cdata), NULL, 0, 0, 0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                         if (H5DEBUG(T)) {
                             fprintf(H5DEBUG(T),
@@ -2541,8 +2540,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                 "unable to register ID for destination datatype");
 
-                if ((conv->u.app_func)(tmp_sid, tmp_did, &cdata, (size_t)0, (size_t)0, (size_t)0, NULL, NULL,
-                                       H5CX_get_dxpl()) < 0) {
+                if ((conv->u.app_func)(tmp_sid, tmp_did, &cdata, 0, 0, 0, NULL, NULL, H5CX_get_dxpl()) < 0) {
                     H5I_dec_ref(tmp_sid);
                     H5I_dec_ref(tmp_did);
                     tmp_sid = tmp_did = H5I_INVALID_HID;
@@ -2551,8 +2549,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                     continue;
                 } /* end if */
             }     /* end if */
-            else if ((conv->u.lib_func)(tmp_stype, tmp_dtype, &cdata, NULL, (size_t)0, (size_t)0, (size_t)0,
-                                        NULL, NULL) < 0) {
+            else if ((conv->u.lib_func)(tmp_stype, tmp_dtype, &cdata, NULL, 0, 0, 0, NULL, NULL) < 0) {
                 H5T_close(tmp_stype);
                 H5T_close(tmp_dtype);
                 tmp_stype = tmp_dtype = NULL;
@@ -2580,8 +2577,8 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
             H5T__print_stats(old_path, &nprint);
             old_path->cdata.command = H5T_CONV_FREE;
             if (old_path->conv.is_app) {
-                if ((old_path->conv.u.app_func)(tmp_sid, tmp_did, &(old_path->cdata), (size_t)0, (size_t)0,
-                                                (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+                if ((old_path->conv.u.app_func)(tmp_sid, tmp_did, &(old_path->cdata), 0, 0, 0, NULL, NULL,
+                                                H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         fprintf(H5DEBUG(T),
@@ -2591,8 +2588,8 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #endif
                 } /* end if */
             }     /* end if */
-            else if ((old_path->conv.u.lib_func)(tmp_stype, tmp_dtype, &(old_path->cdata), NULL, (size_t)0,
-                                                 (size_t)0, (size_t)0, NULL, NULL) < 0) {
+            else if ((old_path->conv.u.lib_func)(tmp_stype, tmp_dtype, &(old_path->cdata), NULL, 0, 0, 0,
+                                                 NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T),
@@ -2802,8 +2799,8 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_o
             H5T__print_stats(path, &nprint);
             path->cdata.command = H5T_CONV_FREE;
             if (path->conv.is_app) {
-                if ((path->conv.u.app_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0, (size_t)0,
-                                            (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+                if ((path->conv.u.app_func)(H5I_INVALID_HID, H5I_INVALID_HID, &(path->cdata), 0, 0, 0, NULL,
+                                            NULL, H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         fprintf(H5DEBUG(T),
@@ -2813,8 +2810,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5VL_o
 #endif
                 } /* end if */
             }     /* end if */
-            else if ((path->conv.u.lib_func)(NULL, NULL, &(path->cdata), NULL, (size_t)0, (size_t)0,
-                                             (size_t)0, NULL, NULL) < 0) {
+            else if ((path->conv.u.lib_func)(NULL, NULL, &(path->cdata), NULL, 0, 0, 0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T),
@@ -2996,7 +2992,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *backgroun
     if (NULL == (tpath = H5T_path_find(src, dst)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
 
-    if (H5T_convert(tpath, src, dst, nelmts, (size_t)0, (size_t)0, buf, background) < 0)
+    if (H5T_convert(tpath, src, dst, nelmts, 0, 0, buf, background) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
 done:
@@ -4960,8 +4956,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         H5T_g.path[0]->conv.is_app     = false;
         H5T_g.path[0]->conv.u.lib_func = H5T__conv_noop;
         H5T_g.path[0]->cdata.command   = H5T_CONV_INIT;
-        if (H5T__conv_noop(NULL, NULL, &(H5T_g.path[0]->cdata), NULL, (size_t)0, (size_t)0, (size_t)0, NULL,
-                           NULL) < 0) {
+        if (H5T__conv_noop(NULL, NULL, &(H5T_g.path[0]->cdata), NULL, 0, 0, 0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
             if (H5DEBUG(T))
                 fprintf(H5DEBUG(T), "H5T: unable to initialize no-op conversion function (ignored)\n");
@@ -5057,12 +5052,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                             "unable to register ID for destination datatype");
 
-            if ((conv->u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0, NULL,
-                                   NULL, H5CX_get_dxpl()) < 0)
+            if ((conv->u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL, H5CX_get_dxpl()) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
         } /* end if */
-        else if ((conv->u.lib_func)(tmp_stype, tmp_dtype, &(path->cdata), NULL, (size_t)0, (size_t)0,
-                                    (size_t)0, NULL, NULL) < 0)
+        else if ((conv->u.lib_func)(tmp_stype, tmp_dtype, &(path->cdata), NULL, 0, 0, 0, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
 
         if (src_id >= 0) {
@@ -5125,15 +5118,15 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                             "unable to register ID for destination datatype");
 
-            if ((H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0,
-                                                (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+            if ((H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL,
+                                                H5CX_get_dxpl()) < 0) {
                 memset(&(path->cdata), 0, sizeof(H5T_cdata_t));
                 H5E_clear_stack(NULL); /*ignore the error*/
                 path_init_error = true;
             } /* end if */
         }     /* end if */
-        else if ((H5T_g.soft[i].conv.u.lib_func)(tmp_stype, tmp_dtype, &(path->cdata), NULL, (size_t)0,
-                                                 (size_t)0, (size_t)0, NULL, NULL) < 0) {
+        else if ((H5T_g.soft[i].conv.u.lib_func)(tmp_stype, tmp_dtype, &(path->cdata), NULL, 0, 0, 0, NULL,
+                                                 NULL) < 0) {
             memset(&(path->cdata), 0, sizeof(H5T_cdata_t));
             H5E_clear_stack(NULL); /*ignore the error*/
             path_init_error = true;
@@ -5202,8 +5195,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         H5T__print_stats(table, &nprint /*in,out*/);
         table->cdata.command = H5T_CONV_FREE;
         if (table->conv.is_app) {
-            if ((table->conv.u.app_func)((hid_t)FAIL, (hid_t)FAIL, &(table->cdata), (size_t)0, (size_t)0,
-                                         (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+            if ((table->conv.u.app_func)(H5I_INVALID_HID, H5I_INVALID_HID, &(table->cdata), 0, 0, 0, NULL,
+                                         NULL, H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     fprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
@@ -5212,8 +5205,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                 H5E_clear_stack(NULL); /*ignore the failure*/
             }                          /* end if */
         }                              /* end if */
-        else if ((table->conv.u.lib_func)(NULL, NULL, &(table->cdata), NULL, (size_t)0, (size_t)0, (size_t)0,
-                                          NULL, NULL) < 0) {
+        else if ((table->conv.u.lib_func)(NULL, NULL, &(table->cdata), NULL, 0, 0, 0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
             if (H5DEBUG(T))
                 fprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
