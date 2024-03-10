@@ -67,7 +67,7 @@ extern "C" {
  *      Version number of the H5FD_hdfs_fapl_t structure. Any instance passed
  *      to H5Pset_fapl_hdfs() / H5Pget_fapl_hdfs() must have a recognized version
  *      number or an error will be raised. Currently, this field should be set
- *      to #H5FD_CURR_HDFS_FAPL_T_VERSION.
+ *      to #H5FD__CURR_HDFS_FAPL_T_VERSION.
  *
  * \var char H5FD_hdfs_fapl_t::namenode_name[H5FD__HDFS_NODE_NAME_SPACE + 1]
  *      Name of "Name Node" to access as the HDFS server
