@@ -334,7 +334,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 /* MAXLOC is invalid */
             default:
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location");
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+        } /* end switch */
 
         /* Indicate that the location changed */
         ret_value = true;
@@ -622,7 +622,7 @@ H5T__vlen_mem_str_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     H5MM_memcpy(_vl, &t, sizeof(char *));
 
-    FUNC_LEAVE_NOAPI(SUCCEED) /*lint !e429 The pointer in 't' has been copied */
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_setnull() */
 
 /*-------------------------------------------------------------------------
@@ -695,7 +695,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     H5MM_memcpy(_vl, &t, sizeof(char *));
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value) /*lint !e429 The pointer in 't' has been copied */
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_mem_str_write() */
 
 /*-------------------------------------------------------------------------
@@ -1035,7 +1035,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
             HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class");
             break;
 
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
