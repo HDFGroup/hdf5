@@ -481,10 +481,10 @@ H5_term_library(void)
                 fprintf(stderr, "HDF5: infinite loop closing library\n");
                 fprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
-                HDabort();
-#endif        /* NDEBUG */
-            } /* end if */
-        }     /* end if */
+                abort();
+#endif
+            }
+        }
     }
 
     /* Free open debugging streams */
@@ -831,18 +831,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5check_version
  *
- * Purpose:    Verifies that the arguments match the version numbers
- *        compiled into the library.  This function is intended to be
- *        called from user to verify that the versions of header files
- *        compiled into the application match the version of the hdf5
- *        library.
- *        Within major.minor.release version, the expectation
- *        is that all release versions are compatible, exceptions to
- *        this rule must be added to the VERS_RELEASE_EXCEPTIONS list.
+ * Purpose:     Verifies that the arguments match the version numbers
+ *              compiled into the library.  This function is intended to be
+ *              called from user to verify that the versions of header files
+ *              compiled into the application match the version of the hdf5
+ *              library.
  *
- * Return:    Success:    SUCCEED
+ *              Within major.minor.release version, the expectation
+ *              is that all release versions are compatible, exceptions to
+ *              this rule must be added to the VERS_RELEASE_EXCEPTIONS list.
  *
- *        Failure:    abort()
+ * Return:      Success:    SUCCEED
+ *              Failure:    abort()
  *
  *-------------------------------------------------------------------------
  */
@@ -909,7 +909,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
                 /* Bail out now. */
                 fputs("Bye...\n", stderr);
-                HDabort();
+                abort();
             case 1:
                 /* continue with a warning */
                 /* Note that the warning message is embedded in the format string.*/
@@ -949,7 +949,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
                         /* Bail out now. */
                         fputs("Bye...\n", stderr);
-                        HDabort();
+                        abort();
                     case 1:
                         /* continue with a warning */
                         /* Note that the warning message is embedded in the format string.*/
