@@ -213,7 +213,6 @@ set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 set (example hdf_example)
 
 add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
-TARGET_C_PROPERTIES (${example} PRIVATE ${LIB_TYPE})
 target_link_libraries (${example} ${LINK_LIBS})
 
 enable_testing ()
