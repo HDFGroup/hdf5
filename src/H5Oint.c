@@ -548,11 +548,6 @@ H5O_open(H5O_loc_t *loc)
     assert(loc);
     assert(loc->file);
 
-#ifdef H5O_DEBUG
-    if (H5DEBUG(O))
-        fprintf(H5DEBUG(O), "> %" PRIuHADDR "\n", loc->addr);
-#endif
-
     /* Turn off the variable for holding file or increment open-lock counters */
     if (loc->holding_file)
         loc->holding_file = false;
@@ -761,16 +756,6 @@ H5O_close(H5O_loc_t *loc, bool *file_closed /*out*/)
 
     /* Decrement open-lock counters */
     H5F_DECR_NOPEN_OBJS(loc->file);
-
-#ifdef H5O_DEBUG
-    if (H5DEBUG(O)) {
-        if (false == H5F_ID_EXISTS(loc->file) && 1 == H5F_NREFS(loc->file))
-            fprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr,
-                    (unsigned long)H5F_NOPEN_OBJS(loc->file));
-        else
-            fprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
-    }
-#endif
 
     /*
      * If the file open object count has reached the number of open mount points
