@@ -1976,9 +1976,8 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
             do {
                 /* Reset current dimension's location to 0 */
                 scaled[curr_dim] = start_scaled[curr_dim];
-                coords[curr_dim] =
-                    start_coords[curr_dim]; /*lint !e771 The start_coords will always be initialized */
-                end[curr_dim] = (coords[curr_dim] + fm->chunk_dim[curr_dim]) - 1;
+                coords[curr_dim] = start_coords[curr_dim];
+                end[curr_dim]    = (coords[curr_dim] + fm->chunk_dim[curr_dim]) - 1;
 
                 /* Decrement current dimension */
                 curr_dim--;

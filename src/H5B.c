@@ -250,7 +250,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_create() */ /*lint !e818 Can't make udata a pointer to const */
+} /* end H5B_create() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_find

@@ -1787,8 +1787,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
                 case H5D_NLAYOUTS:
                 default:
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
-            } /* end switch */ /*lint !e788 All appropriate cases are covered */
-        }                      /* end else */
+            } /* end switch */
+        }     /* end else */
 
         /* If "old" fill value size is 0 (undefined), map it to -1 */
         if (fill_prop->size == 0)
@@ -1972,8 +1972,8 @@ H5D_close(H5D_t *dataset)
                 assert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                     /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+        } /* end switch */
 
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
@@ -2136,8 +2136,8 @@ H5D_mult_refresh_close(hid_t dset_id)
                 assert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                     /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+        } /* end switch */
 
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
@@ -2346,8 +2346,8 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                 assert("not implemented yet" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                     /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+        } /* end switch */
 
         /* Check if we need to initialize the space */
         if (must_init_space) {
@@ -2467,8 +2467,8 @@ H5D__init_storage(H5D_t *dset, bool full_overwrite, hsize_t old_dim[])
             assert("not implemented yet" && 0);
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
-#endif                 /* NDEBUG */
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
+#endif
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2523,7 +2523,7 @@ H5D__get_storage_size(const H5D_t *dset, hsize_t *storage_size)
         case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset type");
-    } /*lint !e788 All appropriate cases are covered */
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
