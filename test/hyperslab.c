@@ -343,7 +343,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
             break;
 
         default:
-            HDabort();
+            FAIL_PUTS_ERROR("Unhandled case");
     } /* end switch */
 
     snprintf(s, sizeof(s), "Testing hyperslab copy %-11s %s", dim, sub);
@@ -406,7 +406,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                                     break;
 
                                 default:
-                                    HDabort();
+                                    FAIL_PUTS_ERROR("Unhandled case");
                             } /* end switch */
 
                             /*

@@ -6118,8 +6118,7 @@ test_misc36_cb1(void *_ctx)
     VERIFY(is_terminating, true, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
-    if (0 != *ctx)
-        HDabort();
+    VERIFY(*ctx, 0, "Wrong context value");
 
     /* Update context value */
     *ctx = 1;
@@ -6139,8 +6138,7 @@ test_misc36_cb2(void *_ctx)
     VERIFY(is_terminating, true, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
-    if (1 != *ctx)
-        HDabort();
+    VERIFY(*ctx, 1, "Wrong context value");
 
     /* Update context value */
     *ctx = 2;
