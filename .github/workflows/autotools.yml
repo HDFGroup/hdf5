@@ -70,3 +70,9 @@ jobs:
       uses: ./.github/workflows/nvhpc-auto.yml
       with:
             build_mode: "production"
+
+    call-release-auto-aocc:
+      name: "Autotools aocc Workflows"
+      uses: ./.github/workflows/aocc-ompi-auto.yml
+      with:
+            build_mode: "production"
