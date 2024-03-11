@@ -1521,7 +1521,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ;;
   *cygwin*)
     AC_DEFINE([HAVE_CYGWIN], [1], [Define if using MinGW])
-    H5_CPPFLAGS="-D_GNU_SOURCE"
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
