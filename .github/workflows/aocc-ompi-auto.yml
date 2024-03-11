@@ -77,6 +77,8 @@ jobs:
       # BUILD
       - name: Autotools Build
         shell: bash
+        env:
+          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
           make -j3
@@ -85,6 +87,8 @@ jobs:
       # RUN TESTS
       # NORMAL
       - name: Autotools Run Tests
+        env:
+          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
           make check -j
@@ -92,6 +96,8 @@ jobs:
 
       # INSTALL (note that this runs even when we don't run the tests)
       - name: Autotools Install
+        env:
+          NPROCS: 2
         run: |
           export PATH=/home/runner/work/hdf5/hdf5/openmpi-4.1.5-install/bin:/usr/local/bin:$PATH
           make install
