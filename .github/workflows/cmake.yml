@@ -73,3 +73,9 @@ jobs:
         uses: ./.github/workflows/nvhpc-cmake.yml
         with:
             build_mode: "Release"
+
+    call-release-cmake-cygwin:
+        name: "CMake Cygwin Workflows"
+        uses: ./.github/workflows/cwin-cmake.yml
+        with:
+            build_mode: "Release"

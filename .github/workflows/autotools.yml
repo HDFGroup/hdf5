@@ -70,3 +70,9 @@ jobs:
       uses: ./.github/workflows/nvhpc-auto.yml
       with:
             build_mode: "production"
+
+    call-release-auto-cygwin:
+      name: "Autotools Cygwin Workflows"
+      uses: ./.github/workflows/cwin-auto.yml
+      with:
+            build_mode: "production"
