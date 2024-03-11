@@ -152,17 +152,35 @@ struct H5T_stats_t {
 
 /* Context struct for information used during datatype conversions */
 typedef struct H5T_conv_ctx_t {
-    H5T_conv_cb_t cb_struct;
-    hid_t         dxpl_id;
-    hid_t         src_type_id;
-    hid_t         dst_type_id;
+    union {
+        /*
+         * Fields only valid during conversion function initialization
+         * (H5T_cmd_t H5T_CONV_INIT)
+         */
+        struct H5T_conv_ctx_init_fields {
+            H5T_conv_cb_t cb_struct;
+        } init;
+
+        /*
+         * Fields only valid during conversion function conversion
+         * process (H5T_cmd_t H5T_CONV_CONV)
+         */
+        struct H5T_conv_ctx_conv_fields {
+            H5T_conv_cb_t cb_struct;
+            hid_t         dxpl_id;
+            hid_t         src_type_id;
+            hid_t         dst_type_id;
+        } conv;
+
+        /* No fields currently defined for H5T_cmd_t H5T_CONV_FREE */
+    } u;
 } H5T_conv_ctx_t;
 
 /* Library internal datatype conversion functions are... */
 typedef herr_t (*H5T_lib_conv_t)(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
                                  size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
 
-/* Conversion callbacks (library internal ones don't need DXPL) */
+/* Conversion callbacks */
 typedef struct H5T_conv_func_t {
     bool is_app; /* Whether conversion function is registered from application */
     union {
