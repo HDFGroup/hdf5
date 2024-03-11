@@ -76,6 +76,6 @@ jobs:
 
     call-release-cmake-cygwin:
         name: "CMake Cygwin Workflows"
-        uses: ./.github/workflows/cwin-cmake.yml
+        uses: ./.github/workflows/cygwin-cmake.yml
         with:
             build_mode: "Release"

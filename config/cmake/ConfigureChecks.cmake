@@ -51,6 +51,10 @@ endmacro ()
 # ----------------------------------------------------------------------
 set (WINDOWS)
 
+if (CYGWIN)
+    set (HDF5_CMAKE_C_FLAGS ${HDF5_CMAKE_C_FLAGS} -D_GNU_SOURCE)
+endif()
+
 if (MINGW)
   set (${HDF_PREFIX}_HAVE_MINGW 1)
   set (WINDOWS 1) # MinGW tries to imitate Windows
