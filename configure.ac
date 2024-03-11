@@ -1520,7 +1520,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
     ;;
   *cygwin*)
-    AC_DEFINE([HAVE_CYGWIN], [1], [Define if using MinGW])
+    AC_DEFINE([HAVE_CYGWIN], [1], [Define if using Cygwin])
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
 esac
