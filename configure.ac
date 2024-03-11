@@ -1519,6 +1519,10 @@ case "$host_cpu-$host_vendor-$host_os" in
     AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
     H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
     ;;
+  *cygwin*)
+    AC_DEFINE([HAVE_CYGWIN], [1], [Define if using MinGW])
+    H5_CPPFLAGS="-D_GNU_SOURCE"
+    ;;
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
