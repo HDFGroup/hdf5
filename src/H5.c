@@ -481,10 +481,10 @@ H5_term_library(void)
                 fprintf(stderr, "HDF5: infinite loop closing library\n");
                 fprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
-                HDabort();
-#endif        /* NDEBUG */
-            } /* end if */
-        }     /* end if */
+                abort();
+#endif
+            }
+        }
     }
 
     /* Free open debugging streams */
@@ -654,7 +654,7 @@ H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "xxxx", reg_size, arr_size, blk_size, fac_size);
+    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -814,7 +814,7 @@ H5get_libversion(unsigned *majnum /*out*/, unsigned *minnum /*out*/, unsigned *r
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "xxx", majnum, minnum, relnum);
+    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum)
@@ -831,18 +831,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5check_version
  *
- * Purpose:    Verifies that the arguments match the version numbers
- *        compiled into the library.  This function is intended to be
- *        called from user to verify that the versions of header files
- *        compiled into the application match the version of the hdf5
- *        library.
- *        Within major.minor.release version, the expectation
- *        is that all release versions are compatible, exceptions to
- *        this rule must be added to the VERS_RELEASE_EXCEPTIONS list.
+ * Purpose:     Verifies that the arguments match the version numbers
+ *              compiled into the library.  This function is intended to be
+ *              called from user to verify that the versions of header files
+ *              compiled into the application match the version of the hdf5
+ *              library.
  *
- * Return:    Success:    SUCCEED
+ *              Within major.minor.release version, the expectation
+ *              is that all release versions are compatible, exceptions to
+ *              this rule must be added to the VERS_RELEASE_EXCEPTIONS list.
  *
- *        Failure:    abort()
+ * Return:      Success:    SUCCEED
+ *              Failure:    abort()
  *
  *-------------------------------------------------------------------------
  */
@@ -909,7 +909,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
                 /* Bail out now. */
                 fputs("Bye...\n", stderr);
-                HDabort();
+                abort();
             case 1:
                 /* continue with a warning */
                 /* Note that the warning message is embedded in the format string.*/
@@ -949,7 +949,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
                         /* Bail out now. */
                         fputs("Bye...\n", stderr);
-                        HDabort();
+                        abort();
                     case 1:
                         /* continue with a warning */
                         /* Note that the warning message is embedded in the format string.*/
@@ -1216,7 +1216,7 @@ H5is_library_threadsafe(bool *is_ts /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "x", is_ts);
+    H5TRACE1("e", "*b", is_ts);
 
     if (is_ts) {
 #ifdef H5_HAVE_THREADSAFE
@@ -1251,7 +1251,7 @@ H5is_library_terminating(bool *is_terminating /*out*/)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "x", is_terminating);
+    H5TRACE1("e", "*b", is_terminating);
 
     assert(is_terminating);
 

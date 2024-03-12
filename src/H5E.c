@@ -534,7 +534,7 @@ H5Eget_class_name(hid_t class_id, char *name /*out*/, size_t size)
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "ixz", class_id, name, size);
+    H5TRACE3("Zs", "i*sz", class_id, name, size);
 
     /* Get the error class */
     if (NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
@@ -774,7 +774,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type /*out*/, char *msg_str /*out*/, size_t
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR((-1))
-    H5TRACE4("Zs", "ixxz", msg_id, type, msg_str, size);
+    H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
@@ -876,8 +876,7 @@ H5E__get_current_stack(void)
     FUNC_ENTER_PACKAGE
 
     /* Get a pointer to the current error stack */
-    if (NULL == (current_stack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean'
-                                                          in non-threaded case */
+    if (NULL == (current_stack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get current error stack");
 
     /* Allocate a new error stack */
@@ -992,8 +991,7 @@ H5E__set_current_stack(H5E_t *estack)
     assert(estack);
 
     /* Get a pointer to the current error stack */
-    if (NULL == (current_stack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean'
-                                                          in non-threaded case */
+    if (NULL == (current_stack = H5E__get_my_stack()))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty current error stack */
@@ -1114,8 +1112,7 @@ H5Eget_num(hid_t error_stack_id)
 
     /* Need to check for errors */
     if (error_stack_id == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, (-1), "can't get current error stack");
     } /* end if */
     else {
@@ -1176,8 +1173,7 @@ H5Epop(hid_t err_stack, size_t count)
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
     } /* end if */
     else {
@@ -1360,8 +1356,7 @@ H5E__print2(hid_t err_stack, FILE *stream)
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
     } /* end if */
     else {
@@ -1403,8 +1398,7 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
     } /* end if */
     else {
@@ -1446,11 +1440,10 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*ou
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "ixx", estack_id, func, client_data);
+    H5TRACE3("e", "i*EA**x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
     } /* end if */
     else {
@@ -1509,8 +1502,7 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
     H5TRACE3("e", "iEA*x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
     } /* end if */
     else {
@@ -1568,8 +1560,7 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
     H5TRACE2("e", "i*Iu", estack_id, is_stack);
 
     if (estack_id == H5E_DEFAULT) {
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
     } /* end if */
     else {

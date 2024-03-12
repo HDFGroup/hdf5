@@ -1033,7 +1033,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     ssize_t           ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", plist_id, expression, size);
+    H5TRACE3("Zs", "i*sz", plist_id, expression, size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1129,7 +1129,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*out*/)
     size_t          ret_value; /* Return value */
 
     FUNC_ENTER_API(0)
-    H5TRACE3("z", "ixx", plist_id, tconv, bkg);
+    H5TRACE3("z", "i**x**x", plist_id, tconv, bkg);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1387,7 +1387,7 @@ H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op /*out*/, void **o
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, op, operate_data);
+    H5TRACE3("e", "i*TE**x", plist_id, op, operate_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1425,7 +1425,7 @@ H5Pget_btree_ratios(hid_t plist_id, double *left /*out*/, double *middle /*out*/
     herr_t          ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ixxx", plist_id, left, middle, right);
+    H5TRACE4("e", "i*d*d*d", plist_id, left, middle, right);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1590,7 +1590,7 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func /*out*/, voi
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ixxxx", plist_id, alloc_func, alloc_info, free_func, free_info);
+    H5TRACE5("e", "i*Ma**x*Mf**x", plist_id, alloc_func, alloc_info, free_func, free_info);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1672,7 +1672,7 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, vector_size);
+    H5TRACE2("e", "i*z", plist_id, vector_size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1904,7 +1904,7 @@ H5Pget_mpio_actual_chunk_opt_mode(hid_t                             plist_id,
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, actual_chunk_opt_mode);
+    H5TRACE2("e", "i*Do", plist_id, actual_chunk_opt_mode);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1936,7 +1936,7 @@ H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, actual_io_mode);
+    H5TRACE2("e", "i*Di", plist_id, actual_io_mode);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -1968,7 +1968,7 @@ H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_ca
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, local_no_collective_cause, global_no_collective_cause);
+    H5TRACE3("e", "i*Iu*Iu", plist_id, local_no_collective_cause, global_no_collective_cause);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2421,7 +2421,7 @@ H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode /
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, selection_io_mode);
+    H5TRACE2("e", "i*DC", plist_id, selection_io_mode);
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2452,7 +2452,7 @@ H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause /*o
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, no_selection_io_cause);
+    H5TRACE2("e", "i*Iu", plist_id, no_selection_io_cause);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2485,7 +2485,7 @@ H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mo
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, actual_selection_io_mode);
+    H5TRACE2("e", "i*Iu", plist_id, actual_selection_io_mode);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2617,7 +2617,7 @@ H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, modify_write_buf);
+    H5TRACE2("e", "i*b", plist_id, modify_write_buf);
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))

@@ -78,7 +78,9 @@ if (WINDOWS)
   endif ()
   if (NOT UNIX AND NOT CYGWIN)
     set (${HDF_PREFIX}_HAVE_GETCONSOLESCREENBUFFERINFO 1)
-    set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
+    if (MSVC_VERSION GREATER_EQUAL 1900)
+      set (${HDF_PREFIX}_HAVE_TIMEZONE 1)
+    endif ()
     set (${HDF_PREFIX}_HAVE_GETTIMEOFDAY 1)
     set (${HDF_PREFIX}_HAVE_LIBWS2_32 1)
     set (${HDF_PREFIX}_HAVE_LIBWSOCK32 1)
@@ -210,86 +212,51 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
 endmacro ()
 
 #-----------------------------------------------------------------------------
-#  Check for large file support
+#  Platform-specific flags
 #-----------------------------------------------------------------------------
-
-# The linux-lfs option is deprecated.
-set (LINUX_LFS 0)
 
 set (HDF_EXTRA_C_FLAGS)
-set (HDF_EXTRA_FLAGS)
-if (MINGW OR NOT WINDOWS)
-  if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-    # Linux Specific flags
-    # This was originally defined as _POSIX_SOURCE which was updated to
-    # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
-    # functionality so clock_gettime and CLOCK_MONOTONIC are defined
-    # correctly. This was later updated to 200112L so that
-    # posix_memalign() is visible for the direct VFD code on Linux
-    # systems.
-    # POSIX feature information can be found in the gcc manual at:
-    # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
-    # Need to add this so that O_DIRECT is visible for the direct
-    # VFD on Linux systems.
-    set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
+# Linux-specific flags
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+  # This was originally defined as _POSIX_SOURCE which was updated to
+  # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
+  # functionality so clock_gettime and CLOCK_MONOTONIC are defined
+  # correctly. This was later updated to 200112L so that
+  # posix_memalign() is visible for the direct VFD code on Linux
+  # systems.
+  # POSIX feature information can be found in the gcc manual at:
+  # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
-    option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
-    mark_as_advanced (HDF_ENABLE_LARGE_FILE)
-    if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
-      set (msg "Performing TEST_LFS_WORKS")
-      try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
-          ${CMAKE_BINARY_DIR}
-          ${HDF_RESOURCES_DIR}/HDFTests.c
-          COMPILE_DEFINITIONS "-DTEST_LFS_WORKS"
-      )
+  # Need to add this so that O_DIRECT is visible for the direct
+  # VFD on Linux systems.
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
 
-      # The LARGEFILE definitions were from the transition period
-      # and are probably no longer needed. The FILE_OFFSET_BITS
-      # check should be generalized for all POSIX systems as it
-      # is in the Autotools.
-      if (TEST_LFS_WORKS_COMPILE)
-        if (TEST_LFS_WORKS_RUN MATCHES 0)
-          set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
-          set (LARGEFILE 1)
-          set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-          message (VERBOSE "${msg}... yes")
-        else ()
-          set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-          message (VERBOSE "${msg}... no")
-          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-                "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
-          )
-        endif ()
-      else ()
-        set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-        message (VERBOSE "${msg}... no")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Test TEST_LFS_WORKS Compile failed\n"
-        )
-      endif ()
-    endif ()
-    set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_FLAGS})
-  endif ()
+  # Set up large file support. This is only necessary on 32-bit systems
+  # but is used on all Linux systems. It has no effect on 64-bit systems
+  # so it's not worth hacking up a 32/64-bit test to selectively include it.
+  #
+  # The library currently does not use any of the 64-flavored API calls
+  # or types
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_LARGEFILE_SOURCE)
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_FILE_OFFSET_BITS=64)
+
+  set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_C_FLAGS})
 endif ()
 
-#-----------------------------------------------------------------------------
-# Check for HAVE_OFF64_T functionality
-#-----------------------------------------------------------------------------
-if (MINGW OR NOT WINDOWS)
-  HDF_FUNCTION_TEST (HAVE_OFF64_T)
-  if (${HDF_PREFIX}_HAVE_OFF64_T)
-    CHECK_FUNCTION_EXISTS (lseek64            ${HDF_PREFIX}_HAVE_LSEEK64)
-  endif ()
+# As of 2024, both AIX and Solaris are uncommon, but still exist! The default
+# compiler options are also often set to -m32, which produces 32-bit binaries.
 
-  CHECK_FUNCTION_EXISTS (fseeko               ${HDF_PREFIX}_HAVE_FSEEKO)
+# 32-bit AIX compiles might require _LARGE_FILES, but we don't have a system on
+# which to test this (yet).
+#
+# https://www.ibm.com/docs/en/aix/7.1?topic=volumes-writing-programs-that-access-large-files
 
-  CHECK_STRUCT_HAS_MEMBER("struct stat64" st_blocks "sys/types.h;sys/stat.h" HAVE_STAT64_STRUCT)
-  if (HAVE_STAT64_STRUCT)
-    CHECK_FUNCTION_EXISTS (stat64             ${HDF_PREFIX}_HAVE_STAT64)
-  endif ()
-endif ()
+# 32-bit Solaris probably needs _LARGEFILE_SOURCE and _FILE_OFFSET_BITS=64,
+# as in Linux, above.
+#
+# https://docs.oracle.com/cd/E23824_01/html/821-1474/lfcompile-5.html
 
 #-----------------------------------------------------------------------------
 #  Check the size in bytes of all the int and float types
@@ -356,10 +323,6 @@ if (MINGW OR NOT WINDOWS)
 endif ()
 
 HDF_CHECK_TYPE_SIZE (off_t          ${HDF_PREFIX}_SIZEOF_OFF_T)
-HDF_CHECK_TYPE_SIZE (off64_t        ${HDF_PREFIX}_SIZEOF_OFF64_T)
-if (NOT ${HDF_PREFIX}_SIZEOF_OFF64_T)
-  set (${HDF_PREFIX}_SIZEOF_OFF64_T 0)
-endif ()
 HDF_CHECK_TYPE_SIZE (time_t          ${HDF_PREFIX}_SIZEOF_TIME_T)
 
 #-----------------------------------------------------------------------------

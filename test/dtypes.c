@@ -4158,6 +4158,89 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_set_fields_offset
+ *
+ * Purpose:     Tests for a bug in H5Tset_fields in which the function
+ *              didn't account for an offset set for a floating-point
+ *              datatype when checking whether the values set for the
+ *              floating-point fields make sense for the datatype.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_set_fields_offset(void)
+{
+    hid_t tid = H5I_INVALID_HID;
+
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0) {
+        H5_FAILED();
+        printf("Can't copy datatype\n");
+        goto error;
+    }
+
+    /* Create a custom 128-bit floating-point datatype */
+    if (H5Tset_size(tid, 16) < 0) {
+        H5_FAILED();
+        printf("Can't set datatype size\n");
+        goto error;
+    }
+
+    /* We will have 7 bytes of MSB padding + 5 bytes of offset padding */
+    if (H5Tset_precision(tid, 116) < 0) {
+        H5_FAILED();
+        printf("Can't set datatype size\n");
+        goto error;
+    }
+
+    if (H5Tset_offset(tid, 5) < 0) {
+        H5_FAILED();
+        printf("Can't set datatype offset\n");
+        goto error;
+    }
+
+    if (H5Tset_ebias(tid, 16383) < 0) {
+        H5_FAILED();
+        printf("Can't set datatype exponent bias\n");
+        goto error;
+    }
+
+    /*
+     * Floating-point type with the following:
+     *
+     *   - 5 bits of LSB padding (bits 0 - 4)
+     *   - 100-bit mantissa starting at bit 5
+     *   - 15-bit exponent starting at bit 105
+     *   - 1 sign bit at bit 120
+     *   - 7 bits of MSB padding
+     */
+    if (H5Tset_fields(tid, 120, 105, 15, 5, 100) < 0) {
+        H5_FAILED();
+        printf("Can't set datatype's floating-point fields\n");
+        goto error;
+    }
+
+    if (H5Tclose(tid) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(tid);
+    }
+    H5E_END_TRY;
+
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_transient
  *
  * Purpose:    Tests transient datatypes.
@@ -9451,6 +9534,7 @@ main(void)
     nerrors += test_detect();
     nerrors += test_compound_1();
     nerrors += test_query();
+    nerrors += test_set_fields_offset();
     nerrors += test_transient(fapl);
     nerrors += test_named(fapl);
     nerrors += test_encode();

@@ -298,7 +298,7 @@ H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/, size_t *block_size /
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ixxx", fapl_id, boundary, block_size, cbuf_size);
+    H5TRACE4("e", "i*z*z*z", fapl_id, boundary, block_size, cbuf_size);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
@@ -541,7 +541,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         }
         else {
             file->fa.must_align = false;
-            if (-1 == HDftruncate(file->fd, (HDoff_t)0))
+            if (-1 == HDftruncate(file->fd, 0))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to truncate file")
         }
     }
@@ -554,7 +554,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         }
         else {
             if (o_flags & O_RDWR) {
-                if (HDlseek(file->fd, (HDoff_t)0, SEEK_SET) < 0)
+                if (HDlseek(file->fd, 0, SEEK_SET) < 0)
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to seek to proper position")
                 if (HDwrite(file->fd, buf1, sizeof(int)) < 0)
                     file->fa.must_align = true;

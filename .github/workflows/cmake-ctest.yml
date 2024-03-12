@@ -12,6 +12,11 @@ on:
         description: "The common base name of the preset configuration name to control the build"
         required: true
         type: string
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
 
 permissions:
   contents: read
@@ -41,6 +46,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
 
       # Get files created by release script
@@ -67,7 +79,7 @@ jobs:
 
       - name: Run ctest (Windows)
         run: |
-          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-MSVC --fresh
         shell: bash
 
@@ -76,9 +88,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/README.md -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip hdf5
@@ -117,6 +129,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
@@ -135,7 +154,7 @@ jobs:
 
       - name: Run ctest (Linux)
         run: |
-          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-GNUC --fresh
         shell: bash
 
@@ -144,9 +163,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
@@ -157,9 +176,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/builddeb"
           mkdir "${{ runner.workspace }}/builddeb/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/builddeb/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddeb/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/builddeb/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/builddeb/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.deb ${{ runner.workspace }}/builddeb/hdf5
           cd "${{ runner.workspace }}/builddeb"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb hdf5
@@ -170,9 +189,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/buildrpm"
           mkdir "${{ runner.workspace }}/buildrpm/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/buildrpm/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/buildrpm/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/buildrpm/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/buildrpm/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC/*.rpm ${{ runner.workspace }}/buildrpm/hdf5
           cd "${{ runner.workspace }}/buildrpm"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm hdf5
@@ -234,6 +253,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS)
@@ -261,7 +287,7 @@ jobs:
       - name: Run ctest (MacOS)
         id: run-ctest
         run: |
-          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-OSX-Clang --fresh
         shell: bash
 
@@ -270,9 +296,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz hdf5
@@ -307,6 +333,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
@@ -325,7 +358,7 @@ jobs:
 
       - name: Run ctest (Linux S3)
         run: |
-          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-S3 --fresh
         shell: bash
 
@@ -334,9 +367,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz hdf5
@@ -380,6 +413,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
 
       # Get files created by release script
@@ -410,7 +450,7 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
         shell: pwsh
 
@@ -419,9 +459,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip hdf5
@@ -462,6 +502,13 @@ jobs:
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          else
+            SOURCE_NAME_BASE=$(echo "$FILE_NAME_BASE")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
@@ -484,7 +531,7 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
-          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh
         shell: bash
 
@@ -493,9 +540,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           mkdir "${{ runner.workspace }}/build/hdf5"
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
-          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build/hdf5
           cp ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build/hdf5
           cd "${{ runner.workspace }}/build"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz hdf5

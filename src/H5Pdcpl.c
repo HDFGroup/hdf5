@@ -1980,7 +1980,7 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/)
     int             ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Is", "iIsx", plist_id, max_ndims, dim);
+    H5TRACE3("Is", "iIs*h", plist_id, max_ndims, dim);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
@@ -2203,7 +2203,7 @@ H5Pget_virtual_count(hid_t dcpl_id, size_t *count /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dcpl_id, count);
+    H5TRACE2("e", "i*z", dcpl_id, count);
 
     if (count) {
         /* Get the plist structure */
@@ -2400,7 +2400,7 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t idx, char *name /*out*/, size_t si
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Zs", "izxz", dcpl_id, idx, name, size);
+    H5TRACE4("Zs", "iz*sz", dcpl_id, idx, name, size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -2458,7 +2458,7 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t idx, char *name /*out*/, size_t si
     ssize_t         ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Zs", "izxz", dcpl_id, idx, name, size);
+    H5TRACE4("Zs", "iz*sz", dcpl_id, idx, name, size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -2554,7 +2554,7 @@ H5Pget_chunk_opts(hid_t plist_id, unsigned *options /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, options);
+    H5TRACE2("e", "i*Iu", plist_id, options);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
@@ -2723,7 +2723,7 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iIuzxxx", plist_id, idx, name_size, name, offset, size);
+    H5TRACE6("e", "iIuz*s*o*h", plist_id, idx, name_size, name, offset, size);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
@@ -3042,8 +3042,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             /* Convert the fill value */
-            if (H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf) <
-                0) {
+            if (H5T_convert(tpath, type, type, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf) < 0) {
                 if (bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
@@ -3085,8 +3084,8 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
     H5T_path_t *tpath;               /*type conversion info	*/
     void       *buf       = NULL;    /*conversion buffer	*/
     void       *bkg       = NULL;    /*conversion buffer	*/
-    hid_t       src_id    = -1;      /*source datatype id	*/
-    hid_t       dst_id    = -1;      /*destination datatype id	*/
+    H5T_t      *src_type  = NULL;    /*source datatype      */
+    H5T_t      *dst_type  = NULL;    /*destination datatype */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3113,8 +3112,10 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
      */
     if (NULL == (tpath = H5T_path_find(fill.type, type)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes");
-    if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill.type, H5T_COPY_TRANSIENT), false)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy/register datatype");
+    if (NULL == (src_type = H5T_copy(fill.type, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
+    if (NULL == (dst_type = H5T_copy(type, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy memory datatype");
 
     /*
      * Data type conversions are always done in place, so we need a buffer
@@ -3135,9 +3136,7 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
     H5MM_memcpy(buf, fill.buf, H5T_get_size(fill.type));
 
     /* Do the conversion */
-    if ((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(type, H5T_COPY_ALL), false)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy/register datatype");
-    if (H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
+    if (H5T_convert(tpath, src_type, dst_type, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "datatype conversion failed");
     if (buf != value)
         H5MM_memcpy(value, buf, H5T_get_size(type));
@@ -3147,10 +3146,10 @@ done:
         H5MM_xfree(buf);
     if (bkg != value)
         H5MM_xfree(bkg);
-    if (src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID");
-    if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID");
+    if (src_type && H5T_close(src_type) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
+    if (dst_type && H5T_close(dst_type) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_get_fill_value() */
@@ -3176,7 +3175,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iix", plist_id, type_id, value);
+    H5TRACE3("e", "ii*x", plist_id, type_id, value);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -3399,7 +3398,7 @@ H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time /*out*/)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, alloc_time);
+    H5TRACE2("e", "i*Da", plist_id, alloc_time);
 
     /* Get values */
     if (alloc_time) {
@@ -3481,7 +3480,7 @@ H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time /*out*/)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, fill_time);
+    H5TRACE2("e", "i*Df", plist_id, fill_time);
 
     /* Set values */
     if (fill_time) {
@@ -3527,7 +3526,7 @@ H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize /*out*/)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dcpl_id, minimize);
+    H5TRACE2("e", "i*b", dcpl_id, minimize);
 
     if (NULL == minimize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "receiving pointer cannot be NULL");

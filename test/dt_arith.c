@@ -491,6 +491,16 @@ except_func(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
     return ret;
 }
 
+static herr_t
+my_conv_int_float_func(hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id,
+                       H5T_cdata_t H5_ATTR_UNUSED *cdata, size_t H5_ATTR_UNUSED nelmts,
+                       size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride,
+                       void H5_ATTR_UNUSED *buf, void H5_ATTR_UNUSED *bkg,
+                       hid_t H5_ATTR_UNUSED dset_xfer_plist)
+{
+    return SUCCEED;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    test_hard_query
  *
@@ -515,20 +525,21 @@ test_hard_query(void)
         goto error;
     }
 
-    /* Unregister the hard conversion from int to float.  Verify the conversion
-     * is a soft conversion. */
-    H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT,
-                  (H5T_conv_t)((void (*)(void))H5T__conv_int_float));
+    /* Unregister all hard conversion paths */
+    H5Tunregister(H5T_PERS_HARD, NULL, H5I_INVALID_HID, H5I_INVALID_HID, NULL);
+
+    /* Verify the conversion is now a soft conversion */
     if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != false) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
     }
 
-    /* Register the hard conversion from int to float.  Verify the conversion
-     * is a hard conversion. */
+    /* Register our custom int to float conversion function */
     H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT,
-                (H5T_conv_t)((void (*)(void))H5T__conv_int_float));
+                (H5T_conv_t)((void (*)(void))my_conv_int_float_func));
+
+    /* Verify the conversion is now a hard conversion */
     if (H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != true) {
         H5_FAILED();
         printf("Can't query conversion function\n");

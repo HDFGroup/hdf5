@@ -122,7 +122,7 @@
       set_tests_properties (H5IMPORT-${testname} PROPERTIES DISABLED true)
     endif ()
     # If using memchecker skip macro based tests
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5IMPORT-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
@@ -180,7 +180,7 @@
 
   macro (ADD_H5_DUMPTEST testname datasetname testfile)
     # If using memchecker skip tests
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5IMPORT-DUMP-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -287,7 +287,7 @@
 
   macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
     # If using memchecker skip tests
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5IMPORT_SUB-DUMP-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -374,7 +374,7 @@
   endmacro ()
 
   macro (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5IMPORT-DUMP-${testname}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
@@ -396,7 +396,7 @@
 ##############################################################################
 ##############################################################################
 
-  if (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_USING_ANALYSIS_TOOL)
     # Remove any output file left over from previous test run
     add_test (
         NAME H5IMPORT-clear-objects

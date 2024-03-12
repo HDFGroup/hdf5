@@ -220,13 +220,13 @@ main(void)
                 FAIL_STACK_ERROR;
 
             max_size[0] = 100;
-            if ((H5Pset_external(dcpl, "ext1.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+            if ((H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
                 FAIL_STACK_ERROR;
-            if ((H5Pset_external(dcpl, "ext2.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+            if ((H5Pset_external(dcpl, "ext2.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
                 FAIL_STACK_ERROR;
-            if ((H5Pset_external(dcpl, "ext3.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+            if ((H5Pset_external(dcpl, "ext3.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
                 FAIL_STACK_ERROR;
-            if ((H5Pset_external(dcpl, "ext4.data", (off_t)0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
+            if ((H5Pset_external(dcpl, "ext4.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
                 FAIL_STACK_ERROR;
 
             /* Test encoding & decoding property list */

@@ -1229,7 +1229,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             int    myerrno = errno;
             time_t mytime  = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+            offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             if (file->fa.flags & H5FD_LOG_LOC_READ)
                 fprintf(file->logfp, "Error! Reading: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n",
@@ -1448,7 +1448,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             int    myerrno = errno;
             time_t mytime  = HDtime(NULL);
 
-            offset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
+            offset = HDlseek(file->fd, 0, SEEK_CUR);
 
             if (file->fa.flags & H5FD_LOG_LOC_WRITE)
                 fprintf(file->logfp, "Error! Writing: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n",

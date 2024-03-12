@@ -709,8 +709,7 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
 
     /* Check for 'default' error stack */
     if (estack == NULL)
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_DONE(FAIL);
 
     /*
@@ -827,8 +826,7 @@ H5E_clear_stack(H5E_t *estack)
 
     /* Check for 'default' error stack */
     if (estack == NULL)
-        if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
-                                                       non-threaded case */
+        if (NULL == (estack = H5E__get_my_stack()))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty the error stack */

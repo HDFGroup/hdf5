@@ -580,7 +580,7 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
     for (i = 0; i < nelmts; i++) {
         /* Copy an element */
         H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-        memset(dst, (int)fill_value, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+        memset(dst, (int)fill_value, (size_t)elmt_size);
 
         /* Decrement indices and advance pointer */
         for (j = (int)(n - 1), carry = true; j >= 0 && carry; --j) {
@@ -637,7 +637,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
 
             /* Copy an element */
             H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-            H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+            H5MM_memcpy(dst, src, (size_t)elmt_size);
 
             /* Decrement indices and advance pointers */
             for (j = (int)(n - 1), carry = true; j >= 0 && carry; --j) {
@@ -655,7 +655,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
     }
     else {
         H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-        H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+        H5MM_memcpy(dst, src, (size_t)elmt_size);
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -700,7 +700,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
 
             /* Copy an element */
             H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-            H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+            H5MM_memcpy(dst, src, (size_t)elmt_size);
 
             /* Decrement indices and advance pointers */
             for (j = (int)(n - 1), carry = true; j >= 0 && carry; --j) {
@@ -718,7 +718,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
     }
     else {
         H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-        H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+        H5MM_memcpy(dst, src, (size_t)elmt_size);
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1099,8 +1099,7 @@ H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *ch
         scaled[u] = coord[u] / chunk[u];
 
     /* Compute the chunk index */
-    chunk_idx = H5VM_array_offset_pre(ndims, down_nchunks,
-                                      scaled); /*lint !e772 scaled_coord will always be initialized */
+    chunk_idx = H5VM_array_offset_pre(ndims, down_nchunks, scaled);
 
     FUNC_LEAVE_NOAPI(chunk_idx)
 } /* end H5VM_chunk_index_scaled() */

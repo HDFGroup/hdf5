@@ -4810,8 +4810,7 @@ process(struct Options *opt)
                     return (-1);
                 }
                 fclose(extfile);
-                H5Pset_external(proplist, in->externFilename, (off_t)0,
-                                numOfElements * (hsize_t)in->inputSize / 8);
+                H5Pset_external(proplist, in->externFilename, 0, numOfElements * (hsize_t)in->inputSize / 8);
             }
 
             /* create dataspace */

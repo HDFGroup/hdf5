@@ -245,7 +245,7 @@ H5Tget_array_dims2(hid_t type_id, hsize_t dims[] /*out*/)
     int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("Is", "ix", type_id, dims);
+    H5TRACE2("Is", "i*h", type_id, dims);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -364,7 +364,7 @@ H5Tget_array_dims1(hid_t type_id, hsize_t dims[] /*out*/, int H5_ATTR_UNUSED per
     int    ret_value; /* return value			*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Is", "ixx", type_id, dims, perm);
+    H5TRACE3("Is", "i*h*Is", type_id, dims, perm);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

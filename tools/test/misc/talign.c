@@ -48,8 +48,8 @@ main(void)
 
     char *data = NULL;
 
-    int    result = 0;
-    herr_t error  = 1;
+    int    result = EXIT_SUCCESS;
+    herr_t error  = FAIL;
 
     printf("%-70s", "Testing alignment in compound datatypes");
 
@@ -59,7 +59,7 @@ main(void)
 
     if (fil < 0) {
         puts("*FAILED*");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     H5E_BEGIN_TRY
@@ -123,10 +123,9 @@ main(void)
 
     /* Now open the set, and read it back in */
     data = (char *)malloc(H5Tget_size(fix));
-
     if (!data) {
-        perror("malloc() failed");
-        HDabort();
+        puts("*FAILED*");
+        return EXIT_FAILURE;
     }
 
     set = H5Dopen2(fil, setname, H5P_DEFAULT);
@@ -137,14 +136,14 @@ main(void)
 
 out:
     if (error < 0) {
-        result = 1;
+        result = EXIT_FAILURE;
         puts("*FAILED - HDF5 library error*");
     }
     else if (!(H5_FLT_ABS_EQUAL(fok[0], fptr[0])) || !(H5_FLT_ABS_EQUAL(fok[1], fptr[1])) ||
              !(H5_FLT_ABS_EQUAL(fnok[0], fptr[2])) || !(H5_FLT_ABS_EQUAL(fnok[1], fptr[3]))) {
         char *mname;
 
-        result = 1;
+        result = EXIT_FAILURE;
         mname  = H5Tget_member_name(fix, 0);
         printf("%14s (%2d) %6s = %s\n", mname ? mname : "(null)", (int)H5Tget_member_offset(fix, 0), string5,
                (char *)(data + H5Tget_member_offset(fix, 0)));
@@ -185,8 +184,8 @@ out:
         puts(" PASSED");
     }
 
-    if (data)
-        free(data);
+    free(data);
+
     H5Sclose(spc);
     H5Tclose(cs6);
     H5Tclose(cmp);
@@ -196,7 +195,9 @@ out:
     H5Tclose(cmp3);
     H5Pclose(plist);
     H5Fclose(fil);
+
     HDunlink(fname);
     fflush(stdout);
+
     return result;
 }

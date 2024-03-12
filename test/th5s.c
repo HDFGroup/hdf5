@@ -933,7 +933,7 @@ test_h5s_zero_dim(void)
          * space in the external file is the size of the dataset (zero because one dimension size is zero).
          * There's no need to clean up the external file since the library doesn't create it
          * until the data is written to it. */
-        ret = H5Pset_external(plist_id, EXTFILE_NAME, (off_t)0, (hsize_t)0);
+        ret = H5Pset_external(plist_id, EXTFILE_NAME, 0, (hsize_t)0);
         CHECK(ret, FAIL, "H5Pset_external");
 
         ret = H5Pset_alloc_time(plist_id, alloc_time);

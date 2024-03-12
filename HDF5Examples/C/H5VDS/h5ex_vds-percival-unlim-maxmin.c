@@ -95,7 +95,7 @@ main(void)
         src_space = H5Screate_simple(RANK, dims, dims_max);
         dcpl      = H5Pcreate(H5P_DATASET_CREATE);
         status    = H5Pset_chunk(dcpl, RANK, chunk_dims);
-        dset   = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        dset   = H5Dcreate2(file, SRC_DATASET[i], H5T_STD_I32LE, src_space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         status = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
         status = H5Sclose(src_space);
         status = H5Pclose(dcpl);
@@ -145,7 +145,7 @@ main(void)
     H5Sselect_none(vspace);
 
     /* Create a virtual dataset */
-    vdset  = H5Dcreate2(vfile, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    vdset  = H5Dcreate2(vfile, DATASET, H5T_STD_I32LE, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     status = H5Sclose(vspace);
     status = H5Sclose(src_space);
     status = H5Pclose(dcpl);

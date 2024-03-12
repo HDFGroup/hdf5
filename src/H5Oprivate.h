@@ -985,8 +985,8 @@ H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *ob
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
                                   H5O_copy_t *cpy_info, bool inc_depth, H5O_type_t *obj_type, void **udata);
-H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *buf_src,
-                                  size_t nbytes_src, H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info);
+H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, H5T_t *dt_src, void *buf_src, size_t nbytes_src,
+                                  H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info);
 
 /* Debugging routines */
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int indent,

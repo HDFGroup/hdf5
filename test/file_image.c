@@ -871,7 +871,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
             HDoff_t off;
 
             /* Position at userblock */
-            off = HDlseek(fd, (HDoff_t)USERBLOCK_SIZE, SEEK_SET);
+            off = HDlseek(fd, USERBLOCK_SIZE, SEEK_SET);
             VERIFY(off >= 0, "HDlseek() failed.");
         }
 

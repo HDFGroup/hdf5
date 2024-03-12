@@ -311,7 +311,7 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
+    H5TRACE4("e", "i*s*!i", loc_id, name, linfo, lapl_id);
 
     /* Check arguments */
     if (!name || !*name)
@@ -396,7 +396,7 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo, lapl_id);
+    H5TRACE7("e", "i*sIiIoh*!i", loc_id, group_name, idx_type, order, n, linfo, lapl_id);
 
     /* Check arguments */
     if (!group_name || !*group_name)

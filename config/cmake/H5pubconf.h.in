@@ -68,6 +68,9 @@
 /* Define if we have Fortran intrinsic STORAGE_SIZE */
 #cmakedefine H5_FORTRAN_HAVE_STORAGE_SIZE @H5_FORTRAN_HAVE_STORAGE_SIZE@
 
+/* Define if Fortran supports allocatable character */
+#cmakedefine H5_FORTRAN_HAVE_CHAR_ALLOC @H5_FORTRAN_HAVE_CHAR_ALLOC@
+
 /* Determine the size of C long double */
 #cmakedefine H5_FORTRAN_SIZEOF_LONG_DOUBLE @H5_FORTRAN_SIZEOF_LONG_DOUBLE@
 
@@ -543,9 +546,6 @@
 #else
  #define H5_SIZEOF_LONG_LONG 8
 #endif
-
-/* The size of `off64_t', as computed by sizeof. */
-#cmakedefine H5_SIZEOF_OFF64_T @H5_SIZEOF_OFF64_T@
 
 /* The size of `off_t', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_OFF_T @H5_SIZEOF_OFF_T@
