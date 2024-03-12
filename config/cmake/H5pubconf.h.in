@@ -538,9 +538,6 @@
  #define H5_SIZEOF_LONG_LONG 8
 #endif
 
-/* The size of `off64_t', as computed by sizeof. */
-#cmakedefine H5_SIZEOF_OFF64_T @H5_SIZEOF_OFF64_T@
-
 /* The size of `off_t', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_OFF_T @H5_SIZEOF_OFF_T@
 

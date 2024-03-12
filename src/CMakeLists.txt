@@ -1065,7 +1065,6 @@ if (BUILD_STATIC_LIBS)
   target_compile_definitions(${HDF5_LIB_TARGET}
       PUBLIC
           ${HDF_EXTRA_C_FLAGS}
-          ${HDF_EXTRA_FLAGS}
       PRIVATE
           "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>" # Enable tracing of the API
           "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
@@ -1100,7 +1099,6 @@ if (BUILD_SHARED_LIBS)
       PUBLIC
           "H5_BUILT_AS_DYNAMIC_LIB"
           ${HDF_EXTRA_C_FLAGS}
-          ${HDF_EXTRA_FLAGS}
       PRIVATE
           "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>"
           "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>"  # Enable tracing of the API
