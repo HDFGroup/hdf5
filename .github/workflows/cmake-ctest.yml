@@ -146,7 +146,7 @@ jobs:
           mkdir "${{ runner.workspace }}/build114/hdf5"
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz hdf5
@@ -273,7 +273,7 @@ jobs:
           mkdir "${{ runner.workspace }}/build114/hdf5"
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Clang/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz hdf5
@@ -337,7 +337,7 @@ u     - name: Run ctest (Linux S3)
           mkdir "${{ runner.workspace }}/build114/hdf5"
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC-S3/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-GNUC-S3/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz hdf5
@@ -422,7 +422,7 @@ u     - name: Run ctest (Linux S3)
           mkdir "${{ runner.workspace }}/build114/hdf5"
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build114/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build114/hdf5/
-          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md -Destination ${{ runner.workspace }}/build114/hdf5/
           Copy-Item -Path ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/* -Destination ${{ runner.workspace }}/build114/hdf5/ -Include *.zip
           cd "${{ runner.workspace }}/build114"
           7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip hdf5
@@ -501,7 +501,7 @@ u     - name: Run ctest (Linux S3)
           mkdir "${{ runner.workspace }}/build114/hdf5"
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build114/hdf5
-          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/README.md ${{ runner.workspace }}/build114/hdf5
           cp ${{ runner.workspace }}/hdf5/build114/${{ inputs.preset_name }}-Intel/*.tar.gz ${{ runner.workspace }}/build114/hdf5
           cd "${{ runner.workspace }}/build114"
           tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz hdf5

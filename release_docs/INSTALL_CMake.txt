@@ -29,7 +29,7 @@ Obtaining HDF5 source code
    2. Obtain HDF5 source from Github
          development branch:  https://github.com/HDFGroup/hdf5
          last release:        https://github.com/HDFGroup/hdf5/releases/latest
-             hdf5-1_15_"X".tar.gz or hdf5-1_15_"X".zip
+             hdf5-1_14_"X".tar.gz or hdf5-1_1
 
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-1.14."X" folder.
@@ -59,10 +59,10 @@ HDF Group recommends using the ctest script mode to build HDF5.
 -------------------------------------------------------------------------
 Individual files needed as mentioned in this document
 -------------------------------------------------------------------------
-CMake build script from https://github.com/HDFGroup/hdf5/tree/master/config/cmake/scripts:
+CMake build script from https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/config/cmake/scripts:
     CTestScript.cmake
 
-Configuration files from https://github.com/HDFGroup/hdf5/tree/master/config/cmake/scripts:
+Configuration files from https://github.com/HDFGroup/hdf5/tree/hdf5_1_14/config/cmake/scripts:
     HDF5config.cmake
     HDF5options.cmake
 
