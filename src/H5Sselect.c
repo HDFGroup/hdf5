@@ -1357,7 +1357,7 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
         the selection is not modified.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iterate(void *buf, H5T_t *type, H5S_t *space, const H5S_sel_iter_op_t *op, void *op_data)
+H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_iter_op_t *op, void *op_data)
 {
     H5S_sel_iter_t *iter      = NULL;         /* Selection iteration info */
     bool            iter_init = false;        /* Selection iteration info has been initialized */

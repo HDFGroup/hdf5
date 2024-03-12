@@ -534,8 +534,8 @@ H5O__fill_copy(const void *_src, void *_dst)
 {
     const H5O_fill_t *src       = (const H5O_fill_t *)_src;
     H5O_fill_t       *dst       = (H5O_fill_t *)_dst;
-    H5T_t            *src_type  = NULL;
     H5T_t            *dst_type  = NULL;
+    H5T_t            *tmp_type  = NULL;
     void             *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -577,10 +577,13 @@ H5O__fill_copy(const void *_src, void *_dst)
                 uint8_t *bkg_buf = NULL; /* Background conversion buffer */
                 size_t   bkg_size;       /* Size of background buffer */
 
-                if (NULL == (src_type = H5T_copy(src->type, H5T_COPY_ALL)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy source datatype");
-                if (NULL == (dst_type = H5T_copy(dst->type, H5T_COPY_TRANSIENT)))
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
+                dst_type = dst->type;
+                if (H5T_detect_class(dst_type, H5T_VLEN, false) > 0 ||
+                    H5T_detect_class(dst_type, H5T_REFERENCE, false) > 0) {
+                    if (NULL == (tmp_type = H5T_copy(dst_type, H5T_COPY_TRANSIENT)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy destination datatype");
+                    dst_type = tmp_type;
+                }
 
                 /* Allocate a background buffer */
                 bkg_size = MAX(H5T_get_size(dst->type), H5T_get_size(src->type));
@@ -588,7 +591,7 @@ H5O__fill_copy(const void *_src, void *_dst)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
                 /* Convert fill value */
-                if (H5T_convert(tpath, src_type, dst_type, (size_t)1, (size_t)0, (size_t)0, dst->buf,
+                if (H5T_convert(tpath, src->type, dst_type, (size_t)1, (size_t)0, (size_t)0, dst->buf,
                                 bkg_buf) < 0) {
                     if (bkg_buf)
                         bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
@@ -608,9 +611,7 @@ H5O__fill_copy(const void *_src, void *_dst)
     ret_value = dst;
 
 done:
-    if (src_type && (H5T_close(src_type) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, NULL, "unable to close temporary datatype");
-    if (dst_type && (H5T_close(dst_type) < 0))
+    if (tmp_type && (H5T_close(tmp_type) < 0))
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, NULL, "unable to close temporary datatype");
 
     if (!ret_value && dst) {
@@ -940,9 +941,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
 {
     H5T_path_t *tpath;                   /* Type conversion info    */
     void       *buf = NULL, *bkg = NULL; /* Conversion buffers    */
-    H5T_t      *src_type  = NULL;
-    H5T_t      *dst_type  = NULL;
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t      ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -973,11 +972,6 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
     if (!H5T_path_noop(tpath)) {
         size_t fill_type_size;
 
-        if (NULL == (src_type = H5T_copy(fill->type, H5T_COPY_ALL)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy fill value datatype");
-        if (NULL == (dst_type = H5T_copy(dset_type, H5T_COPY_ALL)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy dataset's datatype");
-
         /*
          * Datatype conversions are always done in place, so we need a buffer
          * that is large enough for both source and destination.
@@ -994,7 +988,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
         /* Do the conversion */
-        if (H5T_convert(tpath, src_type, dst_type, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
+        if (H5T_convert(tpath, fill->type, dset_type, (size_t)1, (size_t)0, (size_t)0, buf, bkg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
         /* Update the fill message */
@@ -1011,10 +1005,6 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, bool *fill_changed)
     } /* end if */
 
 done:
-    if (src_type && (H5T_close(src_type) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
-    if (dst_type && (H5T_close(dst_type) < 0))
-        HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "unable to close temporary datatype");
     if (bkg)
         H5MM_xfree(bkg);
 

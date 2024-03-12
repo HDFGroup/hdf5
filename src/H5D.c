@@ -1853,7 +1853,7 @@ done:
 herr_t
 H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op, void *operator_data)
 {
-    H5T_t            *type;      /* Datatype */
+    const H5T_t      *type;      /* Datatype */
     H5S_t            *space;     /* Dataspace for iteration */
     H5S_sel_iter_op_t dset_op;   /* Operator for iteration */
     herr_t            ret_value; /* Return value */
@@ -1868,7 +1868,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op, void *op
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
     if (H5I_DATATYPE != H5I_get_type(type_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
-    if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+    if (NULL == (type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
