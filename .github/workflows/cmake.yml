@@ -77,5 +77,10 @@ jobs:
     call-release-cmake-cygwin:
         name: "CMake Cygwin Workflows"
         uses: ./.github/workflows/cygwin-cmake.yml
+
+    call-release-cmake-aocc:
+        name: "CMake nvhpc Workflows"
+        uses: ./.github/workflows/aocc-ompi-cmake.yml
+
         with:
             build_mode: "Release"

@@ -1,6 +1,5 @@
 name: hdf5 dev PAR CMake CI
 
-# Controls when the action will run. Triggers the workflow on a call
 on:
   workflow_call:
     inputs:
@@ -12,9 +11,6 @@ on:
 permissions:
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel. We just have one job, but the matrix items defined below will
-# run in parallel.
 jobs:
   #
   # The GitHub runners are inadequate for running parallel HDF5 tests,
@@ -25,15 +21,10 @@ jobs:
   #
   CMake_build_parallel:
     name: "Parallel GCC-${{ inputs.build_mode }}"
-    # Don't run the action if the commit message says to skip CI
-    if: ${{ inputs.thread_safety != 'TS' }}
-
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # SETUP
+      - uses: actions/checkout@v4.1.1
+
       - name: Install Linux Dependencies
         run: |
            sudo apt update
@@ -45,12 +36,8 @@ jobs:
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Get Sources
-        uses: actions/checkout@v4.1.1
-
-      # CMAKE CONFIGURE
       - name: CMake Configure
+        shell: bash
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -69,7 +56,6 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=OFF \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             $GITHUB_WORKSPACE
-        shell: bash
 
       # BUILD
       - name: CMake Build

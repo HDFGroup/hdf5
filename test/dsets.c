@@ -5877,36 +5877,48 @@ test_floattypes(hid_t file)
         if (H5Dclose(dataset) < 0)
             goto error;
     }
+
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     /* long double */
     {
         long double orig_data[2][5] = {
-            {(long double)1.6081706885101836e+600L, (long double)-255.3209917099448032099170994480,
-             (long double)1.2677579992621376e-610L, (long double)64568.289448797700289448797700,
-             (long double)-1.0619721778839084e-750L},
-            {(long double)2.1499497833454840991499497833454840e+560L,
+            {(long double)1.6081706885101836e+300L, (long double)-255.3209917099448032099170994480,
+             (long double)1.2677579992621376e-310L, (long double)64568.289448797700289448797700,
+             (long double)-1.0619721778839084e-310L},
+            {(long double)2.1499497833454840991499497833454840e+257L,
              (long double)6.6562295504670740996562295504670740e-3,
              (long double)-1.5747263393432150995747263393432150,
              (long double)1.0711093225222612990711093225222612,
              (long double)-9.8971679387636870998971679387636870e-1}};
         long double new_data[2][5];
+        size_t      ld_spos, ld_epos, ld_esize, ld_mpos, ld_msize;
+        size_t      tgt_precision = 128;
 
         TESTING("    long double (setup)");
 
-        /* Define user-defined quad-precision floating-point type for dataset */
-        datatype  = H5Tcopy(H5T_NATIVE_LDOUBLE);
-        precision = 128;
-        if (H5Tset_precision(datatype, precision) < 0)
+        if ((datatype = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
             goto error;
-        if (H5Tset_fields(datatype, (size_t)127, (size_t)112, (size_t)15, (size_t)5, (size_t)107) < 0)
+
+        /* Get the layout of the native long double type */
+        if (H5Tget_fields(datatype, &ld_spos, &ld_epos, &ld_esize, &ld_mpos, &ld_msize) < 0)
             goto error;
-        offset = 5;
-        if (H5Tset_offset(datatype, offset) < 0)
-            goto error;
-        if (H5Tset_size(datatype, (size_t)16) < 0)
-            goto error;
-        if (H5Tset_ebias(datatype, (size_t)255) < 0)
-            goto error;
+
+        /* Check if all "tgt_precision"+ bits are already used. If not, define
+         * a custom floating-point type where the mantissa takes up the extra
+         * bits. Otherwise, just write and read using the native long double type.
+         */
+        if (ld_esize + ld_msize + 1 < tgt_precision) {
+            size_t extra_bits = tgt_precision - ld_esize - ld_msize - 1;
+
+            /* Increasing precision, call H5Tset_precision first */
+            if (H5Tset_precision(datatype, tgt_precision) < 0)
+                goto error;
+            if (H5Tset_fields(datatype, ld_spos + extra_bits, ld_epos + extra_bits, ld_esize, 0,
+                              ld_msize + extra_bits) < 0)
+                goto error;
+            if (H5Tset_size(datatype, 16) < 0)
+                goto error;
+        }
 
         /* Create the data space */
         if ((space = H5Screate_simple(2, size, NULL)) < 0)
