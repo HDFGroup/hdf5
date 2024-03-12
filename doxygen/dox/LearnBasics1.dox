@@ -345,7 +345,7 @@ inadvertently left open. A File Access property controls how the file is closed.
 The HDF Group has developed tools for examining the contents of HDF5 files. The tool used throughout the HDF5 tutorial
 is the HDF5 dumper, <code style="background-color:whitesmoke;">h5dump</code>, which displays the file contents in human-readable form. The output of <code style="background-color:whitesmoke;">h5dump</code> is an ASCII
 display formatted according to the HDF5 DDL grammar. This grammar is defined, using Backus-Naur Form, in the
-\ref DDLBNF110.
+\ref DDLBNF114.
 
 To view the HDF5 file contents, simply type:
 \code
@@ -373,7 +373,7 @@ HDF5 "file.h5" {
 
 \subsection subsecLBFileExampleDDL File Definition in DDL
 The simplified DDL file definition for creating an HDF5 file. For simplicity, a simplified DDL is used in this tutorial. A
-complete and more rigorous DDL can be found in the \ref DDLBNF110.
+complete and more rigorous DDL can be found in the \ref DDLBNF114.
 
 The following symbol definitions are used in the DDL:
 \code
