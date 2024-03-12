@@ -1,0 +1,46 @@
+name: lin auto jl
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  Julia:
+    name: Julia
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: HDFGroup/hdf5
+          path: hdf5
+      - name: Install HDF5
+        run: |
+          cd hdf5
+          ./autogen.sh
+          ./configure --prefix=/tmp
+          make -j
+          make install
+
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.6'
+          arch: 'x64'
+      - uses: actions/checkout@v4
+        with:
+          repository: JuliaIO/HDF5.jl
+          path: .
+
+      - name: Generate LocalPreferences
+        run: |
+          echo '[HDF5]' >> LocalPreferences.toml
+          echo 'libhdf5 = "/tmp/lib/libhdf5.so"' >> LocalPreferences.toml
+          echo 'libhdf5_hl = "/tmp/lib/libhdf5_hl.so"' >> LocalPreferences.toml
+
+      - uses: julia-actions/julia-buildpkg@latest
+      - uses: julia-actions/julia-runtest@latest
+        env:
+          JULIA_DEBUG: Main
