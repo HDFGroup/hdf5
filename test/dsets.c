@@ -5905,8 +5905,7 @@ test_floattypes(hid_t file)
 
         /* Check if all "tgt_precision"+ bits are already used. If not, define
          * a custom floating-point type where the mantissa takes up the extra
-         * extra bits. Otherwise, just write and read using the native long
-         * double type.
+         * bits. Otherwise, just write and read using the native long double type.
          */
         if (ld_esize + ld_msize + 1 < tgt_precision) {
             size_t extra_bits = tgt_precision - ld_esize - ld_msize - 1;
