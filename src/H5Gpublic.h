@@ -1197,12 +1197,12 @@ H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size
  *          \p idx is the transient index used to iterate through the objects in
  *          the group. This parameter is described in more detail in the
  *          discussion of H5Gget_objname_by_idx().
- * 
+ *
  * \note    As of 1.12.0, H5Get_objtype_by_idx() returns the type of the object
  *          that the link points to, but it has been deprecated for H5Oget_info().
- *          Previous behavior for this function returned H5G_LINK for any link type. 
- *          To get the link type, an application may use H5Lget_info_by_idx() 
- *          instead. 
+ *          Previous behavior for this function returned H5G_LINK for any link type.
+ *          To get the link type, an application may use H5Lget_info_by_idx()
+ *          instead.
  *
  * \version 1.8.0 Function deprecated in this release.
  * \version 1.6.0 The function return type changed from \c int to the enumerated
