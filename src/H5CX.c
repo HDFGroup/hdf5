@@ -760,6 +760,28 @@ H5CX__get_context(void)
 #endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_pushed
+ *
+ * Purpose:     Returns whether or not an API context has been pushed.
+ *
+ * Return:      true/false
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5CX_pushed(void)
+{
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head);
+
+    FUNC_LEAVE_NOAPI(*head != NULL);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX__push_common
  *
  * Purpose:     Internal routine to push a context for an API call.
