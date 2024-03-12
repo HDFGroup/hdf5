@@ -76,3 +76,11 @@ jobs:
       uses: ./.github/workflows/aocc-ompi-auto.yml
       with:
             build_mode: "production"
+
+    call-release-auto-cygwin:
+      name: "Autotools Cygwin Workflows"
+      uses: ./.github/workflows/cygwin-auto.yml
+      with:
+            build_mode: "production"
+
+            
