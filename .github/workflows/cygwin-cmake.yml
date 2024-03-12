@@ -41,8 +41,8 @@ jobs:
           -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
           -DLIBAEC_USE_LOCALCONTENT=OFF \
           -DZLIB_USE_LOCALCONTENT=OFF \
-          -DHDF4_BUILD_FORTRAN:BOOL=ON \
-          -DHDF4_BUILD_JAVA:BOOL=OFF \
+          -DHDF5_BUILD_FORTRAN:BOOL=ON \
+          -DHDF5_BUILD_JAVA:BOOL=OFF \
           ..
 
       # BUILD
