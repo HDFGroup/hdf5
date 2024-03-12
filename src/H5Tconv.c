@@ -185,9 +185,9 @@
 #define H5T_CONV_Xx_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MAX);                                                                          \
@@ -196,9 +196,9 @@
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if (*(S) < (ST)(D_MIN)) {                                                                       \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id,                 \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MIN);                                                                          \
@@ -224,9 +224,9 @@
 #define H5T_CONV_Ux_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MAX);                                                                          \
@@ -255,9 +255,9 @@
 #define H5T_CONV_sU_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) < 0) {                                                                                      \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id,                 \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = 0;                                                                                    \
@@ -317,9 +317,9 @@
 /* Called if overflow is possible */
 #define H5T_CONV_uS_CORE_1(S, D, ST, DT, D_MIN, D_MAX)                                                       \
     if (*(S) > (DT)(D_MAX)) {                                                                                \
-        H5T_conv_ret_t except_ret =                                                                          \
-            (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                      \
-                                       conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);          \
+        H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                       \
+            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,      \
+            conv_ctx->u.conv.cb_struct.user_data);                                                           \
         if (except_ret == H5T_CONV_UNHANDLED)                                                                \
             /* Let compiler convert if case is ignored by user handler */                                    \
             *(D) = (DT)(D_MAX);                                                                              \
@@ -380,9 +380,9 @@
 #define H5T_CONV_Su_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) < 0) {                                                                                      \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id,                 \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = 0;                                                                                    \
@@ -391,9 +391,9 @@
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if (sizeof(ST) > sizeof(DT) && *(S) > (ST)(D_MAX)) {                                            \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MAX);                                                                          \
@@ -436,9 +436,9 @@
     {                                                                                                        \
         /* Assumes memory format of unsigned & signed integers is same */                                    \
         if (*(S) < 0) {                                                                                      \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id,                 \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = 0;                                                                                    \
@@ -468,9 +468,9 @@
     {                                                                                                        \
         /* Assumes memory format of unsigned & signed integers is same */                                    \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MAX);                                                                          \
@@ -508,9 +508,9 @@
 #define H5T_CONV_Ff_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                             \
@@ -519,9 +519,9 @@
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if (*(S) < (ST)(D_MIN)) {                                                                       \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id,                 \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
@@ -618,9 +618,9 @@
                                                                                                              \
             /* Check for more bits of precision in src than available in dst */                              \
             if ((high_bit_pos - low_bit_pos) >= dprec) {                                                     \
-                H5T_conv_ret_t except_ret =                                                                  \
-                    (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_PRECISION, conv_ctx->src_type_id,             \
-                                               conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);  \
+                H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                               \
+                    H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,   \
+                    S, D, conv_ctx->u.conv.cb_struct.user_data);                                             \
                 if (except_ret == H5T_CONV_UNHANDLED)                                                        \
                     /* Let compiler convert if case is ignored by user handler*/                             \
                     *(D) = (DT)(*(S));                                                                       \
@@ -655,9 +655,9 @@
 #define H5T_CONV_Fx_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX) || (sprec < dprec && *(S) == (ST)(D_MAX))) {                                  \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MAX);                                                                          \
@@ -666,9 +666,9 @@
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if (*(S) < (ST)(D_MIN)) {                                                                       \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id,                 \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MIN);                                                                          \
@@ -677,9 +677,9 @@
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if (*(S) != (ST)((DT)(*(S)))) {                                                                 \
-            H5T_conv_ret_t except_ret =                                                                      \
-                (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->src_type_id,                  \
-                                           conv_ctx->dst_type_id, S, D, conv_ctx->cb_struct.user_data);      \
+            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                conv_ctx->u.conv.cb_struct.user_data);                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(*(S));                                                                           \
@@ -956,7 +956,7 @@ done:                                                                           
 /* The outer wrapper for the type conversion loop, to check for an exception handling routine */
 #define H5T_CONV_LOOP_OUTER(PRE_SALIGN_GUTS, PRE_DALIGN_GUTS, POST_SALIGN_GUTS, POST_DALIGN_GUTS, GUTS,      \
                             STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                        \
-    if (conv_ctx->cb_struct.func) {                                                                          \
+    if (conv_ctx->u.conv.cb_struct.func) {                                                                   \
         H5T_CONV_LOOP(PRE_SALIGN_GUTS, PRE_DALIGN_GUTS, POST_SALIGN_GUTS, POST_DALIGN_GUTS, GUTS, STYPE,     \
                       DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                                     \
     }                                                                                                        \
@@ -1071,6 +1071,7 @@ typedef struct H5T_conv_struct_t {
     H5T_path_t      **memb_path;   /*conversion path for each member    */
     H5T_subset_info_t subset_info; /*info related to compound subsets   */
     unsigned          src_nmembs;  /*needed by free function            */
+    bool              need_ids;    /*whether we need IDs for the datatypes */
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T__conv_enum() */
@@ -1796,12 +1797,12 @@ H5T__conv_b_b(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
                  */
                 if (src->shared->u.atomic.prec > dst->shared->u.atomic.prec) {
                     /*overflow*/
-                    if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
                         H5T__reverse_order(src_rev, s, src->shared->size,
                                            src->shared->u.atomic.order); /*reverse order first*/
-                        except_ret = (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,
-                                                                conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                                                src_rev, d, conv_ctx->cb_struct.user_data);
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
                     } /* end if */
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
@@ -1906,14 +1907,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_struct_free
  *
- * Purpose:    Free the private data structure used by the compound
- *      conversion functions.
+ * Purpose:     Free the private data structure used by the compound
+ *              conversion functions.
  *
- * Return:    The result of H5MM_xfree(priv) (NULL)
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-static H5T_conv_struct_t *
+static herr_t
 H5T__conv_struct_free(H5T_conv_struct_t *priv)
 {
     int    *src2dst     = priv->src2dst;
@@ -1921,17 +1922,24 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
     H5T_t **dst_memb    = priv->dst_memb;
     hid_t  *src_memb_id = priv->src_memb_id;
     hid_t  *dst_memb_id = priv->dst_memb_id;
+    herr_t  ret_value   = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     for (unsigned i = 0; i < priv->src_nmembs; i++)
         if (src2dst[i] >= 0) {
-            int H5_ATTR_NDEBUG_UNUSED status;
-
-            status = H5I_dec_ref(src_memb_id[i]);
-            assert(status >= 0);
-            status = H5I_dec_ref(dst_memb_id[src2dst[i]]);
-            assert(status >= 0);
+            if (priv->need_ids) {
+                if (H5I_dec_ref(src_memb_id[i]) < 0)
+                    ret_value = FAIL; /* set return value, but keep going */
+                if (H5I_dec_ref(dst_memb_id[src2dst[i]]) < 0)
+                    ret_value = FAIL; /* set return value, but keep going */
+            }
+            else {
+                if (H5T_close(src_memb[i]) < 0)
+                    ret_value = FAIL; /* set return value, but keep going */
+                if (H5T_close(dst_memb[src2dst[i]]) < 0)
+                    ret_value = FAIL; /* set return value, but keep going */
+            }
         } /* end if */
 
     H5MM_xfree(src2dst);
@@ -1939,9 +1947,11 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
     H5MM_xfree(dst_memb);
     H5MM_xfree(src_memb_id);
     H5MM_xfree(dst_memb_id);
-    H5MM_xfree(priv->memb_path);
 
-    FUNC_LEAVE_NOAPI((H5T_conv_struct_t *)H5MM_xfree(priv))
+    H5MM_xfree(priv->memb_path);
+    H5MM_xfree(priv);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_struct_free() */
 
 /*-------------------------------------------------------------------------
@@ -1988,7 +1998,7 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
+H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx)
 {
     H5T_conv_struct_t *priv    = (H5T_conv_struct_t *)(cdata->priv);
     int               *src2dst = NULL;
@@ -2005,13 +2015,31 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         /*
          * Allocate private data structure and arrays.
          */
-        if (NULL == (priv = (H5T_conv_struct_t *)(cdata->priv = H5MM_calloc(sizeof(H5T_conv_struct_t)))) ||
-            NULL == (priv->src2dst = (int *)H5MM_malloc(src_nmembs * sizeof(int))) ||
-            NULL == (priv->src_memb = (H5T_t **)H5MM_malloc(src_nmembs * sizeof(H5T_t *))) ||
-            NULL == (priv->dst_memb = (H5T_t **)H5MM_malloc(dst_nmembs * sizeof(H5T_t *))) ||
-            NULL == (priv->src_memb_id = (hid_t *)H5MM_malloc(src_nmembs * sizeof(hid_t))) ||
-            NULL == (priv->dst_memb_id = (hid_t *)H5MM_malloc(dst_nmembs * sizeof(hid_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        if (NULL == (priv = (H5T_conv_struct_t *)(cdata->priv = H5MM_calloc(sizeof(H5T_conv_struct_t)))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate private conversion data");
+        if (NULL == (priv->src2dst = (int *)H5MM_malloc(src_nmembs * sizeof(int))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate source to destination member mapping array");
+        if (NULL == (priv->src_memb = (H5T_t **)H5MM_malloc(src_nmembs * sizeof(H5T_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate source compound member datatype array");
+        if (NULL == (priv->dst_memb = (H5T_t **)H5MM_malloc(dst_nmembs * sizeof(H5T_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate destination compound member datatype array");
+
+        priv->need_ids = (cdata->command == H5T_CONV_INIT && conv_ctx->u.init.cb_struct.func) ||
+                         (cdata->command == H5T_CONV_CONV && conv_ctx->u.conv.cb_struct.func);
+
+        /* Only create IDs for compound member datatypes if we need to */
+        if (priv->need_ids) {
+            if (NULL == (priv->src_memb_id = (hid_t *)H5MM_malloc(src_nmembs * sizeof(hid_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate source compound member datatype ID array");
+            if (NULL == (priv->dst_memb_id = (hid_t *)H5MM_malloc(dst_nmembs * sizeof(hid_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate destination compound member datatype ID array");
+        }
+
         src2dst          = priv->src2dst;
         priv->src_nmembs = src_nmembs;
 
@@ -2030,8 +2058,7 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
          * Build a mapping from source member number to destination member
          * number. If some source member is not a destination member then that
          * mapping element will be negative.  Also create atoms for each
-         * source and destination member datatype so we can look up the
-         * member datatype conversion functions later.
+         * source and destination member datatype if necessary.
          */
         for (i = 0; i < src_nmembs; i++) {
             src2dst[i] = -1;
@@ -2050,20 +2077,24 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                                 "can't copy source compound member datatype");
                 priv->src_memb[i] = type;
 
-                if ((tid = H5I_register(H5I_DATATYPE, type, false)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "can't register ID for source compound member datatype");
-                priv->src_memb_id[i] = tid;
+                if (priv->need_ids) {
+                    if ((tid = H5I_register(H5I_DATATYPE, type, false)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "can't register ID for source compound member datatype");
+                    priv->src_memb_id[i] = tid;
+                }
 
                 if (NULL == (type = H5T_copy(dst->shared->u.compnd.memb[src2dst[i]].type, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "can't copy destination compound member datatype");
                 priv->dst_memb[src2dst[i]] = type;
 
-                if ((tid = H5I_register(H5I_DATATYPE, type, false)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "can't register ID for source compound member datatype");
-                priv->dst_memb_id[src2dst[i]] = tid;
+                if (priv->need_ids) {
+                    if ((tid = H5I_register(H5I_DATATYPE, type, false)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "can't register ID for source compound member datatype");
+                    priv->dst_memb_id[src2dst[i]] = tid;
+                }
             } /* end if */
         }     /* end for */
     }         /* end if */
@@ -2090,7 +2121,8 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                                               dst->shared->u.compnd.memb[src2dst[i]].type);
 
             if (NULL == (priv->memb_path[i] = tpath)) {
-                cdata->priv = H5T__conv_struct_free(priv);
+                H5T__conv_struct_free(priv);
+                cdata->priv = NULL;
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert member datatype");
             } /* end if */
         }     /* end if */
@@ -2247,16 +2279,21 @@ H5T__conv_struct(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_
             if (H5T_COMPOUND != dst->shared->type)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype");
 
-            if (H5T__conv_struct_init(src, dst, cdata) < 0)
+            if (H5T__conv_struct_init(src, dst, cdata, conv_ctx) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data");
             break;
 
-        case H5T_CONV_FREE:
+        case H5T_CONV_FREE: {
             /*
              * Free the private conversion data.
              */
-            cdata->priv = H5T__conv_struct_free(priv);
+            herr_t status = H5T__conv_struct_free(priv);
+            cdata->priv   = NULL;
+            if (status < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free private conversion data");
+
             break;
+        }
 
         case H5T_CONV_CONV:
             /*
@@ -2272,7 +2309,7 @@ H5T__conv_struct(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
 
-            if (cdata->recalc && H5T__conv_struct_init(src, dst, cdata) < 0)
+            if (cdata->recalc && H5T__conv_struct_init(src, dst, cdata, conv_ctx) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data");
 
             /*
@@ -2323,9 +2360,11 @@ H5T__conv_struct(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_
                     dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                     if (dst_memb->size <= src_memb->size) {
-                        /* Update IDs in conversion context */
-                        tmp_conv_ctx.src_type_id = priv->src_memb_id[u];
-                        tmp_conv_ctx.dst_type_id = priv->dst_memb_id[src2dst[u]];
+                        if (priv->need_ids) {
+                            /* Update IDs in conversion context */
+                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[u];
+                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[u]];
+                        }
 
                         if (H5T_convert_with_ctx(priv->memb_path[u], priv->src_memb[u],
                                                  priv->dst_memb[src2dst[u]], &tmp_conv_ctx, (size_t)1,
@@ -2358,9 +2397,11 @@ H5T__conv_struct(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_
                     dst_memb = dst->shared->u.compnd.memb + src2dst[i];
 
                     if (dst_memb->size > src_memb->size) {
-                        /* Update IDs in conversion context */
-                        tmp_conv_ctx.src_type_id = priv->src_memb_id[i];
-                        tmp_conv_ctx.dst_type_id = priv->dst_memb_id[src2dst[i]];
+                        if (priv->need_ids) {
+                            /* Update IDs in conversion context */
+                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[i];
+                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[i]];
+                        }
 
                         offset -= src_memb->size;
                         if (H5T_convert_with_ctx(priv->memb_path[i], priv->src_memb[i],
@@ -2485,7 +2526,7 @@ H5T__conv_struct_opt(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_COMPOUND datatype");
 
             /* Initialize data which is relatively constant */
-            if (H5T__conv_struct_init(src, dst, cdata) < 0)
+            if (H5T__conv_struct_init(src, dst, cdata, conv_ctx) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data");
             priv    = (H5T_conv_struct_t *)(cdata->priv);
             src2dst = priv->src2dst;
@@ -2518,7 +2559,8 @@ H5T__conv_struct_opt(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_
                     if (dst_memb->size > src_memb->size) {
                         offset -= src_memb->size;
                         if (dst_memb->size > src->shared->size - offset) {
-                            cdata->priv = H5T__conv_struct_free(priv);
+                            H5T__conv_struct_free(priv);
+                            cdata->priv = NULL;
                             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                                         "conversion is unsupported by this function");
                         } /* end if */
@@ -2527,12 +2569,17 @@ H5T__conv_struct_opt(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_
             }             /* end if */
             break;
 
-        case H5T_CONV_FREE:
+        case H5T_CONV_FREE: {
             /*
              * Free the private conversion data.
              */
-            cdata->priv = H5T__conv_struct_free((H5T_conv_struct_t *)(cdata->priv));
+            herr_t status = H5T__conv_struct_free((H5T_conv_struct_t *)(cdata->priv));
+            cdata->priv   = NULL;
+            if (status < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free private conversion data");
+
             break;
+        }
 
         case H5T_CONV_CONV:
             /*
@@ -2547,7 +2594,7 @@ H5T__conv_struct_opt(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_
             tmp_conv_ctx = *conv_ctx;
 
             /* Update cached data if necessary */
-            if (cdata->recalc && H5T__conv_struct_init(src, dst, cdata) < 0)
+            if (cdata->recalc && H5T__conv_struct_init(src, dst, cdata, conv_ctx) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data");
             priv = (H5T_conv_struct_t *)(cdata->priv);
             assert(priv);
@@ -2608,9 +2655,11 @@ H5T__conv_struct_opt(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_
                     dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                     if (dst_memb->size <= src_memb->size) {
-                        /* Update IDs in conversion context */
-                        tmp_conv_ctx.src_type_id = priv->src_memb_id[u];
-                        tmp_conv_ctx.dst_type_id = priv->dst_memb_id[src2dst[u]];
+                        if (priv->need_ids) {
+                            /* Update IDs in conversion context */
+                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[u];
+                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[u]];
+                        }
 
                         xbuf = buf + src_memb->offset;
                         xbkg = bkg + dst_memb->offset;
@@ -2649,9 +2698,11 @@ H5T__conv_struct_opt(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_
                     dst_memb = dst->shared->u.compnd.memb + src2dst[i];
 
                     if (dst_memb->size > src_memb->size) {
-                        /* Update IDs in conversion context */
-                        tmp_conv_ctx.src_type_id = priv->src_memb_id[i];
-                        tmp_conv_ctx.dst_type_id = priv->dst_memb_id[src2dst[i]];
+                        if (priv->need_ids) {
+                            /* Update IDs in conversion context */
+                            tmp_conv_ctx.u.conv.src_type_id = priv->src_memb_id[i];
+                            tmp_conv_ctx.u.conv.dst_type_id = priv->dst_memb_id[src2dst[i]];
+                        }
 
                         offset -= src_memb->size;
                         xbuf = buf + offset;
@@ -2949,10 +3000,10 @@ H5T__conv_enum(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
                         /*overflow*/
                         except_ret = H5T_CONV_UNHANDLED;
                         /*If user's exception handler is present, use it*/
-                        if (conv_ctx->cb_struct.func)
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id, s, d,
-                                conv_ctx->cb_struct.user_data);
+                        if (conv_ctx->u.conv.cb_struct.func)
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, s, d, conv_ctx->u.conv.cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_UNHANDLED)
                             memset(d, 0xff, dst->shared->size);
@@ -2987,10 +3038,10 @@ H5T__conv_enum(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
                     if (lt >= rt) {
                         except_ret = H5T_CONV_UNHANDLED;
                         /*If user's exception handler is present, use it*/
-                        if (conv_ctx->cb_struct.func)
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id, s, d,
-                                conv_ctx->cb_struct.user_data);
+                        if (conv_ctx->u.conv.cb_struct.func)
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, s, d, conv_ctx->u.conv.cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_UNHANDLED)
                             memset(d, 0xff, dst->shared->size);
@@ -3147,6 +3198,7 @@ H5T__conv_vlen(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
     void                 *tmp_buf       = NULL;  /*temporary background buffer          */
     size_t                tmp_buf_size  = 0;     /*size of temporary bkg buffer         */
     bool                  nested        = false; /*flag of nested VL case             */
+    bool                  need_ids      = false; /*whether we need IDs for the datatypes */
     size_t                elmtno;                /*element number counter         */
     herr_t                ret_value = SUCCEED;   /* Return value */
 
@@ -3196,6 +3248,8 @@ H5T__conv_vlen(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
 
+            need_ids = (conv_ctx->u.conv.cb_struct.func != NULL);
+
             /* Initialize source & destination strides */
             if (buf_stride) {
                 assert(buf_stride >= src->shared->size);
@@ -3235,10 +3289,6 @@ H5T__conv_vlen(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
                     if (H5T_set_loc(tsrc_cpy, src->shared->u.vlen.file, src->shared->u.vlen.loc) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set datatype location");
 
-                if ((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, false)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "unable to register ID for source base datatype");
-
                 if (NULL == (tdst_cpy = H5T_copy(dst->shared->parent, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "unable to copy dst base type for conversion");
@@ -3247,13 +3297,18 @@ H5T__conv_vlen(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t 
                     if (H5T_set_loc(tdst_cpy, dst->shared->u.vlen.file, dst->shared->u.vlen.loc) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set datatype location");
 
-                if ((tdst_id = H5I_register(H5I_DATATYPE, tdst_cpy, false)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "unable to register ID for destination base datatype");
+                if (need_ids) {
+                    if ((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, false)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "unable to register ID for source base datatype");
+                    if ((tdst_id = H5I_register(H5I_DATATYPE, tdst_cpy, false)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "unable to register ID for destination base datatype");
+                }
 
                 /* Update IDs in conversion context */
-                tmp_conv_ctx.src_type_id = tsrc_id;
-                tmp_conv_ctx.dst_type_id = tdst_id;
+                tmp_conv_ctx.u.conv.src_type_id = tsrc_id;
+                tmp_conv_ctx.u.conv.dst_type_id = tdst_id;
             } /* end else-if */
             else
                 noop_conv = true;
@@ -3533,6 +3588,7 @@ H5T__conv_array(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t
     uint8_t       *sp, *dp;                    /*source and dest traversal ptrs     */
     ssize_t        src_delta, dst_delta;       /*source & destination stride         */
     int            direction;                  /*direction of traversal         */
+    bool           need_ids  = false;          /*whether we need IDs for the datatypes */
     void          *bkg_buf   = NULL;           /*temporary background buffer          */
     herr_t         ret_value = SUCCEED;        /* Return value */
 
@@ -3582,6 +3638,8 @@ H5T__conv_array(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t
             /* Initialize temporary conversion context */
             tmp_conv_ctx = *conv_ctx;
 
+            need_ids = (conv_ctx->u.conv.cb_struct.func != NULL);
+
             /*
              * Do we process the values from beginning to end or vice
              * versa? Also, how many of the elements have the source and
@@ -3615,20 +3673,23 @@ H5T__conv_array(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t
                 if (NULL == (tsrc_cpy = H5T_copy(src->shared->parent, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "unable to copy src base type for conversion");
-                if ((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, false)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "unable to register ID for source base datatype");
 
                 if (NULL == (tdst_cpy = H5T_copy(dst->shared->parent, H5T_COPY_ALL)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
                                 "unable to copy dst base type for conversion");
-                if ((tdst_id = H5I_register(H5I_DATATYPE, tdst_cpy, false)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-                                "unable to register ID for destination base datatype");
+
+                if (need_ids) {
+                    if ((tsrc_id = H5I_register(H5I_DATATYPE, tsrc_cpy, false)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "unable to register ID for source base datatype");
+                    if ((tdst_id = H5I_register(H5I_DATATYPE, tdst_cpy, false)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                                    "unable to register ID for destination base datatype");
+                }
 
                 /* Update IDs in conversion context */
-                tmp_conv_ctx.src_type_id = tsrc_id;
-                tmp_conv_ctx.dst_type_id = tdst_id;
+                tmp_conv_ctx.u.conv.src_type_id = tsrc_id;
+                tmp_conv_ctx.u.conv.dst_type_id = tdst_id;
             }
 
             /* Check if we need a background buffer for this conversion */
@@ -4066,12 +4127,14 @@ H5T__conv_i_i(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
                     }
                     else if (first >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             H5T__reverse_order(src_rev, s, src->shared->size,
                                                src->shared->u.atomic.order); /*reverse order first*/
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4100,12 +4163,14 @@ H5T__conv_i_i(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
                      */
                     if (first + 1 == src->shared->u.atomic.prec) {
                         /*overflow - source is negative*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             H5T__reverse_order(src_rev, s, src->shared->size,
                                                src->shared->u.atomic.order); /*reverse order first*/
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4126,12 +4191,14 @@ H5T__conv_i_i(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
                     }
                     else if (first >= dst->shared->u.atomic.prec) {
                         /*overflow - source is positive*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             H5T__reverse_order(src_rev, s, src->shared->size,
                                                src->shared->u.atomic.order); /*reverse order first*/
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED)
@@ -4157,12 +4224,14 @@ H5T__conv_i_i(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
                      */
                     if (first + 1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             H5T__reverse_order(src_rev, s, src->shared->size,
                                                src->shared->u.atomic.order); /*reverse order first*/
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4203,12 +4272,14 @@ H5T__conv_i_i(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
 
                     if (sfz >= 0 && fz + 1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             H5T__reverse_order(src_rev, s, src->shared->size,
                                                src->shared->u.atomic.order); /*reverse order first*/
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4244,12 +4315,14 @@ H5T__conv_i_i(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, const H5T_conv_ctx_t *
                      */
                     if (first + 1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             H5T__reverse_order(src_rev, s, src->shared->size,
                                                src->shared->u.atomic.order); /*reverse order first*/
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4524,18 +4597,21 @@ H5T__conv_f_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                     }
                     else if (H5T__bit_find(s, src.u.f.epos, src.u.f.esize, H5T_BIT_LSB, false) < 0) {
                         /* +Inf or -Inf */
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
                             H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                src_p->shared->u.atomic.order);
                             if (sign)
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_NINF, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_NINF, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             else
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_PINF, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_PINF, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4567,17 +4643,19 @@ H5T__conv_f_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                      *If the exponent bits are all 1s and only the 1st bit of mantissa
                      *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
                     /* +Inf or -Inf */
-                    if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
                         H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                         if (sign)
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_NINF, conv_ctx->src_type_id, conv_ctx->dst_type_id, src_rev,
-                                d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_NINF, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         else
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_PINF, conv_ctx->src_type_id, conv_ctx->dst_type_id, src_rev,
-                                d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_PINF, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4607,12 +4685,12 @@ H5T__conv_f_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                 }
                 else if (H5T__bit_find(s, src.u.f.epos, src.u.f.esize, H5T_BIT_LSB, false) < 0) {
                     /* NaN */
-                    if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
                         H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
-                        except_ret = (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_NAN, conv_ctx->src_type_id,
-                                                                conv_ctx->dst_type_id, src_rev, d,
-                                                                conv_ctx->cb_struct.user_data);
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_NAN, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
+                            src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4729,12 +4807,12 @@ H5T__conv_f_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                      * handler make sure the source buffer we hand it is in the
                      * original byte order.
                      */
-                    if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
                         H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
-                        except_ret = (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,
-                                                                conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                                                src_rev, d, conv_ctx->cb_struct.user_data);
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
@@ -4820,13 +4898,15 @@ H5T__conv_f_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                          * calling the overflow handler make sure the source
                          * buffer we hand it is in the original byte order.
                          */
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
                             H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                src_p->shared->u.atomic.order);
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8258,14 +8338,16 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                     }
                     else if (H5T__bit_find(s, src.u.f.epos, src.u.f.esize, H5T_BIT_LSB, false) < 0) {
                         /* +Infinity or -Infinity */
-                        if (sign) {                         /* -Infinity */
-                            if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (sign) { /* -Infinity */
+                            if (conv_ctx->u.conv.cb_struct
+                                    .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_NINF, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_NINF, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8281,14 +8363,16 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                             "can't handle conversion exception");
                         }
-                        else {                              /* +Infinity */
-                            if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                        else { /* +Infinity */
+                            if (conv_ctx->u.conv.cb_struct
+                                    .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_PINF, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_PINF, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8316,14 +8400,16 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                      *If the exponent bits are all 1s and only the 1st bit of mantissa
                      *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
                     /* +Infinity or -Infinity */
-                    if (sign) {                         /* -Infinity */
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (sign) { /* -Infinity */
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
                             H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                src_p->shared->u.atomic.order);
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_NINF, conv_ctx->src_type_id, conv_ctx->dst_type_id, src_rev,
-                                d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_NINF, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8339,14 +8425,16 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                         "can't handle conversion exception");
                     }
-                    else {                              /* +Infinity */
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    else { /* +Infinity */
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
                             H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                src_p->shared->u.atomic.order);
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_PINF, conv_ctx->src_type_id, conv_ctx->dst_type_id, src_rev,
-                                d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_PINF, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
 
                         if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8368,12 +8456,12 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                 }
                 else if (H5T__bit_find(s, src.u.f.epos, src.u.f.esize, H5T_BIT_LSB, false) < 0) {
                     /* NaN */
-                    if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
                         H5T__reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
-                        except_ret = (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_NAN, conv_ctx->src_type_id,
-                                                                conv_ctx->dst_type_id, src_rev, d,
-                                                                conv_ctx->cb_struct.user_data);
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_NAN, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
+                            src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8444,7 +8532,7 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                  * If expo is less than mantissa size, the frantional value is dropped off
                  * during conversion.  Set exception type to be "truncate"
                  */
-                if ((size_t)expo < src.u.f.msize && conv_ctx->cb_struct.func)
+                if ((size_t)expo < src.u.f.msize && conv_ctx->u.conv.cb_struct.func)
                     truncated = true;
 
                 /*
@@ -8470,14 +8558,16 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                      * zero(do nothing).  If user's exception handler is set, call it and
                      * let user handle it.
                      */
-                    if (sign) {                         /*source is negative*/
-                        if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                    if (sign) { /*source is negative*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /*reverse order first*/
                             H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                src_p->shared->u.atomic.order);
-                            except_ret = (conv_ctx->cb_struct.func)(
-                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                src_rev, d, conv_ctx->cb_struct.user_data);
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                             if (except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                             "can't handle conversion exception");
@@ -8491,13 +8581,15 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                     else { /*source is positive*/
                         if (first >= dst.prec) {
                             /*overflow*/
-                            if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                            if (conv_ctx->u.conv.cb_struct
+                                    .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED)
@@ -8512,14 +8604,15 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                                             "can't handle conversion exception");
                         }
                         else if (first < dst.prec) {
-                            if (truncated &&
-                                conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                            if (truncated && conv_ctx->u.conv.cb_struct
+                                                 .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED)
@@ -8539,14 +8632,15 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                 else if (H5T_SGN_2 == dst.u.i.sign) { /*Destination is signed*/
                     if (sign) {                       /*source is negative*/
                         if (first < dst.prec - 1) {
-                            if (truncated &&
-                                conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                            if (truncated && conv_ctx->u.conv.cb_struct
+                                                 .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED) { /*If this case ignored by user handler*/
@@ -8571,13 +8665,15 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                             /* if underflows and no callback, do nothing except turn on
                              * the sign bit because 0x80...00 is the biggest negative value.
                              */
-                            if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                            if (conv_ctx->u.conv.cb_struct
+                                    .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED)
@@ -8595,13 +8691,15 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                     else { /*source is positive*/
                         if (first >= dst.prec - 1) {
                             /*overflow*/
-                            if (conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                            if (conv_ctx->u.conv.cb_struct
+                                    .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED)
@@ -8616,14 +8714,15 @@ H5T__conv_f_i(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                             }
                         }
                         else if (first < dst.prec - 1) {
-                            if (truncated &&
-                                conv_ctx->cb_struct.func) { /*If user's exception handler is present, use it*/
+                            if (truncated && conv_ctx->u.conv.cb_struct
+                                                 .func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
                                 H5T__reverse_order(src_rev, s, src_p->shared->size,
                                                    src_p->shared->u.atomic.order);
-                                except_ret = (conv_ctx->cb_struct.func)(
-                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                    src_rev, d, conv_ctx->cb_struct.user_data);
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
                             }
 
                             if (except_ret == H5T_CONV_UNHANDLED) {
@@ -8942,12 +9041,12 @@ H5T__conv_i_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                     /* If the bit sequence is bigger than the mantissa part, there'll be some
                      * precision loss.  Let user's handler deal with the case if it's present
                      */
-                    if (conv_ctx->cb_struct.func) {
+                    if (conv_ctx->u.conv.cb_struct.func) {
                         H5T__reverse_order(src_rev, s, src_p->shared->size,
                                            src_p->shared->u.atomic.order); /*reverse order first*/
-                        except_ret = (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_PRECISION,
-                                                                conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                                                src_rev, d, conv_ctx->cb_struct.user_data);
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
                     }
 
                     if (except_ret == H5T_CONV_HANDLED) {
@@ -9013,13 +9112,14 @@ H5T__conv_i_f(H5T_t *src_p, H5T_t *dst_p, H5T_cdata_t *cdata, const H5T_conv_ctx
                 /* Check if the exponent is too big */
                 expo_max = (hsize_t)(pow(2.0, (double)dst.u.f.esize) - 1);
 
-                if (expo > expo_max) {              /*overflows*/
-                    if (conv_ctx->cb_struct.func) { /*user's exception handler.  Reverse back source order*/
+                if (expo > expo_max) { /*overflows*/
+                    if (conv_ctx->u.conv.cb_struct
+                            .func) { /*user's exception handler.  Reverse back source order*/
                         H5T__reverse_order(src_rev, s, src_p->shared->size,
                                            src_p->shared->u.atomic.order); /*reverse order first*/
-                        except_ret = (conv_ctx->cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,
-                                                                conv_ctx->src_type_id, conv_ctx->dst_type_id,
-                                                                src_rev, d, conv_ctx->cb_struct.user_data);
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
