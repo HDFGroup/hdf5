@@ -25,7 +25,7 @@ jobs:
       - name: Install Cygwin
         uses: cygwin/cygwin-install-action@master
         with:
-          packages: cmake gcc-fortran make ninja zlib-devel
+          packages: cmake gcc-fortran make ninja zlib-devel flex bison perl
 
       - name: CMake Configure
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
