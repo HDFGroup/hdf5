@@ -38,7 +38,7 @@
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname"><a href="https://www.hdfgroup.org">HDF5</a>
-   &#160;<span id="projectnumber">1.15.0.50a6522</span>
+   &#160;<span id="projectnumber">1.15.0.4279c35</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -204,7 +204,7 @@ $(function(){initNavTree('group___f_a_p_l.html',''); initResizable(); });
 <tr>
 <td><a class="el" href="#ga95d19da25f196ce1ace10af00f49ab53" title="Sets the file access property list to use the family driver.">H5Pset_fapl_family</a>/<a class="el" href="#ga0bc1a003f26bf4b53e4487b6ca117389" title="Returns file access property list information.">H5Pget_fapl_family</a> </td><td>Sets driver for file families, designed for systems that do not support files larger than 2 gigabytes, or retrieves information regarding driver.  </td></tr>
 <tr>
-<td><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14">H5Pset_fapl_hdfs</a>/<a class="el" href="#gae59e7d8e0e8823e6dd6034b66418ed00">H5Pget_fapl_hdfs</a> </td><td>.  </td></tr>
+<td><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs</a>/<a class="el" href="#gae59e7d8e0e8823e6dd6034b66418ed00" title="Queries a File Access Property List for H5FD_HDFS file driver properties.">H5Pget_fapl_hdfs</a> </td><td>.  </td></tr>
 <tr>
 <td><a class="el" href="#ga714340ec9cbb65cb0a819e1d775825f0" title="Modifies the specified File Access Property List to use the H5FD_IOC driver.">H5Pset_fapl_ioc</a>/<a class="el" href="#ga8482cdac1272818e4e0f86a665f8ef98" title="Queries a File Access Property List for H5FD_IOC file driver properties.">H5Pget_fapl_ioc</a> </td><td>Modifies/queries the file driver properties of the I/O concentrator driver.  </td></tr>
 <tr>
@@ -259,10 +259,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0bc1a003f26bf4b53e4487b6ca117389" id="r_ga0bc1a003f26bf4b53e4487b6ca117389"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga0bc1a003f26bf4b53e4487b6ca117389">H5Pget_fapl_family</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *memb_size, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> *memb_fapl_id)</td></tr>
 <tr class="memdesc:ga0bc1a003f26bf4b53e4487b6ca117389"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns file access property list information.  <br /></td></tr>
 <tr class="separator:ga0bc1a003f26bf4b53e4487b6ca117389"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae59e7d8e0e8823e6dd6034b66418ed00" id="r_gae59e7d8e0e8823e6dd6034b66418ed00"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae59e7d8e0e8823e6dd6034b66418ed00">H5Pget_fapl_hdfs</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__hdfs__fapl__t.html">H5FD_hdfs_fapl_t</a> *fa_out)</td></tr>
-<tr class="separator:gae59e7d8e0e8823e6dd6034b66418ed00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga970d077c8e712a4692f43fa4f38dde14" id="r_ga970d077c8e712a4692f43fa4f38dde14"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14">H5Pset_fapl_hdfs</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__hdfs__fapl__t.html">H5FD_hdfs_fapl_t</a> *fa)</td></tr>
+<tr class="memdesc:ga970d077c8e712a4692f43fa4f38dde14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver.  <br /></td></tr>
 <tr class="separator:ga970d077c8e712a4692f43fa4f38dde14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae59e7d8e0e8823e6dd6034b66418ed00" id="r_gae59e7d8e0e8823e6dd6034b66418ed00"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae59e7d8e0e8823e6dd6034b66418ed00">H5Pget_fapl_hdfs</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__hdfs__fapl__t.html">H5FD_hdfs_fapl_t</a> *fa_out)</td></tr>
+<tr class="memdesc:gae59e7d8e0e8823e6dd6034b66418ed00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> file driver properties.  <br /></td></tr>
+<tr class="separator:gae59e7d8e0e8823e6dd6034b66418ed00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4e03be2fe83ed02b32266a6c81427beb" id="r_ga4e03be2fe83ed02b32266a6c81427beb"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga4e03be2fe83ed02b32266a6c81427beb">H5Pset_fapl_log</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *logfile, unsigned long long flags, size_t buf_size)</td></tr>
 <tr class="memdesc:ga4e03be2fe83ed02b32266a6c81427beb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the logging virtual file driver (<a class="el" href="_h5_f_dlog_8h.html#a027aaf28f5104c77c4f51ecd29a5f7f4">H5FD_LOG</a>) for use.  <br /></td></tr>
 <tr class="separator:ga4e03be2fe83ed02b32266a6c81427beb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -737,7 +739,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 <tr>
 <td>Mirror </td><td><a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> </td><td>Serial I/O to file using Unix “stdio” functions. </td><td><a class="el" href="#ga8491676811ccc7ba582e30fb63da6563">H5Pset_fapl_mirror</a>  </td></tr>
 <tr>
-<td>HDFS </td><td><a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> </td><td>Read-Only access to Hadoop Distributed File System (HDFS). </td><td><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14">H5Pset_fapl_hdfs</a>  </td></tr>
+<td>HDFS </td><td><a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> </td><td>Read-Only access to Hadoop Distributed File System (HDFS). </td><td><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs</a>  </td></tr>
 <tr>
 <td>ros3 </td><td><a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> </td><td>Read-Only access to Amazon's S3 service. </td><td><a class="el" href="#gaad28d8c24f236590193215c5ae7a8f18" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3</a>  </td></tr>
 <tr>
@@ -1079,7 +1081,18 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
+
+<p>Queries a File Access Property List for <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> file driver properties. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">fa_out</td><td>Pointer to <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver configuration structure </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#gae59e7d8e0e8823e6dd6034b66418ed00" title="Queries a File Access Property List for H5FD_HDFS file driver properties.">H5Pget_fapl_hdfs()</a> queries the <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver properties as set by <a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs()</a>.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
 
 </div>
 </div>
@@ -1134,7 +1147,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
 
 </div>
 </div>
@@ -2992,7 +3005,18 @@ Raw dataset chunk caching is supported when these drivers are used in read-only 
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
+
+<p>Modifies the file access property list to use the <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fa</td><td>Pointer to <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver configuration structure</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga970d077c8e712a4692f43fa4f38dde14" title="Modifies the file access property list to use the H5FD_HDFS driver.">H5Pset_fapl_hdfs()</a> modifies the file access property list to use the <a class="el" href="_h5_f_dhdfs_8h.html#ac3868cc2fa0e9aec4bcb52830906d584">H5FD_HDFS</a> driver.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
 
 </div>
 </div>
@@ -3284,7 +3308,7 @@ Flavor of allocation   </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo</a></b></dt><dd>Add missing documentation </dd></dl>
 
 </div>
 </div>
