@@ -1060,6 +1060,10 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     fm->single_space      = NULL;
     fm->single_piece_info = NULL;
 
+    /* Initialize selection type in memory and file */
+    fm->msel_type = H5S_SEL_ERROR;
+    fm->fsel_type = H5S_SEL_ERROR;
+
     /* Check if the memory space is scalar & make equivalent memory space */
     if ((sm_ndims = H5S_GET_EXTENT_NDIMS(dinfo->mem_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number");
