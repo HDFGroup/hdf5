@@ -47,6 +47,40 @@ New Features
 
     Configuration:
     -------------
+    - Overhauled LFS support checks
+
+      In 2024, we can assume that Large File Support (LFS) exists on all
+      systems we support, though it may require flags to enable it,
+      particularly when building 32-bit binaries. The HDF5 source does
+      not use any of the 64-bit specific API calls (e.g., ftello64)
+      or explicit 64-bit offsets via off64_t.
+
+      Autotools
+
+      * We now use AC_SYS_LARGEFILE to determine how to support LFS. We
+        previously used a custom m4 script for this.
+
+      CMake
+
+      * The HDF_ENABLE_LARGE_FILE option (advanced) has been removed
+      * We no longer run a test program to determine if LFS works, which
+        will help with cross-compiling
+      * On Linux we now unilaterally set -D_LARGEFILE_SOURCE and
+        -D_FILE_OFFSET_BITS=64, regardless of 32/64 bit system. CMake
+        doesn't offer a nice equivalent to AC_SYS_LARGEFILE and since
+        those options do nothing on 64-bit systems, this seems safe and
+        covers all our bases. We don't set -D_LARGEFILE64_SOURCE since
+        we don't use any of the POSIX 64-bit specific API calls like
+        ftello64, as noted above.
+      * We didn't test for LFS support on non-Linux platforms. We've added
+        comments for how LFS should probably be supported on AIX and Solaris,
+        which seem to be alive, though uncommon. PRs would be appreciated if
+        anyone wishes to test this.
+
+      This overhaul also fixes GitHub #2395, which points out that the LFS flags
+      used when building with CMake differ based on whether CMake has been
+      run before. The LFS check program that caused this problem no longer exists.
+
     - The CMake HDF5_ENABLE_DEBUG_H5B option has been removed
 
       This enabled some additional version-1 B-tree checks. These have been
