@@ -986,60 +986,86 @@ H5_DLL herr_t H5T__conv_ldouble_ullong(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdat
                                        size_t bkg_stride, void *buf, void *bkg);
 
 #ifdef H5_HAVE__FLOAT16
-H5_DLL herr_t H5T__conv_schar__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_uchar__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_short__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_ushort__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_int__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                     size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_uint__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                      size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_long__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                      size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_ulong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_llong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_ullong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_float__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv_double__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_schar__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_uchar__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_short__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_ushort__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                        const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                        size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_int__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                                     size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
+                                     void *bkg);
+H5_DLL herr_t H5T__conv_uint__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                      const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                      size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_long__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                      const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                      size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_ulong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_llong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_ullong__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                        const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                        size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_float__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_double__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                        const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                        size_t bkg_stride, void *buf, void *bkg);
 #ifdef H5T_CONV_INTERNAL_LDOUBLE_FLOAT16
-H5_DLL herr_t H5T__conv_ldouble__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                         size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv_ldouble__Float16(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                         const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                         size_t bkg_stride, void *buf, void *bkg);
 #endif
-H5_DLL herr_t H5T__conv__Float16_schar(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_uchar(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_short(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_ushort(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_int(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                     size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_uint(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                      size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_long(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                      size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_ulong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_llong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_ullong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_float(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                       size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_double(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                        size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
-H5_DLL herr_t H5T__conv__Float16_ldouble(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx, size_t nelmts,
-                                         size_t buf_stride, size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_schar(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_uchar(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_short(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_ushort(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                        const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                        size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_int(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata, const H5T_conv_ctx_t *conv_ctx,
+                                     size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
+                                     void *bkg);
+H5_DLL herr_t H5T__conv__Float16_uint(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                      const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                      size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_long(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                      const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                      size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_ulong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_llong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_ullong(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                        const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                        size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_float(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                       const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                       size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_double(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                        const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                        size_t bkg_stride, void *buf, void *bkg);
+H5_DLL herr_t H5T__conv__Float16_ldouble(H5T_t *st, H5T_t *dt, H5T_cdata_t *cdata,
+                                         const H5T_conv_ctx_t *conv_ctx, size_t nelmts, size_t buf_stride,
+                                         size_t bkg_stride, void *buf, void *bkg);
 #endif
 
 /* Bit twiddling functions */

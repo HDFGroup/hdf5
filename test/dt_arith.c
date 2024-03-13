@@ -2951,8 +2951,19 @@ test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t id
     memcpy(&aligned, src_buf + idx * sizeof(float), sizeof(float));
 
     switch (dst_type) {
-#ifdef H5_HAVE__FLOAT16
+        case FLT_FLOAT:
+            *((float *)hw_dst) = aligned;
+            break;
+        case FLT_DOUBLE:
+            *((double *)hw_dst) = (double)aligned;
+            break;
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
+        case FLT_LDOUBLE:
+            *((long double *)hw_dst) = (long double)aligned;
+            break;
+#endif
         case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
             /* Suppress warning about non-standard floating-point literal suffix */
             H5_GCC_CLANG_DIAG_OFF("pedantic")
 
@@ -2965,17 +2976,6 @@ test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t id
                 ret = 2;
 
             H5_GCC_CLANG_DIAG_ON("pedantic")
-            break;
-#endif
-        case FLT_FLOAT:
-            *((float *)hw_dst) = aligned;
-            break;
-        case FLT_DOUBLE:
-            *((double *)hw_dst) = (double)aligned;
-            break;
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-        case FLT_LDOUBLE:
-            *((long double *)hw_dst) = (long double)aligned;
             break;
 #endif
         case INT_SCHAR:
@@ -3024,22 +3024,6 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
     memcpy(&aligned, src_buf + idx * sizeof(double), sizeof(double));
 
     switch (dst_type) {
-#ifdef H5_HAVE__FLOAT16
-        case FLT_FLOAT16:
-            /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-
-            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
-
-            /* Check for overflow and underflow */
-            if (fabs(aligned) > (double)FLT16_MAX)
-                ret = 1;
-            else if (fabs(aligned) < (double)FLT16_MIN)
-                ret = 2;
-
-            H5_GCC_CLANG_DIAG_ON("pedantic")
-            break;
-#endif
         case FLT_FLOAT:
             *((float *)hw_dst) = (float)aligned;
 
@@ -3056,6 +3040,22 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         case FLT_LDOUBLE:
             *((long double *)hw_dst) = (long double)aligned;
+            break;
+#endif
+        case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabs(aligned) > (double)FLT16_MAX)
+                ret = 1;
+            else if (fabs(aligned) < (double)FLT16_MIN)
+                ret = 2;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
             break;
 #endif
         case INT_SCHAR:
@@ -3105,22 +3105,6 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
     memcpy(&aligned, src_buf + idx * sizeof(long double), sizeof(long double));
 
     switch (dst_type) {
-#ifdef H5_HAVE__FLOAT16
-        case FLT_FLOAT16:
-            /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-
-            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
-
-            /* Check for overflow and underflow */
-            if (fabsl(aligned) > (long double)FLT16_MAX)
-                ret = 1;
-            else if (fabsl(aligned) < (long double)FLT16_MIN)
-                ret = 2;
-
-            H5_GCC_CLANG_DIAG_ON("pedantic")
-            break;
-#endif
         case FLT_FLOAT:
             *((float *)hw_dst) = (float)aligned;
 
@@ -3144,6 +3128,22 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
         case FLT_LDOUBLE:
             *((long double *)hw_dst) = aligned;
             break;
+        case FLT_FLOAT16:
+#ifdef H5_HAVE__FLOAT16
+            /* Suppress warning about non-standard floating-point literal suffix */
+            H5_GCC_CLANG_DIAG_OFF("pedantic")
+
+            *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
+
+            /* Check for overflow and underflow */
+            if (fabsl(aligned) > (long double)FLT16_MAX)
+                ret = 1;
+            else if (fabsl(aligned) < (long double)FLT16_MIN)
+                ret = 2;
+
+            H5_GCC_CLANG_DIAG_ON("pedantic")
+            break;
+#endif
         case INT_SCHAR:
         case INT_UCHAR:
         case INT_SHORT:

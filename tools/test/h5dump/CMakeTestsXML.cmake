@@ -57,6 +57,7 @@
       tdset.h5
       tempty.h5
       textlink.h5
+      tfloat16.h5
       tfpformat.h5
       tgroup.h5
       thlink.h5
@@ -106,6 +107,7 @@
       tenum.h5.xml
       test35.nc.xml
       textlink.h5.xml
+      tfloat16.h5.xml
       tfpformat.h5.xml
       tgroup.h5.xml
       thlink.h5.xml
@@ -293,6 +295,9 @@
   ADD_XML_H5_TEST (torderattr2.h5 0 -H --sort_by=name --sort_order=descending torderattr.h5)
   ADD_XML_H5_TEST (torderattr3.h5 0 -H --sort_by=creation_order --sort_order=ascending torderattr.h5)
   ADD_XML_H5_TEST (torderattr4.h5 0 -H --sort_by=creation_order --sort_order=descending torderattr.h5)
+
+  # Add test for _Float16 type
+  ADD_XML_H5_TEST (tfloat16.h5 0 tfloat16.h5)
 
   # tests for floating point user defined printf format
   ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)
