@@ -52,6 +52,8 @@ New Features
       With the improvements made in CMake since version 3.23 and the addition
       of CMake preset files, this script is no longer necessary.
 
+      See INSTALL_CMake.txt file, Section X: Using CMakePresets.json for compiling
+
     - Overhauled LFS support checks
 
       In 2024, we can assume that Large File Support (LFS) exists on all
