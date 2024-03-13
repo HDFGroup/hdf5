@@ -324,7 +324,7 @@ jobs:
       - name: Uncompress source (Linux S3)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Run ctest (Linux S3)
+u     - name: Run ctest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5/hdfsrc"
           cmake --workflow --preset=${{ inputs.preset_name }}-GNUC-S3 --fresh
