@@ -1,6 +1,5 @@
 name: hdf5 dev CMake icx CI
 
-# Controls when the action will run. Triggers the workflow on a call
 on:
   workflow_call:
     inputs:

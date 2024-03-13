@@ -107,8 +107,6 @@ jobs:
             generator: "-G Ninja"
             run_tests: true
 
-
-
     # Sets the job's name from the properties
     name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}"
 
@@ -120,11 +118,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-
-      #
-      # SETUP
-      #
-
       #Useful for debugging
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
@@ -171,13 +164,13 @@ jobs:
       #
       # CMAKE CONFIGURE
       #
-
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
+            --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS=ON \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
@@ -197,7 +190,6 @@ jobs:
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' }}
-
 
       - name: CMake Configure (Thread-Safe)
         run: |
@@ -229,7 +221,6 @@ jobs:
       #
       # BUILD
       #
-
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
@@ -237,24 +228,16 @@ jobs:
       #
       # RUN TESTS
       #
-
-      # NORMAL
-
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
 
       # THREAD-SAFE
-
       - name: CMake Run Thread-Safe Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R ttsafe
         working-directory: ${{ runner.workspace }}/build
         if: ${{ matrix.run_tests && (inputs.thread_safety == 'TS') }}
-
-      #
-      # INSTALL (note that this runs even when we don't run the tests)
-      #
 
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
