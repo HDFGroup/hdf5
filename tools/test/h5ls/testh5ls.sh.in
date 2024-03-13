@@ -17,6 +17,7 @@ srcdir=@srcdir@
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 HAVE__FLOAT16="@HAVE__FLOAT16@"
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 TESTNAME=h5ls
 EXIT_SUCCESS=0
@@ -80,6 +81,7 @@ $SRC_H5DUMP_TESTFILES/textlink.h5
 $SRC_H5DUMP_TESTFILES/textlinksrc.h5
 $SRC_H5DUMP_TESTFILES/textlinktar.h5
 $SRC_H5DUMP_TESTFILES/tfloat16.h5
+$SRC_H5DUMP_TESTFILES/tfloat16_be.h5
 $SRC_H5DUMP_TESTFILES/tgroup.h5
 $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
 $SRC_H5DUMP_TESTFILES/tgrpnullspace.h5
@@ -132,6 +134,8 @@ $SRC_H5LS_OUTFILES/textlinksrc-6-old.ls
 $SRC_H5LS_OUTFILES/textlinksrc-7-old.ls
 $SRC_H5LS_OUTFILES/tfloat16.ls
 $SRC_H5LS_OUTFILES/tfloat16_nosupport.ls
+$SRC_H5LS_OUTFILES/tfloat16_be.ls
+$SRC_H5LS_OUTFILES/tfloat16_be_nosupport.ls
 $SRC_H5LS_OUTFILES/tsoftlinks-1.ls
 $SRC_H5LS_OUTFILES/tsoftlinks-2.ls
 $SRC_H5LS_OUTFILES/tsoftlinks-3.ls
@@ -367,9 +371,14 @@ TOOLTEST thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thli
 
 # test for _Float16 type
 if test $HAVE__FLOAT16 = "yes" ; then
-  TOOLTEST tfloat16.ls 0 -w80 -v tfloat16.h5
+  if test $WORDS_BIGENDIAN = "yes" ; then
+    TOOLTEST tfloat16_be.ls 0 -w80 -v tfloat16_be.h5
+  else
+    TOOLTEST tfloat16.ls 0 -w80 -v tfloat16.h5
+  fi
 else
   TOOLTEST tfloat16_nosupport.ls 0 -w80 -v tfloat16.h5
+  TOOLTEST tfloat16_be_nosupport.ls 0 -w80 -v tfloat16_be.h5
 fi
 
 # test for wildcards in filename (does not work with cmake)
