@@ -1,4 +1,4 @@
-name: hdf5 dev autotools icx CI
+name: hdf5 dev autotools icx
 
 on:
   workflow_call:
@@ -12,18 +12,20 @@ permissions:
   contents: read
 
 jobs:
-  Intel_build_and_test:
-    name: "Intel ${{ inputs.build_mode }}"
+  intel_build_and_test:
+    name: "oneapi ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
 
       - name: Install Dependencies
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install autoconf automake libtool libtool-bin libaec-dev
 
-      - name: Add oneAPI to apt
+      - name: Install oneAPI
         shell: bash
         run: |
           cd /tmp
@@ -63,17 +65,16 @@ jobs:
             --enable-shared \
             --disable-fortran
 
-      # BUILD
       - name: Autotools Build
+        shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
           make -j3
         working-directory: ${{ runner.workspace }}/build
 
-      # RUN TESTS
-      # NORMAL
       - name: Autotools Run Tests
+        shell: pwsh
         run: |
           source /opt/intel/oneapi/setvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin
@@ -81,8 +82,8 @@ jobs:
           make check -j2
         working-directory: ${{ runner.workspace }}/build
 
-      # INSTALL (note that this runs even when we don't run the tests)
       - name: Autotools Install
+        shell: pwsh
         run: |
           source /opt/intel/oneapi/setvars.sh
           export PATH=$PATH:/opt/intel/oneapi/compiler/2023.2.1/linux/bin

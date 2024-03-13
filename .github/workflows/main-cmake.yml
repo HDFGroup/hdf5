@@ -122,9 +122,7 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      # Only CMake need ninja-build, but we just install it unilaterally
-      # libssl, etc. are needed for the ros3 VFD
-      - name: Install Linux Dependencies
+      - name: Install CMake Dependencies (Linux)
         run: |
            sudo apt update
            sudo apt-get install ninja-build graphviz

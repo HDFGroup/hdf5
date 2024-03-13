@@ -76,7 +76,7 @@ jobs:
 
     call-release-cmake-aocc:
         name: "CMake aocc Workflows"
-        uses: ./.github/workflows/aocc-ompi-cmake.yml
+        uses: ./.github/workflows/aocc-cmake.yml
         with:
             build_mode: "Release"
 

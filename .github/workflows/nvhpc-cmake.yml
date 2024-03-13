@@ -16,9 +16,10 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
 
-      - name: Install Linux dependencies
+      - name: Install Dependencies
         shell: bash
         run: |
           sudo apt update
@@ -42,7 +43,7 @@ jobs:
           echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/cuda/12.2/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
-      - name: CMake Configure with nvc
+      - name: CMake Configure
         shell: bash
         run: |
           export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/bin:$PATH
@@ -60,14 +61,12 @@ jobs:
           -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
           $GITHUB_WORKSPACE
 
-      # BUILD
       - name: CMake Build
         shell: bash
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      # RUN TESTS
       - name: CMake Run Tests
         shell: bash
         run: |

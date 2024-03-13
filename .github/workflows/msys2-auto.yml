@@ -1,4 +1,4 @@
-name: hdf4 dev Autotools MSys2 CI
+name: hdf5 dev Autotools MSys2
 
 on:
   workflow_call:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  Msys2_build_and_test:
+  msys2_build_and_test:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -25,7 +25,7 @@ jobs:
           - { icon: '🟦', sys: mingw64 }
           - { icon: '🟨', sys: ucrt64  }
           - { icon: '🟧', sys: clang64 }
-    name: ${{ matrix.icon }} MSYS2-${{ matrix.sys }}-${{ inputs.build_mode }}
+    name: ${{ matrix.icon }} msys2-${{ matrix.sys }}-${{ inputs.build_mode }}
     defaults:
       run:
         shell: msys2 {0}
@@ -55,14 +55,11 @@ jobs:
             --disable-netcdf \
             --enable-static-exec
 
-      # BUILD
       - name: Autotools Build
         run: |
           make -j3
         working-directory: $GITHUB_WORKSPACE/build
 
-      # RUN TESTS
-      # NORMAL
       - name: Autotools Run Tests
         run: |
           make check -j

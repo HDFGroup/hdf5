@@ -73,7 +73,7 @@ jobs:
 
     call-release-auto-aocc:
       name: "Autotools aocc Workflows"
-      uses: ./.github/workflows/aocc-ompi-auto.yml
+      uses: ./.github/workflows/aocc-auto.yml
       with:
             build_mode: "production"
 
