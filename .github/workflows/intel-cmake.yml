@@ -95,14 +95,8 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           mkdir "${{ runner.workspace }}/build"
-          Set-Location -Path "${{ runner.workspace }}\build"
-          cmake -C $env:GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DHDF5_BUILD_FORTRAN=ON \
-            -DLIBAEC_USE_LOCALCONTENT=OFF \
-            -DZLIB_USE_LOCALCONTENT=OFF \
-            $env:GITHUB_WORKSPACE
+          Set-Location -Path "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF GITHUB_WORKSPACE
 
       - name: CMake Build (Windows)
         shell: pwsh
