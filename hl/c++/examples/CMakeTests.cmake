@@ -28,7 +28,7 @@ set_tests_properties (HL_CPP_ex_ptExampleFL-clear-objects PROPERTIES
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
-if (HDF5_ENABLE_USING_MEMCHECKER)
+if (HDF5_USING_ANALYSIS_TOOL)
   add_test (NAME HL_CPP_ex_ptExampleFL COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:ptExampleFL>)
 else ()
   add_test (NAME HL_CPP_ex_ptExampleFL COMMAND "${CMAKE_COMMAND}"

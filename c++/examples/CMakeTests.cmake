@@ -43,7 +43,7 @@ set_tests_properties (CPP_ex-clean-objects PROPERTIES
 )
 
 foreach (example ${examples})
-  if (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_USING_ANALYSIS_TOOL)
     add_test (NAME CPP_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_ex_${example}>)
   else ()
     add_test (NAME CPP_ex_${example} COMMAND "${CMAKE_COMMAND}"
@@ -95,7 +95,7 @@ set_tests_properties (CPP_ex_tutr-clean-objects PROPERTIES
 )
 
 foreach (example ${tutr_examples})
-  if (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_USING_ANALYSIS_TOOL)
     add_test (NAME CPP_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cpp_ex_${example}>)
   else ()
     add_test (NAME CPP_ex_${example} COMMAND "${CMAKE_COMMAND}"

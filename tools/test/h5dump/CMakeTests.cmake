@@ -441,7 +441,7 @@
 
   macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
     else ()
       add_test (
@@ -467,7 +467,7 @@
 
   macro (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if ("${testtype}" STREQUAL "SKIP")
-      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      if (NOT HDF5_USING_ANALYSIS_TOOL)
         add_test (
             NAME H5DUMP-${skipresultfile}
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
@@ -481,7 +481,7 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -521,7 +521,7 @@
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -570,7 +570,7 @@
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -615,7 +615,7 @@
         COMMAND ${CMAKE_COMMAND} -E remove
             ${resultfile}.txt
     )
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       set_tests_properties (H5DUMP-${resultfile}-clean-objects PROPERTIES
           DEPENDS H5DUMP-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -639,7 +639,7 @@
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -694,7 +694,7 @@
             ${ddlfile}.txt
             ${resultfile}.txt
     )
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       set_tests_properties (H5DUMP-${resultfile}-clean-objects PROPERTIES
           DEPENDS H5DUMP-${resultfile}
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -708,7 +708,7 @@
   endmacro ()
 
   macro (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-output-${resultfile}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -752,7 +752,7 @@
   endmacro ()
 
   macro (ADD_H5_MASK_TEST resultfile resultcode)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -776,7 +776,7 @@
   endmacro ()
 
   macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -799,7 +799,7 @@
   endmacro ()
 
   macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -823,7 +823,7 @@
   endmacro ()
 
   macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envval)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -849,7 +849,7 @@
   endmacro ()
 
   macro (ADD_H5_BIN_EXPORT conffile resultcode testfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-BIN_EXPORT-${conffile}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -890,7 +890,7 @@
 
   macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     # If using memchecker add tests without using scripts
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP-IMPORT-${resultfile}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
@@ -949,7 +949,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5DUMP_UD-${testname}-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -1315,14 +1315,14 @@
   # NATIVE default. the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
 
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     ADD_H5_BIN_EXPORT (tbin2 0 tbinary.h5 --enable-error-stack -b BE -d float)
   endif ()
 
   # the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     ADD_H5_BIN_EXPORT (tbin4 0 tbinary.h5 --enable-error-stack -d double -b FILE)
   endif ()
 

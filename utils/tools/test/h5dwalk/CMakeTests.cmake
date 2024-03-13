@@ -27,7 +27,7 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       message("Entered ADD_H5_TEST - 0")
       add_test (NAME H5DWALK-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dwalk> ${ARGN})
       set_tests_properties (H5DWALK-${resultfile} PROPERTIES

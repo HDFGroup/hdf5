@@ -77,7 +77,7 @@ add_custom_target(HDF5_SF2_VFD_H5DUMP_files ALL COMMENT "Copying files needed by
 ##############################################################################
 
 macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  if (NOT HDF5_USING_ANALYSIS_TOOL)
     add_test (
         NAME H5DUMP_VFD-${vfdname}-${resultfile}-h5dump
         COMMAND "${CMAKE_COMMAND}"

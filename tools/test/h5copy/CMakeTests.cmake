@@ -142,7 +142,7 @@
   endmacro ()
 
   macro (ADD_SKIP_H5_TEST testname skipresultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5COPY-${testname}-${skipresultfile}
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname}-${skipresultfile} ${ARGN}"
@@ -260,7 +260,7 @@
         COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
     )
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
@@ -293,7 +293,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD-${testname}-clear-objects
@@ -367,7 +367,7 @@
   endmacro ()
 
   macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_USING_ANALYSIS_TOOL)
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD_ERR-${testname}-clear-objects
@@ -444,12 +444,12 @@
 
   macro (ADD_SIMPLE_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_USING_ANALYSIS_TOOL)
       add_test (NAME H5COPY-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5COPY-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else (HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5COPY-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
