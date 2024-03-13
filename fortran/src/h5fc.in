@@ -308,20 +308,20 @@ if test "x$do_link" = "xyes"; then
   fi
   link_args="$link_args -L${libdir}"
 
-  case "$host_os" in
-    linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
-    hpux*)                flag="-Wl,+b -Wl," ;;
-    freebsd*|solaris*)    flag="-R" ;;
-    rs6000*|aix*)         flag="-L" ;;
-    sgi)                  flag="-rpath " ;;
-    *)                    flag="" ;;
-  esac
+  if test "x$USE_SHARED_LIB" = "xyes"; then
+    case "$host_os" in
+      linux*)               flag="@fortran_linux_linker_option@-rpath -Wl," ;;
+      hpux*)                flag="-Wl,+b -Wl," ;;
+      freebsd*|solaris*)    flag="-R" ;;
+      rs6000*|aix*)         flag="-L" ;;
+      sgi)                  flag="-rpath " ;;
+      *)                    flag="" ;;
+    esac
 
-  if test -n "$flag"; then
-    shared_link="${flag}${libdir}"
-  fi
-
-  if test "x$USE_SHARED_LIB" != "xyes"; then
+    if test -n "$flag"; then
+      shared_link="${flag}${libdir}"
+    fi
+  else
     # The hdf5 library "-l" flags are in here already.  This is a static
     # compile though, so change it to the static versions (.a) of the libraries.
     new_libraries=""

@@ -314,27 +314,27 @@ if test "x$do_link" = "xyes"; then
   fi
   link_args="$link_args -L${libdir}"
 
-  case "$kind" in
-    gcc|linux*)
-      # MacOS X doesn't support the "-Wl,-rpath -Wl," style of linker flags.
-      # It appears to want none of them specified.
-      case "$host_os" in
-        darwin*)          flag="" ;;
-        *)                flag="-Wl,-rpath -Wl," ;;
-      esac
-      ;;
-    hpux*)                flag="-Wl,+b -Wl," ;;
-    freebsd*|solaris*)    flag="-R" ;;
-    rs6000*|aix*)         flag="-L" ;;
-    sgi)                  flag="-rpath " ;;
-    *)                    flag="" ;;
-  esac
+  if test "x$USE_SHARED_LIB" = "xyes"; then
+    case "$kind" in
+      gcc|linux*)
+        # MacOS X doesn't support the "-Wl,-rpath -Wl," style of linker flags.
+        # It appears to want none of them specified.
+        case "$host_os" in
+          darwin*)          flag="" ;;
+          *)                flag="-Wl,-rpath -Wl," ;;
+        esac
+        ;;
+      hpux*)                flag="-Wl,+b -Wl," ;;
+      freebsd*|solaris*)    flag="-R" ;;
+      rs6000*|aix*)         flag="-L" ;;
+      sgi)                  flag="-rpath " ;;
+      *)                    flag="" ;;
+    esac
 
-  if test -n "$flag"; then
-    shared_link="${flag}${libdir}"
-  fi
-
-  if test "x$USE_SHARED_LIB" != "xyes"; then
+    if test -n "$flag"; then
+      shared_link="${flag}${libdir}"
+    fi
+  else
     # The "-lhdf5" & "-lhdf5_hl" flags are in here already...This is a static
     # compile though, so change it to the static version (.a) of the library.
     new_libraries=""
