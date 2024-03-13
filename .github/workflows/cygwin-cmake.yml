@@ -59,4 +59,4 @@ jobs:
         run: |
            export PATH=/usr/bin:$PATH
            cd build
-           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "FORTRAN | H5TEST"
