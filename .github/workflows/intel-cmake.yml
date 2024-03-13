@@ -31,7 +31,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2023.2'
+          version: '2024.0'
 
       - name: CMake Configure (Linux)
         shell: bash
@@ -85,7 +85,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2023.2'
+          version: '2024.0'
 
       - name: CMake Configure (Windows)
         shell: pwsh
