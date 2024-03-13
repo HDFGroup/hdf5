@@ -224,7 +224,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
   # functionality so clock_gettime and CLOCK_MONOTONIC are defined
   # correctly. This was later updated to 200112L so that
   # posix_memalign() is visible for the direct VFD code on Linux
-  # systems.
+  # systems. Even later, this was changed to 200809L to support
+  # pread/pwrite in VFDs.
+  #
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
   set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
