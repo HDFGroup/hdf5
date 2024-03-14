@@ -633,8 +633,6 @@ cklinks(hid_t fapl, bool new_format)
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR;
 
-    //! [H5Otoken_cmp_snip]
-
     /* Hard link */
     if (H5Oget_info_by_name3(file, "d1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
@@ -656,6 +654,9 @@ cklinks(hid_t fapl, bool new_format)
         puts("    expected file location.");
         TEST_ERROR;
     } /* end if */
+
+    //! [H5Otoken_cmp_snip]
+
     if (H5Lexists(file, "/", H5P_DEFAULT) != true)
         FAIL_STACK_ERROR;
     if (H5Lexists(file, "d1", H5P_DEFAULT) != true)
