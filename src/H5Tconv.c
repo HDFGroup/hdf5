@@ -3058,7 +3058,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_enum_numeric() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_vlen_nested_free
  *
@@ -3072,7 +3071,7 @@ done:
 static herr_t
 H5T__conv_vlen_nested_free(uint8_t *buf, H5T_t *dt)
 {
-    herr_t                ret_value = SUCCEED;          /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3086,14 +3085,16 @@ H5T__conv_vlen_nested_free(uint8_t *buf, H5T_t *dt)
         case H5T_COMPOUND:
             /* Pointer buf refers to COMPOUND data; recurse for each member. */
             for (unsigned i = 0; i < dt->shared->u.compnd.nmembs; ++i)
-                if(H5T__conv_vlen_nested_free(buf + dt->shared->u.compnd.memb[i].offset, dt->shared->u.compnd.memb[i].type) < 0)
+                if (H5T__conv_vlen_nested_free(buf + dt->shared->u.compnd.memb[i].offset,
+                                               dt->shared->u.compnd.memb[i].type) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free compound member");
             break;
 
         case H5T_ARRAY:
             /* Pointer buf refers to ARRAY data; recurse for each element. */
             for (unsigned i = 0; i < dt->shared->u.array.nelem; ++i)
-                if(H5T__conv_vlen_nested_free(buf + i * dt->shared->parent->shared->size, dt->shared->parent) < 0)
+                if (H5T__conv_vlen_nested_free(buf + i * dt->shared->parent->shared->size,
+                                               dt->shared->parent) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free array data");
             break;
 
@@ -3117,7 +3118,6 @@ H5T__conv_vlen_nested_free(uint8_t *buf, H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5T__conv_vlen_nested_free() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_vlen
@@ -3459,8 +3459,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 for (u = seq_len; u < bg_seq_len; u++, tmp += dst_base_size) {
                                     /* Recursively free destination data */
                                     if (H5T__conv_vlen_nested_free(tmp, dst->shared->parent) < 0)
-                                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL,
-                                                     "unable to remove heap object");
+                                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL,
+                                                    "unable to remove heap object");
                                 } /* end for */
                             }     /* end if */
                         }         /* end if */
