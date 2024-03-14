@@ -19,7 +19,7 @@ Links to HDF5 documentation can be found on:
 
 The official HDF5 releases can be obtained from:
 
-     https://portal.hdfgroup.org/downloads/index.html
+     https://www.hdfgroup.org/downloads/hdf5/
 
 Changes from Release to Release and New Features in the HDF5-1.16.x release series
 can be found at:
