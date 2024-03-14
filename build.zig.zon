@@ -1,0 +1,12 @@
+.{
+	.name = "hdf5cpp-fortrajectum",
+	.version = "1.4.3-alpha1",
+	.paths = .{
+		"src",
+		"c++",
+		"build.zig",
+		"build.zig.zon",
+		"configure",
+		"config"
+	}
+}
