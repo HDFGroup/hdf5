@@ -57,6 +57,15 @@ typedef struct H5L_elink_cb_t {
     void                *user_data;
 } H5L_elink_cb_t;
 
+/* User data for path traversal callback to creating a link */
+typedef struct {
+    H5F_t            *file;      /* Pointer to the file */
+    H5P_genplist_t   *lc_plist;  /* Link creation property list */
+    H5G_name_t       *path;      /* Path to object being linked */
+    H5O_obj_create_t *ocrt_info; /* Pointer to object creation info */
+    H5O_link_t       *lnk;       /* Pointer to link information to insert */
+} H5L_trav_cr_t;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/

@@ -339,6 +339,7 @@ typedef struct {
 
 #define MISC38_FILE "type_conversion_path_table_issue.h5"
 #define MISC39_FILE "set_est_link_info.h5"
+#define MISC40_FILE  "obj_props_intermediate.h5"
 
 /****************************************************************
 **
@@ -6642,6 +6643,224 @@ test_misc39(void)
 
 /****************************************************************
 **
+**  test_misc40(): Test that object creation properties are propagated
+**  to intermediate groups.
+**
+****************************************************************/
+static void
+test_misc40(void)
+{
+    hid_t lcpl = H5I_INVALID_HID;
+    hid_t gcpl = H5I_INVALID_HID;
+    hid_t gcpl2 = H5I_INVALID_HID;
+    hid_t def_gcpl = H5I_INVALID_HID;
+    hid_t dcpl = H5I_INVALID_HID;
+    hid_t fid = H5I_INVALID_HID;
+    hid_t gid = H5I_INVALID_HID;
+    hid_t gid2 = H5I_INVALID_HID;
+    hid_t def_gid = H5I_INVALID_HID;
+    hid_t did = H5I_INVALID_HID;
+    hid_t sid = H5I_INVALID_HID;
+    hsize_t dims[1]  = {10};
+    unsigned cr_order = 0;
+    hbool_t     track_times = false;
+    herr_t      status;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing object creation properties are propagated to intermediate groups\n"));
+
+    lcpl = H5Pcreate(H5P_LINK_CREATE);
+    CHECK(lcpl, FAIL, "H5Pcreate");
+
+    status = H5Pset_create_intermediate_group(lcpl, 1);
+    CHECK(status, FAIL, "H5Pset_create_intermediate_group");
+
+    fid = H5Fcreate(MISC40_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+
+    /* 
+     * Verify default creation properties when creating
+     * group with intermdiate group
+     */
+
+    /* Create groups that use default creation properties */
+    def_gid = H5Gcreate2(fid, "def_group1/def_group2", lcpl, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(def_gid, FAIL, "H5Gcreate2");
+
+    status = H5Gclose(def_gid);
+    CHECK(status, FAIL, "H5Gclose");
+
+    def_gid = H5Gopen2(fid, "def_group1", H5P_DEFAULT);
+    CHECK(def_gid, FAIL, "H5Gopen2");
+
+    def_gcpl = H5Gget_create_plist(def_gid);
+    CHECK(def_gcpl, FAIL, "H5Gget_create_plist");
+
+    /* Default is true */
+    status = H5Pget_obj_track_times(def_gcpl, &track_times);
+    CHECK(status, FAIL, "H5Gclose");
+    VERIFY(track_times, true, "H5Pget_obj_track_times");
+
+    /* Default is false */
+    status = H5Pget_attr_creation_order(def_gcpl, &cr_order);
+    CHECK(status, FAIL, "H5Gclose");
+    VERIFY(cr_order, 0, "H5Pget_attr_creation_order");
+
+    status = H5Gclose(def_gid);
+    CHECK(status, FAIL, "H5Gclose");
+
+    status = H5Pclose(def_gcpl);
+    CHECK(status, FAIL, "H5Gclose");
+
+    /* 
+     * Verify non-default creation properties when creating
+     * group with intermediate groups
+     */
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl, FAIL, "H5Fcreate");
+
+    status = H5Pset_attr_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
+    CHECK(status, FAIL, "H5Pset_attr_creation_order");
+
+    status = H5Pset_obj_track_times(gcpl, false);
+    CHECK(status, FAIL, "H5Pset_obj_track_times");
+
+    gid = H5Gcreate2(fid, "group1/group2/group3", lcpl, gcpl, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    status = H5Pclose(gcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    /* Verify group3 */
+    gcpl = H5Gget_create_plist(gid);
+    CHECK(gcpl, FAIL, "H5Gget_create_plist");
+
+    status = H5Pget_attr_creation_order(gcpl, &cr_order);
+    CHECK(status, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(cr_order, H5P_CRT_ORDER_TRACKED, "H5Pget_attr_creation_order");
+
+    status = H5Pget_obj_track_times(gcpl, &track_times);
+    CHECK(status, FAIL, "H5Pget_obj_track_times");
+    VERIFY(track_times, false, "H5Pget_obj_track_times");
+
+    status = H5Gclose(gid);
+    CHECK(status, FAIL, "H5Pclose");
+    status = H5Pclose(gcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    /* Verify group1 */
+    gid = H5Gopen2(fid, "group1", H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
+
+    gcpl = H5Gget_create_plist(gid);
+    CHECK(gcpl, FAIL, "H5Gget_create_plist");
+
+    status = H5Pget_attr_creation_order(gcpl, &cr_order);
+    CHECK(status, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(cr_order, H5P_CRT_ORDER_TRACKED, "H5Pget_attr_creation_order");
+
+    status = H5Pget_obj_track_times(gcpl, &track_times);
+    CHECK(status, FAIL, "H5Pget_obj_track_times");
+    VERIFY(track_times, false, "H5Pget_obj_track_times");
+
+    /* Verify group2 */
+    gid2 = H5Gopen2(gid, "group2", H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
+
+    gcpl2 = H5Gget_create_plist(gid2);
+    CHECK(gcpl2, FAIL, "H5Gget_create_plist");
+
+    status = H5Pget_attr_creation_order(gcpl2, &cr_order);
+    CHECK(status, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(cr_order, H5P_CRT_ORDER_TRACKED, "H5Pget_attr_creation_order");
+
+    status = H5Pget_obj_track_times(gcpl2, &track_times);
+    CHECK(status, FAIL, "H5Pget_obj_track_times");
+    VERIFY(track_times, false, "H5Pget_obj_track_times");
+
+    status = H5Gclose(gid2);
+    CHECK(status, FAIL, "H5Gclose");
+    status = H5Pclose(gcpl2);
+    CHECK(status, FAIL, "H5Pclose");
+
+    status = H5Gclose(gid);
+    CHECK(status, FAIL, "H5Pclose");
+    status = H5Pclose(gcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    /* 
+     * Verify non-default creation properties when creating
+     * dataset with intermediate group
+     */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Fcreate");
+
+    status = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_TRACKED);
+    CHECK(status, FAIL, "H5Pset_attr_creation_order");
+
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    did = H5Dcreate2(fid, "path1/dname", H5T_NATIVE_INT, sid, lcpl, dcpl, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    status = H5Dclose(did);
+    CHECK(status, FAIL, "H5Dclose");
+    status = H5Sclose(sid);
+    CHECK(status, FAIL, "H5Sclose");
+    status = H5Pclose(dcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    /* Verify path1 */
+    gid = H5Gopen2(fid, "path1", H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
+
+    gcpl = H5Gget_create_plist(gid);
+    CHECK(gcpl, FAIL, "H5Gget_create_plist");
+
+    status = H5Pget_attr_creation_order(gcpl, &cr_order);
+    CHECK(status, FAIL, "H5Pget_attr_creation_order");
+    VERIFY(cr_order, H5P_CRT_ORDER_TRACKED, "H5Pget_attr_creation_order");
+
+    status = H5Pget_obj_track_times(gcpl, &track_times);
+    CHECK(status, FAIL, "H5Pget_obj_track_times");
+    VERIFY(track_times, true, "H5Pget_obj_track_times");
+
+    /* Verify dname */
+    did = H5Dopen2(gid, "dname", H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Gopen2");
+
+    dcpl = H5Dget_create_plist(did);
+    CHECK(dcpl, FAIL, "H5Dget_create_plist");
+
+    status = H5Pget_attr_creation_order(dcpl, &cr_order);
+    VERIFY(cr_order, H5P_CRT_ORDER_TRACKED, "H5Pget_attr_creation_order");
+
+    status = H5Pget_obj_track_times(dcpl, &track_times);
+    CHECK(status, FAIL, "H5Pget_obj_track_times");
+    VERIFY(track_times, true, "H5Pget_obj_track_times");
+
+    status = H5Dclose(did);
+    CHECK(status, FAIL, "H5Pclose");
+    status = H5Pclose(dcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    status = H5Gclose(gid);
+    CHECK(status, FAIL, "H5Pclose");
+    status = H5Pclose(gcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+    status = H5Fclose(fid);
+    CHECK(status, FAIL, "H5Fclose");
+
+    status = H5Pclose(lcpl);
+    CHECK(status, FAIL, "H5Pclose");
+
+} /* end test_misc40() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 **
 ****************************************************************/
@@ -6710,6 +6929,7 @@ test_misc(void)
     test_misc37(); /* Test for seg fault failure at file close */
     test_misc38(); /* Test for type conversion path table issue */
     test_misc39(); /* Ensure H5Pset_est_link_info() handles large values */
+    test_misc40(); /* Test object properties propagated to intermediate groups */
 
 } /* test_misc() */
 
@@ -6767,6 +6987,7 @@ cleanup_misc(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
         H5Fdelete(MISC38_FILE, H5P_DEFAULT);
         H5Fdelete(MISC39_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC40_FILE, H5P_DEFAULT);
     }
     H5E_END_TRY
 } /* end cleanup_misc() */

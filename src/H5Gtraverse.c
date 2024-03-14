@@ -24,6 +24,7 @@
 /****************/
 
 #include "H5Gmodule.h" /* This source code file is part of the H5G module */
+#define H5D_FRIEND     /*suppress error about including H5Dpkg       */
 
 /***********/
 /* Headers */
@@ -34,6 +35,7 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File access                              */
 #include "H5Gpkg.h"      /* Groups                                   */
+#include "H5Dpkg.h"      /* Dataset functions                        */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
@@ -614,6 +616,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 const H5O_linfo_t *linfo;     /* Link info settings for new group */
                 const H5O_pline_t *pline;     /* Filter pipeline settings for new group */
                 H5G_obj_create_t   gcrt_info; /* Group creation info */
+                H5O_obj_create_t *ocrt_info;  /* Object creation info in op_data */
 
                 /* Check for the parent group having a group info message */
                 /* (OK if not found) */
@@ -666,8 +669,14 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                     pline = &def_pline;
 
                 /* Create the intermediate group */
-                /* XXX: Should we allow user to control the group creation params here? -QAK */
                 gcrt_info.gcpl_id    = H5P_GROUP_CREATE_DEFAULT;
+                if ((ocrt_info = ((H5L_trav_cr_t *)op_data)->ocrt_info) != NULL) {
+                    if (ocrt_info->obj_type == H5O_TYPE_GROUP)
+                        gcrt_info.gcpl_id = ((H5G_obj_create_t *)ocrt_info->crt_info)->gcpl_id;
+                    else if (ocrt_info->obj_type == H5O_TYPE_DATASET)
+                        gcrt_info.gcpl_id = ((H5D_obj_create_t *)ocrt_info->crt_info)->dcpl_id;
+                }
+
                 gcrt_info.cache_type = H5G_NOTHING_CACHED;
                 memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
                 if (H5G__obj_create_real(grp_oloc.file, ginfo, linfo, pline, &gcrt_info,
