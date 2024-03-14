@@ -37,3 +37,9 @@ jobs:
     uses: ./.github/workflows/cmake.yml
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
+#  workflow-msys2-autotools:
+#    name: "CMake msys2 Workflows"
+#    uses: ./.github/workflows/msys2-auto.yml
+#    with:
+#        build_mode: "production"
+#        build_option: "--enable-production"

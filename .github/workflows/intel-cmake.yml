@@ -1,6 +1,5 @@
 name: hdf5 1.14 CMake icx CI
 
-# Controls when the action will run. Triggers the workflow on a call
 on:
   workflow_call:
     inputs:
@@ -13,30 +12,28 @@ permissions:
   contents: read
 
 jobs:
-  # Linux (Ubuntu) w/ gcc + CMake
-  #
-  Intel_oneapi_linux:
-    name: "ubuntu-oneapi ${{ inputs.build_mode }}"
+  intel_oneapi_linux:
+    name: "linux-oneapi ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - name: Get Sources (Linux)
+        uses: actions/checkout@v4.1.1
 
-      # Only CMake need ninja-build, but we just install it unilaterally
-      # libssl, etc. are needed for the ros3 VFD
-      - name: Install Linux Dependencies
+      - name: Install Dependencies (Linux)
+        shell: bash
         run: |
            sudo apt update
            sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
-      - name: add oneAPI to env
+      - name: Install oneAPI (Linux)
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
           compiler: intel
-          version: '2023.2'
+          version: '2024.0'
 
-      - name: CMake Configure with oneapi
+      - name: CMake Configure (Linux)
         shell: bash
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -45,14 +42,15 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-          -DLIBAEC_USE_LOCALCONTENT=OFF \
-          -DZLIB_USE_LOCALCONTENT=OFF \
-          $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            $GITHUB_WORKSPACE
 
-      # BUILD
-      - name: CMake Build
+      - name: CMake Build (Linux)
         shell: bash
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -62,8 +60,7 @@ jobs:
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      # RUN TESTS
-      - name: CMake Run Tests
+      - name: CMake Run Tests (Linux)
         shell: bash
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -77,19 +74,20 @@ jobs:
     name: "windows-oneapi ${{ inputs.build_mode }}"
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - name: Get Sources (Windows)
+        uses: actions/checkout@v4.1.1
 
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
-      - name: add oneAPI to env
+      - name: install oneAPI (Windows)
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
           compiler: intel
-          version: '2023.2'
+          version: '2024.0'
 
-      - name: CMake Configure with oneapi
+      - name: CMake Configure (Windows)
         shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -100,8 +98,7 @@ jobs:
           Set-Location -Path "${{ runner.workspace }}\\build"
           cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} -DHDF5_BUILD_FORTRAN=ON -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF ${{ github.workspace }}
 
-      # BUILD
-      - name: CMake Build
+      - name: CMake Build (Windows)
         shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
@@ -111,8 +108,7 @@ jobs:
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      # RUN TESTS
-      - name: CMake Run Tests
+      - name: CMake Run Tests (Windows)
         shell: pwsh
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
