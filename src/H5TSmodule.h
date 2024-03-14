@@ -11,40 +11,18 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains public declarations for the H5TS (threadsafety) developer
- *      support routines.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5TS package.  Including this header means that the source file
+ *          is part of the H5TS package.
  */
+#ifndef H5TSmodule_H
+#define H5TSmodule_H
 
-#ifndef H5TSdevelop_H
-#define H5TSdevelop_H
+/* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
+ *      reporting macros.
+ */
+#define H5TS_MODULE
+#define H5_MY_PKG     H5TS
+#define H5_MY_PKG_ERR H5E_THREADSAFE
 
-/*****************/
-/* Public Macros */
-/*****************/
-
-/*******************/
-/* Public Typedefs */
-/*******************/
-
-/********************/
-/* Public Variables */
-/********************/
-
-/*********************/
-/* Public Prototypes */
-/*********************/
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* HDF5 global library lock routines */
-H5_DLL herr_t H5TSmutex_acquire(unsigned lock_count, bool *acquired);
-H5_DLL herr_t H5TSmutex_release(unsigned *lock_count);
-H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned *count);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* H5TSdevelop_H */
+#endif /* H5TSmodule_H */

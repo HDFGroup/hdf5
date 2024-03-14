@@ -48,7 +48,7 @@ hid_t               error_file_g  = H5I_INVALID_HID;
 int                 error_flag_g  = 0;
 int                 error_count_g = 0;
 err_num_t           expected_g[EXPECTED_ERROR_DEPTH];
-H5TS_mutex_simple_t error_mutex_g;
+H5TS_mutex_t error_mutex_g;
 
 /* Prototypes */
 static herr_t error_callback(hid_t, void *);
@@ -104,11 +104,11 @@ tts_error(void)
     H5TS_mutex_init(&error_mutex_g);
 
     /* make thread scheduling global */
-    H5TS_attr_init(&attribute);
+    H5TS__attr_init(&attribute);
 
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
     /* set thread scope to system */
-    H5TS_attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
+    H5TS__attr_setscope(&attribute, H5TS_SCOPE_SYSTEM);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     def_fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -125,10 +125,10 @@ tts_error(void)
         CHECK(error_file_g, H5I_INVALID_HID, "H5Fcreate");
 
         for (i = 0; i < NUM_THREAD; i++)
-            threads[i] = H5TS_create_thread(tts_error_thread, &attribute, NULL);
+            threads[i] = H5TS__create_thread(tts_error_thread, &attribute, NULL);
 
         for (i = 0; i < NUM_THREAD; i++)
-            H5TS_wait_for_thread(threads[i]);
+            H5TS__wait_for_thread(threads[i]);
 
         if (error_flag_g) {
             TestErrPrintf(
@@ -160,7 +160,8 @@ tts_error(void)
     status = H5Idec_ref(vol_id);
     CHECK(status, FAIL, "H5Idec_ref");
 
-    H5TS_attr_destroy(&attribute);
+    H5TS__attr_destroy(&attribute);
+    H5TS_mutex_destroy(&error_mutex_g);
 } /* end tts_error() */
 
 static void *
@@ -221,9 +222,9 @@ tts_error_thread(void H5_ATTR_UNUSED *arg)
 static herr_t
 error_callback(hid_t H5_ATTR_UNUSED estack_id, void *client_data)
 {
-    H5TS_mutex_lock_simple(&error_mutex_g);
+    H5TS_mutex_lock(&error_mutex_g);
     error_count_g++;
-    H5TS_mutex_unlock_simple(&error_mutex_g);
+    H5TS_mutex_unlock(&error_mutex_g);
     return H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 

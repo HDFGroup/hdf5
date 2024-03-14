@@ -174,6 +174,12 @@ if (HDF5_ENABLE_DEBUG_H5FS_ASSERT)
   list (APPEND HDF5_DEBUG_APIS H5FS_DEBUG_ASSERT)
 endif ()
 
+option (HDF5_ENABLE_DEBUG_H5TS "Enable debugging of H5TS module" OFF)
+mark_as_advanced (HDF5_ENABLE_DEBUG_H5TS)
+if (HDF5_ENABLE_DEBUG_H5TS)
+  list (APPEND HDF5_DEBUG_APIS H5TS_DEBUG)
+endif ()
+
 # If HDF5 free list debugging wasn't specifically enabled, disable
 # free lists entirely for developer build modes, as they can
 # make certain types of issues (like references to stale pointers)

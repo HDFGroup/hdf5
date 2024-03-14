@@ -50,7 +50,7 @@
  * In order for this macro to work, H5CX_get_my_context() must be preceded
  * by "H5CX_node_t *ctx =".
  */
-#define H5CX_get_my_context() H5CX__get_context()
+#define H5CX_get_my_context() H5TS_get_api_ctx_ptr()
 #else /* H5_HAVE_THREADSAFE */
 /*
  * The current API context.
@@ -198,6 +198,11 @@ typedef struct H5CX_t {
 
     /* Internal: Metadata cache info */
     H5AC_ring_t ring; /* Current metadata cache ring for entries */
+
+#ifdef H5_HAVE_CODESTACK
+    /* Internal: Function stack info */
+    H5CS_t       fstack;             /* Current function stack for an API operation */
+#endif
 
 #ifdef H5_HAVE_PARALLEL
     /* Internal: Parallel I/O settings */
@@ -427,9 +432,6 @@ typedef struct H5CX_fapl_cache_t {
 /********************/
 /* Local Prototypes */
 /********************/
-#ifdef H5_HAVE_THREADSAFE
-static H5CX_node_t **H5CX__get_context(void);
-#endif /* H5_HAVE_THREADSAFE */
 static void         H5CX__push_common(H5CX_node_t *cnode);
 static H5CX_node_t *H5CX__pop_common(bool update_dxpl_props);
 
@@ -709,55 +711,6 @@ H5CX_term_package(void)
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5CX_term_package() */
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:	H5CX__get_context
- *
- * Purpose:	Support function for H5CX_get_my_context() to initialize and
- *              acquire per-thread API context stack.
- *
- * Return:	Success: Non-NULL pointer to head pointer of API context stack for thread
- *		Failure: NULL
- *
- *-------------------------------------------------------------------------
- */
-static H5CX_node_t **
-H5CX__get_context(void)
-{
-    H5CX_node_t **ctx = NULL;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    ctx = (H5CX_node_t **)H5TS_get_thread_local_value(H5TS_apictx_key_g);
-
-    if (!ctx) {
-        /* No associated value with current thread - create one */
-#ifdef H5_HAVE_WIN_THREADS
-        /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        ctx = (H5CX_node_t **)LocalAlloc(LPTR, sizeof(H5CX_node_t *));
-#else
-        /* Use malloc here since this has to match the free in the
-         * destructor and we want to avoid the codestack there.
-         */
-        ctx = (H5CX_node_t **)malloc(sizeof(H5CX_node_t *));
-#endif /* H5_HAVE_WIN_THREADS */
-        assert(ctx);
-
-        /* Reset the thread-specific info */
-        *ctx = NULL;
-
-        /* (It's not necessary to release this in this API, it is
-         *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
-         */
-        H5TS_set_thread_local_value(H5TS_apictx_key_g, (void *)ctx);
-    } /* end if */
-
-    /* Set return value */
-    FUNC_LEAVE_NOAPI(ctx)
-} /* end H5CX__get_context() */
-#endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_pushed
@@ -1725,6 +1678,32 @@ H5CX_get_ring(void)
 
     FUNC_LEAVE_NOAPI(ring)
 } /* end H5CX_get_ring() */
+
+#ifdef H5_HAVE_CODESTACK
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_fstack
+ *
+ * Purpose:     Retrieves the function stack for the current API call context.
+ *
+ * Return:      Non-NULL on success / NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5CS_t *
+H5CX_get_fstack(void)
+{
+    H5CX_node_t **head = NULL;          /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOERR_NOFS
+
+    /* Sanity check */
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head && *head);
+
+    /* Return value */
+    FUNC_LEAVE_NOAPI_NOFS(&(*head)->ctx.fstack)
+} /* end H5CX_get_fstack() */
+#endif
 
 #ifdef H5_HAVE_PARALLEL
 

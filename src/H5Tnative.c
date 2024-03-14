@@ -715,10 +715,12 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
             match       = H5T_NATIVE_FLOAT_MATCH_DOUBLE;
             native_size = sizeof(double);
         }
+#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         else if (size <= sizeof(long double)) {
             match       = H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
             native_size = sizeof(long double);
         }
+#endif
         else { /* If not match, return the biggest datatype */
             match       = H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
             native_size = sizeof(long double);

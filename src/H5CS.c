@@ -26,87 +26,13 @@
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5CSprivate.h" /* Function stack			*/
+#include "H5CXprivate.h" /* API Contexts                        */
 #include "H5Eprivate.h"  /* Error handling		  	*/
 
 #ifdef H5_HAVE_CODESTACK
 
 #define H5CS_MIN_NSLOTS 16 /* Minimum number of records in an function stack	*/
 
-/* A function stack */
-typedef struct H5CS_t {
-    unsigned     nused;  /* Number of records currently used in stack */
-    unsigned     nalloc; /* Number of records current allocated for stack */
-    const char **rec;    /* Array of function records */
-} H5CS_t;
-
-#ifdef H5_HAVE_THREADSAFE
-/*
- * The per-thread function stack. pthread_once() initializes a special
- * key that will be used by all threads to create a stack specific to
- * each thread individually. The association of stacks to threads will
- * be handled by the pthread library.
- *
- * In order for this macro to work, H5CS_get_my_stack() must be preceded
- * by "H5CS_t *fstack =".
- */
-static H5CS_t *H5CS__get_stack(void);
-#define H5CS_get_my_stack() H5CS__get_stack()
-#else /* H5_HAVE_THREADSAFE */
-/*
- * The function stack.  Eventually we'll have some sort of global table so each
- * thread has it's own stack.  The stacks will be created on demand when the
- * thread first calls H5CS_push().  */
-H5CS_t H5CS_stack_g[1];
-#define H5CS_get_my_stack() (H5CS_stack_g + 0)
-#endif /* H5_HAVE_THREADSAFE */
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:	H5CS__get_stack
- *
- * Purpose:	Support function for H5CS_get_my_stack() to initialize and
- *              acquire per-thread function stack.
- *
- * Return:	Success:	function stack (H5CS_t *)
- *
- *		Failure:	NULL
- *
- *-------------------------------------------------------------------------
- */
-static H5CS_t *
-H5CS__get_stack(void)
-{
-    H5CS_t *fstack;
-
-    FUNC_ENTER_PACKAGE_NOERR_NOFS
-
-    fstack = H5TS_get_thread_local_value(H5TS_funcstk_key_g);
-    if (!fstack) {
-        /* No associated value with current thread - create one */
-#ifdef H5_HAVE_WIN_THREADS
-        fstack = (H5CS_t *)LocalAlloc(
-            LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-#else
-        fstack =
-            (H5CS_t *)malloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
-#endif /* H5_HAVE_WIN_THREADS */
-        assert(fstack);
-
-        /* Set the thread-specific info */
-        fstack->nused  = 0;
-        fstack->nalloc = 0;
-        fstack->rec    = NULL;
-
-        /* (It's not necessary to release this in this API, it is
-         *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
-         */
-        H5TS_set_thread_local_value(H5TS_funcstk_key_g, (void *)fstack);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI_NOFS(fstack)
-} /* end H5CS__get_stack() */
-#endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
  * Function:	H5CS_print_stack
@@ -159,7 +85,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
 herr_t
 H5CS_push(const char *func_name)
 {
-    H5CS_t *fstack = H5CS_get_my_stack(); /* Current function stack for library */
+    H5CS_t *fstack = H5CX_get_fstack(); /* Get function stack from API context */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -201,7 +127,7 @@ H5CS_push(const char *func_name)
 herr_t
 H5CS_pop(void)
 {
-    H5CS_t *fstack = H5CS_get_my_stack();
+    H5CS_t *fstack = H5CX_get_fstack(); /* Get function stack from API context */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -212,6 +138,15 @@ H5CS_pop(void)
 
     /* Pop the function. */
     fstack->nused--;
+
+    if (0 == fstack->nused) {
+        /* The function name strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        free(fstack->rec);
+        fstack->rec = NULL;
+        fstack->nalloc = 0;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_pop() */
@@ -228,9 +163,9 @@ H5CS_pop(void)
 H5CS_t *
 H5CS_copy_stack(void)
 {
-    H5CS_t *old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
-    H5CS_t *new_stack;                       /* New function stack, for copy */
-    H5CS_t *ret_value = NULL;                /* Return value */
+    H5CS_t  *old_stack = H5CX_get_fstack(); /* Get function stack from API context */
+    H5CS_t  *new_stack;                     /* New function stack, for copy */
+    H5CS_t  *ret_value = NULL;              /* Return value */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFS

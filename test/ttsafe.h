@@ -23,6 +23,14 @@
  */
 #include "testhdf5.h"
 
+/*
+ * This file needs to access private datatypes from the H5TS package.
+ * This file also needs to access the threadsafety testing code.
+ */
+#define H5TS_FRIEND /*suppress error about including H5TSpkg      */
+#define H5TS_TESTING
+#include "H5TSpkg.h"
+
 /* Prototypes for the support routines */
 extern char *gen_name(int);
 
@@ -34,6 +42,12 @@ void tts_error(void);
 void tts_cancel(void);
 void tts_acreate(void);
 void tts_attr_vlen(void);
+void tts_thread_id(void);
+void tts_rec_rw_lock_smoke_check_1(void);
+void tts_rec_rw_lock_smoke_check_2(void);
+void tts_rec_rw_lock_smoke_check_3(void);
+void tts_rec_rw_lock_smoke_check_4(void);
+void tts_develop_api(void);
 
 /* Prototypes for the cleanup routines */
 void cleanup_dcreate(void);

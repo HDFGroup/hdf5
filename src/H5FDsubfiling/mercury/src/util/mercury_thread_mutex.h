@@ -36,16 +36,7 @@ extern "C" {
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_mutex_init(hg_thread_mutex_t *mutex);
-
-/**
- * Initialize the mutex, asking for "fast" mutex.
- *
- * \param mutex [IN/OUT]        pointer to mutex object
- *
- * \return Non-negative on success or negative on failure
- */
-HG_UTIL_PUBLIC int hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex);
+int hg_thread_mutex_init(hg_thread_mutex_t *mutex);
 
 /**
  * Destroy the mutex.
@@ -54,14 +45,14 @@ HG_UTIL_PUBLIC int hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_mutex_destroy(hg_thread_mutex_t *mutex);
+int hg_thread_mutex_destroy(hg_thread_mutex_t *mutex);
 
 /**
  * Lock the mutex.
  *
  * \param mutex [IN/OUT]        pointer to mutex object
  */
-static HG_UTIL_INLINE void hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_ACQUIRE(*mutex);
+static inline void hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_ACQUIRE(*mutex);
 
 /**
  * Try locking the mutex.
@@ -70,7 +61,7 @@ static HG_UTIL_INLINE void hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOC
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
+static inline int hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
     HG_LOCK_TRY_ACQUIRE(HG_UTIL_SUCCESS, *mutex);
 
 /**
@@ -78,10 +69,10 @@ static HG_UTIL_INLINE int hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
  *
  * \param mutex [IN/OUT]        pointer to mutex object
  */
-static HG_UTIL_INLINE void hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_RELEASE(*mutex);
+static inline void hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_RELEASE(*mutex);
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE void
+static inline void
 hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 {
 #ifdef _WIN32
@@ -92,7 +83,7 @@ hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
+static inline int
 hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 {
 #ifdef _WIN32
@@ -107,7 +98,7 @@ hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANAL
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE void
+static inline void
 hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 {
 #ifdef _WIN32

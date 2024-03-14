@@ -640,6 +640,17 @@ IDE_GENERATED_PROPERTIES ("H5T" "${H5T_HDRS}" "${H5T_SOURCES}" )
 
 set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TS.c
+    ${HDF5_SRC_DIR}/H5TSbarrier.c
+    ${HDF5_SRC_DIR}/H5TScond.c
+    ${HDF5_SRC_DIR}/H5TSexlock.c
+    ${HDF5_SRC_DIR}/H5TSint.c
+    ${HDF5_SRC_DIR}/H5TSkey.c
+    ${HDF5_SRC_DIR}/H5TSmutex.c
+    ${HDF5_SRC_DIR}/H5TSpthread.c
+    ${HDF5_SRC_DIR}/H5TSrwlock.c
+    ${HDF5_SRC_DIR}/H5TStest.c
+    ${HDF5_SRC_DIR}/H5TSthread.c
+    ${HDF5_SRC_DIR}/H5TSwin.c
 )
 set (H5TS_HDRS
     ${HDF5_SRC_DIR}/H5TSdevelop.h
@@ -757,6 +768,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5SLmodule.h
     ${HDF5_SRC_DIR}/H5SMmodule.h
     ${HDF5_SRC_DIR}/H5Tmodule.h
+    ${HDF5_SRC_DIR}/H5TSmodule.h
     ${HDF5_SRC_DIR}/H5VLmodule.h
     ${HDF5_SRC_DIR}/H5Zmodule.h
 )
@@ -958,6 +970,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Tpkg.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
 
+    ${HDF5_SRC_DIR}/H5TSpkg.h
     ${HDF5_SRC_DIR}/H5TSprivate.h
 
     ${HDF5_SRC_DIR}/H5UCprivate.h

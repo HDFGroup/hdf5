@@ -56,7 +56,7 @@ typedef struct ioc_data_t {
  * use mercury for that purpose...
  */
 
-static hg_thread_mutex_t ioc_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+static H5TS_mutex_t ioc_thread_mutex = H5TS_MUTEX_INITIALIZER;
 
 #ifdef H5FD_IOC_COLLECT_STATS
 static int    sf_write_ops        = 0;
@@ -163,7 +163,7 @@ initialize_ioc_threads(void *_sf_context)
     t_start = MPI_Wtime();
 #endif
 
-    if (hg_thread_mutex_init(&ioc_data->io_queue.q_mutex) < 0)
+    if (H5TS_mutex_init(&ioc_data->io_queue.q_mutex) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */
@@ -229,7 +229,7 @@ finalize_ioc_threads(void *_sf_context)
         assert(0 == atomic_load(&ioc_data->sf_io_ops_pending));
         hg_thread_pool_destroy(ioc_data->io_thread_pool);
 
-        hg_thread_mutex_destroy(&ioc_data->io_queue.q_mutex);
+        H5TS_mutex_destroy(&ioc_data->io_queue.q_mutex);
 
         /* Wait for IOC main thread to exit */
         hg_thread_join(ioc_data->ioc_main_thread);
@@ -563,37 +563,6 @@ handle_work_request(void *arg)
     H5_SUBFILING_FUNC_LEAVE;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    H5FD_ioc_begin_thread_exclusive
- *
- * Purpose:     Mutex lock to restrict access to code or variables.
- *
- * Return:      integer result of mutex_lock request.
- *
- *-------------------------------------------------------------------------
- */
-void
-H5FD_ioc_begin_thread_exclusive(void)
-{
-    hg_thread_mutex_lock(&ioc_thread_mutex);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_ioc_end_thread_exclusive
- *
- * Purpose:     Mutex unlock.  Should only be called by the current holder
- *              of the locked mutex.
- *
- * Return:      result of mutex_unlock operation.
- *
- *-------------------------------------------------------------------------
- */
-void
-H5FD_ioc_end_thread_exclusive(void)
-{
-    hg_thread_mutex_unlock(&ioc_thread_mutex);
-}
-
 static herr_t
 send_ack_to_client(int ack_val, int dest_rank, int source_rank, int msg_tag, MPI_Comm comm)
 {
@@ -794,13 +763,13 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
     sf_queue_delay_time += t_queue_delay;
 #endif
 
-    H5FD_ioc_begin_thread_exclusive();
+    H5TS_mutex_lock(&ioc_thread_mutex);
 
     /* Adjust EOF if necessary */
     if (sf_eof > sf_context->sf_eof)
         sf_context->sf_eof = sf_eof;
 
-    H5FD_ioc_end_thread_exclusive();
+    H5TS_mutex_unlock(&ioc_thread_mutex);
 
     /*
      * Send a message back to the client that the I/O call has
@@ -1313,7 +1282,7 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
     H5MM_memcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
 
     /* must obtain io_queue mutex before appending */
-    hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);
+    H5TS_mutex_lock(&ioc_data->io_queue.q_mutex);
 
     assert(ioc_data->io_queue.q_len == atomic_load(&ioc_data->sf_io_ops_pending));
 
@@ -1375,7 +1344,7 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
 
     assert(ioc_data->io_queue.q_len == atomic_load(&ioc_data->sf_io_ops_pending));
 
-    hg_thread_mutex_unlock(&ioc_data->io_queue.q_mutex);
+    H5TS_mutex_unlock(&ioc_data->io_queue.q_mutex);
 
     return;
 } /* ioc_io_queue_add_entry() */
@@ -1434,11 +1403,16 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
     assert(ioc_data->io_queue.magic == H5FD_IOC__IO_Q_MAGIC);
 
     if (try_lock) {
-        if (hg_thread_mutex_try_lock(&ioc_data->io_queue.q_mutex) < 0)
+        bool acquired;
+        herr_t ret;
+
+        ret = H5TS_mutex_try_lock(&ioc_data->io_queue.q_mutex, &acquired);
+        assert(SUCCEED == ret);
+        if (!acquired)
             return;
     }
     else
-        hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);
+        H5TS_mutex_lock(&ioc_data->io_queue.q_mutex);
 
     entry_ptr = ioc_data->io_queue.q_head;
 
@@ -1558,7 +1532,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, bool try_lock)
 
     assert(ioc_data->io_queue.q_len == atomic_load(&ioc_data->sf_io_ops_pending));
 
-    hg_thread_mutex_unlock(&ioc_data->io_queue.q_mutex);
+    H5TS_mutex_unlock(&ioc_data->io_queue.q_mutex);
 } /* ioc_io_queue_dispatch_eligible_entries() */
 
 /*-------------------------------------------------------------------------
@@ -1593,7 +1567,7 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
     assert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
 
     /* must obtain io_queue mutex before deleting and updating stats */
-    hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);
+    H5TS_mutex_lock(&ioc_data->io_queue.q_mutex);
 
     assert(ioc_data->io_queue.num_pending + ioc_data->io_queue.num_in_progress == ioc_data->io_queue.q_len);
     assert(ioc_data->io_queue.num_in_progress > 0);
@@ -1639,7 +1613,7 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
 
 #endif
 
-    hg_thread_mutex_unlock(&ioc_data->io_queue.q_mutex);
+    H5TS_mutex_unlock(&ioc_data->io_queue.q_mutex);
 
     ioc_io_queue_free_entry(entry_ptr);
 

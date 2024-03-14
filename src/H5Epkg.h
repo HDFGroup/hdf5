@@ -47,7 +47,7 @@
  * In order for this macro to work, H5E__get_my_stack() must be preceded
  * by "H5E_t *estack =".
  */
-#define H5E__get_my_stack() H5E__get_stack()
+#define H5E__get_my_stack() H5TS_get_err_stack()
 #else /* H5_HAVE_THREADSAFE */
 /*
  * The current error stack.
@@ -117,15 +117,13 @@ struct H5E_t {
  * The current error stack.
  */
 H5_DLLVAR H5E_t H5E_stack_g[1];
-#endif /* H5_HAVE_THREADSAFE */
+#endif
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5E__term_deprec_interface(void);
-#ifdef H5_HAVE_THREADSAFE
-H5_DLL H5E_t *H5E__get_stack(void);
-#endif /* H5_HAVE_THREADSAFE */
+H5_DLL void H5E__set_default_auto(H5E_t *stk);
 H5_DLL herr_t  H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
                                hid_t maj_id, hid_t min_id, const char *desc);
 H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);

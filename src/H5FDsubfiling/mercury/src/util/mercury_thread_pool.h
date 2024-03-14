@@ -53,7 +53,7 @@ extern "C" {
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool);
+int hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool);
 
 /**
  * Destroy the thread pool.
@@ -62,7 +62,7 @@ HG_UTIL_PUBLIC int hg_thread_pool_init(unsigned int thread_count, hg_thread_pool
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_pool_destroy(hg_thread_pool_t *pool);
+int hg_thread_pool_destroy(hg_thread_pool_t *pool);
 
 /**
  * Post work to the pool. Note that the operation may be queued depending on
@@ -73,10 +73,10 @@ HG_UTIL_PUBLIC int hg_thread_pool_destroy(hg_thread_pool_t *pool);
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work);
+static inline int hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work);
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
+static inline int
 hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work)
 {
     int ret = HG_UTIL_SUCCESS;

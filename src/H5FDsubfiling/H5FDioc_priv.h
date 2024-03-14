@@ -35,6 +35,7 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
+#include "H5TSprivate.h" /* Threadsafety                             */
 
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
@@ -370,7 +371,7 @@ typedef struct ioc_io_queue {
     int32_t               num_failed;
     int32_t               q_len;
     uint32_t              req_counter;
-    hg_thread_mutex_t     q_mutex;
+    H5TS_mutex_t          q_mutex;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS

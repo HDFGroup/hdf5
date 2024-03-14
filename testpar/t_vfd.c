@@ -356,6 +356,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
     hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
     unsigned    flags         = 0;               /* file open flags              */
     H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
+    bool        api_ctx_pushed = false;          /* Whether API context pushed   */
 
     assert(vfd_name);
     assert(lf_ptr);
@@ -509,6 +510,12 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* Open the VFD test file with the specified VFD.  */
 
     if (pass) {
@@ -595,6 +602,10 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             H5Pclose(dxpl_id);
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+
     return;
 
 } /* setup_vfd_test_file() */
@@ -616,6 +627,7 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
     const char *fcn_name      = "takedown_vfd_test_file()";
     int         cp            = 0;
     bool        show_progress = false;
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     assert(lf_ptr);
     assert(fapl_id_ptr);
@@ -623,6 +635,12 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* Close the test file if it is open, regardless of the value of pass.
      * This should let the test program shut down more cleanly.
@@ -636,6 +654,11 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
             failure_mssg = "H5FDclose() failed.\n";
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -745,6 +768,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[1];
     size_t      sizes[1];
     void       *bufs[1];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -788,6 +812,12 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire increasing_fi_buf to
      *    the file.
      */
@@ -806,11 +836,22 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     /* 3) Barrier */
     MPI_Barrier(comm);
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) On each rank, zero the read buffer, and then read
      *    INTS_PER_RANK * sizeof(int32) bytes from the file
@@ -866,6 +907,11 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -975,6 +1021,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[1];
     size_t      sizes[1];
     void       *bufs[1];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -1018,6 +1065,12 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire decreasing_fi_buf to
      *    the file.
      */
@@ -1036,6 +1089,11 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     /* 3) Barrier */
     MPI_Barrier(comm);
 
@@ -1053,6 +1111,12 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 5) On even ranks, read INTS_PER_RANK * sizeof(int32)
      *    bytes from the file starting at offset mpi_rank *
@@ -1157,6 +1221,11 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1276,6 +1345,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[4];
     size_t      sizes[4];
     void       *bufs[4];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -1319,6 +1389,12 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire negative_fi_buf to
      *    the file.
      */
@@ -1336,6 +1412,11 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     /* 3) Barrier */
     MPI_Barrier(comm);
@@ -1357,6 +1438,12 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 5) On each rank, do a vector read from the file, with
      *    each rank's vector having four elements, with each
@@ -1427,6 +1514,11 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             failure_mssg = "H5FDread_vector() failed.\n";
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1629,6 +1721,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[4];
     size_t      sizes[4];
     void       *bufs[4];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -1672,6 +1765,12 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire negative_fi_buf to
      *    the file.
      */
@@ -1690,6 +1789,11 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     /* 3) Barrier */
     MPI_Barrier(comm);
 
@@ -1707,6 +1811,12 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 5) For each rank, define base_index equal to:
      *
@@ -1815,6 +1925,11 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             failure_mssg = "H5FDread_vector() failed (1).\n";
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     /* 6) On each rank, verify that read_fi_buf contains the
      *    the expected values -- that is the matching values from
@@ -2056,6 +2171,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
     void       *bufs[(INTS_PER_RANK / 16) + 1];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -2099,6 +2215,12 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire negative_fi_buf to
      *    the file.
      */
@@ -2117,6 +2239,11 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     /* 3) Barrier */
     MPI_Barrier(comm);
 
@@ -2134,6 +2261,12 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 5) For each rank, define base_index equal to:
      *
@@ -2175,6 +2308,11 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
             failure_mssg = "H5FDread_vector() failed (1).\n";
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2292,6 +2430,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[1];
     size_t      sizes[1];
     const void *bufs[1];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -2335,6 +2474,12 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Write the entire increasing_fi_buf to the file, with
      *    exactly one buffer per vector per rank.  Use either
      *    independent or collective I/O as specified.
@@ -2355,6 +2500,11 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -2364,6 +2514,12 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf.  Report failure
@@ -2390,6 +2546,11 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2479,6 +2640,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[1];
     size_t      sizes[1];
     const void *bufs[1];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -2521,6 +2683,12 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 2) Write the odd blocks of the increasing_fi_buf to the file,
      *    with the odd ranks writing the odd blocks, and the even
@@ -2589,6 +2757,11 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -2598,6 +2771,12 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 5) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf.  Report failure
@@ -2642,6 +2821,11 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2732,6 +2916,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[4];
     size_t      sizes[4];
     const void *bufs[4];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -2774,6 +2959,12 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 2) For each rank, construct a vector with base address
      *    (mpi_rank * INTS_PER_RANK) and writing all bytes from
@@ -2818,6 +3009,11 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -2827,6 +3023,12 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf,
@@ -2896,6 +3098,11 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2992,6 +3199,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[4];
     size_t      sizes[4];
     const void *bufs[4];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -3034,6 +3242,12 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 2) For each rank, construct a vector with base address
      *    (mpi_rank * INTS_PER_RANK) and writing all bytes from
@@ -3079,6 +3293,11 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -3088,6 +3307,12 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf,
@@ -3157,6 +3382,11 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3289,6 +3519,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[4];
     size_t      sizes[4];
     const void *bufs[4];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -3332,6 +3563,12 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Set the test file in a known state by writing zeros
      *    to all bytes in the test file.  Since we have already
      *    tested this, do this via a vector write of zero_fi_buf.
@@ -3351,6 +3588,11 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -3360,6 +3602,12 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) For each rank, define base_index equal to:
      *
@@ -3468,6 +3716,11 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -3476,6 +3729,12 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 6) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf,
@@ -3619,6 +3878,11 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -3723,6 +3987,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
     const void *bufs[(INTS_PER_RANK / 16) + 1];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -3766,6 +4031,12 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire negative_fi_buf to
      *    the file.
      */
@@ -3783,11 +4054,22 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     /* 3) Barrier */
     MPI_Barrier(comm);
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) For each rank, define base_index equal to:
      *
@@ -3830,6 +4112,11 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -3838,6 +4125,12 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 6) On each rank, read the entire file into the read_fi_buf,
      *    and compare against zero_fi_buf, and increasing_fi_buf
@@ -3871,6 +4164,11 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     } /* end if */
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3980,6 +4278,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[8];
     size_t      sizes[8];
     const void *bufs[8];
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -4023,6 +4322,12 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Set the test file in a known state by writing zeros
      *    to all bytes in the test file.  Since we have already
      *    tested this, do this via a vector write of zero_fi_buf.
@@ -4042,6 +4347,11 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -4051,6 +4361,12 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     if (pass) {
 
@@ -4075,6 +4391,11 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -4083,6 +4404,12 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 6) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf, and zero_fi_buf as
@@ -4132,6 +4459,11 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     }
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -4231,9 +4563,9 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     uint32_t    count = 0;
     size_t      sizes[4];
     H5FD_mem_t  types[2];
-
     haddr_t     *tt_addrs = NULL; /* For storing addrs */
     const void **tt_bufs  = NULL; /* For storing buf pointers */
+    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
 
     pass = true;
 
@@ -4288,6 +4620,12 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* 2) Using rank zero, write the entire negative_fi_buf to
      *    the file.
      */
@@ -4305,11 +4643,22 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     /* 3) Barrier */
     MPI_Barrier(comm);
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 4) For each rank, define base_index equal to:
      *
@@ -4357,6 +4706,11 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         }
     }
 
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
@@ -4365,6 +4719,12 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* 6) On each rank, read the entire file into the read_fi_buf,
      *    and compare against increasing_fi_buf
@@ -4389,6 +4749,11 @@ vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             }
         }
     } /* end if */
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -4650,6 +5015,7 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
     size_t bufsize;
     int    i;
     int    j;
+    bool   api_ctx_pushed = false;     /* Whether API context pushed   */
 
     bufsize = (hsize_t)(sel_dim0 * sel_dim1) * sizeof(int);
     if ((rbuf1 = malloc(bufsize)) == NULL)
@@ -4670,6 +5036,12 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
             rbufs[i] = NULL;
         else
             rbufs[i] = rbufs[rbufcount - 1];
+
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
 
     /* Issue read call */
     if (H5FDread_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes,
@@ -4709,6 +5081,11 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
     return 0;
 
 error:
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (rbuf1)
         free(rbuf1);
     if (rbuf2)
@@ -4727,6 +5104,7 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     const void **bufs = NULL; /* Avoids cast/const warnings */
     int          i;
     int          j;
+    bool         api_ctx_pushed = false;     /* Whether API context pushed   */
 
     if (NULL == (bufs = calloc(count, sizeof(void *))))
         goto error;
@@ -4739,6 +5117,12 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
         bufs[i] = wb[i];
     }
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* Issue write call */
     if (H5FDwrite_selection(lf, type, dxpl, count, mem_spaces, file_spaces, offsets, element_sizes, bufs) < 0)
         goto error;
@@ -4749,6 +5133,11 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     return 0;
 
 error:
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
+
     if (bufs)
         free(bufs);
     return -1;
@@ -5959,13 +6348,13 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     hid_t   file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
     hsize_t dims1[1];                                            /* 1d dimension sizes */
     hsize_t dims2[2];                                            /* 2d dimension sizes */
-
     H5FD_mem_t type;                                          /* File type */
     haddr_t    addrs[2];                                      /* File allocation address */
     size_t     element_sizes[2] = {sizeof(int), sizeof(int)}; /* Element size */
     size_t     bufsize;                                       /* Buffer size */
     int        i;
     int        j;
+    bool       api_ctx_pushed = false;     /* Whether API context pushed   */
 
     curr_nerrors = nerrors;
 
@@ -6036,8 +6425,19 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
     /* Loop over memory types */
     for (type = 1; type < H5FD_MEM_NTYPES; type++) {
 
+        /* Push API context */
+        if (H5CX_push() < 0)
+            pass = FALSE;
+        else
+            api_ctx_pushed = true;
+
         addrs[0] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
         addrs[1] = H5FDalloc(lf, type, H5P_DEFAULT, (sizeof(int) * (hsize_t)sel_dim0 * (hsize_t)sel_dim1));
+
+        /* Pop API context */
+        if (api_ctx_pushed)
+            H5CX_pop(false);
+        api_ctx_pushed = false;
 
         test_selection_io_types_1d(mpi_rank, mpi_size, lf, dxpl, type, addrs, element_sizes, mem_spaces,
                                    file_spaces, dims1);
@@ -6089,12 +6489,12 @@ test_selection_io(int mpi_rank, int mpi_size)
     hid_t    fapl = H5I_INVALID_HID; /* File access property list */
     char     filename[1024];         /* Test file name */
     unsigned flags = 0;              /* File access flags */
-
     unsigned collective;                      /* Types of I/O for testing */
     hid_t    dxpl          = H5I_INVALID_HID; /* Dataset transfer property list */
     hid_t    def_dxpl      = H5I_INVALID_HID; /* dxpl: independent access */
     hid_t    col_xfer_dxpl = H5I_INVALID_HID; /* dxpl: collective access with collective I/O */
     hid_t    ind_io_dxpl   = H5I_INVALID_HID; /* dxpl: collective access with individual I/O */
+    bool     api_ctx_pushed = false;          /* Whether API context pushed   */
 
     /* If I use fapl in this call, I got an environment printout */
     h5_fixname(SELECT_FNAME, H5P_DEFAULT, filename, sizeof(filename));
@@ -6105,11 +6505,22 @@ test_selection_io(int mpi_rank, int mpi_size)
     if (H5Pset_fapl_mpio(fapl, comm, info) < 0)
         P_TEST_ERROR;
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* Create file */
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
     if (NULL == (lf = H5FDopen(filename, flags, fapl, HADDR_UNDEF)))
         P_TEST_ERROR;
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     /* Default dxpl which will be H5FD_MPIO_INDEPENDENT by default */
     def_dxpl = H5Pcreate(H5P_DATASET_XFER);
@@ -6148,9 +6559,20 @@ test_selection_io(int mpi_rank, int mpi_size)
         test_selection_io_real(mpi_rank, mpi_size, lf, dxpl);
     }
 
+    /* Push API context */
+    if (H5CX_push() < 0)
+        pass = FALSE;
+    else
+        api_ctx_pushed = true;
+
     /* Close file */
     if (H5FDclose(lf) < 0)
         P_TEST_ERROR;
+
+    /* Pop API context */
+    if (api_ctx_pushed)
+        H5CX_pop(false);
+    api_ctx_pushed = false;
 
     /* Close the fapl */
     if (H5Pclose(fapl) < 0)

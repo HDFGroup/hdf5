@@ -40,20 +40,6 @@
 #ifndef MERCURY_QUEUE_H
 #define MERCURY_QUEUE_H
 
-#define HG_QUEUE_HEAD_INITIALIZER(name)                                                                      \
-    {                                                                                                        \
-        NULL, &(name).head                                                                                   \
-    }
-
-#define HG_QUEUE_HEAD_INIT(struct_head_name, var_name)                                                       \
-    struct struct_head_name var_name = HG_QUEUE_HEAD_INITIALIZER(var_name)
-
-#define HG_QUEUE_HEAD_DECL(struct_head_name, struct_entry_name)                                              \
-    struct struct_head_name {                                                                                \
-        struct struct_entry_name  *head;                                                                     \
-        struct struct_entry_name **tail;                                                                     \
-    }
-
 #define HG_QUEUE_HEAD(struct_entry_name)                                                                     \
     struct {                                                                                                 \
         struct struct_entry_name  *head;                                                                     \
@@ -75,8 +61,6 @@
 
 #define HG_QUEUE_FIRST(head_ptr) ((head_ptr)->head)
 
-#define HG_QUEUE_NEXT(entry_ptr, entry_field_name) ((entry_ptr)->entry_field_name.next)
-
 #define HG_QUEUE_PUSH_TAIL(head_ptr, entry_ptr, entry_field_name)                                            \
     do {                                                                                                     \
         (entry_ptr)->entry_field_name.next = NULL;                                                           \
@@ -89,28 +73,6 @@
     do {                                                                                                     \
         if ((head_ptr)->head && ((head_ptr)->head = (head_ptr)->head->entry_field_name.next) == NULL)        \
             (head_ptr)->tail = &(head_ptr)->head;                                                            \
-    } while (/*CONSTCOND*/ 0)
-
-#define HG_QUEUE_FOREACH(var, head_ptr, entry_field_name)                                                    \
-    for ((var) = ((head_ptr)->head); (var); (var) = ((var)->entry_field_name.next))
-
-/**
- * Avoid using those for performance reasons or use mercury_list.h instead
- */
-
-#define HG_QUEUE_REMOVE(head_ptr, entry_ptr, type, entry_field_name)                                         \
-    do {                                                                                                     \
-        if ((head_ptr)->head == (entry_ptr)) {                                                               \
-            HG_QUEUE_POP_HEAD((head_ptr), entry_field_name);                                                 \
-        }                                                                                                    \
-        else {                                                                                               \
-            struct type *curelm = (head_ptr)->head;                                                          \
-            while (curelm->entry_field_name.next != (entry_ptr))                                             \
-                curelm = curelm->entry_field_name.next;                                                      \
-            if ((curelm->entry_field_name.next = curelm->entry_field_name.next->entry_field_name.next) ==    \
-                NULL)                                                                                        \
-                (head_ptr)->tail = &(curelm)->entry_field_name.next;                                         \
-        }                                                                                                    \
     } while (/*CONSTCOND*/ 0)
 
 #endif /* MERCURY_QUEUE_H */

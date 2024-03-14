@@ -11,10 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: This file contains the framework for ensuring that the global
- *        library lock is held when an API routine is called.  This framework
- *        works in concert with the FUNC_ENTER_API / FUNC_LEAVE_API macros
- *        defined in H5private.h.
+ * Purpose: Windows threadsafety routines
  *
  * Note:  Because this threadsafety framework operates outside the library,
  *        it does not use the error stack (although it does use error macros
@@ -37,6 +34,8 @@
 
 #ifdef H5_HAVE_THREADSAFE
 
+#ifdef H5_HAVE_WIN_THREADS
+
 /****************/
 /* Local Macros */
 /****************/
@@ -56,8 +55,6 @@
 /* Package Variables */
 /*********************/
 
-/* API threadsafety info */
-H5TS_api_info_t H5TS_api_info_p;
 
 /*****************************/
 /* Library Private Variables */
@@ -70,81 +67,98 @@ H5TS_api_info_t H5TS_api_info_p;
 
 
 /*--------------------------------------------------------------------------
- * Function:    H5TSmutex_acquire
+ * Function:    H5TS__win32_process_enter
  *
- * Purpose:     Attempts to acquire the HDF5 library global lock
+ * Purpose:     Per-process setup on Windows when using Win32 threads.
  *
- * Note:        On success, the 'acquired' flag indicates if the HDF5 library
- *              global lock was acquired.
- *
- * Return:      Non-negative on success / Negative on failure
+ * Returns:     TRUE on success, FALSE on failure
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TSmutex_acquire(unsigned lock_count, bool *acquired)
+H5_DLL BOOL CALLBACK
+H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 {
-    FUNC_ENTER_API_NAMECHECK_ONLY
+    BOOL ret_value = TRUE;
 
-    FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(lock_count, acquired))
-} /* end H5TSmutex_acquire() */
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Initialize global API lock */
+    H5TS__ex_lock_init(&H5TS_api_info_p.api_lock, true);
+
+    /* Initialize the global "lock acquisition attempt" critical section & counter */
+    H5TS_mutex_init(&H5TS_api_info_p.attempt_mutex);
+    H5TS_api_info_p.attempt_lock_count = 0;
+
+    /* Set up per-thread key infrastructure */
+    if (H5_UNLIKELY(H5TS__win_kwd_init() < 0))
+        ret_value = FALSE;
+
+    /* Initialize per-thread library info */
+    if (H5_UNLIKELY(H5TS__tinfo_init() < 0))
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* H5TS__win32_process_enter() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TSmutex_get_attempt_count
+ * Function:    H5TS_win32_thread_enter
  *
- * Purpose:     Get the current count of the global lock attempt
+ * Purpose:     Per-thread setup on Windows when using Win32 threads.
  *
  * Return:      Non-negative on success / Negative on failure
- *
- * Programmer:  Houjun Tang
- *              June 24, 2019
  *
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_get_attempt_count(unsigned *count)
+H5TS_win32_thread_enter(void)
 {
-    bool have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    FUNC_ENTER_API_NAMECHECK_ONLY
+    /* Currently a placeholder function.  TLS setup is performed
+     * elsewhere in the library.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
 
-    /* Acquire the "attempt" lock, retrieve the attempt lock count, release the lock */
-    if (H5_UNLIKELY(H5TS_mutex_lock(&H5TS_api_info_p.attempt_mutex) < 0))
-        HGOTO_DONE(FAIL);
-    have_mutex = true;
-
-    *count = H5TS_api_info_p.attempt_lock_count;
-
-done:
-    /* Release the lock */
-    if(have_mutex)
-        if(H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
-            ret_value = FAIL;
-
-    FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
-} /* end H5TSmutex_get_attempt_count() */
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS_win32_thread_enter() */
 
 /*--------------------------------------------------------------------------
- * Function:    H5TSmutex_release
+ * Function:    H5TS_win32_thread_exit
  *
- * Purpose:     Releases the HDF5 library global lock
+ * Purpose:     Per-thread cleanup on Windows when using Win32 threads.
  *
  * Return:      Non-negative on success / Negative on failure
  *
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_release(unsigned *lock_count)
+H5TS_win32_thread_exit(void)
 {
-    herr_t ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    FUNC_ENTER_API_NAMECHECK_ONLY
+    /* Windows uses a different thread local storage mechanism which does
+     * not support auto-freeing like pthreads' keys.
+     *
+     * WARNING: Do NOT use C standard library functions here.
+     * CRT functions are not allowed in DllMain, which is where this code
+     * is used.
+     */
 
-    *lock_count = 0;
-    if (H5_UNLIKELY(H5TS__mutex_release(lock_count) < 0))
-        ret_value = FAIL;
+    /* Clean up per-thread thread local storage */
+    if (H5TS_thrd_info_key_g != TLS_OUT_OF_INDEXES) {
+        LPVOID lpvData = H5TS__get_thread_local_value(H5TS_thrd_info_key_g);
+        if (lpvData)
+            H5TS__tinfo_destroy(lpvData);
+    }
 
-    FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
-} /* end H5TSmutex_release() */
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
+} /* H5TS_win32_thread_exit() */
+
+#endif /* H5_HAVE_WIN_THREADS */
+
 #endif /* H5_HAVE_THREADSAFE */
+
+

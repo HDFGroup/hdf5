@@ -107,9 +107,6 @@
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
 
-/* Define to 1 if CLOCK_MONOTONIC_COARSE is available */
-#cmakedefine H5_HAVE_CLOCK_MONOTONIC_COARSE @H5_HAVE_CLOCK_MONOTONIC_COARSE@
-
 /* Define if the function stack tracing code is to be compiled in */
 #cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
 
@@ -261,11 +258,8 @@
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 
-/* Define to 1 if 'pthread_condattr_setclock()' is available */
-#cmakedefine H5_HAVE_PTHREAD_CONDATTR_SETCLOCK @H5_HAVE_PTHREAD_CONDATTR_SETCLOCK@
-
-/* Define to 1 if PTHREAD_MUTEX_ADAPTIVE_NP is available */
-#cmakedefine H5_HAVE_PTHREAD_MUTEX_ADAPTIVE_NP @H5_HAVE_PTHREAD_MUTEX_ADAPTIVE_NP@
+/* Define to 1 if the compiler supports the pthread_barrier_*() routines */
+#cmakedefine H5_HAVE_PTHREAD_BARRIER @H5_HAVE_PTHREAD_BARRIER@
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine H5_HAVE_PWD_H @H5_HAVE_PWD_H@
@@ -333,6 +327,9 @@
 
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
+
+/* Define to 1 if the compiler supports the __builtin_expect() extension */
+#cmakedefine H5_HAVE_BUILTIN_EXPECT @H5_HAVE_BUILTIN_EXPECT@
 
 #if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
 /* Not supported on WIN32 platforms with static linking */

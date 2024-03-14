@@ -343,11 +343,14 @@ set(mirror_vfd_SOURCES
 set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.h
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_attr_vlen.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_dcreate.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_develop.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_rec_rw_lock.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_id.c
 )
 
 set (H5_TESTS
@@ -581,24 +584,6 @@ set_target_properties (ttsafe PROPERTIES FOLDER test)
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_ttsafe_FORMAT ttsafe)
 endif ()
-
-######### Special handling for extra link lib of threads #############
-#-- Adding test for thread_id
-add_executable (thread_id ${HDF5_TEST_SOURCE_DIR}/thread_id.c)
-target_compile_options(thread_id PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_compile_definitions(thread_id PRIVATE "${HDF5_TEST_COMPILE_DEFS_PRIVATE}")
-target_include_directories (thread_id PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (thread_id STATIC)
-  target_link_libraries (thread_id PRIVATE ${HDF5_TEST_LIB_TARGET})
-  if (NOT WIN32)
-    target_link_libraries (thread_id PRIVATE "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>")
-  endif ()
-else ()
-  TARGET_C_PROPERTIES (thread_id SHARED)
-  target_link_libraries (thread_id PRIVATE ${HDF5_TEST_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>")
-endif ()
-set_target_properties (thread_id PROPERTIES FOLDER test)
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format

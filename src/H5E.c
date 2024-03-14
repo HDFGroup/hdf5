@@ -73,7 +73,6 @@
 /* Local Prototypes */
 /********************/
 /* Static function declarations */
-static herr_t     H5E__set_default_auto(H5E_t *stk);
 static H5E_cls_t *H5E__register_class(const char *cls_name, const char *lib_name, const char *version);
 static herr_t     H5E__unregister_class(H5E_cls_t *cls, void **request);
 static ssize_t    H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
@@ -90,6 +89,59 @@ static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Default value to initialize R/W locks */
+static const H5E_t H5E_err_stack_def = {
+    0,  /* nused */
+    {   /*slot[] */
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL},
+        {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, 0, NULL, NULL, NULL}
+    },
+
+    /* H5E_auto_op_t */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+#ifdef H5_USE_16_API_DEFAULT
+    {1, TRUE, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2},
+#else  /* H5_USE_16_API */
+    {2, TRUE, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2},
+#endif /* H5_USE_16_API_DEFAULT */
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
+    {(H5E_auto2_t)H5E__print2},
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+    NULL        /* auto_data */
+};
+
 
 /*****************************/
 /* Library Private Variables */
@@ -272,80 +324,16 @@ H5E_term_package(void)
  *
  *--------------------------------------------------------------------------
  */
-static herr_t
+void
 H5E__set_default_auto(H5E_t *stk)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-#ifdef H5_USE_16_API_DEFAULT
-    stk->auto_op.vers = 1;
-#else  /* H5_USE_16_API */
-    stk->auto_op.vers = 2;
-#endif /* H5_USE_16_API_DEFAULT */
+    /* Initialize with default error stack */
+    memcpy(stk, &H5E_err_stack_def, sizeof(H5E_err_stack_def));
 
-    stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
-    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5E__print2;
-    stk->auto_op.is_default                         = true;
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
-    stk->auto_op.func2 = (H5E_auto2_t)H5E__print2;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-    stk->auto_data = NULL;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5E__set_default_auto() */
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:    H5E__get_stack
- *
- * Purpose:     Support function for H5E__get_my_stack() to initialize and
- *              acquire per-thread error stack.
- *
- * Return:      Success:    Pointer to an error stack struct (H5E_t *)
- *
- *              Failure:    NULL
- *
- *-------------------------------------------------------------------------
- */
-H5E_t *
-H5E__get_stack(void)
-{
-    H5E_t *estack = NULL;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    estack = (H5E_t *)H5TS_get_thread_local_value(H5TS_errstk_key_g);
-
-    if (!estack) {
-        /* No associated value with current thread - create one */
-#ifdef H5_HAVE_WIN_THREADS
-        /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
-        estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t));
-#else
-        /* Use malloc here since this has to match the free in the
-         * destructor and we want to avoid the codestack there.
-         */
-        estack = (H5E_t *)malloc(sizeof(H5E_t));
-#endif /* H5_HAVE_WIN_THREADS */
-        assert(estack);
-
-        /* Set the thread-specific info */
-        estack->nused = 0;
-        H5E__set_default_auto(estack);
-
-        /* (It's not necessary to release this in this API, it is
-         *      released by the "key destructor" set up in the H5TS
-         *      routines.  See calls to pthread_key_create() in H5TS.c -QAK)
-         */
-        H5TS_set_thread_local_value(H5TS_errstk_key_g, (void *)estack);
-    } /* end if */
-
-    /* Set return value */
-    FUNC_LEAVE_NOAPI(estack)
-} /* end H5E__get_stack() */
-#endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__free_class

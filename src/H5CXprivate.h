@@ -19,6 +19,9 @@
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                    */
 #include "H5ACprivate.h" /* Metadata cache                       */
+#ifdef H5_HAVE_CODESTACK
+#include "H5CSprivate.h" /* Function stack			*/
+#endif
 #ifdef H5_HAVE_PARALLEL
 #include "H5FDprivate.h" /* File drivers                         */
 #endif                   /* H5_HAVE_PARALLEL */
@@ -87,6 +90,9 @@ H5_DLL herr_t      H5CX_get_vol_wrap_ctx(void **wrap_ctx);
 H5_DLL herr_t      H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop);
 H5_DLL haddr_t     H5CX_get_tag(void);
 H5_DLL H5AC_ring_t H5CX_get_ring(void);
+#ifdef H5_HAVE_CODESTACK
+H5_DLL H5CS_t *H5CX_get_fstack(void);
+#endif
 #ifdef H5_HAVE_PARALLEL
 H5_DLL bool   H5CX_get_coll_metadata_read(void);
 H5_DLL herr_t H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype);

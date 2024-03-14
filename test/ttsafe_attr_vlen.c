@@ -106,12 +106,12 @@ tts_attr_vlen(void)
 
     /* Start multiple threads and execute tts_attr_vlen_thread() for each thread */
     for (i = 0; i < NUM_THREADS; i++) {
-        threads[i] = H5TS_create_thread(tts_attr_vlen_thread, NULL, NULL);
+        threads[i] = H5TS__create_thread(tts_attr_vlen_thread, NULL, NULL);
     }
 
     /* Wait for the threads to end */
     for (i = 0; i < NUM_THREADS; i++)
-        H5TS_wait_for_thread(threads[i]);
+        H5TS__wait_for_thread(threads[i]);
 
 } /* end tts_attr_vlen() */
 

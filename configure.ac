@@ -1830,8 +1830,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support
-## on POSIX systems.
+## Enable thread-safe version of library (requires Pthreads on POSIX
+## systems). We usually pick up the system Pthreads library, so --with-pthread
+## is only necessary if you are using a custom Pthreads library or if
+## your OS hides its implementation in an unusual location.
+##
+## On Windows, we use Win32 threads and no special configuration should be
+## required to use them.
 ##
 AC_SUBST([THREADSAFE])
 
@@ -1968,6 +1973,15 @@ if test "X$THREADSAFE" = "Xyes"; then
         fi
         ;;
     esac
+
+    ## If using Pthreads, check for barrier routines
+    if test "x$HAVE_PTHREAD" = "xyes"; then
+        AC_CHECK_DECL([pthread_barrier_init],
+                      [AC_DEFINE([HAVE_PTHREAD_BARRIER], [1],
+                          [Define if has pthread_barrier_*() routines])],
+                      [],
+                      [[#include <pthread.h>]])
+    fi
 
     ## ----------------------------------------------------------------------
     ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
@@ -2125,6 +2139,14 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                          [Define if the __attribute__(()) extension is present])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([if compiler supports the __builtin_expect() extension])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[void *ptr = (void*) 0;
+               if (__builtin_expect (ptr != (void*) 0, 1)) return 0;]])],
+  [AC_DEFINE([HAVE_BUILTIN_EXPECT], [1],
+          [Define if supports __builtin_expect() extension])
+    AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
 
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.
@@ -2559,8 +2581,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B2,CX,D,F,FA,FL,FS,MM,O,T,Z"
-all_packages="AC,B2,CX,D,F,MM,O,T,Z"
+## all_packages="AC,B2,CX,D,F,FA,FL,FS,MM,O,T,TS,Z"
+all_packages="AC,B2,CX,D,F,MM,O,T,TS,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -3190,25 +3212,7 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     fi
 
     # Checks for libraries.
-    AC_SEARCH_LIBS([shm_open], [rt])
     AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
-
-    # Perform various checks for Mercury util code
-    AC_CHECK_DECL([PTHREAD_MUTEX_ADAPTIVE_NP],
-                  [AC_DEFINE([HAVE_PTHREAD_MUTEX_ADAPTIVE_NP], [1],
-                      [Define if has PTHREAD_MUTEX_ADAPTIVE_NP])],
-                  [],
-                  [[#include <pthread.h>]])
-    AC_CHECK_DECL([pthread_condattr_setclock],
-                  [AC_DEFINE([HAVE_PTHREAD_CONDATTR_SETCLOCK], [1],
-                      [Define if has pthread_condattr_setclock()])],
-                  [],
-                  [[#include <pthread.h>]])
-    AC_CHECK_DECL([CLOCK_MONOTONIC_COARSE],
-                  [AC_DEFINE([HAVE_CLOCK_MONOTONIC_COARSE], [1],
-                      [Define if has CLOCK_MONOTONIC_COARSE])],
-                  [],
-                  [[#include <time.h>]])
 
 else
     AC_MSG_RESULT([no])

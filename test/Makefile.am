@@ -69,8 +69,7 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr thread_id vol timer event_set \
-		   onion
+           unregister cache_logging cork swmr vol timer event_set onion
 
 # List programs to be built when testing here
 #
@@ -161,8 +160,9 @@ libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_
 LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
-ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
-               ttsafe_acreate.c ttsafe_attr_vlen.c
+ttsafe_SOURCES=ttsafe.c ttsafe_acreate.c ttsafe_attr_vlen.c ttsafe_cancel.c \
+    ttsafe_dcreate.c ttsafe_develop.c ttsafe_error.c ttsafe_rec_rw_lock.c \
+    ttsafe_thread_id.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
 

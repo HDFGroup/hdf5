@@ -18,6 +18,7 @@
 #include "H5subfiling_err.h"
 
 #include "H5MMprivate.h"
+#include "H5TSprivate.h" /* Threadsafety                             */
 
 typedef struct {            /* Format of a context map entry  */
     uint64_t file_id;       /* key value (linear search of the cache) */
@@ -43,6 +44,8 @@ static size_t sf_topology_cache_num_entries = 0;
 
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
+
+static H5TS_mutex_t subfiling_log_mutex = H5TS_MUTEX_INITIALIZER;
 
 #define DEFAULT_CONTEXT_CACHE_SIZE  16
 #define DEFAULT_TOPOLOGY_CACHE_SIZE 4
@@ -3136,7 +3139,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         goto done;
     }
 
-    H5FD_ioc_begin_thread_exclusive();
+    H5TS_mutex_lock(&subfiling_log_mutex);
 
     if (sf_context->sf_logfile) {
         vfprintf(sf_context->sf_logfile, fmt, log_args);
@@ -3149,7 +3152,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         fflush(stdout);
     }
 
-    H5FD_ioc_end_thread_exclusive();
+    H5TS_mutex_unlock(&subfiling_log_mutex);
 
 done:
     va_end(log_args);
@@ -3171,7 +3174,7 @@ H5_subfiling_log_nonewline(int64_t sf_context_id, const char *fmt, ...)
         goto done;
     }
 
-    H5FD_ioc_begin_thread_exclusive();
+    H5TS_mutex_lock(&subfiling_log_mutex);
 
     if (sf_context->sf_logfile) {
         vfprintf(sf_context->sf_logfile, fmt, log_args);
@@ -3182,7 +3185,7 @@ H5_subfiling_log_nonewline(int64_t sf_context_id, const char *fmt, ...)
         fflush(stdout);
     }
 
-    H5FD_ioc_end_thread_exclusive();
+    H5TS_mutex_unlock(&subfiling_log_mutex);
 
 done:
     va_end(log_args);

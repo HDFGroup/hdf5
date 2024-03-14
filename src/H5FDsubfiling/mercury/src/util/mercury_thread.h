@@ -21,7 +21,6 @@ typedef LPTHREAD_START_ROUTINE hg_thread_func_t;
 typedef DWORD                  hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t WINAPI
 typedef DWORD     hg_thread_key_t;
-typedef DWORD_PTR hg_cpu_set_t;
 #else
 #include <pthread.h>
 typedef pthread_t hg_thread_t;
@@ -29,18 +28,6 @@ typedef void *(*hg_thread_func_t)(void *);
 typedef void         *hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t
 typedef pthread_key_t hg_thread_key_t;
-#ifdef __APPLE__
-/* Size definition for CPU sets.  */
-#define HG_CPU_SETSIZE 1024
-#define HG_NCPUBITS    (8 * sizeof(hg_cpu_mask_t))
-/* Type for array elements in 'cpu_set_t'.  */
-typedef uint64_t hg_cpu_mask_t;
-typedef struct {
-    hg_cpu_mask_t bits[HG_CPU_SETSIZE / HG_NCPUBITS];
-} hg_cpu_set_t;
-#else
-typedef cpu_set_t hg_cpu_set_t;
-#endif
 #endif
 
 #ifdef __cplusplus
@@ -52,7 +39,7 @@ extern "C" {
  *
  * \param thread [IN/OUT]       pointer to thread object
  */
-HG_UTIL_PUBLIC void hg_thread_init(hg_thread_t *thread);
+void hg_thread_init(hg_thread_t *thread);
 
 /**
  * Create a new thread for the given function.
@@ -63,7 +50,7 @@ HG_UTIL_PUBLIC void hg_thread_init(hg_thread_t *thread);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_create(hg_thread_t *thread, hg_thread_func_t f, void *data);
+int hg_thread_create(hg_thread_t *thread, hg_thread_func_t f, void *data);
 
 /**
  * Ends the calling thread.
@@ -72,7 +59,7 @@ HG_UTIL_PUBLIC int hg_thread_create(hg_thread_t *thread, hg_thread_func_t f, voi
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC void hg_thread_exit(hg_thread_ret_t ret);
+void hg_thread_exit(hg_thread_ret_t ret);
 
 /**
  * Wait for thread completion.
@@ -81,7 +68,7 @@ HG_UTIL_PUBLIC void hg_thread_exit(hg_thread_ret_t ret);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_join(hg_thread_t thread);
+int hg_thread_join(hg_thread_t thread);
 
 /**
  * Terminate the thread.
@@ -90,28 +77,21 @@ HG_UTIL_PUBLIC int hg_thread_join(hg_thread_t thread);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_cancel(hg_thread_t thread);
-
-/**
- * Yield the processor.
- *
- * \return Non-negative on success or negative on failure
- */
-HG_UTIL_PUBLIC int hg_thread_yield(void);
+int hg_thread_cancel(hg_thread_t thread);
 
 /**
  * Obtain handle of the calling thread.
  *
  * \return
  */
-static HG_UTIL_INLINE hg_thread_t hg_thread_self(void);
+static inline hg_thread_t hg_thread_self(void);
 
 /**
  * Compare thread IDs.
  *
  * \return Non-zero if equal, zero if not equal
  */
-static HG_UTIL_INLINE int hg_thread_equal(hg_thread_t t1, hg_thread_t t2);
+static inline int hg_thread_equal(hg_thread_t t1, hg_thread_t t2);
 
 /**
  * Create a thread-specific data key visible to all threads in the process.
@@ -120,7 +100,7 @@ static HG_UTIL_INLINE int hg_thread_equal(hg_thread_t t1, hg_thread_t t2);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_key_create(hg_thread_key_t *key);
+int hg_thread_key_create(hg_thread_key_t *key);
 
 /**
  * Delete a thread-specific data key previously returned by
@@ -130,7 +110,7 @@ HG_UTIL_PUBLIC int hg_thread_key_create(hg_thread_key_t *key);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int hg_thread_key_delete(hg_thread_key_t key);
+int hg_thread_key_delete(hg_thread_key_t key);
 
 /**
  * Get value from specified key.
@@ -139,7 +119,7 @@ HG_UTIL_PUBLIC int hg_thread_key_delete(hg_thread_key_t key);
  *
  * \return Pointer to data associated to the key
  */
-static HG_UTIL_INLINE void *hg_thread_getspecific(hg_thread_key_t key);
+static inline void *hg_thread_getspecific(hg_thread_key_t key);
 
 /**
  * Set value to specified key.
@@ -149,30 +129,10 @@ static HG_UTIL_INLINE void *hg_thread_getspecific(hg_thread_key_t key);
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int hg_thread_setspecific(hg_thread_key_t key, const void *value);
-
-/**
- * Get affinity mask.
- *
- * \param thread [IN]           thread object
- * \param cpu_mask [IN/OUT]     cpu mask
- *
- * \return Non-negative on success or negative on failure
- */
-HG_UTIL_PUBLIC int hg_thread_getaffinity(hg_thread_t thread, hg_cpu_set_t *cpu_mask);
-
-/**
- * Set affinity mask.
- *
- * \param thread [IN]           thread object
- * \param cpu_mask [IN]         cpu mask
- *
- * \return Non-negative on success or negative on failure
- */
-HG_UTIL_PUBLIC int hg_thread_setaffinity(hg_thread_t thread, const hg_cpu_set_t *cpu_mask);
+static inline int hg_thread_setspecific(hg_thread_key_t key, const void *value);
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE hg_thread_t
+static inline hg_thread_t
 hg_thread_self(void)
 {
 #ifdef _WIN32
@@ -183,7 +143,7 @@ hg_thread_self(void)
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
+static inline int
 hg_thread_equal(hg_thread_t t1, hg_thread_t t2)
 {
 #ifdef _WIN32
@@ -194,7 +154,7 @@ hg_thread_equal(hg_thread_t t1, hg_thread_t t2)
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE void *
+static inline void *
 hg_thread_getspecific(hg_thread_key_t key)
 {
 #ifdef _WIN32
@@ -205,7 +165,7 @@ hg_thread_getspecific(hg_thread_key_t key)
 }
 
 /*---------------------------------------------------------------------------*/
-static HG_UTIL_INLINE int
+static inline int
 hg_thread_setspecific(hg_thread_key_t key, const void *value)
 {
 #ifdef _WIN32

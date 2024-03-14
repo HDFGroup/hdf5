@@ -96,7 +96,9 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5Tfloat.c H5Tinit_float.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
         H5Tvlen.c \
-        H5TS.c \
+        H5TS.c H5TSbarrier.c H5TScond.c H5TSexlock.c H5TSint.c H5TSkey.c \
+        H5TSmutex.c H5TSpthread.c H5TSrwlock.c H5TStest.c H5TSthread.c \
+        H5TSwin.c \
         H5VL.c H5VLcallback.c H5VLdyn_ops.c H5VLint.c H5VLnative.c \
         H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
         H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
