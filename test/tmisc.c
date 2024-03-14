@@ -339,7 +339,7 @@ typedef struct {
 
 #define MISC38_FILE "type_conversion_path_table_issue.h5"
 #define MISC39_FILE "set_est_link_info.h5"
-#define MISC40_FILE  "obj_props_intermediate.h5"
+#define MISC40_FILE "obj_props_intermediate.h5"
 
 /****************************************************************
 **
@@ -6650,21 +6650,21 @@ test_misc39(void)
 static void
 test_misc40(void)
 {
-    hid_t lcpl = H5I_INVALID_HID;
-    hid_t gcpl = H5I_INVALID_HID;
-    hid_t gcpl2 = H5I_INVALID_HID;
-    hid_t def_gcpl = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t fid = H5I_INVALID_HID;
-    hid_t gid = H5I_INVALID_HID;
-    hid_t gid2 = H5I_INVALID_HID;
-    hid_t def_gid = H5I_INVALID_HID;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hsize_t dims[1]  = {10};
-    unsigned cr_order = 0;
-    hbool_t     track_times = false;
-    herr_t      status;
+    hid_t    lcpl        = H5I_INVALID_HID;
+    hid_t    gcpl        = H5I_INVALID_HID;
+    hid_t    gcpl2       = H5I_INVALID_HID;
+    hid_t    def_gcpl    = H5I_INVALID_HID;
+    hid_t    dcpl        = H5I_INVALID_HID;
+    hid_t    fid         = H5I_INVALID_HID;
+    hid_t    gid         = H5I_INVALID_HID;
+    hid_t    gid2        = H5I_INVALID_HID;
+    hid_t    def_gid     = H5I_INVALID_HID;
+    hid_t    did         = H5I_INVALID_HID;
+    hid_t    sid         = H5I_INVALID_HID;
+    hsize_t  dims[1]     = {10};
+    unsigned cr_order    = 0;
+    hbool_t  track_times = false;
+    herr_t   status;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing object creation properties are propagated to intermediate groups\n"));
@@ -6678,8 +6678,7 @@ test_misc40(void)
     fid = H5Fcreate(MISC40_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
-
-    /* 
+    /*
      * Verify default creation properties when creating
      * group with intermdiate group
      */
@@ -6713,7 +6712,7 @@ test_misc40(void)
     status = H5Pclose(def_gcpl);
     CHECK(status, FAIL, "H5Gclose");
 
-    /* 
+    /*
      * Verify non-default creation properties when creating
      * group with intermediate groups
      */
@@ -6789,7 +6788,7 @@ test_misc40(void)
     status = H5Pclose(gcpl);
     CHECK(status, FAIL, "H5Pclose");
 
-    /* 
+    /*
      * Verify non-default creation properties when creating
      * dataset with intermediate group
      */
