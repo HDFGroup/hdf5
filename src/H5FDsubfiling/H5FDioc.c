@@ -1498,7 +1498,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         /* TODO: No support for subfile directory prefix currently */
         /* TODO: Possibly try loading config file prefix from file before deleting */
         snprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
-                 prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
+                 prefix_env && (strlen(prefix_env) > 0) ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
         if (NULL == (config_file = fopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
