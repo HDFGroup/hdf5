@@ -41,7 +41,7 @@ set_tests_properties (HL_FORTRAN_f90_ex-clean-objects PROPERTIES
 )
 
 foreach (example ${examples})
-  if (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_USING_ANALYSIS_TOOL)
     add_test (NAME HL_FORTRAN_f90_ex_${example} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_f90_ex_${example}>)
   else ()
     add_test (NAME HL_FORTRAN_f90_ex_${example} COMMAND "${CMAKE_COMMAND}"

@@ -652,6 +652,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
   fi
+  ## Checking if the compiler supports fortran character being allocatable
+  PAC_HAVE_CHAR_ALLOC
 
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
@@ -739,6 +741,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
+  fi
+
+  if test "X$HAVE_CHAR_ALLOC_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_CHAR_ALLOC], [1], [Define if Fortran supports allocatable character])
   fi
 
   ## See if C_LONG_DOUBLE is available
@@ -1454,26 +1460,9 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
-## that might need to be set for largefile support to behave
-## correctly. This macro is defined in acsite.m4 and overrides
-## the version provided by Autoconf (as of v2.65). The custom
-## macro additionally adds the appropriate defines to AM_CPPFLAGS
-## so that later configure checks have them visible.
+## Set up large file support
 
-## Check for _FILE_OFFSET_BITS
-_AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
-  [ac_cv_sys_file_offset_bits],
-  [Number of bits in a file offset, on hosts where this is settable.],
-  [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-
-## Check for _LARGE_FILES
-if test "$ac_cv_sys_file_offset_bits" = unknown; then
-  _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
-    [ac_cv_sys_large_files],
-    [Define for large files, on AIX-style hosts.],
-    [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-fi
+AC_SYS_LARGEFILE
 
 ## ----------------------------------------------------------------------
 ## Add necessary defines for Linux Systems.
@@ -1512,6 +1501,10 @@ case "$host_cpu-$host_vendor-$host_os" in
     AC_DEFINE([HAVE_WIN32_API], [1], [Define if on the Windows platform using the Win32 API])
     AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
     H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
+    ;;
+  *cygwin*)
+    AC_DEFINE([HAVE_CYGWIN], [1], [Define if using Cygwin])
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
@@ -2566,8 +2559,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,MM,O,S,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,MM,O,S,T,Z"
+## all_packages="AC,B2,CX,D,F,FA,FL,FS,MM,O,T,Z"
+all_packages="AC,B2,CX,D,F,MM,O,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)

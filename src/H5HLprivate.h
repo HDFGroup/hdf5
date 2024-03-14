@@ -14,7 +14,7 @@
  *
  * Created:         H5HLprivate.h
  *
- * Purpose:         Private declarations for the H5HL (local heap) package.
+ * Purpose:         Private declarations for the H5HL (local heap) package
  *
  *-------------------------------------------------------------------------
  */
@@ -25,14 +25,6 @@
 #include "H5private.h"   /* Generic Functions                */
 #include "H5ACprivate.h" /* Metadata cache                   */
 #include "H5Fprivate.h"  /* File access                      */
-
-/*
- * Feature: Define H5HL_DEBUG on the compiler command line if you want to
- *          enable diagnostic messages from this layer.
- */
-#ifdef NDEBUG
-#undef H5HL_DEBUG
-#endif
 
 #define H5HL_ALIGN(X) ((((unsigned)X) + 7) & (unsigned)(~0x07)) /* align on 8-byte boundary   */
 

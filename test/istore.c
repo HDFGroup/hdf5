@@ -62,7 +62,7 @@ is_sparse(void)
 
     if ((fd = HDopen("x.h5", O_RDWR | O_TRUNC | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
         return 0;
-    if (HDlseek(fd, (HDoff_t)(1024 * 1024), SEEK_SET) != 1024 * 1024)
+    if (HDlseek(fd, (1024 * 1024), SEEK_SET) != 1024 * 1024)
         return 0;
     if (5 != HDwrite(fd, "hello", (size_t)5))
         return 0;

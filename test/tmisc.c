@@ -338,6 +338,7 @@ typedef struct {
 #define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
 
 #define MISC38_FILE "type_conversion_path_table_issue.h5"
+#define MISC39_FILE "set_est_link_info.h5"
 
 /****************************************************************
 **
@@ -6117,8 +6118,7 @@ test_misc36_cb1(void *_ctx)
     VERIFY(is_terminating, true, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
-    if (0 != *ctx)
-        HDabort();
+    VERIFY(*ctx, 0, "Wrong context value");
 
     /* Update context value */
     *ctx = 1;
@@ -6138,8 +6138,7 @@ test_misc36_cb2(void *_ctx)
     VERIFY(is_terminating, true, "H5is_library_terminating");
 
     /* Verify correct ordering for 'atclose' callbacks */
-    if (1 != *ctx)
-        HDabort();
+    VERIFY(*ctx, 1, "Wrong context value");
 
     /* Update context value */
     *ctx = 2;
@@ -6273,17 +6272,32 @@ test_misc37(void)
 static void
 test_misc38(void)
 {
-    H5VL_object_t *file_vol_obj = NULL;
-    const char    *buf[]        = {"attr_value"};
-    herr_t         ret          = SUCCEED;
-    hid_t          file_id      = H5I_INVALID_HID;
-    hid_t          attr_id      = H5I_INVALID_HID;
-    hid_t          str_type     = H5I_INVALID_HID;
-    hid_t          space_id     = H5I_INVALID_HID;
-    int            init_npaths  = 0;
-    int           *irbuf        = NULL;
-    char         **rbuf         = NULL;
+    H5VL_object_t *file_vol_obj  = NULL;
+    const char    *buf[]         = {"attr_value"};
+    const char    *array_buf[]   = {"attr_value1", "attr_value2"};
+    hsize_t        array_dims[1] = {2};
+    herr_t         ret           = SUCCEED;
+    hid_t          file_id       = H5I_INVALID_HID;
+    hid_t          attr_id1      = H5I_INVALID_HID;
+    hid_t          attr_id2      = H5I_INVALID_HID;
+    hid_t          attr_id3      = H5I_INVALID_HID;
+    hid_t          attr_id4      = H5I_INVALID_HID;
+    hid_t          str_type      = H5I_INVALID_HID;
+    hid_t          array_type    = H5I_INVALID_HID;
+    hid_t          compound_type = H5I_INVALID_HID;
+    hid_t          vlen_type     = H5I_INVALID_HID;
+    hid_t          space_id      = H5I_INVALID_HID;
+    int            init_npaths   = 0;
+    char         **rbuf          = NULL;
+    char         **arr_rbuf      = NULL;
     bool           vol_is_native;
+    typedef struct struct_type {
+        const char *buf;
+    } struct_type;
+    struct_type  cbuf          = {.buf = "attr_value"};
+    struct_type *compound_rbuf = NULL;
+    hvl_t        vlen_buf      = {.len = 2, .p = array_buf};
+    hvl_t       *vlen_rbuf     = NULL;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Fix for type conversion path table issue"));
@@ -6315,11 +6329,26 @@ test_misc38(void)
      */
     VERIFY(file_vol_obj->rc, 1, "checking reference count");
 
+    /* Create a variable-length string type */
     str_type = H5Tcopy(H5T_C_S1);
     CHECK(str_type, H5I_INVALID_HID, "H5Tcopy");
 
     ret = H5Tset_size(str_type, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Create an array type of the string type */
+    array_type = H5Tarray_create2(str_type, 1, array_dims);
+    CHECK(array_type, H5I_INVALID_HID, "H5Tarray_create2");
+
+    /* Create a compound type of the string type */
+    compound_type = H5Tcreate(H5T_COMPOUND, sizeof(compound_type));
+    CHECK(compound_type, H5I_INVALID_HID, "H5Tcreate(H5T_COMPOUND, ...)");
+
+    CHECK(H5Tinsert(compound_type, "varstr", HOFFSET(struct_type, buf), str_type), FAIL, "H5Tinsert");
+
+    /* Create a variable-length type of the string type */
+    vlen_type = H5Tvlen_create(str_type);
+    CHECK(vlen_type, H5I_INVALID_HID, "H5Tvlen_create");
 
     space_id = H5Screate(H5S_SCALAR);
     CHECK(space_id, H5I_INVALID_HID, "H5Screate");
@@ -6331,8 +6360,19 @@ test_misc38(void)
     VERIFY(H5T__get_path_table_npaths(), init_npaths,
            "checking number of type conversion path table entries");
 
-    attr_id = H5Acreate2(file_id, "attribute", str_type, space_id, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(attr_id, H5I_INVALID_HID, "H5Acreate2");
+    /* Increments file's VOL object reference count by 1 */
+    attr_id1 = H5Acreate2(file_id, "varstr_attribute", str_type, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr_id1, H5I_INVALID_HID, "H5Acreate2");
+    /* Increments file's VOL object reference count by 1 */
+    attr_id2 = H5Acreate2(file_id, "array_varstr_attribute", array_type, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr_id2, H5I_INVALID_HID, "H5Acreate2");
+    /* Increments file's VOL object reference count by 1 */
+    attr_id3 =
+        H5Acreate2(file_id, "compound_varstr_attribute", compound_type, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr_id3, H5I_INVALID_HID, "H5Acreate2");
+    /* Increments file's VOL object reference count by 2 */
+    attr_id4 = H5Acreate2(file_id, "vlen_varstr_attribute", vlen_type, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr_id4, H5I_INVALID_HID, "H5Acreate2");
 
     /*
      * Check the number of type conversion path table entries currently
@@ -6343,44 +6383,64 @@ test_misc38(void)
 
     /*
      * Check reference count of file's VOL object field. At this point,
-     * the object should have a reference count of 2. Creating the
-     * attribute on the dataset will have caused a H5T_set_loc call that
-     * associates the attribute's datatype with the file's VOL object
-     * and will have incremented the reference count by 1.
+     * the object should have a reference count of 6. Creating the
+     * attributes in the file will have caused H5T_set_loc calls that
+     * associate each attribute's datatype with the file's VOL object
+     * and will have incremented the reference count by 5.
      */
-    VERIFY(file_vol_obj->rc, 2, "checking reference count");
+    VERIFY(file_vol_obj->rc, 6, "checking reference count");
 
-    ret = H5Awrite(attr_id, str_type, buf);
+    /* Increments file's VOL object reference count by 1 */
+    ret = H5Awrite(attr_id1, str_type, buf);
+    CHECK(ret, FAIL, "H5Awrite");
+    /* Increments file's VOL object reference count by 1 */
+    ret = H5Awrite(attr_id2, array_type, array_buf);
+    CHECK(ret, FAIL, "H5Awrite");
+    /* Increments file's VOL object reference count by 2 */
+    ret = H5Awrite(attr_id3, compound_type, &cbuf);
+    CHECK(ret, FAIL, "H5Awrite");
+    /* Increments file's VOL object reference count by 2 */
+    ret = H5Awrite(attr_id4, vlen_type, &vlen_buf);
     CHECK(ret, FAIL, "H5Awrite");
 
     /*
      * Check the number of type conversion path table entries currently
-     * stored in the cache. The H5Awrite call should have added a new
-     * type conversion path. Note that if another test in this file uses
-     * the same conversion path, this check may fail and need to be
-     * refactored.
+     * stored in the cache. The H5Awrite calls should have added new
+     * type conversion paths. Note that if another test in this file
+     * uses the same conversion path, this check may fail and need to
+     * be refactored.
      */
-    VERIFY(H5T__get_path_table_npaths(), init_npaths + 1,
+    VERIFY(H5T__get_path_table_npaths(), init_npaths + 4,
            "checking number of type conversion path table entries");
 
     /*
      * Check reference count of file's VOL object field. At this point,
-     * the object should have a reference count of 3. Writing to the
-     * variable-length typed attribute will have caused an H5T_convert
-     * call that ends up incrementing the reference count of the
-     * associated file's VOL object.
+     * the object should have a reference count of 12. Writing to the
+     * attributes will have caused H5T_path_find calls that end up
+     * incrementing the reference count of the associated file's VOL
+     * object.
      */
-    VERIFY(file_vol_obj->rc, 3, "checking reference count");
+    VERIFY(file_vol_obj->rc, 12, "checking reference count");
 
-    ret = H5Aclose(attr_id);
+    ret = H5Aclose(attr_id1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(attr_id2);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(attr_id3);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(attr_id4);
     CHECK(ret, FAIL, "H5Aclose");
     ret = H5Fclose(file_id);
     CHECK(ret, FAIL, "H5Fclose");
 
-    irbuf = malloc(100 * 100 * sizeof(int));
-    CHECK_PTR(irbuf, "int read buf allocation");
     rbuf = malloc(sizeof(char *));
     CHECK_PTR(rbuf, "varstr read buf allocation");
+    arr_rbuf = malloc(array_dims[0] * sizeof(char *));
+    CHECK_PTR(arr_rbuf, "array varstr read buf allocation");
+    compound_rbuf = malloc(sizeof(struct_type));
+    CHECK_PTR(compound_rbuf, "compound varstr read buf allocation");
+    vlen_rbuf = malloc(sizeof(hvl_t));
+    CHECK_PTR(vlen_rbuf, "vlen varstr read buf allocation");
 
     for (size_t i = 0; i < 10; i++) {
         file_id = H5Fopen(MISC38_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -6396,54 +6456,189 @@ test_misc38(void)
          */
         VERIFY(file_vol_obj->rc, 1, "checking reference count");
 
-        attr_id = H5Aopen(file_id, "attribute", H5P_DEFAULT);
-        CHECK(attr_id, H5I_INVALID_HID, "H5Aopen");
+        /* Increments file's VOL object reference count by 1 */
+        attr_id1 = H5Aopen(file_id, "varstr_attribute", H5P_DEFAULT);
+        CHECK(attr_id1, H5I_INVALID_HID, "H5Aopen");
+        /* Increments file's VOL object reference count by 1 */
+        attr_id2 = H5Aopen(file_id, "array_varstr_attribute", H5P_DEFAULT);
+        CHECK(attr_id2, H5I_INVALID_HID, "H5Aopen");
+        /* Increments file's VOL object reference count by 1 */
+        attr_id3 = H5Aopen(file_id, "compound_varstr_attribute", H5P_DEFAULT);
+        CHECK(attr_id3, H5I_INVALID_HID, "H5Aopen");
+        /* Increments file's VOL object reference count by 2 */
+        attr_id4 = H5Aopen(file_id, "vlen_varstr_attribute", H5P_DEFAULT);
+        CHECK(attr_id4, H5I_INVALID_HID, "H5Aopen");
 
         /*
          * Check reference count of file's VOL object field. At this point,
-         * the object should have a reference count of 2 since opening
-         * the attribute will also have associated its type with the file's
-         * VOL object.
+         * the object should have a reference count of 6 since opening
+         * the attributes will also have associated their datatypes with
+         * the file's VOL object.
          */
-        VERIFY(file_vol_obj->rc, 2, "checking reference count");
+        VERIFY(file_vol_obj->rc, 6, "checking reference count");
 
-        ret = H5Aread(attr_id, str_type, rbuf);
+        /* Increments file's VOL object reference count by 1 */
+        ret = H5Aread(attr_id1, str_type, rbuf);
+        CHECK(ret, FAIL, "H5Aread");
+        /* Increments file's VOL object reference count by 1 */
+        ret = H5Aread(attr_id2, array_type, arr_rbuf);
+        CHECK(ret, FAIL, "H5Aread");
+        /* Increments file's VOL object reference count by 2 */
+        ret = H5Aread(attr_id3, compound_type, compound_rbuf);
+        CHECK(ret, FAIL, "H5Aread");
+        /* Increments file's VOL object reference count by 2 */
+        ret = H5Aread(attr_id4, vlen_type, vlen_rbuf);
         CHECK(ret, FAIL, "H5Aread");
 
         /*
          * Check the number of type conversion path table entries currently
          * stored in the cache. Each H5Aread call shouldn't cause this number
-         * to go up, as the library should have removed the cached conversion
-         * paths on file close.
+         * to keep going up, as the library should remove the cached conversion
+         * paths on file close during each iteration. The value should stay at
+         * a constant "initial_num_paths + number of H5Aread calls above".
          */
-        VERIFY(H5T__get_path_table_npaths(), init_npaths + 1,
+        VERIFY(H5T__get_path_table_npaths(), init_npaths + 4,
                "checking number of type conversion path table entries");
 
         /*
          * Check reference count of file's VOL object field. At this point,
-         * the object should have a reference count of 3. Writing to the
-         * variable-length typed attribute will have caused an H5T_convert
-         * call that ends up incrementing the reference count of the
-         * associated file's VOL object.
+         * the object should have a reference count of 12. Reading from the
+         * attributes will have caused H5T_path_find calls that end up
+         * incrementing the reference count of the associated file's VOL
+         * object.
          */
-        VERIFY(file_vol_obj->rc, 3, "checking reference count");
+        VERIFY(file_vol_obj->rc, 12, "checking reference count");
 
         ret = H5Treclaim(str_type, space_id, H5P_DEFAULT, rbuf);
+        ret = H5Treclaim(array_type, space_id, H5P_DEFAULT, arr_rbuf);
+        ret = H5Treclaim(compound_type, space_id, H5P_DEFAULT, compound_rbuf);
+        ret = H5Treclaim(vlen_type, space_id, H5P_DEFAULT, vlen_rbuf);
 
-        ret = H5Aclose(attr_id);
+        ret = H5Aclose(attr_id1);
+        CHECK(ret, FAIL, "H5Aclose");
+        ret = H5Aclose(attr_id2);
+        CHECK(ret, FAIL, "H5Aclose");
+        ret = H5Aclose(attr_id3);
+        CHECK(ret, FAIL, "H5Aclose");
+        ret = H5Aclose(attr_id4);
         CHECK(ret, FAIL, "H5Aclose");
         ret = H5Fclose(file_id);
         CHECK(ret, FAIL, "H5Fclose");
     }
 
-    free(irbuf);
     free(rbuf);
+    free(arr_rbuf);
+    free(compound_rbuf);
+    free(vlen_rbuf);
 
     ret = H5Tclose(str_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(array_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(compound_type);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(vlen_type);
     CHECK(ret, FAIL, "H5Tclose");
     ret = H5Sclose(space_id);
     CHECK(ret, FAIL, "H5Sclose");
 }
+
+/****************************************************************
+**
+**  test_misc39(): Ensure H5Pset_est_link_info() handles large
+**                 values
+**
+**  H5Pset_est_link_info() values can be set to large values,
+**  which could cause the library to attempt to create large
+**  object headers that exceed limits and trip asserts in
+**  the library.
+**
+**  This test ensures that the library doesn't error regardless
+**  of the values passed to H5Pset_est_link_info() and
+**  H5Pset_link_phase_change().
+**
+****************************************************************/
+static void
+test_misc39(void)
+{
+    hid_t  fid  = H5I_INVALID_HID; /* File ID */
+    hid_t  gid  = H5I_INVALID_HID; /* Group ID */
+    hid_t  fapl = H5I_INVALID_HID; /* File access property list ID */
+    hid_t  gcpl = H5I_INVALID_HID; /* Group creation property list ID */
+    herr_t ret  = H5I_INVALID_HID; /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Ensure H5Pset_est_link_info handles large values\n"));
+
+    /* Compose file access property list
+     *
+     * NOTE: The bug in question only occurs in new-style groups
+     */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, H5I_INVALID_HID, "H5Pcreate");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
+
+    /* Create the file */
+    fid = H5Fcreate(MISC39_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, H5I_INVALID_HID, "H5Fcreate");
+
+    /* Compose group creation property list */
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl, H5I_INVALID_HID, "H5Pcreate");
+
+    /* Set the estimated link info values to large numbers */
+    ret = H5Pset_est_link_info(gcpl, UINT16_MAX, UINT16_MAX);
+    CHECK(ret, FAIL, "H5Pset_est_link_info");
+
+    /* Create a group */
+    gid = H5Gcreate2(fid, "foo", H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, H5I_INVALID_HID, "H5Gcreate2");
+
+    /* Close the group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the file. Asserts typically occur here, when the metadata cache
+     * objects are flushed.
+     */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open the file */
+    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, H5I_INVALID_HID, "H5Fopen");
+
+    /* Set the compact/dense value high, to see if we can trick the
+     * library into creating a dense group object header that is
+     * larger than the maximum allowed size.
+     */
+    ret = H5Pset_link_phase_change(gcpl, UINT16_MAX, UINT16_MAX);
+    CHECK(ret, FAIL, "H5Pset_link_phase_change");
+
+    /* Set the estimated link info values to large numbers */
+    ret = H5Pset_est_link_info(gcpl, UINT16_MAX / 2, UINT16_MAX);
+    CHECK(ret, FAIL, "H5Pset_est_link_info");
+
+    /* Create another group */
+    gid = H5Gcreate2(fid, "bar", H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, H5I_INVALID_HID, "H5Gcreate2");
+
+    /* Close the group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the property lists */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+} /* end test_misc39() */
 
 /****************************************************************
 **
@@ -6514,6 +6709,7 @@ test_misc(void)
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
     test_misc37(); /* Test for seg fault failure at file close */
     test_misc38(); /* Test for type conversion path table issue */
+    test_misc39(); /* Ensure H5Pset_est_link_info() handles large values */
 
 } /* test_misc() */
 
@@ -6570,6 +6766,7 @@ cleanup_misc(void)
         H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
         H5Fdelete(MISC38_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC39_FILE, H5P_DEFAULT);
     }
     H5E_END_TRY
 } /* end cleanup_misc() */

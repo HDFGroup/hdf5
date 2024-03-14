@@ -145,3 +145,10 @@ jobs:
               name: zip-tarball
               path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save NEWSLETTER
+        uses: actions/upload-artifact@v4
+        with:
+              name: NEWSLETTER
+              path: ./hdfsrc/release_docs/NEWSLETTER.txt
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

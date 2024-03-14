@@ -4,7 +4,7 @@ DATASET "szip" {
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE 372 (2.151:1 COMPRESSION)
+      SIZE XXXX (2.XXX:1 COMPRESSION)
    }
    FILTERS {
       COMPRESSION SZIP {

@@ -47,7 +47,7 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out*/, size_t *epos /*out*/, size_t 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "ixxxxx", type_id, spos, epos, esize, mpos, msize);
+    H5TRACE6("e", "i*z*z*z*z*z", type_id, spos, epos, esize, mpos, msize);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -106,11 +106,11 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos
         dt = dt->shared->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->shared->type)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "operation not defined for datatype class");
-    if (epos + esize > dt->shared->u.atomic.prec)
+    if (epos + esize - dt->shared->u.atomic.offset > dt->shared->u.atomic.prec)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "exponent bit field size/location is invalid");
-    if (mpos + msize > dt->shared->u.atomic.prec)
+    if (mpos + msize - dt->shared->u.atomic.offset > dt->shared->u.atomic.prec)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mantissa bit field size/location is invalid");
-    if (spos >= dt->shared->u.atomic.prec)
+    if (spos - dt->shared->u.atomic.offset >= dt->shared->u.atomic.prec)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sign location is not valid");
 
     /* Check for overlap */

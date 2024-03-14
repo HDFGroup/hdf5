@@ -100,7 +100,7 @@
  * \def H5FD_ROS3_MAX_SECRET_TOK_LEN
  * Maximum string length for specifying the session/security token.
  */
-#define H5FD_ROS3_MAX_SECRET_TOK_LEN 1024
+#define H5FD_ROS3_MAX_SECRET_TOK_LEN 4096
 
 /**
  *\struct H5FD_ros3_fapl_t

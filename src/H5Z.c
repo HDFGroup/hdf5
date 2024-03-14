@@ -29,6 +29,11 @@
 #include "szlib.h"
 #endif
 
+/* This module can collect and optionally dump some simple filter statistics
+ * to stdout. If you want to do this, you need to define H5Z_DEBUG and set
+ * the DUMP_DEBUG_STATS_g flag to true.
+ */
+
 /* Local typedefs */
 #ifdef H5Z_DEBUG
 typedef struct H5Z_stats_t {
@@ -60,6 +65,8 @@ static size_t        H5Z_table_used_g  = 0;
 static H5Z_class2_t *H5Z_table_g       = NULL;
 #ifdef H5Z_DEBUG
 static H5Z_stats_t *H5Z_stat_table_g = NULL;
+/* Set to true if you want to dump compression statistics to stdout */
+static const bool DUMP_DEBUG_STATS_g = false;
 #endif /* H5Z_DEBUG */
 
 /* Local functions */
@@ -138,7 +145,7 @@ H5Z_term_package(void)
     int    dir, nprint = 0;
     size_t i;
 
-    if (H5DEBUG(Z)) {
+    if (DUMP_DEBUG_STATS_g) {
         for (i = 0; i < H5Z_table_used_g; i++) {
             for (dir = 0; dir < 2; dir++) {
                 struct {
@@ -153,11 +160,11 @@ H5Z_term_package(void)
 
                 if (0 == nprint++) {
                     /* Print column headers */
-                    fprintf(H5DEBUG(Z), "H5Z: filter statistics "
-                                        "accumulated over life of library:\n");
-                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Filter", "Total", "Errors",
+                    fprintf(stdout, "H5Z: filter statistics "
+                                    "accumulated over life of library:\n");
+                    fprintf(stdout, "   %-16s %10s %10s %8s %8s %8s %10s\n", "Filter", "Total", "Errors",
                             "User", "System", "Elapsed", "Bandwidth");
-                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----", "------",
+                    fprintf(stdout, "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----", "------",
                             "----", "------", "-------", "---------");
                 } /* end if */
 
@@ -174,7 +181,7 @@ H5Z_term_package(void)
                              H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
                 /* Print the statistics */
-                fprintf(H5DEBUG(Z), "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8s %8s %8s %10s\n",
+                fprintf(stdout, "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8s %8s %8s %10s\n",
                         (dir ? "<" : ">"), comment, H5Z_stat_table_g[i].stats[dir].total,
                         H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
                         timestrs.elapsed, bandwidth);
@@ -205,7 +212,7 @@ next:
 /*-------------------------------------------------------------------------
  * Function: H5Zregister
  *
- * Purpose:  This function registers new filter.
+ * Purpose:  This function registers a new filter
  *
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
@@ -1713,7 +1720,7 @@ H5Zget_filter_info(H5Z_filter_t filter, unsigned *filter_config_flags /*out*/)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "Zfx", filter, filter_config_flags);
+    H5TRACE2("e", "Zf*Iu", filter, filter_config_flags);
 
     /* Get the filter info */
     if (H5Z_get_filter_info(filter, filter_config_flags) < 0)

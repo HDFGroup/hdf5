@@ -614,8 +614,7 @@ H5D__mpio_debug_init(void)
     if (debug_str)
         H5D__mpio_parse_debug_str(debug_str);
 
-    if (H5DEBUG(D))
-        debug_stream = H5DEBUG(D);
+    debug_stream = stdout;
 
     H5D_mpio_debug_inited = true;
 
@@ -1412,7 +1411,7 @@ done:
         fprintf(debug_log_file, "##############\n\n");
         if (EOF == fclose(debug_log_file))
             HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file");
-        debug_stream = H5DEBUG(D);
+        debug_stream = stdout;
     }
 #endif
 
@@ -3279,7 +3278,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
                                (H5MM_free_t)H5D__chunk_mem_free,
                                (void *)&di[dset_idx].dset->shared->dcpl_cache.pline,
                                &di[dset_idx].dset->shared->dcpl_cache.fill, di[dset_idx].dset->shared->type,
-                               di[dset_idx].dset->shared->type_id, 0, curr_dset_info->file_chunk_size) < 0)
+                               0, curr_dset_info->file_chunk_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill value buffer");
 
             curr_dset_info->fb_info_init = true;

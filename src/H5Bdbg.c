@@ -14,7 +14,7 @@
  *
  * Created:         H5Bdbg.c
  *
- * Purpose:         Debugging routines for B-link tree package.
+ * Purpose:         Debugging routines for B-link tree package
  *
  *-------------------------------------------------------------------------
  */
@@ -36,10 +36,9 @@
 /*-------------------------------------------------------------------------
  * Function:    H5B_debug
  *
- * Purpose:     Prints debugging info about a B-tree.
+ * Purpose:     Prints debugging info about a B-tree
  *
  * Return:      Non-negative on success/Negative on failure
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -54,9 +53,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     assert(f);
     assert(H5_addr_defined(addr));
     assert(stream);
@@ -130,27 +127,21 @@ done:
 } /* end H5B_debug() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5B__assert
+ * Function:    H5B__verify_structure
  *
- * Purpose:     Verifies that the tree is structured correctly.
+ * Purpose:     Verifies that the tree is structured correctly
  *
- * Return:      Success:    SUCCEED
- *
- *              Failure:    aborts if something is wrong.
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-#ifdef H5B_DEBUG
 herr_t
-H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
+H5B__verify_structure(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t         *bt = NULL;
     H5UC_t        *rc_shared;   /* Ref-counted shared info */
     H5B_shared_t  *shared;      /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata; /* User-data for metadata cache callback */
-    int            ncell, cmp;
-    static int     ncalls = 0;
-    herr_t         status;
+    int            cmp;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     /* A queue of child data */
@@ -162,70 +153,79 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 
     FUNC_ENTER_PACKAGE
 
-    if (0 == ncalls++) {
-        if (H5DEBUG(B))
-            fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
-    } /* end if */
-
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's shared ref. count object");
-    shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared);
-    assert(shared);
+    if (NULL == (shared = (H5B_shared_t *)H5UC_GET_OBJ(rc_shared)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree's ref counted shared info");
 
     /* Initialize the queue */
     cache_udata.f         = f;
     cache_udata.type      = type;
     cache_udata.rc_shared = rc_shared;
-    bt                    = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG);
-    assert(bt);
-    shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
-    assert(shared);
-    cur = (struct child_t *)H5MM_calloc(sizeof(struct child_t));
-    assert(cur);
+
+    if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "can't protect B-tree node");
+
+    if (NULL == (shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't get B-tree shared data");
+
+    if (NULL == (cur = (struct child_t *)H5MM_calloc(sizeof(struct child_t))))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "can't allocate memory for queue");
+
     cur->addr  = addr;
     cur->level = bt->level;
     head = tail = cur;
 
-    status = H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET);
-    assert(status >= 0);
+    if (H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "can't unprotect B-tree node");
+
     bt = NULL; /* Make certain future references will be caught */
 
-    /*
-     * Do a breadth-first search of the tree.  New nodes are added to the end
+    /* Do a breadth-first search of the tree.  New nodes are added to the end
      * of the queue as the `cur' pointer is advanced toward the end.  We don't
      * remove any nodes from the queue because we need them in the uniqueness
      * test.
      */
-    for (ncell = 0; cur; ncell++) {
-        bt = (H5B_t *)H5AC_protect(f, H5AC_BT, cur->addr, &cache_udata, H5AC__READ_ONLY_FLAG);
-        assert(bt);
+    while (cur) {
+        if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, cur->addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "can't protect B-tree node");
 
         /* Check node header */
-        assert(bt->level == cur->level);
-        if (cur->next && cur->next->level == bt->level)
-            assert(H5_addr_eq(bt->right, cur->next->addr));
-        else
-            assert(!H5_addr_defined(bt->right));
-        if (prev && prev->level == bt->level)
-            assert(H5_addr_eq(bt->left, prev->addr));
-        else
-            assert(!H5_addr_defined(bt->left));
+        if (bt->level != cur->level)
+            HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "B-tree level incorrect");
+
+        if (cur->next && cur->next->level == bt->level) {
+            if (!H5_addr_eq(bt->right, cur->next->addr))
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "right address should not equal next");
+        }
+        else {
+            if (H5_addr_defined(bt->right))
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "bt->right should be HADDR_UNDEF");
+        }
+
+        if (prev && prev->level == bt->level) {
+            if (!H5_addr_eq(bt->left, prev->addr))
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "left address should not equal previous");
+        }
+        else {
+            if (H5_addr_defined(bt->left))
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "bt->left should be HADDR_UNDEF");
+        }
 
         if (cur->level > 0) {
-            unsigned u;
-
-            for (u = 0; u < bt->nchildren; u++) {
-                /*
-                 * Check that child nodes haven't already been seen.  If they
+            for (unsigned u = 0; u < bt->nchildren; u++) {
+                /* Check that child nodes haven't already been seen.  If they
                  * have then the tree has a cycle.
                  */
                 for (tmp = head; tmp; tmp = tmp->next)
-                    assert(H5_addr_ne(tmp->addr, bt->child[u]));
+                    if (!H5_addr_ne(tmp->addr, bt->child[u]))
+                        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "cycle detected in tree");
 
                 /* Add the child node to the end of the queue */
-                tmp = (struct child_t *)H5MM_calloc(sizeof(struct child_t));
-                assert(tmp);
+                if (NULL == (tmp = (struct child_t *)H5MM_calloc(sizeof(struct child_t))))
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "can't allocate memory for child node");
+
                 tmp->addr  = bt->child[u];
                 tmp->level = bt->level - 1;
                 tail->next = tmp;
@@ -233,28 +233,29 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 
                 /* Check that the keys are monotonically increasing */
                 cmp = (type->cmp2)(H5B_NKEY(bt, shared, u), udata, H5B_NKEY(bt, shared, u + 1));
-                assert(cmp < 0);
-            } /* end for */
-        }     /* end if */
+                if (cmp >= 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "keys not monotonically increasing");
+            }
+        }
 
         /* Release node */
-        status = H5AC_unprotect(f, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET);
-        assert(status >= 0);
+        if (H5AC_unprotect(f, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "can't unprotect B-tree node");
+
         bt = NULL; /* Make certain future references will be caught */
 
         /* Advance current location in queue */
         prev = cur;
         cur  = cur->next;
-    } /* end for */
+    }
 
     /* Free all entries from queue */
     while (head) {
         tmp = head->next;
         H5MM_xfree(head);
         head = tmp;
-    } /* end while */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B__assert() */
-#endif /* H5B_DEBUG */
+} /* end H5B__verify_structure() */

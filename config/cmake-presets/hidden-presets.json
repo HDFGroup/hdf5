@@ -522,9 +522,6 @@
       "configurePreset": "ci-x64-Release-MSVC",
       "hidden": true,
       "inherits": "ci-base",
-      "generators": [
-        "ZIP"
-      ],
       "configurations": ["RelWithDebInfo"]
     },
     {
@@ -543,10 +540,7 @@
       "name": "ci-x64-Release-Intel",
       "configurePreset": "ci-x64-Release-Intel",
       "hidden": true,
-      "inherits": "ci-base",
-      "generators": [
-        "TGZ"
-      ]
+      "inherits": "ci-base"
     }
   ]
 }

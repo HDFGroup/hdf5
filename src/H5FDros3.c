@@ -35,9 +35,12 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* toggle function call prints: 1 turns on
+/* toggle debugging; pick a level
  */
-#define ROS3_DEBUG 0
+#define ROS3_DEBUG_NONE           0
+#define ROS3_DEBUG_TRACE_API      1
+#define ROS3_DEBUG_TRACE_INTERNAL 2
+#define ROS3_DEBUG                ROS3_DEBUG_NONE
 
 /* toggle stats collection and reporting
  */
@@ -315,18 +318,18 @@ H5FD_ros3_init(void)
         if (H5I_INVALID_HID == H5FD_ROS3_g) {
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
         }
-    }
 
 #if ROS3_STATS
-    /* pre-compute statsbin boundaries
-     */
-    for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
-        unsigned long long value = 0;
+        /* pre-compute statsbin boundaries */
+        /* do it only during initial registration */
+        for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
+            unsigned long long value = 0;
 
-        ROS3_STATS_POW(bin_i, &value)
-        ros3_stats_boundaries[bin_i] = value;
-    }
+            ROS3_STATS_POW(bin_i, &value)
+            ros3_stats_boundaries[bin_i] = value;
+        }
 #endif
+    }
 
     ret_value = H5FD_ROS3_g;
 
@@ -456,7 +459,7 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", fapl_id, fa_dst);
+    H5TRACE2("e", "i*#", fapl_id, fa_dst);
 
 #if ROS3_DEBUG
     fprintf(stdout, "H5Pget_fapl_ros3() called.\n");
@@ -605,7 +608,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "izx", fapl_id, size, token_dst);
+    H5TRACE3("e", "iz*s", fapl_id, size, token_dst);
 
 #if ROS3_DEBUG
     fprintf(stdout, "H5Pget_fapl_ros3_token() called.\n");
@@ -858,7 +861,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
 
     FUNC_ENTER_PACKAGE
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     printf("ros3_reset_stats() called\n");
 #endif
 
@@ -1169,8 +1172,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      * PRINT OVERVIEW *
      ******************/
 
-    fprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n", count_raw + count_meta, count_meta,
-            count_raw);
+    fprintf(stream, "TOTAL READS: %lu  (%lu meta, %lu raw)\n", count_raw + count_meta, count_meta, count_raw);
     fprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
             bytes_raw);
 
@@ -1294,7 +1296,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
             re_dub /= 1024.0;
         assert(suffix_i < sizeof(suffixes));
 
-        fprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
+        fprintf(stream, " %8.3f%c %7llu %7llu %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
                 suffixes[suffix_i], /* bin ceiling      */
                 m->count,           /* metadata reads   */
                 r->count,           /* raw data reads    */
@@ -1342,16 +1344,16 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     assert(file != NULL);
     assert(file->s3r_handle != NULL);
 
-    /* Close the underlying request handle
-     */
-    if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
-
 #if ROS3_STATS
     /* TODO: mechanism to re-target stats printout */
     if (ros3_fprint_stats(stdout, file) == FAIL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
 #endif /* ROS3_STATS */
+
+    /* Close the underlying request handle
+     */
+    if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
     /* Release the file info */
     H5MM_xfree(file->cache);
@@ -1381,7 +1383,7 @@ done:
  *     + fapl secret_id
  *     + fapl secret_key
  *
- *     tl;dr -> check URL, check crentials
+ *     tl;dr -> check URL, check credentials
  *
  * Return:
  *
@@ -1510,7 +1512,7 @@ H5FD__ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     fprintf(stdout, "H5FD__ros3_query() called.\n");
 #endif
 
@@ -1547,7 +1549,7 @@ H5FD__ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     fprintf(stdout, "H5FD__ros3_get_eoa() called.\n");
 #endif
 
@@ -1575,7 +1577,7 @@ H5FD__ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     fprintf(stdout, "H5FD__ros3_set_eoa() called.\n");
 #endif
 
@@ -1606,7 +1608,7 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     fprintf(stdout, "H5FD__ros3_get_eof() called.\n");
 #endif
 

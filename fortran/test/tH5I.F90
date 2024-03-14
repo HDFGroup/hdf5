@@ -308,9 +308,12 @@ CONTAINS
      ! Clear the error stack from the file close failure
      CALL h5eset_auto_f(1, error)
      CALL h5eclear_f(error)
+     CALL check("h5eclear_f",error,total_error)
+     CALL h5eclear_f(error, H5P_DEFAULT_F)
+     CALL check("h5eclear_f",error,total_error)
 
-      if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-          CALL check("h5_cleanup_f", error, total_error)
+     IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+     CALL check("h5_cleanup_f", error, total_error)
 
      RETURN
      END SUBROUTINE identifier_test
