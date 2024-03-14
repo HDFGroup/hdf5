@@ -12,12 +12,16 @@ const Allocator = std.mem.Allocator;
     const optimize = b.standardOptimizeOption(.{});
 
     const root_dir = b.build_root.handle;
+    const root_path = try root_dir.realpathAlloc(alloc, ".");
 
     // Add a configure step
     const config_step = b.step("configure", "configure hdf5 for building on this machine");
-    b.getInstallStep().dependOn(config_step);
-    const run_config = b.addSystemCommand(&.{"./configure"});
-    run_config.addArgs(&.{"--enable-cxx"});
+    const config_path = try root_dir.realpathAlloc(alloc, "configure");
+    const run_config = b.addSystemCommand(&.{ config_path });
+    run_config.addArgs(&.{
+        "--enable-cxx",
+        b.fmt("--srcdir={s}", .{ root_path })
+    });
     const config_out = run_config.captureStdOut();
     config_step.dependOn(&b.addInstallFile(config_out, "config_log.txt").step);
 
@@ -26,6 +30,7 @@ const Allocator = std.mem.Allocator;
         .optimize = optimize,
         .target = target
     });
+    hdf5cpp.step.dependOn(config_step);
 
     // Add headers
     hdf5cpp.addIncludePath(.{ .path = "src" });
