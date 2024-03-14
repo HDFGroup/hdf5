@@ -13,9 +13,9 @@ HDF5 source.
 Note that documentation in the links below will be updated at the time of each
 final release.
 
-Links to HDF5 documentation can be found on The HDF5 web page:
+Links to HDF5 documentation can be found on:
 
-     https://portal.hdfgroup.org/display/HDF5/HDF5
+     https://portal.hdfgroup.org/documentation/
 
 The official HDF5 releases can be obtained from:
 
