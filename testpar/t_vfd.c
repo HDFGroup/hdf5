@@ -6185,8 +6185,8 @@ main(int argc, char **argv)
 {
 
 #ifdef H5_HAVE_SUBFILING_VFD
-    int   required                               = MPI_THREAD_MULTIPLE;
-    int   provided                               = 0;
+    int   required = MPI_THREAD_MULTIPLE;
+    int   provided = 0;
     char *subfiling_subfile_prefix_saved;
     char *subfiling_ioc_selection_criteria_saved;
     char *subfiling_ioc_per_node_saved;
