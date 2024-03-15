@@ -15752,12 +15752,16 @@ test_downsize_vlen_scalar_dataset(hid_t file)
     hid_t                     vlen_compound_memory_tid = -1; /* VARIABLE COMPOUND datatype ID */
     hid_t                     scalar_did               = -1; /* SCALAR dataset ID */
     hvl_t                     vlen_compound_data;            /* Top-level VLEN data */
-    vlen_ds_compound_memory_t compound_data[VLEN_DS_DIM];    /* Contents of VLEN data */
+    vlen_ds_compound_memory_t *compound_data = NULL;    /* Contents of VLEN data */
     char                      common_string[VLEN_DS_STRLEN]; /* Common string contents */
     hsize_t                   array_dims[2] = {VLEN_DS_ARRAY_DIM1, VLEN_DS_ARRAY_DIM2};
     int                       i, dim1, dim2; /* Local index variables */
 
     TESTING("H5Dwrite() on down-sized VLEN contents");
+
+    /* Allocate space for compound data */
+    if (NULL == (compound_data = (vlen_ds_compound_memory_t *)malloc(VLEN_DS_DIM * sizeof(vlen_ds_compound_memory_t))))
+        TEST_ERROR;
 
     /* Create scalar dataspace */
     if ((scalar_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -15822,7 +15826,7 @@ test_downsize_vlen_scalar_dataset(hid_t file)
     /* Note: the bug in v1.8.14 is tripped on the second iteration, when 100 elements are over-written
      * with 99. */
     for (i = VLEN_DS_DIM; i > 0; --i) {
-        vlen_compound_data.len = i;
+        vlen_compound_data.len = (size_t)i;
         vlen_compound_data.p   = compound_data;
         if (H5Dwrite(scalar_did, vlen_compound_memory_tid, scalar_sid, scalar_sid, H5P_DEFAULT,
                      &vlen_compound_data) < 0)
@@ -15846,6 +15850,8 @@ test_downsize_vlen_scalar_dataset(hid_t file)
         TEST_ERROR;
     if (H5Dclose(scalar_did) < 0)
         TEST_ERROR;
+    free(compound_data);
+    compound_data = NULL;
 
     PASSED();
     return 0;
@@ -15861,6 +15867,8 @@ error:
         H5Tclose(compound_memory_tid);
         H5Tclose(vlen_compound_memory_tid);
         H5Dclose(scalar_did);
+        free(compound_data);
+        compound_data = NULL;
     }
     H5E_END_TRY;
     return -1;
