@@ -1441,7 +1441,7 @@ SUBROUTINE t_enum(total_error)
   !
   ! Create dataspace.  Setting maximum size to be the current size.
   !
-  CALL h5screate_simple_f(2, dims, space, total_error)
+  CALL h5screate_simple_f(2, dims, space, error)
   CALL check("h5screate_simple_f",error, total_error)
   !
   ! Create the dataset and write the enumerated data to it.
