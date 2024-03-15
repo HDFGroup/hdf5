@@ -252,9 +252,9 @@ SUBROUTINE test_error_stack(total_error)
   INTEGER :: total_error
   INTEGER :: error
   INTEGER(HID_T) :: cls_id, major, minor, estack_id, estack_id1, estack_id2
-  CHARACTER(LEN=18), TARGET :: file
-  CHARACTER(LEN=18), TARGET :: func
-  INTEGER(C_INT)   , TARGET :: line
+  CHARACTER(LEN=18) :: file
+  CHARACTER(LEN=18) :: func
+  INTEGER(C_INT)    :: line
   TYPE(C_PTR) :: ptr1, ptr2, ptr3, ptr4
 
   INTEGER :: msg_type
@@ -283,20 +283,16 @@ SUBROUTINE test_error_stack(total_error)
   CALL H5Ecreate_msg_f(cls_id, H5E_MINOR_F, min_mesg, minor, error)
   CALL check("H5Ecreate_msg_f", error, total_error)
 
-  file = "FILE"//C_NULL_CHAR
-  func = "FUNC"//C_NULL_CHAR
+  file = "FILE"
+  func = "FUNC"
   line = 99
-
-  ptr1 = C_LOC(file(1:1))
-  ptr2 = C_LOC(func(1:1))
-  ptr3 = C_LOC(line)
 
   CALL h5ecreate_stack_f(estack_id, error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
   ! push a custom error message onto the stack
-  CALL H5Epush_f(estack_id, cls_id, major, minor, "%s ERROR TEXT %s %s", error, &
-       ptr1, ptr2, ptr3, &
+  CALL H5Epush_f(estack_id, file, func, line, &
+       cls_id, major, minor, "%s ERROR TEXT %s %s", error, &
        arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(10) )
   CALL check("H5Epush_f", error, total_error)
 
@@ -462,9 +458,9 @@ SUBROUTINE test_error_stack(total_error)
   CALL check("h5ecreate_stack_f", error, total_error)
 
   ! push a custom error message onto the stack
-  CALL H5Epush_f(estack_id1, cls_id, major, minor, "%s ERROR TEXT %s"//C_NEW_LINE, error, &
-       ptr1, ptr2, ptr3, &
-       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m" )
+  CALL H5Epush_f(estack_id1, file, func, line, &
+       cls_id, major, minor, "%s ERROR TEXT %s %s", error, &
+       arg1=ACHAR(27)//"[31m", arg2=ACHAR(27)//"[0m", arg3=ACHAR(10) )
   CALL check("H5Epush_f", error, total_error)
 
   CALL H5Eset_current_stack_f(estack_id1, error) ! API will also close estack_id1
