@@ -15,7 +15,7 @@
 /* Check for cond, set ret to err_val and goto label */
 #define HG_UTIL_CHECK_ERROR(cond, label, ret, err_val, ...)                                                  \
     do {                                                                                                     \
-        if (H5_UNLIKELY(cond)) {                                                                                \
+        if (H5_UNLIKELY(cond)) {                                                                             \
             ret = err_val;                                                                                   \
             goto label;                                                                                      \
         }                                                                                                    \
@@ -23,7 +23,7 @@
 
 #define HG_UTIL_CHECK_ERROR_NORET(cond, label, ...)                                                          \
     do {                                                                                                     \
-        if (H5_UNLIKELY(cond)) {                                                                                \
+        if (H5_UNLIKELY(cond)) {                                                                             \
             goto label;                                                                                      \
         }                                                                                                    \
     } while (0)

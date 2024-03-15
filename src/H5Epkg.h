@@ -122,8 +122,8 @@ H5_DLLVAR H5E_t H5E_stack_g[1];
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5E__term_deprec_interface(void);
-H5_DLL void H5E__set_default_auto(H5E_t *stk);
+H5_DLL herr_t  H5E__term_deprec_interface(void);
+H5_DLL void    H5E__set_default_auto(H5E_t *stk);
 H5_DLL herr_t  H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,
                                hid_t maj_id, hid_t min_id, const char *desc);
 H5_DLL ssize_t H5E__get_msg(const H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);

@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5Eprivate.h"  /* Error handling                      */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h"  /* Generic Functions                   */
+#include "H5Eprivate.h" /* Error handling                      */
+#include "H5TSpkg.h"    /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -41,16 +41,13 @@
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
@@ -63,11 +60,9 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Library Private Variables */
 /*****************************/
 
-
 /*******************/
 /* Local Variables */
 /*******************/
-
 
 /*--------------------------------------------------------------------------
  * Function:    H5TSmutex_acquire
@@ -82,12 +77,11 @@ H5TS_api_info_t H5TS_api_info_p;
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TSmutex_acquire(unsigned lock_count, bool *acquired)
-{
+H5TSmutex_acquire(unsigned lock_count, bool *acquired){
     FUNC_ENTER_API_NAMECHECK_ONLY
 
-    FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(lock_count, acquired))
-} /* end H5TSmutex_acquire() */
+        FUNC_LEAVE_API_NAMECHECK_ONLY(H5TS__mutex_acquire(lock_count, acquired))}
+/* end H5TSmutex_acquire() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TSmutex_get_attempt_count
@@ -101,11 +95,10 @@ H5TSmutex_acquire(unsigned lock_count, bool *acquired)
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TSmutex_get_attempt_count(unsigned *count)
+herr_t H5TSmutex_get_attempt_count(unsigned *count)
 {
-    bool have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_API_NAMECHECK_ONLY
 
@@ -118,8 +111,8 @@ H5TSmutex_get_attempt_count(unsigned *count)
 
 done:
     /* Release the lock */
-    if(have_mutex)
-        if(H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
+    if (have_mutex)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&H5TS_api_info_p.attempt_mutex) < 0))
             ret_value = FAIL;
 
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)

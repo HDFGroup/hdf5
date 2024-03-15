@@ -29,9 +29,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5Eprivate.h"  /* Error handling                      */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h"  /* Generic Functions                   */
+#include "H5Eprivate.h" /* Error handling                      */
+#include "H5TSpkg.h"    /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -41,35 +41,31 @@
 
 #ifndef H5_HAVE_PTHREAD_BARRIER
 /* Barrier initialization macro */
-#define H5TS_BARRIER_INIT {			                      \
-			   PTHREAD_MUTEX_INITIALIZER, /* mutex */     \
-			   PTHREAD_COND_INITIALIZER,  /* cv */        \
-			   0,			      /* count */     \
-			   0,			      /* entered */   \
-			   0 			      /* threshold */ \
-			  }
+#define H5TS_BARRIER_INIT                                                                                    \
+    {                                                                                                        \
+        PTHREAD_MUTEX_INITIALIZER,    /* mutex */                                                            \
+            PTHREAD_COND_INITIALIZER, /* cv */                                                               \
+            0,                        /* count */                                                            \
+            0,                        /* entered */                                                          \
+            0                         /* threshold */                                                        \
+    }
 #endif
-
 
 /******************/
 /* Local Typedefs */
 /******************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -99,7 +95,7 @@ H5TS__barrier_init(H5TS_barrier_t *barrier, uint64_t count)
     if (H5_UNLIKELY(NULL == barrier || 0 == count))
         HGOTO_DONE(FAIL);
 
-    /* Initialize the barrier */
+        /* Initialize the barrier */
 #ifdef H5_HAVE_PTHREAD_BARRIER
     if (pthread_barrier_init(barrier, NULL, count))
         HGOTO_DONE(FAIL);
@@ -150,23 +146,23 @@ H5TS__barrier_wait(H5TS_barrier_t *barrier)
 
     barrier->entered++;
     if (barrier->entered < barrier->threshold) {
-	if (H5_UNLIKELY(H5TS_cond_wait(&barrier->cv, &barrier->mutex)))
-	    HGOTO_DONE(FAIL);
+        if (H5_UNLIKELY(H5TS_cond_wait(&barrier->cv, &barrier->mutex)))
+            HGOTO_DONE(FAIL);
     }
     else {
-	if (H5_UNLIKELY(H5TS_cond_broadcast(&barrier->cv)))
-	    HGOTO_DONE(FAIL);
+        if (H5_UNLIKELY(H5TS_cond_broadcast(&barrier->cv)))
+            HGOTO_DONE(FAIL);
 
-	/* Increment threshold count of threads for next barrier */
-	barrier->threshold += barrier->count;
+        /* Increment threshold count of threads for next barrier */
+        barrier->threshold += barrier->count;
     }
 #endif
 
 done:
 #ifndef H5_HAVE_PTHREAD_BARRIER
-    if(have_mutex)
-	if(H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex)))
-	    ret_value = FAIL;
+    if (have_mutex)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex)))
+            ret_value = FAIL;
 #endif
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -203,12 +199,12 @@ H5TS__barrier_destroy(H5TS_barrier_t *barrier)
 
     /* Check for barrier still in use */
     if (H5_UNLIKELY((barrier->threshold - barrier->entered) != barrier->count)) {
-	(void)H5TS_mutex_unlock(&barrier->mutex);
+        (void)H5TS_mutex_unlock(&barrier->mutex);
         HGOTO_DONE(FAIL);
     }
 
     /* Release the barrier's mutex */
-    if(H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex)))
+    if (H5_UNLIKELY(H5TS_mutex_unlock(&barrier->mutex)))
         HGOTO_DONE(FAIL);
 
     /* Call the appropriate pthread destroy routines.  We are committed
@@ -216,9 +212,9 @@ H5TS__barrier_destroy(H5TS_barrier_t *barrier)
      * along the way.
      */
     if (H5_UNLIKELY(H5TS_mutex_destroy(&barrier->mutex)))
-	ret_value = FAIL;
+        ret_value = FAIL;
     if (H5_UNLIKELY(H5TS_cond_destroy(&barrier->cv)))
-	ret_value = FAIL;
+        ret_value = FAIL;
 #endif
 
 done:

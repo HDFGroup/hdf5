@@ -1307,7 +1307,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     {                                                                                                        \
         static bool func_check = false;                                                                      \
                                                                                                              \
-        if (H5_UNLIKELY(!func_check)) {                                                                                   \
+        if (H5_UNLIKELY(!func_check)) {                                                                      \
             /* Check function naming status */                                                               \
             assert(asrt &&                                                                                   \
                    "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "     \
@@ -1348,7 +1348,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     if (H5_UNLIKELY(H5CX_push() < 0))                                                                        \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
     else                                                                                                     \
-        api_ctx_pushed = true;
+        api_ctx_pushed = true;                                                                               \
                                                                                                              \
     /* Push the name of this function on the function stack */                                               \
     H5_PUSH_FUNC
@@ -1617,7 +1617,7 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
     } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
-    if (H5_LIKELY(api_ctx_pushed)) {                                                                                    \
+    if (H5_LIKELY(api_ctx_pushed)) {                                                                         \
         (void)H5CX_pop(true);                                                                                \
         api_ctx_pushed = false;                                                                              \
     }                                                                                                        \

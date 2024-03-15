@@ -33,7 +33,6 @@
 
 #define H5CS_MIN_NSLOTS 16 /* Minimum number of records in an function stack	*/
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5CS_print_stack
  *
@@ -144,7 +143,7 @@ H5CS_pop(void)
          * and are not allocated, so there's no need to free them.
          */
         free(fstack->rec);
-        fstack->rec = NULL;
+        fstack->rec    = NULL;
         fstack->nalloc = 0;
     } /* end if */
 
@@ -163,9 +162,9 @@ H5CS_pop(void)
 H5CS_t *
 H5CS_copy_stack(void)
 {
-    H5CS_t  *old_stack = H5CX_get_fstack(); /* Get function stack from API context */
-    H5CS_t  *new_stack;                     /* New function stack, for copy */
-    H5CS_t  *ret_value = NULL;              /* Return value */
+    H5CS_t *old_stack = H5CX_get_fstack(); /* Get function stack from API context */
+    H5CS_t *new_stack;                     /* New function stack, for copy */
+    H5CS_t *ret_value = NULL;              /* Return value */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFS

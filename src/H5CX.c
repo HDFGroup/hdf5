@@ -201,7 +201,7 @@ typedef struct H5CX_t {
 
 #ifdef H5_HAVE_CODESTACK
     /* Internal: Function stack info */
-    H5CS_t       fstack;             /* Current function stack for an API operation */
+    H5CS_t fstack; /* Current function stack for an API operation */
 #endif
 
 #ifdef H5_HAVE_PARALLEL
@@ -1692,7 +1692,7 @@ H5CX_get_ring(void)
 H5CS_t *
 H5CX_get_fstack(void)
 {
-    H5CX_node_t **head = NULL;          /* Pointer to head of API context list */
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
 
     FUNC_ENTER_NOAPI_NOERR_NOFS
 

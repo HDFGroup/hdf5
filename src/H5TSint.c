@@ -43,30 +43,27 @@
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
 
 /* Per-thread info */
 typedef struct H5TS_thread_info_t {
-    uint64_t    	id;               /* Unique ID for each thread */
+    uint64_t            id;               /* Unique ID for each thread */
     struct H5CX_node_t *api_ctx_node_ptr; /* Pointer to an API context node */
-    H5E_t 		err_stack;	  /* Error stack */
+    H5E_t               err_stack;        /* Error stack */
 } H5TS_thread_info_t;
 
 /* An H5TS_tinfo_node_t is a thread info that is available for reuse */
 typedef struct H5TS_tinfo_node_t {
     struct H5TS_tinfo_node_t *next;
-    H5TS_thread_info_t info;
+    H5TS_thread_info_t        info;
 } H5TS_tinfo_node_t;
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 static H5TS_tinfo_node_t *H5TS__tinfo_create(void);
-
 
 /*********************/
 /* Package Variables */
@@ -75,11 +72,9 @@ static H5TS_tinfo_node_t *H5TS__tinfo_create(void);
 /* Per-thread info */
 H5TS_key_t H5TS_thrd_info_key_g;
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -89,19 +84,18 @@ H5TS_key_t H5TS_thrd_info_key_g;
 #ifdef H5_HAVE_WIN_THREADS
 static H5TS_once_t H5TS_first_init_s;
 #else
-static H5TS_once_t H5TS_first_init_s = PTHREAD_ONCE_INIT;
+static H5TS_once_t  H5TS_first_init_s = PTHREAD_ONCE_INIT;
 #endif
-
 
 /* Pointer to first free thread info record or NULL. */
 static H5TS_tinfo_node_t *H5TS_tinfo_next_free_s = NULL;
-static uint64_t    	  H5TS_next_thrd_id_s  = 0;
+static uint64_t           H5TS_next_thrd_id_s    = 0;
 
 /* Mutex for access to H5TS_tinfo_next_free_s and H5TS_next_thrd_id_s */
 #ifdef H5_HAVE_WIN_THREADS
 static H5TS_mutex_t H5TS_tinfo_mtx_s;
 #else
-static H5TS_mutex_t H5TS_tinfo_mtx_s = PTHREAD_MUTEX_INITIALIZER;
+static H5TS_mutex_t H5TS_tinfo_mtx_s  = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 /*-------------------------------------------------------------------------
@@ -288,7 +282,7 @@ H5TS__tinfo_init(void)
         ret_value = FAIL;
 #endif
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_init() */
 
 /*--------------------------------------------------------------------------
@@ -303,7 +297,7 @@ H5TS__tinfo_init(void)
 static H5TS_tinfo_node_t *
 H5TS__tinfo_create(void)
 {
-    uint64_t new_id;
+    uint64_t           new_id;
     H5TS_tinfo_node_t *tinfo_node;
     H5TS_tinfo_node_t *ret_value;
 
@@ -317,7 +311,7 @@ H5TS__tinfo_create(void)
 
     /* Reuse an info struct that's on the free list if possible */
     if (NULL != (tinfo_node = H5TS_tinfo_next_free_s))
-	H5TS_tinfo_next_free_s = tinfo_node->next;
+        H5TS_tinfo_next_free_s = tinfo_node->next;
 
     /* Always use unique ID value for each thread, even when recycling a
      * H5TS_tinfo_node_t from the free list.
@@ -331,29 +325,29 @@ H5TS__tinfo_create(void)
 
     /* If a new info record is needed, allocate it */
     if (NULL == tinfo_node) {
-	if (H5_UNLIKELY(NULL == (tinfo_node = H5MM_malloc(sizeof(*tinfo_node)))))
-	    HGOTO_DONE(NULL);
-	tinfo_node->next = NULL;
+        if (H5_UNLIKELY(NULL == (tinfo_node = H5MM_malloc(sizeof(*tinfo_node)))))
+            HGOTO_DONE(NULL);
+        tinfo_node->next = NULL;
     }
 
     /* Reset thread info struct */
     memset(tinfo_node, 0, sizeof(*tinfo_node));
 
     /* Set up non-zero per-thread info */
-    tinfo_node->info.id = new_id;			/* ID */
+    tinfo_node->info.id = new_id;                       /* ID */
     H5E__set_default_auto(&tinfo_node->info.err_stack); /* Error stack */
 
     /* Set a thread-local pointer to the thread's info record */
     if (H5_UNLIKELY(H5TS__set_thread_local_value(H5TS_thrd_info_key_g, tinfo_node))) {
-	H5TS__tinfo_destroy(tinfo_node);
-	HGOTO_DONE(NULL);
+        H5TS__tinfo_destroy(tinfo_node);
+        HGOTO_DONE(NULL);
     }
 
     /* Success */
     ret_value = tinfo_node;
 
 done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 }
 
 /*--------------------------------------------------------------------------
@@ -378,21 +372,21 @@ uint64_t
 H5TS_thread_id(void)
 {
     H5TS_tinfo_node_t *tinfo_node;
-    uint64_t ret_value;
+    uint64_t           ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
     if (NULL == (tinfo_node = H5TS__get_thread_local_value(H5TS_thrd_info_key_g)))
-	/* Create thread info for this thread */
-	if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
-	    HGOTO_DONE(0);
+        /* Create thread info for this thread */
+        if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
+            HGOTO_DONE(0);
 
     /* Set return value */
     ret_value = tinfo_node->info.id;
 
 done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_thread_id() */
 
 /*--------------------------------------------------------------------------
@@ -409,22 +403,22 @@ done:
 struct H5CX_node_t **
 H5TS_get_api_ctx_ptr(void)
 {
-    H5TS_tinfo_node_t *tinfo_node;
+    H5TS_tinfo_node_t   *tinfo_node;
     struct H5CX_node_t **ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
     if (NULL == (tinfo_node = H5TS__get_thread_local_value(H5TS_thrd_info_key_g)))
-	/* Create thread info for this thread */
-	if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
-	    HGOTO_DONE(NULL);
+        /* Create thread info for this thread */
+        if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
+            HGOTO_DONE(NULL);
 
     /* Set return value */
     ret_value = &tinfo_node->info.api_ctx_node_ptr;
 
 done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_get_api_ctx_ptr() */
 
 /*--------------------------------------------------------------------------
@@ -442,21 +436,21 @@ H5E_t *
 H5TS_get_err_stack(void)
 {
     H5TS_tinfo_node_t *tinfo_node;
-    H5E_t *ret_value;
+    H5E_t             *ret_value;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
     /* Check if info for thread has been created */
     if (NULL == (tinfo_node = H5TS__get_thread_local_value(H5TS_thrd_info_key_g)))
-	/* Create thread info for this thread */
-	if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
-	    HGOTO_DONE(NULL);
+        /* Create thread info for this thread */
+        if (H5_UNLIKELY(NULL == (tinfo_node = H5TS__tinfo_create())))
+            HGOTO_DONE(NULL);
 
     /* Set return value */
     ret_value = &tinfo_node->info.err_stack;
 
 done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_get_err_stack() */
 
 /*--------------------------------------------------------------------------
@@ -480,11 +474,11 @@ H5TS__tinfo_destroy(void *_tinfo_node)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (tinfo_node) {
-	/* Add thread info node to the free list */
-	H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
-	tinfo_node->next       = H5TS_tinfo_next_free_s;
-	H5TS_tinfo_next_free_s = tinfo_node;
-	H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
+        /* Add thread info node to the free list */
+        H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
+        tinfo_node->next       = H5TS_tinfo_next_free_s;
+        H5TS_tinfo_next_free_s = tinfo_node;
+        H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
     }
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
@@ -508,9 +502,9 @@ H5TS__tinfo_term(void)
 
     /* Release nodes on the free list */
     H5TS_mutex_lock(&H5TS_tinfo_mtx_s);
-    while(H5TS_tinfo_next_free_s) {
+    while (H5TS_tinfo_next_free_s) {
         H5TS_tinfo_node_t *next = H5TS_tinfo_next_free_s->next;
-	H5MM_free(H5TS_tinfo_next_free_s);
+        H5MM_free(H5TS_tinfo_next_free_s);
         H5TS_tinfo_next_free_s = next;
     }
     H5TS_mutex_unlock(&H5TS_tinfo_mtx_s);
@@ -528,7 +522,7 @@ H5TS__tinfo_term(void)
         ret_value = FAIL;
 #endif
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__tinfo_term() */
 
 #endif /* H5_HAVE_THREADSAFE */

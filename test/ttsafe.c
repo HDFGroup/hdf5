@@ -114,10 +114,14 @@ main(int argc, char *argv[])
     AddTest("attr_vlen", tts_attr_vlen, cleanup_attr_vlen, "multi-file-attribute-vlen read", NULL);
 
     /* Recursive R/W locks */
-    AddTest("rec_rwlock_1", tts_rec_rw_lock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic", NULL);
-    AddTest("rec_rwlock_2", tts_rec_rw_lock_smoke_check_2, NULL, "recursive R/W lock smoke check 2 -- mob of readers", NULL);
-    AddTest("rec_rwlock_3", tts_rec_rw_lock_smoke_check_3, NULL, "recursive R/W lock smoke check 3 -- mob of writers", NULL);
-    AddTest("rec_rwlock_4", tts_rec_rw_lock_smoke_check_4, NULL, "recursive R/W lock smoke check 4 -- mixed mob", NULL);
+    AddTest("rec_rwlock_1", tts_rec_rw_lock_smoke_check_1, NULL, "recursive R/W lock smoke check 1 -- basic",
+            NULL);
+    AddTest("rec_rwlock_2", tts_rec_rw_lock_smoke_check_2, NULL,
+            "recursive R/W lock smoke check 2 -- mob of readers", NULL);
+    AddTest("rec_rwlock_3", tts_rec_rw_lock_smoke_check_3, NULL,
+            "recursive R/W lock smoke check 3 -- mob of writers", NULL);
+    AddTest("rec_rwlock_4", tts_rec_rw_lock_smoke_check_4, NULL,
+            "recursive R/W lock smoke check 4 -- mixed mob", NULL);
 
     /* Developer API routine tests */
     AddTest("developer", tts_develop_api, NULL, "developer API routines", NULL);

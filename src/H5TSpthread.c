@@ -29,9 +29,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5Eprivate.h"  /* Error handling                      */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h"  /* Generic Functions                   */
+#include "H5Eprivate.h" /* Error handling                      */
+#include "H5TSpkg.h"    /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -43,34 +43,37 @@
 
 /* R/W lock initialization macro */
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
-#define H5TS_RW_LOCK_INIT {			        \
-			   PTHREAD_MUTEX_INITIALIZER,   /* mutex */		      \
-			   (H5TS_rw_lock_type_t)UNUSED, /* lock_type */		      \
-			   PTHREAD_COND_INITIALIZER,    /* writers_cv */	      \
-			   0,			        /* write_thread */	      \
-			   0,			        /* rec_write_lock_count */    \
-			   0,			        /* waiting_writers_count */   \
-			   false,		        /* is_key_registered */	      \
-			   PTHREAD_COND_INITIALIZER,    /* readers_cv */	      \
-			   0,			        /* active_reader_threads */   \
-			   (H5TS_key_t)0,	        /* rec_read_lock_count_key */ \
-			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} /* stats */  \
-			  }
+#define H5TS_RW_LOCK_INIT                                                                                    \
+    {                                                                                                        \
+        PTHREAD_MUTEX_INITIALIZER,       /* mutex */                                                         \
+            (H5TS_rw_lock_type_t)UNUSED, /* lock_type */                                                     \
+            PTHREAD_COND_INITIALIZER,    /* writers_cv */                                                    \
+            0,                           /* write_thread */                                                  \
+            0,                           /* rec_write_lock_count */                                          \
+            0,                           /* waiting_writers_count */                                         \
+            false,                       /* is_key_registered */                                             \
+            PTHREAD_COND_INITIALIZER,    /* readers_cv */                                                    \
+            0,                           /* active_reader_threads */                                         \
+            (H5TS_key_t)0,               /* rec_read_lock_count_key */                                       \
+        {                                                                                                    \
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                                                      \
+        } /* stats */                                                                                        \
+    }
 #else
-#define H5TS_RW_LOCK_INIT {			        \
-			   PTHREAD_MUTEX_INITIALIZER,   /* mutex */		      \
-			   (H5TS_rw_lock_type_t)UNUSED, /* lock_type */		      \
-			   PTHREAD_COND_INITIALIZER,    /* writers_cv */	      \
-			   0,			        /* write_thread */	      \
-			   0,			        /* rec_write_lock_count */    \
-			   0,			        /* waiting_writers_count */   \
-			   false,		        /* is_key_registered */	      \
-			   PTHREAD_COND_INITIALIZER,    /* readers_cv */	      \
-			   0,			        /* active_reader_threads */   \
-			   (H5TS_key_t)0 	        /* rec_read_lock_count_key */ \
-			  }
+#define H5TS_RW_LOCK_INIT                                                                                    \
+    {                                                                                                        \
+        PTHREAD_MUTEX_INITIALIZER,       /* mutex */                                                         \
+            (H5TS_rw_lock_type_t)UNUSED, /* lock_type */                                                     \
+            PTHREAD_COND_INITIALIZER,    /* writers_cv */                                                    \
+            0,                           /* write_thread */                                                  \
+            0,                           /* rec_write_lock_count */                                          \
+            0,                           /* waiting_writers_count */                                         \
+            false,                       /* is_key_registered */                                             \
+            PTHREAD_COND_INITIALIZER,    /* readers_cv */                                                    \
+            0,                           /* active_reader_threads */                                         \
+            (H5TS_key_t)0                /* rec_read_lock_count_key */                                       \
+    }
 #endif
-
 
 /******************/
 /* Local Typedefs */
@@ -95,9 +98,8 @@
  ******************************************************************************/
 
 typedef struct H5TS_rec_entry_count {
-    int64_t  rec_lock_count;
+    int64_t rec_lock_count;
 } H5TS_rec_entry_count_t;
-
 
 /********************/
 /* Local Prototypes */
@@ -105,16 +107,13 @@ typedef struct H5TS_rec_entry_count {
 
 static void H5TS__key_destructor(void *key_val);
 
-
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -122,7 +121,6 @@ static void H5TS__key_destructor(void *key_val);
 
 /* Default value to initialize R/W locks */
 static const H5TS_rw_lock_t H5TS_rw_lock_def = H5TS_RW_LOCK_INIT;
-
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__key_destructor
@@ -357,8 +355,8 @@ H5TS__update_stats_wr_unlock(H5TS_rw_lock_t *rw_lock)
 herr_t
 H5TS__rw_lock_get_stats(H5TS_rw_lock_t *rw_lock, H5TS_rw_lock_stats_t *stats)
 {
-    bool have_mutex = false;
-    herr_t  ret_value  = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -396,8 +394,8 @@ done:
 herr_t
 H5TS__rw_lock_reset_stats(H5TS_rw_lock_t *rw_lock)
 {
-    bool have_mutex = false;
-    herr_t ret_value   = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -451,7 +449,8 @@ H5TS__rw_lock_print_stats(const char *header_str, H5TS_rw_lock_stats_t *stats)
     fprintf(stdout, "  real_write_locks_granted       = %" PRId64 "\n", stats->real_write_locks_granted);
     fprintf(stdout, "  real_write_locks_released      = %" PRId64 "\n", stats->real_write_locks_released);
     fprintf(stdout, "  max_write_locks                = %" PRId64 "\n", stats->max_write_locks);
-    fprintf(stdout, "  max_write_lock_recursion_depth = %" PRId64 "\n", stats->max_write_lock_recursion_depth);
+    fprintf(stdout, "  max_write_lock_recursion_depth = %" PRId64 "\n",
+            stats->max_write_lock_recursion_depth);
     fprintf(stdout, "  write_locks_delayed            = %" PRId64 "\n", stats->write_locks_delayed);
     fprintf(stdout, "  max_write_locks_pending        = %" PRId64 "\n\n", stats->max_write_locks_pending);
 
@@ -512,14 +511,14 @@ H5TS__rw_lock_destroy(H5TS_rw_lock_t *rw_lock)
      * along the way.
      */
     if (H5_UNLIKELY(H5TS_mutex_destroy(&rw_lock->mutex)))
-	ret_value = FAIL;
+        ret_value = FAIL;
     if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->readers_cv)))
-	ret_value = FAIL;
+        ret_value = FAIL;
     if (H5_UNLIKELY(H5TS_cond_destroy(&rw_lock->writers_cv)))
-	ret_value = FAIL;
+        ret_value = FAIL;
     if (rw_lock->is_key_registered)
-	if (H5_UNLIKELY(H5TS__key_delete(rw_lock->rec_read_lock_count_key)))
-	    ret_value = FAIL;
+        if (H5_UNLIKELY(H5TS__key_delete(rw_lock->rec_read_lock_count_key)))
+            ret_value = FAIL;
 
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -539,9 +538,9 @@ herr_t
 H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
 {
     H5TS_rec_entry_count_t *count;
-    H5TS_thread_t my_thread_id = H5TS_thread_self();
-    bool have_mutex = false;
-    herr_t  ret_value = SUCCEED;
+    H5TS_thread_t           my_thread_id = H5TS_thread_self();
+    bool                    have_mutex   = false;
+    herr_t                  ret_value    = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -564,7 +563,7 @@ H5TS__rw_rdlock(H5TS_rw_lock_t *rw_lock)
         if (H5_UNLIKELY(pthread_key_create(&rw_lock->rec_read_lock_count_key, H5TS__key_destructor)))
             HGOTO_DONE(FAIL);
         rw_lock->is_key_registered = true;
-        count = NULL;
+        count                      = NULL;
     }
     else
         count = (H5TS_rec_entry_count_t *)H5TS__get_thread_local_value(rw_lock->rec_read_lock_count_key);
@@ -627,8 +626,8 @@ herr_t
 H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
 {
     H5TS_thread_t my_thread_id = H5TS_thread_self();
-    bool have_mutex = false;
-    herr_t  ret_value = SUCCEED;
+    bool          have_mutex   = false;
+    herr_t        ret_value    = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -648,7 +647,7 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
         if (READ == rw_lock->lock_type) {
             H5TS_rec_entry_count_t *count;
 
-	    /* Sanity check */
+            /* Sanity check */
             assert(rw_lock->is_key_registered);
 
             /* Fail if read lock count for this thread is > 0 */
@@ -675,7 +674,7 @@ H5TS__rw_wrlock(H5TS_rw_lock_t *rw_lock)
         }
 
         /* Set lock type & owner thread */
-        rw_lock->lock_type = WRITE;
+        rw_lock->lock_type    = WRITE;
         rw_lock->write_thread = my_thread_id;
     }
 
@@ -705,8 +704,8 @@ done:
 herr_t
 H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
 {
-    bool   have_mutex  = false;
-    herr_t ret_value = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -719,7 +718,7 @@ H5TS__rw_unlock(H5TS_rw_lock_t *rw_lock)
     have_mutex = true;
 
     /* Error check */
-    if (H5_UNLIKELY(UNUSED == rw_lock->lock_type))   /* Unlocking an unused lock? */
+    if (H5_UNLIKELY(UNUSED == rw_lock->lock_type)) /* Unlocking an unused lock? */
         HGOTO_DONE(FAIL);
 
     if (WRITE == rw_lock->lock_type) { /* Drop a write lock */

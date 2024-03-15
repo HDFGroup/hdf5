@@ -29,16 +29,15 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5Eprivate.h"  /* Error handling                      */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h"  /* Generic Functions                   */
+#include "H5Eprivate.h" /* Error handling                      */
+#include "H5TSpkg.h"    /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
 /****************/
 /* Local Macros */
 /****************/
-
 
 /******************/
 /* Local Typedefs */
@@ -51,9 +50,9 @@ struct _H5TS_win_kwd_node_t;
 
 /* Global list of all kwd's */
 typedef struct _H5TS_win_kwd_node_t {
-    struct _H5TS_win_kwd_node_t *next;
-    H5TS_key_t key;
-    H5TS_key_destructor_func_t dtor;
+    struct _H5TS_win_kwd_node_t     *next;
+    H5TS_key_t                       key;
+    H5TS_key_destructor_func_t       dtor;
     struct _H5TS_win_kwd_tid_node_t *head_tid_node;
 } H5TS_win_kwd_node_t;
 
@@ -61,12 +60,10 @@ typedef struct _H5TS_win_kwd_node_t {
 typedef struct _H5TS_win_kwd_tid_node_t {
     struct _H5TS_win_kwd_tid_node_t *next;
     struct _H5TS_win_kwd_tid_node_t *prev;
-    uint64_t tid;
-    H5TS_win_kwd_node_t *kwd_node;
+    uint64_t                         tid;
+    H5TS_win_kwd_node_t             *kwd_node;
 } H5TS_win_kwd_tid_node_t;
 #endif
-
-
 
 /********************/
 /* Local Prototypes */
@@ -76,16 +73,13 @@ static herr_t H5TS__add_kwd(H5TS_key_t key, H5TS_key_destructor_func_t dtor);
 static herr_t H5TS__set_kwd(H5TS_key_t key, const void *value);
 #endif
 
-
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -102,7 +96,6 @@ static H5TS_win_kwd_node_t *H5TS_win_kwd_list_head_s = NULL;
 static H5TS_mutex_t H5TS_win_kwd_list_mtx_s;
 static H5TS_mutex_t H5TS_win_kwd_sublist_mtx_s;
 #endif
-
 
 #ifdef H5_HAVE_WIN_THREADS
 /*--------------------------------------------------------------------------
@@ -129,7 +122,7 @@ H5TS__win_kwd_init(void)
     if (H5_UNLIKELY(TLS_OUT_OF_INDEXES == (H5TS_win_kwd_info_key_s = TlsAlloc())))
         ret_value = FAIL;
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__win_kwd_init() */
 
 /*--------------------------------------------------------------------------
@@ -145,7 +138,7 @@ static herr_t
 H5TS__add_kwd(H5TS_key_t key, H5TS_key_destructor_func_t dtor)
 {
     H5TS_win_kwd_node_t *kwd_node;
-    herr_t ret_value = SUCCEED;
+    herr_t               ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -155,7 +148,7 @@ H5TS__add_kwd(H5TS_key_t key, H5TS_key_destructor_func_t dtor)
     /* Create the kwd node for the key */
     if (H5_UNLIKELY(NULL == (kwd_node = H5MM_malloc(sizeof(*kwd_node)))))
         HGOTO_DONE(FAIL);
-    kwd_node->key = key;
+    kwd_node->key  = key;
     kwd_node->dtor = dtor;
 
     /* Acquire the lock for accessing the kwd list */
@@ -176,14 +169,14 @@ H5TS__add_kwd(H5TS_key_t key, H5TS_key_destructor_func_t dtor)
 #endif
 
     /* Add the kwd node to the list */
-    kwd_node->next = H5TS_win_kwd_list_head_s;
+    kwd_node->next           = H5TS_win_kwd_list_head_s;
     H5TS_win_kwd_list_head_s = kwd_node;
 
     /* Release the lock for accessing the kwd list */
     H5TS_mutex_unlock(&H5TS_win_kwd_list_mtx_s);
 
 done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__add_kwd() */
 
 /*--------------------------------------------------------------------------
@@ -200,7 +193,7 @@ static herr_t
 H5TS__set_kwd(H5TS_key_t key, const void *value)
 {
     H5TS_win_kwd_node_t *kwd_node;
-    herr_t ret_value = SUCCEED;
+    herr_t               ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -224,7 +217,7 @@ H5TS__set_kwd(H5TS_key_t key, const void *value)
     /* Check if this thread has been inserted already */
     if (NULL != kwd_node) {
         H5TS_win_kwd_tid_node_t *kwd_tid_node;
-        uint64_t thread_id;
+        uint64_t                 thread_id;
 
         /* Get the ID for this thread */
         if (H5_UNLIKELY(0 == (thread_id = H5TS_thread_id())))
@@ -248,7 +241,7 @@ H5TS__set_kwd(H5TS_key_t key, const void *value)
             /* Create the kwd tid node for the thread */
             if (H5_UNLIKELY(NULL == (kwd_tid_node = H5MM_calloc(sizeof(*kwd_tid_node)))))
                 HGOTO_DONE(FAIL);
-            kwd_tid_node->tid = thread_id;
+            kwd_tid_node->tid      = thread_id;
             kwd_tid_node->kwd_node = kwd_node;
 
             /* Acquire both locks for accessing the kwd list & sub-lists */
@@ -268,11 +261,11 @@ H5TS__set_kwd(H5TS_key_t key, const void *value)
     }
 
     /* Add the kwd node to the list */
-    kwd_node->next = H5TS_win_kwd_list_head_s;
+    kwd_node->next           = H5TS_win_kwd_list_head_s;
     H5TS_win_kwd_list_head_s = kwd_node;
 
 done:
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)                                                           \
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS__add_kwd() */
 
 /*-------------------------------------------------------------------------
@@ -336,9 +329,6 @@ done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_key_create() */
 
-
-
 #endif
 
 #endif /* H5_HAVE_THREADSAFE */
-

@@ -220,8 +220,8 @@ error:
 static int
 session_stop(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
-    int ret_value = 0;
+    bool api_ctx_pushed = false; /* Whether API context pushed   */
+    int  ret_value      = 0;
 
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
@@ -406,7 +406,7 @@ reply_error(struct mirror_session *session, const char *msg)
 static int
 do_close(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
@@ -456,7 +456,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
 {
     size_t                  decode_ret = 0;
     H5FD_mirror_xmit_lock_t xmit_lock;
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool                    api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
@@ -511,10 +511,10 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open)
 {
-    hid_t    fapl_id  = H5I_INVALID_HID;
-    unsigned _flags   = 0;
-    haddr_t  _maxaddr = HADDR_UNDEF;
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    hid_t    fapl_id        = H5I_INVALID_HID;
+    unsigned _flags         = 0;
+    haddr_t  _maxaddr       = HADDR_UNDEF;
+    bool     api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
            true == H5FD_mirror_xmit_is_open(xmit_open));
@@ -566,7 +566,7 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
 
     /* Push API context */
     if (H5CX_push() < 0)
-       goto error;
+        goto error;
     else
         api_ctx_pushed = true;
 
@@ -622,7 +622,7 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 {
     size_t                 decode_ret = 0;
     H5FD_mirror_xmit_eoa_t xmit_seoa;
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool                   api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
@@ -678,7 +678,7 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
 static int
 do_truncate(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
@@ -720,7 +720,7 @@ do_truncate(struct mirror_session *session)
 static int
 do_unlock(struct mirror_session *session)
 {
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC));
 
@@ -774,7 +774,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     char                    *buf               = NULL;
     ssize_t                  nbytes_in_packet  = 0;
     H5FD_mirror_xmit_write_t xmit_write;
-    bool                     api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool                     api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 

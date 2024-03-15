@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5Eprivate.h"  /* Error handling                      */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h"  /* Generic Functions                   */
+#include "H5Eprivate.h" /* Error handling                      */
+#include "H5TSpkg.h"    /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -43,43 +43,40 @@
 
 /* Excl lock initialization macro */
 #ifdef H5_HAVE_PTHREAD_H
-#define H5TS_EX_LOCK_INIT {			        \
-			     H5TS_MUTEX_INITIALIZER, /* mutex */          \
-			     H5TS_COND_INITIALIZER,  /* cond_var */       \
-			     0,			     /* owner_thread */   \
-			     0,			     /* lock_count */     \
-			     false,		     /* disable_cancel */ \
-			     0			     /* previous_state */ \
-			    }
+#define H5TS_EX_LOCK_INIT                                                                                    \
+    {                                                                                                        \
+        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
+            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
+            0,                     /* owner_thread */                                                        \
+            0,                     /* lock_count */                                                          \
+            false,                 /* disable_cancel */                                                      \
+            0                      /* previous_state */                                                      \
+    }
 #else
-#define H5TS_EXL_LOCK_INIT {			        \
-			     H5TS_MUTEX_INITIALIZER, /* mutex */          \
-			     H5TS_COND_INITIALIZER,  /* cond_var */       \
-			     0,			     /* owner_thread */   \
-			     0 			     /* lock_count */     \
-			    }
+#define H5TS_EXL_LOCK_INIT                                                                                   \
+    {                                                                                                        \
+        H5TS_MUTEX_INITIALIZER,    /* mutex */                                                               \
+            H5TS_COND_INITIALIZER, /* cond_var */                                                            \
+            0,                     /* owner_thread */                                                        \
+            0                      /* lock_count */                                                          \
+    }
 #endif
-
 
 /******************/
 /* Local Typedefs */
 /******************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
@@ -87,7 +84,6 @@
 
 /* Default value to initialize exclusive locks */
 static const H5TS_ex_lock_t H5TS_ex_lock_def = H5TS_EX_LOCK_INIT;
-
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__ex_lock_init
@@ -135,8 +131,8 @@ herr_t
 H5TS__ex_lock(H5TS_ex_lock_t *lock)
 {
     H5TS_thread_t my_thread_id = H5TS_thread_self();
-    bool have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    bool          have_mutex   = false;
+    herr_t        ret_value    = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -168,8 +164,8 @@ H5TS__ex_lock(H5TS_ex_lock_t *lock)
     }
 
 done:
-    if(have_mutex)
-        if(H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (have_mutex)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -189,9 +185,9 @@ done:
 herr_t
 H5TS__ex_acquire(H5TS_ex_lock_t *lock, unsigned lock_count, bool *acquired)
 {
-    bool have_mutex = false;
+    bool          have_mutex   = false;
     H5TS_thread_t my_thread_id = H5TS_thread_self();
-    herr_t ret_value = SUCCEED;
+    herr_t        ret_value    = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -220,8 +216,8 @@ H5TS__ex_acquire(H5TS_ex_lock_t *lock, unsigned lock_count, bool *acquired)
 
 done:
     /* Release the mutex, if acquired */
-    if(have_mutex)
-        if(H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (have_mutex)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -240,8 +236,8 @@ done:
 herr_t
 H5TS__ex_release(H5TS_ex_lock_t *lock, unsigned int *lock_count)
 {
-    bool have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -251,7 +247,7 @@ H5TS__ex_release(H5TS_ex_lock_t *lock, unsigned int *lock_count)
     have_mutex = true;
 
     /* Reset the lock count for this thread */
-    *lock_count       = lock->lock_count;
+    *lock_count      = lock->lock_count;
     lock->lock_count = 0;
 
     /* Signal the condition variable, to wake any thread waiting on the lock */
@@ -279,8 +275,8 @@ done:
 herr_t
 H5TS__ex_unlock(H5TS_ex_lock_t *lock)
 {
-    bool have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -308,8 +304,8 @@ H5TS__ex_unlock(H5TS_ex_lock_t *lock)
     }
 
 done:
-    if(have_mutex)
-        if(H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (have_mutex)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
@@ -329,8 +325,8 @@ done:
 herr_t
 H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock)
 {
-    bool have_mutex = false;
-    herr_t ret_value = SUCCEED;
+    bool   have_mutex = false;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
@@ -356,17 +352,16 @@ H5TS__ex_lock_destroy(H5TS_ex_lock_t *lock)
      * along the way.
      */
     if (H5_UNLIKELY(H5TS_mutex_destroy(&lock->mutex)))
-	ret_value = FAIL;
+        ret_value = FAIL;
     if (H5_UNLIKELY(H5TS_cond_destroy(&lock->cond_var)))
-	ret_value = FAIL;
+        ret_value = FAIL;
 
 done:
-    if(have_mutex)
-        if(H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
+    if (have_mutex)
+        if (H5_UNLIKELY(H5TS_mutex_unlock(&lock->mutex)))
             ret_value = FAIL;
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS__ex_lock_destroy() */
 
 #endif /* H5_HAVE_THREADSAFE */
-

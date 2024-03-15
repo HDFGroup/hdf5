@@ -23,7 +23,6 @@
 /* Library Private Macros */
 /**************************/
 
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -35,11 +34,9 @@ typedef struct H5CS_t {
     const char **rec;    /* Array of function records */
 } H5CS_t;
 
-
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */

@@ -21,13 +21,13 @@
 #ifdef H5_HAVE_THREADSAFE
 
 #define CYCLE_COUNT 2
-#define NTHREADS 5
+#define NTHREADS    5
 
-static volatile bool    failed = false;
-static H5TS_barrier_t   barrier;
-static int              times;
-static bool             used[NTHREADS * CYCLE_COUNT];
-static H5TS_mutex_t     used_lock = PTHREAD_MUTEX_INITIALIZER;
+static volatile bool  failed = false;
+static H5TS_barrier_t barrier;
+static int            times;
+static bool           used[NTHREADS * CYCLE_COUNT];
+static H5TS_mutex_t   used_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* Each thread runs this routine.  The routine fetches the current
  * thread's ID, makes sure that it is in the expected range, makes
@@ -48,7 +48,7 @@ static H5TS_mutex_t     used_lock = PTHREAD_MUTEX_INITIALIZER;
 static void *
 thread_main(void H5_ATTR_UNUSED *arg)
 {
-    int min_id, max_id;
+    int      min_id, max_id;
     uint64_t ntid, tid;
 
     tid = H5TS_thread_id();
@@ -97,9 +97,9 @@ void
 tts_thread_id(void)
 {
     H5TS_thread_t threads[NTHREADS];
-    uint64_t tid;
-    int       i;
-    herr_t result;
+    uint64_t      tid;
+    int           i;
+    herr_t        result;
 
     result = H5TS__barrier_init(&barrier, NTHREADS);
     CHECK_I(result, "H5TS__barrier_init");
@@ -123,7 +123,7 @@ tts_thread_id(void)
 
         /* Access synchronized by thread create/join */
         for (i = 0; i < NTHREADS; i++) {
-            if(!used[(times * NTHREADS) + i])
+            if (!used[(times * NTHREADS) + i])
                 TestErrPrintf("thread ID %d did not run.", i + 1);
         }
     }
@@ -133,5 +133,3 @@ tts_thread_id(void)
 } /* end tts_thread_id() */
 
 #endif /*H5_HAVE_THREADSAFE*/
-
-

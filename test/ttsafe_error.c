@@ -44,10 +44,10 @@ typedef struct err_num_struct {
 } err_num_t;
 
 /* Global variables */
-hid_t               error_file_g  = H5I_INVALID_HID;
-int                 error_flag_g  = 0;
-int                 error_count_g = 0;
-err_num_t           expected_g[EXPECTED_ERROR_DEPTH];
+hid_t        error_file_g  = H5I_INVALID_HID;
+int          error_flag_g  = 0;
+int          error_count_g = 0;
+err_num_t    expected_g[EXPECTED_ERROR_DEPTH];
 H5TS_mutex_t error_mutex_g;
 
 /* Prototypes */

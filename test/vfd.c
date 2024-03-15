@@ -4239,9 +4239,9 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
     bool       result     = true; /* will set to false on failure */
     bool       verbose    = false;
     uint32_t   i;
-    size_t     size = SIZE_MAX;
-    H5FD_mem_t type = H5FD_MEM_NTYPES;
-    bool       api_ctx_pushed = false;     /* Whether API context pushed   */
+    size_t     size           = SIZE_MAX;
+    H5FD_mem_t type           = H5FD_MEM_NTYPES;
+    bool       api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Push API context */
     if (H5CX_push() < 0)
@@ -4295,9 +4295,9 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
     bool       result     = true; /* will set to false on failure */
     bool       verbose    = false;
     uint32_t   i;
-    size_t     size = SIZE_MAX;
-    H5FD_mem_t type = H5FD_MEM_NTYPES;
-    bool       api_ctx_pushed = false;     /* Whether API context pushed   */
+    size_t     size           = SIZE_MAX;
+    H5FD_mem_t type           = H5FD_MEM_NTYPES;
+    bool       api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Push API context */
     if (H5CX_push() < 0)
@@ -4479,12 +4479,12 @@ static herr_t
 test_vector_io(const char *vfd_name)
 {
     char        test_title[80];
-    bool        size_fixed_0 = false;           /* whether remaining entry      */
-    bool        size_fixed_1 = false;           /* sizes in vector are fixed.   */
-    bool        size_fixed_2 = false;           /*                              */
-    bool        type_fixed_0 = false;           /* whether remaining entry      */
-    bool        type_fixed_1 = false;           /* types in vector are fixed.   */
-    bool        type_fixed_2 = false;           /*                              */
+    bool        size_fixed_0 = false; /* whether remaining entry      */
+    bool        size_fixed_1 = false; /* sizes in vector are fixed.   */
+    bool        size_fixed_2 = false; /*                              */
+    bool        type_fixed_0 = false; /* whether remaining entry      */
+    bool        type_fixed_1 = false; /* types in vector are fixed.   */
+    bool        type_fixed_2 = false; /*                              */
     bool        verbose      = false;
     hid_t       fapl_id      = H5I_INVALID_HID; /* file access property list ID */
     haddr_t     eoa;                            /* file eoa                     */
@@ -4995,7 +4995,7 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
     const void **bufs; /* Avoids cast/const warnings */
     int          i;
     int          j;
-    bool         api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool         api_ctx_pushed = false; /* Whether API context pushed   */
 
     if (NULL == (bufs = calloc(count, sizeof(void *))))
         TEST_ERROR;
@@ -5058,7 +5058,7 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
     int *rbufs[2] = {rbuf1, rbuf2};
     int  i;
     int  j;
-    bool api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Initialize read buffer */
     for (i = 0; i < (int)rbufcount; i++)
@@ -5165,8 +5165,8 @@ test_selection_io(const char *vfd_name)
     int        erbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                   /* 1D expected read buffer */
     int        erbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                    /* 2D expected read buffer */
     int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
-    int        shorten_element_sizes;   /* Whether to shorten the element sizes array */
-    bool       api_ctx_pushed = false;  /* Whether API context pushed   */
+    int        shorten_element_sizes;  /* Whether to shorten the element sizes array */
+    bool       api_ctx_pushed = false; /* Whether API context pushed   */
 
     snprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
 

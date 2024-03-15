@@ -33,7 +33,7 @@
 #ifndef H5_HAVE_WIN_THREADS
 
 #define MAX_NUM_THREADS 64
-#define MAX_LOCK_CYCLES (10 * 1000  * 1000)
+#define MAX_LOCK_CYCLES (10 * 1000 * 1000)
 
 /* structure used to configure test threads in the recurive
  * R/W/ lock tests.
@@ -265,11 +265,11 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
 void
 tts_rec_rw_lock_smoke_check_1(void)
 {
-    herr_t               result;
+    herr_t result;
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     H5TS_rw_lock_stats_t stats;
 #endif
-    H5TS_rw_lock_t       rec_rw_lock;
+    H5TS_rw_lock_t rec_rw_lock;
 
     /* 1) Initialize an instance of the recursive R/W lock. */
     result = H5TS__rw_lock_init(&rec_rw_lock);
@@ -551,18 +551,18 @@ tts_rec_rw_lock_smoke_check_2(void)
     herr_t                    result;
     int                       express_test;
     int                       i;
-    int                       num_threads                 = MAX_NUM_THREADS;
-    int                       lock_cycles                 = MAX_LOCK_CYCLES;
+    int                       num_threads = MAX_NUM_THREADS;
+    int                       lock_cycles = MAX_LOCK_CYCLES;
     H5TS_thread_t             threads[MAX_NUM_THREADS];
     rec_rw_lock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
-    hbool_t                   verbose = FALSE;
-    int32_t                   total_target_rd_lock_cycles = 0;
-    int32_t                   total_target_wr_lock_cycles = 0;
-    H5TS_rw_lock_stats_t      stats;
-    H5TS_rw_lock_stats_t      expected;
+    hbool_t              verbose                     = FALSE;
+    int32_t              total_target_rd_lock_cycles = 0;
+    int32_t              total_target_wr_lock_cycles = 0;
+    H5TS_rw_lock_stats_t stats;
+    H5TS_rw_lock_stats_t expected;
 #endif
-    H5TS_rw_lock_t            rec_rw_lock;
+    H5TS_rw_lock_t rec_rw_lock;
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -602,12 +602,12 @@ tts_rec_rw_lock_smoke_check_2(void)
     /* 2) Setup the user data to be passed to each reader test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
         memset(&udata[i], 0, sizeof(udata[i]));
-        udata[i].rw_lock                   = &rec_rw_lock;
-        udata[i].target_rd_lock_cycles     = lock_cycles;
-        udata[i].max_recursive_lock_depth  = 10;
+        udata[i].rw_lock                  = &rec_rw_lock;
+        udata[i].target_rd_lock_cycles    = lock_cycles;
+        udata[i].max_recursive_lock_depth = 10;
     }
 
-uint64_t start_time = H5_now_usec();
+    uint64_t start_time = H5_now_usec();
     /* 3) Create the reader threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
         threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, NULL, &udata[i]);
@@ -615,9 +615,10 @@ uint64_t start_time = H5_now_usec();
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
         H5TS__wait_for_thread(threads[i]);
-uint64_t end_time = H5_now_usec();
-uint64_t elap_time = (unsigned long long)(end_time - start_time);
-fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time, (elap_time / (uint64_t)lock_cycles));
+    uint64_t end_time  = H5_now_usec();
+    uint64_t elap_time = (unsigned long long)(end_time - start_time);
+    fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+            (elap_time / (uint64_t)lock_cycles));
 
     /* 5) Examine the user data from the threads, to determine the
      *    total number of real and recursive read locks and unlocks.
@@ -656,9 +657,9 @@ fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time, (
      * and exited early.
      */
     if (total_target_rd_lock_cycles != expected.real_read_locks_granted ||
-            total_target_rd_lock_cycles != expected.real_read_locks_released ||
-            total_target_wr_lock_cycles != expected.real_write_locks_granted ||
-            total_target_wr_lock_cycles != expected.real_write_locks_released)
+        total_target_rd_lock_cycles != expected.real_read_locks_released ||
+        total_target_wr_lock_cycles != expected.real_write_locks_granted ||
+        total_target_wr_lock_cycles != expected.real_write_locks_released)
         TestErrPrintf("Threads reported unexpected number of locks/unlocks.\n");
 
     /* initialize remaining non-zero fields in the expected stats */
@@ -749,18 +750,18 @@ tts_rec_rw_lock_smoke_check_3(void)
     herr_t                    result;
     int                       i;
     int                       express_test;
-    int                       num_threads                 = MAX_NUM_THREADS;
-    int                       lock_cycles                 = MAX_LOCK_CYCLES;
+    int                       num_threads = MAX_NUM_THREADS;
+    int                       lock_cycles = MAX_LOCK_CYCLES;
     H5TS_thread_t             threads[MAX_NUM_THREADS];
     rec_rw_lock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
-    hbool_t                   verbose = FALSE;
-    int32_t                   total_target_rd_lock_cycles = 0;
-    int32_t                   total_target_wr_lock_cycles = 0;
-    H5TS_rw_lock_stats_t      stats;
-    H5TS_rw_lock_stats_t      expected;
+    hbool_t              verbose                     = FALSE;
+    int32_t              total_target_rd_lock_cycles = 0;
+    int32_t              total_target_wr_lock_cycles = 0;
+    H5TS_rw_lock_stats_t stats;
+    H5TS_rw_lock_stats_t expected;
 #endif
-    H5TS_rw_lock_t            rec_rw_lock;
+    H5TS_rw_lock_t rec_rw_lock;
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -800,12 +801,12 @@ tts_rec_rw_lock_smoke_check_3(void)
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
         memset(&udata[i], 0, sizeof(udata[i]));
-        udata[i].rw_lock                   = &rec_rw_lock;
-        udata[i].target_wr_lock_cycles     = lock_cycles;
-        udata[i].max_recursive_lock_depth  = 10;
+        udata[i].rw_lock                  = &rec_rw_lock;
+        udata[i].target_wr_lock_cycles    = lock_cycles;
+        udata[i].max_recursive_lock_depth = 10;
     }
 
-uint64_t start_time = H5_now_usec();
+    uint64_t start_time = H5_now_usec();
     /* 3) Create the writer threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
         threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, NULL, &(udata[i]));
@@ -813,9 +814,10 @@ uint64_t start_time = H5_now_usec();
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
         H5TS__wait_for_thread(threads[i]);
-uint64_t end_time = H5_now_usec();
-uint64_t elap_time = (unsigned long long)(end_time - start_time);
-fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time, (elap_time / (uint64_t)lock_cycles));
+    uint64_t end_time  = H5_now_usec();
+    uint64_t elap_time = (unsigned long long)(end_time - start_time);
+    fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+            (elap_time / (uint64_t)lock_cycles));
 
     /* 5) Examine the user data from the threads, to determine the
      *    total number of real and recursive read locks and unlock.
@@ -854,9 +856,9 @@ fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time, (
      * and exited early.
      */
     if (total_target_rd_lock_cycles != expected.real_read_locks_granted ||
-            total_target_rd_lock_cycles != expected.real_read_locks_released ||
-            total_target_wr_lock_cycles != expected.real_write_locks_granted ||
-            total_target_wr_lock_cycles != expected.real_write_locks_released)
+        total_target_rd_lock_cycles != expected.real_read_locks_released ||
+        total_target_wr_lock_cycles != expected.real_write_locks_granted ||
+        total_target_wr_lock_cycles != expected.real_write_locks_released)
         TestErrPrintf("Threads reported unexpected number of locks/unlocks.\n");
 
     /* initialize remaining non-zero fields in the expected stats */
@@ -947,18 +949,18 @@ tts_rec_rw_lock_smoke_check_4(void)
     herr_t                    result;
     int                       i;
     int                       express_test;
-    int                       num_threads                 = MAX_NUM_THREADS;
-    int                       lock_cycles                 = MAX_LOCK_CYCLES;
+    int                       num_threads = MAX_NUM_THREADS;
+    int                       lock_cycles = MAX_LOCK_CYCLES;
     H5TS_thread_t             threads[MAX_NUM_THREADS];
     rec_rw_lock_test_udata_t *udata = NULL;
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
-    hbool_t                   verbose = FALSE;
-    int32_t                   total_target_rd_lock_cycles = 0;
-    int32_t                   total_target_wr_lock_cycles = 0;
-    H5TS_rw_lock_stats_t      stats;
-    H5TS_rw_lock_stats_t      expected;
+    hbool_t              verbose                     = FALSE;
+    int32_t              total_target_rd_lock_cycles = 0;
+    int32_t              total_target_wr_lock_cycles = 0;
+    H5TS_rw_lock_stats_t stats;
+    H5TS_rw_lock_stats_t expected;
 #endif
-    H5TS_rw_lock_t            rec_rw_lock;
+    H5TS_rw_lock_t rec_rw_lock;
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Reset expected stats fields to zero -- we will construct the expected
@@ -998,13 +1000,13 @@ tts_rec_rw_lock_smoke_check_4(void)
     /* 2) Setup the user data to be passed to each writer test thread. */
     for (i = 0; i < MAX_NUM_THREADS; i++) {
         memset(&udata[i], 0, sizeof(udata[i]));
-        udata[i].rw_lock                   = &rec_rw_lock;
-        udata[i].target_rd_lock_cycles     = lock_cycles;
-        udata[i].target_wr_lock_cycles     = lock_cycles;
-        udata[i].max_recursive_lock_depth  = 10;
+        udata[i].rw_lock                  = &rec_rw_lock;
+        udata[i].target_rd_lock_cycles    = lock_cycles;
+        udata[i].target_wr_lock_cycles    = lock_cycles;
+        udata[i].max_recursive_lock_depth = 10;
     }
 
-uint64_t start_time = H5_now_usec();
+    uint64_t start_time = H5_now_usec();
     /* 3) Create the reader threads, each with its own user data. */
     for (i = 0; i < num_threads; i++)
         threads[i] = H5TS__create_thread(tts_rw_lock_smoke_check_test_thread, NULL, &(udata[i]));
@@ -1012,9 +1014,10 @@ uint64_t start_time = H5_now_usec();
     /* 4) Wait for all threads to complete. */
     for (i = 0; i < num_threads; i++)
         H5TS__wait_for_thread(threads[i]);
-uint64_t end_time = H5_now_usec();
-uint64_t elap_time = (unsigned long long)(end_time - start_time);
-fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time, (elap_time / (uint64_t)lock_cycles));
+    uint64_t end_time  = H5_now_usec();
+    uint64_t elap_time = (unsigned long long)(end_time - start_time);
+    fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time,
+            (elap_time / (uint64_t)lock_cycles));
 
     /* 5) Examine the user data from the threads, to determine the
      *    total number of real and recursive read locks and unlock.
@@ -1053,9 +1056,9 @@ fprintf(stdout, "elapsed usec: %llu, usec per lock_cycle = %llu\n", elap_time, (
      * and exited early.
      */
     if (total_target_rd_lock_cycles != expected.real_read_locks_granted ||
-            total_target_rd_lock_cycles != expected.real_read_locks_released ||
-            total_target_wr_lock_cycles != expected.real_write_locks_granted ||
-            total_target_wr_lock_cycles != expected.real_write_locks_released)
+        total_target_rd_lock_cycles != expected.real_read_locks_released ||
+        total_target_wr_lock_cycles != expected.real_write_locks_granted ||
+        total_target_wr_lock_cycles != expected.real_write_locks_released)
         TestErrPrintf("Threads reported unexpected number of locks/unlocks.\n");
 
     /* initialize remaining non-zero fields in the expected stats */

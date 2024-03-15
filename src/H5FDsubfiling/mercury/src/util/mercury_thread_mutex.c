@@ -23,8 +23,7 @@ hg_thread_mutex_init(hg_thread_mutex_t *mutex)
     int rc;
 
     rc = pthread_mutex_init(mutex, NULL);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_mutex_init() failed (%s)",
-                        strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_mutex_init() failed (%s)", strerror(rc));
 
 done:
 #endif

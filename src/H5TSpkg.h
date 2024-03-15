@@ -50,8 +50,8 @@
 #else /* H5_HAVE_WIN_THREADS */
 
 /* Scope Definitions (Pthreads only) */
-#define H5TS_SCOPE_SYSTEM                       PTHREAD_SCOPE_SYSTEM
-#define H5TS_SCOPE_PROCESS                      PTHREAD_SCOPE_PROCESS
+#define H5TS_SCOPE_SYSTEM                        PTHREAD_SCOPE_SYSTEM
+#define H5TS_SCOPE_PROCESS                       PTHREAD_SCOPE_PROCESS
 
 /* Portability function aliases */
 #define H5TS__get_thread_local_value(key)        pthread_getspecific(key)
@@ -64,7 +64,6 @@
 
 #endif /* H5_HAVE_WIN_THREADS */
 
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -72,13 +71,13 @@
 /* Portability wrappers */
 #ifdef H5_HAVE_WIN_THREADS
 
-typedef HANDLE             H5TS_attr_t;
-typedef INIT_ONCE          H5TS_once_t;
+typedef HANDLE    H5TS_attr_t;
+typedef INIT_ONCE H5TS_once_t;
 
 #else
 
-typedef pthread_attr_t  H5TS_attr_t;
-typedef pthread_once_t  H5TS_once_t;
+typedef pthread_attr_t H5TS_attr_t;
+typedef pthread_once_t H5TS_once_t;
 
 #endif /* H5_HAVE_WIN_THREADS */
 
@@ -92,8 +91,8 @@ typedef struct H5TS_ex_lock_t {
 /* Thread cancellability only supported with pthreads */
 #ifdef H5_HAVE_PTHREAD_H
     /* Cancellation control */
-    bool          disable_cancel;
-    int           previous_state;
+    bool disable_cancel;
+    int  previous_state;
 #endif /* H5_HAVE_PTHREAD_H */
 } H5TS_ex_lock_t;
 
@@ -113,11 +112,11 @@ typedef struct H5TS_barrier_t {
 /* Info for the global API lock */
 typedef struct H5TS_api_info_t {
     /* API lock */
-    H5TS_ex_lock_t  api_lock;
+    H5TS_ex_lock_t api_lock;
 
     /* Count of # of attempts to acquire API lock */
-    H5TS_mutex_t    attempt_mutex; /* mutex for attempt_lock_count */
-    unsigned        attempt_lock_count;
+    H5TS_mutex_t attempt_mutex; /* mutex for attempt_lock_count */
+    unsigned     attempt_lock_count;
 } H5TS_api_info_t;
 
 #ifdef H5_HAVE_WIN_THREADS
@@ -267,27 +266,27 @@ typedef struct H5TS_rw_lock_stats_t {
  ******************************************************************************/
 
 typedef enum {
-    UNUSED = 0,         /* Lock is currently unused */
-    WRITE,              /* Lock is a recursive write lock */
-    READ                /* Lock is a recursive read lock */
+    UNUSED = 0, /* Lock is currently unused */
+    WRITE,      /* Lock is a recursive write lock */
+    READ        /* Lock is a recursive read lock */
 } H5TS_rw_lock_type_t;
 
 typedef struct H5TS_rw_lock_t {
     /* General fields */
-    H5TS_mutex_t         mutex;
-    H5TS_rw_lock_type_t  lock_type;
+    H5TS_mutex_t        mutex;
+    H5TS_rw_lock_type_t lock_type;
 
     /* Writer fields */
-    H5TS_cond_t          writers_cv;
-    H5TS_thread_t        write_thread;
-    int32_t              rec_write_lock_count;
-    int32_t              waiting_writers_count;
+    H5TS_cond_t   writers_cv;
+    H5TS_thread_t write_thread;
+    int32_t       rec_write_lock_count;
+    int32_t       waiting_writers_count;
 
     /* Reader fields */
-    bool                 is_key_registered;
-    H5TS_cond_t          readers_cv;
-    int32_t              active_reader_threads;
-    H5TS_key_t           rec_read_lock_count_key;
+    bool        is_key_registered;
+    H5TS_cond_t readers_cv;
+    int32_t     active_reader_threads;
+    H5TS_key_t  rec_read_lock_count_key;
 
 #if H5TS_ENABLE_REC_RW_LOCK_STATS
     /* Stats */
@@ -296,7 +295,6 @@ typedef struct H5TS_rw_lock_t {
 } H5TS_rw_lock_t;
 
 #endif /* H5_HAVE_WIN_THREADS */
-
 
 /*****************************/
 /* Package Private Variables */
@@ -314,7 +312,7 @@ extern H5TS_key_t H5TS_thrd_info_key_g;
 herr_t H5TS__mutex_acquire(unsigned lock_count, bool *acquired);
 herr_t H5TS__mutex_release(unsigned *lock_count);
 herr_t H5TS__tinfo_init(void);
-void H5TS__tinfo_destroy(void *tinfo_node);
+void   H5TS__tinfo_destroy(void *tinfo_node);
 herr_t H5TS__tinfo_term(void);
 
 #ifdef H5_HAVE_WIN_THREADS

@@ -1534,10 +1534,10 @@ error:
 static int
 compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, const unsigned char *exp)
 {
-    H5FD_t        *raw_vfile = NULL; /* virtual file to look at raw file contents */
-    unsigned char *act_buf   = NULL; /* allocated area for actual file bytes */
-    uint64_t       filesize  = 0;
-    bool           api_ctx_pushed = false;     /* Whether API context pushed   */
+    H5FD_t        *raw_vfile      = NULL; /* virtual file to look at raw file contents */
+    unsigned char *act_buf        = NULL; /* allocated area for actual file bytes */
+    uint64_t       filesize       = 0;
+    bool           api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Push API context */
     if (H5CX_push() < 0)
@@ -1609,11 +1609,11 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     H5FD_onion_header_t          hdr_out;
     H5FD_onion_history_t         history_out;
     H5FD_onion_revision_record_t rev_out;
-    uint64_t                     filesize     = 0;
-    uint64_t                     readsize     = 0;
-    uint8_t                     *ui8p         = NULL;
-    uint32_t                     buf_checksum = 0;
-    bool                         api_ctx_pushed = false;     /* Whether API context pushed   */
+    uint64_t                     filesize       = 0;
+    uint64_t                     readsize       = 0;
+    uint8_t                     *ui8p           = NULL;
+    uint32_t                     buf_checksum   = 0;
+    bool                         api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* memset to avoid bad frees on errors */
     memset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
@@ -1854,9 +1854,9 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     unsigned char history_exp_bytes[]    = {
         'O', 'W', 'H', 'S', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 /* checksum encoded below */
     };
-    unsigned char *ptr      = NULL;
-    uint32_t       checksum = 0;
-    bool           api_ctx_pushed = false;     /* Whether API context pushed   */
+    unsigned char *ptr            = NULL;
+    uint32_t       checksum       = 0;
+    bool           api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Finish populating expected header bytes */
     ptr = hdr_exp_bytes + 8; /* WARNING: must match format */
@@ -1969,8 +1969,8 @@ test_create_oniontarget(bool truncate_canonical, bool with_initial_data)
     H5FD_t                 *vfile_rw  = NULL; /* Onion virtual file for read/write */
     H5FD_t                 *vfile_ro  = NULL; /* Onion virtual file for read-only */
     struct expected_history filter;
-    char                   *buf = NULL;
-    bool                    api_ctx_pushed = false;     /* Whether API context pushed   */
+    char                   *buf            = NULL;
+    bool                    api_ctx_pushed = false; /* Whether API context pushed   */
 
     if (true == truncate_canonical && true == with_initial_data)
         TESTING("onion creation; truncate extant canonical; w/ initial data");
@@ -2257,7 +2257,6 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(false);
 
-
     if (paths != NULL) {
         HDremove(paths->canon);
         HDremove(paths->onion);
@@ -2327,7 +2326,7 @@ test_several_revisions_with_logical_gaps(void)
     uint64_t                a_off = ONION_TEST_PAGE_SIZE_5 + 7; /* 39 */
     uint64_t                b_off = (((a_off + a_list_size_s + ONION_TEST_PAGE_SIZE_5 - 1) >> 5) << 5) +
                      ONION_TEST_PAGE_SIZE_5 + 7; /* full page between */
-    bool                    api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool api_ctx_pushed = false;                 /* Whether API context pushed   */
 
     TESTING("multiple revisions with gaps and overlap");
 
@@ -2637,7 +2636,6 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(false);
 
-
     if (paths != NULL) {
         HDremove(paths->canon);
         HDremove(paths->onion);
@@ -2678,11 +2676,11 @@ static int
 do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_info_p, size_t n_ops,
                          struct revise_revision *about)
 {
-    hid_t          fapl_id = H5I_INVALID_HID;
-    H5FD_t        *file    = NULL; /* Onion virtual file for read/write */
-    unsigned char *buf_vfy = NULL;
-    size_t         i       = 0;
-    bool           api_ctx_pushed = false;     /* Whether API context pushed   */
+    hid_t          fapl_id        = H5I_INVALID_HID;
+    H5FD_t        *file           = NULL; /* Onion virtual file for read/write */
+    unsigned char *buf_vfy        = NULL;
+    size_t         i              = 0;
+    bool           api_ctx_pushed = false; /* Whether API context pushed   */
 
     /* Push API context */
     if (H5CX_push() < 0)
@@ -2807,9 +2805,9 @@ test_page_aligned_history_create(void)
     struct revise_revision about[2];
     H5FD_onion_header_t    hdr_out;
     H5FD_onion_history_t   history_out;
-    size_t                 i     = 0;
-    uint64_t               a_off = b_list_size_s - a_list_size_s;
-    bool                   api_ctx_pushed = false;     /* Whether API context pushed   */
+    size_t                 i              = 0;
+    uint64_t               a_off          = b_list_size_s - a_list_size_s;
+    bool                   api_ctx_pushed = false; /* Whether API context pushed   */
 
     TESTING("page-aligned history on onion-created file");
 

@@ -33,10 +33,10 @@ typedef struct {
 static void *
 tts_develop_api_thr_1(void *_udata)
 {
-    tts_develop_api_udata_t *udata = (tts_develop_api_udata_t *)_udata;
-    unsigned lock_count = UINT_MAX;
-    bool   acquired = false;
-    herr_t result;
+    tts_develop_api_udata_t *udata      = (tts_develop_api_udata_t *)_udata;
+    unsigned                 lock_count = UINT_MAX;
+    bool                     acquired   = false;
+    herr_t                   result;
 
     /* Acquire the API lock - should acquire it */
     result = H5TSmutex_acquire(1, &acquired);
@@ -66,9 +66,9 @@ tts_develop_api_thr_1(void *_udata)
 static void *
 tts_develop_api_thr_2(void *_udata)
 {
-    tts_develop_api_udata_t *udata = (tts_develop_api_udata_t *)_udata;
-    bool   acquired = false;
-    herr_t result;
+    tts_develop_api_udata_t *udata    = (tts_develop_api_udata_t *)_udata;
+    bool                     acquired = false;
+    herr_t                   result;
 
     /* Thread #1 will acquire the API lock */
 
@@ -95,13 +95,13 @@ tts_develop_api_thr_2(void *_udata)
 void
 tts_develop_api(void)
 {
-    H5TS_thread_t  thread_1, thread_2;
-    H5TS_barrier_t barrier;
-    unsigned lock_count = UINT_MAX;
-    bool   acquired = false;
+    H5TS_thread_t           thread_1, thread_2;
+    H5TS_barrier_t          barrier;
+    unsigned                lock_count = UINT_MAX;
+    bool                    acquired   = false;
     tts_develop_api_udata_t udata;
-    unsigned       api_count_1 = 0, api_count_2 = 0;
-    herr_t         result;
+    unsigned                api_count_1 = 0, api_count_2 = 0;
+    herr_t                  result;
 
     /* Check that API count increases with each API call */
     result = H5TSmutex_get_attempt_count(&api_count_1);
@@ -116,7 +116,6 @@ tts_develop_api(void)
 
     VERIFY(api_count_2, (api_count_1 + 1), "H5TSmutex_get_attempt_count");
 
-
     /* Check H5TSmutex_acquire & H5TSmutex_release in thread callbacks */
 
     /* Create the thread barrier for the two threads */
@@ -125,8 +124,8 @@ tts_develop_api(void)
 
     /* Create the threads */
     udata.barrier = &barrier;
-    thread_1 = H5TS__create_thread(tts_develop_api_thr_1, NULL, &udata);
-    thread_2 = H5TS__create_thread(tts_develop_api_thr_2, NULL, &udata);
+    thread_1      = H5TS__create_thread(tts_develop_api_thr_1, NULL, &udata);
+    thread_2      = H5TS__create_thread(tts_develop_api_thr_2, NULL, &udata);
 
     /* Wait for threads to complete. */
     H5TS__wait_for_thread(thread_1);
@@ -134,7 +133,6 @@ tts_develop_api(void)
 
     result = H5TS__barrier_destroy(&barrier);
     CHECK_I(result, "H5TS__barrier_destroy");
-
 
     /* Test multiple / recursive acquisition of the API lock  */
 
@@ -145,7 +143,7 @@ tts_develop_api(void)
 
     /* Acquire the API lock again - should acquire it, since it's the same thread  */
     acquired = false;
-    result = H5TSmutex_acquire(1, &acquired);
+    result   = H5TSmutex_acquire(1, &acquired);
     CHECK_I(result, "H5TSmutex_acquire");
     VERIFY(acquired, true, "H5TSmutex_acquire");
 
@@ -157,4 +155,3 @@ tts_develop_api(void)
 } /* end tts_develop_api() */
 
 #endif /*H5_HAVE_THREADSAFE*/
-

@@ -350,13 +350,13 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 {
     const char *fcn_name = "setup_vfd_test_file()";
     char        filename[512];
-    int         cp            = 0;
-    bool        show_progress = false;
-    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
-    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
-    unsigned    flags         = 0;               /* file open flags              */
-    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
-    bool        api_ctx_pushed = false;          /* Whether API context pushed   */
+    int         cp             = 0;
+    bool        show_progress  = false;
+    hid_t       fapl_id        = H5I_INVALID_HID; /* file access property list ID */
+    hid_t       dxpl_id        = H5I_INVALID_HID; /* data access property list ID */
+    unsigned    flags          = 0;               /* file open flags              */
+    H5FD_t     *lf             = NULL;            /* VFD struct ptr               */
+    bool        api_ctx_pushed = false;           /* Whether API context pushed   */
 
     assert(vfd_name);
     assert(lf_ptr);
@@ -624,10 +624,10 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 static void
 takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fapl_id_ptr, hid_t *dxpl_id_ptr)
 {
-    const char *fcn_name      = "takedown_vfd_test_file()";
-    int         cp            = 0;
-    bool        show_progress = false;
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    const char *fcn_name       = "takedown_vfd_test_file()";
+    int         cp             = 0;
+    bool        show_progress  = false;
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     assert(lf_ptr);
     assert(fapl_id_ptr);
@@ -768,7 +768,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[1];
     size_t      sizes[1];
     void       *bufs[1];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -1021,7 +1021,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[1];
     size_t      sizes[1];
     void       *bufs[1];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -1345,7 +1345,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[4];
     size_t      sizes[4];
     void       *bufs[4];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -1721,7 +1721,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[4];
     size_t      sizes[4];
     void       *bufs[4];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -2171,7 +2171,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
     void       *bufs[(INTS_PER_RANK / 16) + 1];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -2430,7 +2430,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[1];
     size_t      sizes[1];
     const void *bufs[1];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -2640,7 +2640,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[1];
     size_t      sizes[1];
     const void *bufs[1];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -2916,7 +2916,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[4];
     size_t      sizes[4];
     const void *bufs[4];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -3199,7 +3199,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[4];
     size_t      sizes[4];
     const void *bufs[4];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -3519,7 +3519,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[4];
     size_t      sizes[4];
     const void *bufs[4];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -3987,7 +3987,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
     const void *bufs[(INTS_PER_RANK / 16) + 1];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -4278,7 +4278,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     haddr_t     addrs[8];
     size_t      sizes[8];
     const void *bufs[8];
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool        api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -4548,24 +4548,24 @@ static unsigned
 vector_write_test_8(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_t xfer_mode,
                     H5FD_mpio_collective_opt_t coll_opt_mode, const char *vfd_name)
 {
-    const char *fcn_name = "vector_write_test_8()";
-    char        test_title[120];
-    char        filename[512];
-    haddr_t     eoa;
-    haddr_t     base_addr;
-    bool        show_progress = false;
-    hid_t       fapl_id       = H5I_INVALID_HID; /* file access property list ID */
-    hid_t       dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
-    H5FD_t     *lf            = NULL;            /* VFD struct ptr               */
-    int         cp            = 0;
-    int         i;
-    int         base_index;
-    uint32_t    count = 0;
-    size_t      sizes[4];
-    H5FD_mem_t  types[2];
-    haddr_t     *tt_addrs = NULL; /* For storing addrs */
-    const void **tt_bufs  = NULL; /* For storing buf pointers */
-    bool        api_ctx_pushed = false;     /* Whether API context pushed   */
+    const char  *fcn_name = "vector_write_test_8()";
+    char         test_title[120];
+    char         filename[512];
+    haddr_t      eoa;
+    haddr_t      base_addr;
+    bool         show_progress = false;
+    hid_t        fapl_id       = H5I_INVALID_HID; /* file access property list ID */
+    hid_t        dxpl_id       = H5I_INVALID_HID; /* data access property list ID */
+    H5FD_t      *lf            = NULL;            /* VFD struct ptr               */
+    int          cp            = 0;
+    int          i;
+    int          base_index;
+    uint32_t     count = 0;
+    size_t       sizes[4];
+    H5FD_mem_t   types[2];
+    haddr_t     *tt_addrs       = NULL;  /* For storing addrs */
+    const void **tt_bufs        = NULL;  /* For storing buf pointers */
+    bool         api_ctx_pushed = false; /* Whether API context pushed   */
 
     pass = true;
 
@@ -5015,7 +5015,7 @@ test_selection_io_read_verify(hid_t dxpl, int mpi_rank, hsize_t start[], hsize_t
     size_t bufsize;
     int    i;
     int    j;
-    bool   api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool   api_ctx_pushed = false; /* Whether API context pushed   */
 
     bufsize = (hsize_t)(sel_dim0 * sel_dim1) * sizeof(int);
     if ((rbuf1 = malloc(bufsize)) == NULL)
@@ -5104,7 +5104,7 @@ test_selection_io_write(hid_t dxpl, H5FD_t *lf, H5FD_mem_t type, uint32_t count,
     const void **bufs = NULL; /* Avoids cast/const warnings */
     int          i;
     int          j;
-    bool         api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool         api_ctx_pushed = false; /* Whether API context pushed   */
 
     if (NULL == (bufs = calloc(count, sizeof(void *))))
         goto error;
@@ -6344,17 +6344,17 @@ test_selection_io_types_1d(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl, H
 static void
 test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
 {
-    hid_t   mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* memory dataspaces vector */
-    hid_t   file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
-    hsize_t dims1[1];                                            /* 1d dimension sizes */
-    hsize_t dims2[2];                                            /* 2d dimension sizes */
-    H5FD_mem_t type;                                          /* File type */
-    haddr_t    addrs[2];                                      /* File allocation address */
-    size_t     element_sizes[2] = {sizeof(int), sizeof(int)}; /* Element size */
-    size_t     bufsize;                                       /* Buffer size */
+    hid_t      mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* memory dataspaces vector */
+    hid_t      file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vector */
+    hsize_t    dims1[1];                                            /* 1d dimension sizes */
+    hsize_t    dims2[2];                                            /* 2d dimension sizes */
+    H5FD_mem_t type;                                                /* File type */
+    haddr_t    addrs[2];                                            /* File allocation address */
+    size_t     element_sizes[2] = {sizeof(int), sizeof(int)};       /* Element size */
+    size_t     bufsize;                                             /* Buffer size */
     int        i;
     int        j;
-    bool       api_ctx_pushed = false;     /* Whether API context pushed   */
+    bool       api_ctx_pushed = false; /* Whether API context pushed   */
 
     curr_nerrors = nerrors;
 
@@ -6485,16 +6485,16 @@ test_selection_io_real(int mpi_rank, int mpi_size, H5FD_t *lf, hid_t dxpl)
 static void
 test_selection_io(int mpi_rank, int mpi_size)
 {
-    H5FD_t  *lf   = NULL;            /* VFD struct ptr */
-    hid_t    fapl = H5I_INVALID_HID; /* File access property list */
-    char     filename[1024];         /* Test file name */
-    unsigned flags = 0;              /* File access flags */
-    unsigned collective;                      /* Types of I/O for testing */
-    hid_t    dxpl          = H5I_INVALID_HID; /* Dataset transfer property list */
-    hid_t    def_dxpl      = H5I_INVALID_HID; /* dxpl: independent access */
-    hid_t    col_xfer_dxpl = H5I_INVALID_HID; /* dxpl: collective access with collective I/O */
-    hid_t    ind_io_dxpl   = H5I_INVALID_HID; /* dxpl: collective access with individual I/O */
-    bool     api_ctx_pushed = false;          /* Whether API context pushed   */
+    H5FD_t  *lf   = NULL;                      /* VFD struct ptr */
+    hid_t    fapl = H5I_INVALID_HID;           /* File access property list */
+    char     filename[1024];                   /* Test file name */
+    unsigned flags = 0;                        /* File access flags */
+    unsigned collective;                       /* Types of I/O for testing */
+    hid_t    dxpl           = H5I_INVALID_HID; /* Dataset transfer property list */
+    hid_t    def_dxpl       = H5I_INVALID_HID; /* dxpl: independent access */
+    hid_t    col_xfer_dxpl  = H5I_INVALID_HID; /* dxpl: collective access with collective I/O */
+    hid_t    ind_io_dxpl    = H5I_INVALID_HID; /* dxpl: collective access with individual I/O */
+    bool     api_ctx_pushed = false;           /* Whether API context pushed   */
 
     /* If I use fapl in this call, I got an environment printout */
     h5_fixname(SELECT_FNAME, H5P_DEFAULT, filename, sizeof(filename));

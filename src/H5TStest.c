@@ -29,8 +29,8 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h" /* Generic Functions                   */
+#include "H5TSpkg.h"   /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -60,7 +60,6 @@ typedef void *(*H5TS_thread_cb_t)(void *);
 /*******************/
 /* Local Variables */
 /*******************/
-
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -104,4 +103,3 @@ H5TS__create_thread(H5TS_thread_cb_t func, H5TS_attr_t *attr, void *udata)
 } /* H5TS__create_thread */
 
 #endif /* H5_HAVE_THREADSAFE */
-

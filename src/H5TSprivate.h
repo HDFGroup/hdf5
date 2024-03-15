@@ -30,19 +30,25 @@
 /**************************/
 
 /* Thread-safety sanity-checking annotations */
-#define H5TS_CAPABILITY(x)             H5_ATTR_THREAD_ANNOT(capability(x))
-#define H5TS_ACQUIRE(...)              H5_ATTR_THREAD_ANNOT(acquire_capability(__VA_ARGS__))
-#define H5TS_ACQUIRE_SHARED(...)       H5_ATTR_THREAD_ANNOT(acquire_shared_capability(__VA_ARGS__))
-#define H5TS_RELEASE(...)              H5_ATTR_THREAD_ANNOT(release_capability(__VA_ARGS__))
-#define H5TS_RELEASE_SHARED(...)       H5_ATTR_THREAD_ANNOT(release_shared_capability(__VA_ARGS__))
-#define H5TS_TRY_ACQUIRE(...)          H5_ATTR_THREAD_ANNOT(try_acquire_capability(__VA_ARGS__))
-#define H5TS_TRY_ACQUIRE_SHARED(...)   H5_ATTR_THREAD_ANNOT(try_acquire_shared_capability(__VA_ARGS__))
+#define H5TS_CAPABILITY(x)           H5_ATTR_THREAD_ANNOT(capability(x))
+#define H5TS_ACQUIRE(...)            H5_ATTR_THREAD_ANNOT(acquire_capability(__VA_ARGS__))
+#define H5TS_ACQUIRE_SHARED(...)     H5_ATTR_THREAD_ANNOT(acquire_shared_capability(__VA_ARGS__))
+#define H5TS_RELEASE(...)            H5_ATTR_THREAD_ANNOT(release_capability(__VA_ARGS__))
+#define H5TS_RELEASE_SHARED(...)     H5_ATTR_THREAD_ANNOT(release_shared_capability(__VA_ARGS__))
+#define H5TS_TRY_ACQUIRE(...)        H5_ATTR_THREAD_ANNOT(try_acquire_capability(__VA_ARGS__))
+#define H5TS_TRY_ACQUIRE_SHARED(...) H5_ATTR_THREAD_ANNOT(try_acquire_shared_capability(__VA_ARGS__))
 
 /* Static initialization values */
 #ifdef H5_HAVE_WIN_THREADS
-#define H5TS_KEY_INITIALIZER   {NULL, 0, NULL}
-#define H5TS_MUTEX_INITIALIZER {NULL}
-#define H5TS_COND_INITIALIZER  CONDITION_VARIABLE_INIT
+#define H5TS_KEY_INITIALIZER                                                                                 \
+    {                                                                                                        \
+        NULL, 0, NULL                                                                                        \
+    }
+#define H5TS_MUTEX_INITIALIZER                                                                               \
+    {                                                                                                        \
+        NULL                                                                                                 \
+    }
+#define H5TS_COND_INITIALIZER CONDITION_VARIABLE_INIT
 #else
 #define H5TS_KEY_INITIALIZER   (pthread_key_t)0
 #define H5TS_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
@@ -67,21 +73,20 @@ typedef void (*H5TS_key_destructor_func_t)(void *);
 
 /* Portability aliases */
 #ifdef H5_HAVE_WIN_THREADS
-typedef HANDLE                                    H5TS_thread_t;
-typedef DWORD                                     H5TS_key_t;
-typedef CRITICAL_SECTION H5TS_CAPABILITY("mutex") H5TS_mutex_t;
-typedef CONDITION_VARIABLE                        H5TS_cond_t;
+typedef HANDLE             H5TS_thread_t;
+typedef DWORD              H5TS_key_t;
+typedef CRITICAL_SECTION   H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef CONDITION_VARIABLE H5TS_cond_t;
 #else
-typedef pthread_t                                H5TS_thread_t;
-typedef pthread_key_t                            H5TS_key_t;
+typedef pthread_t       H5TS_thread_t;
+typedef pthread_key_t   H5TS_key_t;
 typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
-typedef pthread_cond_t                           H5TS_cond_t;
+typedef pthread_cond_t  H5TS_cond_t;
 #endif
 
 /*****************************/
 /* Library-private Variables */
 /*****************************/
-
 
 /***************************************/
 /* Library-private Function Prototypes */
@@ -99,9 +104,9 @@ H5_DLL herr_t H5TS_api_lock(void);
 H5_DLL herr_t H5TS_api_unlock(void);
 
 /* Retrieve per-thread info */
-H5_DLL uint64_t H5TS_thread_id(void);
+H5_DLL uint64_t             H5TS_thread_id(void);
 H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
-H5_DLL struct H5E_t *H5TS_get_err_stack(void);
+H5_DLL struct H5E_t        *H5TS_get_err_stack(void);
 
 /* Mutex operations */
 H5_DLL herr_t H5TS_mutex_init(H5TS_mutex_t *mutex);

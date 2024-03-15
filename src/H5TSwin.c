@@ -28,9 +28,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                   */
-#include "H5Eprivate.h"  /* Error handling                      */
-#include "H5TSpkg.h"     /* Threadsafety                        */
+#include "H5private.h"  /* Generic Functions                   */
+#include "H5Eprivate.h" /* Error handling                      */
+#include "H5TSpkg.h"    /* Threadsafety                        */
 
 #ifdef H5_HAVE_THREADSAFE
 
@@ -40,31 +40,25 @@
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-
 /*********************/
 /* Package Variables */
 /*********************/
-
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
-
 /*******************/
 /* Local Variables */
 /*******************/
-
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS__win32_process_enter
@@ -110,20 +104,17 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
  *--------------------------------------------------------------------------
  */
 herr_t
-H5TS_win32_thread_enter(void)
-{
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+H5TS_win32_thread_enter(void){FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
-    /* Currently a placeholder function.  TLS setup is performed
-     * elsewhere in the library.
-     *
-     * WARNING: Do NOT use C standard library functions here.
-     * CRT functions are not allowed in DllMain, which is where this code
-     * is used.
-     */
+                                  /* Currently a placeholder function.  TLS setup is performed
+                                   * elsewhere in the library.
+                                   *
+                                   * WARNING: Do NOT use C standard library functions here.
+                                   * CRT functions are not allowed in DllMain, which is where this code
+                                   * is used.
+                                   */
 
-    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)
-} /* H5TS_win32_thread_enter() */
+                                  FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(SUCCEED)} /* H5TS_win32_thread_enter() */
 
 /*--------------------------------------------------------------------------
  * Function:    H5TS_win32_thread_exit
@@ -134,8 +125,7 @@ H5TS_win32_thread_enter(void)
  *
  *--------------------------------------------------------------------------
  */
-herr_t
-H5TS_win32_thread_exit(void)
+herr_t H5TS_win32_thread_exit(void)
 {
     FUNC_ENTER_NOAPI_NAMECHECK_ONLY
 
@@ -160,5 +150,3 @@ H5TS_win32_thread_exit(void)
 #endif /* H5_HAVE_WIN_THREADS */
 
 #endif /* H5_HAVE_THREADSAFE */
-
-

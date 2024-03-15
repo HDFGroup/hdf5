@@ -111,4 +111,3 @@ hg_thread_key_delete(hg_thread_key_t key)
 
     return HG_UTIL_SUCCESS;
 }
-

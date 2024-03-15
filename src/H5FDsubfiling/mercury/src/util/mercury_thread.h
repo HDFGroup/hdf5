@@ -20,7 +20,7 @@ typedef HANDLE                 hg_thread_t;
 typedef LPTHREAD_START_ROUTINE hg_thread_func_t;
 typedef DWORD                  hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t WINAPI
-typedef DWORD     hg_thread_key_t;
+typedef DWORD hg_thread_key_t;
 #else
 #include <pthread.h>
 typedef pthread_t hg_thread_t;
